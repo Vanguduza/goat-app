@@ -1,0 +1,31 @@
+﻿# OS / IDE
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+*.iml
+
+# Android / build
+.gradle/
+build/
+local.properties
+*.apk
+*.aab
+captures/
+
+# Secrets
+.env
+.env.*
+!.env.example
+**/credentials.json
+**/google-services.json
+**/secrets.*
+
+# Kotlin / Java
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Node (if any)
+node_modules/
