@@ -13,6 +13,10 @@
 | D | `FARM_OS_EMBEDDED_AI_MODULE_SPEC.md` |
 | E | `FARM_OS_RABBIT_NEST_BOX_SCHEDULE.md` |
 | F | `FARM_OS_RABBIT_BREEDING_PROGRAMME_SPEC.md` |
+| G | `FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md` |
+| H | `FARM_OS_VET_INTELLIGENCE_FEATURE_IMPLEMENTATION_SPEC.md` |
+| I | `FARM_OS_OPERATIONS_ECONOMICS_LAYER_SPEC.md` |
+| J | `FARM_OS_DESIGN_SYSTEM_SPEC.md` |
 
 ### Contents
 
@@ -22,6 +26,10 @@
 4. [Part D — Embedded AI Module Spec](#part-d--embedded-ai-module-spec)
 5. [Part E — Rabbit Nest-Box Ratio & Schedule](#part-e--rabbit-nest-box-ratio--schedule)
 6. [Part F — Rabbit Breeding Programme Spec (Full MVP)](#part-f--rabbit-breeding-programme-spec-full-mvp)
+7. [Part G — Technical Implementation Handbook (DDE-aligned)](#part-g--technical-implementation-handbook-dde-aligned)
+8. [Part H — Vet Intelligence Feature Implementation Spec](#part-h--vet-intelligence-feature-implementation-spec)
+9. [Part I — Operations & Economics Layer](#part-i--operations--economics-layer)
+10. [Part J — Design System Spec (Field-first visual language)](#part-j--design-system-spec-field-first-visual-language)
 
 ---
 
@@ -4526,5 +4534,1514 @@ Lane A anomalies: missed nest place, kindling overdue, litter mortality spike, d
 | Implementation | Engines in `:domain`; UI in `:feature-rabbit`; schema §3; tests §13 |
 
 *This document is the implementation contract for the rabbit breeding programme MVP.*
+
+<a id="part-g"></a>
+
+# Part G — Technical Implementation Handbook (DDE-aligned)
+
+*Source: `FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md`*
+
+---
+
+## Farm OS — Technical Implementation Handbook
+
+**Version:** 1.0 · **Date:** 22 August 2026
+**Upstream methodology:** [DDE — Development & Engineering Engine](https://github.com/Vanguduza/dde) (`docs/blueprint/REV_2_0.md`, `AGENTS.md`). This handbook adapts DDE's authority model, schema law, gates and governance to the Farm OS platform.
+**Sibling documents:** `GOAT_RABBIT_FARM_PLATFORM_TECHNICAL_IMPLEMENTATION_MASTER_PLAN.md` · `FARM_OS_HEALTH_MODULE_SPEC.md` · `FARM_OS_EMBEDDED_AI_MODULE_SPEC.md` · `FARM_OS_RABBIT_NEST_BOX_SCHEDULE.md` · `FARM_OS_RABBIT_BREEDING_PROGRAMME_SPEC.md`
+
+---
+
+### Contents
+
+| Ch | Title |
+|----|-------|
+| 0 | How to use this handbook |
+| 1 | Authority model |
+| 2 | Product Constitution (Farm OS) |
+| 3 | The five environments |
+| 4 | Architectural principles |
+| 5 | Canonical manufacturing spine |
+| 6 | Schema authority |
+| 7 | Data laws |
+| 8 | Module boundary map |
+| 9 | Definition of done |
+| 10 | Phase gates — CI green ≠ phase done |
+| 11 | Engineering Decision Records (EDRs) |
+| 12 | Verification & evidence |
+| 13 | Offline-first & durability |
+| 14 | Security & credential law |
+| 15 | Staged delivery map |
+| 16 | Forbidden patterns |
+| 17 | Governance & when blocked |
+| 18 | Traceability appendix |
+
+---
+
+### 0. How to use this handbook
+
+**Audience.** The owner, and every AI agent or human contributor building Farm OS. Agents MUST read Chapters 1, 9, 10 and 16 before writing code.
+
+**Division of authority.**
+
+- The **master plan** and **feature specs** govern **WHAT** Farm OS is (scope, data model, screens, schedules).
+- This **handbook** governs **HOW** Farm OS is built (authority, process, gates, verification, durability).
+- Neither overrides the other; they compose. A spec change that alters architecture follows Chapter 17 change control.
+
+**Precedence on conflict** (highest first):
+
+1. Product Constitution (Chapter 2)
+2. Feature specs / master plan normative sections
+3. This handbook's process rules
+4. Accepted EDRs where they amend any of the above (an EDR supersedes; it never rewrites history)
+5. Agent suggestions, conversation memory, model opinion — never authoritative
+
+**Reading discipline (DDE rule).** Read the relevant spec section before changing anything it governs. Do not implement from chat memory.
+
+---
+
+### 1. Authority model
+
+Farm OS copies DDE's precedence ranks. A lower rank may *inform* a higher rank but may never modify it. Modification requires a governed change path (Chapter 17) terminating in a rank-0 owner decision. This rule is the primary defence against stale chat memory, donor contamination and conversational drift.
+
+| Rank | Artifact class | Farm OS concrete artifact | Changed by |
+|------|----------------|---------------------------|------------|
+| 0 | Human-approved governance decisions | Owner decisions recorded in mission/issue log | Owner only |
+| 1 | Product Constitution | Chapter 2 below + master plan "Alignment rules (non-negotiable)" | Rank-0 decision via change control |
+| 2 | Approved product brief | Master plan purpose/scope header | Rank ≤1 |
+| 3 | Approved requirements | Spec requirement statements (e.g. breeding programme §MVP scope lock) | Rank ≤2 |
+| 4 | Accepted EDRs | `docs/truth/edr/EDR-*.md` | Supersede only, never rewrite |
+| 5 | Business rules | KudBat offsets, COI thresholds, foster windows (locked tables in specs) | Rank ≤4 |
+| 6 | Architecture | Master plan data model §4, module map §5, AI spec §architecture | Rank ≤5 |
+| 7 | Task specification | Phase task breakdowns, milestone tickets | Planner within phase scope |
+| 8 | Verified implementation & evidence | Code + tests + gate reports — produced, never asserted | Produced by missions |
+| 9 | External evidence | Vet research pack, Merck Manual, supplier docs, web research | Ingested with citation, never auto-promoted |
+| 10 | Agent hypotheses | Chat suggestions, drafts | Freely produced, never authoritative |
+
+**Two standing rules.**
+
+1. Never edit `docs/truth/**`, the Constitution, or locked spec sections as a side effect of implementing a task. Propose; do not mutate.
+2. When code must diverge from a spec, stop: the divergence is an EDR candidate, not a commit.
+
+---
+
+### 2. Product Constitution (Farm OS)
+
+*Versioned Project Truth. Changes only through change control (Chapter 17).*
+
+#### 2.1 Purpose
+
+A multi-species livestock operating system for smallholder and commercial farms: Android-first recording, species-correct lifecycle workflows, advisory intelligence, offline resilience. Goats and rabbits are the Phase 1–8 system of record; poultry, sheep and cattle are first-class products, not filters.
+
+#### 2.2 Target users
+
+Owner-operators (single farm), farm workers (task executors), breeding managers (rabbit programme), veterinarians/advisors (read-mostly review).
+
+#### 2.3 Non-negotiable constraints
+
+1. **Hosting law.** The backend is Supabase (Postgres, Auth, Storage, Edge Functions) plus the APK. No farm-hosted servers, VMs, sidecars, containers or self-managed LLM runtimes are part of the product.
+2. **Species alignment rules.** No generic Animals home; the only home is a module dashboard. Goat UX designed for goats; rabbit UX for rabbits; poultry kinds live inside `:feature-poultry`; sheep/cattle likewise. Shared tables (`animals`, `domain_events`, measurements) are infrastructure and must never become a shared animal-list product. RFID/search identifies a record then opens that species' module.
+3. **AI is advisory.** Lane A/B/C outputs recommend; they never auto-treat, auto-cull, auto-sell or mutate clinical records without a human confirm step.
+4. **Offline-first.** Every daily workflow works without connectivity; sync reconciles idempotently later.
+5. **Tenancy.** `farm_id` from the authenticated JWT + Postgres RLS on every table. Application-code filtering alone is non-compliant.
+
+#### 2.4 Core workflows
+
+Daily round (dashboard → today board → tasks), breeding cycle (mate → palpate → nest box → kindling → wean → rebreed), health event capture → treatment course → withdrawal tracking, growth recording → charts/anomalies, inventory drawdown linked to events, sales/waitlist fulfilment.
+
+#### 2.5 UX principles
+
+Species-native vocabulary; one-screen-per-task flows usable with dirty hands; notifications actionable (complete/snooze/escalate); charts answer a husbandry question, never decorate; dark-mode and large-touch defaults.
+
+#### 2.6 Security principles
+
+Fail-closed RLS; secrets in Android Keystore; least-privilege DB roles; audit trail for AI actions (`ai_audit`) and sensitive mutations; no long-lived credentials to anything executing model-generated content.
+
+#### 2.7 Architecture principles
+
+Modular Gradle monolith; CQRS with `domain_events` as Source of Record; Room mirror for offline; WorkManager for scheduled truth; BYO Model API behind settings; design for replacement (see Chapter 4).
+
+#### 2.8 Explicit exclusions
+
+iOS/web clients; multi-farm org hierarchies (Phase 8+); drug dose invention; automatic financial ledger beyond optional posting hook; DNA lab integrations; marketplace payments; herd-level ML training in-app.
+
+#### 2.9 Governance rules
+
+Constitution changes require rank-0 approval + dated entry in the master plan revision header. Specs may elaborate but not contradict. Conflicts resolve downward through Chapter 1 ranks.
+
+---
+
+### 3. The five environments
+
+Confusing these is the most common way this project fails. They stay separate.
+
+| # | Environment | Farm OS instance | Authority |
+|---|-------------|------------------|-----------|
+| 1 | **Authoring environment** | Cursor Desktop + local repo on the owner's Windows machine | Never authoritative for anything |
+| 2 | **Platform state** | Supabase project: Postgres (`domain_events`, projections, RLS), Auth, Storage | The only authoritative state |
+| 3 | **Execution runtime** | On-device app sandbox: Room mirror, WorkManager workers, outbox queue | Derived/mirrored state only |
+| 4 | **Product verification** | Instrumented test runs, debug builds against a staging Supabase project, golden fixtures | Produces evidence, holds no truth |
+| 5 | **Model providers** | BYO OpenAI-compatible Model API endpoints configured in Settings; optional `ai-proxy` Edge Function | Replaceable, never trusted, never authoritative |
+
+Rules: environment 1 never writes directly to environment 2 except through reviewed migrations; environment 3 reconciles to environment 2 and never becomes a second source of truth; environment 5 sees only minimised, purpose-scoped payloads (AI spec §safety) and its output is evidence-class (rank 9), not truth.
+
+### 5. Canonical manufacturing spine
+
+This is the normative chain for every Farm OS change. Subordinate runtime bindings (Room mirror, WorkManager job, notification channel) never become alternative sources of state.
+
+```
+Owner intent / husbandry need
+    |
+Requirement .......................... spec section w/ acceptance conditions   (rank 3)
+    |
+EDR (if architectural) ............... docs/truth/edr/                        (rank 4)
+    |
+Schema migration ..................... supabase/migrations/*.sql               (Ch.6 authority)
+    |
+domain_event type registered ......... domain_events ledger contract            (Source of Record)
+    |
+Projection built ..................... analytics_* / breeding read tables       (derived, rebuildable)
+    |
+Room entity + DAO mirror ............. app offline cache                        (Ch.13 durability)
+    |
+UI screen (:feature-*) ............... species-native Compose screens
+    |
+Task/notification generated .......... WorkManager templates from locked offsets
+    |
+Verification ......................... unit/DAO/RLS/UI/golden fixtures        (Ch.12)
+    |
+Evidence + gate sign-off ............. phase gate report                        (Ch.10)
+```
+
+Each step maps to a governing document: steps 1–2 to the relevant spec; step 3 to the master plan data model; steps 4–5 to the CQRS section of the master plan; step 8 to the species alignment rules; step 10 to this handbook's gates.
+
+---
+
+### 6. Schema authority
+
+1. **Single source of truth:** Supabase SQL migrations (`supabase/migrations/`). Room entities, API DTOs and doc tables are downstream artifacts.
+2. **Rule of three.** A schema change ships as: SQL migration **+** matching Room entity update **+** test coverage (DAO test and, where tenancy applies, an RLS policy test). Any two without the third is rejected in review.
+3. **Migrations apply cleanly to an empty database and are reversible** (down migration or verified compensating migration). CI applies `up`, asserts, applies `down`, re-applies `up`.
+4. **Additive first.** Breaking changes require a new versioned path and a compatibility note in the EDR/spec section they amend.
+5. **Prose vs schema:** when documentation and migrations disagree, migrations win; the prose is corrected in the same change.
+6. **Generated artifacts are committed, never hand-edited** (e.g. generated Room DAOs from processors, exported schema snapshots). Drift between snapshot and migrations fails CI.
+
+**Identity law.**
+
+| Rule | Farm OS application |
+|---|---|
+| Time-ordered UUIDs (UUIDv7), generated client-side, native `uuid` PKs | Every durable table (`animals`, `rabbit_matings`, `domain_events`, …); client-side generation keeps offline creates conflict-free |
+| Human-facing codes are separate immutable `slug` columns — never PKs, never FK targets | `ear_tag`, cage `code` ('A','B','C'), nest box `code`, wave `code`, `EDR-nnnn`. Unique per farm via `UNIQUE (farm_id, code)` |
+
+---
+
+### 7. Data laws
+
+| Law | Rule | Enforcement |
+|---|---|---|
+| Tenancy | Every table carries `farm_id`; RLS predicate `farm_id = auth.jwt() ->> 'farm_id'` (or session GUC equivalent) on all farm-scoped rows | Postgres RLS, fail-closed: no claim ⇒ zero rows. RLS tests per table (Ch.12) |
+| Append-only truth | `domain_events` is insert-only; corrections are compensating events, never updates/deletes | DB role for app has INSERT-only on ledger; revoke UPDATE/DELETE |
+| Projections are rebuildable | Read models (`analytics_anomalies`, breeding projections, dashboards) can be dropped and rebuilt from the ledger alone | Rebuild script exercised in CI against fixture ledger |
+| Idempotent mutations | Client mutations carry `mutation_id`; server deduplicates; retries never double-apply (no double mating record, no double inventory draw) | Unique index on `(farm_id, mutation_id)` in command intake |
+| Optimistic concurrency | Mutable aggregates (`tasks`, `litters`, contracts) carry `lock_version`; mismatch returns `VERSION_CONFLICT` to UI | Domain layer check + integration test |
+| Safe queue draining | Outbox/dispatch loops use `SELECT … FOR UPDATE SKIP LOCKED` so multiple workers never double-send notifications | Integration test with concurrent dispatchers |
+| Single-database scale invariant | Modules are Gradle packages, not services; one Supabase Postgres is shared and a transaction may span module boundaries. Extracting any service must first preserve this invariant — that is an EDR, not a refactor | Architecture test + review rule |
+| Retention & growth | Ledger partitioned by month once volume warrants; projections carry the query load; raw ledger retention is permanent (audit value) | Deferred until measured — named deferral, Ch.15 |
+
+---
+
+### 8. Module boundary map
+
+Boundaries are enforced by tests (Konsist/arch-unit style module-graph test in CI), not goodwill — mirroring DDE "boundaries enforced by tests".
+
+| Module | May depend on | Must never |
+|---|---|---|
+| `:core:*` (db, sync, design, notifications) | nothing internal beyond other `:core-*` | import any `:feature-*` or vendor AI SDK |
+| `:domain-*` (per-species engines, `:domain-ai`) | `:core-*` | import Compose/UI, Android framework classes, network clients; only `:domain-*` may emit `domain_event`s |
+| `:feature-goat` / `:feature-rabbit` / `:feature-poultry` / `:feature-sheep` / `:feature-cattle` | own `:domain-<species>`, `:core-*` | touch another feature's tables/DAOs/screens; embed another species' UX vocabulary |
+| `:ai-client` | `:core-*` | be imported directly by features (features use `:domain-ai` ports) |
+| `:ai-runtime-rules` / `:ai-runtime-onnx` / `:ai-runtime-litert` | `:domain-ai` port interfaces | appear anywhere else — vendor SDKs exist only here, behind adapters |
+| Copilot tool layer (`FarmToolRegistry`) | allow-listed tool interface | expose write tools without declared side-effect class + confirm step |
+| `interfaces/*` (settings, exports) | public ports | reach core tables directly |
+
+Additional rules: RFID/search resolves identity then routes into the owning species feature (never a cross-species list screen). Shared infrastructure tables have exactly one owning writer module per event type. Any boundary exception requires an EDR naming why the graph test should gain an exemption.
+
+---
+
+### 9. Definition of done
+
+All of these, every time — a task missing one is not done:
+
+- [ ] A failing-first test existed that failed before the implementation existed (unit/domain engine, DAO, RLS, or UI).
+- [ ] Full local check green: `lint`, `testDebugUnitTest`, instrumented subset for touched modules, `assembleDebug`.
+- [ ] New migrations apply cleanly to an empty database and reverse cleanly.
+- [ ] New tables carry `farm_id` with RLS enabled and tested; new queries cannot bypass tenancy.
+- [ ] New async operation (worker, sync job, notification, export) has a durable identity, an idempotency key (`mutation_id`/dedupe key) and observable state (status visible in UI or logs).
+- [ ] Side-effecting capability declares a side-effect class: `local_record` (ledger write), `notification`, `external_call` (Model API), `commercial` (sales contract/inventory deduction). Commercial + external require human-confirm or reconciliation read.
+- [ ] Public behaviour change reflected in the governing spec section it belongs to (not chat memory).
+- [ ] Golden fixtures still pass: 11-doe KudBat wave schedule fixture, COI pedigree fixtures (parent-child block, half-sib warn, foundation override), offline outbox replay fixture.
+- [ ] No forbidden pattern introduced (Chapter 16).
+
+### 10. Phase gates — CI green ≠ phase done
+
+**CI green is a CI gate, not a phase gate.** Lint/tests passing does not close a phase. A phase closes only after the spec-gate review below.
+
+#### 10.1 Gate procedure
+
+Before declaring a phase (or mission within it) complete, re-read the chartered spec section(s). For every MUST/shall/recovery-grade rule in scope, either:
+
+- **(a)** name the production mutation call site that enforces it — the actual code path where the rule fires on real data, opened and verified, not a docstring claim; or
+- **(b)** list it as **deferred** with a proposed EDR.
+
+Record the mapping in the phase gate report. Never "tests pass ⇒ phase closed."
+
+#### 10.2 Worked example — rabbit nest-box rule
+
+Rule: *"nest box placed mating+28; removed kindling+21; reintroduced rebreed+28"*
+
+| Gate step | Result |
+|---|---|
+| Call sites named | `WaveScheduler`/task template generation writes `nest_in_on`/`nest_out_on`; `NestAssigner.reserveNestBoxes()` enforces availability at placement; `NestBoxReminderWorker` fires place/remove notifications from those columns |
+| Verified at mutation site | Placement task creation mutates `rabbit_nest_box_assignments` only through `reserveNestBoxes`, which rejects a box not in `available`/`sanitized` state |
+| Adversarial check | Could a new sync session replay a placement with a fresh `mutation_id` and double-assign? No: unique active-assignment constraint per box + idempotency index |
+| Deferred items | QR-scan assisted placement = deferred, EDR proposed |
+
+Only then does Phase 2's breeding-programme slice sign off, and only then may the next slice chain.
+
+#### 10.3 Adversarial self-check (before any gate sign-off)
+
+- Could a new device session or new `mutation_id` bypass this control?
+- Is each claimed call site a real mutation of authoritative state, not a read/helper?
+- Does the rule hold with connectivity off (offline path) as well as online?
+
+#### 10.4 No blind chaining
+
+Do not start the next phase until the current gate report is written. If a correction mission is open, freeze further phase progression. Standing auto-resume applies only when an independent gate returns PASS or PASS-WITH-EDR.
+
+---
+
+### 11. Engineering Decision Records (EDRs)
+
+Accepted EDRs are immutable; they are superseded by newer EDRs, never rewritten. Location: `docs/truth/edr/EDR-nnnn-<slug>.md`. Any architectural divergence discovered mid-task becomes an EDR candidate — stop and propose.
+
+#### 11.1 Template
+
+```markdown
+# EDR-nnnn — <slug title>
+
+**Status:** Proposed | Accepted | Superseded by EDR-mmmm
+**Date:** YYYY-MM-DD
+**Affected requirements/spec sections:** …
+
+## Context
+Why this decision exists now; constraints in force.
+
+## Alternatives considered
+| Option | Assessment |
+|---|---|
+
+## Decision
+The decision, stated normatively.
+
+## Rationale
+Why this option; what evidence ranks support it.
+
+## Consequences
+Positive, negative, neutral. What becomes easier/harder.
+
+## Open questions (require explicit human decision)
+…
+
+## Smallest safe next step
+…
+```
+
+#### 11.2 EDR-0001 — In-app CopilotEngine replaces hosted Hermes
+
+**Status:** Accepted · **Date:** 2026-08-20 · **Amends:** AI spec §architecture; master plan stack matrix
+
+**Context.** Original design assumed a farm-hosted Hermes/Ollama sidecar for LLM reasoning. The owner set the hosting law: nothing hosted outside Supabase + APK; no sidecars unless free-tier viable. Hermes requires sustained RAM/CPU beyond any free tier.
+
+**Alternatives considered.** Farm-hosted Ollama (violates hosting law, costs); free sidecar hosting (insufficient RAM, sleeps kill tool-loops); cloud LLM API direct-from-app without governance (credential leakage, unscoped tools).
+
+**Decision.** The Copilot is an in-app Kotlin tool-loop (`CopilotEngine`). Reasoning calls go to a BYO Model API (Settings). Tool execution goes through allow-listed `FarmToolRegistry` against Supabase. Hermes task map: planning → engine loop; retrieval → compiled context builder; tool execution → registry; memory → Room+Supabase state; voice → deferred.
+
+**Consequences.** No server ops for the owner; model quality depends on owner-configured endpoint; audit via `ai_audit`; long loops bounded by device battery policy.
+
+**Open questions.** Default recommended Model API preset list (rank 0 to confirm).
+
+**Smallest safe next step.** Settings screen + `AiClient` contract test behind a fake transport.
+
+#### 11.3 EDR-0002 — BYO Model API in Settings; optional Supabase ai-proxy
+
+**Status:** Accepted · **Date:** 2026-08-20 · **Amends:** AI spec §settings/routing
+
+**Context.** Lane C needs an external LLM endpoint. Keys must never ship inside the APK nor be logged; some owners prefer not to expose even their own key to the client.
+
+**Alternatives considered.** Hard-coded vendor SDK per provider (violates design-for-replacement); embedded default key (forbidden); proxy-only with platform key (creates vendor lock at platform layer).
+
+**Decision.** Settings fields: base URL, model ID, API key, mode (`on_device_only` / `hybrid`), optional `ai-proxy` Edge Function toggle. Routing: offline ⇒ Lane A/B only; hybrid ⇒ Lane C when reachable; proxy mode sends minimised payloads via Edge Function holding the key server-side (Supabase secret). Key stored in Android Keystore; never logged, never rendered in full in UI.
+
+**Consequences.** Owner controls cost/vendor; proxy adds a Supabase-only escape hatch; no vendor code outside `:ai-client`.
+
+**Open questions.** Rate-limit/backoff defaults; payload redaction checklist finalisation.
+
+---
+
+### 12. Verification & evidence
+
+#### 12.1 Test pyramid mapped to Farm OS
+
+| Layer | Tooling | Covers |
+|---|---|---|
+| Domain engines (unit) | JUnit | WaveScheduler offsets, NestAssigner selection, COI math, foster window rules, colour prediction |
+| Persistence | Room in-memory DB | DAO queries, migration integrity, projection rebuild |
+| Tenancy | SQL-level RLS tests run against staging Postgres | Every table's policy: right farm sees rows, wrong farm sees zero, missing claim fails closed |
+| UI | Compose tests | Species screens, today board, pairing planner flows |
+| Background | WorkManager `TestDriver` | Notification schedules fire at locked offsets; retry/backoff policies |
+| End-to-end golden fixtures | Instrumented scenario runs | 11-doe KudBat wave; COI pedigree cases; outbox replay |
+
+#### 12.2 Independent verification principle
+
+The code that generates must not be its only judge. Schedule dates produced by `WaveScheduler` are verified against independently computed fixture dates (hand-derived from the locked offset table), never re-computed by calling the same engine. Similarly, COI results are checked against precomputed pedigree values, and anomaly detection against labelled example series.
+
+#### 12.3 Evidence
+
+Every gate produces durable evidence: gate report file, test output, fixture diffs, linked requirement IDs. Evidence is append-only and referenceable from later missions ("Phase 2 gate, item 4"). Verifier quality is itself measured: if a verifier never fails across stages, it is reviewed for vacuity.
+
+---
+
+### 13. Offline-first & durability
+
+| Concern | Rule |
+|---|---|
+| Outbox mutations | Client-side changes queue in a Room outbox with `mutation_id`; dispatch is idempotent server-side; order per aggregate preserved |
+| Replay safety | Replaying the outbox after restore produces identical server state (idempotency index absorbs duplicates) |
+| Pull-cursor sync | Device tracks last-received `domain_events` cursor; catch-up pulls events in ledger order; projections rebuilt locally deterministically |
+| Conflicts | Optimistic `lock_version` on mutable aggregates; event-ledger merges are additive; UI surfaces genuine conflicts (e.g. same kit sold twice) for human resolution |
+| Checkpoint/restore | Long workers (export builders, bulk photo upload) checkpoint progress; crash resume continues, never restarts side effects already applied |
+| Effect journal | Side-effecting actions beyond the ledger (sales contract PDF, inventory deduction, notification send) record intent→result in a local journal; reconciliation reads confirm outcome before marking done; UNKNOWN outcomes are never blind-retried — only verified absence permits a new attempt |
+
+---
+
+### 14. Security & credential law
+
+1. Identity: Supabase Auth JWT carries `farm_id`; RLS derives tenancy from the token, never from client-supplied target IDs.
+2. Fail closed: missing/expired claim ⇒ zero rows everywhere; no anonymous read paths.
+3. Secrets: Model API keys and service keys live in Android Keystore / Supabase secrets respectively; never in code, logs, screenshots, or prompt payloads.
+4. Model payloads: minimised, purpose-scoped, species-filtered; no cross-farm data ever leaves row scope.
+5. Least privilege: app DB role holds INSERT on ledger, SELECT/DML on its scopes only; Edge Functions use isolated service roles with narrow grants.
+6. Audit: `ai_audit` records every Copilot tool invocation (tool, args hash, principal, result class); sensitive commercial actions append `audit_events`.
+7. Forbidden: passing any long-lived credential to code that executes model-generated content (prompt-injected code must never inherit keys).
+
+### 15. Staged delivery map
+
+Phases follow the master plan. Every stage leaves the whole system runnable (principle: every stage ships a working system).
+
+| Phase | Goal | Gate criteria (beyond DoD) | Explicitly deferred |
+|---|---|---|---|
+| 1 | Foundations: auth, farms, animals, ledger, offline sync, species shells | RLS proven fail-closed on all base tables; outbox replay fixture green | Multi-farm orgs; role UI beyond Owner/Worker |
+| 2 | Reproduction: goat kidding; rabbit breeding programme (waves, nest boxes, COI, litters, tasks) | Nest-box rule gate (Ch.10.2); COI fixtures; 11-doe golden wave | Buck borrowing marketplace; QR hardware printing |
+| 3 | Growth & production: measurements, charts (Vico), Lane A anomalies, `analytics_*` projections | Anomaly call sites named; rebuild-from-ledger proven | Lane B models; Lane C activation |
+| 4 | Health module: events, treatments, withdrawal, task integration | Withdrawal blocking rules at mutation sites | Vet telemedicine; lab integrations |
+| 5 | Poultry / sheep / cattle modules as first-class products | Species alignment rule audit per module | Kinds beyond chicken/duck in poultry v1 |
+| 6 | Inventory, sales, waitlist, contracts, market planner | Commercial side-effect class enforced; reconciliation reads proven | Payments processing; invoicing taxes |
+| 7 | Exports: cage cards PDF, ICS calendar, photo journal, reports | Export determinism fixtures | Custom report builder |
+| 8 | Intelligence: Lane B on-device models, Lane C BYO Model API, Copilot + FarmToolRegistry, `ai_audit` | Tool allow-list audit; payload minimisation checklist; advisory-only confirm gates | Voice; autonomous treatment suggestions; herd-level training |
+
+Deferrals are named, not silent: each has an owner decision pending and may become an EDR when activated.
+
+---
+
+### 16. Forbidden patterns
+
+1. A second source of truth for any mutable state (shadow tables, un-synced local edits, spreadsheet imports that bypass the ledger).
+2. A generic Animals home screen or cross-species animal-list product.
+3. AI auto-treatment, auto-culling, auto-selling, or clinical mutation without human confirmation.
+4. Hard-coding a model vendor, cloud region or storage provider behind anything but Settings/contracts.
+5. Retrying a side-effecting operation without an idempotency key or reconciliation read.
+6. Widening RLS, a tool lease, or an autonomy scope to make a test pass.
+7. Hand-editing generated artifacts (migrations snapshots, generated DAOs, exported schema docs).
+8. Introducing a framework, message bus or microservice split for core state without a measured need + EDR.
+9. Editing `docs/truth/**` or locked spec sections as a side effect of implementation.
+10. Shipping a "temporary" alternative when blocked instead of stating the blocking decision.
+
+---
+
+### 17. Governance & when blocked
+
+#### 17.1 Change control flow
+
+| Change type | Path |
+|---|---|
+| Constitution / alignment rule change | Rank-0 owner decision → dated revision entry in master plan header → specs updated |
+| Spec elaboration (no contradiction) | Direct edit of the owning spec, noted in its revision line |
+| Architectural divergence found mid-task | Stop → draft EDR → owner decision → accepted EDR supersedes; specs amended by reference |
+| Business-rule change (offsets, thresholds) | Spec change (rank 5 artifacts) + fixture update in same change |
+| EDR supersession | New EDR references old; old file gains no edits beyond a superseded-by header note |
+
+#### 17.2 When blocked
+
+Say so. State the smallest decision that would unblock. Stop. Do not invent a contract, do not implement a temporary alternative, do not widen any scope to progress. A blocked state is reported in the mission/gate record with the exact question for the owner.
+
+---
+
+### 18. Traceability appendix
+
+| Handbook chapter | Farm OS source | DDE counterpart |
+|---|---|---|
+| 1 Authority model | Master plan alignment rules | REV_2_0 §2.2 authority ranks |
+| 2 Constitution | Master plan + AI spec hosting law | Product Constitution template |
+| 3 Environments | AI spec hosting footprint | REV_2_0 §1.3 five environments |
+| 4 Principles | Master plan principles; AI spec product law | REV_2_0 §2.3 |
+| 5 Spine | Master plan CQRS §4 | REV_2_0 §2.5 canonical spine |
+| 6 Schema authority | Master plan data model §4 | REV_2_0 §3.1–3.4 |
+| 7 Data laws | Master plan CQRS + sync; breeding spec schema | REV_2_0 §3.2, §3.5, §12 |
+| 8 Boundaries | Master plan module map §5 | REV_2_0 §2.6; AGENTS.md boundaries |
+| 9 Definition of done | Breeding spec test plan §13 | AGENTS.md definition of done |
+| 10 Phase gates | Nest box schedule locked offsets | `.cursor/rules/mission-chapter-gate.mdc` |
+| 11 EDRs | AI spec locked decisions | EDR-0001…0007 in dde repo |
+| 12 Verification | Breeding spec tests; AI spec evals | REV_2_0 Ch.11 |
+| 13 Durability | Master plan offline sync | REV_2_0 Ch.12 |
+| 14 Security | AI spec safety/privacy | REV_2_0 Ch.14 |
+| 15 Staged delivery | Master plan phased delivery | REV_2_0 Ch.18 |
+| 16 Forbidden | Master plan invariants; AI spec forbidden | AGENTS.md forbidden list |
+| 17 Governance | Master plan revision process | REV_2_0 Ch.20; AGENTS.md when blocked |
+| 18 Traceability | This table | REV_2_0 Ch.20 traceability |
+
+*End of handbook. This document governs HOW; the specs govern WHAT; the owner outranks everything.*
+
+<a id="part-h"></a>
+
+# Part H — Vet Intelligence Feature Implementation Spec
+
+*Source: `FARM_OS_VET_INTELLIGENCE_FEATURE_IMPLEMENTATION_SPEC.md`*
+
+---
+
+## Farm OS — Vet Intelligence & Expert Research → Usable Features
+
+**Version:** 1.0 · **Date:** 22 August 2026
+**Purpose:** Turn the veterinary expert research pack (`FARM_OS_VETERINARY_EXPERT_RESEARCH_PACK.md`), the shared Health module (`FARM_OS_HEALTH_MODULE_SPEC.md`) and the embedded AI module (`FARM_OS_EMBEDDED_AI_MODULE_SPEC.md`) into **implemented, usable features**: concrete backend tables, domain engines, and screen-by-screen UX flows.
+**Governs:** WHAT ships for vet-level intelligence. HOW it ships (gates, EDRs, tenancy) is governed by `FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md`.
+**Hosting law unchanged:** app + Supabase only. AI advisory-only. Species-native UX.
+
+---
+
+### Contents
+
+| § | Title |
+|---|-------|
+| 1 | The knowledge pipeline: research pack → shipped feature |
+| 2 | Backend: knowledge base schema (seeded content + farm acceptance) |
+| 3 | Backend: clinical recording & intelligence projections |
+| 4 | Domain engines (Kotlin) |
+| 5 | UX flows: daily intelligence surfaces |
+| 6 | UX flows: clinical capture forms |
+| 7 | UX flows: protocol packs & vet acceptance |
+| 8 | UX flows: Copilot & anomaly triage |
+| 9 | Roles, safety gates & withdrawal enforcement |
+| 10 | Offline behaviour |
+| 11 | Seeding plan (what ships in the APK/Supabase on day 1) |
+| 12 | Acceptance tests & golden fixtures |
+| 13 | Traceability |
+
+---
+
+### 1. The knowledge pipeline: research pack → shipped feature
+
+The research data becomes usable only through this pipeline. Every expert fact must land in one of four sinks — never in prose alone:
+
+```
+Vet research pack / health spec / ICAR sources
+   |
+   v
+[Knowledge seed]  structured rows, versioned, shipped as SQL seeds + APK assets
+   |-- disease_catalog        (signs, first aid, vet_class, red_flag, zoonotic)
+   |-- formulary class rules  (class list; farm adds labelled products)
+   |-- health_tips            (60+ tips, season/module tagged)
+   |-- score definitions      (FAMACHA 1-5, BCS 1-5 / 1-9, locomotion, flystrike)
+   |-- kpi_definitions        (ICAR formulas: kid/lamb survival, hen-housed eggs,
+   |                           calving interval, SCC flag, FCR, hatchability)
+   |-- protocol_pack_templates (CDT, ND, RHDV..., slots + offsets per species/kind)
+   |-- copilot_skills         (module briefing Markdown, kind-aware)
+   v
+[Farm acceptance layer]  the farm's vet accepts/adapts -> health_protocol_packs (vet_accepted)
+   v
+[Task engine]  accepted packs generate WorkManager tasks at locked offsets
+   v
+[Intelligence layer]  recorded data -> charts -> Lane A anomalies -> action drafts -> Copilot explainers
+   v
+[Screens]  Health Today board, dashboard tip card, animal timeline, outbreak path, withdrawal board
+```
+
+Rules:
+
+1. A research fact with no sink is not a feature. It either maps to a seed table, a score definition, a KPI, or a Copilot skill — or it stays out of the product.
+2. Seeds are **content**, not code changes: shipped via versioned seed migrations + bundled JSON so updates don't require an APK rebuild for content-only fixes where Supabase serves the table.
+3. Farm-level clinical authority always sits in the **accepted pack**, never in the raw catalog. Catalog = education; pack = operational truth.
+
+### 2. Backend: knowledge base schema
+
+Extends the health spec §2 tables. New/changed DDL (additive, `farm_id` + RLS on all farm-scoped rows):
+
+```sql
+-- 2.1 Score definitions (global reference content, read-only to apps)
+CREATE TABLE score_definitions (
+    code TEXT PRIMARY KEY,              -- famacha_goat, bcs_ruminant_15, bcs_beef_19, locomotion_cattle, flystrike_awi
+    species_codes TEXT[] NOT NULL,
+    scale_min INT NOT NULL,
+    scale_max INT NOT NULL,
+    labels JSONB NOT NULL,              -- { "1": "...", "2": "..." } display text per step
+    interpretation JSONB NOT NULL,      -- { "4": {"risk":"anaemia likely","action_code":"selective_drench_check"} , ...}
+    source TEXT NOT NULL                -- citation from vet pack §8
+);
+
+-- 2.2 KPI definitions (ICAR etc.), computed on-device from ledger/projections
+CREATE TABLE kpi_definitions (
+    code TEXT PRIMARY KEY,              -- kid_survival_90d, hen_housed_eggs, calving_interval_d
+    species_codes TEXT[] NOT NULL,
+    formula TEXT NOT NULL,              -- human-readable + machine evaluable DSL ref
+    unit TEXT NOT NULL,
+    direction TEXT NOT NULL,            -- higher_better | lower_better
+    target_source TEXT NOT NULL,        -- farm_config | purpose_pack | none
+    source TEXT NOT NULL
+);
+
+-- 2.3 Action catalog: the closed vocabulary of corrective actions (AI spec §4.2)
+CREATE TABLE action_catalog (
+    code TEXT PRIMARY KEY,              -- open_health_pack, call_vet, reweigh_7d, fec_check, biosecurity_walk ...
+    species_codes TEXT[] NOT NULL,
+    requires_role TEXT,                 -- null=any, 'vet', 'breeding_mgr'
+    creates_task_template JSONB,        -- optional task draft shape
+    side_effect_class TEXT NOT NULL DEFAULT 'local_record'
+);
+
+-- 2.4 Copilot skills registry (skills ship as Markdown assets; registry enables per module)
+CREATE TABLE copilot_skills (
+    code TEXT PRIMARY KEY,              -- goat-kidding-briefing, poultry-house-briefing
+    module_ids TEXT[] NOT NULL,
+    asset_path TEXT NOT NULL,
+    min_role TEXT NOT NULL DEFAULT 'worker',
+    version INT NOT NULL DEFAULT 1
+);
+
+-- 2.5 Withdrawal clocks live with treatments (health spec); add sale-blocking projection:
+CREATE TABLE withdrawal_board (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    animal_id UUID REFERENCES animals(id),
+    group_id UUID REFERENCES animal_groups(id),
+    product_id UUID NOT NULL REFERENCES formulary_items(id),
+    meat_until DATE,
+    milk_until DATE,
+    egg_until DATE,
+    source_treatment_id UUID NOT NULL,
+    CHECK (animal_id IS NOT NULL OR group_id IS NOT NULL)
+);
+CREATE INDEX idx_withdrawal_board_farm_active ON withdrawal_board (farm_id, meat_until, milk_until, egg_until);
+
+-- 2.6 Seed bookkeeping
+CREATE TABLE knowledge_seed_versions (
+    seed_set TEXT PRIMARY KEY,          -- disease_catalog, health_tips, ...
+    version INT NOT NULL,
+    applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+RLS notes: `score_definitions`, `kpi_definitions`, `action_catalog`, `copilot_skills` are **global registries** (no farm_id) — readable by all authenticated users, writable only by service role during seeding. `withdrawal_board` and every farm-scoped table carries `farm_id = auth.jwt() ->> 'farm_id'`.
+
+---
+
+### 3. Backend: clinical recording & intelligence projections
+
+Already specified elsewhere; restated here **only as implementation wiring** (these are dependencies, not redesigns):
+
+- Health events, treatments, vaccination records: `FARM_OS_HEALTH_MODULE_SPEC.md` §0–§2 (event core, treatments referencing `formulary_items.id`).
+- Measurements (weight, milk, eggs, scores): master plan measurement tables; each score row references `score_definitions.code`.
+- Anomaly/recommendation projections: AI spec §8 (`analytics_anomalies`, `analytics_recommendations`, `ai_audit`).
+- Breeding programme tables: breeding programme spec §schema (nest boxes, matings, COI).
+
+New projection required by this spec:
+
+```sql
+-- Cohort baselines for Lane A (rebuildable from measurements; refreshed by worker)
+CREATE TABLE analytics_cohort_baselines (
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    feature_code TEXT NOT NULL,          -- growth_adg, egg_rate, mortality_daily ...
+    species_code TEXT NOT NULL,
+    poultry_kind_code TEXT,
+    purpose_code TEXT,                   -- meat, layer, breeder, dairy...
+    window_days INT NOT NULL DEFAULT 30,
+    median NUMERIC(12,4) NOT NULL,
+    mad NUMERIC(12,4) NOT NULL,
+    n_points INT NOT NULL,
+    refreshed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (farm_id, feature_code, species_code, poultry_kind_code, purpose_code, window_days)
+);
+```
+
+Lane A detection reads baselines; recomputation is a WorkManager job after sync (idempotent upsert). Baselines are derived state — rebuildable from the ledger (handbook Ch.7).
+
+### 4. Domain engines (Kotlin, in `:domain-*`)
+
+| Engine | Module | Responsibility | Key inputs → outputs |
+|---|---|---|---|
+| `KnowledgeSeedLoader` | `:core-db` | Load bundled seed JSON → Room mirror + Supabase upsert via service role (Edge seed function); record `knowledge_seed_versions` | seed JSON → rows |
+| `ScoreInterpreter` | `:domain-health` (shared) | Map a recorded score → interpretation + suggested `action_code` from `score_definitions.interpretation` | (score_code, value) → interpretation |
+| `WithdrawalClock` | `:domain-health` | On treatment insert: compute `*_until` dates from `formulary_items` label days; write `withdrawal_board`; block sale/slaughter/milk/egg flows while active; FEFO decrement inventory | treatment → board rows + blocks |
+| `ProtocolPackEngine` | `:domain-health` | Expand accepted `health_protocol_packs` slots (offset_rule) → vaccination/deworming-check tasks; handle from-birth vs from-birth-event anchors | pack + birth event → task drafts |
+| `CohortBaselineEngine` | `:domain-ai` | Compute per-feature cohort median/MAD from measurements → `analytics_cohort_baselines` | measurements → baseline rows |
+| `AnomalyEngine` (Lane A) | `:domain-ai` | AI spec §4 rules: z/MAD flags, polarity, severity; emit `analytics_anomalies` + action drafts from `action_catalog` only | series + baseline → anomalies |
+| `TipSelector` | `:domain-ai` | Health spec §7 algorithm (module ∩, weather season preference, 14-day impression exclusion, stable hash pick) | tips + weather + impressions → tip |
+| `CopilotEngine` | `:domain-ai` | AI spec §6 loop; skills from `copilot_skills`; tools from `FarmToolRegistry`; every run → `ai_audit` | user msg + skill → answer + citations |
+| Species KPI engines | `:domain-<species>` | Compute `kpi_definitions` per module (kid survival, hen-housed eggs, calving interval, FCR, hatchability…) | projections → KPI rows |
+
+All engines are pure Kotlin, unit-testable, no Android imports (handbook Ch.8). Engines never write to the ledger directly except via their owning domain module's event emitter.
+
+### 5. UX flows: daily intelligence surfaces
+
+#### 5.1 Module dashboard — "Health tip of the day" card
+
+```
+[Dashboard top card]
+  "Score FAMACHA in shade; heat changes eyelid colour."        (TipSelector output)
+  Footer: Not a diagnosis. Follow your vet pack.   [Health >]
+```
+
+- Tap → Health home. Card suppressed if no tips remain (never repeats within 14 days).
+- Weather-aware: Open-Meteo fetch (existing weather widget) feeds `season` preference.
+
+#### 5.2 Health Today board
+
+Sections, in order:
+
+1. **Withdrawal board strip** (if any active): animal/group, product, clock chip `milk: 3d left`, red if sale attempted while active.
+2. **Overdue pack tasks**: vaccination/deworming-check tasks from ProtocolPackEngine, oldest first, each opens the capture form pre-filled.
+3. **Red-flag anomalies** (`severity=critical`): FAMACHA 4–5, recumbency flags, mortality spike — each row: title, one-line evidence, two buttons `[Record check]` `[Call vet]`.
+4. **Watch list**: `watch` polarity anomalies, swipe to dismiss (writes `status=dismissed`, audited).
+5. **Playbook cards** (health spec §6): colostrum, needle hygiene, biosecurity… tap opens static playbook page with source citation.
+
+Empty state: "No health actions today. Next pack task: CDT booster — 12 May."
+
+#### 5.3 Animal timeline (per-animal intelligence)
+
+```
+[Goat "Nala"]  FAMACHA 3 ▂▃▅  BCS 3  ADG 120 g/d (cohort band ±σ)
+  Events: 02 Feb CDT dose ✓ · 28 Jan FAMACHA 3 ✓ · 20 Jan drench (FEC 750) ✓
+  [Chart|Table|Both]  [Ask Copilot about Nala]
+```
+
+- Every chart implements `ChartableFeature` (AI spec §3); Vico; cohort band from baselines.
+- Anomaly chips on the series (▲ negative, ● watch, ★ positive) tap → anomaly detail sheet: evidence JSON rendered as sentences, action drafts from `action_catalog` with `[Accept]` (creates task) / `[Dismiss]`.
+- "Ask Copilot" opens the skill-scoped chat (`goat-kidding-briefing` etc.), which may only cite rows the session's tools returned.
+
+#### 5.4 Outbreak path (poultry mortality spike / notifiable hint)
+
+```
+Mortality spike detected (House 2, 3.1× 7-day baseline)
+  [Quarantine house]  [Record mortality]  [Biosecurity walk]  [Notifiable info]
+```
+
+- `Quarantine house` sets group status, stops movements in-app, creates daily recheck task ×7.
+- `Notifiable info` opens jurisdiction SOP card (phone number, farm-configured) — never auto-reports.
+
+### 6. UX flows: clinical capture forms
+
+Species-native forms (vet pack §0.1 event core + module sections). Shared skeleton, per-species fields:
+
+| Step | Goat/sheep form | Rabbit form | Cattle form | Poultry (flock) form |
+|---|---|---|---|---|
+| Subject | animal picker (RFID/search) | doe/litter picker | animal picker | house/flock picker |
+| Type chips | clinical, treatment, score, vax | clinical, treatment, score, vax | clinical, treatment, score, PD | mortality, vax, water/NH3/temp |
+| Score pad | FAMACHA 1–5 photo guide; BCS 1–5 | body condition; sore hocks | BCS 1–9; locomotion | — (flock-level) |
+| Product | formulary picker (FEFO first, cold-chain flag) | same | same | water-soluble class |
+| Withdrawal preview | live chips: meat/milk dates | meat | meat/milk | egg |
+| Red-flag branch | FAMACHA 4–5 → vet-now sheet | GI stasis → vet same-day | down cow → vet SOP | mass death → outbreak path |
+| Save | one `domain_event` + outbox; works offline | | | |
+
+Form rules: product free-typing is disabled (formulary only); every save emits the event-core JSON; score saves reference `score_definitions.code`; the form never blocks on connectivity.
+
+### 7. UX flows: protocol packs & vet acceptance
+
+```
+Health > Protocol packs
+  [Goat — dairy-temperate-v1]        status: draft
+     Slots: CDT prepartum (−30 d) · CDT kid priming (+30/±4wk alt) · [optional: orf]
+  [Accept pack]  (Owner + vet name + date required)
+```
+
+- Accepting writes `health_protocol_packs.status='vet_accepted'`, stamps `accepted_by_vet`/`accepted_at`; only then does ProtocolPackEngine generate tasks.
+- Editing a slot after acceptance creates a **new pack version** (draft); the accepted one is retained for audit.
+- Pack detail screen shows each slot's source citation (health spec §3 sources).
+
+### 8. UX flows: Copilot & anomaly triage
+
+Entry points: animal timeline "Ask", dashboard "Ask Farm Copilot", anomaly sheet "Explain".
+
+```
+User: "why is Nala flagged?"
+CopilotEngine: skill=goat-kidding-briefing context; tools: get_animal, get_weight_series, get_timeline
+Model API → tool calls → rows → final answer:
+  "Nala's ADG is 118 g/d vs cohort median 152 (−1.9σ, watch). FAMACHA last recorded 3 on 28 Jan.
+   Suggested next steps (drafts): reweigh in 7 days · FAMACHA check. This is not a diagnosis."
+  [Reweigh task] [FAMACHA check] [Dismiss]      ← actions from action_catalog only
+```
+
+Triage rules: every Copilot-suggested action maps to `action_catalog.code`; Accept creates a draft task requiring confirm; answers cite row IDs; runs are audited (`ai_audit`). No dose, no drug names, no diagnosis claims.
+
+### 9. Roles, safety gates & withdrawal enforcement
+
+| Capability | Worker | Breeding mgr | Farm mgr | Owner | Vet (external) |
+|---|---|---|---|---|---|
+| Record health event/score/task complete | ✓ | ✓ | ✓ | ✓ | read+advise |
+| Attach formulary product to treatment | — (see stocked name, withdrawal) | — | ✓ (pack-gated classes) | ✓ | advise |
+| Antibiotic / NSAID / hormone class attach | ✗ | ✗ | vet-pack-gated | vet-pack-gated | ✓ |
+| Accept/adapt protocol pack | ✗ | ✗ | propose | ✓ (vet named) | ✓ |
+| Copilot settings / keys | use only | use only | endpoint/model | all | ✗ |
+| Dismiss critical anomaly | ✗ | ✗ | ✓ | ✓ | — |
+
+Hard gates (enforced at mutation call sites, handbook Ch.10):
+
+1. Treatment save requires `formulary_items.id`; UI offers no free text.
+2. Sale/slaughter/milk-pickup/egg-sale flows query `withdrawal_board`; active clock = hard block with reason screen.
+3. AI outputs are drafts; nothing clinical mutates without human Accept.
+4. Notifiable diseases open SOP contact info; never auto-report.
+
+### 10. Offline behaviour
+
+- Seeds bundled in APK assets → Room mirror at first run; Supabase refresh when online (version check).
+- Tip selection, Lane A detection, KPI computation: fully on-device from Room mirror.
+- Copilot: offline ⇒ NL disabled; charts/anomaly drafts still work (AI spec §5 empty-URL mode).
+- Forms/outbox per master plan sync; withdrawal board mirrored to Room so sale-blocking works in a dead-zone barn.
+
+### 11. Seeding plan (day-1 content)
+
+| Seed set | Rows | Source |
+|---|---|---|
+| `disease_catalog` | all codes from health spec §4.1–4.4 (~40 entries) | health spec tables |
+| `score_definitions` | famacha_goat, bcs_ruminant_15, bcs_beef_19, locomotion_cattle, flystrike_awi | vet pack §0.2/§8 citations |
+| `kpi_definitions` | ICAR set: kid/lamb survival, scan%, hen-housed eggs, calving interval, SCC flag, FCR, hatchability | vet pack §8 ICAR links |
+| `action_catalog` | ~25 codes from AI spec §4.2 + outbreak path actions | AI spec §4.2 |
+| `health_tips` | 60+, tagged module/season incl. weather-reactive | health spec §7 |
+| protocol templates | CDT (goat/sheep), dairy/beef cattle, ND/IB/IBD/Marek by kind, RHDV/myxo where endemic | health spec §3 |
+| `copilot_skills` | 5 module briefings | vet pack §6 |
+
+Seed updates: version bump + Edge seed function; app pulls new content without APK release.
+
+### 12. Acceptance tests & golden fixtures
+
+1. **CDT pack expansion fixture**: doe kidded 01 Mar ⇒ tasks: prepartum CDT (if accepted late, retro-dated), kid primer at 30 d ±template choice, booster +4 wk — exactly one template fires (health spec §3.1 rule).
+2. **Withdrawal block fixture**: milk withdrawal 4 d ⇒ sale of milk blocked day −1, allowed day 0; FEFO decremented on treatment save.
+3. **Lane A growth fixture**: synthetic cohort (n≥8) with one animal at −2.2σ ⇒ exactly one negative anomaly + reweigh/vet-check drafts, no drug actions.
+4. **Tip stability fixture**: same farm+date across devices picks identical tip; impression exclusion within 14 d.
+5. **RLS fixtures**: wrong-farm token sees zero rows in every new table; missing claim fails closed.
+6. **Outbreak fixture**: mortality spike ⇒ quarantine group status + 7 daily tasks + notifiable card opens SOP, sends nothing.
+
+### 13. Traceability
+
+| Feature area | Source |
+|---|---|
+| Knowledge pipeline sinks | vet pack §0–§8; health spec §2–§7; AI spec §3–§6 |
+| Withdrawal/formulary law | health spec §5 |
+| Tip algorithm | health spec §7 |
+| Anomaly/action law | AI spec §4; action catalog §2.3 here |
+| Copilot constraints | vet pack §6 must/must-not list; AI spec §6 |
+| Pack acceptance gate | health spec §3; vet pack §7 |
+| Handbook gates | FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md Ch.9–10 |
+
+*End of Part H.*
+
+<a id="part-i"></a>
+
+# Part I — Operations & Economics Layer
+
+*Source: `FARM_OS_OPERATIONS_ECONOMICS_LAYER_SPEC.md`*
+
+---
+
+## Farm OS — Operations & Economics Layer
+
+**Version:** 1.0 · **Date:** 22 August 2026
+**Status:** Scope EXPANSION approved by owner (22 Aug 2026) — supersedes "no financial ledger / inventory hooks only" locks per EDR-0003.
+**Owner decisions locked this day:** full cost accounting · standard stock management + feed planning & simple ration checks · paddock records + rotation planner · farm-owner business cockpit.
+**Governs:** WHAT ships for operations and money. HOW: `FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md`.
+**Unchanged:** app + Supabase hosting law; offline-first; RLS tenancy; species-native UX; advisory-only AI.
+
+### Contents
+
+| § | Title |
+|---|-------|
+| 1 | Design stance: money as events |
+| 2 | Backend schema — cost accounting |
+| 3 | Backend schema — inventory & supply |
+| 4 | Backend schema — pasture & rotation |
+| 5 | Domain engines |
+| 6 | UX flows — money capture |
+| 7 | UX flows — inventory operations |
+| 8 | UX flows — feed planning & ration checks |
+| 9 | UX flows — paddock rotation planner |
+| 10 | UX flows — owner business cockpit |
+| 11 | Unit economics: formulas |
+| 12 | Roles & safety |
+| 13 | Offline behaviour |
+| 14 | Phasing & gates |
+| 15 | Traceability |
+
+---
+
+### 1. Design stance: money as events
+
+Money never lives in a shadow spreadsheet-in-the-database. All financial facts are `domain_events` of class `commercial`:
+
+- `money.recorded` (expense or income, with `category_code`, optional link to animals/group/litter/paddock/enterprise)
+- `money.allocated` (derived projection rows only; allocation is recomputable)
+
+Consequences:
+
+- Append-only, replayable, RLS-scoped like every other event (handbook Ch.7).
+- No double-entry GL. This is **farm unit economics**, not statutory accounting. Exports exist for accountants; we do not become one.
+- Every stock movement that has value can optionally carry a cost line (`inventory_issue` → expense), which is what makes cost-per-kg computable without manual entry.
+
+### 2. Backend schema — cost accounting
+
+```sql
+CREATE TABLE money_categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    code TEXT NOT NULL,
+    display_name TEXT NOT NULL,
+    kind TEXT NOT NULL CHECK (kind IN ('expense','income')),
+    enterprise_allocatable BOOLEAN NOT NULL DEFAULT true,
+    UNIQUE (farm_id, code)
+);
+
+CREATE TABLE money_records (
+    id UUID PRIMARY KEY,                      -- client-generated UUIDv7
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    mutation_id UUID NOT NULL,                -- handbook Ch.7 idempotency
+    occurred_on DATE NOT NULL,
+    kind TEXT NOT NULL CHECK (kind IN ('expense','income')),
+    category_id UUID NOT NULL REFERENCES money_categories(id),
+    amount NUMERIC(14,2) NOT NULL CHECK (amount > 0),
+    currency TEXT NOT NULL DEFAULT 'USD',
+    quantity NUMERIC(12,3),                   -- e.g. litres, kg for price tracking
+    unit TEXT,
+    counterparty TEXT,                        -- buyer/supplier free text
+    animal_id UUID REFERENCES animals(id),
+    group_id UUID REFERENCES animal_groups(id),
+    litter_id UUID REFERENCES litters(id),
+    paddock_id UUID,                          -- FK §4
+    inventory_movement_id UUID,               -- FK §3 when auto-posted
+    breeding_wave_id UUID REFERENCES rabbit_breeding_waves(id),
+    note TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (farm_id, mutation_id)
+);
+
+-- Derived, rebuildable (handbook Ch.7): allocations spread a record across enterprises
+CREATE TABLE money_allocations (
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    record_id UUID NOT NULL REFERENCES money_records(id) ON DELETE CASCADE,
+    enterprise_code TEXT NOT NULL,            -- 'goat-dairy','rabbit-meat','poultry-layer'...
+    amount NUMERIC(14,2) NOT NULL,
+    basis TEXT NOT NULL CHECK (basis IN ('direct','head_days','weight_gain','feed_kg','manual')),
+    PRIMARY KEY (farm_id, record_id, enterprise_code)
+);
+
+CREATE TABLE sales_prices (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    item_kind TEXT NOT NULL,                  -- live_goat, milk_l, rabbit_meat_kg, eggs_tray...
+    price NUMERIC(12,2) NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'USD',
+    effective_on DATE NOT NULL,
+    source TEXT,                              -- manual | contract ref
+    UNIQUE (farm_id, item_kind, effective_on)
+);
+```
+
+### 3. Backend schema — inventory & supply
+
+```sql
+CREATE TABLE suppliers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    name TEXT NOT NULL,
+    phone TEXT, email TEXT,
+    lead_time_days INT DEFAULT 0,
+    notes TEXT
+);
+
+ALTER TABLE inventory_items
+    ADD COLUMN IF NOT EXISTS supplier_id UUID REFERENCES suppliers(id),
+    ADD COLUMN IF NOT EXISTS reorder_point NUMERIC(12,3),
+    ADD COLUMN IF NOT EXISTS reorder_qty NUMERIC(12,3),
+    ADD COLUMN IF NOT EXISTS unit_cost NUMERIC(12,4),
+    ADD COLUMN IF NOT EXISTS is_cold_chain BOOLEAN NOT NULL DEFAULT false;
+
+CREATE TABLE inventory_movements (
+    id UUID PRIMARY KEY,                      -- UUIDv7 client-side
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    mutation_id UUID NOT NULL,
+    item_id UUID NOT NULL REFERENCES inventory_items(id),
+    moved_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    direction TEXT NOT NULL CHECK (direction IN ('in','out','adjust','waste')),
+    qty NUMERIC(12,3) NOT NULL CHECK (qty > 0),
+    reason TEXT NOT NULL CHECK (reason IN (
+        'purchase','treatment_use','feed_issue','bedding_issue','egg_sale',
+        'milk_sale','stocktake','expiry','damage','transfer')),
+    batch_no TEXT, expires_on DATE,           -- FEFO keys; vaccines cold chain
+    unit_cost NUMERIC(12,4),                  -- purchase price → money link
+    linked_treatment_id UUID, linked_event_id UUID,
+    note TEXT,
+    UNIQUE (farm_id, mutation_id)
+);
+
+-- Stock level projection (rebuildable from movements)
+CREATE TABLE inventory_levels (
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    item_id UUID NOT NULL REFERENCES inventory_items(id),
+    qty_on_hand NUMERIC(12,3) NOT NULL DEFAULT 0,
+    avg_unit_cost NUMERIC(12,4),
+    earliest_expiry DATE,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (farm_id, item_id)
+);
+
+CREATE TABLE stocktakes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    taken_on DATE NOT NULL,
+    status TEXT NOT NULL DEFAULT ('open') CHECK (status IN ('open','posted')),
+    notes TEXT
+);
+
+CREATE TABLE stocktake_lines (
+    stocktake_id UUID NOT NULL REFERENCES stocktakes(id) ON DELETE CASCADE,
+    item_id UUID NOT NULL REFERENCES inventory_items(id),
+    counted_qty NUMERIC(12,3) NOT NULL,
+    PRIMARY KEY (stocktake_id, item_id)
+);
+```
+
+Movement rules: every `out` with `reason='treatment_use'` is created by WithdrawalClock/formulary flow (vet spec §6); `feed_issue` by the ration engine (§8); posting a stocktake emits one `adjust` per variance line. Purchases auto-create `money_records` (category from item class).
+
+### 4. Backend schema — pasture & rotation
+
+```sql
+CREATE TABLE paddocks (
+    id UUID PRIMARY KEY,                      -- UUIDv7
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    code TEXT NOT NULL,                       -- slug rule: P1..Pn, unique per farm
+    display_name TEXT NOT NULL,
+    area_ha NUMERIC(10,4),
+    soil_type TEXT,
+    water_source TEXT CHECK (water_source IN ('none','trough','stream','dam','pipeline')),
+    shade BOOLEAN NOT NULL DEFAULT false,
+    active BOOLEAN NOT NULL DEFAULT true,
+    geo JSONB,                                -- optional polygon, later map render
+    UNIQUE (farm_id, code)
+);
+
+CREATE TABLE grazing_sessions (
+    id UUID PRIMARY KEY,
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    mutation_id UUID NOT NULL,
+    paddock_id UUID NOT NULL REFERENCES paddocks(id),
+    group_id UUID NOT NULL REFERENCES animal_groups(id),
+    species_code TEXT NOT NULL,
+    entered_on DATE NOT NULL,
+    exited_on DATE,                            -- null = currently in
+    head_count INT NOT NULL,
+    rest_target_days INT,                      -- from farm config / pack
+    notes TEXT,
+    UNIQUE (farm_id, mutation_id),
+    CHECK (exited_on IS NULL OR exited_on >= entered_on)
+);
+
+-- Derived: paddock rest state (rebuildable)
+CREATE TABLE paddock_state (
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    paddock_id UUID NOT NULL REFERENCES paddocks(id),
+    status TEXT NOT NULL CHECK (status IN ('resting','grazing','locked','quarantine')),
+    occupied_by_group UUID REFERENCES animal_groups(id),
+    days_rest INT NOT NULL DEFAULT 0,
+    last_grazed_on DATE,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (farm_id, paddock_id)
+);
+```
+
+One group grazes one paddock at a time; overlapping open sessions for a paddock are rejected at the engine (concurrency rule like nest boxes). Quarantine status integrates with health outbreak path.
+
+### 5. Domain engines
+
+| Engine | Module | Responsibility |
+|---|---|---|
+| `MoneyRecorder` | `:domain-finance` | Validate + emit `money.recorded`; idempotent by `mutation_id`; auto-post purchase/expense links from inventory & treatments |
+| `AllocationEngine` | `:domain-finance` | Spread records to enterprises by basis (direct / head_days / weight_gain / feed_kg / manual); rebuild `money_allocations` from ledger |
+| `UnitEconomicsEngine` | `:domain-finance` | §11 formulas → projection rows for cockpit & module KPIs |
+| `InventoryProjector` | `:domain-inventory` | movements → `inventory_levels` (qty, avg cost, FEFO earliest expiry); low-stock/reorder detection vs `reorder_point` |
+| `RationPlanner` | `:domain-inventory` | §8: demand forecast from groups + purpose packs; simple ration check (energy/protein/DM vs species tables); feed_issue movements |
+| `RotationEngine` | `:domain-pasture` | sessions → `paddock_state`; rest-day counters; rotation suggestion (ready paddocks ranked by days_rest + shade/water fit); quarantine interlock |
+| `CockpitAggregator` | `:domain-finance` | §10 read model: KPIs, money, stock, compliance, exports |
+
+All pure Kotlin; projections rebuildable; every engine emits through its owning module's event emitter (handbook Ch.8).
+
+### 6. UX flows — money capture
+
+**Principle: capture at the point of action, manual entry is the fallback.**
+
+Auto-posted (no typing): purchase received (inventory `in` → expense), treatment product used (cost of goods), rabbit sales contract marked paid (income, links litter/kit), egg/milk sale logged.
+
+Manual entry screen (`Money > +`):
+
+```
+[Expense|Income]  Date (today)  Amount [  ]  Category [Feed ▾]
+Link to: (optional) [Group ▾] [Animal ▾] [Litter ▾] [Paddock ▾]
+Qty/unit (optional, enables price history)   Note
+[Save]  → outbox; works offline; duplicate-safe
+```
+
+- Categories are farm-seeded defaults (feed, vet, meds, fuel, labour, bedding, sales-income…) editable by Owner.
+- Price history: any record with qty creates a `sales_prices`/purchase-price point; market planner and reorder hints read them.
+
+### 7. UX flows — inventory operations
+
+```
+Stock screen (per module + shared)
+  [Feed maize 18%]  240 kg   exp: 2026-11-02   [Issue to group] [Receive] [Adjust]
+  [CDT vaccine]     12 doses cold-chain  exp 2026-09-14  FEFO
+  ⚠ Low stock: layer mash (below reorder point) → [Create purchase]
+```
+
+- **Receive**: supplier, batch, expiry, unit cost → movement `in` + money record + FEFO update. Cold-chain items flagged (fridge location hint from health spec).
+- **Issue**: pick reason (treatment/feed/bedding/egg sale…) → movement `out`; linked flows auto-issue.
+- **Stocktake**: count sheet per location; posting creates variance `adjust` movements with note.
+- **Low-stock worker**: daily check vs `reorder_point` → notification (existing matrix), one-tap purchase draft.
+
+### 8. UX flows — feed planning & ration checks
+
+**Simple, transparent, vet/extension-aligned — not a nutrition lab.**
+
+```
+Feed plan (week of 24 Aug)
+  Goat dairy herd (24 head): need 8.1 kg DM/day total → maize 45 kg · hay 60 kg · mineral 0.5 kg
+  Coverage: maize 12 days left ⚠ reorder · hay 9 days ⚠ · mineral OK
+Ration check — lactating doe 55 kg: energy 82% of target, protein 104%, Ca:P 1.6:1 ✓
+  → suggestion: +0.4 kg maize/head/day  [Apply to plan] (draft; Owner confirms)
+```
+
+1. Demand = Σ(group head_count × per-head DM by class/purpose from purpose-pack tables; pregnancy/lactation multipliers from vet pack reproduction sections).
+2. Coverage = `inventory_levels` ÷ daily demand → days-left chips and reorder tasks.
+3. Ration check: compare planned mix against species reference tables (bundled, cited) → % of target per nutrient; suggestions are drafts.
+4. Feeding a plan day = `feed_issue` movements (FEFO) + optional money allocation basis `feed_kg`.
+
+### 9. UX flows — paddock rotation planner
+
+```
+Paddocks
+  P1 Grazing (Goat herd A, day 3/5)   P2 Resting (11 d) ✓ ready
+  P3 Resting (4 d) · P4 Quarantine (footrot watch — locked)
+  [Move herd A →]  suggests: P2 (most rest, water ✓ shade ✓)
+Move flow: pick group → pick paddock (ready ones first; blocked ones explain why)
+  → closes old session, opens new, head count confirm, rest timers reset
+```
+
+- Rest target per paddock/group from farm config (default 30 d, editable); ready badge when days_rest ≥ target.
+- Quarantine interlock: quarantined group cannot enter a non-quarantine paddock; engine rejects with reason (health outbreak integration).
+- History per paddock: grazing sessions, rest days, occupants — answers "was P2 grazed in the last 21 days?" for parasite reasoning (supports FAMACHA/refugia playbook, not a diagnosis).
+
+### 10. UX flows — owner business cockpit
+
+One screen, monthly-first:
+
+```
+August 2026                    [Month ▾]        [Export PDF] [Export CSV]
+Net position: −1,240  (income 8,900 / expenses 10,140)
+Per enterprise: goat-dairy +2,100 · rabbit-meat +860 · poultry-layer −4,200 ⚠
+KPIs: kid survival 91% ✓ · hen-housed eggs 218 ✓ · calving interval 383 d ⚠
+Costs: feed 46% of expenses · cost/kg rabbit gain 2.90 · milk cost/l 0.41
+Ops: 2 paddocks resting ✓ · 3 stock alerts ⚠ · 1 withdrawal active · 0 notifiable
+[Ask Copilot: "why is poultry negative?"]  → tool-grounded answer + action drafts
+```
+
+- Every number is a projection row with drill-down to its source records (tap → filtered list → record detail). No number without provenance.
+- Copilot uses `get_kpis`/`get_timeline`-class tools only; money answers cite record IDs; suggestions are action-catalog drafts.
+
+### 11. Unit economics: formulas
+
+| Metric | Formula | Grain |
+|---|---|---|
+| Cost per kg gain | (feed cost + health cost + allocated overhead for cohort) ÷ kg weight gain | rabbit grow-out, beef, goat meat |
+| Milk cost per litre | (feed + health + parlour supplies allocated) ÷ litres shipped | dairy cow/goat |
+| Cost per egg / tray | (feed + health allocated to layer enterprise) ÷ eggs | layers by kind |
+| Margin per litter | litter income (sales contracts) − doe feed share − litter costs | rabbit programme |
+| Enterprise net | Σ allocations(income) − Σ allocations(expense) | per enterprise_code |
+| Feed cost share | feed expense ÷ total expense | farm, monthly |
+| Price received vs market | `sales_prices` series vs manual benchmark entry | optional |
+
+Allocation bases: `direct` (linked at capture), `head_days` (Σ animals × days in enterprise), `weight_gain` (from measurements), `feed_kg` (ration issues). Unallocated remainder shows as "farm overhead" — never silently dropped.
+
+### 12. Roles & safety
+
+| Capability | Worker | Farm mgr | Owner |
+|---|---|---|---|
+| Record money entry | ✗ | ✓ | ✓ |
+| Receive/issue stock, stocktake count | ✓ | ✓ | ✓ |
+| Post stocktake / edit reorder points | ✗ | ✓ | ✓ |
+| Move grazing group | ✓ | ✓ | ✓ |
+| Lock paddock / set quarantine | ✗ | ✓ | ✓ |
+| Edit categories, enterprises, allocation rules | ✗ | propose | ✓ |
+
+Money records are immutable once synced; corrections are reversing entries (`money.recorded` negative-mirror with link) — consistent with append-only law.
+
+### 13. Offline behaviour
+
+- All captures (money, movements, sessions, stocktake counts) queue in outbox with `mutation_id`; projections recompute on device from Room mirror.
+- Cockpit reads are projection-first: month view renders offline with last-synced banner.
+- Rotation engine and ration checks run fully on-device; purchase drafts send when online.
+
+### 14. Phasing & gates
+
+| Phase slice | Ships | Gate (handbook Ch.10 style) |
+|---|---|---|
+| O1 Inventory core | items+movements+levels, receive/issue/stocktake UI, low-stock worker | FEFO fixture: earliest-expiry batch issued first; variance adjust on stocktake post; RLS fixtures |
+| O2 Money core | categories, records, auto-post links, price history | idempotent replay fixture (double-purchase never double-posts); reversal flow test |
+| O3 Pasture | paddocks, sessions, rotation planner, quarantine interlock | overlap-rejection call-site named; quarantine interlock adversarial check |
+| O4 Feed & rations | demand forecast, coverage chips, ration check drafts | demand math golden fixture (24-head dairy herd example above); suggestion-is-draft gate |
+| O5 Allocations & unit economics | AllocationEngine, §11 metrics | rebuild-from-ledger proof: drop allocations, rebuild, byte-equal |
+| O6 Cockpit & exports | cockpit screen, PDF/CSV export | every tile provenance drill-down works; export determinism fixture |
+
+### 15. Traceability
+
+| Area | Source / relation |
+|---|---|
+| Event/idempotency/RLS law | Handbook Ch.6–7; master plan CQRS |
+| Treatment→inventory auto-issue | Vet intelligence spec §4 WithdrawalClock; health spec §5 |
+| Sales contracts → income | Rabbit breeding spec (contracts/waitlist) |
+| Market planner targets | Rabbit breeding spec (market plans) ↔ cost/kg gain here |
+| Weather inputs | Health spec §8 widget feeds rotation/feed heat hints |
+| KPI formulas | Vet pack §8 ICAR sources; kpi_definitions table |
+| Scope change authority | EDR-0003 (owner decision 22 Aug 2026) |
+
+*End of Part I.*
+
+<a id="part-j"></a>
+
+# Part J — Design System Spec (Field-first visual language)
+
+*Source: `FARM_OS_DESIGN_SYSTEM_SPEC.md`*
+
+---
+
+## Farm OS — Design System Spec ("Field-first visual language")
+
+**Version:** 1.0 · **Date:** 22 August 2026
+**Purpose:** Make Farm OS look and feel like a crafted professional product, not generated output. Defines tokens, typography, colour, components, patterns, motion, content voice, and the automation that enforces all of it.
+**Applies to:** all `:feature-*`, `:core-design`; binding on humans and agents.
+**Enforcement:** §14–§15 (lint, snapshot tests, gallery, gate items). HOW-law per `FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md`.
+
+---
+
+### Contents
+
+| § | Title |
+|---|-------|
+| 0 | Why apps look AI-generated — the anti-goals |
+| 1 | Design principles |
+| 2 | Colour tokens (semantic, never raw) |
+| 3 | Typography |
+| 4 | Spacing, shape, elevation, iconography |
+| 5 | Core component specs |
+| 6 | Named screen patterns |
+| 7 | Motion |
+| 8 | Content voice (microcopy law) |
+| 9 | Accessibility |
+| 10 | Theming & branding seams |
+| 11 | Screen inventory & flow polish standards |
+| 12 | App icon & system surfaces |
+| 13 | Asset pipeline |
+| 14 | Enforcement automation |
+| 15 | Definition of done — UI slice |
+| 16 | Anti-generic guardrails ("designed, not generated" protocol) |
+| 17 | Traceability |
+
+### 0. Why apps look AI-generated — the anti-goals
+
+| AI-tell | Our standing rule |
+|---|---|
+| Default Material purple/blue, gradient buttons | One brand colour, used sparingly; zero gradients in controls |
+| Emoji in UI copy and empty states | Never. Icons from one set; words from the voice guide |
+| Everything rounded 28dp+, floating cards everywhere | Radii scale ≤16dp; flat surfaces, hairline borders, tone-shift elevation |
+| Generic copy: "Welcome to your amazing farm!" | Species-correct, terse, sentence case; empty states state the next action |
+| Random spacing, mixed text sizes per screen | 4dp grid + fixed type scale; nothing off-scale |
+| Decorative illustrations, glassmorphism, neon dark mode | None. Dark mode is a true tonal counterpart, not inverted neon |
+| Every screen invented ad hoc | Screens assemble from the shared component library + named patterns |
+
+### 1. Design principles
+
+1. **Field-first.** Sunlight-legible contrast, 48–64dp targets, one-thumb capture flows. A vet wrap or dust decides usability more than beauty does.
+2. **Calm data density.** Farmers scan; dashboards are dense but quiet — hairlines, alignment, tabular numbers, no decoration between the user and data.
+3. **One accent.** A single deep agricultural green carries identity; species colours appear only as small identity chips; status colours are reserved and rare.
+4. **Native, tuned.** Material 3 components with our tokens — never custom-rebuilt basics, never web-clone patterns.
+5. **Motion restraint.** Transitions explain hierarchy (shared-axis); nothing bounces, floats, or celebrates.
+6. **Content is UI.** Microcopy, empty states, and errors are designed artifacts with the same rigor as pixels.
+
+### 2. Colour tokens (semantic, never raw)
+
+Defined once in `:core-design/theme/FosColors.kt` (+ XML equivalent); features may reference **tokens only**.
+
+#### 2.1 Light
+
+| Token | Hex | Use |
+|---|---|---|
+| `brand/primary` | #2C5539 | Primary actions, active nav, links |
+| `brand/onPrimary` | #FFFFFF | |
+| `brand/primaryContainer` | #DDE8DD | Selected backgrounds |
+| `surface/canvas` | #FAFAF6 | App background (warm paper, not white) |
+| `surface/card` | #FFFFFF | Cards, sheets |
+| `surface/sunken` | #F1F1EA | Wells, chart plots |
+| `text/primary` | #1B1D1A | |
+| `text/secondary` | #5A5D57 | Labels, metadata |
+| `border/hairline` | #E3E4DC | Card outlines, dividers |
+| `status/critical` | #B3261E | Red flags, withdrawal breach |
+| `status/warning` | #8A5A00 | Watch anomalies, low stock |
+| `status/positive` | #2E6B34 | Positive anomaly, ready state |
+| `status/info` | #3A5A78 | Neutral notices |
+| `status/withdrawal` | #8E3B62 | Withdrawal clocks (reserved hue) |
+
+#### 2.2 Species accents — chips and badges ONLY (never themes, never headers)
+
+| Module | Token | Hex |
+|---|---|---|
+| Goat | `species/goat` | #A9762B (ochre) |
+| Sheep | `species/sheep` | #6B8F71 (sage) |
+| Cattle | `species/cattle` | #8A6240 (leather) |
+| Rabbit | `species/rabbit` | #5B7C99 (slate) |
+| Poultry | `species/poultry` | #B65C33 (terracotta) |
+
+#### 2.3 Dark & outdoor variants
+
+- Dark: tonal counterparts (canvas #121411, card #1C1F1B, primary #9BC49F, same hues lifted for ≥4.5:1). Not pure black, not neon.
+- **Outdoor mode** (toggleable, default ON for field roles): canvas #FFFFFF, text #000000, minimum contrast 7:1, target size floor 64dp, haptic confirmations emphasized.
+
+Contrast floors: text 4.5:1 (7:1 outdoor), icons/status 3:1. Verified in §14 CI.
+
+### 3. Typography
+
+Single family: **Inter** (variable, bundled). Tabular figures for all numeric data. No second family anywhere.
+
+| Style | Size/Line | Weight | Use |
+|---|---|---|---|
+| display | 28/34 | 600 | Module dashboard greeting only |
+| titleLg | 22/28 | 600 | Screen titles |
+| titleSm | 16/22 | 600 | Card titles, section heads |
+| body | 15/22 | 400 | Default |
+| bodyStrong | 15/22 | 600 | Emphasis, values in lists |
+| label | 13/18 | 500 | Metadata, chips |
+| numeric | 15/22 | 500, tabular | Weights, dates, money |
+| numericLg | 24/30 | 600, tabular | KPI tiles |
+
+Rules: sentence case everywhere; dates as `02 Feb`; weights `45.2 kg`; money with farm currency, no cents unless entered.
+
+### 4. Spacing, shape, elevation, iconography
+
+- **Grid:** 4dp base. Screen margin 16dp; card padding 16dp; list item 56dp min; intra-card gap 12dp; section gap 24dp.
+- **Radii scale (only these):** 8dp (inputs, chips), 12dp (cards, sheets), 16dp (bottom sheets max). Buttons 8dp. **No pill buttons, no 28dp cards.**
+- **Borders over shadows:** cards are `surface/card` + 1dp `border/hairline`. Elevation reserved for: FAB (level 1), drag states, modal sheets (level 2). No drop shadows on lists or tiles.
+- **Icons:** Material Symbols (rounded variant), one weight, 20/24dp, always with text label in buttons. Species glyphs only in identity chips. No emoji, ever.
+- **Touch targets:** ≥48dp (64dp outdoor). Primary action per screen = one filled button; everything else tonal/text.
+
+### 5. Core component specs
+
+#### 5.1 Cards
+
+```
+┌─────────────────────────────────┐
+│ ● Goat · Nala            3d ▾  │  label row: species dot 8dp + name + meta
+│ FAMACHA 3 · BCS 3.0 · 45.2 kg   │  body: numeric style, dot-separated
+│ ─────────────────────────────── │  hairline
+│ [Record check]  [Call vet]      │  actions: text buttons, right-aligned
+└─────────────────────────────────┘
+```
+
+- Radius 12dp, hairline border, no shadow. Title row 40dp min. Max one primary action per card.
+
+#### 5.2 Data table (dense lists)
+
+- Row 56dp; column headers `label` style, hairline under; numeric columns right-aligned tabular; zebra **off**; row press = 8% primary overlay; sticky header on scroll.
+- Status appears as a 6dp dot + word, never as a coloured pill unless it's a chip pattern.
+
+#### 5.3 Chips
+
+Input chips for filters (8dp radius, hairline, selected = `primaryContainer`). Species chip = 20dp circle + label. Status chip reserved for withdrawal/countdown only (uses `status/withdrawal`).
+
+#### 5.4 Empty states
+
+Structure: icon (24dp, `text/secondary`) → one-line statement → one action button. No illustration, no apology, no emoji.
+
+> "No health actions today. Next task: CDT booster — 12 May." `[View schedule]`
+
+#### 5.5 Forms
+
+- Single column; labels above fields (`label` style); helper text ≤1 line; validation inline below field in `status/critical`, never dialogs.
+- Section headers as hairline + `label` text, not cards-in-cards.
+- Score pads (FAMACHA/BCS): segmented control with photo reference sheet behind a `ⓘ` — the photo guide is a documented asset, not a web image.
+- Numeric entry: numeric keyboard, decimal comma/point per locale, unit suffix inside the field (`kg`), tabular results.
+
+#### 5.6 Navigation
+
+- Bottom bar: 4 destinations max per module (Today, Record, [Species core], More). 24dp icons + 12dp labels, active = `brand/primary` icon + dot indicator (no filled-pill nav).
+- Module switcher: top bar left — species chip + module name, opens drawer with species list (identity chips only, no colour themes).
+- Top bar: flat `surface/canvas`, title `titleSm`, actions as icon buttons 48dp.
+
+#### 5.7 Charts (Vico)
+
+- Line 2dp, no fill gradients; cohort band = 12% primary; anomaly markers: ▲ 6dp triangle critical, ● 6dp dot watch; axis labels `label` style, max 4 y-ticks; tabular axis numerals.
+- Chart background `surface/sunken`, hairline frame. Tooltip: single card, `titleSm` value + `label` date.
+
+### 6. Named screen patterns (the library agents build from)
+
+Every screen is an instance of one of these — no invented layouts:
+
+| Pattern | Used by | Structure |
+|---|---|---|
+| `ModuleDashboard` | 5 species homes | greeting (display) → tip card → KPI strip (3 numericLg tiles) → Today list → charts section |
+| `TodayBoard` | Health/rabbit/pasture today | section headers hairline → action rows (dot status + title + meta + action) |
+| `TimelineScreen` | animal/litter/paddock detail | sticky header card → segmented [Chart/Table/Both] → event list grouped by month |
+| `CaptureForm` | all recording | single column sections → sticky bottom bar [Save] + unsaved-changes chip |
+| `InventoryList` | stock, formulary | search + filter chips → dense table → FAB |
+| `PlanBoard` | feed plan, market planner, rotation | week/month columns → coverage chips → draft suggestion cards with [Apply] |
+| `Cockpit` | owner business view | month switcher → net hero (numericLg) → enterprise table → KPI grid → export row |
+| `SettingsList` | settings, pack management | grouped hairline sections → rows with value + chevron |
+| `Wizard` | farm setup, pack acceptance | one question per step → progress dots → [Back][Next] |
+
+Pattern specs live as Compose templates in `:core-design/patterns/` — features compose, never restyle.
+
+### 7. Motion
+
+- Durations: 150ms (chips, presses), 220ms (screens, shared-axis X forward/back), 300ms (sheets).
+- Easing: standard acceleration; **no springs, no bounce, no overshoot**.
+- List diffs: animate placement only; no item fade-stagger cascades.
+- Respect system "remove animations"; reduce-motion ⇒ crossfade 100ms.
+
+### 8. Content voice (microcopy law)
+
+- Terse, specific, sentence case. Verbs first on buttons ("Record check", not "Would you like to record a check?").
+- Numbers in copy: figures, not words ("3 tasks due", not "three tasks due").
+- Species vocabulary enforced: "kidding" not "birthing" in goat; "kindling" in rabbit.
+- Errors say what happened + the fix: "Sync failed — will retry on connection. Your entries are safe on this device."
+- No marketing tone inside the product. No exclamation marks. No "simply/easily/just".
+
+### 9. Accessibility
+
+- Contrast floors per §2.3; all text scales to 200% (no fixed-height text containers; wrap, don't truncate).
+- Touch ≥48dp/64dp outdoor; every icon button has contentDescription; charts have table toggle (data parity rule).
+- TalkBack order = visual order; focus goes to first field on form open; live region for sync/withdrawal countdowns.
+
+### 10. Theming & branding seams
+
+- `:core-design/theme/` owns: tokens, Type.kt, Shapes.kt, Theme.kt (light/dark/outdoor), PlatformIcons.
+- Farm-level config: currency symbol, date locale, unit system (metric/imperial) — data-driven, not re-themed.
+- **No user themes, no colour skins.** Species identity = chips only. This constraint is the brand.
+
+### 11. Screen inventory & flow polish standards
+
+- Every screen from the master plan/binder specs maps to a pattern in §6; the mapping table lives in `:core-design/patterns/PATTERNS.md` and is reviewed at each phase gate.
+- Flow rules: any capture ≤3 taps from its dashboard; destructive actions confirm via bottom sheet (not dialog); every list has search + empty state + offline banner slot.
+- Loading: skeleton of the real layout (same pattern), never spinners-in-cards; sync state is one status chip in the top bar, not per-card badges.
+
+### 12. App icon & system surfaces
+
+- Icon: single glyph — simplified goat head silhouette on `brand/primary` field, no gradients, no text. Adaptive icon layers: background solid, foreground 1dp-safe.
+- Splash: brand field + glyph, 200ms max, then content. No loading slogans.
+- Notifications: templates use app icon + species dot + terse title ("Nest box due — Cage B"); actions mirror in-app buttons.
+
+### 13. Asset pipeline
+
+- Icons: Material Symbols Rounded via material-icons-extended (tree-shaken by lint).
+- Photography: score reference sheets (FAMACHA eyelid, BCS hands-on) bundled at 2x, compressed WebP, credited to source in-app ⓘ.
+- Exports (cage cards, PDFs): rendered from same tokens via Compose → PDF path so paper matches screen.
+
+### 14. Enforcement automation (this is what actually prevents "AI-generated")
+
+1. **Token lint (Konsist/arch test):** features may not declare `Color(0x…)`, raw `dp` outside the approved scales, or `FontFamily` other than Inter. CI fails the build. Only `:core-design/theme` defines colours.
+2. **Pattern lint:** screens must extend/compose a §6 pattern base; new one-off layouts require a design-system EDR.
+3. **Contrast check:** unit test computes contrast for all token pairs used in text/status roles; fails below floors (incl. dark + outdoor variants).
+4. **Screenshot tests (Paparazzi or Roborazzi):** every core component × light/dark/outdoor × font-scale 1.0/1.3/2.0 renders golden images; diffs block PRs. This catches drift that code review misses.
+5. **Component gallery debug screen** (`GalleryActivity`): all tokens/components/patterns live in-app for eyeballing; gallery screenshots are part of the gate evidence.
+6. **Copy lint:** forbidden strings list (`!`, "welcome to", "amazing", emoji ranges, ALL-CAPS headers >4 chars) fails a string-resource test.
+
+### 15. Definition of done — UI slice
+
+A UI task is done only when:
+
+- [ ] Built from §6 patterns with §2–§5 tokens/styles; zero raw values
+- [ ] Light + dark + outdoor screenshot goldens updated and reviewed
+- [ ] Font scale 2.0 usable (no clipped text)
+- [ ] TalkBack passes the flow; targets ≥48dp
+- [ ] Empty/loading/error states designed (all three)
+- [ ] Microcopy follows §8 voice
+- [ ] Gallery updated if any component changed
+
+### 16. Anti-generic guardrails ("designed, not generated" protocol)
+
+Repo consulting produced generic apps because agents (a) write UI without ever seeing rendered pixels and (b) converge on the *average* aesthetic of whatever they consult. These ten guardrails eliminate both failure modes. Binding on humans and agents.
+
+1. **Authority split — repos are engineering references, never visual ones.** Now in Android et al. are consulted for module graphs, test harnesses, sync plumbing — cited by file path in PRs. Consulting any external repo for layout, spacing, colour or component choice is forbidden; the only visual authority is this spec (`FARM_OS_DESIGN_SYSTEM_SPEC.md`). An agent needing a layout decision cites a §6 pattern code, not a repo screen.
+2. **Design-before-code.** Every new screen lands in the Gallery debug app **first**, built from patterns/tokens with realistic fixtures, screenshotted, and approved by the owner **before** the integration PR exists. A screen that never appeared in the Gallery cannot ship. This converts "taste debates in code review" into cheap pixel reviews.
+3. **Realistic-fixture law.** All previews, screenshot tests, demo mode and gallery entries render the named fixture dataset — Nala (goat, FAMACHA 3, ADG 118 g/d), Cage B KudBat wave dates, August money records. Forbidden in any committed UI code or test asset: `Lorem`, `Item 1`, `Test`, `Sample`, `John Doe`, `foo`, placeholder avatars. Generic fixtures produce generic-feeling screens and hide density problems.
+4. **Screenshot-evidence gate.** UI PRs must attach Roborazzi/Paparazzi captures (light + dark + outdoor × font-scale 1.3) generated in CI; CI posts gallery diffs as PR comments. Extends handbook Ch.10: **tests green ≠ UI done** — the phase gate includes owner visual sign-off of the gallery diff, recorded in the gate report.
+5. **Expanded static lints (CI-blocking).**
+   - Material 2 APIs and default `MaterialTheme.typography`/`MaterialTheme.colorScheme` direct usage outside `:core-design` — fail.
+   - `Brush.linearGradient/radialGradient` anywhere in features — fail (gradients banned).
+   - Emoji and high-triage codepoints in string resources or composables — fail.
+   - Raw `dp`/`sp` values outside the §4 scales and type scale — fail (constants only).
+   - `TextStyle(...)` construction outside `:core-design/theme` — fail; `FosText.*` styles only.
+6. **Density matrix in CI.** Goldens render at font-scale 1.0/1.3/2.0 and smallest-width 360/411/780. A layout that breaks at 200% text is broken, full stop.
+7. **One-screen-one-pattern audit.** Each phase gate walks `PATTERNS.md`: every shipped screen maps to exactly one §6 pattern instance; deviations surface as EDR candidates. Orphan screens (pattern-less) are release blockers.
+8. **Microcopy pass at gate.** §8 voice checklist run over every new string resource: verb-first buttons, sentence case, species vocabulary, numbers as figures, zero exclamation marks. Copy defects block like failing tests.
+9. **Weekly sunlight walk.** Owner installs the weekly debug build, walks the five core flows outdoors on a real device (outdoor mode ON), files findings as P1 visual bugs. Release trains require a clean walk. This is the single highest-signal guardrail: sunlight reveals contrast, target-size and glanceability lies that emitters hide.
+10. **Aesthetic-debt budget.** Token-lint violations are counted per module on every CI run and trended. Any upward trend freezes new feature UI in that module until debt returns to zero. Generic drift becomes economically impossible to accumulate silently.
+
+#### 16.1 Why this works where "good prompts" fail
+
+| Failure mode | Guardrail that kills it |
+|---|---|
+| Agent never sees output | #2 Gallery-first + #4 screenshot evidence |
+| Average-pull from reference repos | #1 authority split |
+| Placeholder-feeling screens | #3 realistic fixtures |
+| Slow silent drift | #5 lints + #10 debt budget |
+| Looks fine in IDE, unusable in field | #6 density matrix + #9 sunlight walk |
+| Taste argued in review | #2 pixel review before code exists |
+
+### 17. Traceability
+
+| Area | Source |
+|---|---|
+| Species-native UX law | Master plan alignment rules |
+| Chartable/table parity | AI spec §3 |
+| Withdrawal/status colour reservation | Vet intelligence spec §5.2, §9 |
+| Outdoor mode rationale | Field-first principle; vet pack handling sections |
+| Gate integration | Handbook Ch.9 DoD, Ch.10 phase gates |
+| Agent enforcement | `.cursor/rules/farmos-design-guardrails.mdc`; root `AGENTS.md` |
+
+*End of Part J.*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

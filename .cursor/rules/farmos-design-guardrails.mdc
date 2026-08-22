@@ -1,0 +1,42 @@
+---
+description: Farm OS design law - binding visual, UX and copy constraints for every UI task in this repo. Always applies.
+alwaysApply: true
+---
+
+# Farm OS design guardrails (binding)
+
+Authoritative source: `docs/FARM_OS_DESIGN_SYSTEM_SPEC.md` (Part J of the binder).
+Read the relevant section before writing or reviewing UI code. These are CI-enforced laws, not suggestions.
+
+## Visual authority
+
+- The ONLY visual authority is the design system spec. External repos (nowinandroid, compose-samples, etc.) are ENGINEERING references only - never consult them for layout, spacing, colour or component choice.
+- Every screen composes one named pattern from spec §6 (`ModuleDashboard`, `TodayBoard`, `CaptureForm`, `TimelineScreen`, `InventoryList`, `PlanBoard`, `Cockpit`, `SettingsList`, `Wizard`). Inventing layouts requires a design-system EDR.
+
+## Hard bans (CI fails these)
+
+- Gradients anywhere in feature UI (`Brush.linearGradient/radialGradient`)
+- Emoji in UI copy, empty states or string resources
+- Raw `Color(0x...)`, raw `dp/sp` outside approved scales, non-Inter fonts, ad-hoc `TextStyle(...)` outside `:core-design/theme`
+- Material 2 APIs; direct `MaterialTheme.colorScheme/typography` usage outside `:core-design`
+- Placeholder content in committed code/tests: Lorem, Item 1, Test, Sample, John Doe, foo
+- Decorative animation libraries (Lottie, confetti, particles) without an accepted EDR
+
+## Required states and fixtures
+
+- Every interactive surface defines all five states: idle, loading, empty, error, disabled. Use the shared loadable-state wrapper; never render bare lists.
+- All previews/screenshots/demo data use the named fixtures (Nala goat record, Cage B KudBat wave, August money records) from the fixtures module.
+
+## Copy voice
+
+- Verb-first buttons, sentence case, terse. Numbers as figures. Species vocabulary exact (kidding=goat, kindling=rabbit). No exclamation marks, no marketing tone, no "simply/easily/just".
+- Errors state what happened AND the fix, plus data-safety reassurance for sync failures.
+
+## Process (non-negotiable)
+
+1. Gallery-first: new screens appear in the Gallery debug entry with fixtures BEFORE integration PRs; owner pixel-approval precedes implementation.
+2. Screenshot evidence: Roborazzi/Paparazzi goldens (light/dark/outdoor x font-scale 1.0/1.3/2.0) updated in the same PR; CI diffs block merge.
+3. Tests green != UI done. Phase gates require owner visual sign-off of the gallery diff and a clean outdoor sunlight walk for release trains.
+4. Token-lint violations trend per module; rising aesthetic debt freezes new feature UI in that module until zero.
+
+When blocked on a visual decision not covered by the spec: stop, cite the pattern code you tried to apply, and ask - do not improvise from memory or repos.
