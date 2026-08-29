@@ -1,7 +1,5 @@
 package com.farmos.core.network
 
-import com.farmos.domain.goat.GoatSearchResult
-import com.farmos.domain.goat.SearchSource
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.header
@@ -27,20 +25,29 @@ private data class SearchTokenResponse(
 private data class MeiliSearchRequest(
     val q: String,
     val limit: Int,
-    val attributesToRetrieve: List<String> = listOf("id", "tag", "display_name", "status"),
+    val attributesToRetrieve: List<String> = listOf("id", "tag", "display_name", "status", "species_code"),
 )
 
 @Serializable
-private data class MeiliAnimalHit(
+private data class MeiliEntityHit(
     val id: String,
-    val tag: String,
+    val tag: String? = null,
     @SerialName("display_name") val displayName: String? = null,
-    val status: String,
+    val status: String? = null,
+    @SerialName("species_code") val speciesCode: String? = null,
 )
 
 @Serializable
 private data class MeiliSearchResponse(
-    val hits: List<MeiliAnimalHit>,
+    val hits: List<MeiliEntityHit>,
+)
+
+data class FarmSearchHit(
+    val id: String,
+    val tag: String?,
+    val displayName: String?,
+    val status: String?,
+    val speciesCode: String?,
 )
 
 class FarmSearchClient(
@@ -50,7 +57,7 @@ class FarmSearchClient(
     private val tokenProvider: AccessTokenProvider,
     private val client: HttpClient = defaultFarmOsHttpClient(),
 ) {
-    suspend fun searchGoats(farmId: String, query: String, limit: Int = 20): List<GoatSearchResult> {
+    suspend fun searchAnimals(farmId: String, query: String, limit: Int = 20): List<FarmSearchHit> {
         require(meiliHost.isNotBlank()) { "Meilisearch host is not configured" }
         val accessToken = requireNotNull(tokenProvider.accessToken()) { "Authentication required" }
         val tenant: SearchTokenResponse = client.post(
@@ -71,12 +78,12 @@ class FarmSearchClient(
         }.body()
 
         return response.hits.map { hit ->
-            GoatSearchResult(
-                animalId = hit.id,
+            FarmSearchHit(
+                id = hit.id,
                 tag = hit.tag,
-                name = hit.displayName?.takeUnless { it == hit.tag },
+                displayName = hit.displayName,
                 status = hit.status,
-                source = SearchSource.MEILISEARCH,
+                speciesCode = hit.speciesCode,
             )
         }
     }
