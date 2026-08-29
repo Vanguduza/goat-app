@@ -44,6 +44,7 @@ dependencies {
     implementation(project(":core:sync"))
     implementation(project(":core:design"))
     implementation(project(":domain:goat"))
+    implementation(project(":data:goat"))
     implementation(project(":feature:goat"))
 
     implementation(platform("androidx.compose:compose-bom:2026.08.00"))
