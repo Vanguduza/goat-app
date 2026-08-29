@@ -45,6 +45,7 @@ interface GoatRepository {
     suspend fun registerGoat(command: RegisterGoat, context: LocalCommandContext): LocalCommandResult
     suspend fun recordWeight(command: RecordGoatWeight, context: LocalCommandContext): LocalCommandResult
     suspend fun getGoat(animalId: String): GoatSnapshot?
+    suspend fun searchGoats(query: String, limit: Int = 20): List<GoatSearchResult>
 }
 
 data class LocalCommandContext(
@@ -70,3 +71,13 @@ data class GoatSnapshot(
     val latestWeightGrams: Long?,
     val syncPending: Boolean,
 )
+
+data class GoatSearchResult(
+    val animalId: String,
+    val tag: String,
+    val name: String?,
+    val status: String,
+    val source: SearchSource = SearchSource.LOCAL,
+)
+
+enum class SearchSource { LOCAL, MEILISEARCH }
