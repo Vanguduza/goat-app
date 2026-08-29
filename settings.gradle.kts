@@ -24,5 +24,6 @@ include(
     ":core:sync",
     ":core:design",
     ":domain:goat",
+    ":data:goat",
     ":feature:goat",
 )
