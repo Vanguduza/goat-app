@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import com.farmos.core.design.FosDimens
+import com.farmos.domain.goat.GoatSearchResult
 import com.farmos.domain.goat.GoatSex
 
 @Composable
@@ -31,22 +34,25 @@ fun GoatVerticalSliceScreen(
     onRegister: (tag: String, name: String?, sex: GoatSex) -> Unit,
     onRecordWeight: (weightKgText: String) -> Unit,
     onSyncNow: () -> Unit,
+    onSearch: (query: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var tag by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var sex by remember { mutableStateOf(GoatSex.FEMALE) }
     var weight by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf("") }
 
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(FosDimens.ScreenMargin),
         verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
     ) {
         Text("Goat field record", style = MaterialTheme.typography.titleLarge)
         Text(
-            "Register a goat, record a weight offline, then synchronize the durable outbox.",
+            "Register a goat, record a weight offline, synchronize, then verify discovery.",
             style = MaterialTheme.typography.bodyMedium,
         )
 
@@ -85,7 +91,7 @@ fun GoatVerticalSliceScreen(
         Spacer(Modifier.height(FosDimens.Grid))
         HorizontalDivider()
         Text("Weight", style = MaterialTheme.typography.labelLarge)
-        Text(state.goatSummary ?: "Register a goat before recording weight")
+        Text(state.goatSummary ?: "Register or search for a goat before recording weight")
         OutlinedTextField(
             value = weight,
             onValueChange = { weight = it },
@@ -115,9 +121,39 @@ fun GoatVerticalSliceScreen(
             Text("Sync now")
         }
 
+        HorizontalDivider()
+        Text("Search", style = MaterialTheme.typography.labelLarge)
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            label = { Text("Tag or name") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+        Button(
+            enabled = !state.busy,
+            onClick = { onSearch(searchQuery) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Search records")
+        }
+        Text(state.searchMessage, style = MaterialTheme.typography.bodySmall)
+        state.searchResults.take(8).forEach { result ->
+            Text(
+                text = buildString {
+                    append(result.tag)
+                    result.name?.let { append(" · ").append(it) }
+                    append(" · ").append(result.status)
+                    append(" · ").append(result.source.name.lowercase())
+                },
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+
         state.error?.let {
             Text(it, color = MaterialTheme.colorScheme.error)
         }
+        Spacer(Modifier.height(FosDimens.SectionGap))
     }
 }
 
@@ -125,6 +161,8 @@ data class GoatSliceUiState(
     val animalId: String? = null,
     val goatSummary: String? = null,
     val syncMessage: String = "No local changes yet",
+    val searchMessage: String = "Local search is always available",
+    val searchResults: List<GoatSearchResult> = emptyList(),
     val busy: Boolean = false,
     val error: String? = null,
 )
