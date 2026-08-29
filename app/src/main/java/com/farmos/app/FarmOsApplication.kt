@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.CommandAcknowledgement
 import com.farmos.core.model.CommandResultCode
+import com.farmos.core.network.AccessTokenProvider
 import com.farmos.core.network.CommandTransport
 import com.farmos.core.network.FarmSearchClient
 import com.farmos.core.network.MutableSessionStore
@@ -65,23 +66,31 @@ class FarmOsApplication : Application(), SyncEngineOwner {
                 publishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
                 sessionStore = sessionStore,
             )
+            val refreshingTokenProvider = object : AccessTokenProvider {
+                override suspend fun accessToken(): String? {
+                    if (sessionStore.needsRefresh()) {
+                        identityClient?.refresh()
+                    }
+                    return sessionStore.accessToken()
+                }
+            }
             pullClient = SupabasePullClient(
                 supabaseUrl = BuildConfig.SUPABASE_URL,
                 publishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
-                tokenProvider = sessionStore,
+                tokenProvider = refreshingTokenProvider,
             )
             if (BuildConfig.MEILI_HOST.isNotBlank()) {
                 farmSearchClient = FarmSearchClient(
                     supabaseUrl = BuildConfig.SUPABASE_URL,
                     supabasePublishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
                     meiliHost = BuildConfig.MEILI_HOST,
-                    tokenProvider = sessionStore,
+                    tokenProvider = refreshingTokenProvider,
                 )
             }
             transport = SupabaseRpcCommandTransport(
                 supabaseUrl = BuildConfig.SUPABASE_URL,
                 publishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
-                tokenProvider = sessionStore,
+                tokenProvider = refreshingTokenProvider,
             )
         } else {
             transport = object : CommandTransport {
