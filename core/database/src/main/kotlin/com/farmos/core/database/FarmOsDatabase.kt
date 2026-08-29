@@ -3,17 +3,20 @@ package com.farmos.core.database
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
+import androidx.room.Upsert
 
 @Entity(
     tableName = "animals",
     indices = [
-        Index(value = ["farmId", "tag"], unique = true),
+        Index(value = ["farmId", "id"], unique = true),
+        Index(value = ["farmId", "speciesCode", "tag"], unique = true),
         Index(value = ["farmId", "speciesCode", "status"]),
     ],
 )
@@ -31,6 +34,14 @@ data class AnimalEntity(
 
 @Entity(
     tableName = "measurements",
+    foreignKeys = [
+        ForeignKey(
+            entity = AnimalEntity::class,
+            parentColumns = ["farmId", "id"],
+            childColumns = ["farmId", "animalId"],
+            onDelete = ForeignKey.NO_ACTION,
+        ),
+    ],
     indices = [Index(value = ["farmId", "animalId", "measuredAtEpochMillis"])],
 )
 data class MeasurementEntity(
@@ -83,7 +94,7 @@ interface AnimalDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(animal: AnimalEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertFromServer(animal: AnimalEntity)
 
     @Query("SELECT * FROM animals WHERE farmId = :farmId AND id = :animalId LIMIT 1")
@@ -115,7 +126,7 @@ interface MeasurementDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(measurement: MeasurementEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsertFromServer(measurement: MeasurementEntity)
 
     @Query("SELECT * FROM measurements WHERE farmId = :farmId AND animalId = :animalId AND type = :type ORDER BY measuredAtEpochMillis DESC LIMIT 1")
@@ -150,7 +161,7 @@ interface SyncCursorDao {
     @Query("SELECT changeCursor FROM sync_cursors WHERE farmId = :farmId LIMIT 1")
     suspend fun get(farmId: String): Long?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun upsert(cursor: SyncCursorEntity)
 }
 
