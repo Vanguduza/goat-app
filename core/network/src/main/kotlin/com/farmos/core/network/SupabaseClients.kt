@@ -54,15 +54,23 @@ data class PulledDomainEvent(
     val payload: JsonElement,
 )
 
-class MutableSessionStore : AccessTokenProvider {
+class MutableSessionStore(
+    private val now: () -> Long = System::currentTimeMillis,
+) : AccessTokenProvider {
     @Volatile
     private var session: SupabaseSession? = null
+    @Volatile
+    private var expiresAtEpochMillis: Long = 0L
 
     fun set(value: SupabaseSession?) {
         session = value
+        expiresAtEpochMillis = if (value == null) 0L else now() + value.expiresInSeconds * 1_000L
     }
 
     fun current(): SupabaseSession? = session
+
+    fun needsRefresh(leewayMillis: Long = 60_000L): Boolean =
+        session != null && now() + leewayMillis >= expiresAtEpochMillis
 
     override suspend fun accessToken(): String? = session?.accessToken
 }
