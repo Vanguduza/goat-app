@@ -36,6 +36,16 @@ data class WireCommand(
     val payload: JsonElement,
 )
 
+@Serializable
+private data class RpcRequestBody(
+    val p_mutation_id: String,
+    val p_farm_id: String,
+    val p_device_id: String,
+    val p_expected_stream_version: Long?,
+    val p_occurred_at_epoch_ms: Long,
+    val p_payload: JsonElement,
+)
+
 class SupabaseRpcCommandTransport(
     private val supabaseUrl: String,
     private val publishableKey: String,
@@ -53,13 +63,13 @@ class SupabaseRpcCommandTransport(
             header(HttpHeaders.Authorization, "Bearer $token")
             contentType(ContentType.Application.Json)
             setBody(
-                mapOf(
-                    "p_mutation_id" to command.mutationId,
-                    "p_farm_id" to command.farmId,
-                    "p_device_id" to command.deviceId,
-                    "p_expected_stream_version" to command.expectedStreamVersion,
-                    "p_occurred_at_epoch_ms" to command.occurredAtEpochMillis,
-                    "p_payload" to command.payload,
+                RpcRequestBody(
+                    p_mutation_id = command.mutationId,
+                    p_farm_id = command.farmId,
+                    p_device_id = command.deviceId,
+                    p_expected_stream_version = command.expectedStreamVersion,
+                    p_occurred_at_epoch_ms = command.occurredAtEpochMillis,
+                    p_payload = command.payload,
                 ),
             )
         }.body()
