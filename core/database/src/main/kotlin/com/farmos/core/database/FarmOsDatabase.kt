@@ -9,10 +9,10 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
-import androidx.room.Transaction
 import androidx.room.withTransaction
 import com.farmos.core.model.SyncState
 import com.farmos.domain.goat.GoatRepository
+import com.farmos.domain.goat.GoatSearchResult
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.GoatSnapshot
 import com.farmos.domain.goat.GoatValidationResult
@@ -85,19 +85,47 @@ data class OutboxEntity(
     val serverStreamVersion: Long?,
 )
 
+@Entity(tableName = "sync_cursors")
+data class SyncCursorEntity(
+    @PrimaryKey val farmId: String,
+    val changeCursor: Long,
+    val updatedAtEpochMillis: Long,
+)
+
 @Dao
 interface AnimalDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(animal: AnimalEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertFromServer(animal: AnimalEntity)
+
     @Query("SELECT * FROM animals WHERE farmId = :farmId AND id = :animalId LIMIT 1")
     suspend fun get(farmId: String, animalId: String): AnimalEntity?
+
+    @Query("""
+        SELECT * FROM animals
+        WHERE farmId = :farmId
+          AND speciesCode = 'goat'
+          AND status != 'closed'
+          AND (
+              :query = ''
+              OR tag LIKE '%' || :query || '%' COLLATE NOCASE
+              OR COALESCE(name, '') LIKE '%' || :query || '%' COLLATE NOCASE
+          )
+        ORDER BY CASE WHEN tag = :query THEN 0 ELSE 1 END, tag
+        LIMIT :limit
+    """)
+    suspend fun searchGoats(farmId: String, query: String, limit: Int): List<AnimalEntity>
 }
 
 @Dao
 interface MeasurementDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(measurement: MeasurementEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertFromServer(measurement: MeasurementEntity)
 
     @Query("SELECT * FROM measurements WHERE farmId = :farmId AND animalId = :animalId AND type = 'weight' ORDER BY measuredAtEpochMillis DESC LIMIT 1")
     suspend fun latestWeight(farmId: String, animalId: String): MeasurementEntity?
@@ -126,8 +154,17 @@ interface OutboxDao {
     suspend fun hasPending(farmId: String, aggregateId: String): Boolean
 }
 
+@Dao
+interface SyncCursorDao {
+    @Query("SELECT changeCursor FROM sync_cursors WHERE farmId = :farmId LIMIT 1")
+    suspend fun get(farmId: String): Long?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(cursor: SyncCursorEntity)
+}
+
 @Database(
-    entities = [AnimalEntity::class, MeasurementEntity::class, OutboxEntity::class],
+    entities = [AnimalEntity::class, MeasurementEntity::class, OutboxEntity::class, SyncCursorEntity::class],
     version = 1,
     exportSchema = true,
 )
@@ -135,6 +172,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun animals(): AnimalDao
     abstract fun measurements(): MeasurementDao
     abstract fun outbox(): OutboxDao
+    abstract fun syncCursors(): SyncCursorDao
 }
 
 class RoomGoatRepository(
@@ -249,4 +287,14 @@ class RoomGoatRepository(
             syncPending = database.outbox().hasPending(farmId, animalId),
         )
     }
+
+    override suspend fun searchGoats(query: String, limit: Int): List<GoatSearchResult> =
+        database.animals().searchGoats(farmId, query.trim(), limit.coerceIn(1, 100)).map { animal ->
+            GoatSearchResult(
+                animalId = animal.id,
+                tag = animal.tag,
+                name = animal.name,
+                status = animal.status,
+            )
+        }
 }
