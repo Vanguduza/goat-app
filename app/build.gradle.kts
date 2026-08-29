@@ -10,6 +10,9 @@ val supabaseUrl = providers.gradleProperty("FARM_OS_SUPABASE_URL")
 val supabasePublishableKey = providers.gradleProperty("FARM_OS_SUPABASE_PUBLISHABLE_KEY")
     .orElse(providers.environmentVariable("FARM_OS_SUPABASE_PUBLISHABLE_KEY"))
     .orElse("")
+val meiliHost = providers.gradleProperty("FARM_OS_MEILI_HOST")
+    .orElse(providers.environmentVariable("FARM_OS_MEILI_HOST"))
+    .orElse("")
 
 android {
     namespace = "com.farmos.app"
@@ -24,6 +27,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl.get()}\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"${supabasePublishableKey.get()}\"")
+        buildConfigField("String", "MEILI_HOST", "\"${meiliHost.get()}\"")
     }
 
     buildFeatures {
