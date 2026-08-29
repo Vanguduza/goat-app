@@ -22,6 +22,7 @@ include(
     ":core:database",
     ":core:network",
     ":core:sync",
+    ":core:design",
     ":domain:goat",
     ":feature:goat",
 )
