@@ -9,20 +9,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
-import androidx.room.withTransaction
-import com.farmos.core.model.SyncState
-import com.farmos.domain.goat.GoatRepository
-import com.farmos.domain.goat.GoatSearchResult
-import com.farmos.domain.goat.GoatSex
-import com.farmos.domain.goat.GoatSnapshot
-import com.farmos.domain.goat.GoatValidationResult
-import com.farmos.domain.goat.GoatValidator
-import com.farmos.domain.goat.LocalCommandContext
-import com.farmos.domain.goat.LocalCommandResult
-import com.farmos.domain.goat.RecordGoatWeight
-import com.farmos.domain.goat.RegisterGoat
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 @Entity(
     tableName = "animals",
@@ -106,7 +92,7 @@ interface AnimalDao {
     @Query("""
         SELECT * FROM animals
         WHERE farmId = :farmId
-          AND speciesCode = 'goat'
+          AND speciesCode = :speciesCode
           AND status != 'closed'
           AND (
               :query = ''
@@ -116,7 +102,12 @@ interface AnimalDao {
         ORDER BY CASE WHEN tag = :query THEN 0 ELSE 1 END, tag
         LIMIT :limit
     """)
-    suspend fun searchGoats(farmId: String, query: String, limit: Int): List<AnimalEntity>
+    suspend fun searchBySpecies(
+        farmId: String,
+        speciesCode: String,
+        query: String,
+        limit: Int,
+    ): List<AnimalEntity>
 }
 
 @Dao
@@ -127,8 +118,8 @@ interface MeasurementDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertFromServer(measurement: MeasurementEntity)
 
-    @Query("SELECT * FROM measurements WHERE farmId = :farmId AND animalId = :animalId AND type = 'weight' ORDER BY measuredAtEpochMillis DESC LIMIT 1")
-    suspend fun latestWeight(farmId: String, animalId: String): MeasurementEntity?
+    @Query("SELECT * FROM measurements WHERE farmId = :farmId AND animalId = :animalId AND type = :type ORDER BY measuredAtEpochMillis DESC LIMIT 1")
+    suspend fun latest(farmId: String, animalId: String, type: String): MeasurementEntity?
 }
 
 @Dao
@@ -173,128 +164,4 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun measurements(): MeasurementDao
     abstract fun outbox(): OutboxDao
     abstract fun syncCursors(): SyncCursorDao
-}
-
-class RoomGoatRepository(
-    private val database: FarmOsDatabase,
-    private val farmId: String,
-    private val json: Json = Json { encodeDefaults = true },
-) : GoatRepository {
-
-    override suspend fun registerGoat(command: RegisterGoat, context: LocalCommandContext): LocalCommandResult {
-        require(context.farmId == farmId) { "Farm context mismatch" }
-        val validation = GoatValidator.register(command)
-        require(validation is GoatValidationResult.Valid) {
-            (validation as GoatValidationResult.Invalid).message
-        }
-
-        database.withTransaction {
-            database.animals().insert(
-                AnimalEntity(
-                    id = command.animalId,
-                    farmId = farmId,
-                    tag = command.tag.trim(),
-                    name = command.name?.trim()?.takeIf { it.isNotEmpty() },
-                    speciesCode = "goat",
-                    sex = command.sex.name,
-                    status = "active",
-                    dateOfBirthEpochDay = command.dateOfBirthEpochDay,
-                    updatedAtEpochMillis = context.occurredAtEpochMillis,
-                ),
-            )
-            database.outbox().insert(
-                OutboxEntity(
-                    mutationId = context.mutationId,
-                    farmId = farmId,
-                    actorId = context.actorId,
-                    deviceId = context.deviceId,
-                    commandName = "goat.register.v1",
-                    commandSchemaVersion = 1,
-                    aggregateType = "animal",
-                    aggregateId = command.animalId,
-                    expectedStreamVersion = 0,
-                    payloadJson = json.encodeToString(command),
-                    occurredAtEpochMillis = context.occurredAtEpochMillis,
-                    createdAtEpochMillis = System.currentTimeMillis(),
-                    state = SyncState.PENDING.name,
-                    attemptCount = 0,
-                    nextAttemptAtEpochMillis = null,
-                    lastErrorCode = null,
-                    serverEventId = null,
-                    serverStreamVersion = null,
-                ),
-            )
-        }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
-    }
-
-    override suspend fun recordWeight(command: RecordGoatWeight, context: LocalCommandContext): LocalCommandResult {
-        require(context.farmId == farmId) { "Farm context mismatch" }
-        val validation = GoatValidator.weight(command)
-        require(validation is GoatValidationResult.Valid) {
-            (validation as GoatValidationResult.Invalid).message
-        }
-        requireNotNull(database.animals().get(farmId, command.animalId)) { "Goat not found" }
-
-        database.withTransaction {
-            database.measurements().insert(
-                MeasurementEntity(
-                    id = command.measurementId,
-                    farmId = farmId,
-                    animalId = command.animalId,
-                    type = "weight",
-                    valueLong = command.weightGrams,
-                    unit = "g",
-                    measuredAtEpochMillis = command.measuredAtEpochMillis,
-                ),
-            )
-            database.outbox().insert(
-                OutboxEntity(
-                    mutationId = context.mutationId,
-                    farmId = farmId,
-                    actorId = context.actorId,
-                    deviceId = context.deviceId,
-                    commandName = "goat.record_weight.v1",
-                    commandSchemaVersion = 1,
-                    aggregateType = "animal",
-                    aggregateId = command.animalId,
-                    expectedStreamVersion = null,
-                    payloadJson = json.encodeToString(command),
-                    occurredAtEpochMillis = context.occurredAtEpochMillis,
-                    createdAtEpochMillis = System.currentTimeMillis(),
-                    state = SyncState.PENDING.name,
-                    attemptCount = 0,
-                    nextAttemptAtEpochMillis = null,
-                    lastErrorCode = null,
-                    serverEventId = null,
-                    serverStreamVersion = null,
-                ),
-            )
-        }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
-    }
-
-    override suspend fun getGoat(animalId: String): GoatSnapshot? {
-        val animal = database.animals().get(farmId, animalId) ?: return null
-        val weight = database.measurements().latestWeight(farmId, animalId)
-        return GoatSnapshot(
-            animalId = animal.id,
-            farmId = animal.farmId,
-            tag = animal.tag,
-            name = animal.name,
-            sex = GoatSex.valueOf(animal.sex),
-            latestWeightGrams = weight?.valueLong,
-            syncPending = database.outbox().hasPending(farmId, animalId),
-        )
-    }
-
-    override suspend fun searchGoats(query: String, limit: Int): List<GoatSearchResult> =
-        database.animals().searchGoats(farmId, query.trim(), limit.coerceIn(1, 100)).map { animal ->
-            GoatSearchResult(
-                animalId = animal.id,
-                tag = animal.tag,
-                name = animal.name,
-                status = animal.status,
-            )
-        }
 }
