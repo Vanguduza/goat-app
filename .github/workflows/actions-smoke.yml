@@ -1,0 +1,14 @@
+name: Actions smoke
+
+on:
+  push:
+    branches:
+      - implementation/foundation-vertical-slice
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Runner available
+        run: echo "GitHub Actions runner is available for Farm OS"
