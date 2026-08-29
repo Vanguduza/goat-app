@@ -1,0 +1,42 @@
+{
+  "slice_id": "VS-GOAT-001",
+  "name": "Register Goat + Record Weight Offline + Sync + Search",
+  "updated_at": "2026-08-29",
+  "certificate": "NOT_GREEN",
+  "feature_green": false,
+  "module_green": false,
+  "mvp_green": false,
+  "fanout_authorized": false,
+  "gates": [
+    {"id":"VS-01","requirement":"Goat registration is locally durable before success UI","state":"CODE_PRESENT","evidence":["core/database/.../FarmOsDatabase.kt","app/.../MainActivity.kt"]},
+    {"id":"VS-02","requirement":"Weight capture is locally durable before success UI","state":"CODE_PRESENT","evidence":["core/database/.../FarmOsDatabase.kt","app/.../MainActivity.kt"]},
+    {"id":"VS-03","requirement":"Local durability survives process/device restart","state":"NOT_TESTED","evidence":[]},
+    {"id":"VS-04","requirement":"Outbox retry state machine is deterministic","state":"CODE_PRESENT","evidence":["core/sync/.../SyncEngine.kt"]},
+    {"id":"VS-05","requirement":"Duplicate mutation has one authoritative effect","state":"CODE_PRESENT_NOT_PROVEN","evidence":["supabase/migrations/20260829000100_foundation_vertical_slice.sql"]},
+    {"id":"VS-06","requirement":"Expected stream version conflict behavior is proven","state":"CODE_PRESENT_NOT_PROVEN","evidence":["supabase/migrations/20260829000100_foundation_vertical_slice.sql"]},
+    {"id":"VS-07","requirement":"RLS attack from another farm fails","state":"STRUCTURAL_TEST_PRESENT_NOT_RUN","evidence":["supabase/tests/database/foundation_vertical_slice_test.sql"]},
+    {"id":"VS-08","requirement":"Cross-farm FK attack fails","state":"STRUCTURAL_TEST_PRESENT_NOT_RUN","evidence":["supabase/tests/database/foundation_vertical_slice_test.sql"]},
+    {"id":"VS-09","requirement":"Supabase authoritative transaction commits event/projection atomically","state":"CODE_PRESENT_NOT_RUN","evidence":["supabase/migrations/20260829000100_foundation_vertical_slice.sql"]},
+    {"id":"VS-10","requirement":"Monotonic pull cursor reconciles device state","state":"SERVER_CONTRACT_PRESENT_CLIENT_PULL_MISSING","evidence":["supabase/migrations/20260829000100_foundation_vertical_slice.sql"]},
+    {"id":"VS-11","requirement":"Second-device visibility is proven","state":"NOT_IMPLEMENTED","evidence":[]},
+    {"id":"VS-12","requirement":"Search indexing is eventually updated","state":"CODE_PRESENT_NOT_RUN","evidence":["supabase/functions/meili-indexer/index.ts"]},
+    {"id":"VS-13","requirement":"Meilisearch farm isolation is proven","state":"TOKEN_CODE_PRESENT_NOT_TESTED","evidence":["supabase/functions/search-token/index.ts"]},
+    {"id":"VS-14","requirement":"Meilisearch outage cannot block authoritative capture","state":"ARCHITECTURALLY_SEPARATED_NOT_FAULT_TESTED","evidence":["search_index_jobs","supabase/functions/meili-indexer/index.ts"]},
+    {"id":"VS-15","requirement":"Meilisearch rebuild is demonstrated","state":"NOT_IMPLEMENTED","evidence":[]},
+    {"id":"VS-16","requirement":"Device clock drift is handled","state":"SERVER_TIME_MODEL_PRESENT_NOT_TESTED","evidence":["domain_events.occurred_at","domain_events.recorded_at"]},
+    {"id":"VS-17","requirement":"Supabase Auth token expiry and re-auth work","state":"NOT_IMPLEMENTED","evidence":[]},
+    {"id":"VS-18","requirement":"Revoked farm access rejects pending mutations safely","state":"SERVER_CHECK_PRESENT_NOT_E2E_TESTED","evidence":["public.is_farm_member","goat_register_v1","goat_record_weight_v1"]},
+    {"id":"VS-19","requirement":"Mutation/sync/search observability exists","state":"PARTIAL","evidence":["sync_outbox state","search_index_jobs state"]},
+    {"id":"VS-20","requirement":"Android + database CI pass canonical tests","state":"CI_DEFINED_NOT_RUN","evidence":[".github/workflows/foundation-ci.yml"]}
+  ],
+  "activation_blockers": [
+    "Connect a Supabase project/staging environment and configure publishable project credentials outside git.",
+    "Implement Supabase Auth/session handling and replace bootstrap farm/actor/device identifiers.",
+    "Implement client pull/reconciliation and second-device refresh.",
+    "Implement local search + Meilisearch search client and search fallback UX.",
+    "Add deterministic Meilisearch full rebuild/reconciliation command and test.",
+    "Provide/bundle the approved Inter font asset before UI certification.",
+    "Run CI and repair every build, migration, RLS and pgTAP failure.",
+    "Run fault, restart, clock-drift, revocation and two-device E2E tests."
+  ]
+}
