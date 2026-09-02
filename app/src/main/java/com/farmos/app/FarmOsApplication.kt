@@ -10,12 +10,12 @@ import androidx.work.WorkManager
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.CommandAcknowledgement
 import com.farmos.core.model.CommandResultCode
-import com.farmos.core.network.AccessTokenProvider
 import com.farmos.core.network.AuthenticationRequiredException
 import com.farmos.core.network.CommandTransport
 import com.farmos.core.network.FarmMembership
 import com.farmos.core.network.FarmSearchClient
 import com.farmos.core.network.MutableSessionStore
+import com.farmos.core.network.RefreshingAccessTokenProvider
 import com.farmos.core.network.SupabaseIdentityClient
 import com.farmos.core.network.SupabasePullClient
 import com.farmos.core.network.SupabaseRpcCommandTransport
@@ -102,14 +102,12 @@ class FarmOsApplication : Application(), SyncEngineOwner {
                 publishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
                 sessionStore = sessionStore,
             )
-            val refreshingTokenProvider = object : AccessTokenProvider {
-                override suspend fun accessToken(): String? {
-                    if (sessionStore.needsRefresh()) {
-                        identityClient?.refresh()
-                    }
-                    return sessionStore.accessToken()
-                }
-            }
+            val refreshingTokenProvider = RefreshingAccessTokenProvider(
+                sessionStore = sessionStore,
+                refreshSession = {
+                    requireNotNull(identityClient) { "Supabase identity client unavailable" }.refresh()
+                },
+            )
             pullClient = SupabasePullClient(
                 supabaseUrl = BuildConfig.SUPABASE_URL,
                 publishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
