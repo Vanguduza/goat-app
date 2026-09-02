@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(18);
+select plan(20);
 
 -- Deterministic identities for tenant and idempotency tests.
 insert into auth.users (id, email)
@@ -265,6 +265,26 @@ select is(
      where farm_id = '11111111-1111-4111-8111-111111111111'),
     0::bigint,
     'user B cannot see farm A animals'
+);
+
+reset role;
+
+select is(
+    (select count(*)::bigint from public.search_index_jobs
+     where farm_id = '11111111-1111-4111-8111-111111111111'
+       and entity_id = '33333333-3333-4333-8333-333333333333'
+       and state = 'pending'),
+    2::bigint,
+    'accepted register and weight commands enqueue search projection work exactly once each'
+);
+
+select is(
+    (select projection_version
+     from public.search_rebuild_candidates_v1(null, 100)
+     where farm_id = '11111111-1111-4111-8111-111111111111'
+       and entity_id = '33333333-3333-4333-8333-333333333333'),
+    2::bigint,
+    'search rebuild source reports the latest authoritative animal stream version'
 );
 
 select * from finish();
