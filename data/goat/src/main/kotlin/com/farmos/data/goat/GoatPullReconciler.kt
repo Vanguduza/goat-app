@@ -31,6 +31,13 @@ class GoatPullReconciler(
             database.withTransaction {
                 for (event in events) {
                     applyEvent(farmId, event)
+                    database.aggregateVersions().advance(
+                        farmId = farmId,
+                        aggregateType = event.aggregateType,
+                        aggregateId = event.aggregateId,
+                        streamVersion = event.streamVersion,
+                        updatedAtEpochMillis = now(),
+                    )
                     cursor = maxOf(cursor, event.changeCursor)
                     applied++
                 }

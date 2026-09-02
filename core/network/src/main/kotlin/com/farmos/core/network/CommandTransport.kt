@@ -20,6 +20,8 @@ interface AccessTokenProvider {
     suspend fun accessToken(): String?
 }
 
+class AuthenticationRequiredException(message: String) : IllegalStateException(message)
+
 interface CommandTransport {
     suspend fun send(command: WireCommand): CommandAcknowledgement
 }
@@ -57,7 +59,8 @@ class SupabaseRpcCommandTransport(
     },
 ) : CommandTransport {
     override suspend fun send(command: WireCommand): CommandAcknowledgement {
-        val token = requireNotNull(tokenProvider.accessToken()) { "Authenticated Supabase session required" }
+        val token = tokenProvider.accessToken()
+            ?: throw AuthenticationRequiredException("Authenticated Supabase session required")
         return client.post("${supabaseUrl.trimEnd('/')}/rest/v1/rpc/${command.rpcName}") {
             header("apikey", publishableKey)
             header(HttpHeaders.Authorization, "Bearer $token")

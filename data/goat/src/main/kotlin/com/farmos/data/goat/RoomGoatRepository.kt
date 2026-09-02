@@ -32,6 +32,11 @@ class RoomGoatRepository(
         }
 
         database.withTransaction {
+            val aggregateOrdinal = database.outbox().nextAggregateOrdinal(
+                farmId = farmId,
+                aggregateType = ANIMAL_AGGREGATE,
+                aggregateId = command.animalId,
+            )
             database.animals().insert(
                 AnimalEntity(
                     id = command.animalId,
@@ -50,6 +55,7 @@ class RoomGoatRepository(
                     context = context,
                     commandName = "goat.register.v1",
                     aggregateId = command.animalId,
+                    aggregateOrdinal = aggregateOrdinal,
                     expectedStreamVersion = 0,
                     payloadJson = json.encodeToString(command),
                 ),
@@ -67,6 +73,23 @@ class RoomGoatRepository(
         requireNotNull(database.animals().get(farmId, command.animalId)) { "Goat not found" }
 
         database.withTransaction {
+            val aggregateOrdinal = database.outbox().nextAggregateOrdinal(
+                farmId = farmId,
+                aggregateType = ANIMAL_AGGREGATE,
+                aggregateId = command.animalId,
+            )
+            val authoritativeVersion = database.aggregateVersions().getVersion(
+                farmId = farmId,
+                aggregateType = ANIMAL_AGGREGATE,
+                aggregateId = command.animalId,
+            ) ?: 0L
+            val queuedVersionAdvances = database.outbox().countUnacknowledgedForAggregate(
+                farmId = farmId,
+                aggregateType = ANIMAL_AGGREGATE,
+                aggregateId = command.animalId,
+            )
+            val expectedStreamVersion = authoritativeVersion + queuedVersionAdvances
+
             database.measurements().insert(
                 MeasurementEntity(
                     id = command.measurementId,
@@ -83,7 +106,8 @@ class RoomGoatRepository(
                     context = context,
                     commandName = "goat.record_weight.v1",
                     aggregateId = command.animalId,
-                    expectedStreamVersion = null,
+                    aggregateOrdinal = aggregateOrdinal,
+                    expectedStreamVersion = expectedStreamVersion,
                     payloadJson = json.encodeToString(command),
                 ),
             )
@@ -124,6 +148,7 @@ class RoomGoatRepository(
         context: LocalCommandContext,
         commandName: String,
         aggregateId: String,
+        aggregateOrdinal: Long,
         expectedStreamVersion: Long?,
         payloadJson: String,
     ) = OutboxEntity(
@@ -133,8 +158,9 @@ class RoomGoatRepository(
         deviceId = context.deviceId,
         commandName = commandName,
         commandSchemaVersion = 1,
-        aggregateType = "animal",
+        aggregateType = ANIMAL_AGGREGATE,
         aggregateId = aggregateId,
+        aggregateOrdinal = aggregateOrdinal,
         expectedStreamVersion = expectedStreamVersion,
         payloadJson = payloadJson,
         occurredAtEpochMillis = context.occurredAtEpochMillis,
@@ -146,4 +172,8 @@ class RoomGoatRepository(
         serverEventId = null,
         serverStreamVersion = null,
     )
+
+    companion object {
+        private const val ANIMAL_AGGREGATE = "animal"
+    }
 }

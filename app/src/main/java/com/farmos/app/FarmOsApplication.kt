@@ -48,7 +48,9 @@ class FarmOsApplication : Application(), SyncEngineOwner {
             this,
             FarmOsDatabase::class.java,
             "farm-os.db",
-        ).build()
+        )
+            .addMigrations(FarmOsDatabase.MIGRATION_1_2)
+            .build()
 
         deviceId = getSharedPreferences("farm_os_device", MODE_PRIVATE)
             .getString("device_id", null)
@@ -101,7 +103,11 @@ class FarmOsApplication : Application(), SyncEngineOwner {
                     )
             }
         }
-        syncEngine = SyncEngine(database.outbox(), transport)
+        syncEngine = SyncEngine(
+            outbox = database.outbox(),
+            aggregateVersions = database.aggregateVersions(),
+            transport = transport,
+        )
     }
 
     fun goatRepository(farmId: String): GoatRepository = RoomGoatRepository(database, farmId)
