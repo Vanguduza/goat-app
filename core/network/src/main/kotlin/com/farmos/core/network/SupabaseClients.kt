@@ -106,15 +106,32 @@ class SupabaseIdentityClient(
     suspend fun refresh(): SupabaseSession {
         val current = sessionStore.current()
             ?: throw AuthenticationRequiredException("No Supabase session to refresh")
-        val session: SupabaseSession = client.post(
+        val response = client.post(
             "${supabaseUrl.trimEnd('/')}/auth/v1/token?grant_type=refresh_token",
         ) {
             header("apikey", publishableKey)
             contentType(ContentType.Application.Json)
             setBody(RefreshRequest(current.refreshToken))
-        }.body()
-        sessionStore.set(session)
-        return session
+        }
+
+        return when (response.status.value) {
+            in 200..299 -> {
+                val session: SupabaseSession = response.body()
+                sessionStore.set(session)
+                session
+            }
+            400, 401, 403 -> {
+                // The refresh credential is no longer usable. Persisting it would create a
+                // retry loop in WorkManager and can leave the UI believing a session exists.
+                sessionStore.set(null)
+                throw AuthenticationRequiredException("Supabase session expired; sign in again")
+            }
+            else -> {
+                // Transient provider/network-side failures must not destroy a still-usable
+                // refresh credential. Callers can retry through their normal backoff policy.
+                throw IllegalStateException("Supabase session refresh failed with HTTP ${response.status.value}")
+            }
+        }
     }
 
     suspend fun memberships(): List<FarmMembership> {
