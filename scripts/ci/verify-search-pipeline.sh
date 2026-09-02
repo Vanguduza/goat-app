@@ -348,7 +348,7 @@ REBUILT_B=$(curl --fail-with-body -sS -X POST "${MEILI_HOST}/indexes/${MEILI_IND
   -H "Authorization: Bearer ${TENANT_B}" \
   -H "Content-Type: application/json" \
   -d '{"q":"","limit":20}')
-assert_json "$REBUILT_A" '.hits | length == 1 and .hits[0].id == "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" and .hits[0].updated_projection_version == 2' "Farm A was not rebuilt from authoritative version 2"
-assert_json "$REBUILT_B" '.hits | length == 1 and .hits[0].id == "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" and .hits[0].updated_projection_version == 1' "Farm B was not rebuilt from authoritative version 1"
+assert_json "$REBUILT_A" '(.hits | length) == 1 and .hits[0].id == "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" and .hits[0].updated_projection_version == 2' "Farm A was not rebuilt from authoritative version 2"
+assert_json "$REBUILT_B" '(.hits | length) == 1 and .hits[0].id == "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" and .hits[0].updated_projection_version == 1' "Farm B was not rebuilt from authoritative version 1"
 
 echo "Farm OS search pipeline passed: authoritative RPCs, durable indexing, tenant isolation, outage recovery, and full rebuild are proven live."
