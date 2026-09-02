@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(18);
 
 -- Deterministic identities for tenant and idempotency tests.
 insert into auth.users (id, email)
@@ -26,6 +26,31 @@ insert into public.animals (
     '44444444-4444-4444-8444-444444444444',
     '22222222-2222-4222-8222-222222222222',
     'goat', 'B-001', 'Foreign goat', 'FEMALE', 'active'
+);
+
+create or replace function pg_temp.cross_farm_measurement_fk_rejected()
+returns boolean
+language plpgsql
+as $$
+begin
+    insert into public.measurements (
+        id, farm_id, animal_id, type, value_long, unit, measured_at
+    ) values (
+        '14141414-1414-4414-8414-141414141414',
+        '11111111-1111-4111-8111-111111111111',
+        '44444444-4444-4444-8444-444444444444',
+        'weight', 12500, 'g', now()
+    );
+    return false;
+exception
+    when foreign_key_violation then
+        return true;
+end;
+$$;
+
+select ok(
+    pg_temp.cross_farm_measurement_fk_rejected(),
+    'farm-aware measurement foreign key rejects cross-farm animal references'
 );
 
 set local role authenticated;
