@@ -18,4 +18,6 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:3.0.3")
     implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:2.2.10")
+    testImplementation("junit:junit:4.13.2")
 }
