@@ -112,15 +112,20 @@ class FarmOsDatabasePersistenceTest {
         val reopened = openDatabase()
         val animal = reopened.animals().get(farmId, animalId)
         val weight = reopened.measurements().latest(farmId, animalId, "weight")
-        val pending = reopened.outbox().pending(now = 1_700_000_010_000L, limit = 10)
+        val unacknowledged = reopened.outbox().countUnacknowledgedForAggregate(
+            farmId = farmId,
+            aggregateType = "animal",
+            aggregateId = animalId,
+        )
+        val dispatchable = reopened.outbox().pending(now = 1_700_000_010_000L, limit = 10)
 
         assertNotNull(animal)
         assertEquals("A-RESTART-01", animal?.tag)
         assertEquals(32_450L, weight?.valueLong)
-        assertEquals(2, pending.size)
+        assertEquals(2L, unacknowledged)
         assertEquals(
             listOf("55555555-5555-4555-8555-555555555555"),
-            pending.map { it.mutationId },
+            dispatchable.map { it.mutationId },
         )
         assertTrue(context.getDatabasePath(databaseName).exists())
 
