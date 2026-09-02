@@ -69,12 +69,39 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - name: Type-check Edge Functions
+      - name: Type-check Edge Functions and search verifier
         run: >-
           deno check
           supabase/functions/meili-indexer/index.ts
           supabase/functions/meili-rebuild/index.ts
           supabase/functions/search-token/index.ts
+          search/meilisearch/verify-live-contract.ts
+
+  meilisearch-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      MEILI_HOST: http://127.0.0.1:7700
+      MEILI_MASTER_KEY: farm-os-ci-master-key-32-bytes-minimum
+      MEILI_INDEX_PREFIX: farm-os
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Start pinned Meilisearch
+        run: >-
+          docker run -d --rm --name farm-os-meili
+          -p 7700:7700
+          -e MEILI_MASTER_KEY="$MEILI_MASTER_KEY"
+          -e MEILI_NO_ANALYTICS=true
+          getmeili/meilisearch:v1.53.1
+      - name: Apply index contract and prove tenant isolation
+        run: >-
+          deno run --allow-net=127.0.0.1:7700
+          --allow-env=MEILI_HOST,MEILI_MASTER_KEY,MEILI_INDEX_PREFIX
+          --allow-read=search/meilisearch/animals-v1.settings.json
+          search/meilisearch/verify-live-contract.ts
 
   supabase:
     runs-on: ubuntu-latest
