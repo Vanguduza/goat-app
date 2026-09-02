@@ -46,7 +46,6 @@ cleanup() {
   stop_function
   docker rm -f farm-os-meili >/dev/null 2>&1 || true
   supabase stop --no-backup >/dev/null 2>&1 || true
-  docker network rm farm-os-ci >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
@@ -63,9 +62,8 @@ wait_meili_health() {
 wait_meili_task() {
   local uid="$1"
   for _ in $(seq 1 200); do
-    local task
+    local task status
     task=$(curl -fsS "${MEILI_HOST}/tasks/${uid}" -H "Authorization: Bearer ${MEILI_MASTER_KEY}")
-    local status
     status=$(jq -r '.status' <<<"$task")
     case "$status" in
       succeeded) return ;;
@@ -144,22 +142,39 @@ run_indexer() {
   echo "$response"
 }
 
-echo "Creating isolated local Docker network"
-docker network create farm-os-ci >/dev/null
+create_user() {
+  local email="$1"
+  local password="$2"
+  local headers=(-H "apikey: ${SECRET_API_KEY}")
+  if [[ "${SECRET_API_KEY}" == eyJ* ]]; then
+    headers+=(-H "Authorization: Bearer ${SECRET_API_KEY}")
+  fi
 
-echo "Starting pinned Meilisearch v1.53.1"
+  curl --fail-with-body -sS -X POST "${API_URL}/auth/v1/admin/users" \
+    "${headers[@]}" \
+    -H "Content-Type: application/json" \
+    -d "$(jq -cn --arg email "$email" --arg password "$password" \
+      '{email:$email,password:$password,email_confirm:true}')" >/dev/null
+
+  curl --fail-with-body -sS -X POST "${API_URL}/auth/v1/token?grant_type=password" \
+    -H "apikey: ${PUBLIC_API_KEY}" \
+    -H "Content-Type: application/json" \
+    -d "$(jq -cn --arg email "$email" --arg password "$password" \
+      '{email:$email,password:$password}')" | jq -r '.access_token'
+}
+
+echo "Starting pinned Meilisearch v1.53.1 on published localhost port"
 docker run -d --name farm-os-meili \
-  --network farm-os-ci \
   -p 7700:7700 \
   -e "MEILI_MASTER_KEY=${MEILI_MASTER_KEY}" \
   -e MEILI_NO_ANALYTICS=true \
   getmeili/meilisearch:v1.53.1 >/dev/null
 wait_meili_health
 
-echo "Starting local Supabase authority"
-supabase start --network-id farm-os-ci -x studio,imgproxy,edge-runtime,logflare,vector,supavisor >/tmp/farm-os-supabase-start.log
+echo "Starting local Supabase authority on its CLI-managed default network"
+supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor >/tmp/farm-os-supabase-start.log
 supabase db reset >/tmp/farm-os-supabase-reset.log
-# Current CLI versions may expose new publishable/secret names or legacy anon/service-role names.
+
 eval "$(supabase status -o env)"
 PUBLIC_API_KEY="${PUBLISHABLE_KEY:-${ANON_KEY:-}}"
 SECRET_API_KEY="${SECRET_KEY:-${SERVICE_ROLE_KEY:-}}"
@@ -180,30 +195,10 @@ echo "Creating a search-only Meilisearch parent key"
 SEARCH_KEY_JSON=$(curl --fail-with-body -sS -X POST "${MEILI_HOST}/keys" \
   -H "Authorization: Bearer ${MEILI_MASTER_KEY}" \
   -H "Content-Type: application/json" \
-  -d "$(jq -cn \
-    --arg uid "$SEARCH_KEY_UID" \
-    --arg index "$MEILI_INDEX" \
+  -d "$(jq -cn --arg uid "$SEARCH_KEY_UID" --arg index "$MEILI_INDEX" \
     '{uid:$uid,name:"Farm OS pipeline search key",description:"CI only",actions:["search"],indexes:[$index],expiresAt:null}')")
 MEILI_SEARCH_KEY=$(jq -r '.key' <<<"$SEARCH_KEY_JSON")
 [[ -n "$MEILI_SEARCH_KEY" && "$MEILI_SEARCH_KEY" != "null" ]] || fail "Meilisearch did not return search key"
-
-create_user() {
-  local email="$1"
-  local password="$2"
-  local service_headers=(-H "apikey: ${SECRET_API_KEY}")
-  if [[ "${SECRET_API_KEY}" == eyJ* ]]; then
-    service_headers+=(-H "Authorization: Bearer ${SECRET_API_KEY}")
-  fi
-  curl --fail-with-body -sS -X POST "${API_URL}/auth/v1/admin/users" \
-    "${service_headers[@]}" \
-    -H "Content-Type: application/json" \
-    -d "$(jq -cn --arg email "$email" --arg password "$password" '{email:$email,password:$password,email_confirm:true}')" >/dev/null
-  curl --fail-with-body -sS -X POST "${API_URL}/auth/v1/token?grant_type=password" \
-    -H "apikey: ${PUBLIC_API_KEY}" \
-    -H "Content-Type: application/json" \
-    -d "$(jq -cn --arg email "$email" --arg password "$password" '{email:$email,password:$password}')" \
-    | jq -r '.access_token'
-}
 
 TOKEN_A=$(create_user "farm-a@farmos.invalid" "FarmOS-ci-A-123456!")
 TOKEN_B=$(create_user "farm-b@farmos.invalid" "FarmOS-ci-B-123456!")
@@ -255,7 +250,6 @@ TOKEN_A_JSON=$(curl --fail-with-body -sS -X POST "http://127.0.0.1:8000/" \
   -H "Content-Type: application/json" \
   -d "$(jq -cn --arg farm "$FARM_A" '{farmId:$farm}')")
 TENANT_A=$(jq -r '.token' <<<"$TOKEN_A_JSON")
-
 TOKEN_B_JSON=$(curl --fail-with-body -sS -X POST "http://127.0.0.1:8000/" \
   -H "Authorization: Bearer ${TOKEN_B}" \
   -H "Content-Type: application/json" \
@@ -268,7 +262,7 @@ CROSS_STATUS=$(curl -sS -o /tmp/farm-os-cross-farm-token.json -w '%{http_code}' 
   -d "$(jq -cn --arg farm "$FARM_B" '{farmId:$farm}')")
 [[ "$CROSS_STATUS" == "403" ]] || {
   cat /tmp/farm-os-cross-farm-token.json >&2
-  fail "Farm A user obtained or reached a Farm B tenant-token path (HTTP ${CROSS_STATUS})"
+  fail "Farm A user obtained a Farm B tenant-token path (HTTP ${CROSS_STATUS})"
 }
 stop_function
 
