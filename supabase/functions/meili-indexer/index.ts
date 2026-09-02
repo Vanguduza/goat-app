@@ -6,8 +6,10 @@ type SearchJob = {
   operation: "upsert" | "delete";
   projection_version: number;
   attempts: number;
-  state: "pending" | "in_flight" | "retry" | "done" | "dead_letter";
+  state: "pending" | "dispatching" | "in_flight" | "retry" | "done" | "dead_letter";
   meili_task_uid: number | null;
+  claimed_at: string | null;
+  lease_until: string | null;
 };
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -27,11 +29,14 @@ function serviceHeaders(extra: Record<string, string> = {}) {
 }
 
 async function patchJob(id: number, patch: Record<string, unknown>) {
-  await fetch(`${supabaseUrl}/rest/v1/search_index_jobs?job_id=eq.${id}`, {
+  const response = await fetch(`${supabaseUrl}/rest/v1/search_index_jobs?job_id=eq.${id}`, {
     method: "PATCH",
     headers: serviceHeaders({ Prefer: "return=minimal" }),
     body: JSON.stringify(patch),
   });
+  if (!response.ok) {
+    throw new Error(`Could not update search job ${id}: ${response.status} ${await response.text()}`);
+  }
 }
 
 async function meiliTask(uid: number) {
@@ -55,7 +60,12 @@ async function reconcileInflight(): Promise<number> {
     try {
       const task = await meiliTask(job.meili_task_uid!);
       if (task.status === "succeeded") {
-        await patchJob(job.job_id, { state: "done", completed_at: new Date().toISOString(), last_error: null });
+        await patchJob(job.job_id, {
+          state: "done",
+          completed_at: new Date().toISOString(),
+          last_error: null,
+          lease_until: null,
+        });
         completed++;
       } else if (task.status === "failed" || task.status === "canceled") {
         const attempts = job.attempts + 1;
@@ -65,6 +75,7 @@ async function reconcileInflight(): Promise<number> {
           next_attempt_at: new Date(Date.now() + Math.min(300_000, 2 ** Math.min(attempts, 8) * 1000)).toISOString(),
           last_error: task.error?.message ?? `Meilisearch task ${task.status}`,
           meili_task_uid: null,
+          lease_until: null,
         });
       }
     } catch (error) {
@@ -131,17 +142,28 @@ async function dispatchJob(job: SearchJob) {
   if (!response.ok) throw new Error(`Meilisearch write failed: ${response.status} ${await response.text()}`);
   const task = await response.json();
   if (typeof task.taskUid !== "number") throw new Error("Meilisearch did not return taskUid");
-  await patchJob(job.job_id, { state: "in_flight", meili_task_uid: task.taskUid, last_error: null });
+  await patchJob(job.job_id, {
+    state: "in_flight",
+    meili_task_uid: task.taskUid,
+    last_error: null,
+    lease_until: null,
+  });
 }
 
-async function dispatchPending(): Promise<number> {
-  const now = encodeURIComponent(new Date().toISOString());
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/search_index_jobs?select=*&state=in.(pending,retry)&or=(next_attempt_at.is.null,next_attempt_at.lte.${now})&order=job_id.asc&limit=50`,
-    { headers: serviceHeaders() },
-  );
-  if (!response.ok) throw new Error(`Could not read pending jobs: ${response.status} ${await response.text()}`);
-  const jobs = await response.json() as SearchJob[];
+async function claimDispatchable(): Promise<SearchJob[]> {
+  const response = await fetch(`${supabaseUrl}/rest/v1/rpc/claim_search_index_jobs_v1`, {
+    method: "POST",
+    headers: serviceHeaders(),
+    body: JSON.stringify({ p_limit: 50, p_lease_seconds: 120 }),
+  });
+  if (!response.ok) {
+    throw new Error(`Could not claim search jobs: ${response.status} ${await response.text()}`);
+  }
+  return await response.json() as SearchJob[];
+}
+
+async function dispatchClaimed(): Promise<number> {
+  const jobs = await claimDispatchable();
   let dispatched = 0;
 
   for (const job of jobs) {
@@ -156,6 +178,7 @@ async function dispatchPending(): Promise<number> {
         next_attempt_at: new Date(Date.now() + Math.min(300_000, 2 ** Math.min(attempts, 8) * 1000)).toISOString(),
         last_error: String(error),
         meili_task_uid: null,
+        lease_until: null,
       });
     }
   }
@@ -168,6 +191,6 @@ Deno.serve(async (request) => {
   }
 
   const completed = await reconcileInflight();
-  const dispatched = await dispatchPending();
+  const dispatched = await dispatchClaimed();
   return Response.json({ completed, dispatched });
 });
