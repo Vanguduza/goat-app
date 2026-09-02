@@ -70,6 +70,27 @@ class SyncEngineTest {
     }
 
     @Test
+    fun `revoked farm response rejects pending work without retry loop`() = runSuspend {
+        val outbox = FakeOutboxDao(mutableListOf(item(mutationId = "revoked", attemptCount = 2)))
+        val transport = object : CommandTransport {
+            override suspend fun send(command: WireCommand): CommandAcknowledgement =
+                CommandAcknowledgement(
+                    code = CommandResultCode.AUTH_REJECTED,
+                    safeMessage = "Farm access denied",
+                )
+        }
+
+        val result = SyncEngine(outbox, FakeAggregateVersionDao(), transport, now = { fixedNow }).drain()
+        val saved = outbox.byId("revoked")
+
+        assertEquals(1, result.rejected)
+        assertEquals(0, result.retrying)
+        assertEquals(SyncState.REJECTED.name, saved.state)
+        assertEquals(3, saved.attemptCount)
+        assertEquals("AUTH_REJECTED", saved.lastErrorCode)
+    }
+
+    @Test
     fun `transient transport failure never dead letters valid offline work`() = runSuspend {
         val outbox = FakeOutboxDao(mutableListOf(item(mutationId = "network", attemptCount = 99)))
         val transport = object : CommandTransport {
