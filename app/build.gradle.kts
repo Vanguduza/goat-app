@@ -15,7 +15,7 @@ val meiliHost = providers.gradleProperty("FARM_OS_MEILI_HOST")
 
 android {
     namespace = "com.farmos.app"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.farmos.app"

@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.farmos.core.network"
-    compileSdk = 37
+    compileSdk = 36
     defaultConfig { minSdk = 26 }
 }
 

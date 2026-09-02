@@ -46,6 +46,6 @@ A successful slice earns only `VERTICAL_SLICE_GREEN`. It does **not** make the g
 
 The repository is being bootstrapped from its former documentation-only state.
 
-The CI branch installs JDK 17, Android API 37, Gradle 9.3.1 and builds/tests the current Android foundation. Supabase migrations and pgTAP contracts are also executed against a local Supabase stack in CI.
+The CI branch installs JDK 17, Android API 36, Gradle 9.3.1 and builds/tests the current Android foundation. Supabase migrations and pgTAP contracts are also executed against a local Supabase stack in CI.
 
 Local Supabase/Meilisearch credentials and production secrets are never committed.

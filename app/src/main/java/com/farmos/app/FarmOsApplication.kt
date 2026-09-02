@@ -7,6 +7,7 @@ import com.farmos.core.model.CommandAcknowledgement
 import com.farmos.core.model.CommandResultCode
 import com.farmos.core.network.AccessTokenProvider
 import com.farmos.core.network.CommandTransport
+import com.farmos.core.network.FarmMembership
 import com.farmos.core.network.FarmSearchClient
 import com.farmos.core.network.MutableSessionStore
 import com.farmos.core.network.SupabaseIdentityClient
@@ -24,7 +25,8 @@ class FarmOsApplication : Application(), SyncEngineOwner {
     lateinit var database: FarmOsDatabase
         private set
 
-    val sessionStore = MutableSessionStore()
+    lateinit var sessionStore: MutableSessionStore
+        private set
 
     var identityClient: SupabaseIdentityClient? = null
         private set
@@ -44,6 +46,28 @@ class FarmOsApplication : Application(), SyncEngineOwner {
 
     override fun onCreate() {
         super.onCreate()
+
+        sessionStore = if (backendConfigured) {
+            val secureSessions = SecureSessionPersistence(this, BuildConfig.SUPABASE_URL)
+            MutableSessionStore(
+                onChanged = { session, expiresAt ->
+                    runCatching {
+                        if (session == null) {
+                            secureSessions.clear()
+                        } else {
+                            secureSessions.save(session, expiresAt)
+                        }
+                    }
+                },
+            ).also { store ->
+                secureSessions.load()?.let { restored ->
+                    store.restore(restored.session, restored.expiresAtEpochMillis)
+                }
+            }
+        } else {
+            MutableSessionStore()
+        }
+
         database = Room.databaseBuilder(
             this,
             FarmOsDatabase::class.java,
@@ -114,5 +138,38 @@ class FarmOsApplication : Application(), SyncEngineOwner {
 
     fun goatPullReconciler(): GoatPullReconciler? = pullClient?.let { client ->
         GoatPullReconciler(database, client)
+    }
+
+    fun rememberMembership(membership: FarmMembership) {
+        val userId = sessionStore.current()?.user?.id ?: return
+        getSharedPreferences(FARM_CONTEXT_PREFERENCES, MODE_PRIVATE)
+            .edit()
+            .putString(LAST_USER_ID, userId)
+            .putString(LAST_FARM_ID, membership.farmId)
+            .putString(LAST_FARM_ROLE, membership.role)
+            .commit()
+    }
+
+    fun lastMembershipForCurrentSession(): FarmMembership? {
+        val userId = sessionStore.current()?.user?.id ?: return null
+        val preferences = getSharedPreferences(FARM_CONTEXT_PREFERENCES, MODE_PRIVATE)
+        if (preferences.getString(LAST_USER_ID, null) != userId) return null
+        val farmId = preferences.getString(LAST_FARM_ID, null) ?: return null
+        val role = preferences.getString(LAST_FARM_ROLE, null) ?: return null
+        return FarmMembership(farmId = farmId, role = role)
+    }
+
+    fun clearRememberedMembership() {
+        getSharedPreferences(FARM_CONTEXT_PREFERENCES, MODE_PRIVATE)
+            .edit()
+            .clear()
+            .commit()
+    }
+
+    companion object {
+        private const val FARM_CONTEXT_PREFERENCES = "farm_os_last_context"
+        private const val LAST_USER_ID = "user_id"
+        private const val LAST_FARM_ID = "farm_id"
+        private const val LAST_FARM_ROLE = "role"
     }
 }

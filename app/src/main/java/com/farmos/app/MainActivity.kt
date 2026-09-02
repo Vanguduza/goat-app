@@ -3,6 +3,7 @@ package com.farmos.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,10 +35,31 @@ class MainActivity : ComponentActivity() {
         setContent {
             FarmOsTheme {
                 val scope = rememberCoroutineScope()
-                var memberships by remember { mutableStateOf<List<FarmMembership>>(emptyList()) }
-                var selectedMembership by remember { mutableStateOf<FarmMembership?>(null) }
+                val restoredMembership = remember { app.lastMembershipForCurrentSession() }
+                var memberships by remember {
+                    mutableStateOf(restoredMembership?.let(::listOf) ?: emptyList())
+                }
+                var selectedMembership by remember { mutableStateOf(restoredMembership) }
                 var authBusy by remember { mutableStateOf(false) }
                 var authError by remember { mutableStateOf<String?>(null) }
+
+                LaunchedEffect(restoredMembership?.farmId) {
+                    val restored = restoredMembership ?: return@LaunchedEffect
+                    val identity = app.identityClient ?: return@LaunchedEffect
+                    runCatching { identity.memberships() }
+                        .onSuccess { available ->
+                            memberships = available
+                            val revalidated = available.firstOrNull { it.farmId == restored.farmId }
+                            if (revalidated == null) {
+                                app.clearRememberedMembership()
+                                selectedMembership = null
+                                authError = "Farm access changed. Choose an available farm or sign in again."
+                            } else {
+                                app.rememberMembership(revalidated)
+                                selectedMembership = revalidated
+                            }
+                        }
+                }
 
                 val membership = selectedMembership
                 if (membership == null) {
@@ -57,10 +79,16 @@ class MainActivity : ComponentActivity() {
                                 }.onSuccess { available ->
                                     authBusy = false
                                     memberships = available
-                                    if (available.isEmpty()) {
-                                        authError = "This account does not have a Farm OS farm membership yet"
-                                    } else if (available.size == 1) {
-                                        selectedMembership = available.single()
+                                    when {
+                                        available.isEmpty() -> {
+                                            app.clearRememberedMembership()
+                                            authError = "This account does not have a Farm OS farm membership yet"
+                                        }
+                                        available.size == 1 -> {
+                                            val onlyMembership = available.single()
+                                            app.rememberMembership(onlyMembership)
+                                            selectedMembership = onlyMembership
+                                        }
                                     }
                                 }.onFailure { error ->
                                     authBusy = false
@@ -68,7 +96,10 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         },
-                        onSelectFarm = { selectedMembership = it },
+                        onSelectFarm = { selected ->
+                            app.rememberMembership(selected)
+                            selectedMembership = selected
+                        },
                     )
                 } else {
                     val farmId = membership.farmId

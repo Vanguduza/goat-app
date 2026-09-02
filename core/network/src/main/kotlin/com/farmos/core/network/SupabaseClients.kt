@@ -56,6 +56,7 @@ data class PulledDomainEvent(
 
 class MutableSessionStore(
     private val now: () -> Long = System::currentTimeMillis,
+    private val onChanged: ((SupabaseSession?, Long) -> Unit)? = null,
 ) : AccessTokenProvider {
     @Volatile
     private var session: SupabaseSession? = null
@@ -63,11 +64,20 @@ class MutableSessionStore(
     private var expiresAtEpochMillis: Long = 0L
 
     fun set(value: SupabaseSession?) {
+        val expiry = if (value == null) 0L else now() + value.expiresInSeconds * 1_000L
         session = value
-        expiresAtEpochMillis = if (value == null) 0L else now() + value.expiresInSeconds * 1_000L
+        expiresAtEpochMillis = expiry
+        onChanged?.invoke(value, expiry)
+    }
+
+    fun restore(value: SupabaseSession, expiresAtEpochMillis: Long) {
+        session = value
+        this.expiresAtEpochMillis = expiresAtEpochMillis
     }
 
     fun current(): SupabaseSession? = session
+
+    fun expiryEpochMillis(): Long = expiresAtEpochMillis
 
     fun needsRefresh(leewayMillis: Long = 60_000L): Boolean =
         session != null && now() + leewayMillis >= expiresAtEpochMillis
@@ -94,7 +104,8 @@ class SupabaseIdentityClient(
     }
 
     suspend fun refresh(): SupabaseSession {
-        val current = requireNotNull(sessionStore.current()) { "No Supabase session to refresh" }
+        val current = sessionStore.current()
+            ?: throw AuthenticationRequiredException("No Supabase session to refresh")
         val session: SupabaseSession = client.post(
             "${supabaseUrl.trimEnd('/')}/auth/v1/token?grant_type=refresh_token",
         ) {
@@ -107,7 +118,11 @@ class SupabaseIdentityClient(
     }
 
     suspend fun memberships(): List<FarmMembership> {
-        val session = requireNotNull(sessionStore.current()) { "Authentication required" }
+        if (sessionStore.needsRefresh()) {
+            refresh()
+        }
+        val session = sessionStore.current()
+            ?: throw AuthenticationRequiredException("Authentication required")
         return client.get(
             "${supabaseUrl.trimEnd('/')}/rest/v1/farm_users?select=farm_id,role&user_id=eq.${session.user.id}",
         ) {
@@ -131,7 +146,8 @@ class SupabasePullClient(
     )
 
     suspend fun pull(farmId: String, afterCursor: Long, limit: Int = 200): List<PulledDomainEvent> {
-        val token = requireNotNull(tokenProvider.accessToken()) { "Authentication required" }
+        val token = tokenProvider.accessToken()
+            ?: throw AuthenticationRequiredException("Authentication required")
         return client.post("${supabaseUrl.trimEnd('/')}/rest/v1/rpc/pull_changes_v1") {
             header("apikey", publishableKey)
             header(HttpHeaders.Authorization, "Bearer $token")
