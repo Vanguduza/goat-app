@@ -6,6 +6,14 @@ import androidx.work.WorkerParameters
 
 interface SyncEngineOwner {
     val syncEngine: SyncEngine
+    suspend fun pullAuthoritativeChanges(): AuthoritativePullOutcome
+}
+
+enum class AuthoritativePullOutcome {
+    APPLIED_OR_CURRENT,
+    SKIPPED,
+    RETRY,
+    FAILURE,
 }
 
 class SyncWorker(
@@ -15,10 +23,13 @@ class SyncWorker(
     override suspend fun doWork(): Result {
         val owner = applicationContext as? SyncEngineOwner
             ?: return Result.failure()
-        val run = owner.syncEngine.drain()
+
+        val push = owner.syncEngine.drain()
+        val pull = owner.pullAuthoritativeChanges()
+
         return when {
-            run.conflicts > 0 || run.rejected > 0 -> Result.success()
-            run.retrying > 0 -> Result.retry()
+            pull == AuthoritativePullOutcome.FAILURE -> Result.failure()
+            push.retrying > 0 || pull == AuthoritativePullOutcome.RETRY -> Result.retry()
             else -> Result.success()
         }
     }
