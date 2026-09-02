@@ -15,7 +15,6 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.startCoroutine
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class SyncEngineTest {
     private val fixedNow = 1_700_000_000_000L
@@ -45,7 +44,7 @@ class SyncEngineTest {
         val result = SyncEngine(outbox, versions, transport, now = { fixedNow }).drain()
 
         assertEquals(2, result.acknowledged)
-        assertEquals(listOf(0L, 1L), observedVersions)
+        assertEquals(listOf<Long?>(0L, 1L), observedVersions)
         assertEquals(SyncState.ACKNOWLEDGED.name, outbox.byId("m1").state)
         assertEquals(SyncState.ACKNOWLEDGED.name, outbox.byId("m2").state)
         assertEquals(2L, versions.getVersion("farm-1", "animal", "goat-1"))
@@ -154,7 +153,7 @@ private class FakeOutboxDao(
                     SyncState.RETRY_WAIT.name,
                     SyncState.IN_FLIGHT.name,
                 ) &&
-                    (candidate.nextAttemptAtEpochMillis == null || candidate.nextAttemptAtEpochMillis <= now) &&
+                    (candidate.nextAttemptAtEpochMillis?.let { it <= now } != false) &&
                     items.none { blocker ->
                         blocker.farmId == candidate.farmId &&
                             blocker.aggregateType == candidate.aggregateType &&
