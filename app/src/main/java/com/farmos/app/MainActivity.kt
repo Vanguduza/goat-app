@@ -14,6 +14,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.core.network.AuthenticationRequiredException
 import com.farmos.core.network.FarmMembership
 import com.farmos.core.sync.SyncWorker
 import com.farmos.domain.goat.GoatRepository
@@ -42,6 +43,13 @@ class MainActivity : ComponentActivity() {
                 var selectedMembership by remember { mutableStateOf(restoredMembership) }
                 var authBusy by remember { mutableStateOf(false) }
                 var authError by remember { mutableStateOf<String?>(null) }
+                val requireReauthentication: (String?) -> Unit = { message ->
+                    app.clearRememberedMembership()
+                    memberships = emptyList()
+                    selectedMembership = null
+                    authBusy = false
+                    authError = message ?: "Your session expired. Sign in again."
+                }
 
                 LaunchedEffect(restoredMembership?.farmId) {
                     val restored = restoredMembership ?: return@LaunchedEffect
@@ -57,6 +65,13 @@ class MainActivity : ComponentActivity() {
                             } else {
                                 app.rememberMembership(revalidated)
                                 selectedMembership = revalidated
+                            }
+                        }
+                        .onFailure { error ->
+                            if (error is AuthenticationRequiredException) {
+                                requireReauthentication(error.message)
+                            } else {
+                                authError = error.message ?: "Could not revalidate farm access"
                             }
                         }
                 }
@@ -132,7 +147,11 @@ class MainActivity : ComponentActivity() {
                                     )
                                     enqueueSync()
                                 }.onFailure { error ->
-                                    state = state.copy(busy = false, error = error.message ?: "Could not register goat")
+                                    if (error is AuthenticationRequiredException) {
+                                        requireReauthentication(error.message)
+                                    } else {
+                                        state = state.copy(busy = false, error = error.message ?: "Could not register goat")
+                                    }
                                 }
                             }
                         },
@@ -165,7 +184,11 @@ class MainActivity : ComponentActivity() {
                                     )
                                     enqueueSync()
                                 }.onFailure { error ->
-                                    state = state.copy(busy = false, error = error.message ?: "Could not record weight")
+                                    if (error is AuthenticationRequiredException) {
+                                        requireReauthentication(error.message)
+                                    } else {
+                                        state = state.copy(busy = false, error = error.message ?: "Could not record weight")
+                                    }
                                 }
                             }
                         },
@@ -188,11 +211,15 @@ class MainActivity : ComponentActivity() {
                                         },
                                     )
                                 }.onFailure { error ->
-                                    state = state.copy(
-                                        busy = false,
-                                        syncMessage = "Saved locally · sync failed",
-                                        error = error.message,
-                                    )
+                                    if (error is AuthenticationRequiredException) {
+                                        requireReauthentication(error.message)
+                                    } else {
+                                        state = state.copy(
+                                            busy = false,
+                                            syncMessage = "Saved locally · sync failed",
+                                            error = error.message,
+                                        )
+                                    }
                                 }
                             }
                         },
@@ -206,7 +233,7 @@ class MainActivity : ComponentActivity() {
                                     searchMessage = "${local.size} local result(s)",
                                 )
 
-                                val online = runCatching {
+                                val onlineAttempt = runCatching {
                                     app.farmSearchClient
                                         ?.searchAnimals(farmId, query, 20)
                                         ?.filter { it.speciesCode == null || it.speciesCode == "goat" }
@@ -220,7 +247,13 @@ class MainActivity : ComponentActivity() {
                                                 source = SearchSource.MEILISEARCH,
                                             )
                                         }
-                                }.getOrNull()
+                                }
+                                val onlineError = onlineAttempt.exceptionOrNull()
+                                if (onlineError is AuthenticationRequiredException) {
+                                    requireReauthentication(onlineError.message)
+                                    return@launch
+                                }
+                                val online = onlineAttempt.getOrNull()
 
                                 if (online != null) {
                                     val merged = (online + local).distinctBy { it.animalId }
@@ -242,7 +275,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun newContext(app: FarmOsApplication, farmId: String): LocalCommandContext {
-        val actorId = requireNotNull(app.sessionStore.current()?.user?.id) { "Authenticated session required" }
+        val actorId = app.sessionStore.current()?.user?.id
+            ?: throw AuthenticationRequiredException("Your session expired. Sign in again.")
         return LocalCommandContext(
             farmId = farmId,
             actorId = actorId,
