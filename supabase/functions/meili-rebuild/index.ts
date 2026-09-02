@@ -1,3 +1,5 @@
+import { supabaseServiceHeaders } from "../_shared/supabase_api_keys.ts";
+
 type Candidate = {
   farm_id: string;
   entity_id: string;
@@ -5,22 +7,12 @@ type Candidate = {
 };
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const rebuildSecret = Deno.env.get("MEILI_REBUILD_SECRET")!;
-
-function serviceHeaders(extra: Record<string, string> = {}) {
-  return {
-    apikey: serviceRole,
-    Authorization: `Bearer ${serviceRole}`,
-    "Content-Type": "application/json",
-    ...extra,
-  };
-}
 
 async function candidates(afterId: string | null, limit: number): Promise<Candidate[]> {
   const response = await fetch(`${supabaseUrl}/rest/v1/rpc/search_rebuild_candidates_v1`, {
     method: "POST",
-    headers: serviceHeaders(),
+    headers: supabaseServiceHeaders(),
     body: JSON.stringify({ p_after_id: afterId, p_limit: limit }),
   });
   if (!response.ok) throw new Error(`Could not obtain rebuild candidates: ${response.status} ${await response.text()}`);
@@ -31,7 +23,7 @@ async function enqueue(rows: Candidate[]) {
   if (rows.length === 0) return;
   const response = await fetch(`${supabaseUrl}/rest/v1/search_index_jobs`, {
     method: "POST",
-    headers: serviceHeaders({ Prefer: "return=minimal" }),
+    headers: supabaseServiceHeaders({ Prefer: "return=minimal" }),
     body: JSON.stringify(rows.map((row) => ({
       farm_id: row.farm_id,
       entity_type: "animal",
