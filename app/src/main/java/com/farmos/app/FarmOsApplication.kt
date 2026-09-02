@@ -2,10 +2,16 @@ package com.farmos.app
 
 import android.app.Application
 import androidx.room.Room
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.CommandAcknowledgement
 import com.farmos.core.model.CommandResultCode
 import com.farmos.core.network.AccessTokenProvider
+import com.farmos.core.network.AuthenticationRequiredException
 import com.farmos.core.network.CommandTransport
 import com.farmos.core.network.FarmMembership
 import com.farmos.core.network.FarmSearchClient
@@ -14,12 +20,16 @@ import com.farmos.core.network.SupabaseIdentityClient
 import com.farmos.core.network.SupabasePullClient
 import com.farmos.core.network.SupabaseRpcCommandTransport
 import com.farmos.core.network.WireCommand
+import com.farmos.core.sync.AuthoritativePullOutcome
 import com.farmos.core.sync.SyncEngine
 import com.farmos.core.sync.SyncEngineOwner
+import com.farmos.core.sync.SyncWorker
 import com.farmos.data.goat.GoatPullReconciler
 import com.farmos.data.goat.RoomGoatRepository
+import com.farmos.data.goat.UnsupportedServerEvent
 import com.farmos.domain.goat.GoatRepository
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 class FarmOsApplication : Application(), SyncEngineOwner {
     lateinit var database: FarmOsDatabase
@@ -132,6 +142,29 @@ class FarmOsApplication : Application(), SyncEngineOwner {
             aggregateVersions = database.aggregateVersions(),
             transport = transport,
         )
+
+        if (lastMembershipForCurrentSession() != null) {
+            scheduleBackgroundSync()
+        }
+    }
+
+    override suspend fun pullAuthoritativeChanges(): AuthoritativePullOutcome {
+        if (!backendConfigured) return AuthoritativePullOutcome.SKIPPED
+        val farmId = lastMembershipForCurrentSession()?.farmId
+            ?: return AuthoritativePullOutcome.SKIPPED
+        val reconciler = goatPullReconciler()
+            ?: return AuthoritativePullOutcome.SKIPPED
+
+        return try {
+            reconciler.reconcile(farmId)
+            AuthoritativePullOutcome.APPLIED_OR_CURRENT
+        } catch (_: AuthenticationRequiredException) {
+            AuthoritativePullOutcome.RETRY
+        } catch (_: UnsupportedServerEvent) {
+            AuthoritativePullOutcome.FAILURE
+        } catch (_: Exception) {
+            AuthoritativePullOutcome.RETRY
+        }
     }
 
     fun goatRepository(farmId: String): GoatRepository = RoomGoatRepository(database, farmId)
@@ -148,6 +181,7 @@ class FarmOsApplication : Application(), SyncEngineOwner {
             .putString(LAST_FARM_ID, membership.farmId)
             .putString(LAST_FARM_ROLE, membership.role)
             .commit()
+        scheduleBackgroundSync()
     }
 
     fun lastMembershipForCurrentSession(): FarmMembership? {
@@ -164,6 +198,23 @@ class FarmOsApplication : Application(), SyncEngineOwner {
             .edit()
             .clear()
             .commit()
+        WorkManager.getInstance(this).cancelUniqueWork(PERIODIC_SYNC_WORK_NAME)
+    }
+
+    private fun scheduleBackgroundSync() {
+        if (!backendConfigured) return
+        val request = PeriodicWorkRequestBuilder<SyncWorker>(15, TimeUnit.MINUTES)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build(),
+            )
+            .build()
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            PERIODIC_SYNC_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            request,
+        )
     }
 
     companion object {
@@ -171,5 +222,6 @@ class FarmOsApplication : Application(), SyncEngineOwner {
         private const val LAST_USER_ID = "user_id"
         private const val LAST_FARM_ID = "farm_id"
         private const val LAST_FARM_ROLE = "role"
+        private const val PERIODIC_SYNC_WORK_NAME = "farm-os-authoritative-sync"
     }
 }
