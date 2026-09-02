@@ -26,8 +26,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
-      - name: Domain tests and debug build
-        run: gradle :domain:goat:test :app:assembleDebug --stacktrace
+      - name: Domain and sync tests + debug build
+        run: gradle :domain:goat:test :core:sync:testDebugUnitTest :app:assembleDebug --stacktrace
 
   supabase:
     runs-on: ubuntu-latest
