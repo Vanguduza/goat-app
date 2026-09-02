@@ -1,3 +1,5 @@
+import { supabaseServiceHeaders } from "../_shared/supabase_api_keys.ts";
+
 type SearchJob = {
   job_id: number;
   farm_id: string;
@@ -13,25 +15,15 @@ type SearchJob = {
 };
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const meiliHost = (Deno.env.get("MEILI_HOST") ?? "").replace(/\/$/, "");
 const meiliAdminKey = Deno.env.get("MEILI_ADMIN_KEY")!;
 const indexPrefix = Deno.env.get("MEILI_INDEX_PREFIX") ?? "farm-os";
 const invokeSecret = Deno.env.get("INDEXER_INVOKE_SECRET")!;
 
-function serviceHeaders(extra: Record<string, string> = {}) {
-  return {
-    apikey: serviceRole,
-    Authorization: `Bearer ${serviceRole}`,
-    "Content-Type": "application/json",
-    ...extra,
-  };
-}
-
 async function patchJob(id: number, patch: Record<string, unknown>) {
   const response = await fetch(`${supabaseUrl}/rest/v1/search_index_jobs?job_id=eq.${id}`, {
     method: "PATCH",
-    headers: serviceHeaders({ Prefer: "return=minimal" }),
+    headers: supabaseServiceHeaders({ Prefer: "return=minimal" }),
     body: JSON.stringify(patch),
   });
   if (!response.ok) {
@@ -50,7 +42,7 @@ async function meiliTask(uid: number) {
 async function reconcileInflight(): Promise<number> {
   const response = await fetch(
     `${supabaseUrl}/rest/v1/search_index_jobs?select=*&state=eq.in_flight&meili_task_uid=not.is.null&order=job_id.asc&limit=50`,
-    { headers: serviceHeaders() },
+    { headers: supabaseServiceHeaders() },
   );
   if (!response.ok) throw new Error(`Could not read in-flight jobs: ${response.status}`);
   const jobs = await response.json() as SearchJob[];
@@ -88,7 +80,7 @@ async function reconcileInflight(): Promise<number> {
 async function buildAnimalDocument(job: SearchJob) {
   const response = await fetch(
     `${supabaseUrl}/rest/v1/animals?id=eq.${job.entity_id}&farm_id=eq.${job.farm_id}&select=id,farm_id,species_code,tag,name,status`,
-    { headers: serviceHeaders() },
+    { headers: supabaseServiceHeaders() },
   );
   if (!response.ok) throw new Error(`Could not read animal projection: ${response.status}`);
   const rows = await response.json();
@@ -153,7 +145,7 @@ async function dispatchJob(job: SearchJob) {
 async function claimDispatchable(): Promise<SearchJob[]> {
   const response = await fetch(`${supabaseUrl}/rest/v1/rpc/claim_search_index_jobs_v1`, {
     method: "POST",
-    headers: serviceHeaders(),
+    headers: supabaseServiceHeaders(),
     body: JSON.stringify({ p_limit: 50, p_lease_seconds: 120 }),
   });
   if (!response.ok) {
