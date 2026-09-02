@@ -15,6 +15,8 @@ ANIMAL_A="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
 ANIMAL_B="bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
 FUNCTION_PID=""
 FUNCTION_LOG="/tmp/farm-os-function.log"
+PUBLIC_API_KEY=""
+SECRET_API_KEY=""
 
 fail() {
   echo "ERROR: $*" >&2
@@ -103,7 +105,7 @@ rpc() {
   local function="$2"
   local body="$3"
   curl --fail-with-body -sS -X POST "${API_URL}/rest/v1/rpc/${function}" \
-    -H "apikey: ${ANON_KEY}" \
+    -H "apikey: ${PUBLIC_API_KEY}" \
     -H "Authorization: Bearer ${token}" \
     -H "Content-Type: application/json" \
     -d "${body}"
@@ -111,9 +113,11 @@ rpc() {
 
 service_get() {
   local path="$1"
-  curl --fail-with-body -sS "${API_URL}${path}" \
-    -H "apikey: ${SERVICE_ROLE_KEY}" \
-    -H "Authorization: Bearer ${SERVICE_ROLE_KEY}"
+  local headers=(-H "apikey: ${SECRET_API_KEY}")
+  if [[ "${SECRET_API_KEY}" == eyJ* ]]; then
+    headers+=(-H "Authorization: Bearer ${SECRET_API_KEY}")
+  fi
+  curl --fail-with-body -sS "${API_URL}${path}" "${headers[@]}"
 }
 
 wait_all_inflight_tasks() {
@@ -128,7 +132,7 @@ run_indexer() {
   start_function \
     "supabase/functions/meili-indexer/index.ts" \
     "SUPABASE_URL=${API_URL}" \
-    "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}" \
+    "SUPABASE_SECRET_KEY=${SECRET_API_KEY}" \
     "MEILI_HOST=${MEILI_HOST}" \
     "MEILI_ADMIN_KEY=${MEILI_MASTER_KEY}" \
     "MEILI_INDEX_PREFIX=${MEILI_INDEX_PREFIX}" \
@@ -155,10 +159,12 @@ wait_meili_health
 echo "Starting local Supabase authority"
 supabase start --network-id farm-os-ci -x studio,imgproxy,edge-runtime,logflare,vector,supavisor >/tmp/farm-os-supabase-start.log
 supabase db reset >/tmp/farm-os-supabase-reset.log
-# The CLI env format is shell-compatible and still exposes legacy local keys for compatibility tests.
+# Current CLI versions may expose new publishable/secret names or legacy anon/service-role names.
 eval "$(supabase status -o env)"
-: "${ANON_KEY:?Supabase local ANON_KEY missing}"
-: "${SERVICE_ROLE_KEY:?Supabase local SERVICE_ROLE_KEY missing}"
+PUBLIC_API_KEY="${PUBLISHABLE_KEY:-${ANON_KEY:-}}"
+SECRET_API_KEY="${SECRET_KEY:-${SERVICE_ROLE_KEY:-}}"
+[[ -n "${PUBLIC_API_KEY}" ]] || fail "Supabase local publishable/anon API key missing"
+[[ -n "${SECRET_API_KEY}" ]] || fail "Supabase local secret/service-role API key missing"
 
 echo "Applying the production Meilisearch index contract"
 MEILI_HOST="${MEILI_HOST}" \
@@ -184,13 +190,16 @@ MEILI_SEARCH_KEY=$(jq -r '.key' <<<"$SEARCH_KEY_JSON")
 create_user() {
   local email="$1"
   local password="$2"
+  local service_headers=(-H "apikey: ${SECRET_API_KEY}")
+  if [[ "${SECRET_API_KEY}" == eyJ* ]]; then
+    service_headers+=(-H "Authorization: Bearer ${SECRET_API_KEY}")
+  fi
   curl --fail-with-body -sS -X POST "${API_URL}/auth/v1/admin/users" \
-    -H "apikey: ${SERVICE_ROLE_KEY}" \
-    -H "Authorization: Bearer ${SERVICE_ROLE_KEY}" \
+    "${service_headers[@]}" \
     -H "Content-Type: application/json" \
     -d "$(jq -cn --arg email "$email" --arg password "$password" '{email:$email,password:$password,email_confirm:true}')" >/dev/null
   curl --fail-with-body -sS -X POST "${API_URL}/auth/v1/token?grant_type=password" \
-    -H "apikey: ${ANON_KEY}" \
+    -H "apikey: ${PUBLIC_API_KEY}" \
     -H "Content-Type: application/json" \
     -d "$(jq -cn --arg email "$email" --arg password "$password" '{email:$email,password:$password}')" \
     | jq -r '.access_token'
@@ -198,7 +207,7 @@ create_user() {
 
 TOKEN_A=$(create_user "farm-a@farmos.invalid" "FarmOS-ci-A-123456!")
 TOKEN_B=$(create_user "farm-b@farmos.invalid" "FarmOS-ci-B-123456!")
-[[ "$TOKEN_A" != "null" && "$TOKEN_B" != "null" ]] || fail "Could not sign in local test users"
+[[ -n "$TOKEN_A" && "$TOKEN_A" != "null" && -n "$TOKEN_B" && "$TOKEN_B" != "null" ]] || fail "Could not sign in local test users"
 
 echo "Creating isolated farms through the authoritative RPC"
 FARM_A_CREATE=$(rpc "$TOKEN_A" "farm_create_v1" "$(jq -cn --arg id "$FARM_A" '{p_farm_id:$id,p_name:"Farm A"}')")
@@ -236,7 +245,7 @@ echo "Serving the real search-token function and proving membership isolation"
 start_function \
   "supabase/functions/search-token/index.ts" \
   "SUPABASE_URL=${API_URL}" \
-  "SUPABASE_ANON_KEY=${ANON_KEY}" \
+  "SUPABASE_PUBLISHABLE_KEY=${PUBLIC_API_KEY}" \
   "MEILI_SEARCH_KEY=${MEILI_SEARCH_KEY}" \
   "MEILI_SEARCH_KEY_UID=${SEARCH_KEY_UID}" \
   "MEILI_INDEX_PREFIX=${MEILI_INDEX_PREFIX}"
@@ -271,7 +280,6 @@ SEARCH_B=$(curl --fail-with-body -sS -X POST "${MEILI_HOST}/indexes/${MEILI_INDE
   -H "Authorization: Bearer ${TENANT_B}" \
   -H "Content-Type: application/json" \
   -d '{"q":"","limit":20}')
-assert_json "$SEARCH_A" --argdummy 2>/dev/null || true
 assert_json "$SEARCH_A" '(.hits | map(.id)) == ["aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"]' "Farm A tenant search leaked or lost documents"
 assert_json "$SEARCH_B" '(.hits | map(.id)) == ["bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"]' "Farm B tenant search leaked or lost documents"
 
@@ -323,7 +331,7 @@ assert_json "$EMPTY_SEARCH" '.hits | length == 0' "Search projection was not emp
 start_function \
   "supabase/functions/meili-rebuild/index.ts" \
   "SUPABASE_URL=${API_URL}" \
-  "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY}" \
+  "SUPABASE_SECRET_KEY=${SECRET_API_KEY}" \
   "MEILI_REBUILD_SECRET=${REBUILD_SECRET}"
 REBUILD_RESPONSE=$(curl --fail-with-body -sS -X POST "http://127.0.0.1:8000/" \
   -H "x-farmos-rebuild-secret: ${REBUILD_SECRET}" \
