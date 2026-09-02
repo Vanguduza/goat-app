@@ -90,6 +90,44 @@ class SupabaseIdentityClientTest {
         assertEquals("Supabase session refresh failed with HTTP 503", failure.message)
     }
 
+    @Test
+    fun `refreshing provider returns fresh token without unnecessary refresh`() = runBlocking {
+        val store = MutableSessionStore(now = { 1_000L })
+        store.set(
+            initialSession.copy(expiresInSeconds = 3_600),
+        )
+        var refreshCalls = 0
+        val provider = RefreshingAccessTokenProvider(store) {
+            refreshCalls++
+        }
+
+        assertEquals("old-access", provider.accessToken())
+        assertEquals(0, refreshCalls)
+    }
+
+    @Test
+    fun `refreshing provider refreshes near expiry before returning a token`() = runBlocking {
+        var now = 1_000L
+        val store = MutableSessionStore(now = { now })
+        store.set(initialSession)
+        now = 2_000L
+        var refreshCalls = 0
+        val provider = RefreshingAccessTokenProvider(store) {
+            refreshCalls++
+            store.set(
+                SupabaseSession(
+                    accessToken = "rotated-access",
+                    refreshToken = "rotated-refresh",
+                    expiresInSeconds = 3_600,
+                    user = AuthUser("user-1"),
+                ),
+            )
+        }
+
+        assertEquals("rotated-access", provider.accessToken())
+        assertEquals(1, refreshCalls)
+    }
+
     private fun mockClient(status: HttpStatusCode, body: String): HttpClient = HttpClient(
         MockEngine {
             respond(
