@@ -1,4 +1,5 @@
 import { signTenantToken } from "../../supabase/functions/_shared/meili_tenant_token.ts";
+import { applyAnimalsIndexContract, waitForMeiliTask } from "./index_contract.ts";
 
 type TaskResponse = { taskUid: number };
 type SearchResponse = { hits: Array<Record<string, unknown>> };
@@ -38,63 +39,6 @@ async function requireOk(response: Response, action: string): Promise<unknown> {
   return body;
 }
 
-async function waitHealthy() {
-  for (let attempt = 0; attempt < 100; attempt++) {
-    try {
-      const response = await fetch(`${host}/health`);
-      if (response.ok) return;
-    } catch {
-      // Container may still be starting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  throw new Error("Meilisearch did not become healthy");
-}
-
-async function waitTask(taskUid: number) {
-  for (let attempt = 0; attempt < 200; attempt++) {
-    const response = await fetch(`${host}/tasks/${taskUid}`, { headers: adminHeaders() });
-    const task = await requireOk(response, `read task ${taskUid}`) as Record<string, unknown>;
-    if (task.status === "succeeded") return task;
-    if (task.status === "failed" || task.status === "canceled") {
-      throw new Error(`Meilisearch task ${taskUid} ${task.status}: ${JSON.stringify(task.error)}`);
-    }
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-  throw new Error(`Meilisearch task ${taskUid} did not finish`);
-}
-
-async function createIndex() {
-  const response = await fetch(`${host}/indexes`, {
-    method: "POST",
-    headers: adminHeaders(),
-    body: JSON.stringify({ uid: index, primaryKey: "id" }),
-  });
-  const task = await requireOk(response, "create animals index") as TaskResponse;
-  await waitTask(task.taskUid);
-}
-
-async function applySettings() {
-  const settingsUrl = new URL("./animals-v1.settings.json", import.meta.url);
-  const settings = JSON.parse(await Deno.readTextFile(settingsUrl));
-  const response = await fetch(`${host}/indexes/${index}/settings`, {
-    method: "PATCH",
-    headers: adminHeaders(),
-    body: JSON.stringify(settings),
-  });
-  const task = await requireOk(response, "apply animals index settings") as TaskResponse;
-  await waitTask(task.taskUid);
-
-  const actual = await requireOk(
-    await fetch(`${host}/indexes/${index}/settings`, { headers: adminHeaders() }),
-    "read applied settings",
-  ) as Record<string, unknown>;
-  const filterable = actual.filterableAttributes;
-  if (!Array.isArray(filterable) || !filterable.includes("farm_id")) {
-    throw new Error("farm_id is not filterable after settings reconciliation");
-  }
-}
-
 async function seedDocuments() {
   const documents = [
     {
@@ -132,7 +76,7 @@ async function seedDocuments() {
     body: JSON.stringify(documents),
   });
   const task = await requireOk(response, "seed tenant-isolation documents") as TaskResponse;
-  await waitTask(task.taskUid);
+  await waitForMeiliTask(host, masterKey, task.taskUid);
 }
 
 async function createSearchKey(): Promise<ApiKeyResponse> {
@@ -180,9 +124,7 @@ function assertIds(result: SearchResponse, expected: string[], message: string) 
   }
 }
 
-await waitHealthy();
-await createIndex();
-await applySettings();
+await applyAnimalsIndexContract({ host, masterKey, indexPrefix });
 await seedDocuments();
 const searchKey = await createSearchKey();
 
