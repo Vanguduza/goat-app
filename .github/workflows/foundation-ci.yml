@@ -69,13 +69,16 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - name: Type-check Edge Functions and search verifier
+      - name: Type-check Edge Functions and search tools
         run: >-
           deno check
           supabase/functions/meili-indexer/index.ts
           supabase/functions/meili-rebuild/index.ts
           supabase/functions/search-token/index.ts
+          search/meilisearch/apply-index-contract.ts
           search/meilisearch/verify-live-contract.ts
+      - name: Test Supabase API-key compatibility
+        run: deno test --allow-env supabase/functions/tests/supabase_api_keys_test.ts
 
   meilisearch-contract:
     runs-on: ubuntu-latest
