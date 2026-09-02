@@ -1,10 +1,11 @@
 name: Actions smoke
 
 on:
-  push:
-    branches:
-      - implementation/foundation-vertical-slice
   pull_request:
+
+concurrency:
+  group: actions-smoke-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   smoke:
