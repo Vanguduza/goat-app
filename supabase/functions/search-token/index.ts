@@ -1,28 +1,4 @@
-const encoder = new TextEncoder();
-
-function base64Url(bytes: Uint8Array): string {
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
-}
-
-function base64UrlJson(value: unknown): string {
-  return base64Url(encoder.encode(JSON.stringify(value)));
-}
-
-async function signTenantToken(secret: string, payload: unknown): Promise<string> {
-  const header = { alg: "HS256", typ: "JWT" };
-  const signingInput = `${base64UrlJson(header)}.${base64UrlJson(payload)}`;
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(signingInput));
-  return `${signingInput}.${base64Url(new Uint8Array(signature))}`;
-}
+import { signTenantToken } from "../_shared/meili_tenant_token.ts";
 
 Deno.serve(async (request) => {
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
@@ -63,7 +39,7 @@ Deno.serve(async (request) => {
 
   const expiresAt = Math.floor(Date.now() / 1000) + 15 * 60;
   const mandatoryFilter = `farm_id = "${farmId.replaceAll('"', '\\"')}"`;
-  const payload = {
+  const token = await signTenantToken(meiliSearchKey, {
     apiKeyUid: meiliSearchKeyUid,
     exp: expiresAt,
     searchRules: {
@@ -71,8 +47,7 @@ Deno.serve(async (request) => {
       [`${indexPrefix}-inventory-v1`]: { filter: mandatoryFilter },
       [`${indexPrefix}-reference-v1`]: { filter: mandatoryFilter },
     },
-  };
+  });
 
-  const token = await signTenantToken(meiliSearchKey, payload);
   return Response.json({ token, expiresAt, indexPrefix });
 });
