@@ -33,6 +33,37 @@ jobs:
       - name: Domain, session and sync tests + debug build
         run: gradle :domain:goat:test :core:network:testDebugUnitTest :core:sync:testDebugUnitTest :app:assembleDebug --stacktrace
 
+  android-device-persistence:
+    needs: android
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install compile SDK
+        run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Prove Room persistence across Android reopen
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          script: gradle :core:database:connectedDebugAndroidTest --stacktrace
+
   supabase:
     runs-on: ubuntu-latest
     timeout-minutes: 30
