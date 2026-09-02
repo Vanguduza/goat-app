@@ -25,3 +25,16 @@ jwt_expiry = 3600
 [storage]
 enabled = true
 file_size_limit = "25MiB"
+
+[functions.search-token]
+verify_jwt = true
+
+[functions.meili-indexer]
+# Worker calls are authorized inside the function with INDEXER_INVOKE_SECRET.
+# This allows modern sb_secret_* API keys to remain in the apikey header rather
+# than being misused as JWT bearer tokens at the Edge gateway.
+verify_jwt = false
+
+[functions.meili-rebuild]
+# Worker calls are authorized inside the function with MEILI_REBUILD_SECRET.
+verify_jwt = false
