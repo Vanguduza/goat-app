@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -26,8 +26,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
-      - name: Domain and sync tests + debug build
-        run: gradle :domain:goat:test :core:sync:testDebugUnitTest :app:assembleDebug --stacktrace
+      - name: Domain, session and sync tests + debug build
+        run: gradle :domain:goat:test :core:network:testDebugUnitTest :core:sync:testDebugUnitTest :app:assembleDebug --stacktrace
 
   supabase:
     runs-on: ubuntu-latest
