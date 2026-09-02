@@ -85,6 +85,18 @@ class MutableSessionStore(
     override suspend fun accessToken(): String? = session?.accessToken
 }
 
+class RefreshingAccessTokenProvider(
+    private val sessionStore: MutableSessionStore,
+    private val refreshSession: suspend () -> Unit,
+) : AccessTokenProvider {
+    override suspend fun accessToken(): String? {
+        if (sessionStore.needsRefresh()) {
+            refreshSession()
+        }
+        return sessionStore.accessToken()
+    }
+}
+
 class SupabaseIdentityClient(
     private val supabaseUrl: String,
     private val publishableKey: String,
@@ -121,14 +133,10 @@ class SupabaseIdentityClient(
                 session
             }
             400, 401, 403 -> {
-                // The refresh credential is no longer usable. Persisting it would create a
-                // retry loop in WorkManager and can leave the UI believing a session exists.
                 sessionStore.set(null)
                 throw AuthenticationRequiredException("Supabase session expired; sign in again")
             }
             else -> {
-                // Transient provider/network-side failures must not destroy a still-usable
-                // refresh credential. Callers can retry through their normal backoff policy.
                 throw IllegalStateException("Supabase session refresh failed with HTTP ${response.status.value}")
             }
         }
