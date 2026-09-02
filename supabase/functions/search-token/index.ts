@@ -1,10 +1,11 @@
+import { supabasePublishableKey } from "../_shared/supabase_api_keys.ts";
 import { signTenantToken } from "../_shared/meili_tenant_token.ts";
 
 Deno.serve(async (request) => {
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const publishableKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const publishableKey = supabasePublishableKey();
   const meiliSearchKey = Deno.env.get("MEILI_SEARCH_KEY")!;
   const meiliSearchKeyUid = Deno.env.get("MEILI_SEARCH_KEY_UID")!;
   const indexPrefix = Deno.env.get("MEILI_INDEX_PREFIX") ?? "farm-os";
