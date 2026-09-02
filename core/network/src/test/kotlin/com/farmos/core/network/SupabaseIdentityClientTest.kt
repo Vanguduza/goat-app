@@ -9,13 +9,11 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.coroutines.startCoroutine
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 class SupabaseIdentityClientTest {
@@ -27,7 +25,7 @@ class SupabaseIdentityClientTest {
     )
 
     @Test
-    fun `successful refresh rotates and persists the session`() {
+    fun `successful refresh rotates and persists the session`() = runBlocking {
         val store = MutableSessionStore(now = { 1_000L })
         store.set(initialSession)
         val identity = SupabaseIdentityClient(
@@ -40,7 +38,7 @@ class SupabaseIdentityClientTest {
             ),
         )
 
-        val refreshed = runSuspend { identity.refresh() }
+        val refreshed = identity.refresh()
 
         assertEquals("new-access", refreshed.accessToken)
         assertEquals("new-refresh", refreshed.refreshToken)
@@ -49,7 +47,7 @@ class SupabaseIdentityClientTest {
     }
 
     @Test
-    fun `terminal refresh rejection clears stale credentials and requires sign in`() {
+    fun `terminal refresh rejection clears stale credentials and requires sign in`() = runBlocking {
         var persistedSession: SupabaseSession? = initialSession
         val store = MutableSessionStore(
             now = { 1_000L },
@@ -64,7 +62,7 @@ class SupabaseIdentityClientTest {
         )
 
         assertFailsWith<AuthenticationRequiredException> {
-            runSuspend { identity.refresh() }
+            identity.refresh()
         }
 
         assertEquals(null, store.current())
@@ -73,7 +71,7 @@ class SupabaseIdentityClientTest {
     }
 
     @Test
-    fun `transient refresh failure preserves refresh credentials for retry`() {
+    fun `transient refresh failure preserves refresh credentials for retry`() = runBlocking {
         val store = MutableSessionStore(now = { 1_000L })
         store.set(initialSession)
         val identity = SupabaseIdentityClient(
@@ -84,7 +82,7 @@ class SupabaseIdentityClientTest {
         )
 
         val failure = assertFailsWith<IllegalStateException> {
-            runSuspend { identity.refresh() }
+            identity.refresh()
         }
 
         assertNotNull(store.current())
@@ -105,17 +103,4 @@ class SupabaseIdentityClientTest {
             json(Json { ignoreUnknownKeys = true; explicitNulls = false })
         }
     }
-}
-
-private fun <T> runSuspend(block: suspend () -> T): T {
-    var outcome: Result<T>? = null
-    block.startCoroutine(
-        object : Continuation<T> {
-            override val context = EmptyCoroutineContext
-            override fun resumeWith(result: Result<T>) {
-                outcome = result
-            }
-        },
-    )
-    return requireNotNull(outcome) { "Suspending test did not complete synchronously" }.getOrThrow()
 }
