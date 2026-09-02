@@ -2,13 +2,10 @@ name: Farm OS foundation CI
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - implementation/foundation-vertical-slice
   pull_request:
 
 concurrency:
-  group: foundation-ci-${{ github.workflow }}-${{ github.ref }}
+  group: foundation-ci-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
