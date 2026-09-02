@@ -10,7 +10,6 @@ import com.farmos.core.network.SupabasePullClient
 import com.farmos.domain.goat.RecordGoatWeight
 import com.farmos.domain.goat.RegisterGoat
 import java.time.Instant
-import kotlinx.serialization.decodeFromJsonElement
 import kotlinx.serialization.json.Json
 
 class GoatPullReconciler(
@@ -59,7 +58,7 @@ class GoatPullReconciler(
     private suspend fun applyEvent(farmId: String, event: PulledDomainEvent) {
         when (event.eventType) {
             "goat.registered.v1" -> {
-                val payload = json.decodeFromJsonElement<RegisterGoat>(event.payload)
+                val payload = json.decodeFromJsonElement(RegisterGoat.serializer(), event.payload)
                 require(payload.animalId == event.aggregateId) { "Goat event aggregate mismatch" }
                 database.animals().upsertFromServer(
                     AnimalEntity(
@@ -76,7 +75,7 @@ class GoatPullReconciler(
                 )
             }
             "goat.weight_recorded.v1" -> {
-                val payload = json.decodeFromJsonElement<RecordGoatWeight>(event.payload)
+                val payload = json.decodeFromJsonElement(RecordGoatWeight.serializer(), event.payload)
                 require(payload.animalId == event.aggregateId) { "Weight event aggregate mismatch" }
                 database.measurements().upsertFromServer(
                     MeasurementEntity(
