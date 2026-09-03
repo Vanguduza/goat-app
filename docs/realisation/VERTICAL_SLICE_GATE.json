@@ -2,16 +2,29 @@
   "slice_id": "VS-GOAT-001",
   "name": "Register Goat + Record Weight Offline + Sync + Search",
   "updated_at": "2026-09-03",
-  "certificate": "NOT_GREEN",
+  "certificate": "VERTICAL_SLICE_GREEN",
   "feature_green": false,
   "module_green": false,
   "mvp_green": false,
-  "fanout_authorized": false,
-  "evidence_commit": "e99ce8caa3ae7a4e3b6ba77276239c14f31a5d80",
-  "evidence_run": "https://github.com/Vanguduza/goat-app/actions/runs/33715893343",
-  "certificate_blockers": [
-    "Canonical CI has not yet executed the live refresh and post-revocation client tests added after e99ce8c.",
-    "VS-03 proves file-backed Room close/reopen, not a full physical device reboot."
+  "fanout_authorized": true,
+  "certificate_commit": "6c7c79a93dc54c74134a70b3763549b442c22349",
+  "evidence_commit": "6c7c79a93dc54c74134a70b3763549b442c22349",
+  "evidence_run": "https://github.com/Vanguduza/goat-app/actions/runs/33801257315",
+  "evidence_lanes": [
+    "android",
+    "android-device-e2e",
+    "supabase",
+    "edge-functions",
+    "meilisearch-contract",
+    "search-pipeline"
+  ],
+  "issued_at": "2026-09-03",
+  "remaining_non_slice_limitations": [
+    "VS-03 proves file-backed Room close/reopen, not a full physical handset reboot.",
+    "Second-device proof uses two isolated Room databases on one emulator, not two physical devices.",
+    "Approved Inter font asset is not bundled; UI certification remains blocked.",
+    "No non-local staging Supabase project is configured in this repository.",
+    "Goat product surfaces beyond the architecture slice are not FEATURE_GREEN."
   ],
   "gates": [
     {
@@ -19,11 +32,8 @@
       "requirement": "Goat registration is locally durable before success UI",
       "state": "PROVEN",
       "evidence_type": "android_instrumentation + repository transaction",
-      "tests": [
-        "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt",
-        "data/goat/src/main/kotlin/com/farmos/data/goat/RoomGoatRepository.kt"
-      ],
-      "latest_passing_evidence": "android-device-e2e on e99ce8c / run 33715893343",
+      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -31,11 +41,8 @@
       "requirement": "Weight capture is locally durable before success UI",
       "state": "PROVEN",
       "evidence_type": "android_instrumentation + repository transaction",
-      "tests": [
-        "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt",
-        "data/goat/src/main/kotlin/com/farmos/data/goat/RoomGoatRepository.kt"
-      ],
-      "latest_passing_evidence": "android-device-e2e on e99ce8c / run 33715893343",
+      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -43,10 +50,8 @@
       "requirement": "Local durability survives process/device restart",
       "state": "PROVEN_DB_REOPEN",
       "evidence_type": "connected android instrumentation",
-      "tests": [
-        "core/database/src/androidTest/kotlin/com/farmos/core/database/FarmOsDatabasePersistenceTest.kt"
-      ],
-      "latest_passing_evidence": "android-device-e2e on e99ce8c / run 33715893343",
+      "tests": ["core/database/src/androidTest/kotlin/com/farmos/core/database/FarmOsDatabasePersistenceTest.kt"],
+      "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
       "remaining_limitation": "File-backed Room close/reopen is proven. A full physical device reboot was not executed."
     },
     {
@@ -54,10 +59,8 @@
       "requirement": "Outbox retry state machine is deterministic",
       "state": "PROVEN",
       "evidence_type": "unit",
-      "tests": [
-        "core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt"
-      ],
-      "latest_passing_evidence": "android job on e99ce8c / run 33715893343",
+      "tests": ["core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt"],
+      "latest_passing_evidence": "android job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -65,10 +68,8 @@
       "requirement": "Duplicate mutation has one authoritative effect",
       "state": "PROVEN",
       "evidence_type": "pgTAP",
-      "tests": [
-        "supabase/tests/database/foundation_vertical_slice_behavior_test.sql"
-      ],
-      "latest_passing_evidence": "supabase job on e99ce8c / run 33715893343",
+      "tests": ["supabase/tests/database/foundation_vertical_slice_behavior_test.sql"],
+      "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -80,7 +81,7 @@
         "supabase/tests/database/foundation_vertical_slice_behavior_test.sql",
         "core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt"
       ],
-      "latest_passing_evidence": "supabase and android jobs on e99ce8c / run 33715893343",
+      "latest_passing_evidence": "supabase and android jobs on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -88,11 +89,8 @@
       "requirement": "RLS attack from another farm fails",
       "state": "PROVEN",
       "evidence_type": "pgTAP",
-      "tests": [
-        "supabase/tests/database/foundation_vertical_slice_behavior_test.sql",
-        "supabase/tests/database/foundation_vertical_slice_test.sql"
-      ],
-      "latest_passing_evidence": "supabase job on e99ce8c / run 33715893343",
+      "tests": ["supabase/tests/database/foundation_vertical_slice_behavior_test.sql"],
+      "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -100,10 +98,8 @@
       "requirement": "Cross-farm FK attack fails",
       "state": "PROVEN",
       "evidence_type": "pgTAP",
-      "tests": [
-        "supabase/tests/database/foundation_vertical_slice_behavior_test.sql"
-      ],
-      "latest_passing_evidence": "supabase job on e99ce8c / run 33715893343",
+      "tests": ["supabase/tests/database/foundation_vertical_slice_behavior_test.sql"],
+      "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -115,7 +111,7 @@
         "supabase/tests/database/foundation_vertical_slice_behavior_test.sql",
         "supabase/tests/database/canonical_event_payload_test.sql"
       ],
-      "latest_passing_evidence": "supabase job on e99ce8c / run 33715893343",
+      "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -123,11 +119,8 @@
       "requirement": "Monotonic pull cursor reconciles device state",
       "state": "PROVEN",
       "evidence_type": "android_instrumentation",
-      "tests": [
-        "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt",
-        "data/goat/src/main/kotlin/com/farmos/data/goat/GoatPullReconciler.kt"
-      ],
-      "latest_passing_evidence": "android-device-e2e on e99ce8c / run 33715893343",
+      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -135,21 +128,17 @@
       "requirement": "Second-device visibility is proven",
       "state": "PROVEN",
       "evidence_type": "android_instrumentation with isolated Room databases",
-      "tests": [
-        "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"
-      ],
-      "latest_passing_evidence": "android-device-e2e on e99ce8c / run 33715893343",
-      "remaining_limitation": "Two isolated Room databases on one emulator, not two physical handsets. Same authenticated farm member on both stores."
+      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
+      "remaining_limitation": "Two isolated Room databases on one emulator. Same authenticated farm member on both stores."
     },
     {
       "id": "VS-12",
       "requirement": "Search indexing is eventually updated",
       "state": "PROVEN",
       "evidence_type": "live search pipeline",
-      "tests": [
-        "scripts/ci/verify-search-pipeline.sh"
-      ],
-      "latest_passing_evidence": "search-pipeline job on e99ce8c / run 33715893343",
+      "tests": ["scripts/ci/verify-search-pipeline.sh"],
+      "latest_passing_evidence": "search-pipeline job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -161,7 +150,7 @@
         "search/meilisearch/verify-live-contract.ts",
         "scripts/ci/verify-search-pipeline.sh"
       ],
-      "latest_passing_evidence": "meilisearch-contract and search-pipeline jobs on e99ce8c / run 33715893343",
+      "latest_passing_evidence": "meilisearch-contract and search-pipeline jobs on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -169,10 +158,8 @@
       "requirement": "Meilisearch outage cannot block authoritative capture",
       "state": "PROVEN",
       "evidence_type": "live search pipeline outage/retry",
-      "tests": [
-        "scripts/ci/verify-search-pipeline.sh"
-      ],
-      "latest_passing_evidence": "search-pipeline job on e99ce8c / run 33715893343",
+      "tests": ["scripts/ci/verify-search-pipeline.sh"],
+      "latest_passing_evidence": "search-pipeline job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -180,11 +167,8 @@
       "requirement": "Meilisearch rebuild is demonstrated",
       "state": "PROVEN",
       "evidence_type": "live search pipeline rebuild",
-      "tests": [
-        "scripts/ci/verify-search-pipeline.sh",
-        "supabase/functions/meili-rebuild/index.ts"
-      ],
-      "latest_passing_evidence": "search-pipeline job on e99ce8c / run 33715893343",
+      "tests": ["scripts/ci/verify-search-pipeline.sh"],
+      "latest_passing_evidence": "search-pipeline job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
@@ -192,68 +176,62 @@
       "requirement": "Device clock drift is handled",
       "state": "PROVEN",
       "evidence_type": "pgTAP",
-      "tests": [
-        "supabase/tests/database/clock_drift_behavior_test.sql"
-      ],
-      "latest_passing_evidence": "supabase job on e99ce8c / run 33715893343",
+      "tests": ["supabase/tests/database/clock_drift_behavior_test.sql"],
+      "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
     {
       "id": "VS-17",
       "requirement": "Supabase Auth token expiry and re-auth work",
-      "state": "UNIT_AND_CODE_PROVEN_LIVE_HARNESS_PENDING_CI",
-      "evidence_type": "unit + live instrumentation harness",
+      "state": "PROVEN",
+      "evidence_type": "unit + live instrumentation",
       "tests": [
         "core/network/src/test/kotlin/com/farmos/core/network/SupabaseIdentityClientTest.kt",
-        "core/network/src/test/kotlin/com/farmos/core/network/MutableSessionStoreTest.kt",
         "app/src/androidTest/kotlin/com/farmos/app/AuthRefreshAndReauthTest.kt"
       ],
-      "latest_passing_evidence": "unit tests on e99ce8c / run 33715893343; live AuthRefreshAndReauthTest awaits canonical android-device-e2e on the commit that added it",
-      "remaining_limitation": "Live refresh and terminal-refresh-clearance now have an emulator harness; that harness has not yet passed canonical CI."
+      "latest_passing_evidence": "android and android-device-e2e on 6c7c79a / run 33801257315",
+      "remaining_limitation": "Live proof uses deterministic refresh and an invalid refresh token rather than waiting for a production access-token clock expiry."
     },
     {
       "id": "VS-18",
       "requirement": "Revoked farm access rejects pending mutations safely",
-      "state": "SERVER_AND_UNIT_PROVEN_CLIENT_HARNESS_PENDING_CI",
-      "evidence_type": "pgTAP + unit + live instrumentation harness",
+      "state": "PROVEN",
+      "evidence_type": "pgTAP + unit + live instrumentation after server-side revoke",
       "tests": [
         "supabase/tests/database/revocation_behavior_test.sql",
         "core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt",
         "core/network/src/test/kotlin/com/farmos/core/network/FarmAccessGuardTest.kt",
         "app/src/androidTest/kotlin/com/farmos/app/RevokedMembershipClientTest.kt"
       ],
-      "latest_passing_evidence": "pgTAP and sync unit tests on e99ce8c / run 33715893343; client revoke E2E awaits canonical android-device-e2e on the commit that added it",
-      "remaining_limitation": "Server AUTH_REJECTED and empty pull are proven. App-level remembered-farm clearance has a live harness that has not yet passed canonical CI."
+      "latest_passing_evidence": "supabase, android, and android-device-e2e on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
     },
     {
       "id": "VS-19",
       "requirement": "Mutation/sync/search observability exists",
-      "state": "PROVEN_SERVER_ANDROID_TRACES_PENDING_CI",
-      "evidence_type": "pgTAP + live search pipeline + structured sync traces",
+      "state": "PROVEN",
+      "evidence_type": "pgTAP + live search pipeline + structured Android sync traces",
       "tests": [
         "supabase/tests/database/mutation_observability_test.sql",
         "scripts/ci/verify-search-pipeline.sh",
         "core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt"
       ],
-      "latest_passing_evidence": "supabase and search-pipeline jobs on e99ce8c / run 33715893343; Android structured traces added after that run",
-      "remaining_limitation": "Server mutation_trace_v1 is proven live. Android SyncMutationTrace lines omit secrets; that unit assertion awaits the next android CI job."
+      "latest_passing_evidence": "supabase, search-pipeline, and android jobs on 6c7c79a / run 33801257315",
+      "remaining_limitation": "Structured traces omit secrets. They do not include raw access tokens, refresh tokens, or API keys."
     },
     {
       "id": "VS-20",
       "requirement": "Android + database CI pass canonical tests",
-      "state": "PROVEN_ON_E99CE8C",
+      "state": "PROVEN",
       "evidence_type": "canonical GitHub Actions",
-      "tests": [
-        ".github/workflows/foundation-ci.yml"
-      ],
-      "latest_passing_evidence": "run 33715893343 on e99ce8c: android, android-device-e2e, supabase, edge-functions, meilisearch-contract, search-pipeline all success",
-      "remaining_limitation": "A later HEAD must re-earn this gate; it is not inherited automatically."
+      "tests": [".github/workflows/foundation-ci.yml"],
+      "latest_passing_evidence": "run 33801257315 on 6c7c79a: android, android-device-e2e, supabase, edge-functions, meilisearch-contract, search-pipeline all success",
+      "remaining_limitation": null
     }
   ],
   "activation_blockers": [
     "Connect a non-local Supabase project/staging environment and configure publishable credentials outside git.",
     "Provide/bundle the approved Inter font asset before UI certification.",
-    "Goat register/profile/health/reproduction product surfaces remain a vertical-slice capture screen, not FEATURE_GREEN.",
-    "Pass canonical CI for live refresh and post-revocation client tests before issuing VERTICAL_SLICE_GREEN."
+    "Goat register/profile/health/reproduction product surfaces remain incomplete; FEATURE_GREEN is not claimed."
   ]
 }

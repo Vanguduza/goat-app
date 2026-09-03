@@ -42,6 +42,8 @@ Register Goat
 
 A successful slice earns only `VERTICAL_SLICE_GREEN`. It does **not** make the goat feature, goat module, or MVP complete.
 
+Current architecture-slice certificate: `VERTICAL_SLICE_GREEN` on `6c7c79a93dc54c74134a70b3763549b442c22349` from [canonical run 33801257315](https://github.com/Vanguduza/goat-app/actions/runs/33801257315). Fan-out of further feature work is authorized. `FEATURE_GREEN`, `MODULE_GREEN`, and `MVP_GREEN` remain false. See [`docs/realisation/VERTICAL_SLICE_GATE.json`](docs/realisation/VERTICAL_SLICE_GATE.json).
+
 ## Build
 
 Canonical CI (`.github/workflows/foundation-ci.yml`) runs:

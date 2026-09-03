@@ -122,6 +122,20 @@ interface AnimalDao {
         WHERE farmId = :farmId
           AND speciesCode = :speciesCode
           AND status != 'closed'
+        ORDER BY tag
+        LIMIT :limit
+    """)
+    suspend fun listBySpecies(
+        farmId: String,
+        speciesCode: String,
+        limit: Int,
+    ): List<AnimalEntity>
+
+    @Query("""
+        SELECT * FROM animals
+        WHERE farmId = :farmId
+          AND speciesCode = :speciesCode
+          AND status != 'closed'
           AND (
               :query = ''
               OR tag LIKE '%' || :query || '%' COLLATE NOCASE
@@ -148,6 +162,9 @@ interface MeasurementDao {
 
     @Query("SELECT * FROM measurements WHERE farmId = :farmId AND animalId = :animalId AND type = :type ORDER BY measuredAtEpochMillis DESC LIMIT 1")
     suspend fun latest(farmId: String, animalId: String, type: String): MeasurementEntity?
+
+    @Query("SELECT * FROM measurements WHERE farmId = :farmId AND animalId = :animalId AND type = :type ORDER BY measuredAtEpochMillis ASC")
+    suspend fun history(farmId: String, animalId: String, type: String): List<MeasurementEntity>
 }
 
 @Dao

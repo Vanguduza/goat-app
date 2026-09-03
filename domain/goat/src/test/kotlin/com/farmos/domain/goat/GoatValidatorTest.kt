@@ -1,6 +1,7 @@
 package com.farmos.domain.goat
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class GoatValidatorTest {
@@ -36,5 +37,27 @@ class GoatValidatorTest {
             ),
         )
         assertIs<GoatValidationResult.Valid>(result)
+    }
+
+    @Test
+    fun `average daily gain uses whole grams over elapsed days`() {
+        val gain = GoatGrowth.averageDailyGainGrams(
+            listOf(
+                WeightSample("m1", 30_000, measuredAtEpochMillis = 0L),
+                WeightSample("m2", 32_160, measuredAtEpochMillis = 10 * 86_400_000L),
+            ),
+        )
+        assertEquals(216L, gain)
+    }
+
+    @Test
+    fun `average daily gain is absent until two chronological weights exist`() {
+        assertEquals(null, GoatGrowth.averageDailyGainGrams(emptyList()))
+        assertEquals(
+            null,
+            GoatGrowth.averageDailyGainGrams(
+                listOf(WeightSample("m1", 30_000, measuredAtEpochMillis = 1L)),
+            ),
+        )
     }
 }

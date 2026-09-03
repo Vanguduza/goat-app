@@ -45,6 +45,7 @@ interface GoatRepository {
     suspend fun registerGoat(command: RegisterGoat, context: LocalCommandContext): LocalCommandResult
     suspend fun recordWeight(command: RecordGoatWeight, context: LocalCommandContext): LocalCommandResult
     suspend fun getGoat(animalId: String): GoatSnapshot?
+    suspend fun listGoats(limit: Int = 100): List<GoatSnapshot>
     suspend fun searchGoats(query: String, limit: Int = 20): List<GoatSearchResult>
 }
 
@@ -68,9 +69,32 @@ data class GoatSnapshot(
     val tag: String,
     val name: String?,
     val sex: GoatSex,
+    val status: String = "active",
+    val dateOfBirthEpochDay: Long? = null,
     val latestWeightGrams: Long?,
+    val averageDailyGainGrams: Long? = null,
+    val weightHistory: List<WeightSample> = emptyList(),
     val syncPending: Boolean,
 )
+
+data class WeightSample(
+    val measurementId: String,
+    val weightGrams: Long,
+    val measuredAtEpochMillis: Long,
+)
+
+object GoatGrowth {
+    private const val MILLIS_PER_DAY = 86_400_000L
+
+    fun averageDailyGainGrams(samples: List<WeightSample>): Long? {
+        val ordered = samples.sortedBy { it.measuredAtEpochMillis }
+        if (ordered.size < 2) return null
+        val deltaMillis = ordered.last().measuredAtEpochMillis - ordered.first().measuredAtEpochMillis
+        if (deltaMillis <= 0L) return null
+        val deltaGrams = ordered.last().weightGrams - ordered.first().weightGrams
+        return (deltaGrams * MILLIS_PER_DAY) / deltaMillis
+    }
+}
 
 data class GoatSearchResult(
     val animalId: String,

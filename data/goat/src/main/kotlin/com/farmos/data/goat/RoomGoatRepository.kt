@@ -6,6 +6,7 @@ import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.MeasurementEntity
 import com.farmos.core.database.OutboxEntity
 import com.farmos.core.model.SyncState
+import com.farmos.domain.goat.GoatGrowth
 import com.farmos.domain.goat.GoatRepository
 import com.farmos.domain.goat.GoatSearchResult
 import com.farmos.domain.goat.GoatSex
@@ -16,6 +17,7 @@ import com.farmos.domain.goat.LocalCommandContext
 import com.farmos.domain.goat.LocalCommandResult
 import com.farmos.domain.goat.RecordGoatWeight
 import com.farmos.domain.goat.RegisterGoat
+import com.farmos.domain.goat.WeightSample
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -117,17 +119,34 @@ class RoomGoatRepository(
 
     override suspend fun getGoat(animalId: String): GoatSnapshot? {
         val animal = database.animals().get(farmId, animalId) ?: return null
-        val weight = database.measurements().latest(farmId, animalId, "weight")
+        val history = database.measurements().history(farmId, animalId, "weight").map { measurement ->
+            WeightSample(
+                measurementId = measurement.id,
+                weightGrams = measurement.valueLong,
+                measuredAtEpochMillis = measurement.measuredAtEpochMillis,
+            )
+        }
         return GoatSnapshot(
             animalId = animal.id,
             farmId = animal.farmId,
             tag = animal.tag,
             name = animal.name,
             sex = GoatSex.valueOf(animal.sex),
-            latestWeightGrams = weight?.valueLong,
+            status = animal.status,
+            dateOfBirthEpochDay = animal.dateOfBirthEpochDay,
+            latestWeightGrams = history.lastOrNull()?.weightGrams,
+            averageDailyGainGrams = GoatGrowth.averageDailyGainGrams(history),
+            weightHistory = history,
             syncPending = database.outbox().hasPending(farmId, animalId),
         )
     }
+
+    override suspend fun listGoats(limit: Int): List<GoatSnapshot> =
+        database.animals().listBySpecies(
+            farmId = farmId,
+            speciesCode = "goat",
+            limit = limit.coerceIn(1, 500),
+        ).mapNotNull { getGoat(it.id) }
 
     override suspend fun searchGoats(query: String, limit: Int): List<GoatSearchResult> =
         database.animals().searchBySpecies(
