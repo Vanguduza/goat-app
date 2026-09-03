@@ -157,6 +157,17 @@ fun FarmSessionContent(
         return
     }
 
+    if (module == FarmModule.INVENTORY) {
+        InventoryModuleHost(
+            farmId = membership.farmId,
+            ops = ops,
+            newContext = ::context,
+            enqueueSync = ::enqueueSync,
+            onBack = { module = FarmModule.HOME },
+        )
+        return
+    }
+
     if (module != FarmModule.GOAT) {
         OperatingModuleHost(
             module = module,
