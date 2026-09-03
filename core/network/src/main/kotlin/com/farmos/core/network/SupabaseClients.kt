@@ -12,10 +12,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import com.farmos.core.model.CommandAcknowledgement
+import com.farmos.core.model.CommandResultCode
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import java.util.UUID
 
 @Serializable
 data class AuthUser(val id: String)
@@ -38,6 +41,18 @@ private data class RefreshRequest(@SerialName("refresh_token") val refreshToken:
 data class FarmMembership(
     @SerialName("farm_id") val farmId: String,
     val role: String,
+)
+
+@Serializable
+data class FarmRecord(
+    val id: String,
+    val name: String,
+)
+
+@Serializable
+private data class CreateFarmBody(
+    val p_farm_id: String,
+    val p_name: String,
 )
 
 @Serializable
@@ -158,6 +173,49 @@ class SupabaseIdentityClient(
             header("apikey", publishableKey)
             header(HttpHeaders.Authorization, "Bearer ${session.accessToken}")
         }.body()
+    }
+
+    suspend fun farm(farmId: String): FarmRecord? = farms(listOf(farmId)).firstOrNull()
+
+    suspend fun farms(ids: List<String>): List<FarmRecord> {
+        if (ids.isEmpty()) return emptyList()
+        if (sessionStore.needsRefresh()) {
+            refresh()
+        }
+        val session = sessionStore.current()
+            ?: throw AuthenticationRequiredException("Authentication required")
+        val filter = ids.joinToString(",")
+        return client.get(
+            "${supabaseUrl.trimEnd('/')}/rest/v1/farms?select=id,name&id=in.($filter)",
+        ) {
+            header("apikey", publishableKey)
+            header(HttpHeaders.Authorization, "Bearer ${session.accessToken}")
+        }.body()
+    }
+
+    suspend fun createFarm(name: String): FarmMembership {
+        if (sessionStore.needsRefresh()) {
+            refresh()
+        }
+        val session = sessionStore.current()
+            ?: throw AuthenticationRequiredException("Authentication required")
+        val trimmed = name.trim()
+        require(trimmed.isNotEmpty()) { "Farm name is required" }
+        val farmId = UUID.randomUUID().toString()
+        val acknowledgement: CommandAcknowledgement = client.post(
+            "${supabaseUrl.trimEnd('/')}/rest/v1/rpc/farm_create_v1",
+        ) {
+            header("apikey", publishableKey)
+            header(HttpHeaders.Authorization, "Bearer ${session.accessToken}")
+            contentType(ContentType.Application.Json)
+            setBody(CreateFarmBody(p_farm_id = farmId, p_name = trimmed))
+        }.body()
+        return when (acknowledgement.code) {
+            CommandResultCode.ACCEPTED -> FarmMembership(farmId = farmId, role = "owner")
+            else -> throw IllegalStateException(
+                acknowledgement.safeMessage ?: "Could not create farm",
+            )
+        }
     }
 }
 

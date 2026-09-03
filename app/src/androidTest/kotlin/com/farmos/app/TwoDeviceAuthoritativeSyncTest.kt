@@ -12,10 +12,10 @@ import com.farmos.core.network.SupabaseIdentityClient
 import com.farmos.core.network.SupabasePullClient
 import com.farmos.core.network.SupabaseRpcCommandTransport
 import com.farmos.core.sync.SyncEngine
-import com.farmos.data.goat.GoatPullReconciler
 import com.farmos.data.goat.RoomGoatRepository
+import com.farmos.data.herd.FarmOsPullReconciler
 import com.farmos.domain.goat.GoatSex
-import com.farmos.domain.goat.LocalCommandContext
+import com.farmos.core.model.LocalCommandContext
 import com.farmos.domain.goat.RecordGoatWeight
 import com.farmos.domain.goat.RegisterGoat
 import java.util.UUID
@@ -102,7 +102,7 @@ class TwoDeviceAuthoritativeSyncTest {
                     tokenProvider = tokenProviderA,
                 ),
             )
-            val reconcilerB = GoatPullReconciler(
+            val reconcilerB = FarmOsPullReconciler(
                 database = databaseB,
                 pullClient = SupabasePullClient(
                     supabaseUrl = supabaseUrl,
@@ -211,7 +211,7 @@ class TwoDeviceAuthoritativeSyncTest {
         FarmOsDatabase::class.java,
         name,
     )
-        .addMigrations(FarmOsDatabase.MIGRATION_1_2)
+        .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
         .build()
 
     private fun context(

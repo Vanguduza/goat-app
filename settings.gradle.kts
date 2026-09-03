@@ -24,6 +24,11 @@ include(
     ":core:sync",
     ":core:design",
     ":domain:goat",
+    ":domain:rabbit",
+    ":domain:ops",
     ":data:goat",
+    ":data:herd",
     ":feature:goat",
+    ":feature:rabbit",
+    ":feature:ops",
 )

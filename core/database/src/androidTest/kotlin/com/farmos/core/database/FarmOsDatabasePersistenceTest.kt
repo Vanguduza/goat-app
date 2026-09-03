@@ -137,6 +137,6 @@ class FarmOsDatabasePersistenceTest {
         FarmOsDatabase::class.java,
         databaseName,
     )
-        .addMigrations(FarmOsDatabase.MIGRATION_1_2)
+            .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
         .build()
 }

@@ -66,3 +66,38 @@ enum class SyncState {
     RETRY_WAIT,
     DEAD_LETTER,
 }
+
+data class LocalCommandContext(
+    val farmId: String,
+    val actorId: String,
+    val deviceId: String,
+    val mutationId: String,
+    val occurredAtEpochMillis: Long,
+)
+
+data class LocalCommandResult(
+    val mutationId: String,
+    val aggregateId: String,
+    val locallyDurable: Boolean,
+)
+
+enum class SearchSource { LOCAL, MEILISEARCH }
+
+enum class AnimalSex { FEMALE, MALE }
+
+enum class AnimalStatus {
+    ACTIVE,
+    SOLD,
+    DEAD,
+    CULLED,
+    CLOSED,
+    ;
+
+    fun wireValue(): String = name.lowercase()
+
+    companion object {
+        fun fromWire(value: String): AnimalStatus =
+            entries.firstOrNull { it.wireValue() == value.lowercase() }
+                ?: error("Unknown animal status $value")
+    }
+}

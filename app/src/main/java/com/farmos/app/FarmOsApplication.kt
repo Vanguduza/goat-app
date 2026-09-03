@@ -22,15 +22,16 @@ import com.farmos.core.network.RefreshingAccessTokenProvider
 import com.farmos.core.network.SupabaseIdentityClient
 import com.farmos.core.network.SupabasePullClient
 import com.farmos.core.network.SupabaseRpcCommandTransport
+import com.farmos.core.network.UnsupportedServerEvent
 import com.farmos.core.network.WireCommand
 import com.farmos.core.sync.AuthoritativePullOutcome
 import com.farmos.core.sync.SyncEngine
 import com.farmos.core.sync.SyncEngineOwner
 import com.farmos.core.sync.SyncObserver
 import com.farmos.core.sync.SyncWorker
-import com.farmos.data.goat.GoatPullReconciler
 import com.farmos.data.goat.RoomGoatRepository
-import com.farmos.data.goat.UnsupportedServerEvent
+import com.farmos.data.herd.FarmOsPullReconciler
+import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.goat.GoatRepository
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -90,7 +91,7 @@ class FarmOsApplication : Application(), SyncEngineOwner {
             FarmOsDatabase::class.java,
             "farm-os.db",
         )
-            .addMigrations(FarmOsDatabase.MIGRATION_1_2)
+            .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
             .build()
 
         deviceId = getSharedPreferences("farm_os_device", MODE_PRIVATE)
@@ -161,7 +162,7 @@ class FarmOsApplication : Application(), SyncEngineOwner {
         val remembered = lastMembershipForCurrentSession()
             ?: return AuthoritativePullOutcome.SKIPPED
         val identity = identityClient ?: return AuthoritativePullOutcome.SKIPPED
-        val reconciler = goatPullReconciler()
+        val reconciler = farmPullReconciler()
             ?: return AuthoritativePullOutcome.SKIPPED
 
         return try {
@@ -203,9 +204,13 @@ class FarmOsApplication : Application(), SyncEngineOwner {
 
     fun goatRepository(farmId: String): GoatRepository = RoomGoatRepository(database, farmId)
 
-    fun goatPullReconciler(): GoatPullReconciler? = pullClient?.let { client ->
-        GoatPullReconciler(database, client)
+    fun opsRepository(farmId: String): RoomOpsRepository = RoomOpsRepository(database, farmId)
+
+    fun farmPullReconciler(): FarmOsPullReconciler? = pullClient?.let { client ->
+        FarmOsPullReconciler(database, client)
     }
+
+    fun goatPullReconciler(): FarmOsPullReconciler? = farmPullReconciler()
 
     fun rememberMembership(membership: FarmMembership) {
         val userId = sessionStore.current()?.user?.id ?: return

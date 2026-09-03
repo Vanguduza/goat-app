@@ -55,8 +55,13 @@ dependencies {
     implementation(project(":core:sync"))
     implementation(project(":core:design"))
     implementation(project(":domain:goat"))
+    implementation(project(":domain:rabbit"))
+    implementation(project(":domain:ops"))
     implementation(project(":data:goat"))
+    implementation(project(":data:herd"))
     implementation(project(":feature:goat"))
+    implementation(project(":feature:rabbit"))
+    implementation(project(":feature:ops"))
 
     implementation(platform("androidx.compose:compose-bom:2026.08.00"))
     implementation("androidx.activity:activity-compose:1.13.0")

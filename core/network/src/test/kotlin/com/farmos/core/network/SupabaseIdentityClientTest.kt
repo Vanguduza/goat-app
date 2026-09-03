@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
@@ -105,6 +106,39 @@ class SupabaseIdentityClientTest {
         assertNotNull(store.current())
         assertEquals("old-refresh", store.current()?.refreshToken)
         assertEquals("Supabase session refresh failed with HTTP 503", failure.message)
+    }
+
+    @Test
+    fun `create farm returns owner membership after accepted rpc`() = runBlocking {
+        val store = MutableSessionStore(now = { 1_000L })
+        store.set(initialSession.copy(expiresInSeconds = 3_600))
+        val identity = SupabaseIdentityClient(
+            supabaseUrl = "https://farm-os.test",
+            publishableKey = "publishable",
+            sessionStore = store,
+            client = mockClient(HttpStatusCode.OK, """{"code":"ACCEPTED"}"""),
+        )
+
+        val created = identity.createFarm("Nala herd")
+
+        assertEquals("owner", created.role)
+        assertTrue(created.farmId.isNotBlank())
+    }
+
+    @Test
+    fun `blank farm name is rejected before the create rpc`() = runBlocking {
+        val store = MutableSessionStore(now = { 1_000L })
+        store.set(initialSession.copy(expiresInSeconds = 3_600))
+        val identity = SupabaseIdentityClient(
+            supabaseUrl = "https://farm-os.test",
+            publishableKey = "publishable",
+            sessionStore = store,
+            client = mockClient(HttpStatusCode.OK, """{"code":"ACCEPTED"}"""),
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            identity.createFarm("   ")
+        }
     }
 
     @Test

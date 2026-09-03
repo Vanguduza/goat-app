@@ -22,6 +22,8 @@ interface AccessTokenProvider {
 
 class AuthenticationRequiredException(message: String) : IllegalStateException(message)
 
+class UnsupportedServerEvent(message: String) : IllegalStateException(message)
+
 interface CommandTransport {
     suspend fun send(command: WireCommand): CommandAcknowledgement
 }

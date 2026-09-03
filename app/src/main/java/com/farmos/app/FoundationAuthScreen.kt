@@ -27,12 +27,15 @@ fun FoundationAuthScreen(
     error: String?,
     sessionPresent: Boolean,
     memberships: List<FarmMembership>,
+    farmNames: Map<String, String> = emptyMap(),
     onSignIn: (email: String, password: String) -> Unit,
     onSelectFarm: (FarmMembership) -> Unit,
+    onCreateFarm: (name: String) -> Unit,
     onSignOut: () -> Unit,
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var farmName by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -60,7 +63,11 @@ fun FoundationAuthScreen(
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text("${membership.farmId.take(8)}… · ${membership.role.replace('_', ' ')}")
+                        val name = farmNames[membership.farmId]
+                        Text(
+                            (name ?: "${membership.farmId.take(8)}…") +
+                                " · ${membership.role.replace('_', ' ')}",
+                        )
                     }
                 }
                 TextButton(onClick = onSignOut, enabled = !busy) {
@@ -68,13 +75,24 @@ fun FoundationAuthScreen(
                 }
             }
             sessionPresent -> {
-                Text("No farm access", style = MaterialTheme.typography.labelLarge)
-                Text("This account has no Farm OS farm membership. Ask an owner to restore access, or sign out.")
-                Button(
-                    onClick = onSignOut,
+                Text("Create farm", style = MaterialTheme.typography.labelLarge)
+                Text("This account has no Farm OS farm membership. Create a farm on a connection, or sign out.")
+                OutlinedTextField(
+                    value = farmName,
+                    onValueChange = { farmName = it },
+                    label = { Text("Farm name") },
+                    modifier = Modifier.fillMaxWidth(),
                     enabled = !busy,
+                    singleLine = true,
+                )
+                Button(
+                    onClick = { onCreateFarm(farmName) },
+                    enabled = !busy && farmName.isNotBlank(),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
+                    Text("Create farm")
+                }
+                TextButton(onClick = onSignOut, enabled = !busy) {
                     Text("Sign out")
                 }
             }

@@ -18,7 +18,7 @@ import com.farmos.core.network.SupabaseRpcCommandTransport
 import com.farmos.core.sync.SyncEngine
 import com.farmos.data.goat.RoomGoatRepository
 import com.farmos.domain.goat.GoatSex
-import com.farmos.domain.goat.LocalCommandContext
+import com.farmos.core.model.LocalCommandContext
 import com.farmos.domain.goat.RegisterGoat
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
@@ -78,7 +78,7 @@ class RevokedMembershipClientTest {
         )
 
         val database = Room.databaseBuilder(context, FarmOsDatabase::class.java, databaseName)
-            .addMigrations(FarmOsDatabase.MIGRATION_1_2)
+            .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
             .build()
         val app = context.applicationContext as FarmOsApplication
         try {

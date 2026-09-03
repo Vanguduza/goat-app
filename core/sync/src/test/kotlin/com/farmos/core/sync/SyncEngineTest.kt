@@ -131,6 +131,86 @@ class SyncEngineTest {
     }
 
     @Test
+    fun `lifecycle command maps to the versioned status rpc`() = runSuspend {
+        val outbox = FakeOutboxDao(
+            mutableListOf(
+                item(mutationId = "status-1").copy(commandName = "goat.set_status.v1"),
+            ),
+        )
+        val sent = mutableListOf<String>()
+        val transport = object : CommandTransport {
+            override suspend fun send(command: WireCommand): CommandAcknowledgement {
+                sent += command.rpcName
+                return CommandAcknowledgement(
+                    code = CommandResultCode.ACCEPTED,
+                    eventId = "event-status",
+                    streamVersion = 2,
+                )
+            }
+        }
+
+        val result = SyncEngine(outbox, FakeAggregateVersionDao(), transport, now = { fixedNow }).drain()
+
+        assertEquals(listOf("goat_set_status_v1"), sent)
+        assertEquals(1, result.acknowledged)
+        assertEquals("goat_set_status_v1", result.traces.single().rpc)
+    }
+
+    @Test
+    fun `operating spine commands map to versioned rpcs`() = runSuspend {
+        val names = listOf(
+            "goat.record_kidding.v1" to "goat_record_kidding_v1",
+            "rabbit.wave_create.v1" to "rabbit_wave_create_v1",
+            "task.create.v1" to "task_create_v1",
+            "health.record_observation.v1" to "health_record_observation_v1",
+            "money.record.v1" to "money_record_v1",
+            "inventory.move.v1" to "inventory_move_v1",
+            "sheep.register.v1" to "sheep_register_v1",
+            "sheep.record_joining.v1" to "sheep_record_joining_v1",
+            "cattle.record_service.v1" to "cattle_record_service_v1",
+            "rabbit.record_kindling.v1" to "rabbit_record_kindling_v1",
+            "goat.record_milk.v1" to "goat_record_milk_v1",
+            "purchase.record.v1" to "purchase_record_v1",
+            "rabbit.nest_box_set_status.v1" to "rabbit_nest_box_set_status_v1",
+            "cattle.record_bcs.v1" to "cattle_record_bcs_v1",
+            "sheep.record_marking.v1" to "sheep_record_marking_v1",
+            "goat.record_bcs.v1" to "goat_record_bcs_v1",
+            "rabbit.waitlist_enqueue.v1" to "rabbit_waitlist_enqueue_v1",
+            "cattle.record_scc.v1" to "cattle_record_scc_v1",
+            "sheep.record_shearing.v1" to "sheep_record_shearing_v1",
+            "poultry.hatch_set.v1" to "poultry_hatch_set_v1",
+            "sheep.record_flystrike.v1" to "sheep_record_flystrike_v1",
+            "rabbit.record_mating_outcome.v1" to "rabbit_record_mating_outcome_v1",
+            "goat.record_scc.v1" to "goat_record_scc_v1",
+            "rabbit.bedding_bind.v1" to "rabbit_bedding_bind_v1",
+            "poultry.record_vaccination.v1" to "poultry_record_vaccination_v1",
+            "cattle.record_dryoff.v1" to "cattle_record_dryoff_v1",
+            "poultry.flock_place.v1" to "poultry_flock_place_v1",
+            "poultry.record_biosecurity.v1" to "poultry_record_biosecurity_v1",
+            "goat.record_heat.v1" to "goat_record_heat_v1",
+            "goat.record_mating.v1" to "goat_record_mating_v1",
+            "inventory.lot_issue.v1" to "inventory_lot_issue_v1",
+            "pedigree.link.v1" to "pedigree_link_v1",
+            "health.pack_apply.v1" to "health_pack_apply_v1",
+            "cattle.record_dof.v1" to "cattle_record_dof_v1",
+            "goat.plan_lactation.v1" to "goat_plan_lactation_v1",
+            "goat.register_kid.v1" to "goat_register_kid_v1",
+        )
+        names.forEach { (command, rpc) ->
+            val outbox = FakeOutboxDao(mutableListOf(item(mutationId = command).copy(commandName = command)))
+            val sent = mutableListOf<String>()
+            val transport = object : CommandTransport {
+                override suspend fun send(wire: WireCommand): CommandAcknowledgement {
+                    sent += wire.rpcName
+                    return CommandAcknowledgement(code = CommandResultCode.ACCEPTED, eventId = "e", streamVersion = 1)
+                }
+            }
+            SyncEngine(outbox, FakeAggregateVersionDao(), transport, now = { fixedNow }).drain()
+            assertEquals(listOf(rpc), sent)
+        }
+    }
+
+    @Test
     fun `conflict remains visible and blocks later command for same aggregate`() = runSuspend {
         val outbox = FakeOutboxDao(
             mutableListOf(
@@ -257,6 +337,9 @@ private class FakeOutboxDao(
                 it.aggregateId == aggregateId &&
                 it.state != SyncState.ACKNOWLEDGED.name
         }
+
+    override suspend fun countUnacknowledgedForFarm(farmId: String): Long =
+        items.count { it.farmId == farmId && it.state != SyncState.ACKNOWLEDGED.name }.toLong()
 
     fun byId(mutationId: String): OutboxEntity = items.single { it.mutationId == mutationId }
 }

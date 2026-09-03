@@ -24,7 +24,9 @@
     "Second-device proof uses two isolated Room databases on one emulator, not two physical devices.",
     "Approved Inter font asset is not bundled; UI certification remains blocked.",
     "No non-local staging Supabase project is configured in this repository.",
-    "Goat product surfaces beyond the architecture slice are not FEATURE_GREEN."
+    "Goat herd, profile, weight history, lifecycle, kidding, and farm-create fan-out are implemented but not FEATURE_GREEN.",
+    "Operating spine now has governed write paths for rabbit programme including palpation/kindling/foster/wean, nest-box cycle, kits/retention, waitlist/contracts, market-plan records (no ADG projection), bedding/feed inventory binds (no auto-issue on nest place), and GI-stasis red-flag observation plus vet-call task, sheep joining/scan/lambing/marking/weaning/wool/shearing/dag/footrot/flystrike/FAMACHA/micron, cattle service/PD/calving/BCS/milk/locomotion/SCC/dry-off/weaning/days-on-feed/lot place and close-out, goat milk/BCS/SCC/heat/mating/+45 pregnancy-check, +7 lactation follow-up, and kid records capped to live kids with a dam pedigree link, official identifiers and cattle/sheep movements, FEFO dated-lot receive/issue with no silent non-lot fallback plus reorder-point records, vet visits and lab results as records not diagnoses, poultry kind enable plus earlier flock/hatch/vax/placement/biosecurity, record-only pedigree links with no COI engine, protocol-pack slots that generate due tasks on apply, group census, procurement purchases, protocol packs, and treatment withdrawal windows, plus earlier identity/weight/status, tasks, health, pasture, labour, assets, feed, water, sales, money, and inventory. These are not FEATURE_GREEN.",
+    "AI/Copilot, genetics/COI, simulation, reports/documents, admin/audit, ration engine percentages, gallery/Roborazzi, Inter font, and mixed-farm field certification remain unimplemented or uncertified."
   ],
   "gates": [
     {
@@ -232,6 +234,7 @@
   "activation_blockers": [
     "Connect a non-local Supabase project/staging environment and configure publishable credentials outside git.",
     "Provide/bundle the approved Inter font asset before UI certification.",
-    "Goat register/profile/health/reproduction product surfaces remain incomplete; FEATURE_GREEN is not claimed."
+    "Goat health, reproduction, and other species/shared modules have an operating spine only; FEATURE_GREEN, MODULE_GREEN, and MVP_GREEN are not claimed.",
+    "Do not convert a green architecture slice or this fan-out spine into FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN."
   ]
 }
