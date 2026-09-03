@@ -27,8 +27,16 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.3.1'
-      - name: Domain, session and sync tests + debug build
-        run: gradle :domain:goat:test :core:network:testDebugUnitTest :core:sync:testDebugUnitTest :app:assembleDebug --stacktrace
+      - name: Domain, session and sync tests + Kotlin compile
+        run: >-
+          gradle
+          :domain:goat:test
+          :domain:rabbit:test
+          :domain:ops:test
+          :core:network:testDebugUnitTest
+          :core:sync:testDebugUnitTest
+          :app:compileDebugKotlin
+          --stacktrace
 
   android-device-e2e:
     needs: android
@@ -59,7 +67,7 @@ jobs:
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost \
             /usr/local/lib/android/sdk/ndk /usr/local/lib/android/sdk/sources || true
           df -h
-      - name: Prove Room restart durability and second-device authoritative visibility
+      - name: Prove Room migration/restart durability and second-device authoritative visibility
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 36
