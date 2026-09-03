@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - name: Enforce Kotlin architecture stabilization guardrails
+        run: bash scripts/ci/verify-kotlin-architecture.sh
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
@@ -93,7 +95,12 @@ jobs:
         with:
           deno-version: 2.9.6
       - name: Validate CI harness shell syntax
-        run: bash -n scripts/ci/verify-search-pipeline.sh scripts/ci/prepare-two-device-e2e.sh scripts/ci/run-two-device-e2e.sh
+        run: >-
+          bash -n
+          scripts/ci/verify-kotlin-architecture.sh
+          scripts/ci/verify-search-pipeline.sh
+          scripts/ci/prepare-two-device-e2e.sh
+          scripts/ci/run-two-device-e2e.sh
       - name: Type-check Edge Functions and search tools
         run: >-
           deno check
