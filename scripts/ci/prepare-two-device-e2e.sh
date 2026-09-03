@@ -65,14 +65,21 @@ jq -e '.code == "ACCEPTED"' >/dev/null <<<"${CREATE_FARM}" || {
   fail "Could not create local E2E farm"
 }
 
-[[ -n "${GITHUB_ENV:-}" ]] || fail "GITHUB_ENV is required for CI E2E preparation"
-{
-  echo "FARM_OS_SUPABASE_URL=${DEVICE_API_URL}"
-  echo "FARM_OS_SUPABASE_PUBLISHABLE_KEY=${PUBLIC_API_KEY}"
-  echo "FARM_OS_E2E_EMAIL=${EMAIL}"
-  echo "FARM_OS_E2E_PASSWORD=${PASSWORD}"
-  echo "FARM_OS_E2E_FARM_ID=${FARM_ID}"
-} >>"${GITHUB_ENV}"
+export FARM_OS_SUPABASE_URL="${DEVICE_API_URL}"
+export FARM_OS_SUPABASE_PUBLISHABLE_KEY="${PUBLIC_API_KEY}"
+export FARM_OS_E2E_EMAIL="${EMAIL}"
+export FARM_OS_E2E_PASSWORD="${PASSWORD}"
+export FARM_OS_E2E_FARM_ID="${FARM_ID}"
+
+if [[ -n "${GITHUB_ENV:-}" ]]; then
+  {
+    echo "FARM_OS_SUPABASE_URL=${FARM_OS_SUPABASE_URL}"
+    echo "FARM_OS_SUPABASE_PUBLISHABLE_KEY=${FARM_OS_SUPABASE_PUBLISHABLE_KEY}"
+    echo "FARM_OS_E2E_EMAIL=${FARM_OS_E2E_EMAIL}"
+    echo "FARM_OS_E2E_PASSWORD=${FARM_OS_E2E_PASSWORD}"
+    echo "FARM_OS_E2E_FARM_ID=${FARM_OS_E2E_FARM_ID}"
+  } >>"${GITHUB_ENV}"
+fi
 
 trap - EXIT
 echo "Android two-device E2E authority is ready; only the publishable key and disposable local test credentials were exported."
