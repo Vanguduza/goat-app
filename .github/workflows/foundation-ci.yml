@@ -64,11 +64,7 @@ jobs:
           ram-size: 2048M
           disable-animations: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-metrics
-          script: |
-            source scripts/ci/prepare-two-device-e2e.sh
-            trap 'supabase stop --no-backup >/dev/null 2>&1 || true' EXIT
-            adb reverse tcp:54321 tcp:54321
-            gradle :core:database:connectedDebugAndroidTest :app:connectedDebugAndroidTest --stacktrace
+          script: bash scripts/ci/run-two-device-e2e.sh
       - name: Stop local Supabase
         if: always()
         run: supabase stop --no-backup || true
@@ -82,7 +78,7 @@ jobs:
         with:
           deno-version: 2.9.6
       - name: Validate CI harness shell syntax
-        run: bash -n scripts/ci/verify-search-pipeline.sh scripts/ci/prepare-two-device-e2e.sh
+        run: bash -n scripts/ci/verify-search-pipeline.sh scripts/ci/prepare-two-device-e2e.sh scripts/ci/run-two-device-e2e.sh
       - name: Type-check Edge Functions and search tools
         run: >-
           deno check
