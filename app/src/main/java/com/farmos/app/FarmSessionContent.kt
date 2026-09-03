@@ -17,9 +17,7 @@ import com.farmos.core.network.AuthenticationRequiredException
 import com.farmos.core.network.FarmMembership
 import com.farmos.core.sync.SyncWorker
 import com.farmos.domain.goat.GoatSearchResult
-import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.GoatSnapshot
-import com.farmos.domain.goat.GoatStatus
 import com.farmos.domain.goat.PlanGoatLactation
 import com.farmos.domain.goat.RecordGoatBcs
 import com.farmos.domain.goat.RecordGoatFamacha
@@ -52,6 +50,7 @@ fun FarmSessionContent(
     val scope = rememberCoroutineScope()
     var module by remember { mutableStateOf(FarmModule.HOME) }
     val repository = remember(membership.farmId) { app.goatRepository(membership.farmId) }
+    val ops = remember(membership.farmId) { app.opsRepository(membership.farmId) }
     var herd by remember { mutableStateOf<List<GoatSnapshot>>(emptyList()) }
     var selectedGoatId by remember { mutableStateOf<String?>(null) }
     var selected by remember { mutableStateOf<GoatSnapshot?>(null) }
@@ -136,12 +135,23 @@ fun FarmSessionContent(
         return
     }
 
+    if (module == FarmModule.TASKS) {
+        TasksModuleHost(
+            farmId = membership.farmId,
+            ops = ops,
+            newContext = ::context,
+            enqueueSync = ::enqueueSync,
+            onBack = { module = FarmModule.HOME },
+        )
+        return
+    }
+
     if (module != FarmModule.GOAT) {
         OperatingModuleHost(
             module = module,
             farmId = membership.farmId,
             database = app.database,
-            ops = app.opsRepository(membership.farmId),
+            ops = ops,
             newContext = ::context,
             enqueueSync = ::enqueueSync,
             onBack = { module = FarmModule.HOME },
