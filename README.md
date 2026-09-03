@@ -44,8 +44,13 @@ A successful slice earns only `VERTICAL_SLICE_GREEN`. It does **not** make the g
 
 ## Build
 
-The repository is being bootstrapped from its former documentation-only state.
+Canonical CI (`.github/workflows/foundation-ci.yml`) runs:
 
-The CI branch installs JDK 17, Android API 36, Gradle 9.3.1 and builds/tests the current Android foundation. Supabase migrations and pgTAP contracts are also executed against a local Supabase stack in CI.
+- Android domain, session and sync unit tests plus a debug APK
+- Connected emulator proofs for Room reopen durability, two-device pull visibility, auth refresh, and revoked-membership client handling
+- Local Supabase migrations and pgTAP
+- Edge Function type-checks and API-key compatibility tests
+- Live Meilisearch index contract and tenant isolation
+- Full search pipeline: authority → index job → outage/retry → rebuild
 
-Local Supabase/Meilisearch credentials and production secrets are never committed.
+Use JDK 17, Android compile SDK 37, Gradle 9.3.1, and pinned Supabase CLI 2.116.0. Local secrets and production credentials are never committed.

@@ -9,6 +9,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,9 +25,11 @@ fun FoundationAuthScreen(
     backendConfigured: Boolean,
     busy: Boolean,
     error: String?,
+    sessionPresent: Boolean,
     memberships: List<FarmMembership>,
     onSignIn: (email: String, password: String) -> Unit,
     onSelectFarm: (FarmMembership) -> Unit,
+    onSignOut: () -> Unit,
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -47,40 +50,57 @@ fun FoundationAuthScreen(
             return@Column
         }
 
-        if (memberships.isEmpty()) {
-            Text("Sign in", style = MaterialTheme.typography.labelLarge)
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-            )
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-            )
-            Button(
-                onClick = { onSignIn(email, password) },
-                enabled = !busy && email.isNotBlank() && password.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Sign in")
+        when {
+            memberships.isNotEmpty() -> {
+                Text("Choose farm", style = MaterialTheme.typography.labelLarge)
+                Text("The server membership table is authoritative for this selection.")
+                memberships.forEach { membership ->
+                    Button(
+                        onClick = { onSelectFarm(membership) },
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("${membership.farmId.take(8)}… · ${membership.role.replace('_', ' ')}")
+                    }
+                }
+                TextButton(onClick = onSignOut, enabled = !busy) {
+                    Text("Sign out")
+                }
             }
-        } else {
-            Text("Choose farm", style = MaterialTheme.typography.labelLarge)
-            Text("The server membership table is authoritative for this selection.")
-            memberships.forEach { membership ->
+            sessionPresent -> {
+                Text("No farm access", style = MaterialTheme.typography.labelLarge)
+                Text("This account has no Farm OS farm membership. Ask an owner to restore access, or sign out.")
                 Button(
-                    onClick = { onSelectFarm(membership) },
+                    onClick = onSignOut,
                     enabled = !busy,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("${membership.farmId.take(8)}… · ${membership.role.replace('_', ' ')}")
+                    Text("Sign out")
+                }
+            }
+            else -> {
+                Text("Sign in", style = MaterialTheme.typography.labelLarge)
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+                Button(
+                    onClick = { onSignIn(email, password) },
+                    enabled = !busy && email.isNotBlank() && password.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Sign in")
                 }
             }
         }

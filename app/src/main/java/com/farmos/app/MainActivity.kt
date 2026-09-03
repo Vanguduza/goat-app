@@ -1,8 +1,11 @@
 package com.farmos.app
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +18,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.core.network.AuthenticationRequiredException
+import com.farmos.core.network.AuthorizationLoss
+import com.farmos.core.network.FarmAccessDecision
+import com.farmos.core.network.FarmAccessGuard
 import com.farmos.core.network.FarmMembership
 import com.farmos.core.sync.SyncWorker
 import com.farmos.domain.goat.GoatRepository
@@ -43,12 +49,43 @@ class MainActivity : ComponentActivity() {
                 var selectedMembership by remember { mutableStateOf(restoredMembership) }
                 var authBusy by remember { mutableStateOf(false) }
                 var authError by remember { mutableStateOf<String?>(null) }
+                var sessionPresent by remember { mutableStateOf(app.sessionStore.current() != null) }
                 val requireReauthentication: (String?) -> Unit = { message ->
-                    app.clearRememberedMembership()
+                    app.applyAuthorizationLoss(AuthorizationLoss.SESSION_EXPIRED)
+                    sessionPresent = false
                     memberships = emptyList()
                     selectedMembership = null
                     authBusy = false
                     authError = message ?: "Your session expired. Sign in again."
+                }
+                val requireFarmReselection: (String, List<FarmMembership>) -> Unit = { message, available ->
+                    app.applyAuthorizationLoss(AuthorizationLoss.FARM_ACCESS_REVOKED)
+                    sessionPresent = app.sessionStore.current() != null
+                    memberships = available
+                    selectedMembership = null
+                    authBusy = false
+                    authError = message
+                }
+
+                DisposableEffect(Unit) {
+                    app.authorizationListener = { loss ->
+                        Handler(Looper.getMainLooper()).post {
+                            if (loss == AuthorizationLoss.SESSION_EXPIRED) {
+                                requireReauthentication(null)
+                            } else {
+                                scope.launch {
+                                    val available = runCatching {
+                                        app.identityClient?.memberships().orEmpty()
+                                    }.getOrDefault(emptyList())
+                                    requireFarmReselection(
+                                        "Farm access was removed. Choose another farm or sign out.",
+                                        available,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    onDispose { app.authorizationListener = null }
                 }
 
                 LaunchedEffect(restoredMembership?.farmId) {
@@ -57,14 +94,30 @@ class MainActivity : ComponentActivity() {
                     runCatching { identity.memberships() }
                         .onSuccess { available ->
                             memberships = available
-                            val revalidated = available.firstOrNull { it.farmId == restored.farmId }
-                            if (revalidated == null) {
-                                app.clearRememberedMembership()
-                                selectedMembership = null
-                                authError = "Farm access changed. Choose an available farm or sign in again."
-                            } else {
-                                app.rememberMembership(revalidated)
-                                selectedMembership = revalidated
+                            sessionPresent = true
+                            val decision = FarmAccessGuard.decide(
+                                sessionPresent = true,
+                                rememberedFarmId = restored.farmId,
+                                memberships = available,
+                            )
+                            when (decision) {
+                                FarmAccessDecision.GRANTED -> {
+                                    val revalidated = available.first { it.farmId == restored.farmId }
+                                    app.rememberMembership(revalidated)
+                                    selectedMembership = revalidated
+                                }
+                                else -> {
+                                    val loss = FarmAccessGuard.authorizationLoss(decision)
+                                    if (loss == AuthorizationLoss.FARM_ACCESS_REVOKED) {
+                                        requireFarmReselection(
+                                            "Farm access changed. Choose an available farm or sign out.",
+                                            available,
+                                        )
+                                    } else {
+                                        selectedMembership = null
+                                        authError = "Choose an available farm to continue"
+                                    }
+                                }
                             }
                         }
                         .onFailure { error ->
@@ -82,6 +135,7 @@ class MainActivity : ComponentActivity() {
                         backendConfigured = app.backendConfigured,
                         busy = authBusy,
                         error = authError,
+                        sessionPresent = sessionPresent,
                         memberships = memberships,
                         onSignIn = { email, password ->
                             scope.launch {
@@ -93,6 +147,7 @@ class MainActivity : ComponentActivity() {
                                     identity.memberships()
                                 }.onSuccess { available ->
                                     authBusy = false
+                                    sessionPresent = true
                                     memberships = available
                                     when {
                                         available.isEmpty() -> {
@@ -107,6 +162,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }.onFailure { error ->
                                     authBusy = false
+                                    sessionPresent = app.sessionStore.current() != null
                                     authError = error.message ?: "Sign in failed"
                                 }
                             }
@@ -114,6 +170,13 @@ class MainActivity : ComponentActivity() {
                         onSelectFarm = { selected ->
                             app.rememberMembership(selected)
                             selectedMembership = selected
+                        },
+                        onSignOut = {
+                            app.applyAuthorizationLoss(AuthorizationLoss.SESSION_EXPIRED)
+                            sessionPresent = false
+                            memberships = emptyList()
+                            selectedMembership = null
+                            authError = null
                         },
                     )
                 } else {
@@ -200,6 +263,21 @@ class MainActivity : ComponentActivity() {
                                     val pull = app.goatPullReconciler()?.reconcile(farmId)
                                     push to pull
                                 }.onSuccess { (push, pull) ->
+                                    val loss = push.authorizationLoss
+                                    if (loss == AuthorizationLoss.SESSION_EXPIRED) {
+                                        requireReauthentication(null)
+                                        return@launch
+                                    }
+                                    if (loss == AuthorizationLoss.FARM_ACCESS_REVOKED) {
+                                        val available = runCatching {
+                                            app.identityClient?.memberships().orEmpty()
+                                        }.getOrDefault(emptyList())
+                                        requireFarmReselection(
+                                            "Farm access was removed. Pending local records stayed on this device and were not sent.",
+                                            available,
+                                        )
+                                        return@launch
+                                    }
                                     state = state.copy(
                                         busy = false,
                                         syncMessage = when {
@@ -293,6 +371,7 @@ class MainActivity : ComponentActivity() {
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build(),
             )
+            .addTag(FarmOsApplication.SYNC_WORK_TAG)
             .build()
         WorkManager.getInstance(this).enqueue(request)
     }

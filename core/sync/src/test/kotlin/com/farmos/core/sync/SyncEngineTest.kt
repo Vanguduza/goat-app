@@ -8,8 +8,11 @@ import com.farmos.core.model.CommandAcknowledgement
 import com.farmos.core.model.CommandResultCode
 import com.farmos.core.model.SyncState
 import com.farmos.core.network.AuthenticationRequiredException
+import com.farmos.core.network.AuthorizationLoss
 import com.farmos.core.network.CommandTransport
 import com.farmos.core.network.WireCommand
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.startCoroutine
@@ -41,13 +44,17 @@ class SyncEngineTest {
             }
         }
 
-        val result = SyncEngine(outbox, versions, transport, now = { fixedNow }).drain()
+        val result = SyncEngine(outbox, versions, transport, now = { fixedNow }).drain(workName = "foreground-test")
 
         assertEquals(2, result.acknowledged)
         assertEquals(listOf<Long?>(0L, 1L), observedVersions)
         assertEquals(SyncState.ACKNOWLEDGED.name, outbox.byId("m1").state)
         assertEquals(SyncState.ACKNOWLEDGED.name, outbox.byId("m2").state)
         assertEquals(2L, versions.getVersion("farm-1", "animal", "goat-1"))
+        assertNull(result.authorizationLoss)
+        assertEquals(listOf("m1", "m2"), result.traces.map { it.mutationId })
+        assertEquals("goat_register_v1", result.traces.first().rpc)
+        assertEquals("foreground-test", result.traces.first().workName)
     }
 
     @Test
@@ -63,6 +70,8 @@ class SyncEngineTest {
         val saved = outbox.byId("auth")
 
         assertEquals(1, result.retrying)
+        assertEquals(1, result.sessionRequired)
+        assertEquals(AuthorizationLoss.SESSION_EXPIRED, result.authorizationLoss)
         assertEquals(7, saved.attemptCount)
         assertEquals(SyncState.RETRY_WAIT.name, saved.state)
         assertEquals("AUTH_SESSION_REQUIRED", saved.lastErrorCode)
@@ -84,10 +93,24 @@ class SyncEngineTest {
         val saved = outbox.byId("revoked")
 
         assertEquals(1, result.rejected)
+        assertEquals(1, result.authRejected)
         assertEquals(0, result.retrying)
+        assertEquals(AuthorizationLoss.FARM_ACCESS_REVOKED, result.authorizationLoss)
         assertEquals(SyncState.REJECTED.name, saved.state)
         assertEquals(3, saved.attemptCount)
         assertEquals("AUTH_REJECTED", saved.lastErrorCode)
+        val trace = result.traces.single()
+        assertEquals("revoked", trace.mutationId)
+        assertEquals("farm-1", trace.farmId)
+        assertEquals("animal", trace.aggregateType)
+        assertEquals("goat-1", trace.aggregateId)
+        assertEquals(1L, trace.aggregateOrdinal)
+        assertEquals("goat_register_v1", trace.rpc)
+        assertEquals("AUTH_REJECTED", trace.result)
+        assertEquals("AUTH_REJECTED", trace.rejectionClass)
+        assertEquals(3, trace.retryCount)
+        assertTrue(!trace.toStructuredLine().contains("token", ignoreCase = true))
+        assertTrue(!trace.toStructuredLine().contains("password", ignoreCase = true))
     }
 
     @Test

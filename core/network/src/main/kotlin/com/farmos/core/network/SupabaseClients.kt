@@ -115,6 +115,10 @@ class SupabaseIdentityClient(
         return session
     }
 
+    fun signOut() {
+        sessionStore.set(null)
+    }
+
     suspend fun refresh(): SupabaseSession {
         val current = sessionStore.current()
             ?: throw AuthenticationRequiredException("No Supabase session to refresh")

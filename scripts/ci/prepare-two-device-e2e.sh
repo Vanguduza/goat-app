@@ -51,7 +51,9 @@ LOGIN=$(curl --fail-with-body -sS -X POST "${API_URL}/auth/v1/token?grant_type=p
   -d "$(jq -cn --arg email "${EMAIL}" --arg password "${PASSWORD}" \
     '{email:$email,password:$password}')")
 ACCESS_TOKEN=$(jq -r '.access_token' <<<"${LOGIN}")
+USER_ID=$(jq -r '.user.id' <<<"${LOGIN}")
 [[ -n "${ACCESS_TOKEN}" && "${ACCESS_TOKEN}" != "null" ]] || fail "Local E2E sign-in did not return an access token"
+[[ -n "${USER_ID}" && "${USER_ID}" != "null" ]] || fail "Local E2E sign-in did not return a user id"
 
 echo "Creating Farm OS E2E farm through the same authoritative RPC used by the app"
 CREATE_FARM=$(curl --fail-with-body -sS -X POST "${API_URL}/rest/v1/rpc/farm_create_v1" \
@@ -70,6 +72,8 @@ export FARM_OS_SUPABASE_PUBLISHABLE_KEY="${PUBLIC_API_KEY}"
 export FARM_OS_E2E_EMAIL="${EMAIL}"
 export FARM_OS_E2E_PASSWORD="${PASSWORD}"
 export FARM_OS_E2E_FARM_ID="${FARM_ID}"
+export FARM_OS_E2E_USER_ID="${USER_ID}"
+export FARM_OS_E2E_API_URL="${API_URL}"
 
 if [[ -n "${GITHUB_ENV:-}" ]]; then
   {

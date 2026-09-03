@@ -71,6 +71,23 @@ class SupabaseIdentityClientTest {
     }
 
     @Test
+    fun `sign out clears local credentials without waiting for network logout`() = runBlocking {
+        val store = MutableSessionStore(now = { 1_000L })
+        store.set(initialSession)
+        val identity = SupabaseIdentityClient(
+            supabaseUrl = "https://farm-os.test",
+            publishableKey = "publishable",
+            sessionStore = store,
+            client = mockClient(HttpStatusCode.OK, "{}"),
+        )
+
+        identity.signOut()
+
+        assertEquals(null, store.current())
+        assertEquals(0L, store.expiryEpochMillis())
+    }
+
+    @Test
     fun `transient refresh failure preserves refresh credentials for retry`() = runBlocking {
         val store = MutableSessionStore(now = { 1_000L })
         store.set(initialSession)

@@ -1,6 +1,7 @@
 package com.farmos.app
 
 import android.app.Application
+import android.util.Log
 import androidx.room.Room
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -11,7 +12,9 @@ import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.CommandAcknowledgement
 import com.farmos.core.model.CommandResultCode
 import com.farmos.core.network.AuthenticationRequiredException
+import com.farmos.core.network.AuthorizationLoss
 import com.farmos.core.network.CommandTransport
+import com.farmos.core.network.FarmAccessGuard
 import com.farmos.core.network.FarmMembership
 import com.farmos.core.network.FarmSearchClient
 import com.farmos.core.network.MutableSessionStore
@@ -23,6 +26,7 @@ import com.farmos.core.network.WireCommand
 import com.farmos.core.sync.AuthoritativePullOutcome
 import com.farmos.core.sync.SyncEngine
 import com.farmos.core.sync.SyncEngineOwner
+import com.farmos.core.sync.SyncObserver
 import com.farmos.core.sync.SyncWorker
 import com.farmos.data.goat.GoatPullReconciler
 import com.farmos.data.goat.RoomGoatRepository
@@ -50,6 +54,9 @@ class FarmOsApplication : Application(), SyncEngineOwner {
 
     lateinit var deviceId: String
         private set
+
+    @Volatile
+    var authorizationListener: ((AuthorizationLoss) -> Unit)? = null
 
     val backendConfigured: Boolean
         get() = BuildConfig.SUPABASE_URL.isNotBlank() && BuildConfig.SUPABASE_PUBLISHABLE_KEY.isNotBlank()
@@ -139,6 +146,9 @@ class FarmOsApplication : Application(), SyncEngineOwner {
             outbox = database.outbox(),
             aggregateVersions = database.aggregateVersions(),
             transport = transport,
+            observer = SyncObserver { trace ->
+                Log.i(SYNC_LOG_TAG, trace.toStructuredLine())
+            },
         )
 
         if (lastMembershipForCurrentSession() != null) {
@@ -148,21 +158,47 @@ class FarmOsApplication : Application(), SyncEngineOwner {
 
     override suspend fun pullAuthoritativeChanges(): AuthoritativePullOutcome {
         if (!backendConfigured) return AuthoritativePullOutcome.SKIPPED
-        val farmId = lastMembershipForCurrentSession()?.farmId
+        val remembered = lastMembershipForCurrentSession()
             ?: return AuthoritativePullOutcome.SKIPPED
+        val identity = identityClient ?: return AuthoritativePullOutcome.SKIPPED
         val reconciler = goatPullReconciler()
             ?: return AuthoritativePullOutcome.SKIPPED
 
         return try {
-            reconciler.reconcile(farmId)
-            AuthoritativePullOutcome.APPLIED_OR_CURRENT
+            val memberships = identity.memberships()
+            val decision = FarmAccessGuard.decide(
+                sessionPresent = sessionStore.current() != null,
+                rememberedFarmId = remembered.farmId,
+                memberships = memberships,
+            )
+            val loss = FarmAccessGuard.authorizationLoss(decision)
+            if (loss != null) {
+                onTerminalAuthorizationLoss(loss)
+                AuthoritativePullOutcome.AUTHORIZATION_LOST
+            } else {
+                reconciler.reconcile(remembered.farmId)
+                AuthoritativePullOutcome.APPLIED_OR_CURRENT
+            }
         } catch (_: AuthenticationRequiredException) {
-            AuthoritativePullOutcome.RETRY
+            onTerminalAuthorizationLoss(AuthorizationLoss.SESSION_EXPIRED)
+            AuthoritativePullOutcome.AUTHORIZATION_LOST
         } catch (_: UnsupportedServerEvent) {
             AuthoritativePullOutcome.FAILURE
         } catch (_: Exception) {
             AuthoritativePullOutcome.RETRY
         }
+    }
+
+    override fun onTerminalAuthorizationLoss(reason: AuthorizationLoss) {
+        applyAuthorizationLoss(reason)
+        authorizationListener?.invoke(reason)
+    }
+
+    fun applyAuthorizationLoss(reason: AuthorizationLoss) {
+        if (reason == AuthorizationLoss.SESSION_EXPIRED) {
+            identityClient?.signOut() ?: sessionStore.set(null)
+        }
+        clearRememberedMembership()
     }
 
     fun goatRepository(farmId: String): GoatRepository = RoomGoatRepository(database, farmId)
@@ -196,7 +232,9 @@ class FarmOsApplication : Application(), SyncEngineOwner {
             .edit()
             .clear()
             .commit()
-        WorkManager.getInstance(this).cancelUniqueWork(PERIODIC_SYNC_WORK_NAME)
+        val workManager = WorkManager.getInstance(this)
+        workManager.cancelUniqueWork(PERIODIC_SYNC_WORK_NAME)
+        workManager.cancelAllWorkByTag(SYNC_WORK_TAG)
     }
 
     private fun scheduleBackgroundSync() {
@@ -207,6 +245,7 @@ class FarmOsApplication : Application(), SyncEngineOwner {
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build(),
             )
+            .addTag(SYNC_WORK_TAG)
             .build()
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             PERIODIC_SYNC_WORK_NAME,
@@ -221,5 +260,7 @@ class FarmOsApplication : Application(), SyncEngineOwner {
         private const val LAST_FARM_ID = "farm_id"
         private const val LAST_FARM_ROLE = "role"
         private const val PERIODIC_SYNC_WORK_NAME = "farm-os-authoritative-sync"
+        const val SYNC_WORK_TAG = "farm-os-sync"
+        private const val SYNC_LOG_TAG = "FarmOsSync"
     }
 }
