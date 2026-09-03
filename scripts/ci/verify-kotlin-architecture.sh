@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+fail=0
+
+check_max_lines() {
+  local path="$1"
+  local max="$2"
+  local count
+  count=$(wc -l < "$path")
+  if (( count > max )); then
+    echo "ERROR: $path has $count lines; stabilization ceiling is $max. Split responsibilities before adding more code." >&2
+    fail=1
+  fi
+}
+
+echo "Checking Kotlin files for duplicate imports"
+while IFS= read -r -d '' file; do
+  duplicates=$(grep '^import ' "$file" | sort | uniq -d || true)
+  if [[ -n "$duplicates" ]]; then
+    echo "ERROR: duplicate imports in $file" >&2
+    echo "$duplicates" >&2
+    fail=1
+  fi
+done < <(find app core data domain feature -type f -name '*.kt' -print0)
+
+# These are no-growth ceilings, not desired end-state sizes. They stop further
+# expansion until the current large orchestration files are decomposed.
+check_max_lines "data/herd/src/main/kotlin/com/farmos/data/herd/FarmOsPullReconciler.kt" 2400
+check_max_lines "app/src/main/java/com/farmos/app/OperatingModuleHost.kt" 1900
+check_max_lines "app/src/main/java/com/farmos/app/MainActivity.kt" 260
+check_max_lines "app/src/main/java/com/farmos/app/FarmSessionContent.kt" 450
+
+if (( fail != 0 )); then
+  exit 1
+fi
+
+echo "Kotlin architecture stabilization checks passed"
