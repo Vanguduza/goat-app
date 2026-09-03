@@ -36,6 +36,8 @@ jobs:
           :core:network:testDebugUnitTest
           :core:sync:testDebugUnitTest
           :app:compileDebugKotlin
+          :core:database:compileDebugAndroidTestKotlin
+          :app:compileDebugAndroidTestKotlin
           --stacktrace
 
   android-device-e2e:
