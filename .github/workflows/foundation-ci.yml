@@ -49,8 +49,6 @@ jobs:
       - uses: supabase/setup-cli@v2
         with:
           version: 2.116.0
-      - name: Prepare local Supabase authority for two-device Android E2E
-        run: bash scripts/ci/prepare-two-device-e2e.sh
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -65,13 +63,15 @@ jobs:
           disk-size: 2048M
           ram-size: 2048M
           disable-animations: true
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-metrics
           script: |
+            source scripts/ci/prepare-two-device-e2e.sh
+            trap 'supabase stop --no-backup >/dev/null 2>&1 || true' EXIT
             adb reverse tcp:54321 tcp:54321
             gradle :core:database:connectedDebugAndroidTest :app:connectedDebugAndroidTest --stacktrace
       - name: Stop local Supabase
         if: always()
-        run: supabase stop --no-backup
+        run: supabase stop --no-backup || true
 
   edge-functions:
     runs-on: ubuntu-latest
