@@ -31,6 +31,7 @@ async function enqueue(rows: Candidate[]) {
       operation: "upsert",
       projection_version: row.projection_version,
       state: "pending",
+      origin: "rebuild",
     }))),
   });
   if (!response.ok) throw new Error(`Could not enqueue rebuild jobs: ${response.status} ${await response.text()}`);
