@@ -35,7 +35,6 @@ import com.farmos.domain.goat.RecordGoatHeat
 import com.farmos.domain.goat.RecordGoatMating
 import com.farmos.domain.goat.PlanGoatLactation
 import com.farmos.domain.goat.RecordGoatPregnancy
-import com.farmos.domain.goat.PlanGoatLactation
 import com.farmos.domain.goat.RecordGoatScc
 import com.farmos.domain.goat.RecordGoatKidding
 import com.farmos.domain.goat.RecordGoatMilk
@@ -122,22 +121,16 @@ class MainActivity : ComponentActivity() {
                                 memberships = available,
                             )
                             when (decision) {
-                                FarmAccessDecision.GRANTED -> {
-                                    val revalidated = available.first { it.farmId == restored.farmId }
-                                    app.rememberMembership(revalidated)
-                                    selectedMembership = revalidated
+                                is FarmAccessDecision.Restore -> {
+                                    selectedMembership = decision.membership
+                                    app.rememberMembership(decision.membership)
                                 }
-                                else -> {
-                                    val loss = FarmAccessGuard.authorizationLoss(decision)
-                                    if (loss == AuthorizationLoss.FARM_ACCESS_REVOKED) {
-                                        requireFarmReselection(
-                                            "Farm access changed. Choose an available farm or sign out.",
-                                            available,
-                                        )
-                                    } else {
-                                        selectedMembership = null
-                                        authError = "Choose an available farm to continue"
-                                    }
+                                FarmAccessDecision.RequireFarmSelection -> {
+                                    selectedMembership = null
+                                    app.clearRememberedMembership()
+                                }
+                                FarmAccessDecision.RequireAuthentication -> {
+                                    requireReauthentication(null)
                                 }
                             }
                         }
@@ -145,7 +138,7 @@ class MainActivity : ComponentActivity() {
                             if (error is AuthenticationRequiredException) {
                                 requireReauthentication(error.message)
                             } else {
-                                authError = error.message ?: "Could not revalidate farm access"
+                                authError = error.message
                             }
                         }
                 }
@@ -153,7 +146,6 @@ class MainActivity : ComponentActivity() {
                 val membership = selectedMembership
                 if (membership == null) {
                     FoundationAuthScreen(
-                        backendConfigured = app.backendConfigured,
                         busy = authBusy,
                         error = authError,
                         sessionPresent = sessionPresent,
@@ -172,31 +164,23 @@ class MainActivity : ComponentActivity() {
                                     }.getOrDefault(emptyMap())
                                     available to names
                                 }.onSuccess { (available, names) ->
-                                    authBusy = false
-                                    sessionPresent = true
                                     memberships = available
                                     farmNames = names
-                                    when {
-                                        available.isEmpty() -> {
-                                            app.clearRememberedMembership()
-                                            authError = "Create a farm on a connection, or wait for an owner to grant access."
-                                        }
-                                        available.size == 1 -> {
-                                            val onlyMembership = available.single()
-                                            app.rememberMembership(onlyMembership)
-                                            selectedMembership = onlyMembership
-                                        }
-                                    }
+                                    sessionPresent = true
                                 }.onFailure { error ->
-                                    authBusy = false
-                                    sessionPresent = app.sessionStore.current() != null
-                                    authError = error.message ?: "Sign in failed"
+                                    if (error is AuthenticationRequiredException) {
+                                        requireReauthentication(error.message)
+                                    } else {
+                                        authError = error.message
+                                    }
                                 }
+                                authBusy = false
                             }
                         },
-                        onSelectFarm = { selected ->
-                            app.rememberMembership(selected)
-                            selectedMembership = selected
+                        onSelectFarm = { chosen ->
+                            selectedMembership = chosen
+                            app.rememberMembership(chosen)
+                            authError = null
                         },
                         onCreateFarm = { name ->
                             scope.launch {
@@ -204,765 +188,355 @@ class MainActivity : ComponentActivity() {
                                 authError = null
                                 runCatching {
                                     val identity = requireNotNull(app.identityClient) { "Supabase is not configured" }
-                                    identity.createFarm(name)
-                                }.onSuccess { created ->
-                                    authBusy = false
-                                    app.rememberMembership(created)
-                                    farmNames = farmNames + (created.farmId to name.trim())
-                                    memberships = listOf(created)
-                                    selectedMembership = created
+                                    val created = identity.createFarm(name)
+                                    val available = identity.memberships()
+                                    val names = identity.farms(available.map { it.farmId }).associate { it.id to it.name }
+                                    created to (available to names)
+                                }.onSuccess { (created, access) ->
+                                    val (available, names) = access
+                                    memberships = available
+                                    farmNames = names
+                                    sessionPresent = true
+                                    val chosen = available.firstOrNull { it.farmId == created.id }
+                                    if (chosen != null) {
+                                        selectedMembership = chosen
+                                        app.rememberMembership(chosen)
+                                    }
                                 }.onFailure { error ->
-                                    authBusy = false
                                     if (error is AuthenticationRequiredException) {
                                         requireReauthentication(error.message)
                                     } else {
-                                        authError = error.message ?: "Could not create farm. Check the connection and try again."
+                                        authError = error.message
                                     }
                                 }
+                                authBusy = false
                             }
                         },
                         onSignOut = {
-                            app.applyAuthorizationLoss(AuthorizationLoss.SESSION_EXPIRED)
-                            sessionPresent = false
-                            memberships = emptyList()
-                            selectedMembership = null
-                            authError = null
-                        },
-                    )
-                } else {
-                    val farmId = membership.farmId
-                    var module by remember(farmId) { mutableStateOf(FarmModule.HOME) }
-                    val repository: GoatRepository = remember(farmId) { app.goatRepository(farmId) }
-                    var state by remember(farmId) {
-                        mutableStateOf(
-                            GoatSliceUiState(
-                                farmName = farmNames[farmId],
-                                herdState = LoadableSurfaceState.LOADING,
-                                busy = true,
-                            ),
-                        )
-                    }
-                    suspend fun refreshSurface(
-                        selectedId: String?,
-                        syncMessage: String = state.syncMessage,
-                        searchMessage: String = state.searchMessage,
-                        searchResults: List<GoatSearchResult> = state.searchResults,
-                        error: String? = null,
-                    ): GoatSliceUiState {
-                        val herd = repository.listGoats()
-                        val selected = selectedId?.let { repository.getGoat(it) }
-                        return GoatSliceUiState(
-                            farmName = farmNames[farmId],
-                            herd = herd,
-                            herdState = if (herd.isEmpty()) {
-                                LoadableSurfaceState.EMPTY
-                            } else {
-                                LoadableSurfaceState.IDLE
-                            },
-                            selected = selected,
-                            animalId = selected?.animalId,
-                            pendingSyncCount = repository.pendingSyncCount(),
-                            goatSummary = selected?.let(::summarizeGoat),
-                            syncMessage = syncMessage,
-                            searchMessage = searchMessage,
-                            searchResults = searchResults,
-                            busy = false,
-                            error = error,
-                        )
-                    }
-
-                    LaunchedEffect(farmId) {
-                        runCatching {
-                            val name = app.identityClient?.farm(farmId)?.name
-                            if (name != null) {
-                                farmNames = farmNames + (farmId to name)
-                            }
-                            refreshSurface(state.animalId)
-                        }.onSuccess { loaded ->
-                            state = loaded
-                        }.onFailure { error ->
-                            if (error is AuthenticationRequiredException) {
-                                requireReauthentication(error.message)
-                            } else {
-                                state = state.copy(
-                                    busy = false,
-                                    herdState = LoadableSurfaceState.ERROR,
-                                    error = error.message ?: "Herd could not be loaded. Retry sync, then open the list again.",
-                                )
-                            }
-                        }
-                    }
-
-                    when (module) {
-                        FarmModule.HOME -> FarmHomeScreen(
-                            farmName = farmNames[farmId],
-                            onOpen = { module = it },
-                            onSignOut = {
+                            scope.launch {
+                                runCatching { app.identityClient?.signOut() }
                                 app.applyAuthorizationLoss(AuthorizationLoss.SESSION_EXPIRED)
                                 sessionPresent = false
                                 memberships = emptyList()
                                 selectedMembership = null
+                                farmNames = emptyMap()
                                 authError = null
-                            },
-                        )
-                        FarmModule.GOAT -> GoatVerticalSliceScreen(
-                        state = state,
-                        onRegister = { tag, name, sex, dateOfBirthText ->
-                            scope.launch {
-                                val dateOfBirthEpochDay = dateOfBirthText.trim().takeIf { it.isNotEmpty() }?.let { raw ->
-                                    runCatching { LocalDate.parse(raw).toEpochDay() }.getOrElse {
-                                        state = state.copy(error = "Enter date of birth as YYYY-MM-DD")
-                                        return@launch
-                                    }
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    val animalId = UUID.randomUUID().toString()
-                                    repository.registerGoat(
-                                        RegisterGoat(
-                                            animalId = animalId,
-                                            tag = tag,
-                                            name = name,
-                                            sex = sex,
-                                            dateOfBirthEpochDay = dateOfBirthEpochDay,
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "Saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(busy = false, error = error.message ?: "Could not register goat")
-                                    }
-                                }
                             }
                         },
-                        onRecordWeight = { weightText ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                val kg = weightText.replace(',', '.').toDoubleOrNull()
-                                if (kg == null || kg <= 0.0) {
-                                    state = state.copy(error = "Enter a valid weight in kg")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.recordWeight(
-                                        RecordGoatWeight(
-                                            animalId = animalId,
-                                            measurementId = UUID.randomUUID().toString(),
-                                            weightGrams = (kg * 1_000.0).toLong(),
-                                            measuredAtEpochMillis = System.currentTimeMillis(),
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "Weight saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(busy = false, error = error.message ?: "Could not record weight")
-                                    }
-                                }
-                            }
-                        },
-                        onRecordKidding = { bornText, liveText, deadText, dayText ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                val born = bornText.toIntOrNull()
-                                val live = liveText.toIntOrNull()
-                                val dead = deadText.toIntOrNull() ?: 0
-                                val day = runCatching { LocalDate.parse(dayText.trim()).toEpochDay() }.getOrNull()
-                                if (born == null || live == null || day == null) {
-                                    state = state.copy(error = "Enter born, live, dead counts and a YYYY-MM-DD kidding date")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.recordKidding(
-                                        RecordGoatKidding(
-                                            kiddingId = UUID.randomUUID().toString(),
-                                            damAnimalId = animalId,
-                                            bornCount = born,
-                                            liveCount = live,
-                                            deadCount = dead,
-                                            occurredEpochDay = day,
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "Kidding saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not record kidding",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onRegisterKid = { kiddingId, tag, sex ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                if (tag.isBlank()) {
-                                    state = state.copy(error = "Enter a kid tag")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.registerKid(
-                                        RegisterGoatKid(
-                                            animalId = UUID.randomUUID().toString(),
-                                            kiddingId = kiddingId,
-                                            tag = tag,
-                                            sex = sex,
-                                            pedigreeLinkId = UUID.randomUUID().toString(),
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "Kid saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not register kid",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onRecordMilk = { litresText, dayText ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                val litres = litresText.replace(',', '.').toDoubleOrNull()
-                                val day = runCatching { LocalDate.parse(dayText.trim()).toEpochDay() }.getOrNull()
-                                if (litres == null || litres <= 0.0 || day == null) {
-                                    state = state.copy(error = "Enter litres and a YYYY-MM-DD milk date")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.recordMilk(
-                                        RecordGoatMilk(
-                                            milkId = UUID.randomUUID().toString(),
-                                            animalId = animalId,
-                                            litresMilli = (litres * 1000.0).toLong(),
-                                            occurredEpochDay = day,
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "Milk saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not record milk",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onRecordBcs = { tenthsText, dayText ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                val tenths = tenthsText.toIntOrNull()
-                                val day = runCatching { LocalDate.parse(dayText.trim()).toEpochDay() }.getOrNull()
-                                if (tenths == null || day == null) {
-                                    state = state.copy(error = "Enter BCS tenths from 10 to 50 and a YYYY-MM-DD date")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.recordBcs(
-                                        RecordGoatBcs(
-                                            scoreId = UUID.randomUUID().toString(),
-                                            animalId = animalId,
-                                            scoreTenths = tenths,
-                                            occurredEpochDay = day,
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "BCS saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not record BCS",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onRecordScc = { cellsText, dimText, dayText ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                val cells = cellsText.toIntOrNull()
-                                val day = runCatching { LocalDate.parse(dayText.trim()).toEpochDay() }.getOrNull()
-                                if (cells == null || day == null) {
-                                    state = state.copy(error = "Enter SCC cells per millilitre and a YYYY-MM-DD date")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.recordScc(
-                                        RecordGoatScc(
-                                            recordId = UUID.randomUUID().toString(),
-                                            animalId = animalId,
-                                            cellsPerMl = cells,
-                                            dimDays = dimText.toIntOrNull(),
-                                            occurredEpochDay = day,
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "SCC saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not record SCC",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onRecordHeat = { dayText ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                val day = runCatching { LocalDate.parse(dayText.trim()).toEpochDay() }.getOrNull()
-                                if (day == null) {
-                                    state = state.copy(error = "Enter a YYYY-MM-DD heat date")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.recordHeat(
-                                        RecordGoatHeat(
-                                            heatId = UUID.randomUUID().toString(),
-                                            animalId = animalId,
-                                            occurredEpochDay = day,
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "Heat saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not record heat",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onRecordMating = { method, sireId, dayText ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                val day = runCatching { LocalDate.parse(dayText.trim()).toEpochDay() }.getOrNull()
-                                if (day == null) {
-                                    state = state.copy(error = "Enter a YYYY-MM-DD mating date")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.recordMating(
-                                        RecordGoatMating(
-                                            matingId = UUID.randomUUID().toString(),
-                                            damId = animalId,
-                                            sireId = sireId.trim().ifBlank { null },
-                                            method = method.trim(),
-                                            occurredEpochDay = day,
-                                            pregCheckTaskId = UUID.randomUUID().toString(),
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "Mating saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not record mating",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onRecordPregnancy = { result, dayText ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                val day = runCatching { LocalDate.parse(dayText.trim()).toEpochDay() }.getOrNull()
-                                if (day == null) {
-                                    state = state.copy(error = "Enter a YYYY-MM-DD pregnancy-check date")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.recordPregnancy(
-                                        RecordGoatPregnancy(
-                                            checkId = UUID.randomUUID().toString(),
-                                            animalId = animalId,
-                                            result = result.trim(),
-                                            occurredEpochDay = day,
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "Pregnancy check saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not record pregnancy check",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onPlanLactation = { dayText ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                val day = runCatching { LocalDate.parse(dayText.trim()).toEpochDay() }.getOrNull()
-                                if (day == null) {
-                                    state = state.copy(error = "Enter a YYYY-MM-DD kidding date")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.planLactation(
-                                        PlanGoatLactation(
-                                            planId = UUID.randomUUID().toString(),
-                                            animalId = animalId,
-                                            occurredEpochDay = day,
-                                            checkTaskId = UUID.randomUUID().toString(),
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "Lactation plan saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not plan lactation follow-up",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onRecordFamacha = { scoreText, dayText ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                val score = scoreText.toIntOrNull()
-                                val day = runCatching { LocalDate.parse(dayText.trim()).toEpochDay() }.getOrNull()
-                                if (score == null || day == null) {
-                                    state = state.copy(error = "Enter a FAMACHA score from 1 to 5 and a YYYY-MM-DD date")
-                                    return@launch
-                                }
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.recordFamacha(
-                                        RecordGoatFamacha(
-                                            scoreId = UUID.randomUUID().toString(),
-                                            animalId = animalId,
-                                            score = score,
-                                            occurredEpochDay = day,
-                                        ),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "FAMACHA saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not record FAMACHA",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onSetStatus = { nextStatus ->
-                            scope.launch {
-                                val animalId = state.animalId ?: return@launch
-                                state = state.copy(busy = true, error = null)
-                                runCatching {
-                                    repository.setStatus(
-                                        SetGoatStatus(animalId = animalId, status = nextStatus),
-                                        newContext(app, farmId),
-                                    )
-                                    refreshSurface(
-                                        selectedId = animalId,
-                                        syncMessage = "Status saved on this device · waiting to sync",
-                                    )
-                                }.onSuccess { loaded ->
-                                    state = loaded
-                                    enqueueSync()
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Could not change goat status",
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onSelectGoat = { animalId ->
-                            scope.launch {
-                                state = state.copy(busy = true, error = null)
-                                runCatching { refreshSurface(animalId) }
-                                    .onSuccess { state = it }
-                                    .onFailure { error ->
-                                        state = state.copy(
-                                            busy = false,
-                                            error = error.message ?: "Goat record could not be opened",
-                                        )
-                                    }
-                            }
-                        },
-                        onSyncNow = {
-                            scope.launch {
-                                state = state.copy(busy = true, error = null, syncMessage = "Syncing")
-                                runCatching {
-                                    val push = app.syncEngine.drain()
-                                    val pull = app.goatPullReconciler()?.reconcile(farmId)
-                                    push to pull
-                                }.onSuccess { (push, pull) ->
-                                    val loss = push.authorizationLoss
-                                    if (loss == AuthorizationLoss.SESSION_EXPIRED) {
-                                        requireReauthentication(null)
-                                        return@launch
-                                    }
-                                    if (loss == AuthorizationLoss.FARM_ACCESS_REVOKED) {
-                                        val available = runCatching {
-                                            app.identityClient?.memberships().orEmpty()
-                                        }.getOrDefault(emptyList())
-                                        requireFarmReselection(
-                                            "Farm access was removed. Pending local records stayed on this device and were not sent.",
-                                            available,
-                                        )
-                                        return@launch
-                                    }
-                                    state = refreshSurface(
-                                        selectedId = state.animalId,
-                                        syncMessage = when {
-                                            push.conflicts > 0 -> "Conflict needs review"
-                                            push.rejected > 0 -> "Server rejected a pending record"
-                                            push.retrying > 0 -> "Saved locally · server retry pending"
-                                            (push.acknowledged > 0) || ((pull?.appliedEvents ?: 0) > 0) ->
-                                                "Synced · ${pull?.appliedEvents ?: 0} server changes applied"
-                                            else -> "Synced · no new server changes"
-                                        },
-                                    )
-                                }.onFailure { error ->
-                                    if (error is AuthenticationRequiredException) {
-                                        requireReauthentication(error.message)
-                                    } else {
-                                        state = state.copy(
-                                            busy = false,
-                                            herdState = LoadableSurfaceState.ERROR,
-                                            syncMessage = "Saved locally · sync failed. Entries stay on this device.",
-                                            error = error.message,
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        onSearch = { query ->
-                            scope.launch {
-                                state = state.copy(busy = true, error = null)
-                                val local = repository.searchGoats(query)
-                                state = state.copy(
-                                    busy = false,
-                                    searchResults = local,
-                                    searchMessage = "${local.size} local result(s)",
-                                )
-
-                                val onlineAttempt = runCatching {
-                                    app.farmSearchClient
-                                        ?.searchAnimals(farmId, query, 20)
-                                        ?.filter { it.speciesCode == null || it.speciesCode == "goat" }
-                                        ?.mapNotNull { hit ->
-                                            val tag = hit.tag ?: return@mapNotNull null
-                                            GoatSearchResult(
-                                                animalId = hit.id,
-                                                tag = tag,
-                                                name = hit.displayName?.takeUnless { it == tag },
-                                                status = hit.status ?: "active",
-                                                source = SearchSource.MEILISEARCH,
-                                            )
-                                        }
-                                }
-                                val onlineError = onlineAttempt.exceptionOrNull()
-                                if (onlineError is AuthenticationRequiredException) {
-                                    requireReauthentication(onlineError.message)
-                                    return@launch
-                                }
-                                val online = onlineAttempt.getOrNull()
-
-                                if (online != null) {
-                                    val merged = (online + local).distinctBy { it.animalId }
-                                    state = state.copy(
-                                        searchResults = merged,
-                                        searchMessage = "${local.size} local · ${online.size} online result(s)",
-                                    )
-                                } else {
-                                    state = state.copy(
-                                        searchMessage = "${local.size} local result(s) · online search unavailable",
-                                    )
-                                }
-                            }
-                        },
-                        onSignOut = {
-                            app.applyAuthorizationLoss(AuthorizationLoss.SESSION_EXPIRED)
-                            sessionPresent = false
-                            memberships = emptyList()
-                            selectedMembership = null
-                            authError = null
-                        },
-                        onBack = { module = FarmModule.HOME },
                     )
-                        else -> OperatingModuleHost(
-                            module = module,
-                            farmId = farmId,
-                            database = app.database,
-                            ops = remember(farmId) { app.opsRepository(farmId) },
-                            newContext = { newContext(app, farmId) },
-                            enqueueSync = { enqueueSync() },
-                            onBack = { module = FarmModule.HOME },
-                        )
-                    }
+                } else {
+                    FarmSessionContent(
+                        app = app,
+                        membership = membership,
+                        farmName = farmNames[membership.farmId],
+                        onRequireReauth = requireReauthentication,
+                        onRequireFarmReselection = requireFarmReselection,
+                        onSignOut = {
+                            scope.launch {
+                                runCatching { app.identityClient?.signOut() }
+                                app.applyAuthorizationLoss(AuthorizationLoss.SESSION_EXPIRED)
+                                sessionPresent = false
+                                memberships = emptyList()
+                                selectedMembership = null
+                                farmNames = emptyMap()
+                                authError = null
+                            }
+                        },
+                    )
                 }
             }
         }
     }
+}
 
-    private fun summarizeGoat(goat: GoatSnapshot): String = buildString {
-        append(goat.tag)
-        append(" · ")
-        append(goat.sex.name.lowercase())
-        append(" · ")
-        append(goat.status.wireValue())
-        goat.latestWeightGrams?.let { grams ->
-            append(" · ")
-            append("%.2f".format(grams / 1_000.0))
-            append(" kg")
-        }
-        if (goat.syncPending) append(" · waiting to sync")
-    }
+@androidx.compose.runtime.Composable
+private fun FarmSessionContent(
+    app: FarmOsApplication,
+    membership: FarmMembership,
+    farmName: String?,
+    onRequireReauth: (String?) -> Unit,
+    onRequireFarmReselection: (String, List<FarmMembership>) -> Unit,
+    onSignOut: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var module by remember { mutableStateOf(FarmModule.HOME) }
+    val repository = remember(membership.farmId) { app.goatRepository(membership.farmId) }
+    var herd by remember { mutableStateOf<List<GoatSnapshot>>(emptyList()) }
+    var selectedGoatId by remember { mutableStateOf<String?>(null) }
+    var selected by remember { mutableStateOf<GoatSnapshot?>(null) }
+    var remoteResults by remember { mutableStateOf<List<GoatSearchResult>>(emptyList()) }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var herdState by remember { mutableStateOf(LoadableSurfaceState.LOADING) }
+    var pendingSyncCount by remember { mutableStateOf(0L) }
 
-    private fun newContext(app: FarmOsApplication, farmId: String): LocalCommandContext {
-        val actorId = app.sessionStore.current()?.user?.id
-            ?: throw AuthenticationRequiredException("Your session expired. Sign in again.")
+    fun context(): LocalCommandContext {
+        val userId = requireNotNull(app.sessionStore.current()?.user?.id) { "Sign in is required" }
         return LocalCommandContext(
-            farmId = farmId,
-            actorId = actorId,
-            deviceId = app.deviceId,
             mutationId = UUID.randomUUID().toString(),
+            farmId = membership.farmId,
+            actorId = userId,
+            deviceId = app.deviceId,
             occurredAtEpochMillis = System.currentTimeMillis(),
         )
     }
 
-    private fun enqueueSync() {
-        val request = OneTimeWorkRequestBuilder<SyncWorker>()
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build(),
-            )
-            .addTag(FarmOsApplication.SYNC_WORK_TAG)
-            .build()
-        WorkManager.getInstance(this).enqueue(request)
+    suspend fun refreshGoatState() {
+        herdState = LoadableSurfaceState.LOADING
+        runCatching {
+            val loaded = repository.listGoats(500)
+            val effectiveId = selectedGoatId ?: loaded.firstOrNull()?.animalId
+            val chosen = effectiveId?.let { repository.getGoat(it) }
+            Triple(loaded, effectiveId, chosen)
+        }.onSuccess { (loaded, effectiveId, chosen) ->
+            herd = loaded
+            selectedGoatId = effectiveId
+            selected = chosen
+            pendingSyncCount = app.database.outbox().countUnacknowledgedForFarm(membership.farmId)
+            herdState = if (loaded.isEmpty()) LoadableSurfaceState.EMPTY else LoadableSurfaceState.IDLE
+        }.onFailure { failure ->
+            error = failure.message
+            herdState = LoadableSurfaceState.ERROR
+        }
     }
+
+    suspend fun refreshMembershipAfterAuthorizationLoss(message: String) {
+        val available = runCatching { app.identityClient?.memberships().orEmpty() }.getOrDefault(emptyList())
+        onRequireFarmReselection(message, available)
+    }
+
+    fun handleFailure(failure: Throwable) {
+        when (failure) {
+            is AuthenticationRequiredException -> onRequireReauth(failure.message)
+            else -> error = failure.message
+        }
+    }
+
+    fun enqueueSync() {
+        WorkManager.getInstance(app).enqueue(
+            OneTimeWorkRequestBuilder<SyncWorker>()
+                .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+                .build(),
+        )
+    }
+
+    fun runGoatWrite(block: suspend () -> Unit) {
+        scope.launch {
+            busy = true
+            error = null
+            runCatching {
+                block()
+                refreshGoatState()
+            }.onSuccess {
+                enqueueSync()
+            }.onFailure(::handleFailure)
+            busy = false
+        }
+    }
+
+    LaunchedEffect(membership.farmId) { refreshGoatState() }
+
+    if (module == FarmModule.HOME) {
+        FarmHomeScreen(
+            farmName = farmName,
+            onOpen = { module = it },
+            onSignOut = onSignOut,
+        )
+        return
+    }
+
+    if (module != FarmModule.GOAT) {
+        OperatingModuleHost(
+            module = module,
+            farmId = membership.farmId,
+            database = app.database,
+            ops = app.opsRepository(membership.farmId),
+            newContext = ::context,
+            enqueueSync = ::enqueueSync,
+            onBack = { module = FarmModule.HOME },
+        )
+        return
+    }
+
+    GoatVerticalSliceScreen(
+        state = GoatSliceUiState(
+            animalId = selectedGoatId,
+            herd = herd,
+            selected = selected,
+            farmName = farmName,
+            pendingSyncCount = pendingSyncCount,
+            busy = busy,
+            error = error,
+            herdState = herdState,
+            remoteResults = remoteResults,
+        ),
+        onRegister = { tag, name, sex, dateText ->
+            runGoatWrite {
+                val day = dateText.takeIf { it.isNotBlank() }?.let { LocalDate.parse(it).toEpochDay() }
+                val animalId = UUID.randomUUID().toString()
+                repository.registerGoat(
+                    RegisterGoat(animalId, tag, name, sex, day),
+                    context(),
+                )
+                selectedGoatId = animalId
+            }
+        },
+        onRecordWeight = { text ->
+            val animalId = selectedGoatId
+            if (animalId == null) {
+                error = "Select a goat first"
+            } else {
+                runGoatWrite {
+                    val grams = ((text.toBigDecimal() * 1000.toBigDecimal()).longValueExact())
+                    repository.recordWeight(
+                        RecordGoatWeight(
+                            animalId = animalId,
+                            measurementId = UUID.randomUUID().toString(),
+                            weightGrams = grams,
+                            measuredAtEpochMillis = System.currentTimeMillis(),
+                        ),
+                        context(),
+                    )
+                }
+            }
+        },
+        onRecordKidding = { born, live, dead, day ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a doe first" else runGoatWrite {
+                repository.recordKidding(
+                    RecordGoatKidding(
+                        kiddingId = UUID.randomUUID().toString(),
+                        damAnimalId = animalId,
+                        bornCount = born.toInt(),
+                        liveCount = live.toInt(),
+                        deadCount = dead.toInt(),
+                        occurredEpochDay = LocalDate.parse(day).toEpochDay(),
+                    ),
+                    context(),
+                )
+            }
+        },
+        onRegisterKid = { kiddingId, tag, sex ->
+            val damId = selectedGoatId
+            if (damId == null) error = "Select the dam first" else runGoatWrite {
+                val kidId = UUID.randomUUID().toString()
+                repository.registerKid(
+                    RegisterGoatKid(
+                        animalId = kidId,
+                        kiddingId = kiddingId,
+                        damAnimalId = damId,
+                        tag = tag,
+                        name = null,
+                        sex = sex,
+                    ),
+                    context(),
+                )
+                selectedGoatId = kidId
+            }
+        },
+        onRecordFamacha = { score, day ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                repository.recordFamacha(RecordGoatFamacha(UUID.randomUUID().toString(), animalId, score.toInt(), LocalDate.parse(day).toEpochDay()), context())
+            }
+        },
+        onRecordMilk = { litres, day ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a doe first" else runGoatWrite {
+                val milliLitres = (litres.toBigDecimal() * 1000.toBigDecimal()).longValueExact()
+                repository.recordMilk(RecordGoatMilk(UUID.randomUUID().toString(), animalId, milliLitres, LocalDate.parse(day).toEpochDay()), context())
+            }
+        },
+        onRecordBcs = { scoreTenths, day ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                repository.recordBcs(RecordGoatBcs(UUID.randomUUID().toString(), animalId, scoreTenths.toInt(), LocalDate.parse(day).toEpochDay()), context())
+            }
+        },
+        onRecordScc = { cells, dim, day ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a doe first" else runGoatWrite {
+                repository.recordScc(RecordGoatScc(UUID.randomUUID().toString(), animalId, cells.toLong(), dim.toInt(), LocalDate.parse(day).toEpochDay()), context())
+            }
+        },
+        onRecordHeat = { day ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a doe first" else runGoatWrite {
+                repository.recordHeat(RecordGoatHeat(UUID.randomUUID().toString(), animalId, LocalDate.parse(day).toEpochDay()), context())
+            }
+        },
+        onRecordMating = { method, sireId, day ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a doe first" else runGoatWrite {
+                repository.recordMating(RecordGoatMating(UUID.randomUUID().toString(), animalId, method, sireId.ifBlank { null }, LocalDate.parse(day).toEpochDay()), context())
+            }
+        },
+        onRecordPregnancy = { result, day ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a doe first" else runGoatWrite {
+                repository.recordPregnancy(RecordGoatPregnancy(UUID.randomUUID().toString(), animalId, result, LocalDate.parse(day).toEpochDay()), context())
+            }
+        },
+        onPlanLactation = { day ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a doe first" else runGoatWrite {
+                repository.planLactation(PlanGoatLactation(UUID.randomUUID().toString(), animalId, LocalDate.parse(day).toEpochDay()), context())
+            }
+        },
+        onSetStatus = { status ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                repository.setStatus(SetGoatStatus(animalId, status), context())
+            }
+        },
+        onSelectGoat = { animalId ->
+            scope.launch {
+                selectedGoatId = animalId
+                selected = repository.getGoat(animalId)
+            }
+        },
+        onSyncNow = {
+            scope.launch {
+                busy = true
+                error = null
+                runCatching { app.performAuthoritativePull() }
+                    .onSuccess { refreshGoatState() }
+                    .onFailure { failure ->
+                        when (failure) {
+                            is AuthenticationRequiredException -> onRequireReauth(failure.message)
+                            else -> {
+                                val message = failure.message.orEmpty()
+                                if (message.contains("permission", true) || message.contains("access", true)) {
+                                    refreshMembershipAfterAuthorizationLoss("Farm access was removed. Choose another farm or sign out.")
+                                } else {
+                                    error = failure.message
+                                }
+                            }
+                        }
+                    }
+                busy = false
+            }
+        },
+        onSearch = { query ->
+            scope.launch {
+                error = null
+                runCatching {
+                    if (query.isBlank()) emptyList() else repository.searchGoats(query, 25)
+                }.onSuccess { local ->
+                    remoteResults = local
+                    runCatching {
+                        app.searchClient?.search(membership.farmId, "goat", query, 25).orEmpty()
+                    }.onSuccess { remote ->
+                        remoteResults = (local + remote).distinctBy { it.animalId }.map {
+                            if (local.any { localRow -> localRow.animalId == it.animalId }) it.copy(source = SearchSource.LOCAL) else it
+                        }
+                    }.onFailure { remoteFailure ->
+                        if (remoteFailure is AuthenticationRequiredException) onRequireReauth(remoteFailure.message)
+                    }
+                }.onFailure(::handleFailure)
+            }
+        },
+        onSignOut = onSignOut,
+        onBack = { module = FarmModule.HOME },
+    )
 }
