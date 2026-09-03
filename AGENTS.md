@@ -45,6 +45,17 @@ Current locked owner decisions:
 - Vendor AI SDKs live behind Farm OS-owned ports.
 - Meilisearch lives behind Farm OS-owned search interfaces and is never a system of record.
 
+## Fan-out discipline
+
+A green architecture slice authorizes implementation breadth, not uncontrolled batch size.
+
+- New feature fan-out must be delivered in reviewable vertical batches. Prefer one coherent Feature Implementation Contract or one tightly coupled infrastructure slice per commit series.
+- Every newly added domain module must enter canonical CI in the same batch as its production code.
+- Every Room schema version increase must add executable migration-chain evidence; fresh-database tests alone are insufficient.
+- Do not expand `FarmOsPullReconciler.kt`, `OperatingModuleHost.kt`, `MainActivity.kt`, or other known orchestration hotspots beyond the checked-in stabilization ceilings. Split responsibilities first.
+- A batch that introduces thousands of lines across unrelated species/modules without completed compilation/test evidence is not a valid completion batch.
+- If CI is unavailable, do not convert unexecuted code into a green claim. Keep the last proven certificate pinned to its evidence commit.
+
 ## Design system
 
 `docs/FARM_OS_DESIGN_SYSTEM_SPEC.md` is the only visual authority.
