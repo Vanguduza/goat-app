@@ -236,6 +236,12 @@ assert_json "$INDEXER_RECONCILE" '.completed == 2' "Indexer did not reconcile su
 DONE_JOBS=$(service_get "/rest/v1/search_index_jobs?select=state&projection_version=eq.1")
 assert_json "$DONE_JOBS" 'length == 2 and all(.[]; .state == "done")' "Registration search jobs are not done"
 
+TRACE_REGISTER_A=$(rpc "$TOKEN_A" "mutation_trace_v1" "$(jq -cn \
+  --arg farm "$FARM_A" \
+  --arg mutation "aaaaaaaa-1111-4111-8111-aaaaaaaaaaaa" \
+  '{p_farm_id:$farm,p_mutation_id:$mutation}')")
+assert_json "$TRACE_REGISTER_A" '.code == "FOUND" and .commandName == "goat.register.v1" and .event.eventType == "goat.registered.v1" and .event.streamVersion == 1 and any(.searchJobs[]; .origin == "command" and .state == "done" and .projectionVersion == 1)' "Live mutation trace did not correlate registration receipt, event and completed search job"
+
 echo "Serving the real search-token function and proving membership isolation"
 start_function \
   "supabase/functions/search-token/index.ts" \
@@ -312,6 +318,12 @@ RECOVERED_DOC=$(curl --fail-with-body -sS "${MEILI_HOST}/indexes/${MEILI_INDEX}/
   -H "Authorization: Bearer ${MEILI_MASTER_KEY}")
 assert_json "$RECOVERED_DOC" '.updated_projection_version == 2' "Recovered search document is not at authoritative stream version 2"
 
+TRACE_WEIGHT_A=$(rpc "$TOKEN_A" "mutation_trace_v1" "$(jq -cn \
+  --arg farm "$FARM_A" \
+  --arg mutation "aaaaaaaa-2222-4222-8222-aaaaaaaaaaaa" \
+  '{p_farm_id:$farm,p_mutation_id:$mutation}')")
+assert_json "$TRACE_WEIGHT_A" '.code == "FOUND" and .commandName == "goat.record_weight.v1" and .event.streamVersion == 2 and any(.searchJobs[]; .origin == "command" and .state == "done" and .projectionVersion == 2 and .attempts == 1)' "Live mutation trace did not preserve search outage retry/recovery evidence"
+
 echo "Clearing the search projection and exercising the real rebuild function"
 DELETE_TASK=$(curl --fail-with-body -sS -X DELETE "${MEILI_HOST}/indexes/${MEILI_INDEX}/documents" \
   -H "Authorization: Bearer ${MEILI_MASTER_KEY}")
@@ -351,4 +363,4 @@ REBUILT_B=$(curl --fail-with-body -sS -X POST "${MEILI_HOST}/indexes/${MEILI_IND
 assert_json "$REBUILT_A" '(.hits | length) == 1 and .hits[0].id == "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" and .hits[0].updated_projection_version == 2' "Farm A was not rebuilt from authoritative version 2"
 assert_json "$REBUILT_B" '(.hits | length) == 1 and .hits[0].id == "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" and .hits[0].updated_projection_version == 1' "Farm B was not rebuilt from authoritative version 1"
 
-echo "Farm OS search pipeline passed: authoritative RPCs, durable indexing, tenant isolation, outage recovery, and full rebuild are proven live."
+echo "Farm OS search pipeline passed: authoritative RPCs, durable indexing, tenant isolation, outage recovery, mutation observability, and full rebuild are proven live."
