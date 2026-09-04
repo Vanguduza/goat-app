@@ -31,6 +31,14 @@ check_max_lines "app/src/main/java/com/farmos/app/OperatingModuleHost.kt" 1900
 check_max_lines "app/src/main/java/com/farmos/app/MainActivity.kt" 260
 check_max_lines "app/src/main/java/com/farmos/app/FarmSessionContent.kt" 450
 
+# Extracted module hosts are intentionally narrow. If one needs to grow past
+# these ceilings, split state/read/write responsibilities rather than rebuilding
+# a second all-domain host.
+check_max_lines "app/src/main/java/com/farmos/app/TasksModuleHost.kt" 120
+check_max_lines "app/src/main/java/com/farmos/app/MoneyModuleHost.kt" 120
+check_max_lines "app/src/main/java/com/farmos/app/InventoryModuleHost.kt" 180
+check_max_lines "app/src/main/java/com/farmos/app/HealthModuleHost.kt" 240
+
 if (( fail != 0 )); then
   exit 1
 fi
