@@ -34,6 +34,7 @@ fun HealthModuleHost(
     var observations by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var catalog by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var treatments by remember(farmId) { mutableStateOf(emptyList<String>()) }
+    var formulary by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var packs by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var withdrawals by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var busy by remember { mutableStateOf(false) }
@@ -42,6 +43,7 @@ fun HealthModuleHost(
     suspend fun refresh() {
         observations = ops.recentObservations().map { row -> "${row.speciesCode} · ${row.signs}" }
         catalog = ops.diseases().map { row -> "${row.speciesCode} · ${row.displayName} · ${row.firstAid}" }
+        formulary = ops.approvedFormulary().map { row -> "${row.id} · ${row.productName} · ${row.speciesCode} · ${row.vetClass}" }
         treatments = ops.recentTreatments().map { row ->
             "${row.speciesCode} · ${row.reason} · formulary ${row.formularyItemId}"
         }
@@ -78,6 +80,7 @@ fun HealthModuleHost(
         rows = observations,
         catalog = catalog,
         treatments = treatments,
+        formulary = formulary,
         packs = packs,
         withdrawals = withdrawals,
         busy = busy,

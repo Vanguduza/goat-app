@@ -1140,7 +1140,7 @@ screens:
     name: Customer Waitlist
     module: rabbit
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2190,7 +2190,7 @@ screens:
     name: Health Dashboard
     module: health
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2210,7 +2210,7 @@ screens:
     name: Observation List
     module: health
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2220,7 +2220,7 @@ screens:
     name: Record Observation
     module: health
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2250,7 +2250,7 @@ screens:
     name: Record Treatment
     module: health
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2270,7 +2270,7 @@ screens:
     name: Withdrawal Dashboard
     module: health
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2310,7 +2310,7 @@ screens:
     name: Formulary
     module: health
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2330,7 +2330,7 @@ screens:
     name: Protocol Packs
     module: health
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2350,7 +2350,7 @@ screens:
     name: Accept Protocol Pack
     module: health
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2360,7 +2360,7 @@ screens:
     name: Apply Protocol Pack
     module: health
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2370,7 +2370,7 @@ screens:
     name: Protocol Slot Editor
     module: health
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2390,7 +2390,7 @@ screens:
     name: Record Vet Visit
     module: health
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2420,7 +2420,7 @@ screens:
     name: Record Lab Result
     module: health
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2440,7 +2440,7 @@ screens:
     name: Disease or Reference Library
     module: health
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2640,7 +2640,7 @@ screens:
     name: Inventory Dashboard
     module: inv
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2650,7 +2650,7 @@ screens:
     name: Inventory List
     module: inv
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2670,7 +2670,7 @@ screens:
     name: Create Item
     module: inv
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2680,7 +2680,7 @@ screens:
     name: Receive Stock
     module: inv
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2690,7 +2690,7 @@ screens:
     name: Receive Lot
     module: inv
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2700,7 +2700,7 @@ screens:
     name: Issue Stock
     module: inv
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2710,7 +2710,7 @@ screens:
     name: FEFO Issue
     module: inv
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2750,7 +2750,7 @@ screens:
     name: Reorder Rules
     module: inv
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2760,7 +2760,7 @@ screens:
     name: Reorder Alert
     module: inv
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2830,7 +2830,7 @@ screens:
     name: Feed Dashboard
     module: feed
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2950,7 +2950,7 @@ screens:
     name: Water Dashboard
     module: water
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -3050,7 +3050,7 @@ screens:
     name: Pasture Dashboard
     module: pasture
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -3160,7 +3160,7 @@ screens:
     name: Groups
     module: group
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -3250,7 +3250,7 @@ screens:
     name: Labour Dashboard
     module: labour
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -3340,7 +3340,7 @@ screens:
     name: Assets Dashboard
     module: asset
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -3460,7 +3460,7 @@ screens:
     name: Finance Dashboard
     module: fin
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -3470,7 +3470,7 @@ screens:
     name: Transactions
     module: fin
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -3490,7 +3490,7 @@ screens:
     name: Record Income
     module: fin
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -3500,7 +3500,7 @@ screens:
     name: Record Expense
     module: fin
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -3590,7 +3590,7 @@ screens:
     name: Sales Dashboard
     module: sales
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -3710,7 +3710,7 @@ screens:
     name: Procurement Dashboard
     module: proc
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX

@@ -54,3 +54,21 @@ surfaces:
     old_visual_layout_authoritative: false
     visual_reference: FOS-VREF-TASK-001
     action: preserve_and_expand_to_remaining_task_screen_contracts
+  - file: feature/ops/src/main/kotlin/com/farmos/feature/ops/HealthExperienceScreen.kt
+    current_role: routed_health_operating_family
+    target_screens: [FOS-HEALTH-001, FOS-HEALTH-003, FOS-HEALTH-004, FOS-HEALTH-007, FOS-HEALTH-009, FOS-HEALTH-013, FOS-HEALTH-015, FOS-HEALTH-017, FOS-HEALTH-018, FOS-HEALTH-019, FOS-HEALTH-021, FOS-HEALTH-024, FOS-HEALTH-026]
+    command_state_reuse: true
+    visual_reference: FOS-VREF-OPS-001
+    action: expand_remaining_health_routes_without_collapsing_safety_states
+  - file: feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryExperienceScreen.kt
+    current_role: routed_inventory_operating_family
+    target_screens: [FOS-INV-001, FOS-INV-002, FOS-INV-004, FOS-INV-005, FOS-INV-006, FOS-INV-007, FOS-INV-008, FOS-INV-012, FOS-INV-013]
+    command_state_reuse: true
+    visual_reference: FOS-VREF-OPS-001
+    action: expand_item_lot_history_count_and_report_routes
+  - file: feature/ops/src/main/kotlin/com/farmos/feature/ops/FinanceExperienceScreen.kt
+    current_role: routed_finance_operating_family
+    target_screens: [FOS-FIN-001, FOS-FIN-002, FOS-FIN-004, FOS-FIN-005]
+    command_state_reuse: true
+    visual_reference: FOS-VREF-OPS-001
+    action: expand_profitability_cashflow_budget_report_and_export_routes

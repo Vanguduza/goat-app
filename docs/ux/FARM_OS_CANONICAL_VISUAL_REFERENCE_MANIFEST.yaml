@@ -85,3 +85,10 @@ references:
     intensity: I2-I3
     source: recovered_style_guide_tasks_reference
     status: implementation_reference_unverified
+  - reference_id: FOS-VREF-OPS-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-HEALTH-001, FOS-INV-001, FOS-FIN-001, FOS-GROUP-001, FOS-PASTURE-001, FOS-LABOUR-001, FOS-ASSET-001, FOS-FEED-001, FOS-WATER-001, FOS-PROC-001, FOS-SALES-001]
+    environment: content_first_farm_operations
+    intensity: I2-I4
+    source: recovered_style_guide_operational_language
+    status: implementation_reference_unverified

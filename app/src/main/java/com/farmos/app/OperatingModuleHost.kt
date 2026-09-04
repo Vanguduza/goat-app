@@ -1415,6 +1415,7 @@ fun OperatingModuleHost(
             val day = remember { mutableStateOf("") }
             val groupId = remember { mutableStateOf("") }
             SimpleCaptureScreen(
+                screenId = "FOS-GROUP-001",
                 title = "Groups",
                 help = "Groups hold a census for grazing, feed issue, and poultry flock sheets.",
                 empty = "No groups on this device.",
@@ -1488,6 +1489,7 @@ fun OperatingModuleHost(
             val sessionId = remember { mutableStateOf("") }
             val exited = remember { mutableStateOf("") }
             SimpleCaptureScreen(
+                screenId = "FOS-PASTURE-001",
                 title = "Pasture",
                 help = "One group grazes one paddock at a time. Rest starts when the session ends.",
                 empty = "No paddocks on this device.",
@@ -1540,6 +1542,7 @@ fun OperatingModuleHost(
             val minutes = remember { mutableStateOf("") }
             val day = remember { mutableStateOf("") }
             SimpleCaptureScreen(
+                screenId = "FOS-LABOUR-001",
                 title = "Labour",
                 help = "Minutes are whole figures. Worker name is a farm label, not a login.",
                 empty = "No labour entries on this device.",
@@ -1567,6 +1570,7 @@ fun OperatingModuleHost(
             val title = remember { mutableStateOf("") }
             val day = remember { mutableStateOf("") }
             SimpleCaptureScreen(
+                screenId = "FOS-ASSET-001",
                 title = "Assets",
                 help = "Record equipment and maintenance. This is not a depreciation ledger.",
                 empty = "No assets on this device.",
@@ -1604,6 +1608,7 @@ fun OperatingModuleHost(
             val qty = remember { mutableStateOf("") }
             val day = remember { mutableStateOf("") }
             SimpleCaptureScreen(
+                screenId = "FOS-FEED-001",
                 title = "Feed",
                 help = "Issuing feed deducts inventory in milli-units. Ration percentages stay advisory drafts.",
                 empty = "No feed issues on this device.",
@@ -1629,6 +1634,7 @@ fun OperatingModuleHost(
             val litres = remember { mutableStateOf("") }
             val day = remember { mutableStateOf("") }
             SimpleCaptureScreen(
+                screenId = "FOS-WATER-001",
                 title = "Water",
                 help = "Enter litres as a figure. The device stores milli-litres.",
                 empty = "No water records on this device.",
@@ -1665,6 +1671,7 @@ fun OperatingModuleHost(
             val grams = remember { mutableStateOf("") }
             val day = remember { mutableStateOf("") }
             SimpleCaptureScreen(
+                screenId = "FOS-RABBIT-027",
                 title = "Rabbit waitlist",
                 help = "Enqueue a buyer, mark a kit sale_pet, then fulfill. A contract posts income in minor units.",
                 empty = "No waitlist rows on this device.",
@@ -1793,6 +1800,7 @@ fun OperatingModuleHost(
             val amount = remember { mutableStateOf("") }
             val day = remember { mutableStateOf("") }
             SimpleCaptureScreen(
+                screenId = "FOS-PROC-001",
                 title = "Procurement",
                 help = "A purchase receives inventory and posts an expense in integer minor units.",
                 empty = "No suppliers on this device.",
@@ -1845,6 +1853,7 @@ fun OperatingModuleHost(
             val amount = remember { mutableStateOf("") }
             val day = remember { mutableStateOf("") }
             SimpleCaptureScreen(
+                screenId = "FOS-SALES-001",
                 title = "Sales",
                 help = "A sale posts income in integer minor units. This is farm unit economics, not a statutory ledger.",
                 empty = "No sales on this device.",
