@@ -13,6 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,6 +39,15 @@ fun FarmHomeScreen(
     onOpen: (FarmModule) -> Unit,
     onSignOut: () -> Unit,
 ) {
+    var showSpeciesNavigator by remember { mutableStateOf(false) }
+    if (showSpeciesNavigator) {
+        SpeciesNavigatorScreen(
+            onOpen = onOpen,
+            onBack = { showSpeciesNavigator = false },
+        )
+        return
+    }
+
     val species = listOf(
         HomeModuleCard(FarmModule.GOAT, "Goats", "Herd, growth, health and reproduction"),
         HomeModuleCard(FarmModule.RABBIT, "Rabbits", "Rabbitry, breeding waves, litters and market plans"),
@@ -78,6 +91,7 @@ fun FarmHomeScreen(
             }
 
             HomeSection("Animals", "Species-native farm management", species, onOpen)
+            TextButton(onClick = { showSpeciesNavigator = true }) { Text("Explore all species") }
             HomeSection("Work", "Run the farm day", work, onOpen)
             HomeSection("Business", "Stock, buying, selling and money", business, onOpen)
 

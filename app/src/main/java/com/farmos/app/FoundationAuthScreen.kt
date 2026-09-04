@@ -87,7 +87,7 @@ fun FoundationAuthScreen(
                             onSelectFarm = onSelectFarm,
                             onSignOut = onSignOut,
                         )
-                        sessionPresent -> FarmCreationState(
+                        sessionPresent -> FarmSetupWizardState(
                             farmName = farmName,
                             onFarmNameChange = { farmName = it },
                             busy = busy,
@@ -191,28 +191,42 @@ private fun FarmSelectionState(
 }
 
 @Composable
-private fun FarmCreationState(
+private fun FarmSetupWizardState(
     farmName: String,
     onFarmNameChange: (String) -> Unit,
     busy: Boolean,
     onCreateFarm: (String) -> Unit,
     onSignOut: () -> Unit,
 ) {
+    var step by remember { mutableStateOf(0) }
     Text("Create your farm", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-    Text("Start the farm identity now. Species and operating setup follow after creation.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-    OutlinedTextField(
-        value = farmName,
-        onValueChange = onFarmNameChange,
-        label = { Text("Farm name") },
-        modifier = Modifier.fillMaxWidth(),
-        enabled = !busy,
-        singleLine = true,
-    )
-    Button(
-        onClick = { onCreateFarm(farmName) },
-        enabled = !busy && farmName.isNotBlank(),
-        modifier = Modifier.fillMaxWidth(),
-    ) { Text(if (busy) "Creating…" else "Create farm") }
+    Text("Farm setup · step ${step + 1} of 2", color = MaterialTheme.colorScheme.primary)
+
+    if (step == 0) {
+        Text("Start with the farm identity. The server creates the tenancy boundary from this name.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        OutlinedTextField(
+            value = farmName,
+            onValueChange = onFarmNameChange,
+            label = { Text("Farm name") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !busy,
+            singleLine = true,
+        )
+        Button(
+            onClick = { step = 1 },
+            enabled = !busy && farmName.isNotBlank(),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Review setup") }
+    } else {
+        Text(farmName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text("After the farm is created, Farm OS continues setup inside the farm with species, locations, units, currency, people and infrastructure. Those fields are not silently discarded here.")
+        Button(
+            onClick = { onCreateFarm(farmName) },
+            enabled = !busy && farmName.isNotBlank(),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text(if (busy) "Creating…" else "Create farm") }
+        TextButton(onClick = { step = 0 }, enabled = !busy) { Text("Back to farm identity") }
+    }
     TextButton(onClick = onSignOut, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Sign out") }
 }
 

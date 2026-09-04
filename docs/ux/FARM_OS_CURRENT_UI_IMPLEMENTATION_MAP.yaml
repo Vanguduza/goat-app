@@ -1,24 +1,49 @@
-schema_version: 1
+schema_version: 2
 branch_baseline: implementation/foundation-vertical-slice
-baseline_head: 9ed4f281092f2ee493d1a5045dfe287164197c58
+baseline_head: 5e9335e7fe53e04ea7ba2e79898597555500b986
+status_law: code existence is not VISUAL_GREEN or FEATURE_GREEN
 surfaces:
+  - file: app/src/main/java/com/farmos/app/FarmOsSplashScreen.kt
+    target_screens: [FOS-GLOBAL-001]
+    visual_reference: FOS-VREF-SPLASH-001
+    visual_state: VISUAL_IMPLEMENTED
+    evidence_missing: [phone_golden, tablet_review, accessibility_review, owner_visual_approval]
   - file: app/src/main/java/com/farmos/app/FoundationAuthScreen.kt
-    current_role: collapsed_auth_membership_farm_create_surface
-    target_screens: [FOS-GLOBAL-002, FOS-GLOBAL-005, FOS-GLOBAL-006]
+    target_screens: [FOS-GLOBAL-002, FOS-GLOBAL-005, FOS-GLOBAL-006, FOS-GLOBAL-018]
     backend_callbacks_reusable: true
-    old_visual_layout_authoritative: false
     drift_before_recovery: VD-4
-    action: illustrated_realign_then_decompose
+    visual_state: VISUAL_IMPLEMENTED
+    feature_limitations:
+      - farm setup currently persists farm identity only
+      - account creation and password recovery are not exposed without backend contracts
+    evidence_missing: [phone_golden, tablet_golden, state_matrix_goldens, accessibility_review, owner_visual_approval]
   - file: app/src/main/java/com/farmos/app/FarmHomeScreen.kt
-    current_role: generic_module_button_launcher
-    target_screens: [FOS-HOME-001, FOS-HOME-002]
+    target_screens: [FOS-HOME-001]
     navigation_callbacks_reusable: true
-    old_visual_layout_authoritative: false
     drift_before_recovery: VD-4
-    action: replace_with_illustrated_operating_home
+    visual_state: VISUAL_IMPLEMENTED
+    evidence_missing: [phone_golden, tablet_golden, populated_data_fixture, owner_visual_approval]
+  - file: app/src/main/java/com/farmos/app/SpeciesNavigatorScreen.kt
+    target_screens: [FOS-HOME-002]
+    visual_reference: FOS-VREF-SPECIES-001
+    visual_state: VISUAL_IMPLEMENTED
+    evidence_missing: [phone_golden, tablet_review, owner_visual_approval]
   - file: feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatVerticalSliceScreen.kt
-    current_role: architecture_proving_mega_screen
-    target_screens: [FOS-GOAT-001, FOS-GOAT-002, FOS-GOAT-003, FOS-GOAT-004, FOS-GOAT-011, FOS-GOAT-022, FOS-GOAT-031, FOS-GOAT-032, FOS-GOAT-034, FOS-GOAT-037, FOS-GOAT-039]
-    command_state_reuse: partial
-    old_visual_layout_authoritative: false
-    action: split_into_atomic_species_native_pages
+    current_role: compatibility_entrypoint_preserving_proven_command_boundary
+    target_screens: [FOS-GOAT-001, FOS-GOAT-002, FOS-GOAT-003, FOS-GOAT-004, FOS-GOAT-006, FOS-GOAT-011, FOS-GOAT-016, FOS-GOAT-017, FOS-GOAT-020, FOS-GOAT-022, FOS-GOAT-031, FOS-GOAT-032, FOS-GOAT-034, FOS-GOAT-037, FOS-GOAT-039, FOS-GOAT-043, FOS-GOAT-051]
+    command_state_reuse: preserved
+    old_mega_screen_removed: true
+    visual_state: VISUAL_IMPLEMENTED
+    feature_state: IMPLEMENTED_UNVERIFIED
+  - file: feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatExperienceScreen.kt
+    target_screens: [FOS-GOAT-001, FOS-GOAT-002, FOS-GOAT-003, FOS-GOAT-051]
+    tablet_reference: FOS-GOAT-003
+    visual_reference: FOS-VREF-GOAT-001
+    visual_state: VISUAL_IMPLEMENTED
+    evidence_missing: [phone_golden, tablet_golden, accessibility_review, owner_visual_approval]
+  - file: feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatCaptureScreens.kt
+    target_screens: [FOS-GOAT-004, FOS-GOAT-006, FOS-GOAT-011, FOS-GOAT-016, FOS-GOAT-017, FOS-GOAT-020, FOS-GOAT-022, FOS-GOAT-031, FOS-GOAT-032, FOS-GOAT-034, FOS-GOAT-037, FOS-GOAT-039, FOS-GOAT-043, FOS-SYNC-002, FOS-SYNC-003]
+    i3_reference: FOS-GOAT-011
+    i4_reference: FOS-GOAT-051
+    visual_state: VISUAL_IMPLEMENTED
+    evidence_missing: [goldens, validation_state_matrix, offline_receipt_golden, accessibility_review, owner_visual_approval]

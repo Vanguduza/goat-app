@@ -41,3 +41,27 @@ references:
     environment: goat_paddock
     intensity: I2
     status: required_before_goat_visual_green
+  - reference_id: FOS-VREF-SPLASH-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-GLOBAL-001]
+    environment: mixed_farm_countryside
+    intensity: I1
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-SPECIES-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-HOME-002]
+    environment: mixed_species_gateway
+    intensity: I2
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-GOAT-WEIGHT-001
+    parent: FOS-VREF-GOAT-001
+    screen_ids: [FOS-GOAT-011]
+    environment: restrained_goat_identity
+    intensity: I3
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-GOAT-SAFETY-001
+    parent: FOS-VREF-GOAT-001
+    screen_ids: [FOS-GOAT-051]
+    environment: restrained_safety_surface
+    intensity: I4
+    status: implementation_reference_unverified

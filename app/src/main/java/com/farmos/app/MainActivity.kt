@@ -18,6 +18,7 @@ import com.farmos.core.network.AuthorizationLoss
 import com.farmos.core.network.FarmAccessDecision
 import com.farmos.core.network.FarmAccessGuard
 import com.farmos.core.network.FarmMembership
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -27,6 +28,16 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             FarmOsTheme {
+                var showSplash by remember { mutableStateOf(true) }
+                LaunchedEffect(Unit) {
+                    delay(650)
+                    showSplash = false
+                }
+                if (showSplash) {
+                    FarmOsSplashScreen()
+                    return@FarmOsTheme
+                }
+
                 val scope = rememberCoroutineScope()
                 val restoredMembership = remember { app.lastMembershipForCurrentSession() }
                 var memberships by remember {

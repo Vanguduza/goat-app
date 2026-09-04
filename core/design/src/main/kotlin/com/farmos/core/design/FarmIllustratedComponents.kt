@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,17 +51,21 @@ object FarmIllustratedPalette {
  * Rich approved raster/vector art may replace individual layers without changing this contract.
  */
 @Composable
+enum class FarmSpeciesVisual { GOAT, RABBIT, SHEEP, CATTLE, POULTRY }
+
+@Composable
 fun FarmPastoralBackdrop(
     modifier: Modifier = Modifier,
+    heroSpecies: FarmSpeciesVisual? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     Box(modifier = modifier.background(FarmIllustratedPalette.SkyTop)) {
-        Canvas(Modifier.fillMaxSize()) { drawPastoralScene() }
+        Canvas(Modifier.fillMaxSize()) { drawPastoralScene(heroSpecies) }
         content()
     }
 }
 
-private fun DrawScope.drawPastoralScene() {
+private fun DrawScope.drawPastoralScene(heroSpecies: FarmSpeciesVisual?) {
     drawRect(
         brush = Brush.verticalGradient(
             listOf(FarmIllustratedPalette.SkyTop, FarmIllustratedPalette.SkyHorizon),
@@ -138,6 +143,24 @@ private fun DrawScope.drawPastoralScene() {
     drawRabbit(Offset(w * .30f, h * .87f), w * .075f, Color(0xFFD9C4AE))
     drawSheep(Offset(w * .82f, h * .82f), w * .12f)
     drawChicken(Offset(w * .93f, h * .91f), w * .055f)
+
+    when (heroSpecies) {
+        FarmSpeciesVisual.GOAT -> {
+            drawGoat(Offset(w * .62f, h * .73f), w * .22f, Color(0xFFE7D7BF))
+            drawGoat(Offset(w * .78f, h * .82f), w * .12f, Color(0xFFF2E7D5))
+        }
+        FarmSpeciesVisual.RABBIT -> {
+            drawRabbit(Offset(w * .62f, h * .82f), w * .14f, Color(0xFFD8C1A8))
+            drawRabbit(Offset(w * .78f, h * .86f), w * .10f, Color(0xFFE8DDD0))
+        }
+        FarmSpeciesVisual.SHEEP -> drawSheep(Offset(w * .66f, h * .77f), w * .20f)
+        FarmSpeciesVisual.CATTLE -> drawCattle(Offset(w * .63f, h * .72f), w * .24f)
+        FarmSpeciesVisual.POULTRY -> {
+            drawChicken(Offset(w * .67f, h * .82f), w * .11f)
+            drawChicken(Offset(w * .79f, h * .87f), w * .08f)
+        }
+        null -> Unit
+    }
 }
 
 private fun DrawScope.drawGoat(origin: Offset, scale: Float, coat: Color) {
@@ -181,6 +204,17 @@ private fun DrawScope.drawChicken(origin: Offset, scale: Float) {
     drawCircle(Color(0xFF9A3F32), scale * .075f, Offset(origin.x + scale * .82f, origin.y - scale * .17f))
 }
 
+private fun DrawScope.drawCattle(origin: Offset, scale: Float) {
+    val coat = Color(0xFFEDE5D9)
+    val dark = Color(0xFF3E3833)
+    drawOval(coat, origin, Size(scale, scale * .50f))
+    drawOval(dark, Offset(origin.x + scale * .72f, origin.y + scale * .03f), Size(scale * .33f, scale * .28f))
+    drawCircle(dark, scale * .08f, Offset(origin.x + scale * .32f, origin.y + scale * .12f))
+    drawCircle(dark, scale * .07f, Offset(origin.x + scale * .58f, origin.y + scale * .30f))
+    drawLine(dark, Offset(origin.x + scale * .18f, origin.y + scale * .42f), Offset(origin.x + scale * .16f, origin.y + scale * .76f), 5f)
+    drawLine(dark, Offset(origin.x + scale * .68f, origin.y + scale * .42f), Offset(origin.x + scale * .72f, origin.y + scale * .76f), 5f)
+}
+
 @Composable
 fun FarmStorySurface(
     modifier: Modifier = Modifier,
@@ -194,7 +228,7 @@ fun FarmStorySurface(
         tonalElevation = 1.dp,
         shadowElevation = 6.dp,
     ) {
-        Column(Modifier.padding(contentPadding), content = content)
+        Column(Modifier.padding(contentPadding), verticalArrangement = Arrangement.spacedBy(10.dp), content = content)
     }
 }
 
@@ -209,6 +243,6 @@ fun FarmIllustratedSectionSurface(
         color = FarmIllustratedPalette.Cream.copy(alpha = .94f),
         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = .55f)),
     ) {
-        Column(Modifier.padding(FosDimens.CardPadding), content = content)
+        Column(Modifier.padding(FosDimens.CardPadding), verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
     }
 }

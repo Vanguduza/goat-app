@@ -8,6 +8,10 @@ required=(
   docs/ux/FARM_OS_CURRENT_UI_IMPLEMENTATION_MAP.yaml
   docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md
   core/design/src/main/kotlin/com/farmos/core/design/FarmIllustratedComponents.kt
+  app/src/main/java/com/farmos/app/FarmOsSplashScreen.kt
+  app/src/main/java/com/farmos/app/SpeciesNavigatorScreen.kt
+  feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatExperienceScreen.kt
+  feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatCaptureScreens.kt
 )
 for path in "${required[@]}"; do
   [[ -s "$path" ]] || { echo "ERROR: missing visual authority artifact: $path"; exit 1; }
@@ -25,6 +29,25 @@ grep -q 'FOS-GLOBAL-002' app/src/main/java/com/farmos/app/FoundationAuthScreen.k
 grep -q 'FOS-HOME-001' app/src/main/java/com/farmos/app/FarmHomeScreen.kt || {
   echo 'ERROR: farm home is not mapped to FOS-HOME-001'; exit 1;
 }
+
+grep -q 'FOS-GLOBAL-001' app/src/main/java/com/farmos/app/FarmOsSplashScreen.kt || {
+  echo 'ERROR: splash is not mapped to FOS-GLOBAL-001'; exit 1;
+}
+grep -q 'FOS-HOME-002' app/src/main/java/com/farmos/app/SpeciesNavigatorScreen.kt || {
+  echo 'ERROR: species navigator is not mapped to FOS-HOME-002'; exit 1;
+}
+grep -q 'FOS-GOAT-003' feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatExperienceScreen.kt || {
+  echo 'ERROR: goat profile reference is missing'; exit 1;
+}
+grep -q 'FOS-GOAT-011 · I3 reference' feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatCaptureScreens.kt || {
+  echo 'ERROR: goat I3 weight reference is missing'; exit 1;
+}
+grep -q 'FOS-GOAT-051 · I4' feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatExperienceScreen.kt || {
+  echo 'ERROR: goat I4 lifecycle reference is missing'; exit 1;
+}
+if (( $(wc -l < feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatVerticalSliceScreen.kt) > 120 )); then
+  echo 'ERROR: goat proving mega-screen has grown back instead of remaining an atomic compatibility entrypoint'; exit 1
+fi
 
 # Prevent the two known VD-4 foundation labels from silently returning.
 if grep -q 'Text("Farm OS foundation"' app/src/main/java/com/farmos/app/FoundationAuthScreen.kt; then

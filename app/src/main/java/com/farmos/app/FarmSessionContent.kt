@@ -1,5 +1,4 @@
 package com.farmos.app
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,7 +37,6 @@ import com.farmos.feature.goat.LoadableSurfaceState
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
-
 @Composable
 fun FarmSessionContent(
     app: FarmOsApplication,
@@ -62,7 +60,6 @@ fun FarmSessionContent(
     var error by remember { mutableStateOf<String?>(null) }
     var herdState by remember { mutableStateOf(LoadableSurfaceState.LOADING) }
     var pendingSyncCount by remember { mutableStateOf(0L) }
-
     fun context(): LocalCommandContext {
         val userId = requireNotNull(app.sessionStore.current()?.user?.id) { "Sign in is required" }
         return LocalCommandContext(
@@ -73,7 +70,6 @@ fun FarmSessionContent(
             occurredAtEpochMillis = System.currentTimeMillis(),
         )
     }
-
     suspend fun refreshGoatState() {
         herdState = LoadableSurfaceState.LOADING
         runCatching {
@@ -92,19 +88,16 @@ fun FarmSessionContent(
             herdState = LoadableSurfaceState.ERROR
         }
     }
-
     suspend fun refreshMembershipAfterAuthorizationLoss(message: String) {
         val available = runCatching { app.identityClient?.memberships().orEmpty() }.getOrDefault(emptyList())
         onRequireFarmReselection(message, available)
     }
-
     fun handleFailure(failure: Throwable) {
         when (failure) {
             is AuthenticationRequiredException -> onRequireReauth(failure.message)
             else -> error = failure.message
         }
     }
-
     fun enqueueSync() {
         WorkManager.getInstance(app).enqueue(
             OneTimeWorkRequestBuilder<SyncWorker>()
@@ -113,7 +106,6 @@ fun FarmSessionContent(
                 .build(),
         )
     }
-
     fun runGoatWrite(block: suspend () -> Unit) {
         scope.launch {
             busy = true
@@ -128,7 +120,6 @@ fun FarmSessionContent(
             busy = false
         }
     }
-
     LaunchedEffect(membership.farmId) { refreshGoatState() }
 
     if (module == FarmModule.HOME) {
