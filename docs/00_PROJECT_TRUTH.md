@@ -163,3 +163,7 @@ The slice must additionally prove duplicate mutation handling, RLS/tenant attack
 8. older documents as provenance only.
 
 If an older document says goats/rabbits are the only MVP system-of-record species, excludes Meilisearch from MVP, mandates Ktor/Keycloak/MinIO/Kubernetes, or treats a vertical slice as feature completion, that statement is superseded.
+
+## 11A. Visual product law
+
+Farm OS uses the owner-locked illustrated agricultural visual family whose portable authority is `docs/ux/FARM_OS_VISUAL_AUTHORITY.md` and whose complete screen/feature/visual mapping is `docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md`. Existing UI code is implementation evidence, not visual authority. Later field-first documents are superseded wherever they prohibit or contradict the canonical illustrated family; their field usability, accessibility, safety and evidence requirements remain binding. Every product screen must have a registered `FOS-*` Screen ID and visual lineage. Visual certification remains separate from feature/module/MVP green states.

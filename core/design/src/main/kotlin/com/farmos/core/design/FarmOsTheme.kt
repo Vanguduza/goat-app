@@ -14,8 +14,8 @@ object FosColors {
     val Primary = Color(0xFF2C5539)
     val OnPrimary = Color(0xFFFFFFFF)
     val PrimaryContainer = Color(0xFFDDE8DD)
-    val Canvas = Color(0xFFFAFAF6)
-    val Card = Color(0xFFFFFFFF)
+    val Canvas = Color(0xFFF7F0E1)
+    val Card = Color(0xFFFFFCF3)
     val Sunken = Color(0xFFF1F1EA)
     val TextPrimary = Color(0xFF1B1D1A)
     val TextSecondary = Color(0xFF5A5D57)
@@ -51,10 +51,10 @@ private val DarkColors = darkColorScheme(
 )
 
 private val FarmShapes = Shapes(
-    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
-    small = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
-    medium = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
-    large = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
+    small = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+    medium = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+    large = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
 )
 
 /**

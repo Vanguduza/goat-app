@@ -1,3 +1,6 @@
+> **SUPERSESSION NOTICE — 05 September 2026**
+> The illustrated Farm OS visual family defined in `docs/ux/FARM_OS_VISUAL_AUTHORITY.md` and `docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md` supersedes this document wherever this v1 spec bans illustration, limits the product to a single-font visual identity, or otherwise conflicts with the locked illustrated reference family. Field usability, accessibility, data-density, safety, offline clarity and evidence gates remain binding. Existing values below are historical implementation tokens until re-derived from the canonical visual family.
+
 # Farm OS — Design System Spec ("Field-first visual language")
 
 **Version:** 1.0 · **Date:** 22 August 2026
@@ -16,7 +19,7 @@
 | Everything rounded 28dp+, floating cards everywhere | Radii scale ≤16dp; flat surfaces, hairline borders, tone-shift elevation |
 | Generic copy: "Welcome to your amazing farm!" | Species-correct, terse, sentence case; empty states state the next action |
 | Random spacing, mixed text sizes per screen | 4dp grid + fixed type scale; nothing off-scale |
-| Decorative illustrations, glassmorphism, neon dark mode | None. Dark mode is a true tonal counterpart, not inverted neon |
+| Uncontrolled/inconsistent illustration, glassmorphism, neon dark mode | Illustration is required where assigned by I1–I3 visual classes and must inherit the canonical Farm OS family; glassmorphism/neon remain forbidden |
 | Every screen invented ad hoc | Screens assemble from the shared component library + named patterns |
 
 ## 1. Design principles
@@ -70,7 +73,7 @@ Contrast floors: text 4.5:1 (7:1 outdoor), icons/status 3:1. Verified in §14 CI
 
 ## 3. Typography
 
-Single family: **Inter** (variable, bundled). Tabular figures for all numeric data. No second family anywhere.
+Operational typography uses the governed sans-serif family with tabular figures for numeric data. A restrained handwritten/display accent family is permitted only for canonical emotional brand copy on approved I1/I2 surfaces; never for critical data, forms, safety copy or tables. Final font files remain subject to repository asset approval.
 
 | Style | Size/Line | Weight | Use |
 |---|---|---|---|
@@ -119,7 +122,7 @@ Input chips for filters (8dp radius, hairline, selected = `primaryContainer`). S
 
 ### 5.4 Empty states
 
-Structure: icon (24dp, `text/secondary`) → one-line statement → one action button. No illustration, no apology, no emoji.
+Structure depends on visual class. I1/I2 major empty states use a canonical illustrated empty-state asset; I3/I4 operational empty states remain concise icon/text/action surfaces. No emoji or unrelated illustration family.
 
 > "No health actions today. Next task: CDT booster — 12 May." `[View schedule]`
 
@@ -229,7 +232,7 @@ A UI task is done only when:
 
 Repo consulting produced generic apps because agents (a) write UI without ever seeing rendered pixels and (b) converge on the *average* aesthetic of whatever they consult. These ten guardrails eliminate both failure modes. Binding on humans and agents.
 
-1. **Authority split — repos are engineering references, never visual ones.** Now in Android et al. are consulted for module graphs, test harnesses, sync plumbing — cited by file path in PRs. Consulting any external repo for layout, spacing, colour or component choice is forbidden; the only visual authority is this spec (`FARM_OS_DESIGN_SYSTEM_SPEC.md`). An agent needing a layout decision cites a §6 pattern code, not a repo screen.
+1. **Authority split — repos are engineering references, never visual ones.** Now in Android et al. are consulted for module graphs, test harnesses, sync plumbing — cited by file path in PRs. Consulting any external repo for layout, spacing, colour or component choice is forbidden. Canonical visual authority is `docs/ux/FARM_OS_VISUAL_AUTHORITY.md` plus the REV 2 Screen Atlas. An agent needing a layout decision cites its `FOS-*` Screen ID and canonical visual lineage, not a repo screen.
 2. **Design-before-code.** Every new screen lands in the Gallery debug app **first**, built from patterns/tokens with realistic fixtures, screenshotted, and approved by the owner **before** the integration PR exists. A screen that never appeared in the Gallery cannot ship. This converts "taste debates in code review" into cheap pixel reviews.
 3. **Realistic-fixture law.** All previews, screenshot tests, demo mode and gallery entries render the named fixture dataset — Nala (goat, FAMACHA 3, ADG 118 g/d), Cage B KudBat wave dates, August money records. Forbidden in any committed UI code or test asset: `Lorem`, `Item 1`, `Test`, `Sample`, `John Doe`, `foo`, placeholder avatars. Generic fixtures produce generic-feeling screens and hide density problems.
 4. **Screenshot-evidence gate.** UI PRs must attach Roborazzi/Paparazzi captures (light + dark + outdoor × font-scale 1.3) generated in CI; CI posts gallery diffs as PR comments. Extends handbook Ch.10: **tests green ≠ UI done** — the phase gate includes owner visual sign-off of the gallery diff, recorded in the gate report.

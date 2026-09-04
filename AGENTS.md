@@ -58,11 +58,13 @@ A green architecture slice authorizes implementation breadth, not uncontrolled b
 
 ## Design system
 
-`docs/FARM_OS_DESIGN_SYSTEM_SPEC.md` is the only visual authority.
+`docs/ux/FARM_OS_VISUAL_AUTHORITY.md` plus `docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md` are the canonical visual/product-surface authority. The older design-system spec remains operational guidance only where compatible.
 
-- Features use design tokens/patterns; external repositories are never visual authorities.
-- No default Material purple/blue, gradients, emoji, marketing copy, arbitrary radii or placeholder content.
-- Required Inter typography remains a release/gate blocker until the approved font asset is actually present; do not fake compliance.
+- Every UI change declares its `FOS-*` Screen ID and canonical visual lineage.
+- Features use governed tokens/components; external repositories are never visual authorities.
+- The illustrated Farm OS family is mandatory for assigned I1–I3 surfaces; generic Material/SaaS/flat-vector substitutions are drift.
+- No default Material purple/blue, emoji, marketing copy, arbitrary ungoverned radii or placeholder content.
+- Required production font/illustration assets remain visual-green blockers until approved assets are versioned; never fake certification.
 
 ## Donor repositories
 

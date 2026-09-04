@@ -1,0 +1,43 @@
+schema_version: 1
+visual_family: farm_os_illustrated
+provenance_session: "01a04f06-bfbe-7b32-bf12-f9834e900244"
+portable_authority: "docs/ux/FARM_OS_VISUAL_AUTHORITY.md"
+policy:
+  session_assets_required_at_runtime: false
+  session_access_required_for_agents: false
+  visual_lineage_required: true
+  owner_lock_required_for_i1_i2: true
+references:
+  - reference_id: FOS-VREF-ROOT-001
+    name: Locked countryside Farm OS visual family
+    role: root_visual_dna
+    authority: canonical
+    source: owner_locked_session_reference
+    status: reconstructed_as_repository_visual_contract
+    required_traits:
+      - warm_painterly_agricultural_illustration
+      - layered_pastoral_depth
+      - believable_friendly_livestock
+      - cream_task_surfaces
+      - deep_farm_green_primary_actions
+      - soft_rounded_geometry
+      - clean_operational_sans
+      - restrained_handwritten_brand_accent
+  - reference_id: FOS-VREF-LOGIN-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-GLOBAL-002]
+    environment: mixed_farm_countryside
+    intensity: I1
+    status: implementation_reference
+  - reference_id: FOS-VREF-HOME-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-HOME-001, FOS-HOME-002]
+    environment: mixed_farm_operating_overview
+    intensity: I2
+    status: implementation_reference
+  - reference_id: FOS-VREF-GOAT-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-GOAT-001, FOS-GOAT-003]
+    environment: goat_paddock
+    intensity: I2
+    status: required_before_goat_visual_green

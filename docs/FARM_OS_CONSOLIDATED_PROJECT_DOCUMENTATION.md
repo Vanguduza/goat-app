@@ -1,3 +1,6 @@
+> **VISUAL SUPERSESSION NOTICE — 05 September 2026**
+> This binder is a historical compiled snapshot. Its embedded Part J anti-illustration, single-font-only and “design spec is the only visual authority” statements are superseded. Current visual authority is `docs/ux/FARM_OS_VISUAL_AUTHORITY.md` and `docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md`. Preserve the binder for domain/technical provenance; do not use embedded Part J to override the illustrated Farm OS family.
+
 # Farm OS — Consolidated Project Documentation
 
 **Compiled:** 20 August 2026

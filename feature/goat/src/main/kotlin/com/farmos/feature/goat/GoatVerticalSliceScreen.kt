@@ -35,6 +35,11 @@ import com.farmos.domain.goat.WeightSample
 import java.time.Instant
 import java.time.LocalDate
 
+/**
+ * Architecture proving surface only. Visual authority maps this legacy mega-screen to
+ * FOS-GOAT-001/002/003/004/011/022/031/032/034/037/039.
+ * Preserve command/state contracts while decomposing into atomic illustrated pages.
+ */
 @Composable
 fun GoatVerticalSliceScreen(
     state: GoatSliceUiState,

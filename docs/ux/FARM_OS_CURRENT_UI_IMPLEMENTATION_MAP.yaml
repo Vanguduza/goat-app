@@ -1,0 +1,24 @@
+schema_version: 1
+branch_baseline: implementation/foundation-vertical-slice
+baseline_head: 9ed4f281092f2ee493d1a5045dfe287164197c58
+surfaces:
+  - file: app/src/main/java/com/farmos/app/FoundationAuthScreen.kt
+    current_role: collapsed_auth_membership_farm_create_surface
+    target_screens: [FOS-GLOBAL-002, FOS-GLOBAL-005, FOS-GLOBAL-006]
+    backend_callbacks_reusable: true
+    old_visual_layout_authoritative: false
+    drift_before_recovery: VD-4
+    action: illustrated_realign_then_decompose
+  - file: app/src/main/java/com/farmos/app/FarmHomeScreen.kt
+    current_role: generic_module_button_launcher
+    target_screens: [FOS-HOME-001, FOS-HOME-002]
+    navigation_callbacks_reusable: true
+    old_visual_layout_authoritative: false
+    drift_before_recovery: VD-4
+    action: replace_with_illustrated_operating_home
+  - file: feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatVerticalSliceScreen.kt
+    current_role: architecture_proving_mega_screen
+    target_screens: [FOS-GOAT-001, FOS-GOAT-002, FOS-GOAT-003, FOS-GOAT-004, FOS-GOAT-011, FOS-GOAT-022, FOS-GOAT-031, FOS-GOAT-032, FOS-GOAT-034, FOS-GOAT-037, FOS-GOAT-039]
+    command_state_reuse: partial
+    old_visual_layout_authoritative: false
+    action: split_into_atomic_species_native_pages
