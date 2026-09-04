@@ -44,15 +44,19 @@ A successful slice earns only `VERTICAL_SLICE_GREEN`. It does **not** make the g
 
 Current architecture-slice certificate: `VERTICAL_SLICE_GREEN` on `6c7c79a93dc54c74134a70b3763549b442c22349` from [canonical run 33801257315](https://github.com/Vanguduza/goat-app/actions/runs/33801257315). Fan-out of further feature work is authorized. `FEATURE_GREEN`, `MODULE_GREEN`, and `MVP_GREEN` remain false. See [`docs/realisation/VERTICAL_SLICE_GATE.json`](docs/realisation/VERTICAL_SLICE_GATE.json).
 
-## Build
+Post-certificate fan-out remains intentionally uncertified until the strengthened canonical suite actually executes. Recent stabilization work adds Room v1→v13 migration-chain evidence, representative fan-out offline durability tests, broader domain-test coverage, instrumentation-source compilation, and module-specific Android state hosts. GitHub-hosted runners are currently failing before job steps begin, so those newer commits must not inherit the older green certificate.
+
+## Build and verification
 
 Canonical CI (`.github/workflows/foundation-ci.yml`) runs:
 
-- Android domain, session and sync unit tests plus a debug APK
-- Connected emulator proofs for Room reopen durability, two-device pull visibility, auth refresh, and revoked-membership client handling
-- Local Supabase migrations and pgTAP
+- Goat, rabbit and operations domain tests plus session/sync unit tests
+- Kotlin compilation for app and Android instrumentation sources; canonical CI does **not** run `assembleDebug`
+- Connected emulator proofs for Room migration/reopen durability, representative fan-out offline durability, two-device pull visibility, auth refresh, and revoked-membership client handling
+- Local Supabase migrations and the full pgTAP database suite
 - Edge Function type-checks and API-key compatibility tests
 - Live Meilisearch index contract and tenant isolation
 - Full search pipeline: authority → index job → outage/retry → rebuild
+- Kotlin duplicate-import and orchestration no-growth stabilization checks
 
 Use JDK 17, Android compile SDK 37, Gradle 9.3.1, and pinned Supabase CLI 2.116.0. Local secrets and production credentials are never committed.
