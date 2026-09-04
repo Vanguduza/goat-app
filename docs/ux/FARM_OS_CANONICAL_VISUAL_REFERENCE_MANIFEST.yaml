@@ -92,3 +92,9 @@ references:
     intensity: I2-I4
     source: recovered_style_guide_operational_language
     status: implementation_reference_unverified
+  - reference_id: FOS-VREF-RABBIT-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-RABBIT-001, FOS-RABBIT-002, FOS-RABBIT-005, FOS-RABBIT-006, FOS-RABBIT-009, FOS-RABBIT-011, FOS-RABBIT-012, FOS-RABBIT-013, FOS-RABBIT-017, FOS-RABBIT-020, FOS-RABBIT-022, FOS-RABBIT-034]
+    environment: illustrated_rabbitry_and_nest_cycle
+    intensity: I2-I4
+    status: implementation_reference_unverified

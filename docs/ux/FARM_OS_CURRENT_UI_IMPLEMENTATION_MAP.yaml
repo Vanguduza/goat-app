@@ -72,3 +72,9 @@ surfaces:
     command_state_reuse: true
     visual_reference: FOS-VREF-OPS-001
     action: expand_profitability_cashflow_budget_report_and_export_routes
+  - file: feature/rabbit/src/main/kotlin/com/farmos/feature/rabbit/RabbitProgrammeScreen.kt
+    current_role: biology_specific_rabbitry_experience
+    target_screens: [FOS-RABBIT-001, FOS-RABBIT-002, FOS-RABBIT-005, FOS-RABBIT-006, FOS-RABBIT-009, FOS-RABBIT-011, FOS-RABBIT-012, FOS-RABBIT-013, FOS-RABBIT-017, FOS-RABBIT-020, FOS-RABBIT-022, FOS-RABBIT-034]
+    command_state_reuse: true
+    visual_reference: FOS-VREF-RABBIT-001
+    action: expand_litter_kit_retention_market_pedigree_timeline_and_report_routes

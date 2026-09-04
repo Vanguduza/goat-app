@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -20,9 +19,36 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.FarmOperationalPage
+import com.farmos.core.design.FarmOperationalRows
+import com.farmos.core.design.FarmOperationalSection
+import com.farmos.core.design.FarmPastoralBackdrop
+import com.farmos.core.design.FarmSpeciesVisual
+import com.farmos.core.design.FarmStorySurface
+import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.FosDimens
 import com.farmos.domain.rabbit.KudbatSemiIntensiveExcel
+import java.time.LocalDate
 
+private enum class RabbitPage {
+    DASHBOARD,
+    ANIMALS,
+    REGISTER,
+    CAGES,
+    WAVE,
+    PALPATION,
+    KINDLING,
+    FOSTER,
+    WEAN,
+    OUTCOME,
+    NESTS,
+    GI_STASIS,
+}
+
+/** Rabbit biology is wave/cage/litter-first; this is not a Goat layout with rabbit labels. */
 @Composable
 fun RabbitProgrammeScreen(
     cages: List<String>,
@@ -45,154 +71,545 @@ fun RabbitProgrammeScreen(
     onRecordGiStasis: (animalId: String, signs: String, day: String) -> Unit = { _, _, _ -> },
     onBack: () -> Unit,
 ) {
-    var doeTag by remember { mutableStateOf("") }
-    var doeName by remember { mutableStateOf("") }
-    var doeSex by remember { mutableStateOf("FEMALE") }
+    var page by remember { mutableStateOf(RabbitPage.DASHBOARD) }
+    val home = { page = RabbitPage.DASHBOARD }
+    when (page) {
+        RabbitPage.DASHBOARD -> {
+            RabbitDashboard(does, cages, waves, availableBoxes, error, { page = it }, onBack)
+        }
+
+        RabbitPage.ANIMALS -> {
+            RabbitRows("FOS-RABBIT-002", "Breeding animals", does, "No rabbits registered", error, home)
+        }
+
+        RabbitPage.REGISTER -> {
+            RabbitRegisterScreen(busy, error, onRegisterDoe, home)
+        }
+
+        RabbitPage.CAGES -> {
+            RabbitCagesScreen(
+                cages,
+                nestBoxes,
+                availableBoxes,
+                busy,
+                error,
+                onCreateCage,
+                onCreateNestBox,
+                onSetNestStatus,
+                home,
+            )
+        }
+
+        RabbitPage.WAVE -> {
+            RabbitWaveScreen(waves, busy, error, onCreateWave, home)
+        }
+
+        RabbitPage.PALPATION -> {
+            RabbitPalpationScreen(busy, error, onPalpate, home)
+        }
+
+        RabbitPage.KINDLING -> {
+            RabbitKindlingScreen(busy, error, onKindle, home)
+        }
+
+        RabbitPage.FOSTER -> {
+            RabbitFosterScreen(busy, error, onFoster, home)
+        }
+
+        RabbitPage.WEAN -> {
+            RabbitWeanScreen(busy, error, onWean, home)
+        }
+
+        RabbitPage.OUTCOME -> {
+            RabbitOutcomeScreen(busy, error, onRecordOutcome, home)
+        }
+
+        RabbitPage.NESTS -> {
+            RabbitRows("FOS-RABBIT-013", "Nest-box schedule", nestBoxes, "No nest boxes on this device", error, home)
+        }
+
+        RabbitPage.GI_STASIS -> {
+            RabbitGiStasisScreen(busy, error, onRecordGiStasis, home)
+        }
+    }
+}
+
+/** FOS-RABBIT-001 — illustrated rabbitry dashboard. */
+@Composable
+private fun RabbitDashboard(
+    animals: List<String>,
+    cages: List<String>,
+    waves: List<String>,
+    availableBoxes: Long,
+    error: String?,
+    onOpen: (RabbitPage) -> Unit,
+    onBack: () -> Unit,
+) {
+    FarmPastoralBackdrop(Modifier.fillMaxSize(), heroSpecies = FarmSpeciesVisual.RABBIT) {
+        Column(
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
+        ) {
+            FarmStorySurface(Modifier.fillMaxWidth()) {
+                Text("Rabbitry", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text("Breeding waves. Nest boxes. Litters. Market-ready rabbits.", color = MaterialTheme.colorScheme.primary)
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                RabbitMetric("Rabbits", animals.size, Modifier.weight(1f))
+                RabbitMetric("Cages", cages.size, Modifier.weight(1f))
+                RabbitMetric("Waves", waves.size, Modifier.weight(1f))
+                RabbitMetric("Boxes", availableBoxes.toInt(), Modifier.weight(1f))
+            }
+            RabbitDashboardAction("Breeding animals", "Does and bucks", { onOpen(RabbitPage.ANIMALS) })
+            RabbitDashboardAction("Register rabbit", "Add a doe or buck", { onOpen(RabbitPage.REGISTER) })
+            RabbitDashboardAction("Cages & nest boxes", "Housing, capacity and nest cycle", { onOpen(RabbitPage.CAGES) })
+            RabbitDashboardAction("Breeding wave", "Mating schedule and generated due work", { onOpen(RabbitPage.WAVE) })
+            RabbitDashboardAction("Palpation", "Record pregnant or open", { onOpen(RabbitPage.PALPATION) })
+            RabbitDashboardAction("Kindling", "Record live and dead kits", { onOpen(RabbitPage.KINDLING) })
+            RabbitDashboardAction("Foster kits", "Move kits between waves with timing acknowledgement", { onOpen(RabbitPage.FOSTER) })
+            RabbitDashboardAction("Weaning", "Record kits leaving the litter", { onOpen(RabbitPage.WEAN) })
+            RabbitDashboardAction("Mating outcome", "Record false pregnancy or outcome", { onOpen(RabbitPage.OUTCOME) })
+            RabbitDashboardAction("GI-stasis red flag", "Flag signs and create vet-call work", { onOpen(RabbitPage.GI_STASIS) })
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            TextButton(onClick = onBack) { Text("Back to farm home") }
+        }
+    }
+}
+
+@Composable
+private fun RabbitMetric(
+    label: String,
+    value: Int,
+    modifier: Modifier,
+) {
+    FarmIllustratedSectionSurface(modifier) {
+        Text(value.toString(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(label, style = MaterialTheme.typography.labelMedium)
+    }
+}
+
+@Composable
+private fun RabbitDashboardAction(
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+) {
+    FarmIllustratedSectionSurface(Modifier.fillMaxWidth()) {
+        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        TextButton(onClick = onClick) { Text("Open") }
+    }
+}
+
+@Composable
+private fun RabbitRows(
+    screenId: String,
+    title: String,
+    rows: List<String>,
+    empty: String,
+    error: String?,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(screenId, title, "Rabbitry records on this device.", onBack = onBack) {
+        FarmOperationalRows(rows, empty, "Add a record from the rabbitry dashboard.")
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    }
+}
+
+@Composable
+private fun RabbitRegisterScreen(
+    busy: Boolean,
+    error: String?,
+    onRegister: (String, String?, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var tag by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var sex by remember { mutableStateOf("FEMALE") }
+    FarmOperationalPage("FOS-RABBIT-005", "Register rabbit", "Register a breeding doe or buck.", onBack = onBack) {
+        FarmOperationalSection("Identity") {
+            OutlinedTextField(
+                tag,
+                { tag = it },
+                label = { Text("Tag") },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !busy,
+                singleLine = true,
+            )
+            OutlinedTextField(name, {
+                name = it
+            }, label = { Text("Name (optional)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = { sex = "FEMALE" }, enabled = !busy) { Text(if (sex == "FEMALE") "Doe · selected" else "Doe") }
+                TextButton(onClick = { sex = "MALE" }, enabled = !busy) { Text(if (sex == "MALE") "Buck · selected" else "Buck") }
+            }
+            Button(onClick = {
+                onRegister(
+                    tag,
+                    name.trim().ifBlank {
+                        null
+                    },
+                    sex,
+                )
+            }, enabled = !busy && tag.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Register rabbit") }
+        }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    }
+}
+
+@Composable
+private fun RabbitCagesScreen(
+    cages: List<String>,
+    nestBoxes: List<String>,
+    availableBoxes: Long,
+    busy: Boolean,
+    error: String?,
+    onCreateCage: (String) -> Unit,
+    onCreateNestBox: (String, String) -> Unit,
+    onSetNestStatus: (String, String) -> Unit,
+    onBack: () -> Unit,
+) {
     var cageCode by remember { mutableStateOf("") }
     var boxCode by remember { mutableStateOf("") }
-    var doeCount by remember { mutableStateOf("11") }
-    var matingDay by remember { mutableStateOf("") }
-    var waveId by remember { mutableStateOf("") }
-    var palpationResult by remember { mutableStateOf("pregnant") }
-    var kindlingLive by remember { mutableStateOf("") }
-    var kindlingDead by remember { mutableStateOf("0") }
-    var kindlingDay by remember { mutableStateOf("") }
-    var fromWaveId by remember { mutableStateOf("") }
-    var toWaveId by remember { mutableStateOf("") }
-    var kitCount by remember { mutableStateOf("") }
-    var fosterDay by remember { mutableStateOf("") }
-    var ackFoster by remember { mutableStateOf(false) }
-    var nestBoxId by remember { mutableStateOf("") }
-    var nestStatus by remember { mutableStateOf("in_cage") }
-    var weanCount by remember { mutableStateOf("") }
-    var matingOutcome by remember { mutableStateOf("false_pregnancy") }
-    var outcomeDay by remember { mutableStateOf("") }
-    var giAnimalId by remember { mutableStateOf("") }
-    var giSigns by remember { mutableStateOf("") }
-    var giDay by remember { mutableStateOf("") }
+    var boxId by remember { mutableStateOf("") }
+    var boxStatus by remember { mutableStateOf("in_cage") }
+    FarmOperationalPage("FOS-RABBIT-006", "Cages & nest boxes", "Rabbit housing and nest-box availability.", FarmVisualClass.I2, onBack) {
+        FarmOperationalRows(cages, "No cages yet", "Create a cage before starting a breeding wave.")
+        FarmOperationalSection(
+            "Nest capacity",
+        ) { Text("$availableBoxes available nest box(es)", style = MaterialTheme.typography.titleLarge) }
+        FarmOperationalSection("Create cage") {
+            OutlinedTextField(cageCode, {
+                cageCode = it
+            }, label = { Text("Cage code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Button(onClick = {
+                onCreateCage(cageCode)
+            }, enabled = !busy && cageCode.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Create cage") }
+        }
+        FarmOperationalSection("Add nest box") {
+            OutlinedTextField(cageCode, {
+                cageCode = it
+            }, label = { Text("Cage code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(boxCode, {
+                boxCode = it
+            }, label = { Text("Nest box code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Button(onClick = {
+                onCreateNestBox(cageCode, boxCode)
+            }, enabled = !busy && cageCode.isNotBlank() && boxCode.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    "Add nest box",
+                )
+            }
+        }
+        FarmOperationalRows(nestBoxes, "No nest boxes yet", null)
+        FarmOperationalSection("Nest-box cycle", "Available/sanitized → assigned → in cage → dirty → sanitize.") {
+            OutlinedTextField(boxId, {
+                boxId = it
+            }, label = { Text("Nest box id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(boxStatus, {
+                boxStatus = it
+            }, label = { Text("Next status") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Button(onClick = {
+                onSetNestStatus(boxId, boxStatus)
+            }, enabled = !busy && boxId.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Set nest status") }
+        }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    }
+}
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(FosDimens.ScreenMargin),
-        verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
+@Composable
+private fun RabbitWaveScreen(
+    waves: List<String>,
+    busy: Boolean,
+    error: String?,
+    onCreate: (String, Int, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var cage by remember { mutableStateOf("") }
+    var does by remember { mutableStateOf("11") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    FarmOperationalPage(
+        "FOS-RABBIT-009",
+        "Breeding wave",
+        "Semi-intensive timing generates nest, kindling, rebreed and weaning work.",
+        FarmVisualClass.I2,
+        onBack,
     ) {
-        Text("Rabbit programme", style = MaterialTheme.typography.titleLarge)
-        Text(
-            "KudBat semi-intensive pack: nest in mating+${KudbatSemiIntensiveExcel.NEST_IN_DAYS_AFTER_MATING}, kindling +${KudbatSemiIntensiveExcel.KINDLING_DAYS_AFTER_MATING}, rebreed +${KudbatSemiIntensiveExcel.REBREED_DAYS_AFTER_MATING}. A wave of 11 does needs 11 nest boxes.",
-        )
-        Text("Available nest boxes on the selected cage: $availableBoxes")
-        HorizontalDivider()
-        Text("Does and bucks", style = MaterialTheme.typography.labelLarge)
-        if (does.isEmpty()) Text("No rabbits on this device. Register a doe or buck before starting a wave.")
-        does.forEach { Text(it) }
-        OutlinedTextField(doeTag, { doeTag = it }, label = { Text("Tag") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(doeName, { doeName = it }, label = { Text("Name (optional)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Row {
-            TextButton(onClick = { doeSex = "FEMALE" }, enabled = !busy) {
-                Text(if (doeSex == "FEMALE") "Doe selected" else "Doe")
-            }
-            TextButton(onClick = { doeSex = "MALE" }, enabled = !busy) {
-                Text(if (doeSex == "MALE") "Buck selected" else "Buck")
-            }
-        }
-        Button(
-            onClick = { onRegisterDoe(doeTag, doeName.trim().ifBlank { null }, doeSex) },
-            enabled = !busy && doeTag.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
-        ) { Text("Register rabbit") }
-        HorizontalDivider()
-        OutlinedTextField(cageCode, { cageCode = it }, label = { Text("Cage code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Button(onClick = { onCreateCage(cageCode) }, enabled = !busy && cageCode.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
-            Text("Create cage")
-        }
-        OutlinedTextField(boxCode, { boxCode = it }, label = { Text("Nest box code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Button(onClick = { onCreateNestBox(cageCode, boxCode) }, enabled = !busy && cageCode.isNotBlank() && boxCode.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
-            Text("Add nest box")
-        }
-        OutlinedTextField(doeCount, { doeCount = it }, label = { Text("Doe count") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(matingDay, { matingDay = it }, label = { Text("Mating date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Button(
-            onClick = { onCreateWave(cageCode, doeCount.toIntOrNull() ?: 0, matingDay) },
-            enabled = !busy && cageCode.isNotBlank() && matingDay.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
+        FarmOperationalRows(waves, "No breeding waves yet", null)
+        FarmOperationalSection(
+            "Create wave",
+            "Nest +${KudbatSemiIntensiveExcel.NEST_IN_DAYS_AFTER_MATING} d · kindling +${KudbatSemiIntensiveExcel.KINDLING_DAYS_AFTER_MATING} d · rebreed +${KudbatSemiIntensiveExcel.REBREED_DAYS_AFTER_MATING} d",
         ) {
-            Text("Create wave")
+            OutlinedTextField(cage, {
+                cage = it
+            }, label = { Text("Cage code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(does, {
+                does = it
+            }, label = { Text("Doe count") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(day, {
+                day = it
+            }, label = { Text("Mating date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Button(
+                onClick = { onCreate(cage, does.toIntOrNull() ?: 0, day) },
+                enabled =
+                    !busy && cage.isNotBlank() && runCatching { LocalDate.parse(day) }.isSuccess,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Create breeding wave") }
         }
-        HorizontalDivider()
-        Text("Cages", style = MaterialTheme.typography.labelLarge)
-        if (cages.isEmpty()) Text("No cages on this device. Create cage A, B, or C to start.")
-        cages.forEach { Text(it) }
-        Text("Waves", style = MaterialTheme.typography.labelLarge)
-        if (waves.isEmpty()) Text("No breeding waves yet.")
-        waves.forEach { Text(it) }
-        HorizontalDivider()
-        Text("Palpation, kindling, foster", style = MaterialTheme.typography.labelLarge)
-        Text("Palpation is pregnant or open. Kindling uses live and dead kit counts. Foster after 3 days from kindling needs an acknowledgement.")
-        OutlinedTextField(waveId, { waveId = it }, label = { Text("Wave id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(palpationResult, { palpationResult = it }, label = { Text("Palpation result") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(kindlingDay, { kindlingDay = it }, label = { Text("Event date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Button(
-            onClick = { onPalpate(waveId, palpationResult, kindlingDay) },
-            enabled = !busy && waveId.isNotBlank() && kindlingDay.isNotBlank(),
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    }
+}
+
+@Composable
+private fun RabbitPalpationScreen(
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var wave by remember { mutableStateOf("") }
+    var result by remember { mutableStateOf("pregnant") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    RabbitEventPage(
+        "FOS-RABBIT-011",
+        "Palpation",
+        "Record pregnant or open; this is a farm record, not a diagnosis.",
+        busy,
+        error,
+        onBack,
+    ) {
+        OutlinedTextField(
+            wave,
+            { wave = it },
+            label = { Text("Wave id") },
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Record palpation") }
-        OutlinedTextField(kindlingLive, { kindlingLive = it }, label = { Text("Live kits") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(kindlingDead, { kindlingDead = it }, label = { Text("Dead kits") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Button(
-            onClick = { onKindle(waveId, kindlingLive, kindlingDead, kindlingDay) },
-            enabled = !busy && waveId.isNotBlank() && kindlingLive.isNotBlank() && kindlingDay.isNotBlank(),
+            enabled = !busy,
+            singleLine = true,
+        )
+        OutlinedTextField(result, {
+            result = it
+        }, label = { Text("Result") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        OutlinedTextField(
+            day,
+            { day = it },
+            label = { Text("Date") },
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Record kindling") }
-        OutlinedTextField(fromWaveId, { fromWaveId = it }, label = { Text("From wave id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(toWaveId, { toWaveId = it }, label = { Text("To wave id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(kitCount, { kitCount = it }, label = { Text("Kit count") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(fosterDay, { fosterDay = it }, label = { Text("Foster date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        TextButton(onClick = { ackFoster = !ackFoster }, enabled = !busy) {
-            Text(if (ackFoster) "Outside-window acknowledgement on" else "Acknowledge foster outside 3-day window")
-        }
+            enabled = !busy,
+            singleLine = true,
+        )
+        Button(onClick = {
+            onRecord(wave, result, day)
+        }, enabled = !busy && wave.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record palpation") }
+    }
+}
+
+@Composable
+private fun RabbitKindlingScreen(
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var wave by remember { mutableStateOf("") }
+    var live by remember { mutableStateOf("") }
+    var dead by remember { mutableStateOf("0") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    RabbitEventPage(
+        "FOS-RABBIT-017",
+        "Record kindling",
+        "Record live and dead kit counts clearly.",
+        busy,
+        error,
+        onBack,
+        FarmVisualClass.I4,
+    ) {
+        OutlinedTextField(
+            wave,
+            { wave = it },
+            label = { Text("Wave id") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !busy,
+            singleLine = true,
+        )
+        OutlinedTextField(live, {
+            live = it
+        }, label = { Text("Live kits") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        OutlinedTextField(dead, {
+            dead = it
+        }, label = { Text("Dead kits") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        OutlinedTextField(day, {
+            day = it
+        }, label = { Text("Kindling date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        Button(onClick = {
+            onRecord(wave, live, dead, day)
+        }, enabled = !busy && wave.isNotBlank() && live.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record kindling") }
+    }
+}
+
+@Composable
+private fun RabbitFosterScreen(
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String, String, Boolean) -> Unit,
+    onBack: () -> Unit,
+) {
+    var from by remember { mutableStateOf("") }
+    var to by remember { mutableStateOf("") }
+    var kits by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    var ack by remember { mutableStateOf(false) }
+    RabbitEventPage(
+        "FOS-RABBIT-020",
+        "Foster kits",
+        "Fostering after the governed window requires explicit acknowledgement.",
+        busy,
+        error,
+        onBack,
+    ) {
+        OutlinedTextField(from, {
+            from = it
+        }, label = { Text("From wave") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        OutlinedTextField(
+            to,
+            { to = it },
+            label = { Text("To wave") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !busy,
+            singleLine = true,
+        )
+        OutlinedTextField(kits, {
+            kits = it
+        }, label = { Text("Kit count") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        OutlinedTextField(day, {
+            day = it
+        }, label = { Text("Foster date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        TextButton(onClick = {
+            ack = !ack
+        }, enabled = !busy) { Text(if (ack) "Outside-window acknowledgement recorded" else "Acknowledge outside 3-day window") }
         Button(
-            onClick = { onFoster(fromWaveId, toWaveId, kitCount, fosterDay, ackFoster) },
-            enabled = !busy && fromWaveId.isNotBlank() && toWaveId.isNotBlank() && kitCount.isNotBlank() && fosterDay.isNotBlank(),
+            onClick = { onRecord(from, to, kits, day, ack) },
+            enabled =
+                !busy && from.isNotBlank() && to.isNotBlank() && kits.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
         ) { Text("Record foster") }
-        OutlinedTextField(weanCount, { weanCount = it }, label = { Text("Weaned kits") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Button(
-            onClick = { onWean(waveId, weanCount, kindlingDay) },
-            enabled = !busy && waveId.isNotBlank() && weanCount.isNotBlank() && kindlingDay.isNotBlank(),
+    }
+}
+
+@Composable
+private fun RabbitWeanScreen(
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var wave by remember { mutableStateOf("") }
+    var count by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    RabbitEventPage("FOS-RABBIT-022", "Weaning", "Record kits weaned from a breeding wave.", busy, error, onBack) {
+        OutlinedTextField(
+            wave,
+            { wave = it },
+            label = { Text("Wave id") },
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Record wean") }
-        OutlinedTextField(matingOutcome, { matingOutcome = it }, label = { Text("Mating outcome") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(outcomeDay, { outcomeDay = it }, label = { Text("Outcome date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Button(
-            onClick = { onRecordOutcome(waveId, matingOutcome, outcomeDay) },
-            enabled = !busy && waveId.isNotBlank() && outcomeDay.isNotBlank(),
+            enabled = !busy,
+            singleLine = true,
+        )
+        OutlinedTextField(count, {
+            count = it
+        }, label = { Text("Weaned kits") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        OutlinedTextField(day, {
+            day = it
+        }, label = { Text("Weaning date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        Button(onClick = {
+            onRecord(wave, count, day)
+        }, enabled = !busy && wave.isNotBlank() && count.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record weaning") }
+    }
+}
+
+@Composable
+private fun RabbitOutcomeScreen(
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var wave by remember { mutableStateOf("") }
+    var outcome by remember { mutableStateOf("false_pregnancy") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    RabbitEventPage("FOS-RABBIT-012", "Pregnancy status", "Record the breeding-wave outcome.", busy, error, onBack) {
+        OutlinedTextField(
+            wave,
+            { wave = it },
+            label = { Text("Wave id") },
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Record mating outcome") }
-        HorizontalDivider()
-        Text("GI stasis is a red-flag observation, not a diagnosis. A vet-call task is created.")
-        OutlinedTextField(giAnimalId, { giAnimalId = it }, label = { Text("Rabbit id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(giSigns, { giSigns = it }, label = { Text("Signs") }, modifier = Modifier.fillMaxWidth(), enabled = !busy)
-        OutlinedTextField(giDay, { giDay = it }, label = { Text("Flag date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Button(
-            onClick = { onRecordGiStasis(giAnimalId, giSigns, giDay) },
-            enabled = !busy && giAnimalId.isNotBlank() && giSigns.isNotBlank() && giDay.isNotBlank(),
+            enabled = !busy,
+            singleLine = true,
+        )
+        OutlinedTextField(outcome, {
+            outcome = it
+        }, label = { Text("Outcome") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        OutlinedTextField(day, {
+            day = it
+        }, label = { Text("Outcome date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        Button(onClick = {
+            onRecord(wave, outcome, day)
+        }, enabled = !busy && wave.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record outcome") }
+    }
+}
+
+@Composable
+private fun RabbitGiStasisScreen(
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var animal by remember { mutableStateOf("") }
+    var signs by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    RabbitEventPage(
+        "FOS-RABBIT-034",
+        "GI-stasis red flag",
+        "Record signs and create vet-call work. Farm OS does not diagnose GI stasis.",
+        busy,
+        error,
+        onBack,
+        FarmVisualClass.I4,
+    ) {
+        OutlinedTextField(animal, {
+            animal = it
+        }, label = { Text("Rabbit id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        OutlinedTextField(signs, { signs = it }, label = { Text("Signs observed") }, modifier = Modifier.fillMaxWidth(), enabled = !busy)
+        OutlinedTextField(
+            day,
+            { day = it },
+            label = { Text("Flag date") },
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Flag GI stasis") }
-        HorizontalDivider()
-        Text("Nest boxes", style = MaterialTheme.typography.labelLarge)
-        Text("Cycle is available or sanitized, assigned, in cage, dirty, then sanitize.")
-        if (nestBoxes.isEmpty()) Text("No nest boxes on this device.")
-        nestBoxes.forEach { Text(it) }
-        OutlinedTextField(nestBoxId, { nestBoxId = it }, label = { Text("Nest box id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(nestStatus, { nestStatus = it }, label = { Text("Next status") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Button(
-            onClick = { onSetNestStatus(nestBoxId, nestStatus) },
-            enabled = !busy && nestBoxId.isNotBlank() && nestStatus.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
-        ) { Text("Set nest box status") }
+            enabled = !busy,
+            singleLine = true,
+        )
+        Button(onClick = {
+            onRecord(animal, signs, day)
+        }, enabled = !busy && animal.isNotBlank() && signs.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
+            Text("Flag and create vet-call task")
+        }
+    }
+}
+
+@Composable
+private fun RabbitEventPage(
+    screenId: String,
+    title: String,
+    subtitle: String,
+    busy: Boolean,
+    error: String?,
+    onBack: () -> Unit,
+    visualClass: FarmVisualClass = FarmVisualClass.I3,
+    content: @Composable () -> Unit,
+) {
+    FarmOperationalPage(screenId, title, subtitle, visualClass, onBack) {
+        FarmOperationalSection("Record") { content() }
+        if (busy) Text("Saving on this device…", color = MaterialTheme.colorScheme.primary)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        TextButton(onClick = onBack, enabled = !busy) { Text("Back to farm home") }
     }
 }
