@@ -1240,7 +1240,7 @@ screens:
     name: Sheep Dashboard
     module: sheep
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1250,7 +1250,7 @@ screens:
     name: Mob or Flock List
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1260,7 +1260,7 @@ screens:
     name: Sheep Profile
     module: sheep
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1270,7 +1270,7 @@ screens:
     name: Sheep Registration
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1290,7 +1290,7 @@ screens:
     name: Weight Capture
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1320,7 +1320,7 @@ screens:
     name: FAMACHA
     module: sheep
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1330,7 +1330,7 @@ screens:
     name: Joining Dashboard
     module: sheep
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1340,7 +1340,7 @@ screens:
     name: Record Joining
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1350,7 +1350,7 @@ screens:
     name: Pregnancy Scan
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1370,7 +1370,7 @@ screens:
     name: Record Lambing
     module: sheep
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1390,7 +1390,7 @@ screens:
     name: Lamb Marking
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1400,7 +1400,7 @@ screens:
     name: Weaning
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1420,7 +1420,7 @@ screens:
     name: Shearing
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1430,7 +1430,7 @@ screens:
     name: Fleece Record
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1440,7 +1440,7 @@ screens:
     name: Micron or Fibre Result
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1450,7 +1450,7 @@ screens:
     name: Dag Score
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1460,7 +1460,7 @@ screens:
     name: Footrot
     module: sheep
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1470,7 +1470,7 @@ screens:
     name: Flystrike
     module: sheep
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1490,7 +1490,7 @@ screens:
     name: Pedigree
     module: sheep
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1500,7 +1500,7 @@ screens:
     name: Movement
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1520,7 +1520,7 @@ screens:
     name: Official Identifier
     module: sheep
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1530,7 +1530,7 @@ screens:
     name: Status Change
     module: sheep
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1560,7 +1560,7 @@ screens:
     name: Cattle Dashboard
     module: cattle
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1570,7 +1570,7 @@ screens:
     name: Herd or Mob or Lot List
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1580,7 +1580,7 @@ screens:
     name: Cattle Profile
     module: cattle
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1590,7 +1590,7 @@ screens:
     name: Cattle Registration
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1600,7 +1600,7 @@ screens:
     name: EID or Official Identifier
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1610,7 +1610,7 @@ screens:
     name: Weight Capture
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1630,7 +1630,7 @@ screens:
     name: BCS
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1650,7 +1650,7 @@ screens:
     name: Service
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1680,7 +1680,7 @@ screens:
     name: Pregnancy Diagnosis
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1700,7 +1700,7 @@ screens:
     name: Record Calving
     module: cattle
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1720,7 +1720,7 @@ screens:
     name: Weaning
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1730,7 +1730,7 @@ screens:
     name: Dairy Dashboard
     module: cattle
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1740,7 +1740,7 @@ screens:
     name: Milk Capture
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1760,7 +1760,7 @@ screens:
     name: SCC Capture
     module: cattle
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1780,7 +1780,7 @@ screens:
     name: Locomotion Score
     module: cattle
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1790,7 +1790,7 @@ screens:
     name: Dry-Off
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1810,7 +1810,7 @@ screens:
     name: Feedlot Placement
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1830,7 +1830,7 @@ screens:
     name: Days on Feed
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1840,7 +1840,7 @@ screens:
     name: Lot Close-Out
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1850,7 +1850,7 @@ screens:
     name: Movement
     module: cattle
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1870,7 +1870,7 @@ screens:
     name: Pedigree
     module: cattle
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1890,7 +1890,7 @@ screens:
     name: Status Change
     module: cattle
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX

@@ -104,3 +104,15 @@ references:
     environment: illustrated_poultry_houses_range_and_hatchery
     intensity: I2-I4
     status: implementation_reference_unverified
+  - reference_id: FOS-VREF-SHEEP-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-SHEEP-001, FOS-SHEEP-002, FOS-SHEEP-003, FOS-SHEEP-004, FOS-SHEEP-006, FOS-SHEEP-009, FOS-SHEEP-010, FOS-SHEEP-011, FOS-SHEEP-012, FOS-SHEEP-014, FOS-SHEEP-016, FOS-SHEEP-017, FOS-SHEEP-019, FOS-SHEEP-020, FOS-SHEEP-021, FOS-SHEEP-022, FOS-SHEEP-023, FOS-SHEEP-024, FOS-SHEEP-026, FOS-SHEEP-027, FOS-SHEEP-029, FOS-SHEEP-030]
+    environment: illustrated_sheep_pasture_joining_and_wool
+    intensity: I2-I4
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-CATTLE-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-CATTLE-001, FOS-CATTLE-002, FOS-CATTLE-003, FOS-CATTLE-004, FOS-CATTLE-005, FOS-CATTLE-006, FOS-CATTLE-008, FOS-CATTLE-010, FOS-CATTLE-013, FOS-CATTLE-015, FOS-CATTLE-017, FOS-CATTLE-018, FOS-CATTLE-019, FOS-CATTLE-021, FOS-CATTLE-023, FOS-CATTLE-024, FOS-CATTLE-026, FOS-CATTLE-028, FOS-CATTLE-029, FOS-CATTLE-030, FOS-CATTLE-032, FOS-CATTLE-034]
+    environment: illustrated_cattle_pasture_dairy_and_beef
+    intensity: I2-I4
+    status: implementation_reference_unverified

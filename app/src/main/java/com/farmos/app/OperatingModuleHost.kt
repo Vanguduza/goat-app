@@ -93,11 +93,15 @@ import com.farmos.domain.rabbit.FulfillRabbitWaitlist
 import com.farmos.domain.rabbit.PromoteRabbitKit
 import com.farmos.domain.rabbit.RecordRabbitMarketPlan
 import com.farmos.domain.rabbit.RegisterRabbitKit
+import com.farmos.feature.ops.CattleOperationsActions
+import com.farmos.feature.ops.CattleOperationsScreen
 import com.farmos.feature.ops.HealthObservationScreen
 import com.farmos.feature.ops.InventoryScreen
 import com.farmos.feature.ops.MoneyCaptureScreen
 import com.farmos.feature.ops.PoultryExperienceScreen
 import com.farmos.feature.ops.SimpleCaptureScreen
+import com.farmos.feature.ops.SheepOperationsActions
+import com.farmos.feature.ops.SheepOperationsScreen
 import com.farmos.feature.ops.TasksBoardScreen
 import com.farmos.feature.rabbit.RabbitProgrammeScreen
 import java.time.LocalDate
@@ -690,6 +694,7 @@ fun OperatingModuleHost(
                 else -> "Poultry flock"
             }
             SpeciesHerdScreen(
+                module = module,
                 title = title,
                 femaleLabel = when (module) {
                     FarmModule.SHEEP -> "Ewe"
@@ -727,603 +732,224 @@ fun OperatingModuleHost(
                     run { herd?.setStatus(animalId, status, newContext()) }
                 },
                 onBack = onBack,
-                extra = { selected ->
+                extra = { selected, operationsBack ->
                     when (module) {
-                        FarmModule.SHEEP -> {
-                            val groupId = remember { mutableStateOf("") }
-                            val joiningDay = remember { mutableStateOf("") }
-                            val scanResult = remember { mutableStateOf("single") }
-                            val scanDay = remember { mutableStateOf("") }
-                            val born = remember { mutableStateOf("") }
-                            val live = remember { mutableStateOf("") }
-                            val dead = remember { mutableStateOf("0") }
-                            val lambingDay = remember { mutableStateOf("") }
-                            androidx.compose.material3.HorizontalDivider()
-                            androidx.compose.material3.Text("Joining, scanning, lambing")
-                            androidx.compose.material3.OutlinedTextField(groupId.value, { groupId.value = it }, label = { androidx.compose.material3.Text("Sheep mob id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(joiningDay.value, { joiningDay.value = it }, label = { androidx.compose.material3.Text("Joining start") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
+                        FarmModule.SHEEP -> SheepOperationsScreen(
+                            selectedAnimalId = selected?.animalId,
+                            busy = busy,
+                            error = error,
+                            actions = SheepOperationsActions(
+                                onJoining = { groupId, day ->
                                     run {
                                         ops.recordJoining(
                                             RecordSheepJoining(
-                                                joiningId = UUID.randomUUID().toString(),
-                                                groupId = groupId.value,
-                                                startedEpochDay = LocalDate.parse(joiningDay.value).toEpochDay(),
-                                                scanTaskId = UUID.randomUUID().toString(),
-                                                preLambTaskId = UUID.randomUUID().toString(),
-                                                paddockTaskId = UUID.randomUUID().toString(),
-                                                lambingTaskId = UUID.randomUUID().toString(),
+                                                joiningId = UUID.randomUUID().toString(), groupId = groupId,
+                                                startedEpochDay = LocalDate.parse(day).toEpochDay(),
+                                                scanTaskId = UUID.randomUUID().toString(), preLambTaskId = UUID.randomUUID().toString(),
+                                                paddockTaskId = UUID.randomUUID().toString(), lambingTaskId = UUID.randomUUID().toString(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && groupId.value.isNotBlank() && joiningDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record joining") }
-                            androidx.compose.material3.OutlinedTextField(scanResult.value, { scanResult.value = it }, label = { androidx.compose.material3.Text("Scan result") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(scanDay.value, { scanDay.value = it }, label = { androidx.compose.material3.Text("Scan date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a ewe")
-                                    run {
-                                        ops.recordScan(
-                                            RecordSheepScan(UUID.randomUUID().toString(), animalId, scanResult.value, LocalDate.parse(scanDay.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
+                                onScan = { animalId, result, day ->
+                                    run { ops.recordScan(RecordSheepScan(UUID.randomUUID().toString(), animalId, result, LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
-                                enabled = !busy && selected != null && scanDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record scan") }
-                            androidx.compose.material3.OutlinedTextField(born.value, { born.value = it }, label = { androidx.compose.material3.Text("Born") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(live.value, { live.value = it }, label = { androidx.compose.material3.Text("Live") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(dead.value, { dead.value = it }, label = { androidx.compose.material3.Text("Dead") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(lambingDay.value, { lambingDay.value = it }, label = { androidx.compose.material3.Text("Lambing date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a ewe")
+                                onLambing = { animalId, born, live, dead, day ->
                                     run {
                                         ops.recordLambing(
                                             RecordSheepLambing(
-                                                UUID.randomUUID().toString(),
-                                                animalId,
-                                                born.value.toIntOrNull() ?: 0,
-                                                live.value.toIntOrNull() ?: 0,
-                                                dead.value.toIntOrNull() ?: 0,
-                                                LocalDate.parse(lambingDay.value).toEpochDay(),
+                                                UUID.randomUUID().toString(), animalId, born.toIntOrNull() ?: 0, live.toIntOrNull() ?: 0,
+                                                dead.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && selected != null && lambingDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record lambing") }
-                            val markCount = remember { mutableStateOf("") }
-                            val markDay = remember { mutableStateOf("") }
-                            val weanCount = remember { mutableStateOf("") }
-                            val weanDay = remember { mutableStateOf("") }
-                            val woolGrams = remember { mutableStateOf("") }
-                            val woolDay = remember { mutableStateOf("") }
-                            androidx.compose.material3.OutlinedTextField(markCount.value, { markCount.value = it }, label = { androidx.compose.material3.Text("Marked count") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(markDay.value, { markDay.value = it }, label = { androidx.compose.material3.Text("Marking date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
+                                onMarking = { groupId, animalId, count, day ->
                                     run {
                                         ops.recordMarking(
                                             RecordSheepMarking(
-                                                markingId = UUID.randomUUID().toString(),
-                                                groupId = groupId.value.trim().ifBlank { null },
-                                                animalId = selected?.animalId,
-                                                markedCount = markCount.value.toIntOrNull() ?: 0,
-                                                occurredEpochDay = LocalDate.parse(markDay.value).toEpochDay(),
+                                                UUID.randomUUID().toString(), groupId.trim().ifBlank { null }, animalId.trim().ifBlank { null },
+                                                count.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && markCount.value.isNotBlank() && markDay.value.isNotBlank() && (selected != null || groupId.value.isNotBlank()),
-                            ) { androidx.compose.material3.Text("Record marking") }
-                            androidx.compose.material3.OutlinedTextField(weanCount.value, { weanCount.value = it }, label = { androidx.compose.material3.Text("Weaned count") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(weanDay.value, { weanDay.value = it }, label = { androidx.compose.material3.Text("Weaning date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
+                                onWeaning = { groupId, animalId, count, day ->
                                     run {
                                         ops.recordSheepWeaning(
                                             RecordSheepWeaning(
-                                                weaningId = UUID.randomUUID().toString(),
-                                                groupId = groupId.value.trim().ifBlank { null },
-                                                animalId = selected?.animalId,
-                                                weanedCount = weanCount.value.toIntOrNull() ?: 0,
-                                                occurredEpochDay = LocalDate.parse(weanDay.value).toEpochDay(),
+                                                UUID.randomUUID().toString(), groupId.trim().ifBlank { null }, animalId.trim().ifBlank { null },
+                                                count.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && weanCount.value.isNotBlank() && weanDay.value.isNotBlank() && (selected != null || groupId.value.isNotBlank()),
-                            ) { androidx.compose.material3.Text("Record weaning") }
-                            androidx.compose.material3.OutlinedTextField(woolGrams.value, { woolGrams.value = it }, label = { androidx.compose.material3.Text("Greasy grams") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(woolDay.value, { woolDay.value = it }, label = { androidx.compose.material3.Text("Clip date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
+                                onWool = { groupId, animalId, grams, day ->
                                     run {
                                         ops.recordWool(
                                             RecordSheepWool(
-                                                clipId = UUID.randomUUID().toString(),
-                                                animalId = selected?.animalId,
-                                                groupId = groupId.value.trim().ifBlank { null },
-                                                greasyGrams = woolGrams.value.toIntOrNull() ?: 0,
-                                                occurredEpochDay = LocalDate.parse(woolDay.value).toEpochDay(),
+                                                UUID.randomUUID().toString(), animalId.trim().ifBlank { null }, groupId.trim().ifBlank { null },
+                                                grams.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && woolGrams.value.isNotBlank() && woolDay.value.isNotBlank() && (selected != null || groupId.value.isNotBlank()),
-                            ) { androidx.compose.material3.Text("Record wool clip") }
-                            val dag = remember { mutableStateOf("") }
-                            val footrot = remember { mutableStateOf("") }
-                            val scoreDay = remember { mutableStateOf("") }
-                            androidx.compose.material3.OutlinedTextField(dag.value, { dag.value = it }, label = { androidx.compose.material3.Text("Dag score") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(footrot.value, { footrot.value = it }, label = { androidx.compose.material3.Text("Footrot score") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(scoreDay.value, { scoreDay.value = it }, label = { androidx.compose.material3.Text("Score date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a sheep")
-                                    run {
-                                        ops.recordDag(
-                                            RecordSheepDag(UUID.randomUUID().toString(), animalId, dag.value.toIntOrNull() ?: -1, LocalDate.parse(scoreDay.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && selected != null && dag.value.isNotBlank() && scoreDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record dag") }
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a sheep")
-                                    run {
-                                        ops.recordFootrot(
-                                            RecordSheepFootrot(UUID.randomUUID().toString(), animalId, footrot.value.toIntOrNull() ?: -1, LocalDate.parse(scoreDay.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && selected != null && footrot.value.isNotBlank() && scoreDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record footrot") }
-                            val shearKind = remember { mutableStateOf("shearing") }
-                            val shearGrams = remember { mutableStateOf("") }
-                            val shearDay = remember { mutableStateOf("") }
-                            androidx.compose.material3.OutlinedTextField(shearKind.value, { shearKind.value = it }, label = { androidx.compose.material3.Text("Shearing kind") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(shearGrams.value, { shearGrams.value = it }, label = { androidx.compose.material3.Text("Greasy grams") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(shearDay.value, { shearDay.value = it }, label = { androidx.compose.material3.Text("Shearing date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
+                                onShearing = { groupId, animalId, kind, grams, day ->
                                     run {
                                         ops.recordShearing(
                                             RecordSheepShearing(
-                                                eventId = UUID.randomUUID().toString(),
-                                                animalId = selected?.animalId,
-                                                groupId = groupId.value.trim().ifBlank { null },
-                                                kind = shearKind.value,
-                                                greasyGrams = shearGrams.value.toIntOrNull(),
-                                                occurredEpochDay = LocalDate.parse(shearDay.value).toEpochDay(),
+                                                UUID.randomUUID().toString(), animalId.trim().ifBlank { null }, groupId.trim().ifBlank { null }, kind,
+                                                grams.toIntOrNull(), LocalDate.parse(day).toEpochDay(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && shearDay.value.isNotBlank() && (selected != null || groupId.value.isNotBlank()),
-                            ) { androidx.compose.material3.Text("Record shearing") }
-                            val fly = remember { mutableStateOf("") }
-                            val flyDay = remember { mutableStateOf("") }
-                            androidx.compose.material3.OutlinedTextField(fly.value, { fly.value = it }, label = { androidx.compose.material3.Text("Flystrike 0-5") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(flyDay.value, { flyDay.value = it }, label = { androidx.compose.material3.Text("Flystrike date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a sheep")
-                                    run {
-                                        ops.recordFlystrike(
-                                            RecordSheepFlystrike(UUID.randomUUID().toString(), animalId, fly.value.toIntOrNull() ?: 0, occurredEpochDay = LocalDate.parse(flyDay.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && selected != null && fly.value.isNotBlank() && flyDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record flystrike") }
-                            val sheepFamacha = remember { mutableStateOf("") }
-                            val micronTenths = remember { mutableStateOf("") }
-                            val idType = remember { mutableStateOf("ear_tag") }
-                            val idValue = remember { mutableStateOf("") }
-                            val moveDir = remember { mutableStateOf("on") }
-                            val moveFrom = remember { mutableStateOf("") }
-                            val moveTo = remember { mutableStateOf("") }
-                            val parentId = remember { mutableStateOf("") }
-                            val relation = remember { mutableStateOf("sire") }
-                            androidx.compose.material3.OutlinedTextField(sheepFamacha.value, { sheepFamacha.value = it }, label = { androidx.compose.material3.Text("FAMACHA 1-5") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a sheep")
-                                    run {
-                                        ops.recordSheepFamacha(
-                                            RecordFamacha(UUID.randomUUID().toString(), animalId, sheepFamacha.value.toIntOrNull() ?: 0, LocalDate.parse(scoreDay.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && selected != null && sheepFamacha.value.isNotBlank() && scoreDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record sheep FAMACHA") }
-                            androidx.compose.material3.OutlinedTextField(micronTenths.value, { micronTenths.value = it }, label = { androidx.compose.material3.Text("Micron tenths 80-500") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
+                                onMicron = { groupId, animalId, tenths, day ->
                                     run {
                                         ops.recordMicron(
                                             RecordSheepMicron(
-                                                UUID.randomUUID().toString(),
-                                                selected?.animalId,
-                                                groupId.value.trim().ifBlank { null },
-                                                micronTenths.value.toIntOrNull() ?: 0,
-                                                LocalDate.parse(scoreDay.value).toEpochDay(),
+                                                UUID.randomUUID().toString(), animalId.trim().ifBlank { null }, groupId.trim().ifBlank { null },
+                                                tenths.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && micronTenths.value.isNotBlank() && scoreDay.value.isNotBlank() && (selected != null || groupId.value.isNotBlank()),
-                            ) { androidx.compose.material3.Text("Record micron") }
-                            androidx.compose.material3.OutlinedTextField(idType.value, { idType.value = it }, label = { androidx.compose.material3.Text("Identifier type") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(idValue.value, { idValue.value = it }, label = { androidx.compose.material3.Text("Identifier value") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a sheep")
-                                    run {
-                                        ops.assignIdentifier(
-                                            AssignAnimalIdentifier(UUID.randomUUID().toString(), animalId, idType.value, idValue.value, LocalDate.parse(scoreDay.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
+                                onFamacha = { animalId, score, day ->
+                                    run { ops.recordSheepFamacha(RecordFamacha(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
-                                enabled = !busy && selected != null && idValue.value.isNotBlank() && scoreDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Assign identifier") }
-                            androidx.compose.material3.OutlinedTextField(moveDir.value, { moveDir.value = it }, label = { androidx.compose.material3.Text("Movement on/off/transfer") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(moveFrom.value, { moveFrom.value = it }, label = { androidx.compose.material3.Text("From place") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(moveTo.value, { moveTo.value = it }, label = { androidx.compose.material3.Text("To place") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a sheep")
+                                onDag = { animalId, score, day ->
+                                    run { ops.recordDag(RecordSheepDag(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: -1, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onFootrot = { animalId, score, day ->
+                                    run { ops.recordFootrot(RecordSheepFootrot(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: -1, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onFlystrike = { animalId, score, day ->
+                                    run { ops.recordFlystrike(RecordSheepFlystrike(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: -1, occurredEpochDay = LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onIdentifier = { animalId, type, value, day ->
+                                    run { ops.assignIdentifier(AssignAnimalIdentifier(UUID.randomUUID().toString(), animalId, type, value, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onMovement = { animalId, direction, from, to, day ->
                                     run {
                                         ops.recordOfficialMovement(
                                             RecordOfficialMovement(
-                                                UUID.randomUUID().toString(),
-                                                animalId,
-                                                moveDir.value,
-                                                moveFrom.value.trim().ifBlank { null },
-                                                moveTo.value.trim().ifBlank { null },
-                                                LocalDate.parse(scoreDay.value).toEpochDay(),
+                                                UUID.randomUUID().toString(), animalId, direction, from.trim().ifBlank { null }, to.trim().ifBlank { null },
+                                                LocalDate.parse(day).toEpochDay(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && selected != null && scoreDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record official movement") }
-                            androidx.compose.material3.OutlinedTextField(parentId.value, { parentId.value = it }, label = { androidx.compose.material3.Text("Parent id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(relation.value, { relation.value = it }, label = { androidx.compose.material3.Text("Pedigree relation") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a sheep")
-                                    run {
-                                        ops.linkPedigree(
-                                            LinkPedigree(UUID.randomUUID().toString(), animalId, parentId.value, relation.value),
-                                            newContext(),
-                                        )
-                                    }
+                                onPedigree = { animalId, parentId, relation ->
+                                    run { ops.linkPedigree(LinkPedigree(UUID.randomUUID().toString(), animalId, parentId, relation), newContext()) }
                                 },
-                                enabled = !busy && selected != null && parentId.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Link pedigree") }
-                        }
-                        FarmModule.CATTLE -> {
-                            val method = remember { mutableStateOf("ai") }
-                            val serviceDay = remember { mutableStateOf("") }
-                            val pdResult = remember { mutableStateOf("pregnant") }
-                            val pdDay = remember { mutableStateOf("") }
-                            val born = remember { mutableStateOf("") }
-                            val live = remember { mutableStateOf("") }
-                            val dead = remember { mutableStateOf("0") }
-                            val calvingDay = remember { mutableStateOf("") }
-                            androidx.compose.material3.HorizontalDivider()
-                            androidx.compose.material3.Text("Service, PD, calving")
-                            androidx.compose.material3.OutlinedTextField(method.value, { method.value = it }, label = { androidx.compose.material3.Text("Service method") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(serviceDay.value, { serviceDay.value = it }, label = { androidx.compose.material3.Text("Service date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
+                            ),
+                            onBack = operationsBack,
+                        )
+                        FarmModule.CATTLE -> CattleOperationsScreen(
+                            selectedAnimalId = selected?.animalId,
+                            busy = busy,
+                            error = error,
+                            actions = CattleOperationsActions(
+                                onService = { animalId, method, day ->
                                     run {
                                         ops.recordCattleService(
                                             RecordCattleService(
-                                                serviceId = UUID.randomUUID().toString(),
-                                                animalId = animalId,
-                                                method = method.value,
-                                                occurredEpochDay = LocalDate.parse(serviceDay.value).toEpochDay(),
-                                                pdTaskId = UUID.randomUUID().toString(),
-                                                paddockTaskId = UUID.randomUUID().toString(),
-                                                calvingTaskId = UUID.randomUUID().toString(),
+                                                UUID.randomUUID().toString(), animalId, method, LocalDate.parse(day).toEpochDay(),
+                                                UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && selected != null && serviceDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record service") }
-                            androidx.compose.material3.OutlinedTextField(pdResult.value, { pdResult.value = it }, label = { androidx.compose.material3.Text("PD result") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(pdDay.value, { pdDay.value = it }, label = { androidx.compose.material3.Text("PD date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
-                                    run {
-                                        ops.recordCattlePd(
-                                            RecordCattlePd(UUID.randomUUID().toString(), animalId, pdResult.value, LocalDate.parse(pdDay.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
+                                onPd = { animalId, result, day ->
+                                    run { ops.recordCattlePd(RecordCattlePd(UUID.randomUUID().toString(), animalId, result, LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
-                                enabled = !busy && selected != null && pdDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record PD") }
-                            androidx.compose.material3.OutlinedTextField(born.value, { born.value = it }, label = { androidx.compose.material3.Text("Born") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(live.value, { live.value = it }, label = { androidx.compose.material3.Text("Live") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(dead.value, { dead.value = it }, label = { androidx.compose.material3.Text("Dead") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(calvingDay.value, { calvingDay.value = it }, label = { androidx.compose.material3.Text("Calving date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
+                                onCalving = { animalId, born, live, dead, day ->
                                     run {
                                         ops.recordCalving(
                                             RecordCattleCalving(
-                                                UUID.randomUUID().toString(),
-                                                animalId,
-                                                born.value.toIntOrNull() ?: 0,
-                                                live.value.toIntOrNull() ?: 0,
-                                                dead.value.toIntOrNull() ?: 0,
-                                                LocalDate.parse(calvingDay.value).toEpochDay(),
+                                                UUID.randomUUID().toString(), animalId, born.toIntOrNull() ?: 0, live.toIntOrNull() ?: 0,
+                                                dead.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && selected != null && calvingDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record calving") }
-                            val scale = remember { mutableStateOf("1_5") }
-                            val score = remember { mutableStateOf("") }
-                            val bcsDay = remember { mutableStateOf("") }
-                            androidx.compose.material3.OutlinedTextField(scale.value, { scale.value = it }, label = { androidx.compose.material3.Text("BCS scale") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(score.value, { score.value = it }, label = { androidx.compose.material3.Text("Score tenths") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(bcsDay.value, { bcsDay.value = it }, label = { androidx.compose.material3.Text("BCS date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
+                                onBcs = { animalId, scale, score, day ->
+                                    run { ops.recordCattleBcs(RecordCattleBcs(UUID.randomUUID().toString(), animalId, scale, score.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onMilk = { animalId, litres, day ->
                                     run {
-                                        ops.recordCattleBcs(
-                                            RecordCattleBcs(
-                                                UUID.randomUUID().toString(),
-                                                animalId,
-                                                scale.value,
-                                                score.value.toIntOrNull() ?: 0,
-                                                LocalDate.parse(bcsDay.value).toEpochDay(),
-                                            ),
-                                            newContext(),
-                                        )
+                                        val milli = ((litres.replace(',', '.').toBigDecimal()) * 1000.toBigDecimal()).longValueExact()
+                                        ops.recordCattleMilk(RecordCattleMilk(UUID.randomUUID().toString(), animalId, milli, LocalDate.parse(day).toEpochDay()), newContext())
                                     }
                                 },
-                                enabled = !busy && selected != null && score.value.isNotBlank() && bcsDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record BCS") }
-                            val milkLitres = remember { mutableStateOf("") }
-                            val milkDay = remember { mutableStateOf("") }
-                            androidx.compose.material3.OutlinedTextField(milkLitres.value, { milkLitres.value = it }, label = { androidx.compose.material3.Text("Milk litres") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(milkDay.value, { milkDay.value = it }, label = { androidx.compose.material3.Text("Milk date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
-                                    val litres = milkLitres.value.replace(',', '.').toDoubleOrNull() ?: error("Enter litres")
-                                    run {
-                                        ops.recordCattleMilk(
-                                            RecordCattleMilk(
-                                                UUID.randomUUID().toString(),
-                                                animalId,
-                                                (litres * 1000.0).toLong(),
-                                                LocalDate.parse(milkDay.value).toEpochDay(),
-                                            ),
-                                            newContext(),
-                                        )
-                                    }
+                                onLocomotion = { animalId, score, day ->
+                                    run { ops.recordLocomotion(RecordCattleLocomotion(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
-                                enabled = !busy && selected != null && milkLitres.value.isNotBlank() && milkDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record milk") }
-                            val loco = remember { mutableStateOf("") }
-                            val scc = remember { mutableStateOf("") }
-                            val dim = remember { mutableStateOf("") }
-                            val scoreDay2 = remember { mutableStateOf("") }
-                            androidx.compose.material3.OutlinedTextField(loco.value, { loco.value = it }, label = { androidx.compose.material3.Text("Locomotion 1-5") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(scc.value, { scc.value = it }, label = { androidx.compose.material3.Text("SCC cells/ml") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(dim.value, { dim.value = it }, label = { androidx.compose.material3.Text("DIM days") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(scoreDay2.value, { scoreDay2.value = it }, label = { androidx.compose.material3.Text("Score date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
-                                    run {
-                                        ops.recordLocomotion(
-                                            RecordCattleLocomotion(UUID.randomUUID().toString(), animalId, loco.value.toIntOrNull() ?: 0, LocalDate.parse(scoreDay2.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
+                                onScc = { animalId, cells, dim, day ->
+                                    run { ops.recordScc(RecordCattleScc(UUID.randomUUID().toString(), animalId, cells.toIntOrNull() ?: 0, dim.toIntOrNull(), LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
-                                enabled = !busy && selected != null && loco.value.isNotBlank() && scoreDay2.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record locomotion") }
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
-                                    run {
-                                        ops.recordScc(
-                                            RecordCattleScc(
-                                                UUID.randomUUID().toString(),
-                                                animalId,
-                                                scc.value.toIntOrNull() ?: 0,
-                                                dim.value.toIntOrNull(),
-                                                LocalDate.parse(scoreDay2.value).toEpochDay(),
-                                            ),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && selected != null && scc.value.isNotBlank() && scoreDay2.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record SCC") }
-                            val dryDay = remember { mutableStateOf("") }
-                            val calvingDay2 = remember { mutableStateOf("") }
-                            androidx.compose.material3.OutlinedTextField(dryDay.value, { dryDay.value = it }, label = { androidx.compose.material3.Text("Dry-off date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(calvingDay2.value, { calvingDay2.value = it }, label = { androidx.compose.material3.Text("Expected calving") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
+                                onDryOff = { animalId, day, expectedCalving ->
                                     run {
                                         ops.recordDryOff(
                                             RecordCattleDryOff(
-                                                UUID.randomUUID().toString(),
-                                                animalId,
-                                                LocalDate.parse(dryDay.value).toEpochDay(),
-                                                calvingDay2.value.trim().takeIf { it.isNotBlank() }?.let { LocalDate.parse(it).toEpochDay() },
+                                                UUID.randomUUID().toString(), animalId, LocalDate.parse(day).toEpochDay(),
+                                                expectedCalving.trim().takeIf { it.isNotBlank() }?.let { LocalDate.parse(it).toEpochDay() },
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && selected != null && dryDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record dry-off") }
-                            val weanGrams = remember { mutableStateOf("") }
-                            val cattleIdType = remember { mutableStateOf("nlis") }
-                            val cattleIdValue = remember { mutableStateOf("") }
-                            val cattleMoveDir = remember { mutableStateOf("on") }
-                            val cattleFrom = remember { mutableStateOf("") }
-                            val cattleTo = remember { mutableStateOf("") }
-                            val cattleParent = remember { mutableStateOf("") }
-                            val cattleRel = remember { mutableStateOf("sire") }
-                            androidx.compose.material3.OutlinedTextField(weanGrams.value, { weanGrams.value = it }, label = { androidx.compose.material3.Text("Wean grams") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.recordCattleWeaning(
-                                            RecordCattleWeaning(
-                                                UUID.randomUUID().toString(),
-                                                selected?.animalId,
-                                                null,
-                                                weanGrams.value.toLongOrNull(),
-                                                LocalDate.parse(dryDay.value).toEpochDay(),
-                                            ),
-                                            newContext(),
-                                        )
-                                    }
+                                onWeaning = { animalId, weightGrams, day ->
+                                    run { ops.recordCattleWeaning(RecordCattleWeaning(UUID.randomUUID().toString(), animalId, null, weightGrams.toLongOrNull(), LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
-                                enabled = !busy && selected != null && dryDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record weaning") }
-                            androidx.compose.material3.OutlinedTextField(cattleIdType.value, { cattleIdType.value = it }, label = { androidx.compose.material3.Text("Identifier type") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(cattleIdValue.value, { cattleIdValue.value = it }, label = { androidx.compose.material3.Text("Identifier value") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
-                                    run {
-                                        ops.assignIdentifier(
-                                            AssignAnimalIdentifier(UUID.randomUUID().toString(), animalId, cattleIdType.value, cattleIdValue.value, LocalDate.parse(dryDay.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
+                                onIdentifier = { animalId, type, value, day ->
+                                    run { ops.assignIdentifier(AssignAnimalIdentifier(UUID.randomUUID().toString(), animalId, type, value, LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
-                                enabled = !busy && selected != null && cattleIdValue.value.isNotBlank() && dryDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Assign identifier") }
-                            androidx.compose.material3.OutlinedTextField(cattleMoveDir.value, { cattleMoveDir.value = it }, label = { androidx.compose.material3.Text("Movement on/off/transfer") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(cattleFrom.value, { cattleFrom.value = it }, label = { androidx.compose.material3.Text("From place") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(cattleTo.value, { cattleTo.value = it }, label = { androidx.compose.material3.Text("To place") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
+                                onMovement = { animalId, direction, from, to, day ->
                                     run {
                                         ops.recordOfficialMovement(
                                             RecordOfficialMovement(
-                                                UUID.randomUUID().toString(),
-                                                animalId,
-                                                cattleMoveDir.value,
-                                                cattleFrom.value.trim().ifBlank { null },
-                                                cattleTo.value.trim().ifBlank { null },
-                                                LocalDate.parse(dryDay.value).toEpochDay(),
+                                                UUID.randomUUID().toString(), animalId, direction, from.trim().ifBlank { null }, to.trim().ifBlank { null },
+                                                LocalDate.parse(day).toEpochDay(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && selected != null && dryDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record official movement") }
-                            androidx.compose.material3.OutlinedTextField(cattleParent.value, { cattleParent.value = it }, label = { androidx.compose.material3.Text("Parent id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(cattleRel.value, { cattleRel.value = it }, label = { androidx.compose.material3.Text("Pedigree relation") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    val animalId = selected?.animalId ?: error("Select a cow")
-                                    run {
-                                        ops.linkPedigree(
-                                            LinkPedigree(UUID.randomUUID().toString(), animalId, cattleParent.value, cattleRel.value),
-                                            newContext(),
-                                        )
-                                    }
+                                onPedigree = { animalId, parentId, relation ->
+                                    run { ops.linkPedigree(LinkPedigree(UUID.randomUUID().toString(), animalId, parentId, relation), newContext()) }
                                 },
-                                enabled = !busy && selected != null && cattleParent.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Link pedigree") }
-                            val lotId = remember { mutableStateOf("") }
-                            val lotHeads = remember { mutableStateOf("") }
-                            val dofDays = remember { mutableStateOf("") }
-                            val closeHeads = remember { mutableStateOf("") }
-                            androidx.compose.material3.OutlinedTextField(lotId.value, { lotId.value = it }, label = { androidx.compose.material3.Text("Cattle lot id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(lotHeads.value, { lotHeads.value = it }, label = { androidx.compose.material3.Text("Heads on feed") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.placeCattleLot(
-                                            PlaceCattleLot(UUID.randomUUID().toString(), lotId.value, lotHeads.value.toIntOrNull() ?: 0, LocalDate.parse(dryDay.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
+                                onPlaceLot = { groupId, heads, day ->
+                                    run { ops.placeCattleLot(PlaceCattleLot(UUID.randomUUID().toString(), groupId, heads.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
-                                enabled = !busy && lotId.value.isNotBlank() && lotHeads.value.isNotBlank() && dryDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Place lot on feed") }
-                            androidx.compose.material3.OutlinedTextField(dofDays.value, { dofDays.value = it }, label = { androidx.compose.material3.Text("Days on feed") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.recordDaysOnFeed(
-                                            RecordCattleDaysOnFeed(UUID.randomUUID().toString(), lotId.value, dofDays.value.toIntOrNull() ?: -1, LocalDate.parse(dryDay.value).toEpochDay()),
-                                            newContext(),
-                                        )
-                                    }
+                                onDaysOnFeed = { groupId, days, day ->
+                                    run { ops.recordDaysOnFeed(RecordCattleDaysOnFeed(UUID.randomUUID().toString(), groupId, days.toIntOrNull() ?: -1, LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
-                                enabled = !busy && lotId.value.isNotBlank() && dofDays.value.isNotBlank() && dryDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record days on feed") }
-                            androidx.compose.material3.OutlinedTextField(closeHeads.value, { closeHeads.value = it }, label = { androidx.compose.material3.Text("Head out") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
+                                onCloseLot = { groupId, headOut, weightGrams, daysOnFeed, day ->
                                     run {
                                         ops.closeCattleLot(
                                             CloseCattleLot(
-                                                UUID.randomUUID().toString(),
-                                                lotId.value,
-                                                closeHeads.value.toIntOrNull() ?: 0,
-                                                weanGrams.value.toLongOrNull(),
-                                                dofDays.value.toIntOrNull(),
-                                                LocalDate.parse(dryDay.value).toEpochDay(),
+                                                UUID.randomUUID().toString(), groupId, headOut.toIntOrNull() ?: 0, weightGrams.toLongOrNull(),
+                                                daysOnFeed.toIntOrNull(), LocalDate.parse(day).toEpochDay(),
                                             ),
                                             newContext(),
                                         )
                                     }
                                 },
-                                enabled = !busy && lotId.value.isNotBlank() && closeHeads.value.isNotBlank() && dryDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Close lot") }
-                        }
-
-                        else -> Unit
+                            ),
+                            onBack = operationsBack,
+                        )
+                        else -> error("Unsupported species operations module $module")
                     }
                 },
             )
