@@ -62,7 +62,7 @@ fun MoneyModuleHost(
         error = error,
         onRecord = { kind, category, amount, day ->
             runWrite {
-                val amountMinor = BigDecimal(amount)
+                val amountMinor = BigDecimal(amount.replace(',', '.'))
                     .movePointRight(2)
                     .longValueExact()
                 ops.recordMoney(
