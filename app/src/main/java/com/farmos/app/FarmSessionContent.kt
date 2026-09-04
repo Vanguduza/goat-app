@@ -14,6 +14,7 @@ import androidx.work.WorkManager
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.model.SearchSource
 import com.farmos.core.network.AuthenticationRequiredException
+import com.farmos.core.network.AuthorizationLoss
 import com.farmos.core.network.FarmMembership
 import com.farmos.core.sync.SyncWorker
 import com.farmos.domain.goat.GoatSearchResult
@@ -54,7 +55,9 @@ fun FarmSessionContent(
     var herd by remember { mutableStateOf<List<GoatSnapshot>>(emptyList()) }
     var selectedGoatId by remember { mutableStateOf<String?>(null) }
     var selected by remember { mutableStateOf<GoatSnapshot?>(null) }
-    var remoteResults by remember { mutableStateOf<List<GoatSearchResult>>(emptyList()) }
+    var searchResults by remember { mutableStateOf<List<GoatSearchResult>>(emptyList()) }
+    var syncMessage by remember { mutableStateOf("No local changes yet") }
+    var searchMessage by remember { mutableStateOf("Local search is always available") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var herdState by remember { mutableStateOf(LoadableSurfaceState.LOADING) }
@@ -106,6 +109,7 @@ fun FarmSessionContent(
         WorkManager.getInstance(app).enqueue(
             OneTimeWorkRequestBuilder<SyncWorker>()
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+                .addTag(FarmOsApplication.SYNC_WORK_TAG)
                 .build(),
         )
     }
@@ -118,6 +122,7 @@ fun FarmSessionContent(
                 block()
                 refreshGoatState()
             }.onSuccess {
+                syncMessage = "Saved on this device · waiting to sync"
                 enqueueSync()
             }.onFailure(::handleFailure)
             busy = false
@@ -202,7 +207,9 @@ fun FarmSessionContent(
             busy = busy,
             error = error,
             herdState = herdState,
-            remoteResults = remoteResults,
+            syncMessage = syncMessage,
+            searchMessage = searchMessage,
+            searchResults = searchResults,
         ),
         onRegister = { tag, name, sex, dateText ->
             runGoatWrite {
@@ -258,10 +265,11 @@ fun FarmSessionContent(
                     RegisterGoatKid(
                         animalId = kidId,
                         kiddingId = kiddingId,
-                        damAnimalId = damId,
                         tag = tag,
                         name = null,
                         sex = sex,
+                        dateOfBirthEpochDay = null,
+                        pedigreeLinkId = UUID.randomUUID().toString(),
                     ),
                     context(),
                 )
@@ -300,7 +308,13 @@ fun FarmSessionContent(
             val animalId = selectedGoatId
             if (animalId == null) error = "Select a doe first" else runGoatWrite {
                 repository.recordScc(
-                    RecordGoatScc(UUID.randomUUID().toString(), animalId, cells.toLong(), dim.toInt(), LocalDate.parse(day).toEpochDay()),
+                    RecordGoatScc(
+                        recordId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        cellsPerMl = cells.toInt(),
+                        dimDays = dim.toIntOrNull(),
+                        occurredEpochDay = LocalDate.parse(day).toEpochDay(),
+                    ),
                     context(),
                 )
             }
@@ -318,7 +332,14 @@ fun FarmSessionContent(
             val animalId = selectedGoatId
             if (animalId == null) error = "Select a doe first" else runGoatWrite {
                 repository.recordMating(
-                    RecordGoatMating(UUID.randomUUID().toString(), animalId, method, sireId.ifBlank { null }, LocalDate.parse(day).toEpochDay()),
+                    RecordGoatMating(
+                        matingId = UUID.randomUUID().toString(),
+                        damId = animalId,
+                        sireId = sireId.ifBlank { null },
+                        method = method,
+                        occurredEpochDay = LocalDate.parse(day).toEpochDay(),
+                        pregCheckTaskId = UUID.randomUUID().toString(),
+                    ),
                     context(),
                 )
             }
@@ -336,7 +357,13 @@ fun FarmSessionContent(
             val animalId = selectedGoatId
             if (animalId == null) error = "Select a doe first" else runGoatWrite {
                 repository.planLactation(
-                    PlanGoatLactation(UUID.randomUUID().toString(), animalId, LocalDate.parse(day).toEpochDay()),
+                    PlanGoatLactation(
+                        planId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        kiddingId = null,
+                        occurredEpochDay = LocalDate.parse(day).toEpochDay(),
+                        checkTaskId = UUID.randomUUID().toString(),
+                    ),
                     context(),
                 )
             }
@@ -357,23 +384,36 @@ fun FarmSessionContent(
             scope.launch {
                 busy = true
                 error = null
-                runCatching { app.performAuthoritativePull() }
-                    .onSuccess { refreshGoatState() }
-                    .onFailure { failure ->
-                        when (failure) {
-                            is AuthenticationRequiredException -> onRequireReauth(failure.message)
-                            else -> {
-                                val message = failure.message.orEmpty()
-                                if (message.contains("permission", true) || message.contains("access", true)) {
-                                    refreshMembershipAfterAuthorizationLoss(
-                                        "Farm access was removed. Choose another farm or sign out.",
-                                    )
-                                } else {
-                                    error = failure.message
-                                }
+                syncMessage = "Syncing"
+                runCatching {
+                    val push = app.syncEngine.drain()
+                    push to if (push.authorizationLoss == null) app.farmPullReconciler()?.reconcile(membership.farmId) else null
+                }.onSuccess { (push, pull) ->
+                    when (push.authorizationLoss) {
+                        AuthorizationLoss.SESSION_EXPIRED -> onRequireReauth(null)
+                        AuthorizationLoss.FARM_ACCESS_REVOKED -> refreshMembershipAfterAuthorizationLoss(
+                            "Farm access was removed. Pending local records stayed on this device and were not sent.",
+                        )
+                        null -> {
+                            syncMessage = when {
+                                push.conflicts > 0 -> "Conflict needs review"
+                                push.rejected > 0 -> "Server rejected a pending record"
+                                push.retrying > 0 -> "Saved locally · server retry pending"
+                                push.acknowledged > 0 || (pull?.appliedEvents ?: 0) > 0 ->
+                                    "Synced · ${pull?.appliedEvents ?: 0} server changes applied"
+                                else -> "Synced · no new server changes"
                             }
+                            refreshGoatState()
                         }
                     }
+                }.onFailure { failure ->
+                    if (failure is AuthenticationRequiredException) {
+                        onRequireReauth(failure.message)
+                    } else {
+                        syncMessage = "Saved locally · sync failed. Entries stay on this device."
+                        error = failure.message
+                    }
+                }
                 busy = false
             }
         },
@@ -383,19 +423,32 @@ fun FarmSessionContent(
                 runCatching {
                     if (query.isBlank()) emptyList() else repository.searchGoats(query, 25)
                 }.onSuccess { local ->
-                    remoteResults = local
+                    searchResults = local
+                    searchMessage = "${local.size} local result(s)"
                     runCatching {
-                        app.searchClient?.search(membership.farmId, "goat", query, 25).orEmpty()
-                    }.onSuccess { remote ->
-                        remoteResults = (local + remote).distinctBy { it.animalId }.map {
-                            if (local.any { localRow -> localRow.animalId == it.animalId }) {
-                                it.copy(source = SearchSource.LOCAL)
-                            } else {
-                                it
+                        app.farmSearchClient
+                            ?.searchAnimals(membership.farmId, query, 25)
+                            ?.filter { it.speciesCode == null || it.speciesCode == "goat" }
+                            ?.mapNotNull { hit ->
+                                val tag = hit.tag ?: return@mapNotNull null
+                                GoatSearchResult(
+                                    animalId = hit.id,
+                                    tag = tag,
+                                    name = hit.displayName?.takeUnless { it == tag },
+                                    status = hit.status ?: "active",
+                                    source = SearchSource.MEILISEARCH,
+                                )
                             }
-                        }
+                            .orEmpty()
+                    }.onSuccess { remote ->
+                        searchResults = (remote + local).distinctBy { it.animalId }
+                        searchMessage = "${local.size} local · ${remote.size} online result(s)"
                     }.onFailure { remoteFailure ->
-                        if (remoteFailure is AuthenticationRequiredException) onRequireReauth(remoteFailure.message)
+                        if (remoteFailure is AuthenticationRequiredException) {
+                            onRequireReauth(remoteFailure.message)
+                        } else {
+                            searchMessage = "${local.size} local result(s) · online search unavailable"
+                        }
                     }
                 }.onFailure(::handleFailure)
             }
