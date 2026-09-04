@@ -2490,7 +2490,7 @@ screens:
     name: Today Board
     module: task
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2520,7 +2520,7 @@ screens:
     name: Create Task
     module: task
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2550,7 +2550,7 @@ screens:
     name: Scheduled
     module: task
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2560,7 +2560,7 @@ screens:
     name: Overdue
     module: task
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2570,7 +2570,7 @@ screens:
     name: Completed
     module: task
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX

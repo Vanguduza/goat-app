@@ -47,3 +47,10 @@ surfaces:
     i4_reference: FOS-GOAT-051
     visual_state: VISUAL_IMPLEMENTED
     evidence_missing: [goldens, validation_state_matrix, offline_receipt_golden, accessibility_review, owner_visual_approval]
+  - file: feature/ops/src/main/kotlin/com/farmos/feature/ops/TasksBoardScreen.kt
+    current_role: illustrated_task_reference_family
+    target_screens: [FOS-TASK-001, FOS-TASK-004, FOS-TASK-007, FOS-TASK-008, FOS-TASK-009]
+    command_state_reuse: true
+    old_visual_layout_authoritative: false
+    visual_reference: FOS-VREF-TASK-001
+    action: preserve_and_expand_to_remaining_task_screen_contracts

@@ -78,3 +78,10 @@ references:
     environment: restrained_safety_surface
     intensity: I4
     status: implementation_reference_unverified
+  - reference_id: FOS-VREF-TASK-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-TASK-001, FOS-TASK-004, FOS-TASK-007, FOS-TASK-008, FOS-TASK-009]
+    environment: restrained_farm_workboard
+    intensity: I2-I3
+    source: recovered_style_guide_tasks_reference
+    status: implementation_reference_unverified

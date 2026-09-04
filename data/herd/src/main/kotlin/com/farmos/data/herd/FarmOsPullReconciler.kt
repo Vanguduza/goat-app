@@ -1165,6 +1165,8 @@ class RoomOpsRepository(
 
     suspend fun openTasks() = database.tasks().openForFarm(farmId)
 
+    suspend fun completedTasks(limit: Int = 100) = database.tasks().completedForFarm(farmId, limit)
+
     suspend fun createCage(command: CreateRabbitCage, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.cage(command)?.let { error(it) }
         enqueue(context, "rabbit.cage_create.v1", "rabbit_cage", command.cageId, 0, json.encodeToString(command)) {

@@ -423,6 +423,9 @@ interface TaskDao {
 
     @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND status = 'open' ORDER BY dueOnEpochDay, title")
     suspend fun openForFarm(farmId: String): List<TaskEntity>
+
+    @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND status = 'done' ORDER BY updatedAtEpochMillis DESC LIMIT :limit")
+    suspend fun completedForFarm(farmId: String, limit: Int = 100): List<TaskEntity>
 }
 
 @Dao

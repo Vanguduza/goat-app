@@ -22,43 +22,6 @@ import androidx.compose.ui.Modifier
 import com.farmos.core.design.FosDimens
 
 @Composable
-fun TasksBoardScreen(
-    rows: List<String>,
-    busy: Boolean,
-    error: String?,
-    onCreate: (title: String, module: String, code: String, due: String) -> Unit,
-    onComplete: (taskId: String) -> Unit,
-    onBack: () -> Unit,
-) {
-    var title by remember { mutableStateOf("") }
-    var module by remember { mutableStateOf("goat") }
-    var code by remember { mutableStateOf("CHECK") }
-    var due by remember { mutableStateOf("") }
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(FosDimens.ScreenMargin),
-        verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
-    ) {
-        Text("Today tasks", style = MaterialTheme.typography.titleLarge)
-        if (rows.isEmpty()) Text("No open tasks on this device.")
-        rows.forEach { row ->
-            Text(row)
-            val id = row.substringBefore(' ')
-            TextButton(onClick = { onComplete(id) }, enabled = !busy) { Text("Mark done") }
-        }
-        HorizontalDivider()
-        OutlinedTextField(title, { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(module, { module = it }, label = { Text("Module") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(code, { code = it }, label = { Text("Task code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(due, { due = it }, label = { Text("Due date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        Button(onClick = { onCreate(title, module, code, due) }, enabled = !busy && title.isNotBlank() && due.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
-            Text("Create task")
-        }
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        TextButton(onClick = onBack, enabled = !busy) { Text("Back to farm home") }
-    }
-}
-
-@Composable
 fun HealthObservationScreen(
     rows: List<String>,
     catalog: List<String>,

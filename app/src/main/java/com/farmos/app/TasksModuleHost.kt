@@ -11,6 +11,7 @@ import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateFarmTask
+import com.farmos.feature.ops.TaskUiRow
 import com.farmos.feature.ops.TasksBoardScreen
 import java.time.LocalDate
 import java.util.UUID
@@ -25,12 +26,23 @@ fun TasksModuleHost(
     onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var rows by remember(farmId) { mutableStateOf(emptyList<String>()) }
+    var rows by remember(farmId) { mutableStateOf(emptyList<TaskUiRow>()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
     suspend fun refresh() {
-        rows = ops.openTasks().map { task -> "${task.id} ${task.title} · ${task.taskCode}" }
+        val open = ops.openTasks()
+        val completed = ops.completedTasks(100)
+        rows = (open + completed).map { task ->
+            TaskUiRow(
+                id = task.id,
+                title = task.title,
+                moduleCode = task.moduleCode,
+                taskCode = task.taskCode,
+                dueEpochDay = task.dueOnEpochDay,
+                status = task.status,
+            )
+        }
     }
 
     fun runWrite(block: suspend () -> Unit) {
