@@ -78,3 +78,9 @@ surfaces:
     command_state_reuse: true
     visual_reference: FOS-VREF-RABBIT-001
     action: expand_litter_kit_retention_market_pedigree_timeline_and_report_routes
+  - file: feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryExperienceScreen.kt
+    current_role: flock_house_first_poultry_experience
+    target_screens: [FOS-POULTRY-001, FOS-POULTRY-002, FOS-POULTRY-004, FOS-POULTRY-006, FOS-POULTRY-008, FOS-POULTRY-009, FOS-POULTRY-014, FOS-POULTRY-016, FOS-POULTRY-017, FOS-POULTRY-018, FOS-POULTRY-020, FOS-POULTRY-021]
+    command_state_reuse: true
+    visual_reference: FOS-VREF-POULTRY-001
+    action: expand_flock_profile_house_detail_egg_fcr_schedule_move_closeout_health_timeline_report

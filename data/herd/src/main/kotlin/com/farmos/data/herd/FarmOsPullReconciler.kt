@@ -1731,6 +1731,7 @@ class RoomOpsRepository(
     suspend fun inventoryLink() = database.lifecycle().inventoryLink(farmId)
     suspend fun vaccinations() = database.lifecycle().vaccinations(farmId)
     suspend fun placements() = database.lifecycle().placements(farmId)
+    suspend fun enabledPoultryKinds() = database.lifecycle().enabledPoultryKinds(farmId)
 
     suspend fun recordObservation(command: RecordHealthObservation, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.observation(command)?.let { error(it) }

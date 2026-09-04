@@ -17,6 +17,7 @@ required=(
   feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryExperienceScreen.kt
   feature/ops/src/main/kotlin/com/farmos/feature/ops/FinanceExperienceScreen.kt
   feature/ops/src/main/kotlin/com/farmos/feature/ops/TasksBoardScreen.kt
+  feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryExperienceScreen.kt
   feature/rabbit/src/main/kotlin/com/farmos/feature/rabbit/RabbitProgrammeScreen.kt
 )
 for path in "${required[@]}"; do
@@ -63,6 +64,7 @@ grep -q '^screen_count: 537$' docs/ux/FARM_OS_SCREEN_REGISTRY.yaml || {
   echo 'ERROR: generated atomic screen registry is stale; run scripts/design/generate_screen_registry.py'; exit 1;
 }
 
+grep -q 'FOS-POULTRY-001' feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryExperienceScreen.kt || { echo 'ERROR: poultry visual reference family missing'; exit 1; }
 grep -q 'FOS-RABBIT-001' feature/rabbit/src/main/kotlin/com/farmos/feature/rabbit/RabbitProgrammeScreen.kt || { echo 'ERROR: rabbit visual reference family missing'; exit 1; }
 grep -q 'FOS-HEALTH-001' feature/ops/src/main/kotlin/com/farmos/feature/ops/HealthExperienceScreen.kt || { echo 'ERROR: health visual reference family missing'; exit 1; }
 grep -q 'FOS-INV-001' feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryExperienceScreen.kt || { echo 'ERROR: inventory visual reference family missing'; exit 1; }

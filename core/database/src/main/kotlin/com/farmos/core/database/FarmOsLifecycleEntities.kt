@@ -394,6 +394,8 @@ interface LifecycleDao {
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMicron(row: SheepMicronEntity)
     @Upsert suspend fun upsertMicron(row: SheepMicronEntity)
     @Upsert suspend fun upsertEnabledKind(row: EnabledPoultryKindEntity)
+    @Query("SELECT * FROM enabled_poultry_kinds WHERE farmId = :farmId ORDER BY poultryKindCode")
+    suspend fun enabledPoultryKinds(farmId: String): List<EnabledPoultryKindEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertGiStasis(row: RabbitGiStasisEntity)
     @Upsert suspend fun upsertGiStasis(row: RabbitGiStasisEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPedigree(row: PedigreeRelationEntity)

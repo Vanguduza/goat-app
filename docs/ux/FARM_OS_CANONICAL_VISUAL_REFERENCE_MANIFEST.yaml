@@ -98,3 +98,9 @@ references:
     environment: illustrated_rabbitry_and_nest_cycle
     intensity: I2-I4
     status: implementation_reference_unverified
+  - reference_id: FOS-VREF-POULTRY-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-POULTRY-001, FOS-POULTRY-002, FOS-POULTRY-004, FOS-POULTRY-006, FOS-POULTRY-008, FOS-POULTRY-009, FOS-POULTRY-014, FOS-POULTRY-016, FOS-POULTRY-017, FOS-POULTRY-018, FOS-POULTRY-020, FOS-POULTRY-021]
+    environment: illustrated_poultry_houses_range_and_hatchery
+    intensity: I2-I4
+    status: implementation_reference_unverified

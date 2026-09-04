@@ -1920,7 +1920,7 @@ screens:
     name: Poultry Dashboard
     module: poultry
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1930,7 +1930,7 @@ screens:
     name: Enabled Poultry Kinds
     module: poultry
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1950,7 +1950,7 @@ screens:
     name: Flock List
     module: poultry
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1970,7 +1970,7 @@ screens:
     name: House List
     module: poultry
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -1990,7 +1990,7 @@ screens:
     name: Placement
     module: poultry
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2000,7 +2000,7 @@ screens:
     name: Daily Mortality
     module: poultry
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2050,7 +2050,7 @@ screens:
     name: Vaccination Capture
     module: poultry
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2070,7 +2070,7 @@ screens:
     name: Biosecurity Check
     module: poultry
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2080,7 +2080,7 @@ screens:
     name: Hatchery Dashboard
     module: poultry
     visual_class: I2
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2090,7 +2090,7 @@ screens:
     name: Eggs Set
     module: poultry
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2110,7 +2110,7 @@ screens:
     name: Candling
     module: poultry
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -2120,7 +2120,7 @@ screens:
     name: Hatch Result
     module: poultry
     visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX

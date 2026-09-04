@@ -96,6 +96,7 @@ import com.farmos.domain.rabbit.RegisterRabbitKit
 import com.farmos.feature.ops.HealthObservationScreen
 import com.farmos.feature.ops.InventoryScreen
 import com.farmos.feature.ops.MoneyCaptureScreen
+import com.farmos.feature.ops.PoultryExperienceScreen
 import com.farmos.feature.ops.SimpleCaptureScreen
 import com.farmos.feature.ops.TasksBoardScreen
 import com.farmos.feature.rabbit.RabbitProgrammeScreen
@@ -147,12 +148,13 @@ fun OperatingModuleHost(
     var houseRows by remember { mutableStateOf(emptyList<String>()) }
     var hatchRows by remember { mutableStateOf(emptyList<String>()) }
     var vaxRows by remember { mutableStateOf(emptyList<String>()) }
+    var enabledPoultryKindRows by remember { mutableStateOf(emptyList<String>()) }
+    var poultryPlacementRows by remember { mutableStateOf(emptyList<String>()) }
     var beddingLine by remember { mutableStateOf("No bedding item bound.") }
 
     val speciesCode = when (module) {
         FarmModule.SHEEP -> "sheep"
         FarmModule.CATTLE -> "cattle"
-        FarmModule.POULTRY -> "poultry"
         else -> null
     }
     val herd = remember(farmId, speciesCode) {
@@ -176,6 +178,8 @@ fun OperatingModuleHost(
         houseRows = ops.houses().map { "${it.id} ${it.code} · ${it.kind} · ${it.poultryKindCode}" }
         hatchRows = ops.hatches().map { "${it.id} ${it.poultryKindCode} · ${it.eggsSet} eggs · ${it.status}" }
         vaxRows = ops.vaccinations().map { "${it.id} ${it.poultryKindCode} · flock ${it.groupId} · ${it.formularyItemId}" }
+        enabledPoultryKindRows = ops.enabledPoultryKinds().map { it.poultryKindCode }
+        poultryPlacementRows = ops.placements().map { "${it.groupId} · ${it.poultryKindCode} · house ${it.houseId} · ${it.headCount} head" }
         beddingLine = ops.inventoryLink()?.let { "Bedding ${it.nestBeddingItemId ?: "none"} · ${it.nestBeddingQtyMilli} milli" }
             ?: "No bedding item bound."
         speciesRows = herd?.list()?.map { animal ->
@@ -586,7 +590,100 @@ fun OperatingModuleHost(
             },
             onBack = onBack,
         )
-        FarmModule.SHEEP, FarmModule.CATTLE, FarmModule.POULTRY -> {
+        FarmModule.POULTRY -> PoultryExperienceScreen(
+            enabledKinds = enabledPoultryKindRows,
+            houses = houseRows,
+            placements = poultryPlacementRows,
+            flockDays = flockRows,
+            hatches = hatchRows,
+            vaccinations = vaxRows,
+            busy = busy,
+            error = error,
+            onEnableKind = { kind -> run { ops.enablePoultryKind(EnablePoultryKind(kind), newContext()) } },
+            onCreateHouse = { code, houseKind, poultryKind ->
+                run { ops.createHouse(CreatePoultryHouse(UUID.randomUUID().toString(), code, houseKind, poultryKind), newContext()) }
+            },
+            onPlaceFlock = { groupId, houseId, poultryKind, heads, day ->
+                run {
+                    ops.placeFlock(
+                        PlacePoultryFlock(
+                            UUID.randomUUID().toString(), groupId, houseId, poultryKind, heads.toIntOrNull() ?: 0,
+                            LocalDate.parse(day).toEpochDay(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                        ),
+                        newContext(),
+                    )
+                }
+            },
+            onRecordFlockDay = { groupId, eggs, dead, culls, feedGrams, day ->
+                run {
+                    ops.recordFlockDay(
+                        RecordPoultryFlockDay(
+                            UUID.randomUUID().toString(), groupId, eggs.toIntOrNull() ?: 0, dead.toIntOrNull() ?: 0,
+                            culls.toIntOrNull() ?: 0, feedGrams.toLongOrNull() ?: 0L, LocalDate.parse(day).toEpochDay(),
+                        ),
+                        newContext(),
+                    )
+                }
+            },
+            onSetEggs = { poultryKind, eggs, day, houseId, groupId ->
+                run {
+                    ops.setHatch(
+                        SetPoultryHatch(
+                            hatchId = UUID.randomUUID().toString(), poultryKindCode = poultryKind, eggsSet = eggs.toIntOrNull() ?: 0,
+                            setEpochDay = LocalDate.parse(day).toEpochDay(), houseId = houseId.trim().ifBlank { null },
+                            groupId = groupId.trim().ifBlank { null }, candleTaskId = UUID.randomUUID().toString(),
+                            lockTaskId = UUID.randomUUID().toString(), hatchTaskId = UUID.randomUUID().toString(),
+                        ),
+                        newContext(),
+                    )
+                }
+            },
+            onCandle = { hatchId, fertile, infertile, midDead, day ->
+                run {
+                    ops.candleHatch(
+                        CandlePoultryHatch(
+                            hatchId, fertile.toIntOrNull() ?: 0, infertile.toIntOrNull() ?: 0, midDead.toIntOrNull() ?: 0,
+                            LocalDate.parse(day).toEpochDay(),
+                        ),
+                        newContext(),
+                    )
+                }
+            },
+            onRecordHatch = { hatchId, hatched, culls, day ->
+                run {
+                    ops.recordHatch(
+                        RecordPoultryHatch(
+                            hatchId, hatched.toIntOrNull() ?: 0, culls.toIntOrNull() ?: 0,
+                            occurredEpochDay = LocalDate.parse(day).toEpochDay(),
+                        ),
+                        newContext(),
+                    )
+                }
+            },
+            onVaccinate = { groupId, poultryKind, formularyId, day ->
+                run {
+                    ops.recordVaccination(
+                        RecordPoultryVaccination(
+                            UUID.randomUUID().toString(), groupId, poultryKind, formularyId, LocalDate.parse(day).toEpochDay(),
+                        ),
+                        newContext(),
+                    )
+                }
+            },
+            onBiosecurity = { houseId, groupId, findings, mixedSpecies, day ->
+                run {
+                    ops.recordBiosecurity(
+                        RecordPoultryBiosecurity(
+                            UUID.randomUUID().toString(), houseId.trim().ifBlank { null }, groupId.trim().ifBlank { null }, findings,
+                            mixedSpecies, LocalDate.parse(day).toEpochDay(),
+                        ),
+                        newContext(),
+                    )
+                }
+            },
+            onBack = onBack,
+        )
+        FarmModule.SHEEP, FarmModule.CATTLE -> {
             val title = when (module) {
                 FarmModule.SHEEP -> "Sheep flock"
                 FarmModule.CATTLE -> "Cattle herd"
@@ -604,7 +701,7 @@ fun OperatingModuleHost(
                     FarmModule.CATTLE -> "Bull"
                     else -> "Male"
                 },
-                kindRequired = module == FarmModule.POULTRY,
+                kindRequired = false,
                 rows = speciesRows,
                 busy = busy,
                 error = error,
@@ -1225,181 +1322,7 @@ fun OperatingModuleHost(
                                 enabled = !busy && lotId.value.isNotBlank() && closeHeads.value.isNotBlank() && dryDay.value.isNotBlank(),
                             ) { androidx.compose.material3.Text("Close lot") }
                         }
-                        FarmModule.POULTRY -> {
-                            val houseCode = remember { mutableStateOf("") }
-                            val houseKind = remember { mutableStateOf("house") }
-                            val poultryKind = remember { mutableStateOf("chicken") }
-                            val eggs = remember { mutableStateOf("") }
-                            val setDay = remember { mutableStateOf("") }
-                            val hatchId = remember { mutableStateOf("") }
-                            val fertile = remember { mutableStateOf("") }
-                            val infertile = remember { mutableStateOf("") }
-                            val midDead = remember { mutableStateOf("") }
-                            val hatched = remember { mutableStateOf("") }
-                            val culls = remember { mutableStateOf("0") }
-                            androidx.compose.material3.HorizontalDivider()
-                            androidx.compose.material3.Text("Hatchery uses kind incubation. Chicken 21, duck 28, muscovy 35, quail 17.")
-                            houseRows.forEach { androidx.compose.material3.Text(it) }
-                            hatchRows.forEach { androidx.compose.material3.Text(it) }
-                            if (houseRows.isEmpty() && hatchRows.isEmpty()) {
-                                androidx.compose.material3.Text("No houses or hatches on this device.")
-                            }
-                            androidx.compose.material3.OutlinedTextField(houseCode.value, { houseCode.value = it }, label = { androidx.compose.material3.Text("House code") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(houseKind.value, { houseKind.value = it }, label = { androidx.compose.material3.Text("Housing kind") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(poultryKind.value, { poultryKind.value = it }, label = { androidx.compose.material3.Text("Poultry kind") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.createHouse(
-                                            CreatePoultryHouse(UUID.randomUUID().toString(), houseCode.value, houseKind.value, poultryKind.value),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && houseCode.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Create house") }
-                            androidx.compose.material3.OutlinedTextField(eggs.value, { eggs.value = it }, label = { androidx.compose.material3.Text("Eggs set") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(setDay.value, { setDay.value = it }, label = { androidx.compose.material3.Text("Set date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.setHatch(
-                                            SetPoultryHatch(
-                                                hatchId = UUID.randomUUID().toString(),
-                                                poultryKindCode = poultryKind.value,
-                                                eggsSet = eggs.value.toIntOrNull() ?: 0,
-                                                setEpochDay = LocalDate.parse(setDay.value).toEpochDay(),
-                                                candleTaskId = UUID.randomUUID().toString(),
-                                                lockTaskId = UUID.randomUUID().toString(),
-                                                hatchTaskId = UUID.randomUUID().toString(),
-                                            ),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && eggs.value.isNotBlank() && setDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Set eggs") }
-                            androidx.compose.material3.OutlinedTextField(hatchId.value, { hatchId.value = it }, label = { androidx.compose.material3.Text("Hatch id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(fertile.value, { fertile.value = it }, label = { androidx.compose.material3.Text("Fertile") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(infertile.value, { infertile.value = it }, label = { androidx.compose.material3.Text("Infertile") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(midDead.value, { midDead.value = it }, label = { androidx.compose.material3.Text("Mid-dead") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.candleHatch(
-                                            CandlePoultryHatch(
-                                                hatchId.value,
-                                                fertile.value.toIntOrNull() ?: 0,
-                                                infertile.value.toIntOrNull() ?: 0,
-                                                midDead.value.toIntOrNull() ?: 0,
-                                                LocalDate.parse(setDay.value).toEpochDay(),
-                                            ),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && hatchId.value.isNotBlank() && setDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record candling") }
-                            androidx.compose.material3.OutlinedTextField(hatched.value, { hatched.value = it }, label = { androidx.compose.material3.Text("Hatched") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(culls.value, { culls.value = it }, label = { androidx.compose.material3.Text("Culls") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.recordHatch(
-                                            RecordPoultryHatch(
-                                                hatchId.value,
-                                                hatched.value.toIntOrNull() ?: 0,
-                                                culls.value.toIntOrNull() ?: 0,
-                                                occurredEpochDay = LocalDate.parse(setDay.value).toEpochDay(),
-                                            ),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && hatchId.value.isNotBlank() && hatched.value.isNotBlank() && setDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record hatch") }
-                            val vaxGroup = remember { mutableStateOf("") }
-                            val vaxForm = remember { mutableStateOf("") }
-                            val vaxDay = remember { mutableStateOf("") }
-                            androidx.compose.material3.Text("Vaccination uses a vet-approved poultry formulary item. This is not a diagnosis.")
-                            vaxRows.forEach { androidx.compose.material3.Text(it) }
-                            androidx.compose.material3.OutlinedTextField(vaxGroup.value, { vaxGroup.value = it }, label = { androidx.compose.material3.Text("Flock group id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(vaxForm.value, { vaxForm.value = it }, label = { androidx.compose.material3.Text("Formulary item id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(vaxDay.value, { vaxDay.value = it }, label = { androidx.compose.material3.Text("Vaccination date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.recordVaccination(
-                                            RecordPoultryVaccination(
-                                                UUID.randomUUID().toString(),
-                                                vaxGroup.value,
-                                                poultryKind.value,
-                                                vaxForm.value,
-                                                LocalDate.parse(vaxDay.value).toEpochDay(),
-                                            ),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && vaxGroup.value.isNotBlank() && vaxForm.value.isNotBlank() && vaxDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Record vaccination") }
-                            val placeGroup = remember { mutableStateOf("") }
-                            val placeHouse = remember { mutableStateOf("") }
-                            val heads = remember { mutableStateOf("") }
-                            val findings = remember { mutableStateOf("") }
-                            androidx.compose.material3.OutlinedTextField(placeGroup.value, { placeGroup.value = it }, label = { androidx.compose.material3.Text("Place flock id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(placeHouse.value, { placeHouse.value = it }, label = { androidx.compose.material3.Text("House id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.OutlinedTextField(heads.value, { heads.value = it }, label = { androidx.compose.material3.Text("Head count") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.placeFlock(
-                                            PlacePoultryFlock(
-                                                UUID.randomUUID().toString(),
-                                                placeGroup.value,
-                                                placeHouse.value,
-                                                poultryKind.value,
-                                                heads.value.toIntOrNull() ?: 0,
-                                                LocalDate.parse(setDay.value).toEpochDay(),
-                                                UUID.randomUUID().toString(),
-                                                UUID.randomUUID().toString(),
-                                            ),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && placeGroup.value.isNotBlank() && placeHouse.value.isNotBlank() && heads.value.isNotBlank() && setDay.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Place flock") }
-                            androidx.compose.material3.OutlinedTextField(findings.value, { findings.value = it }, label = { androidx.compose.material3.Text("Biosecurity findings") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.recordBiosecurity(
-                                            RecordPoultryBiosecurity(
-                                                walkId = UUID.randomUUID().toString(),
-                                                houseId = placeHouse.value.trim().ifBlank { null },
-                                                groupId = placeGroup.value.trim().ifBlank { null },
-                                                findings = findings.value,
-                                                occurredEpochDay = LocalDate.parse(setDay.value).toEpochDay(),
-                                            ),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && findings.value.isNotBlank() && setDay.value.isNotBlank() && (placeHouse.value.isNotBlank() || placeGroup.value.isNotBlank()),
-                            ) { androidx.compose.material3.Text("Record biosecurity walk") }
-                            androidx.compose.material3.Button(
-                                onClick = {
-                                    run {
-                                        ops.enablePoultryKind(
-                                            EnablePoultryKind(poultryKind.value),
-                                            newContext(),
-                                        )
-                                    }
-                                },
-                                enabled = !busy && poultryKind.value.isNotBlank(),
-                            ) { androidx.compose.material3.Text("Enable poultry kind") }
-                        }
+
                         else -> Unit
                     }
                 },
