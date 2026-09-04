@@ -1,64 +1,5382 @@
-schema_version: 1
+schema_version: 2
 source: FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md
-certification:
-  visual_states: [VISUAL_CONTRACT_DEFINED, VISUAL_IMPLEMENTED, VISUAL_GREEN]
-  feature_states: [NOT_IMPLEMENTED, IMPLEMENTED_UNVERIFIED, FEATURE_GREEN]
-mandatory_global_states: [initial, loading, populated, empty, offline, local_unsynced, syncing, sync_failed, auth_expired, access_revoked, validation_error, conflict, destructive_confirmation, success, degraded_search, accessibility_200]
-modules:
-  global: [FOS-GLOBAL-001..020]
-  home: [FOS-HOME-001..012]
-  goat: [FOS-GOAT-001..055]
-  rabbit: [FOS-RABBIT-001..036]
-  sheep: [FOS-SHEEP-001..032]
-  cattle: [FOS-CATTLE-001..036]
-  poultry: [FOS-POULTRY-001..027]
-  health: [FOS-HEALTH-001..030]
-  tasks: [FOS-TASK-001..015]
-  inventory: [FOS-INV-001..019]
-  feed: [FOS-FEED-001..012]
-  water: [FOS-WATER-001..010]
-  pasture: [FOS-PASTURE-001..011]
-  groups: [FOS-GROUP-001..009]
-  labour: [FOS-LABOUR-001..009]
-  assets: [FOS-ASSET-001..012]
-  finance: [FOS-FIN-001..013]
-  sales: [FOS-SALES-001..012]
-  procurement: [FOS-PROC-001..010]
-  capacity: [FOS-CAP-001..010]
-  genetics: [FOS-GEN-001..010]
-  analytics: [FOS-AN-001..014]
-  simulation: [FOS-SIM-001..009]
-  search: [FOS-SEARCH-001..009]
-  ai: [FOS-AI-001..012]
-  reports: [FOS-REPORT-001..015]
-  admin: [FOS-ADMIN-001..025]
-  sync: [FOS-SYNC-001..018]
-  atomic: [FOS-ATOM-001..035]
+authority: docs/ux/FARM_OS_VISUAL_AUTHORITY.md
+state_profile: GLOBAL_16_PLUS_STATE_MATRIX
+role_profile: OWNER_MANAGER_SUPERVISOR_WORKER_VET_FINANCE_READONLY_ADMIN
+device_profile: PHONE_PLUS_TABLET_WHERE_APPLICABLE
+certification_law: VISUAL_GREEN_requires_reference_goldens_states_accessibility_drift_review_and_approval
+screens:
+  - screen_id: FOS-GLOBAL-001
+    name: Splash
+    module: global
+    visual_class: I1
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-002
+    name: Login
+    module: global
+    visual_class: I1
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-003
+    name: Create account
+    module: global
+    visual_class: I1
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-004
+    name: Password recovery
+    module: global
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-005
+    name: Farm membership selector
+    module: global
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-006
+    name: Create farm wizard
+    module: global
+    visual_class: I1
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-007
+    name: Join invited farm
+    module: global
+    visual_class: I1
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-008
+    name: First-run species setup
+    module: global
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-009
+    name: Role and permissions explanation
+    module: global
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-010
+    name: Notification permission
+    module: global
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-011
+    name: Camera permission
+    module: global
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-012
+    name: Bluetooth permission
+    module: global
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-013
+    name: Location permission
+    module: global
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-014
+    name: Offline-first introduction
+    module: global
+    visual_class: I1
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-015
+    name: Terms and privacy
+    module: global
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-016
+    name: Session expired
+    module: global
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-017
+    name: Farm access revoked
+    module: global
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-018
+    name: Backend unavailable
+    module: global
+    visual_class: I4
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-019
+    name: Account profile
+    module: global
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GLOBAL-020
+    name: Sign-out confirmation
+    module: global
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-001
+    name: Farm Home
+    module: home
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-002
+    name: Species Navigator
+    module: home
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-003
+    name: Today Summary
+    module: home
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-004
+    name: Farm Alerts Centre
+    module: home
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-005
+    name: Farm Activity Stream
+    module: home
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-006
+    name: Global Search
+    module: home
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-007
+    name: Search Results
+    module: home
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-008
+    name: Quick Capture Launcher
+    module: home
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-009
+    name: Sync Status Centre entry
+    module: home
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-010
+    name: Farm Switcher
+    module: home
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-011
+    name: Notification Centre
+    module: home
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-012
+    name: Role-tailored Home
+    module: home
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-001
+    name: Goat Dashboard
+    module: goat
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-002
+    name: Herd List
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-003
+    name: Goat Profile
+    module: goat
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-004
+    name: Register Goat
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-005
+    name: Edit Goat Identity
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-006
+    name: Goat Search
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-007
+    name: RFID or Tag Scan
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-008
+    name: Goat Photo or Gallery
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-009
+    name: Goat Timeline
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-010
+    name: Goat Documents
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-011
+    name: Weight Capture
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-012
+    name: BLE Scale Pairing
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-013
+    name: Growth History
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-014
+    name: Growth Chart
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-015
+    name: ADG Detail
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-016
+    name: Body Condition Score
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-017
+    name: Milk Capture
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-018
+    name: Lactation Dashboard
+    module: goat
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-019
+    name: Lactation History
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-020
+    name: SCC Capture
+    module: goat
+    visual_class: I4
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-021
+    name: SCC History
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-022
+    name: FAMACHA Capture
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-023
+    name: FAMACHA Reference
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-024
+    name: FAMACHA History
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-025
+    name: Goat Health Summary
+    module: goat
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-026
+    name: Goat Treatment History
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-027
+    name: Goat Withdrawal Status
+    module: goat
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-028
+    name: Goat Vet Visit
+    module: goat
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-029
+    name: Goat Lab Result
+    module: goat
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-030
+    name: Doe Reproduction Dashboard
+    module: goat
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-031
+    name: Heat Record
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-032
+    name: Mating or Service
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-033
+    name: Sire Selector
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-034
+    name: Pregnancy Check
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-035
+    name: Pregnancy Dashboard
+    module: goat
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-036
+    name: Kidding Due
+    module: goat
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-037
+    name: Record Kidding
+    module: goat
+    visual_class: I4
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-038
+    name: Kidding Event Detail
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-039
+    name: Register Kid
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-040
+    name: Kid Cohort
+    module: goat
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-041
+    name: Kid Profile
+    module: goat
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-042
+    name: Weaning
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-043
+    name: Lactation Plan
+    module: goat
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-044
+    name: Pedigree Tree
+    module: goat
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-045
+    name: Parentage Editor
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-046
+    name: Breeding Candidate Compare
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-047
+    name: Goat Groups
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-048
+    name: Group Membership
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-049
+    name: Goat Movement
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-050
+    name: Official Identifier
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-051
+    name: Status Change
+    module: goat
+    visual_class: I4
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-052
+    name: Sale Exit
+    module: goat
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-053
+    name: Mortality Record
+    module: goat
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-054
+    name: Cull Record
+    module: goat
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GOAT-055
+    name: Goat Report
+    module: goat
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-001
+    name: Rabbitry Dashboard
+    module: rabbit
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-002
+    name: Breeding Animals
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-003
+    name: Doe Profile
+    module: rabbit
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-004
+    name: Buck Profile
+    module: rabbit
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-005
+    name: Rabbit Registration
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-006
+    name: Cage Dashboard
+    module: rabbit
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-007
+    name: Cage Detail
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-008
+    name: Cage Occupancy
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-009
+    name: Breeding Wave
+    module: rabbit
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-010
+    name: Mating
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-011
+    name: Palpation
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-012
+    name: Pregnancy Status
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-013
+    name: Nest-Box Schedule
+    module: rabbit
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-014
+    name: Nest Placement
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-015
+    name: Nest Removal
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-016
+    name: Kindling Due
+    module: rabbit
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-017
+    name: Record Kindling
+    module: rabbit
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-018
+    name: Litter Profile
+    module: rabbit
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-019
+    name: Kit Census
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-020
+    name: Foster Kits
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-021
+    name: Kit Mortality
+    module: rabbit
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-022
+    name: Weaning
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-023
+    name: Individualise Kits
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-024
+    name: Retention Selection
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-025
+    name: Replacement Candidate Compare
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-026
+    name: Market Plan
+    module: rabbit
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-027
+    name: Customer Waitlist
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-028
+    name: Reservation
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-029
+    name: Contract
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-030
+    name: Sale Allocation
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-031
+    name: Rabbit Pedigree
+    module: rabbit
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-032
+    name: Rabbit Weight
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-033
+    name: Rabbit Health
+    module: rabbit
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-034
+    name: GI Stasis Red-Flag
+    module: rabbit
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-035
+    name: Rabbit Timeline
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-RABBIT-036
+    name: Rabbit Report
+    module: rabbit
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-001
+    name: Sheep Dashboard
+    module: sheep
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-002
+    name: Mob or Flock List
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-003
+    name: Sheep Profile
+    module: sheep
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-004
+    name: Sheep Registration
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-005
+    name: EID Scan
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-006
+    name: Weight Capture
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-007
+    name: Growth History
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-008
+    name: BCS
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-009
+    name: FAMACHA
+    module: sheep
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-010
+    name: Joining Dashboard
+    module: sheep
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-011
+    name: Record Joining
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-012
+    name: Pregnancy Scan
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-013
+    name: Lambing Due
+    module: sheep
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-014
+    name: Record Lambing
+    module: sheep
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-015
+    name: Lamb Profile
+    module: sheep
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-016
+    name: Lamb Marking
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-017
+    name: Weaning
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-018
+    name: Wool Dashboard
+    module: sheep
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-019
+    name: Shearing
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-020
+    name: Fleece Record
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-021
+    name: Micron or Fibre Result
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-022
+    name: Dag Score
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-023
+    name: Footrot
+    module: sheep
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-024
+    name: Flystrike
+    module: sheep
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-025
+    name: Health Summary
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-026
+    name: Pedigree
+    module: sheep
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-027
+    name: Movement
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-028
+    name: Paddock Assignment
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-029
+    name: Official Identifier
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-030
+    name: Status Change
+    module: sheep
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-031
+    name: Timeline
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SHEEP-032
+    name: Sheep Report
+    module: sheep
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-001
+    name: Cattle Dashboard
+    module: cattle
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-002
+    name: Herd or Mob or Lot List
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-003
+    name: Cattle Profile
+    module: cattle
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-004
+    name: Cattle Registration
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-005
+    name: EID or Official Identifier
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-006
+    name: Weight Capture
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-007
+    name: Growth History
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-008
+    name: BCS
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-009
+    name: Heat Detection
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-010
+    name: Service
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-011
+    name: AI Record
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-012
+    name: ET Record
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-013
+    name: Pregnancy Diagnosis
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-014
+    name: Calving Due
+    module: cattle
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-015
+    name: Record Calving
+    module: cattle
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-016
+    name: Calf Registration
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-017
+    name: Weaning
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-018
+    name: Dairy Dashboard
+    module: cattle
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-019
+    name: Milk Capture
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-020
+    name: Lactation History
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-021
+    name: SCC Capture
+    module: cattle
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-022
+    name: SCC History
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-023
+    name: Locomotion Score
+    module: cattle
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-024
+    name: Dry-Off
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-025
+    name: Beef Dashboard
+    module: cattle
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-026
+    name: Feedlot Placement
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-027
+    name: Feedlot Lot Detail
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-028
+    name: Days on Feed
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-029
+    name: Lot Close-Out
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-030
+    name: Movement
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-031
+    name: Official Movement Record
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-032
+    name: Pedigree
+    module: cattle
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-033
+    name: Health Summary
+    module: cattle
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-034
+    name: Status Change
+    module: cattle
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-035
+    name: Timeline
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CATTLE-036
+    name: Cattle Report
+    module: cattle
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-001
+    name: Poultry Dashboard
+    module: poultry
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-002
+    name: Enabled Poultry Kinds
+    module: poultry
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-003
+    name: Enable Kind
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-004
+    name: Flock List
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-005
+    name: Flock Profile
+    module: poultry
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-006
+    name: House List
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-007
+    name: House Detail
+    module: poultry
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-008
+    name: Placement
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-009
+    name: Daily Mortality
+    module: poultry
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-010
+    name: Egg Production
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-011
+    name: Egg Collection
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-012
+    name: Feed or FCR
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-013
+    name: Vaccination Schedule
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-014
+    name: Vaccination Capture
+    module: poultry
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-015
+    name: Biosecurity Dashboard
+    module: poultry
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-016
+    name: Biosecurity Check
+    module: poultry
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-017
+    name: Hatchery Dashboard
+    module: poultry
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-018
+    name: Eggs Set
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-019
+    name: Incubation Batch
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-020
+    name: Candling
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-021
+    name: Hatch Result
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-022
+    name: Chick Placement
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-023
+    name: Flock Move
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-024
+    name: Flock Close-Out
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-025
+    name: Poultry Health
+    module: poultry
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-026
+    name: Flock Timeline
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-POULTRY-027
+    name: Poultry Report
+    module: poultry
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-001
+    name: Health Dashboard
+    module: health
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-002
+    name: Today Health Actions
+    module: health
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-003
+    name: Observation List
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-004
+    name: Record Observation
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-005
+    name: Health Case Detail
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-006
+    name: Treatment List
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-007
+    name: Record Treatment
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-008
+    name: Treatment Detail
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-009
+    name: Withdrawal Dashboard
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-010
+    name: Withdrawal Detail
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-011
+    name: Vaccination Schedule
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-012
+    name: Vaccination Capture
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-013
+    name: Formulary
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-014
+    name: Formulary Item
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-015
+    name: Protocol Packs
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-016
+    name: Protocol Pack Detail
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-017
+    name: Accept Protocol Pack
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-018
+    name: Apply Protocol Pack
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-019
+    name: Protocol Slot Editor
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-020
+    name: Vet Visit List
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-021
+    name: Record Vet Visit
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-022
+    name: Vet Visit Detail
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-023
+    name: Lab Results
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-024
+    name: Record Lab Result
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-025
+    name: Lab Result Detail
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-026
+    name: Disease or Reference Library
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-027
+    name: Reference Detail
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-028
+    name: Emergency or Red Flag
+    module: health
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-029
+    name: Health Timeline
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HEALTH-030
+    name: Health Report
+    module: health
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-001
+    name: Today Board
+    module: task
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-002
+    name: All Tasks
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-003
+    name: Task Detail
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-004
+    name: Create Task
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-005
+    name: Edit Task
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-006
+    name: Assigned to Me
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-007
+    name: Scheduled
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-008
+    name: Overdue
+    module: task
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-009
+    name: Completed
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-010
+    name: Calendar
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-011
+    name: Recurrence
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-012
+    name: Task Attachment
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-013
+    name: Task Completion Evidence
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-014
+    name: Task Generated by Protocol
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-TASK-015
+    name: Task Generated by Lifecycle
+    module: task
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-001
+    name: Inventory Dashboard
+    module: inv
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-002
+    name: Inventory List
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-003
+    name: Inventory Item
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-004
+    name: Create Item
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-005
+    name: Receive Stock
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-006
+    name: Receive Lot
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-007
+    name: Issue Stock
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-008
+    name: FEFO Issue
+    module: inv
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-009
+    name: Lot Detail
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-010
+    name: Expiry Queue
+    module: inv
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-011
+    name: Low Stock
+    module: inv
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-012
+    name: Reorder Rules
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-013
+    name: Reorder Alert
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-014
+    name: Stock Movement History
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-015
+    name: Stock Adjustment
+    module: inv
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-016
+    name: Stock Count
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-017
+    name: Inventory Search
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-018
+    name: Supplier Binding
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-INV-019
+    name: Inventory Report
+    module: inv
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-001
+    name: Feed Dashboard
+    module: feed
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-002
+    name: Feed Inventory
+    module: feed
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-003
+    name: Feed Item
+    module: feed
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-004
+    name: Feed Plan
+    module: feed
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-005
+    name: Feeding Schedule
+    module: feed
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-006
+    name: Feed Issue or Consumption
+    module: feed
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-007
+    name: Feed Cost
+    module: feed
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-008
+    name: Ration Builder
+    module: feed
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-009
+    name: Ration Analysis
+    module: feed
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-010
+    name: Ration Compare
+    module: feed
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-011
+    name: Feed Alert
+    module: feed
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FEED-012
+    name: Feed Report
+    module: feed
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-WATER-001
+    name: Water Dashboard
+    module: water
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-WATER-002
+    name: Water Point List
+    module: water
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-WATER-003
+    name: Water Point Detail
+    module: water
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-WATER-004
+    name: Consumption Capture
+    module: water
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-WATER-005
+    name: Water Inspection
+    module: water
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-WATER-006
+    name: Water Quality Result
+    module: water
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-WATER-007
+    name: Water Issue
+    module: water
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-WATER-008
+    name: Water Maintenance
+    module: water
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-WATER-009
+    name: Water History
+    module: water
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-WATER-010
+    name: Water Report
+    module: water
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-001
+    name: Pasture Dashboard
+    module: pasture
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-002
+    name: Paddock List
+    module: pasture
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-003
+    name: Paddock Detail
+    module: pasture
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-004
+    name: Grazing Rotation
+    module: pasture
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-005
+    name: Group Movement
+    module: pasture
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-006
+    name: Rest Period
+    module: pasture
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-007
+    name: Carrying Capacity
+    module: pasture
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-008
+    name: Pasture Condition
+    module: pasture
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-009
+    name: Grazing History
+    module: pasture
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-010
+    name: Pasture Map
+    module: pasture
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PASTURE-011
+    name: Pasture Report
+    module: pasture
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GROUP-001
+    name: Groups
+    module: group
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GROUP-002
+    name: Group Detail
+    module: group
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GROUP-003
+    name: Create Group
+    module: group
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GROUP-004
+    name: Edit Group
+    module: group
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GROUP-005
+    name: Membership
+    module: group
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GROUP-006
+    name: Group Census
+    module: group
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GROUP-007
+    name: Group Move
+    module: group
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GROUP-008
+    name: Group Health
+    module: group
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GROUP-009
+    name: Group Timeline
+    module: group
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-LABOUR-001
+    name: Labour Dashboard
+    module: labour
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-LABOUR-002
+    name: Worker List
+    module: labour
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-LABOUR-003
+    name: Worker Detail
+    module: labour
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-LABOUR-004
+    name: Worker Assignment
+    module: labour
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-LABOUR-005
+    name: Work Log
+    module: labour
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-LABOUR-006
+    name: Attendance or Availability
+    module: labour
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-LABOUR-007
+    name: Labour Cost
+    module: labour
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-LABOUR-008
+    name: Coverage or Workload
+    module: labour
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-LABOUR-009
+    name: Labour Report
+    module: labour
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-001
+    name: Assets Dashboard
+    module: asset
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-002
+    name: Asset Register
+    module: asset
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-003
+    name: Asset Detail
+    module: asset
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-004
+    name: Create Asset
+    module: asset
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-005
+    name: Meter or Usage Capture
+    module: asset
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-006
+    name: Maintenance Schedule
+    module: asset
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-007
+    name: Maintenance Job
+    module: asset
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-008
+    name: Breakdown
+    module: asset
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-009
+    name: Service History
+    module: asset
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-010
+    name: Asset Documents
+    module: asset
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-011
+    name: Asset Photo Gallery
+    module: asset
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ASSET-012
+    name: Asset Report
+    module: asset
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-001
+    name: Finance Dashboard
+    module: fin
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-002
+    name: Transactions
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-003
+    name: Transaction Detail
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-004
+    name: Record Income
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-005
+    name: Record Expense
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-006
+    name: Enterprise Profitability
+    module: fin
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-007
+    name: Species Cost
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-008
+    name: Activity Cost
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-009
+    name: Cash Flow
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-010
+    name: Budget
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-011
+    name: Variance
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-012
+    name: Finance Report
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-FIN-013
+    name: Export
+    module: fin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-001
+    name: Sales Dashboard
+    module: sales
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-002
+    name: Customer List
+    module: sales
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-003
+    name: Customer Detail
+    module: sales
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-004
+    name: Sales Orders
+    module: sales
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-005
+    name: Sale Detail
+    module: sales
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-006
+    name: Create Sale
+    module: sales
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-007
+    name: Animal Sale
+    module: sales
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-008
+    name: Produce Sale
+    module: sales
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-009
+    name: Rabbit Reservation Sale
+    module: sales
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-010
+    name: Delivery or Collection
+    module: sales
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-011
+    name: Sales History
+    module: sales
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SALES-012
+    name: Sales Report
+    module: sales
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PROC-001
+    name: Procurement Dashboard
+    module: proc
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PROC-002
+    name: Supplier List
+    module: proc
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PROC-003
+    name: Supplier Detail
+    module: proc
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PROC-004
+    name: Purchase Orders
+    module: proc
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PROC-005
+    name: Purchase Detail
+    module: proc
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PROC-006
+    name: Create Purchase
+    module: proc
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PROC-007
+    name: Receive Purchase
+    module: proc
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PROC-008
+    name: Purchase to Inventory
+    module: proc
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PROC-009
+    name: Procurement History
+    module: proc
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-PROC-010
+    name: Procurement Report
+    module: proc
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CAP-001
+    name: Capacity Dashboard
+    module: cap
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CAP-002
+    name: Housing Capacity
+    module: cap
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CAP-003
+    name: Stocking Pressure
+    module: cap
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CAP-004
+    name: Cage Capacity
+    module: cap
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CAP-005
+    name: Poultry House Capacity
+    module: cap
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CAP-006
+    name: Paddock Capacity
+    module: cap
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CAP-007
+    name: Feed Capacity
+    module: cap
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CAP-008
+    name: Water Capacity
+    module: cap
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CAP-009
+    name: Capacity Forecast
+    module: cap
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-CAP-010
+    name: Capacity Alert
+    module: cap
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GEN-001
+    name: Genetics Dashboard
+    module: gen
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GEN-002
+    name: Pedigree Explorer
+    module: gen
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GEN-003
+    name: Parentage Record
+    module: gen
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GEN-004
+    name: Parentage Verification
+    module: gen
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GEN-005
+    name: Relationship Explorer
+    module: gen
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GEN-006
+    name: COI Analysis
+    module: gen
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GEN-007
+    name: Mate Comparison
+    module: gen
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GEN-008
+    name: Candidate Ranking
+    module: gen
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GEN-009
+    name: Genetic Warning
+    module: gen
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-GEN-010
+    name: Genetics Report
+    module: gen
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-001
+    name: Farm Analytics
+    module: an
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-002
+    name: Species Performance
+    module: an
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-003
+    name: Reproduction Analytics
+    module: an
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-004
+    name: Growth Analytics
+    module: an
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-005
+    name: Mortality Analytics
+    module: an
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-006
+    name: Health Trends
+    module: an
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-007
+    name: Production Analytics
+    module: an
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-008
+    name: Feed Efficiency
+    module: an
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-009
+    name: Financial Performance
+    module: an
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-010
+    name: Benchmark or Compare
+    module: an
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-011
+    name: Anomaly Centre
+    module: an
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-012
+    name: Forecasts
+    module: an
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-013
+    name: Insight Detail
+    module: an
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AN-014
+    name: Evidence or Source Drilldown
+    module: an
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SIM-001
+    name: Simulation Hub
+    module: sim
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SIM-002
+    name: Herd Growth Scenario
+    module: sim
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SIM-003
+    name: Breeding Scenario
+    module: sim
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SIM-004
+    name: Feed Scenario
+    module: sim
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SIM-005
+    name: Capacity Scenario
+    module: sim
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SIM-006
+    name: Financial Scenario
+    module: sim
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SIM-007
+    name: Scenario Compare
+    module: sim
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SIM-008
+    name: Scenario Save
+    module: sim
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SIM-009
+    name: Scenario Report
+    module: sim
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SEARCH-001
+    name: Search Home
+    module: search
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SEARCH-002
+    name: Search Results
+    module: search
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SEARCH-003
+    name: Filter Sheet
+    module: search
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SEARCH-004
+    name: No Results
+    module: search
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SEARCH-005
+    name: Offline Local Search
+    module: search
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SEARCH-006
+    name: Server Search Unavailable
+    module: search
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SEARCH-007
+    name: RFID Result
+    module: search
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SEARCH-008
+    name: QR or Barcode Result
+    module: search
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SEARCH-009
+    name: Recent Searches
+    module: search
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-001
+    name: Copilot Home
+    module: ai
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-002
+    name: Ask Farm OS
+    module: ai
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-003
+    name: Conversation
+    module: ai
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-004
+    name: Insight Detail
+    module: ai
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-005
+    name: Evidence or Sources
+    module: ai
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-006
+    name: Suggested Actions
+    module: ai
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-007
+    name: Action Review
+    module: ai
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-008
+    name: Anomaly Review
+    module: ai
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-009
+    name: Model Provider Settings
+    module: ai
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-010
+    name: API Key or Provider Connection
+    module: ai
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-011
+    name: AI Privacy and Controls
+    module: ai
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-AI-012
+    name: AI Unavailable
+    module: ai
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-001
+    name: Reports Hub
+    module: report
+    visual_class: I2
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-002
+    name: Animal Report
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-003
+    name: Herd or Flock Report
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-004
+    name: Health Report
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-005
+    name: Production Report
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-006
+    name: Finance Report
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-007
+    name: Inventory Report
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-008
+    name: Breeding Report
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-009
+    name: Genetics Report
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-010
+    name: Operations Report
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-011
+    name: Export Sheet
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-012
+    name: Generated Documents
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-013
+    name: Document Viewer
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-014
+    name: Share or Print
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-REPORT-015
+    name: Certificate Viewer
+    module: report
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-001
+    name: Settings Home
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-002
+    name: Farm Profile
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-003
+    name: Members
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-004
+    name: Invite Member
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-005
+    name: Role Detail
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-006
+    name: Permissions
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-007
+    name: Species Configuration
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-008
+    name: Poultry Kinds
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-009
+    name: Locations
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-010
+    name: Units
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-011
+    name: Currency
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-012
+    name: Notifications
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-013
+    name: Offline or Sync Settings
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-014
+    name: Search Settings
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-015
+    name: Integrations
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-016
+    name: Hardware
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-017
+    name: BLE Devices
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-018
+    name: RFID Devices
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-019
+    name: Model API
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-020
+    name: Security
+    module: admin
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-021
+    name: Session or Devices
+    module: admin
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-022
+    name: Data Export
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-023
+    name: Backup or Restore Status
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-024
+    name: Audit Log
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ADMIN-025
+    name: About or Version
+    module: admin
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-001
+    name: Offline Banner
+    module: sync
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-002
+    name: Sync Status
+    module: sync
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-003
+    name: Pending Changes
+    module: sync
+    visual_class: I3
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-004
+    name: In-Flight
+    module: sync
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-005
+    name: Retry Waiting
+    module: sync
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-006
+    name: Conflict Centre
+    module: sync
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-007
+    name: Conflict Detail
+    module: sync
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-008
+    name: Rejected Mutation
+    module: sync
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-009
+    name: Dead Letter
+    module: sync
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-010
+    name: Auth Required
+    module: sync
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-011
+    name: Farm Access Revoked
+    module: sync
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-012
+    name: Backend Outage
+    module: sync
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-013
+    name: Search Outage
+    module: sync
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-014
+    name: Local Data Safe Confirmation
+    module: sync
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-015
+    name: Manual Sync
+    module: sync
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-016
+    name: Last Successful Sync
+    module: sync
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-017
+    name: Reconciliation Detail
+    module: sync
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-SYNC-018
+    name: Mutation Trace
+    module: sync
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-001
+    name: Date Picker
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-002
+    name: Time Picker
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-003
+    name: Species Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-004
+    name: Animal Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-005
+    name: Group Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-006
+    name: Farm Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-007
+    name: Location Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-008
+    name: Sire or Dam Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-009
+    name: Inventory Item Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-010
+    name: Lot Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-011
+    name: Supplier Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-012
+    name: Customer Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-013
+    name: Worker Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-014
+    name: Asset Selector
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-015
+    name: Photo Capture
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-016
+    name: Attachment Picker
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-017
+    name: Document Picker
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-018
+    name: QR or Barcode Scanner
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-019
+    name: RFID Scanner
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-020
+    name: BLE Device Picker
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-021
+    name: Filter Sheet
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-022
+    name: Sort Sheet
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-023
+    name: Bulk Selection
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-024
+    name: Bulk Action Sheet
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-025
+    name: Delete Confirmation
+    module: atom
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-026
+    name: Irreversible Status Confirmation
+    module: atom
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-027
+    name: Conflict Resolution Sheet
+    module: atom
+    visual_class: I4
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-028
+    name: Permission Explanation
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-029
+    name: Export Format
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-030
+    name: Share Sheet
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-031
+    name: Search Empty State
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-032
+    name: Loading Skeleton
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-033
+    name: Error Recovery
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-034
+    name: Offline Save Receipt
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-ATOM-035
+    name: Sync Pending Receipt
+    module: atom
+    visual_class: I3
+    implementation_audit: AUDIT_REQUIRED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: ROLE_MATRIX_APPLIES
+    required_devices: DEVICE_MATRIX_APPLIES
 
-implemented_reference_surfaces:
-  FOS-GLOBAL-001: VISUAL_IMPLEMENTED
-  FOS-GLOBAL-002: VISUAL_IMPLEMENTED
-  FOS-GLOBAL-005: VISUAL_IMPLEMENTED
-  FOS-GLOBAL-006: VISUAL_IMPLEMENTED
-  FOS-HOME-001: VISUAL_IMPLEMENTED
-  FOS-HOME-002: VISUAL_IMPLEMENTED
-  FOS-GOAT-001: VISUAL_IMPLEMENTED
-  FOS-GOAT-002: VISUAL_IMPLEMENTED
-  FOS-GOAT-003: VISUAL_IMPLEMENTED
-  FOS-GOAT-004: VISUAL_IMPLEMENTED
-  FOS-GOAT-006: VISUAL_IMPLEMENTED
-  FOS-GOAT-011: VISUAL_IMPLEMENTED
-  FOS-GOAT-016: VISUAL_IMPLEMENTED
-  FOS-GOAT-017: VISUAL_IMPLEMENTED
-  FOS-GOAT-020: VISUAL_IMPLEMENTED
-  FOS-GOAT-022: VISUAL_IMPLEMENTED
-  FOS-GOAT-031: VISUAL_IMPLEMENTED
-  FOS-GOAT-032: VISUAL_IMPLEMENTED
-  FOS-GOAT-034: VISUAL_IMPLEMENTED
-  FOS-GOAT-037: VISUAL_IMPLEMENTED
-  FOS-GOAT-039: VISUAL_IMPLEMENTED
-  FOS-GOAT-043: VISUAL_IMPLEMENTED
-  FOS-GOAT-051: VISUAL_IMPLEMENTED
-  FOS-SYNC-002: VISUAL_IMPLEMENTED
-  FOS-SYNC-003: VISUAL_IMPLEMENTED
-visual_green: []
+screen_count: 537
+visual_green_count: 0
+feature_green_claims_from_this_registry: 0

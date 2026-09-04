@@ -22,10 +22,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.farmos.core.design.FarmOsAccentMedium
+import com.farmos.core.design.FarmOsWordmark
 import com.farmos.core.design.FarmPastoralBackdrop
 import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FosDimens
@@ -59,12 +60,7 @@ fun FoundationAuthScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                Text(
-                    "Farm OS",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                FarmOsWordmark()
                 Text(
                     "Animals. Land. People. A Better Tomorrow.",
                     style = MaterialTheme.typography.titleMedium,
@@ -72,8 +68,7 @@ fun FoundationAuthScreen(
                 )
                 Text(
                     "Real Farms. Brighter Futures.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontStyle = FontStyle.Italic,
+                    style = FarmOsAccentMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
 
@@ -162,7 +157,7 @@ private fun SignInState(
     Text(
         "Healthy Animals. Thriving Farms.",
         modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 4.dp),
-        style = MaterialTheme.typography.labelLarge,
+        style = FarmOsAccentMedium,
         color = MaterialTheme.colorScheme.primary,
     )
 }

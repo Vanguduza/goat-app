@@ -49,6 +49,17 @@ if (( $(wc -l < feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatVertica
   echo 'ERROR: goat proving mega-screen has grown back instead of remaining an atomic compatibility entrypoint'; exit 1
 fi
 
+registry_count=$(grep -c '^  - screen_id:' docs/ux/FARM_OS_SCREEN_REGISTRY.yaml)
+if [[ "$registry_count" -lt 500 ]]; then
+  echo "ERROR: quantum screen registry collapsed below atomic coverage floor: $registry_count"; exit 1
+fi
+grep -q '^screen_count: 537$' docs/ux/FARM_OS_SCREEN_REGISTRY.yaml || {
+  echo 'ERROR: generated atomic screen registry is stale; run scripts/design/generate_screen_registry.py'; exit 1;
+}
+grep -q '^visual_green_count: 0$' docs/ux/FARM_OS_SCREEN_REGISTRY.yaml || {
+  echo 'ERROR: visual-green count changed without evidence registry update'; exit 1;
+}
+
 # Prevent the two known VD-4 foundation labels from silently returning.
 if grep -q 'Text("Farm OS foundation"' app/src/main/java/com/farmos/app/FoundationAuthScreen.kt; then
   echo 'ERROR: generic foundation auth visual has returned'; exit 1

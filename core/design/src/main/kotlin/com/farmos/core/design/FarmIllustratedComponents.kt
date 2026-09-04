@@ -5,16 +5,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -23,16 +27,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 object FarmIllustratedPalette {
-    val SkyTop = Color(0xFFDCE9ED)
-    val SkyHorizon = Color(0xFFF4EFD9)
-    val HillFar = Color(0xFF91A58A)
-    val HillNear = Color(0xFF6E8B63)
-    val Pasture = Color(0xFF5F7D52)
-    val PastureLight = Color(0xFF88A66E)
-    val Barn = Color(0xFF9A5743)
+    val SkyTop = FosColors.Sky.copy(alpha = .72f)
+    val SkyHorizon = FosColors.Sunlight.copy(alpha = .86f)
+    val HillFar = FosColors.Sage.copy(alpha = .72f)
+    val HillNear = FosColors.Sage
+    val Pasture = FosColors.Sage
+    val PastureLight = FosColors.Leaf
+    val Barn = FosColors.BarnRed
     val BarnDark = Color(0xFF6F3D31)
     val Silo = Color(0xFFB8B5A8)
     val Bark = Color(0xFF604736)
@@ -40,8 +45,8 @@ object FarmIllustratedPalette {
     val LeafLight = Color(0xFF68865B)
     val Cream = Color(0xFFF9F4E8)
     val CreamStrong = Color(0xFFFFFCF3)
-    val Soil = Color(0xFF8A6B4E)
-    val Ink = Color(0xFF233126)
+    val Soil = FosColors.Soil
+    val Ink = FosColors.TextPrimary
 }
 
 /**
@@ -50,8 +55,45 @@ object FarmIllustratedPalette {
  * repository-owned visual baseline even when original chat/session assets are unavailable.
  * Rich approved raster/vector art may replace individual layers without changing this contract.
  */
-@Composable
 enum class FarmSpeciesVisual { GOAT, RABBIT, SHEEP, CATTLE, POULTRY }
+
+@Composable
+fun FarmOsWordmark(
+    modifier: Modifier = Modifier,
+    compact: Boolean = false,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Canvas(Modifier.size(if (compact) 28.dp else 38.dp)) {
+            val stem = FosColors.Primary
+            drawLine(
+                color = stem,
+                start = Offset(size.width * .48f, size.height * .88f),
+                end = Offset(size.width * .52f, size.height * .28f),
+                strokeWidth = size.width * .09f,
+            )
+            drawOval(
+                color = FosColors.Leaf,
+                topLeft = Offset(size.width * .05f, size.height * .12f),
+                size = Size(size.width * .48f, size.height * .36f),
+            )
+            drawOval(
+                color = FosColors.Sage,
+                topLeft = Offset(size.width * .50f, size.height * .02f),
+                size = Size(size.width * .45f, size.height * .34f),
+            )
+        }
+        Text(
+            text = "Farm OS",
+            style = if (compact) MaterialTheme.typography.titleLarge else MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold,
+            color = FosColors.Primary,
+        )
+    }
+}
 
 @Composable
 fun FarmPastoralBackdrop(

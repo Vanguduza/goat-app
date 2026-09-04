@@ -16,7 +16,7 @@
 |---|---|
 | Default Material purple/blue, gradient buttons | One brand colour, used sparingly; zero gradients in controls |
 | Emoji in UI copy and empty states | Never. Icons from one set; words from the voice guide |
-| Everything rounded 28dp+, floating cards everywhere | Radii scale ≤16dp; flat surfaces, hairline borders, tone-shift elevation |
+| Uncontrolled rounded geometry / floating SaaS cards | Use the locked soft Farm OS geometry: 10dp inputs, 14dp controls, 20dp cards, 24dp hero/story surfaces; elevation remains restrained |
 | Generic copy: "Welcome to your amazing farm!" | Species-correct, terse, sentence case; empty states state the next action |
 | Random spacing, mixed text sizes per screen | 4dp grid + fixed type scale; nothing off-scale |
 | Uncontrolled/inconsistent illustration, glassmorphism, neon dark mode | Illustration is required where assigned by I1–I3 visual classes and must inherit the canonical Farm OS family; glassmorphism/neon remain forbidden |
@@ -39,15 +39,15 @@ Defined once in `:core-design/theme/FosColors.kt` (+ XML equivalent); features m
 
 | Token | Hex | Use |
 |---|---|---|
-| `brand/primary` | #2C5539 | Primary actions, active nav, links |
+| `brand/primary` | #1E4D2B | Primary actions, active nav, links |
 | `brand/onPrimary` | #FFFFFF | |
-| `brand/primaryContainer` | #DDE8DD | Selected backgrounds |
-| `surface/canvas` | #FAFAF6 | App background (warm paper, not white) |
-| `surface/card` | #FFFFFF | Cards, sheets |
+| `brand/primaryContainer` | #E2EFE3 | Selected backgrounds |
+| `surface/canvas` | #F8F5EC | App background (warm paper, not white) |
+| `surface/card` | #FFFCF3 | Cards, sheets |
 | `surface/sunken` | #F1F1EA | Wells, chart plots |
-| `text/primary` | #1B1D1A | |
-| `text/secondary` | #5A5D57 | Labels, metadata |
-| `border/hairline` | #E3E4DC | Card outlines, dividers |
+| `text/primary` | #1F2937 | |
+| `text/secondary` | #526157 | Labels, metadata |
+| `border/hairline` | #D8DED6 | Card outlines, dividers |
 | `status/critical` | #B3261E | Red flags, withdrawal breach |
 | `status/warning` | #8A5A00 | Watch anomalies, low stock |
 | `status/positive` | #2E6B34 | Positive anomaly, ready state |
@@ -73,7 +73,7 @@ Contrast floors: text 4.5:1 (7:1 outdoor), icons/status 3:1. Verified in §14 CI
 
 ## 3. Typography
 
-Operational typography uses the governed sans-serif family with tabular figures for numeric data. A restrained handwritten/display accent family is permitted only for canonical emotional brand copy on approved I1/I2 surfaces; never for critical data, forms, safety copy or tables. Final font files remain subject to repository asset approval.
+Operational typography is **Inter** with tabular figures for numeric data. **Caveat** is the locked handwritten accent family for approved emotional brand copy on I1/I2 surfaces only; never for critical data, forms, safety copy or tables. Both variable fonts are bundled under `core/design/src/main/res/font/` with SIL OFL licence texts in `docs/ux/licenses/`.
 
 | Style | Size/Line | Weight | Use |
 |---|---|---|---|
@@ -91,7 +91,7 @@ Rules: sentence case everywhere (no ALL CAPS headers, no title case buttons); da
 ## 4. Spacing, shape, elevation, iconography
 
 - **Grid:** 4dp base. Screen margin 16dp; card padding 16dp; list item 56dp min; intra-card gap 12dp; section gap 24dp.
-- **Radii scale (only these):** 8dp (inputs, chips), 12dp (cards, sheets), 16dp (bottom sheets max). Buttons 8dp. **No pill buttons, no 28dp cards.**
+- **Illustrated geometry scale:** 10dp (compact/input), 14dp (control), 20dp (operational card), 24dp (hero/story surface). Primary actions may use the soft rounded/capsule treatment shown in the locked reference. Do not extrapolate into bubble-heavy SaaS UI.
 - **Borders over shadows:** cards are `surface/card` + 1dp `border/hairline`. Elevation reserved for: FAB (level 1), drag states, modal sheets (level 2). No drop shadows on lists or tiles.
 - **Icons:** Material Symbols (rounded variant), one weight, 20/24dp, always with text label in buttons. Species glyphs only in identity chips. No emoji, ever.
 - **Touch targets:** ≥48dp (64dp outdoor). Primary action per screen = one filled button; everything else tonal/text.

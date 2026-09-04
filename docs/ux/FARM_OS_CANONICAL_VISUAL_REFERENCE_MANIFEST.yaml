@@ -13,7 +13,20 @@ references:
     role: root_visual_dna
     authority: canonical
     source: owner_locked_session_reference
-    status: reconstructed_as_repository_visual_contract
+    status: recovered_and_verified_against_original_assets
+  source_assets:
+    - name: Farm OS Countryside Login Screen.png
+      library_file_id: file_0000000028d082089c51076042ddff41
+      sha256: 2bb779512fa5018ee5bdad7cba94a90997ca234936efde1a258a3afbfa65228f
+      role: primary_login_composition
+    - name: Farm OS Visual Style Guide.png
+      library_file_id: file_000000002d6c82089ed11e74d0610518
+      sha256: bc3cdfa4d6fa3a38e3636cbaf54a48f3d99a66b76efbd951c4e9924961e74249
+      role: cross_screen_style_and_tokens
+    - name: Farm OS Design Audit Guide.png
+      library_file_id: file_00000000d33482089366509a8d40229d
+      sha256: 83c5ba861c233f700ab43ae2e4269da6e533f56b7b0c95dc502f6504a47681c5
+      role: audit_and_extension_guide
     required_traits:
       - warm_painterly_agricultural_illustration
       - layered_pastoral_depth

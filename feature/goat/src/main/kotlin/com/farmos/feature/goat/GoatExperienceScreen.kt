@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.FarmOsAccentMedium
 import com.farmos.core.design.FarmPastoralBackdrop
 import com.farmos.core.design.FarmSpeciesVisual
 import com.farmos.core.design.FarmStorySurface
@@ -86,7 +87,7 @@ internal fun GoatExperienceScreen(
     }
 }
 
-/** FOS-GOAT-001 — illustrated goat operating dashboard. */
+/** FOS-GOAT-001 — illustrated goat operating dashboard derived from FOS-VREF-GOAT-001. */
 @Composable
 private fun GoatDashboardScreen(
     state: GoatSliceUiState,
@@ -95,62 +96,63 @@ private fun GoatDashboardScreen(
     onSignOut: () -> Unit,
     modifier: Modifier,
 ) {
-    val active = state.herd.count { it.status == GoatStatus.ACTIVE }
-    val does = state.herd.count { it.status == GoatStatus.ACTIVE && it.sex == GoatSex.FEMALE }
+    val active = state.herd.filter { it.status == GoatStatus.ACTIVE }
+    val does = active.count { it.sex == GoatSex.FEMALE }
+    val bucks = active.count { it.sex == GoatSex.MALE }
+    val today = LocalDate.now().toEpochDay()
+    val kids = active.count { goat -> goat.dateOfBirthEpochDay?.let { today - it < 365 } == true }
+    val selectedDoe = state.selected?.takeIf { it.status == GoatStatus.ACTIVE && it.sex == GoatSex.FEMALE }
 
     FarmPastoralBackdrop(modifier.fillMaxSize(), heroSpecies = FarmSpeciesVisual.GOAT) {
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             FarmStorySurface(Modifier.fillMaxWidth()) {
-                Text("Goats", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                Text(
-                    state.farmName ?: "Goat herd",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text("Herd. Growth. Health. Reproduction.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(
-                    state.syncMessage,
-                    modifier = Modifier.padding(top = 10.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                Text("Goats", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Text(state.farmName ?: "Your goat herd", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Healthy animals. Thriving farms.", style = FarmOsAccentMedium, color = MaterialTheme.colorScheme.primary)
             }
 
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                GoatMetric("Active", active.toString(), Modifier.weight(1f))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                GoatMetric("Total", active.size.toString(), Modifier.weight(1f))
                 GoatMetric("Does", does.toString(), Modifier.weight(1f))
-                GoatMetric("Pending", state.pendingSyncCount.toString(), Modifier.weight(1f))
+                GoatMetric("Bucks", bucks.toString(), Modifier.weight(1f))
+                GoatMetric("Kids", kids.toString(), Modifier.weight(1f))
             }
 
-            FarmIllustratedSectionSurface {
-                Text("Herd", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Text("Browse every goat or register a new animal.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { onOpen(GoatPage.HERD) }) { Text("Open herd") }
-                    TextButton(onClick = { onOpen(GoatPage.REGISTER) }) { Text("Register goat") }
-                }
+            GoatDashboardAction("Herd", "View and manage your goats") { onOpen(GoatPage.HERD) }
+            GoatDashboardAction("Register Goat", "Add a new goat") { onOpen(GoatPage.REGISTER) }
+            GoatDashboardAction("Breeding", "Heat, mating and pregnancy") {
+                onOpen(if (selectedDoe != null) GoatPage.REPRODUCTION else GoatPage.HERD)
             }
+            GoatDashboardAction("Kidding", "Due dates and birth records") {
+                onOpen(if (selectedDoe != null) GoatPage.KIDDING else GoatPage.HERD)
+            }
+            GoatDashboardAction("Health", "Treatments, FAMACHA, BCS and SCC observations") {
+                onOpen(if (state.selected != null) GoatPage.HEALTH else GoatPage.HERD)
+            }
+            GoatDashboardAction("Milk", "Production and SCC") {
+                onOpen(if (selectedDoe != null) GoatPage.REPRODUCTION else GoatPage.HERD)
+            }
+            GoatDashboardAction("Growth", "Weights and growth rates") {
+                onOpen(if (state.selected != null) GoatPage.WEIGHT else GoatPage.HERD)
+            }
+            GoatDashboardAction("Search", state.searchMessage) { onOpen(GoatPage.SEARCH) }
 
             state.selected?.let { goat ->
-                FarmIllustratedSectionSurface(
-                    Modifier.clickable { onOpen(GoatPage.PROFILE) },
-                ) {
-                    Text("Open goat", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                FarmIllustratedSectionSurface(Modifier.clickable { onOpen(GoatPage.PROFILE) }) {
+                    Text("Current animal", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                     Text(goatDisplayName(goat), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(goat.tag + " · " + goatStatusLabel(goat.status))
                     goat.latestWeightGrams?.let { Text("${formatKg(it)} kg latest weight") }
-                    if (goat.syncPending) Text("Saved on this device · waiting to sync")
                 }
             }
 
             FarmIllustratedSectionSurface {
-                Text("Find and reconcile", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { onOpen(GoatPage.SEARCH) }) { Text("Search") }
-                    TextButton(onClick = { onOpen(GoatPage.SYNC) }) { Text("Sync") }
-                }
+                Text(state.syncMessage, style = MaterialTheme.typography.bodyMedium)
+                Text("${state.pendingSyncCount} local change(s) waiting", style = MaterialTheme.typography.labelMedium)
+                TextButton(onClick = { onOpen(GoatPage.SYNC) }) { Text("Open sync status") }
             }
 
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
@@ -159,6 +161,18 @@ private fun GoatDashboardScreen(
                 TextButton(onClick = onSignOut) { Text("Sign out") }
             }
         }
+    }
+}
+
+@Composable
+private fun GoatDashboardAction(
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+) {
+    FarmIllustratedSectionSurface(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
+        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

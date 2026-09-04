@@ -123,10 +123,9 @@ fun FarmSessionContent(
     LaunchedEffect(membership.farmId) { refreshGoatState() }
 
     if (module == FarmModule.HOME) {
-        FarmHomeScreen(
-            farmName = farmName,
-            onOpen = { module = it },
-            onSignOut = onSignOut,
+        FarmHomeHost(
+            farmName = farmName, goatCount = herd.size, pendingSync = pendingSyncCount, ops = ops,
+            onOpen = { module = it }, onSignOut = onSignOut,
         )
         return
     }

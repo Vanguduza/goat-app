@@ -5833,7 +5833,7 @@ Contrast floors: text 4.5:1 (7:1 outdoor), icons/status 3:1. Verified in §14 CI
 
 ### 3. Typography
 
-Single family: **Inter** (variable, bundled). Tabular figures for all numeric data. No second family anywhere.
+**Current illustrated authority supersedes this line:** Inter is the operational UI family; Caveat is the locked, restrained accent family for non-critical brand copy only. Tabular figures remain Inter.
 
 | Style | Size/Line | Weight | Use |
 |---|---|---|---|

@@ -10,8 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.farmos.core.design.FarmOsAccentMedium
+import com.farmos.core.design.FarmOsWordmark
 import com.farmos.core.design.FarmPastoralBackdrop
 import com.farmos.core.design.FarmStorySurface
 
@@ -25,21 +26,17 @@ fun FarmOsSplashScreen() {
             verticalArrangement = Arrangement.Center,
         ) {
             FarmStorySurface(Modifier.fillMaxWidth()) {
-                Text(
-                    "Farm OS",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                FarmOsWordmark()
                 Text(
                     "Animals. Land. People. A Better Tomorrow.",
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    "Plan · Monitor · Grow · Sustain",
-                    style = MaterialTheme.typography.bodyLarge,
+                    "Real Farms. Brighter Futures.",
+                    style = FarmOsAccentMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
+                Text("Plan · Monitor · Grow · Sustain", style = MaterialTheme.typography.bodyLarge)
             }
         }
     }
