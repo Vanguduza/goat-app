@@ -87,21 +87,34 @@ class MainActivity : ComponentActivity() {
                                 identity.farms(available.map { it.farmId }).associate { it.id to it.name }
                             }.getOrDefault(farmNames)
                             when (
-                                val decision = FarmAccessGuard.decide(
+                                FarmAccessGuard.decide(
                                     sessionPresent = true,
                                     rememberedFarmId = restored.farmId,
                                     memberships = available,
                                 )
                             ) {
-                                is FarmAccessDecision.Restore -> {
-                                    selectedMembership = decision.membership
-                                    app.rememberMembership(decision.membership)
+                                FarmAccessDecision.GRANTED -> {
+                                    val revalidated = available.first { it.farmId == restored.farmId }
+                                    selectedMembership = revalidated
+                                    app.rememberMembership(revalidated)
                                 }
-                                FarmAccessDecision.RequireFarmSelection -> {
-                                    selectedMembership = null
+                                FarmAccessDecision.SESSION_EXPIRED -> requireReauthentication(null)
+                                FarmAccessDecision.NEEDS_FARM_SELECTION -> {
                                     app.clearRememberedMembership()
+                                    selectedMembership = null
                                 }
-                                FarmAccessDecision.RequireAuthentication -> requireReauthentication(null)
+                                FarmAccessDecision.REMEMBERED_FARM_REVOKED -> {
+                                    requireFarmReselection(
+                                        "Farm access changed. Choose an available farm or sign out.",
+                                        available,
+                                    )
+                                }
+                                FarmAccessDecision.NO_FARM_MEMBERSHIP -> {
+                                    requireFarmReselection(
+                                        "This account has no current farm membership. Create a farm or sign out.",
+                                        available,
+                                    )
+                                }
                             }
                         }
                         .onFailure { error ->
@@ -116,6 +129,7 @@ class MainActivity : ComponentActivity() {
                 val membership = selectedMembership
                 if (membership == null) {
                     FoundationAuthScreen(
+                        backendConfigured = app.backendConfigured,
                         busy = authBusy,
                         error = authError,
                         sessionPresent = sessionPresent,
@@ -167,10 +181,9 @@ class MainActivity : ComponentActivity() {
                                     memberships = available
                                     farmNames = names
                                     sessionPresent = true
-                                    available.firstOrNull { it.farmId == created.id }?.let { chosen ->
-                                        selectedMembership = chosen
-                                        app.rememberMembership(chosen)
-                                    }
+                                    val chosen = available.firstOrNull { it.farmId == created.farmId } ?: created
+                                    selectedMembership = chosen
+                                    app.rememberMembership(chosen)
                                 }.onFailure { error ->
                                     if (error is AuthenticationRequiredException) {
                                         requireReauthentication(error.message)
