@@ -193,7 +193,7 @@ private fun FarmHomeBottomBar(
 }
 
 @Composable
-private fun FarmMoreScreen(
+internal fun FarmMoreScreen(
     onOpen: (FarmModule) -> Unit,
     onBack: () -> Unit,
     onSignOut: () -> Unit,

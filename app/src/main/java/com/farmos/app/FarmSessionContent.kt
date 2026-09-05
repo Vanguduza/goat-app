@@ -124,7 +124,8 @@ fun FarmSessionContent(
 
     if (module == FarmModule.HOME) {
         FarmHomeHost(
-            farmName = farmName, goatCount = herd.size, pendingSync = pendingSyncCount, ops = ops,
+            farmName = farmName, membershipRole = membership.role,
+            goatCount = herd.size, pendingSync = pendingSyncCount, ops = ops,
             onOpen = { module = it }, onSignOut = onSignOut,
         )
         return

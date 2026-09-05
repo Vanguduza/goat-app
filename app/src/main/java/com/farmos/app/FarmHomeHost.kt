@@ -19,6 +19,7 @@ internal data class FarmHomeSummary(
 @Composable
 fun FarmHomeHost(
     farmName: String?,
+    membershipRole: String,
     goatCount: Int,
     pendingSync: Long,
     ops: RoomOpsRepository,
@@ -39,7 +40,8 @@ fun FarmHomeHost(
             pendingSync = pendingSync,
         )
     }
-    FarmHomeScreen(
+    RoleAwareFarmHomeScreen(
+        role = membershipRole,
         farmName = farmName,
         summary = summary,
         onOpen = onOpen,

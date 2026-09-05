@@ -319,13 +319,93 @@ screens:
   - screen_id: FOS-HOME-012
     name: Role-tailored Home
     module: home
-    visual_class: I3
-    implementation_audit: AUDIT_REQUIRED
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
+  - screen_id: FOS-HOME-012-A
+    name: Owner Dashboard
+    module: home
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: FARM_OWNER
+    required_devices: PHONE_AND_TABLET_MANAGER_OPTIMISED
+  - screen_id: FOS-HOME-012-B
+    name: Farm Manager Dashboard
+    module: home
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: FARM_MANAGER
+    required_devices: PHONE_AND_TABLET_MANAGER_OPTIMISED
+  - screen_id: FOS-HOME-012-C
+    name: Supervisor Dashboard
+    module: home
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: SUPERVISOR
+    required_devices: PHONE_AND_TABLET
+  - screen_id: FOS-HOME-012-D
+    name: Worker My Day Dashboard
+    module: home
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: FARM_WORKER
+    required_devices: PHONE_FIRST_FIELD_GRADE
+  - screen_id: FOS-HOME-012-E
+    name: Breeding Manager Dashboard
+    module: home
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: BREEDING_MANAGER
+    required_devices: PHONE_AND_TABLET
+  - screen_id: FOS-HOME-012-F
+    name: Vet Health Dashboard
+    module: home
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: VET_HEALTH
+    required_devices: PHONE_AND_TABLET
+  - screen_id: FOS-HOME-012-G
+    name: Finance Dashboard
+    module: home
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: FINANCE_ADMIN
+    required_devices: TABLET_PREFERRED_PHONE_ADAPTIVE
+  - screen_id: FOS-HOME-012-H
+    name: Buyer Read-only Dashboard
+    module: home
+    visual_class: I2
+    implementation_audit: VISUAL_IMPLEMENTED
+    visual_green: false
+    feature_green: false
+    required_states: GLOBAL_16_PLUS_STATE_MATRIX
+    required_roles: BUYER_READ_ONLY
+    required_devices: PHONE_AND_TABLET
   - screen_id: FOS-GOAT-001
     name: Goat Dashboard
     module: goat
