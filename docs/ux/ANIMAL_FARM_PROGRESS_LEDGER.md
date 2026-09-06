@@ -421,3 +421,11 @@ Meilisearch contract uses the pinned `v1.53.1` Linux binary when Docker is absen
 Executed against `24b6f1ceb83c2d5870d0a6335fabf010418b7dda`: smoke, handover-integrity, android (including `:app:compileDebugAndroidTestKotlin` on this x86_64 host), edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
 
 No green-gate promotion. This local report is not GitHub-hosted certification.
+
+## Exact task, vet, and breeding deep entries — 2026-09-06
+
+- `3966b583808777650a3efbc60e65b6d6729bd2bb` — overdue/work tiles and specialist task actions open `TaskEntryPage.BOARD` / FOS-TASK-001 (today board already includes due-today and overdue open work; a separate overdue page was not invented). Vet home (PAGE-PATTERNS 012-F) opens existing FOS-HEALTH-009 / FOS-HEALTH-007 / FOS-HEALTH-021 / FOS-HEALTH-024. Breeding home (012-E) opens existing FOS-GOAT-037 and FOS-GOAT-032 with a doe picker. Goat sync deep entry returns to farm home. FOS-HEALTH-010, FOS-TASK-005, FOS-INV-011, FOS-GOAT-007, FOS-HOME-006, photo persistence, DEAD_LETTER, and P2P/Drive/Relay were not invented.
+
+`:app:compileDebugKotlin` `:feature:goat:compileDebugKotlin` `:feature:ops:compileDebugKotlin` — PASS (`--offline`). Navigation and gap self-tests passed. Architecture and visual-authority scripts passed. No green-gate promotion.
+
+Rebound static inventory at `3966b58...`: 545 rows; 146 some evidence; 399 none; runtime 0. `registered_ids_mentioned_in_kotlin` 115 (was 114): FOS-GOAT-032 is now a standalone code ID. `STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE` 98; `STATIC_SOURCE_MAP_HINT_ONLY` 20. `direct_action_scope_violations = []`.
