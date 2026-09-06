@@ -121,6 +121,8 @@ const directActionViolations = [
   ['Open health', 'FarmDestination.Health()', 'FOS-HEALTH-001'],
   ['Open feed', 'FarmModule.FEED', 'FOS-FEED-001'],
   ['Open water', 'FarmModule.WATER', 'FOS-WATER-001'],
+  ['Open groups', 'FarmModule.GROUPS', 'FOS-GROUP-001'],
+  ['Open waitlist', 'FarmModule.WAITLIST', 'FOS-RABBIT-027'],
 ].filter(([label, token]) => appKt.includes(`"${label}"`) && !appKt.includes(token))
   .map(([label, , expected]) => ({
     label,

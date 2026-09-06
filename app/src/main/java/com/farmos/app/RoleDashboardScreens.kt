@@ -25,6 +25,18 @@ internal fun resolveFarmHomePersona(role: String): FarmHomePersona = when (role.
     else -> FarmHomePersona.GENERAL
 }
 
+/** Reachable module entries on the general home fallback. Shared More stays buyer-safe. */
+internal fun generalHomeActions(): List<Pair<String, FarmDestination>> =
+    listOf(
+        "Open tasks" to FarmDestination.Tasks(TaskEntryPage.BOARD),
+        "Open health" to FarmDestination.Health(),
+        "Open feed" to FarmDestination.Module(FarmModule.FEED),
+        // FOS-WATER-001 — general home already keeps feed; More has pasture, not water.
+        "Open water" to FarmDestination.Module(FarmModule.WATER),
+        // FOS-HOME-009 / FOS-SYNC-002
+        "Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC),
+    )
+
 /** Reachable module entries on Management A. Shared More stays buyer-safe. */
 internal fun managementHomeActions(): List<Pair<String, FarmDestination>> =
     listOf(
@@ -36,6 +48,10 @@ internal fun managementHomeActions(): List<Pair<String, FarmDestination>> =
         "Open feed" to FarmDestination.Module(FarmModule.FEED),
         // FOS-WATER-001 — same hole as feed; buyer home does not gain Water.
         "Open water" to FarmDestination.Module(FarmModule.WATER),
+        // FOS-GROUP-001 — More has pasture, not groups. The operating host already owns this module.
+        "Open groups" to FarmDestination.Module(FarmModule.GROUPS),
+        // FOS-RABBIT-027 — More has sales, not the rabbit waitlist. Owner/manager keep the existing module reachable.
+        "Open waitlist" to FarmDestination.Module(FarmModule.WAITLIST),
     )
 
 /** Exact-owner actions for specialist homes. Buyer/read-only does not gain Sync. */
@@ -61,6 +77,8 @@ internal fun specialistHomeActions(persona: FarmHomePersona): List<Pair<String, 
             "Cattle" to FarmDestination.Module(FarmModule.CATTLE),
             "Poultry" to FarmDestination.Module(FarmModule.POULTRY),
             "Due work" to FarmDestination.Tasks(TaskEntryPage.BOARD),
+            // FOS-RABBIT-027 — breeding already opens rabbits; waitlist stays a distinct existing module.
+            "Open waitlist" to FarmDestination.Module(FarmModule.WAITLIST),
         )
         FarmHomePersona.VET -> listOf(
             "Health centre" to FarmDestination.Health(),

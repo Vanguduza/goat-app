@@ -96,4 +96,47 @@ class FarmDestinationTest {
                 .none { it.second == FarmDestination.Module(FarmModule.WATER) },
         )
     }
+
+    @Test
+    fun generalHomeKeepsFeedAndWaterReachable() {
+        val actions = generalHomeActions()
+        assertEquals(
+            FarmDestination.Module(FarmModule.FEED),
+            actions.first { it.first == "Open feed" }.second,
+        )
+        assertEquals(
+            FarmDestination.Module(FarmModule.WATER),
+            actions.first { it.first == "Open water" }.second,
+        )
+    }
+
+    @Test
+    fun managementHomeKeepsGroupsReachable() {
+        val dest = managementHomeActions()
+            .first { it.first == "Open groups" }
+            .second
+        assertEquals(FarmDestination.Module(FarmModule.GROUPS), dest)
+    }
+
+    @Test
+    fun managementAndBreedingKeepWaitlistReachable() {
+        val waitlist = FarmDestination.Module(FarmModule.WAITLIST)
+        assertEquals(
+            waitlist,
+            managementHomeActions().first { it.first == "Open waitlist" }.second,
+        )
+        assertEquals(
+            waitlist,
+            specialistHomeActions(FarmHomePersona.BREEDING)
+                .first { it.first == "Open waitlist" }
+                .second,
+        )
+    }
+
+    @Test
+    fun buyerHomeDoesNotGainGroupsOrWaitlist() {
+        val actions = specialistHomeActions(FarmHomePersona.BUYER)
+        assertTrue(actions.none { it.second == FarmDestination.Module(FarmModule.GROUPS) })
+        assertTrue(actions.none { it.second == FarmDestination.Module(FarmModule.WAITLIST) })
+    }
 }
