@@ -451,3 +451,9 @@ No green-gate promotion. This local report is not GitHub-hosted certification. G
 `:app:testDebugUnitTest --tests com.farmos.app.FarmDestinationTest` — PASS after a failing-first `TASKS` mapping assertion. `:app:compileDebugKotlin` — PASS. Navigation self-test passed. No green-gate promotion.
 
 Rebound static inventory at `ea53caa...`: 545 rows; 147 some evidence; 398 none; runtime 0. FOS-HOME-009 is now `STATIC_CODE_ID_REFERENCE_ONLY`. Kotlin registered IDs 116.
+
+## Local CI after home sync entry — 2026-09-06
+
+`bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/local-ci-report.json` executed against `deeaa472d035f453bbeea7853d6a0007223c6bd8`: smoke, handover-integrity, android, edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
+
+No green-gate promotion. Not GitHub-hosted certification.
