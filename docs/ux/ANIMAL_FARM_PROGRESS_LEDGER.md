@@ -139,3 +139,45 @@ No `VISUAL_GREEN`, `FEATURE_GREEN`, `MODULE_GREEN`, or `MVP_GREEN` claim is made
 ### Next Gate 1 slice
 
 Continue the presentation foundation with the governed Home **Theme-only** control and application-level theme selection seam, then migrate Login using the supplied original animal-lineup asset and locked copy/layout rules while preserving authentication callbacks and truthful backend/session states. Outdoor remains a candidate requiring native acceptance and must not be certified from token tests alone.
+## Gate 1 Theme and Login lock implementation — 2026-09-06
+
+### Versioned implementation checkpoint
+
+- `18304a3b4b0fe0c111ed81d25ca106087d999cdd` — application-level Animal Farm Theme seam, Theme-only home control, exact locked image assets, and locked entrance/login presentation.
+
+### Implemented presentation contracts
+
+- `FarmOsTheme` now carries the active `AnimalFarmThemeMode` plus a composition-level mode-change callback; business and navigation APIs are unchanged.
+- The application persists only the local theme enum in a dedicated private preference namespace. It is separate from remembered farm/session context and does not enter Room, outbox, Supabase or sync state.
+- Both current home bottom bars include the shared `HomeThemeButton` at the bottom-right and apply navigation-bar safe insets. The control exposes only Light, Dark and Outdoor. Outdoor is labeled as a native candidate because owner/native acceptance is still open.
+- `farm_animal_lineup.png` and `farm_family_portraits_v1.png` were copied byte-for-byte from the protected visual-lock package into Android `drawable-nodpi`. SHA-256 remains `5f708f81...` and `41828998...` respectively.
+- `scripts/design/verify-handover.cjs` now also fails if either Android copy differs from its protected source while preserving the exact protected-package inventory check.
+- `FoundationAuthScreen` no longer uses the historical drawn wordmark/pastoral identity or redundant slogans. The entrance identity is now centered `Animal Farm` → exact lineup → real entrance state.
+- Sign-in retains the existing callback/enablement behavior, centers the `Sign in` action, keeps labeled credentials, and adds email/password keyboard types plus an accessible password visibility control. Membership selection, farm setup and truthful connection-unavailable states remain real callbacks/states rather than decorative actions.
+
+### Executable evidence at exact commit `18304a3...`
+
+- `:core:design:testDebugUnitTest` — PASS.
+- `:app:compileDebugKotlin` — PASS.
+- `bash scripts/ci/verify-kotlin-architecture.sh` — PASS before commit with the same source tree.
+- Protected handover integrity — PASS, including exact Android visual-lock copies.
+- Protected package self-test — PASS; 545 IDs remain intact and package green flags remain false.
+- Navigation audit self-test and route/screen/feature-gap self-test — PASS.
+- New/owned design and entrance files were ktlint-clean after explicit Compose naming suppression. Legacy formatting debt remains in older app/home files and was not mass-formatted in this slice.
+
+### Refreshed reconciliation evidence
+
+Canonical static route evidence is rebound to `18304a3b4b0fe0c111ed81d25ca106087d999cdd`:
+
+- registry rows: 545;
+- some static source-derived route/implementation evidence: 143;
+- no static route evidence: 402;
+- runtime reachability executed: 0.
+
+### Status law
+
+This slice is implemented and compiles, but **no visual status is promoted**. There is still no native screenshot matrix, physical/emulator visual inspection, 200% text evidence, TalkBack evidence, dark/outdoor image-plate acceptance, or independent visual approval. `VISUAL_GREEN`, `FEATURE_GREEN`, `MODULE_GREEN`, and `MVP_GREEN` therefore remain unclaimed.
+
+### Next Gate 1 slice
+
+Establish deterministic native reference fixtures/previews for Login and Theme selection, then begin the locked Management A and Worker D+C home compositions. The existing generic/pastoral role dashboards are still migration targets and must not be treated as visually locked because the shared theme and login now compile.
