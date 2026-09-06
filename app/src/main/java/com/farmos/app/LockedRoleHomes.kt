@@ -291,7 +291,7 @@ internal fun WorkerWorkBoardScreen(
                             title = row.title,
                             fact = if (row.status == "done") "Completed" else "Open · ${row.moduleCode}",
                             actionLabel = if (row.status == "done") "Open task" else "Continue task",
-                            onAction = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+                            onAction = { onOpen(FarmDestination.Task(row.id)) },
                             family = family,
                         )
                         AnimalFarmCarouselControls(

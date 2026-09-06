@@ -102,6 +102,8 @@ const directActionViolations = [
   ['Add Treatment', 'openTreatment = true', 'FOS-HEALTH-007'],
   ['Scan Animal', 'GoatEntryPage.SEARCH', 'FOS-GOAT-006'],
   ['Waiting to sync', 'GoatEntryPage.SYNC', 'FOS-SYNC-002'],
+  ['Continue task', 'FarmDestination.Task', 'FOS-TASK-003'],
+  ['Open task', 'FarmDestination.Task', 'FOS-TASK-003'],
 ].filter(([label, token]) => appKt.includes(`"${label}"`) && !appKt.includes(token))
   .map(([label, , expected]) => ({
     label,

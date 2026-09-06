@@ -23,7 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmModuleHeader
+import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FosDimens
 import java.time.LocalDate
 
@@ -48,6 +50,7 @@ fun TasksBoardScreen(
     onCreate: (title: String, module: String, code: String, due: String) -> Unit,
     onComplete: (taskId: String) -> Unit,
     onBack: () -> Unit,
+    onOpenDetail: (taskId: String) -> Unit = {},
 ) {
     var tab by remember { mutableStateOf(TaskTab.TODAY) }
     var showCreate by remember { mutableStateOf(false) }
@@ -83,7 +86,13 @@ fun TasksBoardScreen(
                 }
             } else {
                 visible.forEach { task ->
-                    TaskCard(task = task, today = today, busy = busy, onComplete = onComplete)
+                    TaskCard(
+                        task = task,
+                        today = today,
+                        busy = busy,
+                        onComplete = onComplete,
+                        onOpen = { onOpenDetail(task.id) },
+                    )
                 }
             }
 
@@ -111,9 +120,10 @@ private fun TaskCard(
     today: Long,
     busy: Boolean,
     onComplete: (String) -> Unit,
+    onOpen: () -> Unit,
 ) {
     val overdue = task.status == "open" && task.dueEpochDay < today
-    FarmIllustratedSectionSurface(Modifier.fillMaxWidth()) {
+    FarmIllustratedSectionSurface(Modifier.fillMaxWidth().clickable(onClick = onOpen)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(task.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -186,4 +196,45 @@ private fun emptyTaskHint(tab: TaskTab): String = when (tab) {
     TaskTab.TODAY -> "Your open work for today will appear here."
     TaskTab.UPCOMING -> "Scheduled farm work will appear here."
     TaskTab.COMPLETED -> "Finished work remains visible for farm history."
+}
+
+/** FOS-TASK-003 — task detail. Complete is the only authorized write here. */
+@Composable
+fun TaskDetailScreen(
+    task: TaskUiRow?,
+    busy: Boolean,
+    error: String?,
+    onComplete: (String) -> Unit,
+    onBack: () -> Unit,
+) {
+    val today = LocalDate.now().toEpochDay()
+    FarmOperationalPage(
+        screenId = "FOS-TASK-003",
+        title = task?.title ?: "Task",
+        subtitle = task?.let { "${it.moduleCode} · ${it.taskCode}" } ?: "That task is not on this device.",
+        onBack = onBack,
+    ) {
+        if (task == null) {
+            Text("The selected task is not in the local records.")
+        } else {
+            val overdue = task.status == "open" && task.dueEpochDay < today
+            Text(
+                when {
+                    task.status == "done" -> "Completed"
+                    overdue -> "Overdue · ${LocalDate.ofEpochDay(task.dueEpochDay)}"
+                    task.dueEpochDay == today -> "Due today"
+                    else -> "Due ${LocalDate.ofEpochDay(task.dueEpochDay)}"
+                },
+                color = if (overdue) AnimalFarmTheme.colors.critical else AnimalFarmTheme.colors.mutedInk,
+            )
+            if (task.status == "open") {
+                Button(
+                    onClick = { onComplete(task.id) },
+                    enabled = !busy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Mark done") }
+            }
+        }
+        error?.let { Text(it, color = AnimalFarmTheme.colors.critical) }
+    }
 }

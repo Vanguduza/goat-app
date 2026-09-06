@@ -11,6 +11,7 @@ import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateFarmTask
+import com.farmos.feature.ops.TaskDetailScreen
 import com.farmos.feature.ops.TaskUiRow
 import com.farmos.feature.ops.TasksBoardScreen
 import java.time.LocalDate
@@ -24,11 +25,14 @@ fun TasksModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    focusTaskId: String? = null,
 ) {
     val scope = rememberCoroutineScope()
     var rows by remember(farmId) { mutableStateOf(emptyList<TaskUiRow>()) }
+    var selectedId by remember(farmId, focusTaskId) { mutableStateOf(focusTaskId) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    val deepEntry = focusTaskId != null
 
     suspend fun refresh() {
         val open = ops.openTasks()
@@ -66,6 +70,19 @@ fun TasksModuleHost(
             .onFailure { error = it.message }
     }
 
+    if (selectedId != null) {
+        TaskDetailScreen(
+            task = rows.firstOrNull { it.id == selectedId },
+            busy = busy,
+            error = error,
+            onComplete = { taskId ->
+                runWrite { ops.completeTask(CompleteFarmTask(taskId), newContext()) }
+            },
+            onBack = { if (deepEntry) onBack() else selectedId = null },
+        )
+        return
+    }
+
     TasksBoardScreen(
         rows = rows,
         busy = busy,
@@ -85,10 +102,9 @@ fun TasksModuleHost(
             }
         },
         onComplete = { taskId ->
-            runWrite {
-                ops.completeTask(CompleteFarmTask(taskId), newContext())
-            }
+            runWrite { ops.completeTask(CompleteFarmTask(taskId), newContext()) }
         },
+        onOpenDetail = { selectedId = it },
         onBack = onBack,
     )
 }

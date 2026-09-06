@@ -16,6 +16,10 @@ sealed class FarmDestination {
     data class Health(
         val openTreatment: Boolean = false,
     ) : FarmDestination()
+
+    data class Task(
+        val taskId: String,
+    ) : FarmDestination()
 }
 
 fun FarmModule.toDestination(): FarmDestination =
