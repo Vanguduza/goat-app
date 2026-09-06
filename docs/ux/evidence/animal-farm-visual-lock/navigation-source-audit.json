@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "18304a3b4b0fe0c111ed81d25ca106087d999cdd",
+  "tested_commit": "e51770b082a825487c40622869be103a1e9e5e5d",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 125,
     "registered_ids_absent_from_static_implementation_map": 420,
-    "registered_ids_mentioned_in_kotlin": 117
+    "registered_ids_mentioned_in_kotlin": 112
   },
   "top_level": {
     "farm_modules": [
@@ -66,7 +66,7 @@
         {
           "value": "DASHBOARD",
           "refs": 7,
-          "transition_refs": 5,
+          "transition_refs": 6,
           "render_only_candidate": false
         },
         {
@@ -89,8 +89,8 @@
         },
         {
           "value": "WEIGHT",
-          "refs": 3,
-          "transition_refs": 2,
+          "refs": 4,
+          "transition_refs": 3,
           "render_only_candidate": false
         },
         {
@@ -113,8 +113,8 @@
         },
         {
           "value": "SEARCH",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 3,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -200,9 +200,9 @@
         },
         {
           "value": "NESTS",
-          "refs": 1,
-          "transition_refs": 0,
-          "render_only_candidate": true
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
         },
         {
           "value": "GI_STASIS",
@@ -359,7 +359,7 @@
         },
         {
           "value": "TREATMENT",
-          "refs": 2,
+          "refs": 3,
           "transition_refs": 1,
           "render_only_candidate": false
         },
@@ -766,9 +766,7 @@
     }
   ],
   "findings": {
-    "render_only_state_candidates": [
-      "RabbitPage.NESTS"
-    ],
+    "render_only_state_candidates": [],
     "operating_module_host_callers": [
       "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
       "app/src/main/java/com/farmos/app/OperatingModuleHost.kt"
@@ -779,23 +777,7 @@
       "MONEY",
       "INVENTORY"
     ],
-    "direct_action_scope_violations": [
-      {
-        "label": "Record Weight",
-        "current_destination": "FarmModule.GOAT",
-        "expected_exact_owner": "FOS-GOAT-011"
-      },
-      {
-        "label": "Add Treatment",
-        "current_destination": "FarmModule.HEALTH",
-        "expected_exact_owner": "FOS-HEALTH-007"
-      },
-      {
-        "label": "Scan Animal",
-        "current_destination": "FarmModule.GOAT",
-        "expected_exact_owner": "FOS-HOME-006/FOS-GOAT-007"
-      }
-    ],
+    "direct_action_scope_violations": [],
     "feature_id_catalog": "NOT_FOUND: screen contract template requires feature_ids, but no canonical feature-ID catalog was found in docs/code search"
   },
   "limitations": [

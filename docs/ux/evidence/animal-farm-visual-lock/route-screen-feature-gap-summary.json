@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "tested_commit": "18304a3b4b0fe0c111ed81d25ca106087d999cdd",
+  "tested_commit": "e51770b082a825487c40622869be103a1e9e5e5d",
   "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_NOT_RUNTIME_CERTIFICATION",
   "registry_rows": 545,
   "route_evidence_counts": {
-    "NO_ROUTE_EVIDENCE": 402,
+    "NO_ROUTE_EVIDENCE": 400,
     "STATIC_AUTH_STATE_BRANCH": 4,
-    "STATIC_CODE_ID_REFERENCE_ONLY": 10,
+    "STATIC_CODE_ID_REFERENCE_ONLY": 12,
     "STATIC_GENERAL_HOME_FALLBACK": 1,
     "STATIC_HOME_NESTED_DESTINATION": 1,
     "STATIC_MAIN_ACTIVITY_SPLASH_BRANCH": 1,
@@ -14,8 +14,8 @@
     "STATIC_SOURCE_MAP_HINT_ONLY": 22,
     "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 96
   },
-  "no_route_evidence": 402,
-  "some_static_route_evidence": 143,
+  "no_route_evidence": 400,
+  "some_static_route_evidence": 145,
   "runtime_reachability_executed": 0,
   "feature_id_catalog_status": "MISSING_OR_NOT_CANONICALLY_IDENTIFIED",
   "module_gap_counts": {
@@ -65,7 +65,7 @@
     },
     "goat": {
       "total": 55,
-      "no_route_evidence": 38
+      "no_route_evidence": 37
     },
     "group": {
       "total": 9,
@@ -77,7 +77,7 @@
     },
     "home": {
       "total": 20,
-      "no_route_evidence": 9
+      "no_route_evidence": 8
     },
     "inv": {
       "total": 19,
@@ -137,9 +137,7 @@
     }
   },
   "known_navigation_defects": {
-    "render_only_state_candidates": [
-      "RabbitPage.NESTS"
-    ],
+    "render_only_state_candidates": [],
     "operating_module_host_callers": [
       "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
       "app/src/main/java/com/farmos/app/OperatingModuleHost.kt"
@@ -150,23 +148,7 @@
       "MONEY",
       "INVENTORY"
     ],
-    "direct_action_scope_violations": [
-      {
-        "label": "Record Weight",
-        "current_destination": "FarmModule.GOAT",
-        "expected_exact_owner": "FOS-GOAT-011"
-      },
-      {
-        "label": "Add Treatment",
-        "current_destination": "FarmModule.HEALTH",
-        "expected_exact_owner": "FOS-HEALTH-007"
-      },
-      {
-        "label": "Scan Animal",
-        "current_destination": "FarmModule.GOAT",
-        "expected_exact_owner": "FOS-HOME-006/FOS-GOAT-007"
-      }
-    ],
+    "direct_action_scope_violations": [],
     "feature_id_catalog": "NOT_FOUND: screen contract template requires feature_ids, but no canonical feature-ID catalog was found in docs/code search"
   },
   "status_law": "MAPPED inventory is not CONTRACT_READY, IMPLEMENTED, VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN."

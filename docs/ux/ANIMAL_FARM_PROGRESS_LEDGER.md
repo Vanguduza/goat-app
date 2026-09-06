@@ -181,3 +181,90 @@ This slice is implemented and compiles, but **no visual status is promoted**. Th
 ### Next Gate 1 slice
 
 Establish deterministic native reference fixtures/previews for Login and Theme selection, then begin the locked Management A and Worker D+C home compositions. The existing generic/pastoral role dashboards are still migration targets and must not be treated as visually locked because the shared theme and login now compile.
+
+## Gate 1 Management A / Worker D+C and exact deep entries — 2026-09-06
+
+### Reconstruction facts that superseded the handover prompt
+
+- Workspace boot was docs-only `main` at `402ee5f0299e60cc29cf8be57e5f5cd500d8e4b9`.
+- Protected target `origin/implementation/animal-farm-visual-lock` remains `afc53440b305a2ea086f16155c0d9227e4030180`.
+- Latest versioned recovery checkpoint is `c603a903b570e5519cdc571b88a2c166177900ba`.
+- Claimed home commit `b3ccf6f8b19fcdb3679099a310cdccec1f57ebb2` does **not** exist on any local or GitHub ref. Management A and Worker D+C were still the pastoral RoleDashboardScreens at recovery HEAD.
+- Historic worktrees `/home/ubuntu/goat-app-af-gate1`, `goat-app-visual-realignment`, and `goat-app-visual-lock-integration` are not present in this environment and were not created or reset.
+- `THE_ANIMAL_FARM_OFFLINE_FIRST_DATABASE_ARCHITECTURE.md` is not in this repository. Adopted write/offline law remains `docs/00_PROJECT_TRUTH.md`: Room + transactional outbox + WorkManager + versioned Supabase RPC. Peer coordinator / Farm Relay / Drive backup were **not** adopted and were not invented.
+
+### Versioned implementation checkpoint
+
+- `e51770b082a825487c40622869be103a1e9e5e5d` — locked Management A and Worker D+C homes, exact worker deep entries, Rabbit nest-box reachability, and home projection tests.
+
+### Implemented contracts
+
+- FOS-HOME-012-A/B use P02 control-room composition: farm/date context, ranked real attention, work/resource tiles, family launchers from the approved portrait sheet. Goat counts are device-local; other species show `Open` rather than invented headcounts.
+- FOS-HOME-012-D uses P03: DUE_NOW / UPCOMING / COMPLETED as a presentation projection of existing `open`/`done` + due dates. Review & decide carousel uses previous/next controls. Empty stages stay empty.
+- Worker shortcuts now enter exact owners:
+  - Record Weight → `GoatEntryPage.WEIGHT` / FOS-GOAT-011, with herd pick when no goat is selected.
+  - Add Treatment → `Health(openTreatment = true)` / FOS-HEALTH-007.
+  - Scan Animal → existing FOS-GOAT-006 tag/name search. FOS-GOAT-007 RFID and FOS-HOME-006 global search were not invented.
+- `RabbitPage.NESTS` is reachable from the rabbitry dashboard (`onOpen(RabbitPage.NESTS)`).
+- Goat session orchestration was extracted to `GoatModuleHost` so `FarmSessionContent.kt` stays under the 450-line ceiling (122 lines).
+- Theme-only home gear and login lock from `18304a3...` are preserved.
+
+### Executable evidence at exact commit `e51770b...`
+
+This host is **x86_64**. The historic aarch64 AAPT2 blocker does not apply here. Android SDK platform 37.0 and build-tools 37.0.0 were provisioned locally and are not committed.
+
+- `:domain:ops:test` `:domain:goat:test` `:domain:rabbit:test` — PASS, including `WorkerTaskProjectionTest`.
+- `:core:design:testDebugUnitTest` — PASS, including locked family-window coordinates.
+- `:core:network:testDebugUnitTest` — PASS.
+- `:core:sync:testDebugUnitTest` — PASS.
+- `:app:compileDebugKotlin` — PASS.
+- `:app:assembleDebug` — PASS. Local artifact `app/build/outputs/apk/debug/app-debug.apk` (not committed).
+- `:app:compileDebugAndroidTestKotlin` — PASS.
+- `:core:database:compileDebugAndroidTestKotlin` — PASS, warnings only.
+- `bash scripts/ci/verify-kotlin-architecture.sh` — PASS.
+- Protected handover verifier — PASS.
+- Protected pack self-test — PASS; 545 IDs intact; green flags remain false.
+- Navigation audit self-test — PASS. `RabbitPage.NESTS` is no longer render-only. `direct_action_scope_violations = []`.
+
+### Refreshed static reconciliation evidence
+
+Canonical static evidence rebound to `e51770b082a825487c40622869be103a1e9e5e5d`:
+
+- registry rows: 545;
+- some static source-derived route/implementation evidence: 145;
+- no static route evidence: 400;
+- runtime reachability executed: 0.
+
+The +2 static mentions are source-derived ID references, not runtime certification.
+
+### Offline / APK-hosted infrastructure coverage from source (not assumed complete)
+
+Present and used by the compiled APK:
+
+- Room operational store and generated schema v13;
+- `sync_outbox` with PENDING / IN_FLIGHT / ACKNOWLEDGED / CONFLICT / REJECTED / RETRY_WAIT / DEAD_LETTER;
+- WorkManager drain (`SyncWorker`);
+- server-issued pull cursor + `FarmOsPullReconciler`;
+- device id on commands;
+- local save receipts that do not claim server acknowledgment.
+
+Not present; not implemented in this slice because they are not adopted Project Truth:
+
+- APK-hosted local sync HTTP API;
+- peer discovery / transport broker;
+- coordinator lease / failover;
+- shift handover / chunk resume;
+- Farm Relay;
+- Google Drive backup/restore;
+- Android Keystore-backed device enrolment/revocation fabric.
+
+### Status law
+
+No `VISUAL_GREEN`, `FEATURE_GREEN`, `MODULE_GREEN`, `MVP_GREEN`, `OFFLINE_GREEN`, `SYNC_GREEN`, `COORDINATOR_GREEN`, `SHIFT_GREEN`, `BACKUP_GREEN`, `SECURITY_GREEN`, or `PROJECT_GREEN` claim is made. Native screenshot/device evidence remains unexecuted. Outdoor remains a candidate.
+
+### Next independent slices
+
+1. Continue Gate 1 restyle of species navigator, goat dashboard/weight, and remaining specialist homes on the same token family without dropping commands.
+2. Keep Project Truth sync/outbox hardening inside the adopted Supabase path.
+3. Do not promote a peer-coordinator architecture unless an accepted EDR supersedes Project Truth.
+
