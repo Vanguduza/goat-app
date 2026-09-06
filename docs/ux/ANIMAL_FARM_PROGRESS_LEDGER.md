@@ -487,3 +487,12 @@ Rebound static inventory at `4487c16...`: 545 rows; 147 some evidence; 398 none;
 `bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/local-ci-report.json` executed against `9aebae24b9c46462bd15a240fc5e5b85cf8ce3dd`: smoke, handover-integrity, android, edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
 
 No green-gate promotion. Not GitHub-hosted certification.
+
+## Management feed and water reachability — 2026-09-06
+
+- `844293d63de6a236fb2ef669dc1b6fd9b44d772b` — Management A “Open feed” opens existing `FarmModule.FEED` / FOS-FEED-001 and “Open water” opens existing `FarmModule.WATER` / FOS-WATER-001. Shared More still has pasture, not feed or water, so buyer/read-only does not gain Water. Supervisor “Health exceptions” remains `Health()`. FOS-HEALTH-010, FOS-HEALTH-009 vs 001 for supervisor, FOS-TASK-005, FOS-INV-011, FOS-GOAT-007, FOS-HOME-006, Groups, waitlist, Rabbit/Finance/Inventory entry pages, DEAD_LETTER, photo/SY03, and P2P/Drive/Relay were not invented.
+
+`:app:testDebugUnitTest --tests com.farmos.app.FarmDestinationTest` — PASS after failing-first management feed/water assertions. `:app:compileDebugKotlin` — PASS (`--offline`). Navigation and gap self-tests passed. Architecture script passed. No green-gate promotion.
+
+Rebound static inventory at `844293d...`: 545 rows; 147 some evidence; 398 none; runtime 0. Kotlin registered IDs 116. `direct_action_scope_violations = []`.
+
