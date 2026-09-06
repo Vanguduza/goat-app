@@ -25,6 +25,15 @@ internal fun resolveFarmHomePersona(role: String): FarmHomePersona = when (role.
     else -> FarmHomePersona.GENERAL
 }
 
+/** Reachable module entries on Management A. Shared More stays buyer-safe. */
+internal fun managementHomeActions(): List<Pair<String, FarmDestination>> =
+    listOf(
+        // FOS-HOME-009 / FOS-SYNC-002 — reachable even when pending-sync is not the ranked hero
+        "Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC),
+        // FOS-HEALTH-001 — More is shared with buyer, so health stays on management home
+        "Open health" to FarmDestination.Health(),
+    )
+
 /** Exact-owner actions for specialist homes. Buyer/read-only does not gain Sync. */
 internal fun specialistHomeActions(persona: FarmHomePersona): List<Pair<String, FarmDestination>> {
     val core = when (persona) {
@@ -53,6 +62,8 @@ internal fun specialistHomeActions(persona: FarmHomePersona): List<Pair<String, 
             "Health centre" to FarmDestination.Health(),
             "Open withdrawals" to FarmDestination.Health(HealthEntryPage.WITHDRAWALS),
             "Add Treatment" to FarmDestination.Health(HealthEntryPage.TREATMENT),
+            // FOS-HEALTH-004
+            "Record observation" to FarmDestination.Health(HealthEntryPage.RECORD_OBSERVATION),
             // FOS-HEALTH-013
             "Open formulary" to FarmDestination.Health(HealthEntryPage.FORMULARY),
             // FOS-HEALTH-021

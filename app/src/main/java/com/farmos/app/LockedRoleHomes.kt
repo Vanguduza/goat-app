@@ -203,8 +203,9 @@ private fun ManagementFamilies(
                 repeat(3 - row.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
             }
         }
-        // FOS-HOME-009 / FOS-SYNC-002 — reachable even when pending-sync is not the ranked hero
-        AnimalFarmQuickAction("Open sync status", { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) })
+        managementHomeActions().forEach { (label, dest) ->
+            AnimalFarmQuickAction(label, { onOpen(dest) })
+        }
     }
 }
 

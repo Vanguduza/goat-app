@@ -1,6 +1,7 @@
 package com.farmos.app
 
 import com.farmos.feature.goat.GoatEntryPage
+import com.farmos.feature.ops.HealthEntryPage
 import com.farmos.feature.ops.TaskEntryPage
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -48,6 +49,30 @@ class FarmDestinationTest {
         assertTrue(
             specialistHomeActions(FarmHomePersona.BUYER)
                 .none { it.second == FarmDestination.Goat(GoatEntryPage.SYNC) },
+        )
+    }
+
+    @Test
+    fun vetHomeOpensRecordObservation() {
+        val dest = specialistHomeActions(FarmHomePersona.VET)
+            .first { it.first == "Record observation" }
+            .second
+        assertEquals(FarmDestination.Health(HealthEntryPage.RECORD_OBSERVATION), dest)
+    }
+
+    @Test
+    fun managementHomeKeepsHealthDashboardReachable() {
+        val dest = managementHomeActions()
+            .first { it.first == "Open health" }
+            .second
+        assertEquals(FarmDestination.Health(), dest)
+    }
+
+    @Test
+    fun buyerHomeDoesNotGainHealthAction() {
+        assertTrue(
+            specialistHomeActions(FarmHomePersona.BUYER)
+                .none { it.second == FarmDestination.Health() },
         )
     }
 }
