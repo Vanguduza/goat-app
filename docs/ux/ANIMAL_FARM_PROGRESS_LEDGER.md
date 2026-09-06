@@ -473,3 +473,11 @@ Hosted GitHub Actions on this branch and PR, including HEAD `0824aa9` and echo-o
 `bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/local-ci-report.json` executed against `0824aa9538c28a68f506ace6a0bc144e896812e5`: smoke, handover-integrity, android, edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
 
 No green-gate promotion. Not GitHub-hosted certification.
+
+## Management health and vet observation deep entries — 2026-09-06
+
+- `4487c16987d60e094814c0f15166357b042b9df3` — Management A “Open health” opens existing `FarmDestination.Health()` / FOS-HEALTH-001, because shared More stays buyer-safe. Vet home “Record observation” opens `HealthEntryPage.RECORD_OBSERVATION` / FOS-HEALTH-004. Supervisor “Health exceptions” remains `Health()`. Buyer still has no Sync or Health action. FOS-HEALTH-010, FOS-HEALTH-009 vs 001 for supervisor, FOS-TASK-005, FOS-INV-011, FOS-GOAT-007, FOS-HOME-006, Rabbit/Finance/Inventory entry pages, DEAD_LETTER, photo/SY03, and P2P/Drive/Relay were not invented.
+
+`:app:testDebugUnitTest --tests com.farmos.app.FarmDestinationTest` — PASS after failing-first vet observation and management health assertions. `:app:compileDebugKotlin` — PASS (`--offline`). Navigation and gap self-tests passed. Architecture script passed. No green-gate promotion.
+
+Rebound static inventory at `4487c16...`: 545 rows; 147 some evidence; 398 none; runtime 0. Kotlin registered IDs 116. `direct_action_scope_violations = []`.
