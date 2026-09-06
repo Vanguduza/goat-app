@@ -321,4 +321,23 @@ No `VISUAL_GREEN`, `FEATURE_GREEN`, `MODULE_GREEN`, `MVP_GREEN`, `OFFLINE_GREEN`
 2. Close more real transitions only where a page and owner already exist.
 3. Keep Project Truth sync/outbox hardening. Do not implement APK-hosted P2P unless an accepted EDR supersedes Project Truth.
 
+## Truthful goat sync receipts — 2026-09-06
+
+### Versioned implementation checkpoints
+
+- `3eaa72f230f7492ce333d3fd4b2e6d9f83f5f79a` — replace `Synced` wording in goat manual sync.
+- `59913762c4fab66ffdd08241249f2f12fb8d8aaa` — extract `goatManualSyncReceipt` with `:app:testDebugUnitTest` coverage on this x86_64 host.
+
+### Contract
+
+Manual sync receipts name the server outcome or stay on local-pending language. An empty successful drain+pull does not say `Synced`. Local writes still say `Saved on this device · waiting to sync`.
+
+### Evidence
+
+- `:app:testDebugUnitTest --tests com.farmos.app.GoatSyncReceiptTest` — PASS, including `processDebugResources` on x86_64.
+- `:app:compileDebugKotlin` — PASS.
+- Visual-authority guardrail rejects a return of `Synced ·` in `GoatModuleHost.kt`.
+
+No green-gate promotion. Native visual evidence remains unexecuted. Peer coordinator / Drive backup remain unadopted.
+
 
