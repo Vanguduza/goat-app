@@ -91,3 +91,51 @@ None. No screen, feature, module or MVP status has been promoted. Registry membe
 ### Active next slice
 
 Gate 1 shared visual foundation, starting with the smallest isolated semantic theme/tokens + Theme selection seam needed by Login and Home. It must not alter business command, Room/outbox, Supabase/RLS or sync behavior.
+
+## Gate 1 foundation and recovered Android build evidence — 2026-09-06
+
+### Versioned implementation checkpoints
+
+- `2dacd4812457b1cb78a72158280f4fa2a61d37bb` — shared Animal Farm semantic theme/token foundation and focused token tests.
+- `451068a2cf9dc56e26946f607ba6b9a8b2225e03` — gap-audit self-test made non-mutating; self-test now uses temporary current-source evidence rather than overwriting canonical evidence or requiring an older committed audit to equal HEAD.
+- `9ec7480a8e9dfcb969e631e9b9928c79b791e45f` — recovered baseline Android build contracts without changing the protected visual-lock package.
+
+The build-repair commit fixes only defects exposed by executing the recovered handover code: obsolete Compose `weight` imports, a Room DAO table-name typo, cross-module Kotlin smart-cast failures, lost `ColumnScope` receivers in auth state helpers, app-internal visibility mismatches, a stale typed task projection, incomplete species call signatures, and one JUnit4 expression-bodied test returning a non-`Unit` value. The generated Room v13 schema snapshot is committed because the database module exports schemas to `core/database/schemas` and the governing handbook requires generated Room schema snapshots to be versioned rather than hand-edited.
+
+### Executable Android evidence
+
+The connected host is ARM64. Machine-local tooling was provisioned outside the repository: Android SDK platform 37.0, Build-Tools 37.0.0 (with 36.0.0 also installed by Gradle), platform-tools 37.0.1, Gradle 9.3.1, and an ARM64 OpenJDK 17 toolchain. No machine-local SDK path was committed.
+
+Verified passes:
+
+- `:core:design:testDebugUnitTest` — passed; this executes the locked light/dark palette, Outdoor candidate, and touch-target token contract tests.
+- `:app:compileDebugKotlin` — passed after `9ec7480...`.
+- `bash scripts/ci/verify-kotlin-architecture.sh` — passed.
+- `:domain:goat:test`, `:domain:rabbit:test`, `:domain:ops:test` — passed.
+- `:core:network:testDebugUnitTest` — passed after correcting the JUnit4 test return contract.
+- `:core:sync:testDebugUnitTest` — passed in the CI-equivalent task run.
+- `:core:database:compileDebugAndroidTestKotlin` — passed; migration-test source compiles, with warnings only.
+- Protected handover verifier and protected package self-test continue to pass: 39 original package files, 19 protected hashes, eight negative checks, and 545 exact registry IDs.
+
+The remaining local CI-equivalent Android-test compilation is environment-blocked, not source-certified: during `app` Android-test resource processing, Android Gradle Plugin 9.1.1 resolves Maven `aapt2-9.1.1-14792394-linux`, which is an **x86-64** ELF binary, while the connected Oracle host is **aarch64**. It fails before `:app:compileDebugAndroidTestKotlin` can execute. Therefore app Android-test compilation remains unproven on this host and is not reported as passed.
+
+GitHub draft PR #2 targets `implementation/animal-farm-visual-lock`, not `main`. Its first Foundation CI run failed before executing any workflow steps: independent jobs had no assigned runner (`runner_id: 0`), so that run supplies no compile/test evidence.
+
+### Refreshed static reconciliation evidence
+
+The canonical static navigation/gap evidence was regenerated from clean commit `9ec7480a8e9dfcb969e631e9b9928c79b791e45f` after the build repairs:
+
+- registry rows: 545;
+- rows with some static source-derived route/implementation evidence: 143;
+- rows with no static route evidence: 402;
+- runtime reachability executed: 0.
+
+The counts are unchanged from the prior audit. Static evidence remains non-runtime and does not upgrade any screen, feature, module or MVP status.
+
+### Status law after build recovery
+
+No `VISUAL_GREEN`, `FEATURE_GREEN`, `MODULE_GREEN`, or `MVP_GREEN` claim is made. Compilation and unit tests prove only the exercised code contracts. Native screenshot evidence, accessibility evidence, deterministic runtime route traversal, exact feature binding, independent visual acceptance, and post-presentation end-to-end architecture verification remain open.
+
+### Next Gate 1 slice
+
+Continue the presentation foundation with the governed Home **Theme-only** control and application-level theme selection seam, then migrate Login using the supplied original animal-lineup asset and locked copy/layout rules while preserving authentication callbacks and truthful backend/session states. Outdoor remains a candidate requiring native acceptance and must not be certified from token tests alone.
