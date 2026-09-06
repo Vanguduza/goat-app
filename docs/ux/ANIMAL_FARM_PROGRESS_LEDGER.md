@@ -362,4 +362,10 @@ Not executed here: `supabase start` / pgTAP, live Meilisearch Docker contract, s
 
 Do not treat `runner_id: 0` as a source defect. Do not skip or weaken those jobs to manufacture a CI green. External action required: the repository owner must restore GitHub-hosted Actions runners/minutes for `ubuntu-latest`. No self-hosted worker is connected to this cloud run.
 
+## Pending-sync attention owner — 2026-09-06
+
+- `6c7d056a51cbe6457e12314d6d319a6b9ee0934d` — Management A “Waiting to sync” opens `GoatEntryPage.SYNC` / FOS-SYNC-002 instead of the task board.
+
+`:app:compileDebugKotlin` and navigation self-test passed. No green-gate promotion.
+
 
