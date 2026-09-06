@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tested_commit": "82365ba0525a53d121d362e42efc0d050ee77b26",
+  "tested_commit": "f799edad60c666ea5951b48b6bcb4072b8680843",
   "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_NOT_RUNTIME_CERTIFICATION",
   "registry_rows": 545,
   "route_evidence_counts": {
@@ -11,8 +11,8 @@
     "STATIC_HOME_NESTED_DESTINATION": 1,
     "STATIC_MAIN_ACTIVITY_SPLASH_BRANCH": 1,
     "STATIC_ROLE_DISPATCH_PRESENT": 8,
-    "STATIC_SOURCE_MAP_HINT_ONLY": 22,
-    "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 96
+    "STATIC_SOURCE_MAP_HINT_ONLY": 21,
+    "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 97
   },
   "no_route_evidence": 399,
   "some_static_route_evidence": 146,

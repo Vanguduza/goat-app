@@ -383,3 +383,11 @@ Rebound static inventory: 545 rows; 146 some evidence; 399 none; runtime 0.
 `:app:compileDebugKotlin` and navigation self-test passed. Static inventory rebound below. No green-gate promotion.
 
 Rebound static inventory: 545 rows; 146 some evidence; 399 none; runtime 0. FOS-HEALTH-009 remains mapped-plus-code; FOS-HEALTH-010 remains no route evidence.
+
+## Task create deep entry — 2026-09-06
+
+- `f799edad60c666ea5951b48b6bcb4072b8680843` — Worker “Add Task” opens `TaskEntryPage.CREATE` / FOS-TASK-004. Edit and recurrence were not invented.
+
+`:app:compileDebugKotlin` and navigation self-test passed. Static inventory rebound below. No green-gate promotion.
+
+Rebound static inventory: 545 rows; 146 some evidence; 399 none; runtime 0.
