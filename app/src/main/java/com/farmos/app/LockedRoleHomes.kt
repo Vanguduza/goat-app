@@ -41,6 +41,7 @@ import com.farmos.domain.ops.inferTaskSpeciesFamily
 import com.farmos.domain.ops.projectWorkerTaskStage
 import com.farmos.domain.ops.rankHomeAttention
 import com.farmos.feature.goat.GoatEntryPage
+import com.farmos.feature.ops.HealthEntryPage
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -106,8 +107,9 @@ private fun ManagementAttention(
                 category = "Health",
                 title = "Withdrawal window open",
                 context = "${summary.activeWithdrawals} active window(s)",
-                actionLabel = "Review health",
-                onAction = { onOpen(FarmDestination.Health()) },
+                actionLabel = "Open withdrawals",
+                // FOS-HEALTH-009
+                onAction = { onOpen(FarmDestination.Health(HealthEntryPage.WITHDRAWALS)) },
                 family = family,
             )
             HomeAttentionKind.OVERDUE_WORK -> AnimalFarmHeroCard(
@@ -307,7 +309,7 @@ internal fun WorkerWorkBoardScreen(
                     // FOS-GOAT-011
                     AnimalFarmQuickAction("Record Weight", { onOpen(FarmDestination.Goat(GoatEntryPage.WEIGHT)) })
                     // FOS-HEALTH-007
-                    AnimalFarmQuickAction("Add Treatment", { onOpen(FarmDestination.Health(openTreatment = true)) })
+                    AnimalFarmQuickAction("Add Treatment", { onOpen(FarmDestination.Health(HealthEntryPage.TREATMENT)) })
                     // FOS-GOAT-006 existing identification search. FOS-GOAT-007 RFID and FOS-HOME-006 are not invented.
                     AnimalFarmQuickAction("Scan Animal", { onOpen(FarmDestination.Goat(GoatEntryPage.SEARCH)) })
                     Text("Guides and areas", color = AnimalFarmTheme.colors.ink)

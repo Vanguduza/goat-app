@@ -17,6 +17,7 @@ import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordLabResult
 import com.farmos.domain.ops.RecordVetVisit
+import com.farmos.feature.ops.HealthEntryPage
 import com.farmos.feature.ops.HealthObservationScreen
 import java.time.LocalDate
 import java.util.UUID
@@ -29,7 +30,7 @@ fun HealthModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
-    openTreatment: Boolean = false,
+    entryPage: HealthEntryPage = HealthEntryPage.DASHBOARD,
 ) {
     val scope = rememberCoroutineScope()
     var observations by remember(farmId) { mutableStateOf(emptyList<String>()) }
@@ -196,6 +197,6 @@ fun HealthModuleHost(
             }
         },
         onBack = onBack,
-        openTreatment = openTreatment,
+        entryPage = entryPage,
     )
 }

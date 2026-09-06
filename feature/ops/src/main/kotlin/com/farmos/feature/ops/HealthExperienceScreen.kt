@@ -57,11 +57,12 @@ fun HealthObservationScreen(
     onAddPackSlot: (packId: String, slotCode: String, title: String, offset: String, fromEvent: String) -> Unit = { _, _, _, _, _ -> },
     onApplyPack: (packId: String, animalId: String, day: String) -> Unit = { _, _, _ -> },
     onBack: () -> Unit,
-    openTreatment: Boolean = false,
+    entryPage: HealthEntryPage = HealthEntryPage.DASHBOARD,
 ) {
-    var page by remember { mutableStateOf(if (openTreatment) HealthPage.TREATMENT else HealthPage.DASHBOARD) }
+    var page by remember { mutableStateOf(entryPage.toHealthPage()) }
     val home = { page = HealthPage.DASHBOARD }
-    val treatmentBack = if (openTreatment) onBack else home
+    val treatmentBack = if (entryPage == HealthEntryPage.TREATMENT) onBack else home
+    val withdrawalBack = if (entryPage == HealthEntryPage.WITHDRAWALS) onBack else home
     when (page) {
         HealthPage.DASHBOARD -> {
             HealthDashboard(rows, treatments, withdrawals, packs, error, { page = it }, onBack)
@@ -90,7 +91,7 @@ fun HealthObservationScreen(
                 withdrawals,
                 "No open withdrawal windows",
                 error,
-                home,
+                withdrawalBack,
                 FarmVisualClass.I4,
             )
         }
@@ -124,6 +125,13 @@ fun HealthObservationScreen(
         }
     }
 }
+
+private fun HealthEntryPage.toHealthPage(): HealthPage =
+    when (this) {
+        HealthEntryPage.DASHBOARD -> HealthPage.DASHBOARD
+        HealthEntryPage.TREATMENT -> HealthPage.TREATMENT
+        HealthEntryPage.WITHDRAWALS -> HealthPage.WITHDRAWALS
+    }
 
 @Composable
 private fun HealthDashboard(

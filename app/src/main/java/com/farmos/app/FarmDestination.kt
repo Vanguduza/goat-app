@@ -1,6 +1,7 @@
 package com.farmos.app
 
 import com.farmos.feature.goat.GoatEntryPage
+import com.farmos.feature.ops.HealthEntryPage
 
 sealed class FarmDestination {
     data object Home : FarmDestination()
@@ -14,7 +15,7 @@ sealed class FarmDestination {
     ) : FarmDestination()
 
     data class Health(
-        val openTreatment: Boolean = false,
+        val entry: HealthEntryPage = HealthEntryPage.DASHBOARD,
     ) : FarmDestination()
 
     data class Task(
