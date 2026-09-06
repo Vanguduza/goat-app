@@ -99,6 +99,7 @@ const appKt = allKt
   .join('\n');
 const directActionViolations = [
   ['Record Weight', 'GoatEntryPage.WEIGHT', 'FOS-GOAT-011'],
+  ['Add Task', 'TaskEntryPage.CREATE', 'FOS-TASK-004'],
   ['Add Treatment', 'HealthEntryPage.TREATMENT', 'FOS-HEALTH-007'],
   ['Scan Animal', 'GoatEntryPage.SEARCH', 'FOS-GOAT-006'],
   ['Waiting to sync', 'GoatEntryPage.SYNC', 'FOS-SYNC-002'],

@@ -12,6 +12,7 @@ import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateFarmTask
 import com.farmos.feature.ops.TaskDetailScreen
+import com.farmos.feature.ops.TaskEntryPage
 import com.farmos.feature.ops.TaskUiRow
 import com.farmos.feature.ops.TasksBoardScreen
 import java.time.LocalDate
@@ -26,6 +27,7 @@ fun TasksModuleHost(
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
     focusTaskId: String? = null,
+    entryPage: TaskEntryPage = TaskEntryPage.BOARD,
 ) {
     val scope = rememberCoroutineScope()
     var rows by remember(farmId) { mutableStateOf(emptyList<TaskUiRow>()) }
@@ -106,5 +108,6 @@ fun TasksModuleHost(
         },
         onOpenDetail = { selectedId = it },
         onBack = onBack,
+        entryPage = entryPage,
     )
 }

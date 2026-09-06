@@ -51,7 +51,12 @@ fun TasksBoardScreen(
     onComplete: (taskId: String) -> Unit,
     onBack: () -> Unit,
     onOpenDetail: (taskId: String) -> Unit = {},
+    entryPage: TaskEntryPage = TaskEntryPage.BOARD,
 ) {
+    if (entryPage == TaskEntryPage.CREATE) {
+        CreateTaskScreen(busy = busy, error = error, onCreate = onCreate, onBack = onBack)
+        return
+    }
     var tab by remember { mutableStateOf(TaskTab.TODAY) }
     var showCreate by remember { mutableStateOf(false) }
     val today = LocalDate.now().toEpochDay()
@@ -147,6 +152,24 @@ private fun TaskCard(
                 TextButton(onClick = { onComplete(task.id) }, enabled = !busy) { Text("Done") }
             }
         }
+    }
+}
+
+@Composable
+fun CreateTaskScreen(
+    busy: Boolean,
+    error: String?,
+    onCreate: (title: String, module: String, code: String, due: String) -> Unit,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        screenId = "FOS-TASK-004",
+        title = "Add task",
+        subtitle = "Create a farm task. Species-specific capture stays inside its native module.",
+        onBack = onBack,
+    ) {
+        CreateTaskCard(busy = busy, onCreate = onCreate) {}
+        error?.let { Text(it, color = AnimalFarmTheme.colors.critical) }
     }
 }
 

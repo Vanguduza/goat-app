@@ -84,6 +84,14 @@ fun FarmSessionContent(
             onBack = backHome,
             focusTaskId = dest.taskId,
         )
+        is FarmDestination.Tasks -> TasksModuleHost(
+            farmId = membership.farmId,
+            ops = ops,
+            newContext = ::context,
+            enqueueSync = ::enqueueSync,
+            onBack = backHome,
+            entryPage = dest.entry,
+        )
         is FarmDestination.Module -> when (dest.module) {
             FarmModule.TASKS -> TasksModuleHost(
                 farmId = membership.farmId,

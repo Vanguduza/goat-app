@@ -42,6 +42,7 @@ import com.farmos.domain.ops.projectWorkerTaskStage
 import com.farmos.domain.ops.rankHomeAttention
 import com.farmos.feature.goat.GoatEntryPage
 import com.farmos.feature.ops.HealthEntryPage
+import com.farmos.feature.ops.TaskEntryPage
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -305,7 +306,7 @@ internal fun WorkerWorkBoardScreen(
                         )
                     }
                     Text("Quick record", color = AnimalFarmTheme.colors.ink)
-                    AnimalFarmQuickAction("Add Task", { onOpen(FarmDestination.Module(FarmModule.TASKS)) })
+                    AnimalFarmQuickAction("Add Task", { onOpen(FarmDestination.Tasks(TaskEntryPage.CREATE)) })
                     // FOS-GOAT-011
                     AnimalFarmQuickAction("Record Weight", { onOpen(FarmDestination.Goat(GoatEntryPage.WEIGHT)) })
                     // FOS-HEALTH-007
