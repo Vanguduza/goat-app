@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "b38a72f096de9ec893054ebadd5844cb9fe51d99",
+  "tested_commit": "82365ba0525a53d121d362e42efc0d050ee77b26",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
@@ -365,7 +365,7 @@
         },
         {
           "value": "WITHDRAWALS",
-          "refs": 2,
+          "refs": 3,
           "transition_refs": 1,
           "render_only_candidate": false
         },
