@@ -457,3 +457,19 @@ Rebound static inventory at `ea53caa...`: 545 rows; 147 some evidence; 398 none;
 `bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/local-ci-report.json` executed against `deeaa472d035f453bbeea7853d6a0007223c6bd8`: smoke, handover-integrity, android, edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
 
 No green-gate promotion. Not GitHub-hosted certification.
+
+## Specialist sync reachability and hosted CI re-check — 2026-09-06
+
+- `0824aa9538c28a68f506ace6a0bc144e896812e5` — supervisor, breeding, vet, and finance homes open existing `GoatEntryPage.SYNC` / FOS-SYNC-002 (FOS-HOME-009). Buyer/read-only still has no Sync action. Supervisor “Health exceptions” remains `Health()`. FOS-HEALTH-010, FOS-TASK-005, FOS-INV-011, RFID, and P2P/Drive/Relay were not invented.
+
+`:app:testDebugUnitTest --tests com.farmos.app.FarmDestinationTest` — PASS after a failing-first specialist sync assertion. `:app:compileDebugKotlin` — PASS. Navigation self-test passed. No green-gate promotion.
+
+Rebound static inventory at `0824aa9...`: 545 rows; 147 some evidence; 398 none; runtime 0. Kotlin registered IDs 116. `direct_action_scope_violations = []`.
+
+Hosted GitHub Actions on this branch and PR, including HEAD `0824aa9` and echo-only Actions smoke, still finish in ~2s with `runner_id` unset, empty `runner_name`, and `steps: []`. The same assignment block appears on `implementation/animal-farm-visual-lock` (`afc53440`) and `agent/animal-farm-gate1-recovery` (`c603a903`). No inspected job executed a source step. Workflows were not skipped or weakened.
+
+## Local CI after specialist sync — 2026-09-06
+
+`bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/local-ci-report.json` executed against `0824aa9538c28a68f506ace6a0bc144e896812e5`: smoke, handover-integrity, android, edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
+
+No green-gate promotion. Not GitHub-hosted certification.
