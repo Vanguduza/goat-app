@@ -502,3 +502,11 @@ Rebound static inventory at `844293d...`: 545 rows; 147 some evidence; 398 none;
 
 No green-gate promotion. Not GitHub-hosted certification.
 
+## General water, groups, and waitlist reachability — 2026-09-06
+
+- `b5ee1838dd39dc285d59c6e25cb64e5b275d1ddd` — General home “Open water” opens existing `FarmModule.WATER` / FOS-WATER-001 beside feed. Management A “Open groups” opens existing `FarmModule.GROUPS` / FOS-GROUP-001 and “Open waitlist” opens existing `FarmModule.WAITLIST` / FOS-RABBIT-027. Breeding home also opens that waitlist. Shared More still has pasture/sales, not groups or waitlist, so buyer/read-only does not gain Water, Groups, or Waitlist. Supervisor “Health exceptions” remains `Health()`. FOS-HEALTH-010, FOS-HEALTH-009 vs 001 for supervisor, FOS-TASK-005, FOS-INV-011, FOS-GOAT-007, FOS-HOME-006, Finance/Inventory/Rabbit entry pages, DEAD_LETTER, photo/SY03, and P2P/Drive/Relay were not invented.
+
+`:app:testDebugUnitTest --tests com.farmos.app.FarmDestinationTest` — PASS after failing-first general water, groups, and waitlist assertions. `:app:compileDebugKotlin` — PASS (`--offline`). Navigation and gap self-tests passed. Architecture script passed. No green-gate promotion.
+
+Rebound static inventory at `b5ee183...`: 545 rows; 147 some evidence; 398 none; runtime 0. Kotlin registered IDs 116. `direct_action_scope_violations = []`.
+
