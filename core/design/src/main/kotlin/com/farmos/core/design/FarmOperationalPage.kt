@@ -36,7 +36,7 @@ fun FarmOperationalPage(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     key(screenId) {
-        Surface(modifier = modifier.fillMaxSize(), color = FosColors.Canvas) {
+        Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(
                 Modifier
                     .fillMaxSize()

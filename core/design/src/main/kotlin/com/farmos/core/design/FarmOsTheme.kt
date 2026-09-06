@@ -3,27 +3,33 @@ package com.farmos.core.design
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
+/**
+ * Legacy visual constants retained only while older surfaces are migrated to semantic tokens.
+ * New Animal Farm surfaces must consume [AnimalFarmTheme] / MaterialTheme instead.
+ */
+@Deprecated("Use AnimalFarmTheme semantic tokens")
 object FosColors {
-    val Primary = Color(0xFF1E4D2B)
-    val OnPrimary = Color(0xFFFFFFFF)
-    val PrimaryContainer = Color(0xFFE2EFE3)
-    val Canvas = Color(0xFFF8F5EC)
-    val Card = Color(0xFFFFFCF3)
-    val Sunken = Color(0xFFF1F1EA)
-    val TextPrimary = Color(0xFF1F2937)
-    val TextSecondary = Color(0xFF526157)
-    val Hairline = Color(0xFFD8DED6)
-    val Critical = Color(0xFFB3261E)
-    val Warning = Color(0xFF8A5A00)
-    val Positive = Color(0xFF2E6B34)
-    val Info = Color(0xFF3A5A78)
-    val Withdrawal = Color(0xFF8E3B62)
+    val Primary = AnimalFarmColors.Light.primary
+    val OnPrimary = AnimalFarmColors.Light.onPrimary
+    val PrimaryContainer = AnimalFarmColors.Light.lime
+    val Canvas = AnimalFarmColors.Light.background
+    val Card = AnimalFarmColors.Light.surface
+    val Sunken = AnimalFarmColors.Light.softSurface
+    val TextPrimary = AnimalFarmColors.Light.ink
+    val TextSecondary = AnimalFarmColors.Light.mutedInk
+    val Hairline = AnimalFarmColors.Light.divider
+    val Critical = AnimalFarmColors.Light.critical
+    val Warning = AnimalFarmColors.Light.onWarning
+    val Positive = AnimalFarmColors.Light.positive
+    val Info = AnimalFarmColors.Light.information
+    val Withdrawal = AnimalFarmColors.Light.withdrawal
+
+    // Historical illustrated-surface migration constants. They are not new theme authority.
     val Goat = Color(0xFFA9762B)
     val Sage = Color(0xFF4E7F52)
     val Leaf = Color(0xFF7FB069)
@@ -33,44 +39,41 @@ object FosColors {
     val Soil = Color(0xFF8B6847)
 }
 
-private val LightColors = lightColorScheme(
-    primary = FosColors.Primary,
-    onPrimary = FosColors.OnPrimary,
-    primaryContainer = FosColors.PrimaryContainer,
-    background = FosColors.Canvas,
-    surface = FosColors.Card,
-    onBackground = FosColors.TextPrimary,
-    onSurface = FosColors.TextPrimary,
-    outline = FosColors.Hairline,
-    error = FosColors.Critical,
-)
-
-private val DarkColors = darkColorScheme(
-    primary = Color(0xFF9BC49F),
-    background = Color(0xFF121411),
-    surface = Color(0xFF1C1F1B),
-    onBackground = Color(0xFFF3F4EE),
-    onSurface = Color(0xFFF3F4EE),
-    outline = Color(0xFF454940),
-    error = Color(0xFFFFB4AB),
-)
-
-private val FarmShapes = Shapes(
-    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
-    small = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-    medium = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
-    large = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
-)
+private val FarmShapes =
+    Shapes(
+        extraSmall =
+            androidx.compose.foundation.shape
+                .RoundedCornerShape(8.dp),
+        small =
+            androidx.compose.foundation.shape
+                .RoundedCornerShape(16.dp),
+        medium =
+            androidx.compose.foundation.shape
+                .RoundedCornerShape(20.dp),
+        large =
+            androidx.compose.foundation.shape
+                .RoundedCornerShape(24.dp),
+        extraLarge =
+            androidx.compose.foundation.shape
+                .RoundedCornerShape(28.dp),
+    )
 
 @Composable
+@Suppress("ktlint:standard:function-naming")
 fun FarmOsTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    mode: AnimalFarmThemeMode = if (isSystemInDarkTheme()) AnimalFarmThemeMode.DARK else AnimalFarmThemeMode.LIGHT,
     content: @Composable () -> Unit,
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
-        shapes = FarmShapes,
-        typography = FarmOsTypography,
-        content = content,
-    )
+    val colors = AnimalFarmColors.forMode(mode)
+    CompositionLocalProvider(
+        LocalAnimalFarmPalette provides colors,
+        LocalAnimalFarmThemeMode provides mode,
+    ) {
+        MaterialTheme(
+            colorScheme = colors.materialScheme(mode),
+            shapes = FarmShapes,
+            typography = FarmOsTypography,
+            content = content,
+        )
+    }
 }

@@ -17,4 +17,6 @@ dependencies {
     api("androidx.compose.material3:material3")
     api("androidx.compose.foundation:foundation")
     api("androidx.compose.runtime:runtime")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:2.2.10")
+    testImplementation("junit:junit:4.13.2")
 }
