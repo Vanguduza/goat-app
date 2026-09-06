@@ -418,4 +418,6 @@ bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/loca
 
 Meilisearch contract uses the pinned `v1.53.1` Linux binary when Docker is absent. Search-pipeline, supabase pgTAP, and emulator e2e stay UNAVAILABLE until Docker + Supabase CLI + AVD exist.
 
+Executed against `24b6f1ceb83c2d5870d0a6335fabf010418b7dda`: smoke, handover-integrity, android (including `:app:compileDebugAndroidTestKotlin` on this x86_64 host), edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
+
 No green-gate promotion. This local report is not GitHub-hosted certification.
