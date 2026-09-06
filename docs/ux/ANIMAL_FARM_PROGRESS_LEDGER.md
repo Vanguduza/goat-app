@@ -437,3 +437,9 @@ Rebound static inventory at `3966b58...`: 545 rows; 146 some evidence; 399 none;
 `:app:compileDebugKotlin` `:feature:ops:compileDebugKotlin` — PASS (`--offline`). Navigation self-test passed. No green-gate promotion.
 
 Rebound static inventory at `2e0b543...`: 545 rows; 146 some evidence; 399 none; runtime 0.
+
+## Local CI after exact-owner batch — 2026-09-06
+
+`bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/local-ci-report.json` executed against `b57621a0481966fcae339283aceae3c8578ceb66`: smoke, handover-integrity, android, edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
+
+No green-gate promotion. This local report is not GitHub-hosted certification. GitHub-hosted `ubuntu-latest` jobs remain an external runner-assignment block.
