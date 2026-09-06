@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 import re
 import subprocess
+import tempfile
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -72,13 +73,36 @@ def main():
     parser.add_argument('--self-test', action='store_true')
     args = parser.parse_args()
 
+    sha = git_sha()
+    temp_dir = None
+    if args.self_test:
+        temp_dir = tempfile.TemporaryDirectory(prefix='animal-farm-gap-self-test-')
+        temp_root = Path(temp_dir.name)
+        audit_path = temp_root / 'navigation-source-audit.json'
+        subprocess.run(
+            [
+                'node',
+                str(ROOT / 'scripts/design/audit-navigation.cjs'),
+                '--out',
+                str(audit_path),
+                '--quiet',
+            ],
+            cwd=ROOT,
+            check=True,
+        )
+        out_csv = temp_root / 'route-screen-feature-gap.csv'
+        out_summary = temp_root / 'route-screen-feature-gap-summary.json'
+    else:
+        audit_path = AUDIT
+        out_csv = ROOT / args.out_csv
+        out_summary = ROOT / args.out_summary
+
     registry = yaml.safe_load(REGISTRY.read_text())
     screens = registry['screens']
     mapped = mapped_ids()
     code = kotlin_ids()
     role_ids = role_dispatch_ids()
-    audit = json.loads(AUDIT.read_text())
-    sha = git_sha()
+    audit = json.loads(audit_path.read_text())
     if audit['tested_commit'] != sha:
         raise SystemExit(f'navigation audit is stale: {audit["tested_commit"]} != {sha}')
 
@@ -108,7 +132,6 @@ def main():
             ),
         })
 
-    out_csv = ROOT / args.out_csv
     out_csv.parent.mkdir(parents=True, exist_ok=True)
     with out_csv.open('w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]), lineterminator='\n')
@@ -136,7 +159,6 @@ def main():
         'known_navigation_defects': audit['findings'],
         'status_law': 'MAPPED inventory is not CONTRACT_READY, IMPLEMENTED, VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN.',
     }
-    out_summary = ROOT / args.out_summary
     out_summary.parent.mkdir(parents=True, exist_ok=True)
     out_summary.write_text(json.dumps(summary, indent=2) + '\n')
 
@@ -147,6 +169,7 @@ def main():
         assert all(row['feature_ids'] == 'UNRESOLVED_CANONICAL_FEATURE_ID_CATALOG' for row in rows)
         assert all(row['visual_status'] == 'NOT_GREEN' and row['feature_status'] == 'NOT_GREEN' for row in rows)
         print('PASS route-screen-feature gap inventory self-test')
+        temp_dir.cleanup()
 
 
 if __name__ == '__main__':
