@@ -268,3 +268,57 @@ No `VISUAL_GREEN`, `FEATURE_GREEN`, `MODULE_GREEN`, `MVP_GREEN`, `OFFLINE_GREEN`
 2. Keep Project Truth sync/outbox hardening inside the adopted Supabase path.
 3. Do not promote a peer-coordinator architecture unless an accepted EDR supersedes Project Truth.
 
+## Gate 1 module canvas restyle — 2026-09-06
+
+### Versioned implementation checkpoint
+
+- `59b1688cee4662192eb00490a36d7f61cddf62bc` — shared illustrated primitives and Gate 1 module chrome restyled onto Animal Farm tokens.
+
+### Implemented presentation contracts
+
+- `FarmPastoralBackdrop` is a semantic Animal Farm canvas. Geometric hills, barns, gradients and drawn animals are removed.
+- `FarmOsWordmark` renders `Animal Farm` in Inter, not a leaf/Farm OS mark.
+- `FarmStorySurface` and `FarmIllustratedSectionSurface` use locked surface/divider tokens with no heavy shadow, so remaining call sites follow dark/outdoor palettes.
+- Splash (FOS-GLOBAL-001) uses centered Animal Farm plus the exact lineup asset. Marketing slogans are gone.
+- Species navigator (FOS-HOME-002) is a family-launcher grid, not a mixed-species CRUD list.
+- Goat, rabbit, poultry, sheep/cattle, and task dashboards use `AnimalFarmModuleHeader` with approved family portraits where a species is known.
+- Health, inventory and finance keep existing commands; dashboard subtitles are factual device-local copy.
+- Visual-authority CI now fails if pastoral scenery or the removed slogans return. `AGENTS.md` names `FARM_OS_VISUAL_AUTHORITY.md` as superseded inventory/provenance.
+
+Commands, Room writes, outbox and navigation contracts are unchanged.
+
+### Executable evidence at exact commit `59b1688...`
+
+- `:core:design:testDebugUnitTest` — PASS, including family-window and species-to-family mapping tests.
+- `:app:compileDebugKotlin` — PASS.
+- `:feature:goat:compileDebugKotlin` `:feature:rabbit:compileDebugKotlin` `:feature:ops:compileDebugKotlin` — PASS.
+- `:domain:goat:test` `:domain:rabbit:test` `:domain:ops:test` — PASS.
+- `:core:network:testDebugUnitTest` `:core:sync:testDebugUnitTest` — PASS.
+- `bash scripts/ci/verify-kotlin-architecture.sh` — PASS.
+- `bash scripts/ci/verify-visual-authority.sh` — PASS.
+- Protected handover verifier — PASS.
+- Protected pack self-test — PASS; 545 IDs intact; green flags remain false.
+- Navigation audit self-test — PASS. `direct_action_scope_violations = []`. `RabbitPage.NESTS` remains reachable.
+
+### Refreshed static reconciliation evidence
+
+Canonical static evidence rebound to `59b1688cee4662192eb00490a36d7f61cddf62bc`:
+
+- registry rows: 545;
+- some static source-derived route/implementation evidence: 145;
+- no static route evidence: 400;
+- runtime reachability executed: 0.
+
+Counts are unchanged from `e51770b...`. This slice is presentation-only.
+
+### Status law
+
+No `VISUAL_GREEN`, `FEATURE_GREEN`, `MODULE_GREEN`, `MVP_GREEN`, `OFFLINE_GREEN`, `SYNC_GREEN`, `COORDINATOR_GREEN`, `SHIFT_GREEN`, `BACKUP_GREEN`, `SECURITY_GREEN`, or `PROJECT_GREEN` claim is made. Native screenshot/device evidence remains unexecuted. Outdoor remains a candidate. Peer coordinator / Farm Relay / Drive backup remain unadopted Project Truth and were not invented.
+
+### Next independent slices
+
+1. Continue remaining operational chrome (sheep/cattle ops homes, shared capture shells) on the same tokens without dropping commands.
+2. Close more real transitions only where a page and owner already exist.
+3. Keep Project Truth sync/outbox hardening. Do not implement APK-hosted P2P unless an accepted EDR supersedes Project Truth.
+
+
