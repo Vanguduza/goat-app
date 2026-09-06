@@ -15,6 +15,7 @@ kotlin { jvmToolchain(17) }
 dependencies {
     api(platform("androidx.compose:compose-bom:2026.08.00"))
     api("androidx.compose.material3:material3")
+    api("androidx.compose.material:material-icons-extended")
     api("androidx.compose.foundation:foundation")
     api("androidx.compose.runtime:runtime")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:2.2.10")

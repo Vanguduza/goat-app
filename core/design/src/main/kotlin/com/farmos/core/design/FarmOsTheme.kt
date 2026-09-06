@@ -62,12 +62,14 @@ private val FarmShapes =
 @Suppress("ktlint:standard:function-naming")
 fun FarmOsTheme(
     mode: AnimalFarmThemeMode = if (isSystemInDarkTheme()) AnimalFarmThemeMode.DARK else AnimalFarmThemeMode.LIGHT,
+    onModeChange: (AnimalFarmThemeMode) -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     val colors = AnimalFarmColors.forMode(mode)
     CompositionLocalProvider(
         LocalAnimalFarmPalette provides colors,
         LocalAnimalFarmThemeMode provides mode,
+        LocalAnimalFarmThemeChange provides onModeChange,
     ) {
         MaterialTheme(
             colorScheme = colors.materialScheme(mode),

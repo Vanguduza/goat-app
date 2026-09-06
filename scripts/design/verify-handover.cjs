@@ -21,5 +21,19 @@ function walk(dir) {
   }
 }
 walk(prefix.slice(0, -1));
+function assertExactCopy(source, target) {
+  const sourceBytes = fs.readFileSync(path.join(root, source));
+  const targetBytes = fs.readFileSync(path.join(root, target));
+  if (!sourceBytes.equals(targetBytes)) throw Error('Android visual-lock copy differs from protected source: ' + target);
+}
+assertExactCopy(
+  'docs/ux/animal-farm-visual-lock/assets/farm_animal_lineup.png',
+  'core/design/src/main/res/drawable-nodpi/farm_animal_lineup.png',
+);
+assertExactCopy(
+  'docs/ux/animal-farm-visual-lock/assets/farm_family_portraits_v1.png',
+  'core/design/src/main/res/drawable-nodpi/farm_family_portraits_v1.png',
+);
 console.log('PASS: ' + expected.size + ' complete original handover files; exact bytes and inventory.');
+console.log('PASS: Android lineup/family visual-lock copies exactly match protected sources.');
 console.log('Integrity only; no native, feature, module or MVP certification.');

@@ -9,6 +9,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.model.CommandAcknowledgement
 import com.farmos.core.model.CommandResultCode
 import com.farmos.core.network.AuthenticationRequiredException
@@ -202,6 +203,20 @@ class FarmOsApplication : Application(), SyncEngineOwner {
         clearRememberedMembership()
     }
 
+    fun savedThemeMode(): AnimalFarmThemeMode? {
+        val stored = getSharedPreferences(THEME_PREFERENCES, MODE_PRIVATE)
+            .getString(THEME_MODE, null)
+            ?: return null
+        return AnimalFarmThemeMode.entries.firstOrNull { it.name == stored }
+    }
+
+    fun saveThemeMode(mode: AnimalFarmThemeMode) {
+        getSharedPreferences(THEME_PREFERENCES, MODE_PRIVATE)
+            .edit()
+            .putString(THEME_MODE, mode.name)
+            .apply()
+    }
+
     fun goatRepository(farmId: String): GoatRepository = RoomGoatRepository(database, farmId)
 
     fun opsRepository(farmId: String): RoomOpsRepository = RoomOpsRepository(database, farmId)
@@ -261,6 +276,8 @@ class FarmOsApplication : Application(), SyncEngineOwner {
 
     companion object {
         private const val FARM_CONTEXT_PREFERENCES = "farm_os_last_context"
+        private const val THEME_PREFERENCES = "animal_farm_theme"
+        private const val THEME_MODE = "mode"
         private const val LAST_USER_ID = "user_id"
         private const val LAST_FARM_ID = "farm_id"
         private const val LAST_FARM_ROLE = "role"

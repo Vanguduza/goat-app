@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -27,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.HomeThemeButton
 import com.farmos.core.design.FarmOsAccentMedium
 import com.farmos.core.design.FarmPastoralBackdrop
 import com.farmos.core.design.FarmSpeciesVisual
@@ -445,7 +447,11 @@ private fun RoleHomeBottomBar(
     onAnimals: () -> Unit,
     onMore: () -> Unit,
 ) {
-    Surface(color = MaterialTheme.colorScheme.surface.copy(alpha = .98f), shadowElevation = 8.dp) {
+    Surface(
+        modifier = Modifier.navigationBarsPadding(),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = .98f),
+        shadowElevation = 8.dp,
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.SpaceAround,
@@ -454,6 +460,7 @@ private fun RoleHomeBottomBar(
             TextButton(onClick = onAnimals) { Text("Animals") }
             TextButton(onClick = { onOpen(FarmModule.TASKS) }) { Text("Tasks") }
             TextButton(onClick = onMore) { Text("More") }
+            HomeThemeButton()
         }
     }
 }

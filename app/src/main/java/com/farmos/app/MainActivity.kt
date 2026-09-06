@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -12,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.core.network.AuthenticationRequiredException
 import com.farmos.core.network.AuthorizationLoss
@@ -27,7 +29,16 @@ class MainActivity : ComponentActivity() {
         val app = application as FarmOsApplication
 
         setContent {
-            FarmOsTheme {
+            var savedThemeMode by remember { mutableStateOf(app.savedThemeMode()) }
+            val systemThemeMode = if (isSystemInDarkTheme()) AnimalFarmThemeMode.DARK else AnimalFarmThemeMode.LIGHT
+            val themeMode = savedThemeMode ?: systemThemeMode
+            FarmOsTheme(
+                mode = themeMode,
+                onModeChange = { selected ->
+                    savedThemeMode = selected
+                    app.saveThemeMode(selected)
+                },
+            ) {
                 var showSplash by remember { mutableStateOf(true) }
                 LaunchedEffect(Unit) {
                     delay(650)

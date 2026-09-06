@@ -1,19 +1,29 @@
+@file:Suppress("ktlint:standard:function-naming")
+
 package com.farmos.app
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -24,13 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.farmos.core.design.FarmOsAccentMedium
-import com.farmos.core.design.FarmOsWordmark
-import com.farmos.core.design.FarmPastoralBackdrop
-import com.farmos.core.design.FarmStorySurface
-import com.farmos.core.design.FosDimens
+import com.farmos.core.design.FarmAnimalLineup
 import com.farmos.core.network.FarmMembership
 
 /** FOS-GLOBAL-002 / 005 / 006 — entrance family recovery surface. */
@@ -51,7 +60,7 @@ fun FoundationAuthScreen(
     var password by remember { mutableStateOf("") }
     var farmName by remember { mutableStateOf("") }
 
-    FarmPastoralBackdrop(Modifier.fillMaxSize()) {
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(
             modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 24.dp),
             contentAlignment = Alignment.Center,
@@ -59,62 +68,72 @@ fun FoundationAuthScreen(
             Column(
                 modifier = Modifier.widthIn(max = 520.dp).verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                FarmOsWordmark()
                 Text(
-                    "Animals. Land. People. A Better Tomorrow.",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "Animal Farm",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
-                Text(
-                    "Real Farms. Brighter Futures.",
-                    style = FarmOsAccentMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                FarmAnimalLineup(
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 220.dp),
                 )
-
-                FarmStorySurface(Modifier.fillMaxWidth()) {
-                    when {
-                        !backendConfigured -> BackendUnavailableState()
-                        memberships.isNotEmpty() -> FarmSelectionState(
-                            memberships = memberships,
-                            farmNames = farmNames,
-                            busy = busy,
-                            onSelectFarm = onSelectFarm,
-                            onSignOut = onSignOut,
-                        )
-                        sessionPresent -> FarmSetupWizardState(
-                            farmName = farmName,
-                            onFarmNameChange = { farmName = it },
-                            busy = busy,
-                            onCreateFarm = onCreateFarm,
-                            onSignOut = onSignOut,
-                        )
-                        else -> SignInState(
-                            email = email,
-                            password = password,
-                            busy = busy,
-                            onEmailChange = { email = it },
-                            onPasswordChange = { password = it },
-                            onSignIn = onSignIn,
-                        )
-                    }
-                    error?.let {
-                        Text(
-                            it,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
-                    }
-                }
-
-                Row(
+                Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 ) {
-                    listOf("Plan", "Monitor", "Grow", "Sustain").forEach { value ->
-                        Text(value, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onBackground)
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                    ) {
+                        when {
+                            !backendConfigured -> {
+                                BackendUnavailableState()
+                            }
+
+                            memberships.isNotEmpty() -> {
+                                FarmSelectionState(
+                                    memberships = memberships,
+                                    farmNames = farmNames,
+                                    busy = busy,
+                                    onSelectFarm = onSelectFarm,
+                                    onSignOut = onSignOut,
+                                )
+                            }
+
+                            sessionPresent -> {
+                                FarmSetupWizardState(
+                                    farmName = farmName,
+                                    onFarmNameChange = { farmName = it },
+                                    busy = busy,
+                                    onCreateFarm = onCreateFarm,
+                                    onSignOut = onSignOut,
+                                )
+                            }
+
+                            else -> {
+                                SignInState(
+                                    email = email,
+                                    password = password,
+                                    busy = busy,
+                                    onEmailChange = { email = it },
+                                    onPasswordChange = { password = it },
+                                    onSignIn = onSignIn,
+                                )
+                            }
+                        }
+                        error?.let {
+                            Text(
+                                text = it,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
                     }
                 }
             }
@@ -131,13 +150,13 @@ private fun ColumnScope.SignInState(
     onPasswordChange: (String) -> Unit,
     onSignIn: (String, String) -> Unit,
 ) {
-    Text("Welcome back", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-    Text("Sign in to your farm.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+    var passwordVisible by remember { mutableStateOf(false) }
     OutlinedTextField(
         value = email,
         onValueChange = onEmailChange,
         label = { Text("Email address") },
         modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
         singleLine = true,
         enabled = !busy,
     )
@@ -145,22 +164,27 @@ private fun ColumnScope.SignInState(
         value = password,
         onValueChange = onPasswordChange,
         label = { Text("Password") },
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                Icon(
+                    imageVector = if (passwordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                    contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                )
+            }
+        },
         modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
         singleLine = true,
         enabled = !busy,
     )
     Button(
         onClick = { onSignIn(email, password) },
         enabled = !busy && email.isNotBlank() && password.isNotBlank(),
-        modifier = Modifier.fillMaxWidth(),
-    ) { Text(if (busy) "Signing in…" else "Sign in") }
-    Text(
-        "Healthy Animals. Thriving Farms.",
-        modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 4.dp),
-        style = FarmOsAccentMedium,
-        color = MaterialTheme.colorScheme.primary,
-    )
+        modifier = Modifier.align(Alignment.CenterHorizontally).widthIn(min = 160.dp),
+    ) {
+        Text(if (busy) "Signing in…" else "Sign in")
+    }
 }
 
 @Composable
@@ -172,7 +196,6 @@ private fun ColumnScope.FarmSelectionState(
     onSignOut: () -> Unit,
 ) {
     Text("Choose your farm", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-    Text("Your server membership determines the farms you can open.", color = MaterialTheme.colorScheme.onSurfaceVariant)
     memberships.forEach { membership ->
         Button(
             onClick = { onSelectFarm(membership) },
@@ -183,7 +206,13 @@ private fun ColumnScope.FarmSelectionState(
             Text("$name · ${membership.role.replace('_', ' ')}")
         }
     }
-    TextButton(onClick = onSignOut, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Sign out") }
+    TextButton(
+        onClick = onSignOut,
+        enabled = !busy,
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+    ) {
+        Text("Sign out")
+    }
 }
 
 @Composable
@@ -196,10 +225,9 @@ private fun ColumnScope.FarmSetupWizardState(
 ) {
     var step by remember { mutableStateOf(0) }
     Text("Create your farm", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-    Text("Farm setup · step ${step + 1} of 2", color = MaterialTheme.colorScheme.primary)
+    Text("Step ${step + 1} of 2", color = MaterialTheme.colorScheme.onSurfaceVariant)
 
     if (step == 0) {
-        Text("Start with the farm identity. The server creates the tenancy boundary from this name.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         OutlinedTextField(
             value = farmName,
             onValueChange = onFarmNameChange,
@@ -212,23 +240,38 @@ private fun ColumnScope.FarmSetupWizardState(
             onClick = { step = 1 },
             enabled = !busy && farmName.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
-        ) { Text("Review setup") }
+        ) {
+            Text("Review setup")
+        }
     } else {
         Text(farmName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Text("After the farm is created, Farm OS continues setup inside the farm with species, locations, units, currency, people and infrastructure. Those fields are not silently discarded here.")
+        Text(
+            "Farm identity is ready. Species, locations, units, people and infrastructure remain separate setup steps.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Button(
             onClick = { onCreateFarm(farmName) },
             enabled = !busy && farmName.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
-        ) { Text(if (busy) "Creating…" else "Create farm") }
-        TextButton(onClick = { step = 0 }, enabled = !busy) { Text("Back to farm identity") }
+        ) {
+            Text(if (busy) "Creating…" else "Create farm")
+        }
+        TextButton(onClick = { step = 0 }, enabled = !busy) { Text("Back") }
     }
-    TextButton(onClick = onSignOut, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Sign out") }
+    TextButton(
+        onClick = onSignOut,
+        enabled = !busy,
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+    ) {
+        Text("Sign out")
+    }
 }
 
 @Composable
 private fun BackendUnavailableState() {
-    Text("Farm OS is offline", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-    Text("This build has no Supabase connection configured. Recording remains locked because Farm OS will not invent a farm identity.")
-    Text("Configure the backend outside source control, then sign in. Your tenancy boundary remains explicit.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text("Connection unavailable", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+    Text(
+        "Sign in is unavailable until this installation is connected to the farm service.",
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }

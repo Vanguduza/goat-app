@@ -121,6 +121,7 @@ object AnimalFarmTouchTarget {
 
 internal val LocalAnimalFarmPalette = staticCompositionLocalOf { AnimalFarmColors.Light }
 internal val LocalAnimalFarmThemeMode = staticCompositionLocalOf { AnimalFarmThemeMode.LIGHT }
+internal val LocalAnimalFarmThemeChange = staticCompositionLocalOf<(AnimalFarmThemeMode) -> Unit> { {} }
 
 object AnimalFarmTheme {
     val colors: AnimalFarmPalette
@@ -131,6 +132,9 @@ object AnimalFarmTheme {
 
     val minimumTouchDp: Int
         @Composable get() = AnimalFarmTouchTarget.minimumDp(mode)
+
+    val onModeChange: (AnimalFarmThemeMode) -> Unit
+        @Composable get() = LocalAnimalFarmThemeChange.current
 }
 
 internal fun AnimalFarmPalette.materialScheme(mode: AnimalFarmThemeMode): ColorScheme {
