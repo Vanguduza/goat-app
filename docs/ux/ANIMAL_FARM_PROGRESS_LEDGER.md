@@ -391,3 +391,9 @@ Rebound static inventory: 545 rows; 146 some evidence; 399 none; runtime 0. FOS-
 `:app:compileDebugKotlin` and navigation self-test passed. Static inventory rebound below. No green-gate promotion.
 
 Rebound static inventory: 545 rows; 146 some evidence; 399 none; runtime 0.
+
+## Sync acknowledgement coverage — 2026-09-06
+
+- `18a91e5bd7813f8eab785a1d4dbfaf6434df79e4` — `SyncEngineTest` now covers `ALREADY_APPLIED` idempotent ack, `VALIDATION_REJECTED`, `STALE_CLIENT`, and `TEMPORARY_FAILURE` → `RETRY_WAIT`. `DEAD_LETTER` remains unimplemented in `SyncEngine` and was not invented.
+
+`:core:sync:testDebugUnitTest --tests com.farmos.core.sync.SyncEngineTest` — PASS. No green-gate promotion.
