@@ -119,6 +119,8 @@ const directActionViolations = [
   ['Record kidding', 'GoatEntryPage.KIDDING', 'FOS-GOAT-037'],
   ['Record mating', 'GoatEntryPage.REPRODUCTION', 'FOS-GOAT-032'],
   ['Open health', 'FarmDestination.Health()', 'FOS-HEALTH-001'],
+  ['Open feed', 'FarmModule.FEED', 'FOS-FEED-001'],
+  ['Open water', 'FarmModule.WATER', 'FOS-WATER-001'],
 ].filter(([label, token]) => appKt.includes(`"${label}"`) && !appKt.includes(token))
   .map(([label, , expected]) => ({
     label,

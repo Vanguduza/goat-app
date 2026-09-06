@@ -75,4 +75,25 @@ class FarmDestinationTest {
                 .none { it.second == FarmDestination.Health() },
         )
     }
+
+    @Test
+    fun managementHomeKeepsFeedAndWaterReachable() {
+        val actions = managementHomeActions()
+        assertEquals(
+            FarmDestination.Module(FarmModule.FEED),
+            actions.first { it.first == "Open feed" }.second,
+        )
+        assertEquals(
+            FarmDestination.Module(FarmModule.WATER),
+            actions.first { it.first == "Open water" }.second,
+        )
+    }
+
+    @Test
+    fun buyerHomeDoesNotGainWaterAction() {
+        assertTrue(
+            specialistHomeActions(FarmHomePersona.BUYER)
+                .none { it.second == FarmDestination.Module(FarmModule.WATER) },
+        )
+    }
 }

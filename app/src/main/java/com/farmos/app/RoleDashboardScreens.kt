@@ -32,6 +32,10 @@ internal fun managementHomeActions(): List<Pair<String, FarmDestination>> =
         "Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC),
         // FOS-HEALTH-001 — More is shared with buyer, so health stays on management home
         "Open health" to FarmDestination.Health(),
+        // FOS-FEED-001 — More has pasture, not feed. Worker/supervisor already open this module.
+        "Open feed" to FarmDestination.Module(FarmModule.FEED),
+        // FOS-WATER-001 — same hole as feed; buyer home does not gain Water.
+        "Open water" to FarmDestination.Module(FarmModule.WATER),
     )
 
 /** Exact-owner actions for specialist homes. Buyer/read-only does not gain Sync. */
