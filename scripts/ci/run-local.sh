@@ -87,16 +87,7 @@ job_android() {
   run_job "android" bash -lc '
     bash scripts/ci/verify-kotlin-architecture.sh &&
     bash scripts/ci/verify-visual-authority.sh &&
-    gradle
-      :domain:goat:test
-      :domain:rabbit:test
-      :domain:ops:test
-      :core:network:testDebugUnitTest
-      :core:sync:testDebugUnitTest
-      :app:compileDebugKotlin
-      :core:database:compileDebugAndroidTestKotlin
-      :app:compileDebugAndroidTestKotlin
-      --stacktrace --offline
+    gradle :domain:goat:test :domain:rabbit:test :domain:ops:test :core:network:testDebugUnitTest :core:sync:testDebugUnitTest :app:compileDebugKotlin :core:database:compileDebugAndroidTestKotlin :app:compileDebugAndroidTestKotlin --stacktrace --offline
   '
 }
 
@@ -110,18 +101,8 @@ job_edge_functions() {
     return 0
   fi
   run_job "edge-functions" bash -lc '
-    bash -n
-      scripts/ci/verify-kotlin-architecture.sh
-      scripts/ci/verify-search-pipeline.sh
-      scripts/ci/prepare-two-device-e2e.sh
-      scripts/ci/run-two-device-e2e.sh
-      scripts/ci/run-local.sh &&
-    deno check
-      supabase/functions/meili-indexer/index.ts
-      supabase/functions/meili-rebuild/index.ts
-      supabase/functions/search-token/index.ts
-      search/meilisearch/apply-index-contract.ts
-      search/meilisearch/verify-live-contract.ts &&
+    bash -n scripts/ci/verify-kotlin-architecture.sh scripts/ci/verify-search-pipeline.sh scripts/ci/prepare-two-device-e2e.sh scripts/ci/run-two-device-e2e.sh scripts/ci/run-local.sh &&
+    deno check supabase/functions/meili-indexer/index.ts supabase/functions/meili-rebuild/index.ts supabase/functions/search-token/index.ts search/meilisearch/apply-index-contract.ts search/meilisearch/verify-live-contract.ts &&
     deno test --allow-env supabase/functions/tests/supabase_api_keys_test.ts
   '
 }
@@ -241,6 +222,12 @@ if [[ "${1:-}" == "--self-test" ]]; then
   echo "PASS local CI runner self-test"
   exit 0
 fi
+
+if [[ -n "${FARM_OS_LOCAL_CI:-}" ]]; then
+  echo "ERROR: refusing recursive scripts/ci/run-local.sh" >&2
+  exit 2
+fi
+export FARM_OS_LOCAL_CI=1
 
 OUT=""
 if [[ "${1:-}" == "--out" ]]; then
