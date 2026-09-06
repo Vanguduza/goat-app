@@ -25,6 +25,67 @@ internal fun resolveFarmHomePersona(role: String): FarmHomePersona = when (role.
     else -> FarmHomePersona.GENERAL
 }
 
+/** Exact-owner actions for specialist homes. Buyer/read-only does not gain Sync. */
+internal fun specialistHomeActions(persona: FarmHomePersona): List<Pair<String, FarmDestination>> {
+    val core = when (persona) {
+        FarmHomePersona.SUPERVISOR -> listOf(
+            "Team tasks" to FarmDestination.Tasks(TaskEntryPage.BOARD),
+            "People" to FarmDestination.Module(FarmModule.LABOUR),
+            // Supervisor Health exceptions stays on the health dashboard. FOS-HEALTH-009 vs 001 was not guessed.
+            "Health exceptions" to FarmDestination.Health(),
+            "Equipment" to FarmDestination.Module(FarmModule.ASSETS),
+            "Feed" to FarmDestination.Module(FarmModule.FEED),
+            "Water" to FarmDestination.Module(FarmModule.WATER),
+        )
+        FarmHomePersona.BREEDING -> listOf(
+            "Goats" to FarmDestination.Goat(),
+            // FOS-GOAT-037
+            "Record kidding" to FarmDestination.Goat(GoatEntryPage.KIDDING),
+            // FOS-GOAT-032
+            "Record mating" to FarmDestination.Goat(GoatEntryPage.REPRODUCTION),
+            "Rabbits" to FarmDestination.Module(FarmModule.RABBIT),
+            "Sheep" to FarmDestination.Module(FarmModule.SHEEP),
+            "Cattle" to FarmDestination.Module(FarmModule.CATTLE),
+            "Poultry" to FarmDestination.Module(FarmModule.POULTRY),
+            "Due work" to FarmDestination.Tasks(TaskEntryPage.BOARD),
+        )
+        FarmHomePersona.VET -> listOf(
+            "Health centre" to FarmDestination.Health(),
+            "Open withdrawals" to FarmDestination.Health(HealthEntryPage.WITHDRAWALS),
+            "Add Treatment" to FarmDestination.Health(HealthEntryPage.TREATMENT),
+            // FOS-HEALTH-013
+            "Open formulary" to FarmDestination.Health(HealthEntryPage.FORMULARY),
+            // FOS-HEALTH-021
+            "Record vet visit" to FarmDestination.Health(HealthEntryPage.VET_VISIT),
+            // FOS-HEALTH-024
+            "Record lab result" to FarmDestination.Health(HealthEntryPage.LAB_RESULT),
+            "Follow-up tasks" to FarmDestination.Tasks(TaskEntryPage.BOARD),
+            "Goats" to FarmDestination.Goat(),
+            "Rabbits" to FarmDestination.Module(FarmModule.RABBIT),
+            "Sheep" to FarmDestination.Module(FarmModule.SHEEP),
+            "Cattle" to FarmDestination.Module(FarmModule.CATTLE),
+        )
+        FarmHomePersona.FINANCE -> listOf(
+            "Finance" to FarmDestination.Module(FarmModule.MONEY),
+            "Sales" to FarmDestination.Module(FarmModule.SALES),
+            "Procurement" to FarmDestination.Module(FarmModule.PROCUREMENT),
+            "Inventory" to FarmDestination.Module(FarmModule.INVENTORY),
+            "Labour" to FarmDestination.Module(FarmModule.LABOUR),
+            "Assets" to FarmDestination.Module(FarmModule.ASSETS),
+        )
+        FarmHomePersona.BUYER -> listOf(
+            "Purchases" to FarmDestination.Module(FarmModule.PROCUREMENT),
+            "Inventory" to FarmDestination.Module(FarmModule.INVENTORY),
+            "Feed" to FarmDestination.Module(FarmModule.FEED),
+            "Assets" to FarmDestination.Module(FarmModule.ASSETS),
+        )
+        else -> emptyList()
+    }
+    if (persona == FarmHomePersona.BUYER || core.isEmpty()) return core
+    // FOS-HOME-009 / FOS-SYNC-002 — PAGE-PATTERNS keeps sync entry reachable on mutation homes.
+    return core + ("Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC))
+}
+
 /**
  * FOS-HOME-012 — role-tailored home family.
  * Management A / worker D+C use the locked Animal Farm composition.
@@ -55,72 +116,27 @@ internal fun RoleAwareFarmHomeScreen(
         FarmHomePersona.WORKER -> WorkerWorkBoardScreen(farmName, summary, onOpen, onAnimals, onMore)
         FarmHomePersona.SUPERVISOR -> SpecialistRoleShell(
             farmName, "Team today",
-            listOf(
-                "Team tasks" to FarmDestination.Tasks(TaskEntryPage.BOARD),
-                "People" to FarmDestination.Module(FarmModule.LABOUR),
-                "Health exceptions" to FarmDestination.Health(),
-                "Equipment" to FarmDestination.Module(FarmModule.ASSETS),
-                "Feed" to FarmDestination.Module(FarmModule.FEED),
-                "Water" to FarmDestination.Module(FarmModule.WATER),
-            ),
+            specialistHomeActions(FarmHomePersona.SUPERVISOR),
             summary, onOpen, onAnimals, onMore,
         )
         FarmHomePersona.BREEDING -> SpecialistRoleShell(
             farmName, "Breeding programme",
-            listOf(
-                "Goats" to FarmDestination.Goat(),
-                // FOS-GOAT-037
-                "Record kidding" to FarmDestination.Goat(GoatEntryPage.KIDDING),
-                // FOS-GOAT-032
-                "Record mating" to FarmDestination.Goat(GoatEntryPage.REPRODUCTION),
-                "Rabbits" to FarmDestination.Module(FarmModule.RABBIT),
-                "Sheep" to FarmDestination.Module(FarmModule.SHEEP),
-                "Cattle" to FarmDestination.Module(FarmModule.CATTLE),
-                "Poultry" to FarmDestination.Module(FarmModule.POULTRY),
-                "Due work" to FarmDestination.Tasks(TaskEntryPage.BOARD),
-            ),
+            specialistHomeActions(FarmHomePersona.BREEDING),
             summary, onOpen, onAnimals, onMore,
         )
         FarmHomePersona.VET -> SpecialistRoleShell(
             farmName, "Health review",
-            listOf(
-                "Health centre" to FarmDestination.Health(),
-                "Open withdrawals" to FarmDestination.Health(HealthEntryPage.WITHDRAWALS),
-                "Add Treatment" to FarmDestination.Health(HealthEntryPage.TREATMENT),
-                // FOS-HEALTH-013
-                "Open formulary" to FarmDestination.Health(HealthEntryPage.FORMULARY),
-                // FOS-HEALTH-021
-                "Record vet visit" to FarmDestination.Health(HealthEntryPage.VET_VISIT),
-                // FOS-HEALTH-024
-                "Record lab result" to FarmDestination.Health(HealthEntryPage.LAB_RESULT),
-                "Follow-up tasks" to FarmDestination.Tasks(TaskEntryPage.BOARD),
-                "Goats" to FarmDestination.Goat(),
-                "Rabbits" to FarmDestination.Module(FarmModule.RABBIT),
-                "Sheep" to FarmDestination.Module(FarmModule.SHEEP),
-                "Cattle" to FarmDestination.Module(FarmModule.CATTLE),
-            ),
+            specialistHomeActions(FarmHomePersona.VET),
             summary, onOpen, onAnimals, onMore,
         )
         FarmHomePersona.FINANCE -> SpecialistRoleShell(
             farmName, "Farm business",
-            listOf(
-                "Finance" to FarmDestination.Module(FarmModule.MONEY),
-                "Sales" to FarmDestination.Module(FarmModule.SALES),
-                "Procurement" to FarmDestination.Module(FarmModule.PROCUREMENT),
-                "Inventory" to FarmDestination.Module(FarmModule.INVENTORY),
-                "Labour" to FarmDestination.Module(FarmModule.LABOUR),
-                "Assets" to FarmDestination.Module(FarmModule.ASSETS),
-            ),
+            specialistHomeActions(FarmHomePersona.FINANCE),
             summary, onOpen, onAnimals, onMore,
         )
         FarmHomePersona.BUYER -> SpecialistRoleShell(
             farmName, "Purchasing",
-            listOf(
-                "Purchases" to FarmDestination.Module(FarmModule.PROCUREMENT),
-                "Inventory" to FarmDestination.Module(FarmModule.INVENTORY),
-                "Feed" to FarmDestination.Module(FarmModule.FEED),
-                "Assets" to FarmDestination.Module(FarmModule.ASSETS),
-            ),
+            specialistHomeActions(FarmHomePersona.BUYER),
             summary, onOpen, onAnimals, onMore,
         )
         FarmHomePersona.GENERAL -> FarmHomeScreen(farmName, summary, onOpen, onSignOut)
