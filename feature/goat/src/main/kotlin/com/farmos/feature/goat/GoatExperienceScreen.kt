@@ -144,7 +144,7 @@ private fun GoatDashboardScreen(
             }
 
             GoatDashboardAction("Herd", "Herd on this device") { onOpen(GoatPage.HERD) }
-            GoatDashboardAction("Register Goat", "Add a goat record") { onOpen(GoatPage.REGISTER) }
+            GoatDashboardAction("Register goat", "Add a goat record") { onOpen(GoatPage.REGISTER) }
             GoatDashboardAction("Breeding", "Heat, mating and pregnancy") {
                 onOpen(if (selectedDoe != null) GoatPage.REPRODUCTION else GoatPage.HERD)
             }

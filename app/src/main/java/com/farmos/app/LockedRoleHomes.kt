@@ -203,6 +203,8 @@ private fun ManagementFamilies(
                 repeat(3 - row.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
             }
         }
+        // FOS-HOME-009 / FOS-SYNC-002 — reachable even when pending-sync is not the ranked hero
+        AnimalFarmQuickAction("Open sync status", { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) })
     }
 }
 
@@ -311,6 +313,8 @@ internal fun WorkerWorkBoardScreen(
                     AnimalFarmQuickAction("Water", { onOpen(FarmDestination.Module(FarmModule.WATER)) })
                     AnimalFarmQuickAction("Pasture", { onOpen(FarmDestination.Module(FarmModule.PASTURE)) })
                     AnimalFarmQuickAction("Assets", { onOpen(FarmDestination.Module(FarmModule.ASSETS)) })
+                    // FOS-HOME-009 / FOS-SYNC-002
+                    AnimalFarmQuickAction("Open sync status", { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) })
                 }
             }
         }

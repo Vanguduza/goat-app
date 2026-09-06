@@ -105,6 +105,7 @@ const directActionViolations = [
   ['Resources', 'FarmModule.INVENTORY', 'FOS-INV-001'],
   ['Scan Animal', 'GoatEntryPage.SEARCH', 'FOS-GOAT-006'],
   ['Waiting to sync', 'GoatEntryPage.SYNC', 'FOS-SYNC-002'],
+  ['Open sync status', 'FarmDestination.Goat(GoatEntryPage.SYNC)', 'FOS-SYNC-002'],
   ['Continue task', 'FarmDestination.Task', 'FOS-TASK-003'],
   ['Open task', 'FarmDestination.Task', 'FOS-TASK-003'],
   ['Open withdrawals', 'HealthEntryPage.WITHDRAWALS', 'FOS-HEALTH-009'],

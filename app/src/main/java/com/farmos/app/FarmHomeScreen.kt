@@ -24,6 +24,7 @@ import com.farmos.core.design.AnimalFarmHomeMetrics
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmQuickAction
 import com.farmos.core.design.AnimalFarmSummaryTile
+import com.farmos.feature.goat.GoatEntryPage
 import com.farmos.feature.ops.TaskEntryPage
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -101,8 +102,10 @@ internal fun FarmHomeScreen(
                     }
                 }
                 AnimalFarmQuickAction("Open tasks", { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) })
-                AnimalFarmQuickAction("Health", { onOpen(FarmDestination.Health()) })
-                AnimalFarmQuickAction("Feed", { onOpen(FarmDestination.Module(FarmModule.FEED)) })
+                AnimalFarmQuickAction("Open health", { onOpen(FarmDestination.Health()) })
+                AnimalFarmQuickAction("Open feed", { onOpen(FarmDestination.Module(FarmModule.FEED)) })
+                // FOS-HOME-009 / FOS-SYNC-002
+                AnimalFarmQuickAction("Open sync status", { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) })
             }
         }
         AnimalFarmHomeBottomBar(

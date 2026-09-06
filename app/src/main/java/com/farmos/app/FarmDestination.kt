@@ -33,5 +33,6 @@ fun FarmModule.toDestination(): FarmDestination =
         FarmModule.HOME -> FarmDestination.Home
         FarmModule.GOAT -> FarmDestination.Goat()
         FarmModule.HEALTH -> FarmDestination.Health()
+        FarmModule.TASKS -> FarmDestination.Tasks(TaskEntryPage.BOARD)
         else -> FarmDestination.Module(this)
     }
