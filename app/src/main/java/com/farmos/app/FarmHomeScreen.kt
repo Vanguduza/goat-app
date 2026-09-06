@@ -24,6 +24,7 @@ import com.farmos.core.design.AnimalFarmHomeMetrics
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmQuickAction
 import com.farmos.core.design.AnimalFarmSummaryTile
+import com.farmos.feature.ops.TaskEntryPage
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -80,7 +81,7 @@ internal fun FarmHomeScreen(
                     title = "Today",
                     value = "${summary.openTasks} open tasks",
                     detail = "${summary.activeWithdrawals} withdrawal(s) · ${summary.pendingSync} waiting to sync",
-                    onClick = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+                    onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
                     lime = true,
                 )
                 families.chunked(2).forEach { pair ->
@@ -99,7 +100,7 @@ internal fun FarmHomeScreen(
                         if (pair.size == 1) androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
                     }
                 }
-                AnimalFarmQuickAction("Tasks", { onOpen(FarmDestination.Module(FarmModule.TASKS)) })
+                AnimalFarmQuickAction("Tasks", { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) })
                 AnimalFarmQuickAction("Health", { onOpen(FarmDestination.Health()) })
                 AnimalFarmQuickAction("Feed", { onOpen(FarmDestination.Module(FarmModule.FEED)) })
             }
@@ -107,7 +108,7 @@ internal fun FarmHomeScreen(
         AnimalFarmHomeBottomBar(
             onHome = { destination = "home" },
             onAnimals = { destination = "animals" },
-            onTasks = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+            onTasks = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
             onMore = { destination = "more" },
         )
     }
@@ -123,7 +124,7 @@ internal fun FarmMoreScreen(
         HomeModuleCard(FarmModule.INVENTORY, "Inventory", "Stock, lots, FEFO and reorder"),
         HomeModuleCard(FarmModule.SALES, "Sales", "Customers, animals, produce and orders"),
         HomeModuleCard(FarmModule.PROCUREMENT, "Procurement", "Suppliers, purchases and receiving"),
-        HomeModuleCard(FarmModule.MONEY, "Finance", "Income, expenses and farm performance"),
+        HomeModuleCard(FarmModule.MONEY, "Finance", "Income and expenses on this device"),
         HomeModuleCard(FarmModule.PASTURE, "Pasture", "Paddocks, rotations, condition and capacity"),
         HomeModuleCard(FarmModule.LABOUR, "Labour", "People, assignments and coverage"),
         HomeModuleCard(FarmModule.ASSETS, "Assets", "Equipment, maintenance and breakdowns"),

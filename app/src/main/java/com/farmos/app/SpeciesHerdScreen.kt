@@ -156,7 +156,7 @@ private fun SpeciesDashboard(
             if (selected != null) SpeciesAction("Open profile", selected.label) { onOpen(SpeciesPage.PROFILE) }
             SpeciesAction(
                 config.operationsTitle,
-                "Open species-native production and reproduction workflows",
+                "Open this species module",
             ) { onOpen(SpeciesPage.OPERATIONS) }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             TextButton(onClick = onBack) { Text("Farm home") }

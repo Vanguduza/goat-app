@@ -176,6 +176,7 @@ internal fun GoatHealthCaptureScreen(
 internal fun GoatReproductionScreen(
     state: GoatSliceUiState,
     actions: GoatExperienceActions,
+    onSelectGoat: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     var milk by remember { mutableStateOf("") }
@@ -190,7 +191,11 @@ internal fun GoatReproductionScreen(
     IllustratedGoatPage("Reproduction & milk", "FOS-GOAT-017/031/032/034/043 · I3", onBack) {
         val goat = state.selected
         if (goat == null || goat.sex != GoatSex.FEMALE) {
-            Text("Select an active doe before recording reproduction or milk events.")
+            GoatDoePicker(
+                state = state,
+                emptyMessage = "Select an active doe before recording reproduction or milk events.",
+                onSelectGoat = onSelectGoat,
+            )
             return@IllustratedGoatPage
         }
         FarmIllustratedSectionSurface {
@@ -228,6 +233,7 @@ internal fun GoatReproductionScreen(
 internal fun GoatKiddingScreen(
     state: GoatSliceUiState,
     actions: GoatExperienceActions,
+    onSelectGoat: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     var born by remember { mutableStateOf("") }
@@ -239,7 +245,11 @@ internal fun GoatKiddingScreen(
     IllustratedGoatPage("Kidding", "FOS-GOAT-037/039 · I3/I4", onBack) {
         val goat = state.selected
         if (goat == null || goat.sex != GoatSex.FEMALE) {
-            Text("Select a doe before recording kidding.")
+            GoatDoePicker(
+                state = state,
+                emptyMessage = "Select a doe before recording kidding.",
+                onSelectGoat = onSelectGoat,
+            )
             return@IllustratedGoatPage
         }
         FarmIllustratedSectionSurface {
@@ -266,6 +276,33 @@ internal fun GoatKiddingScreen(
                 enabled = !state.busy && latest != null && kidTag.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Register kid") }
+        }
+    }
+}
+
+@Composable
+private fun GoatDoePicker(
+    state: GoatSliceUiState,
+    emptyMessage: String,
+    onSelectGoat: (String) -> Unit,
+) {
+    Text(emptyMessage)
+    when (state.herdState) {
+        LoadableSurfaceState.LOADING -> Text("Loading herd")
+        LoadableSurfaceState.EMPTY -> Text("No goats on this device yet.")
+        LoadableSurfaceState.ERROR -> Text(state.error ?: "Herd could not be loaded", color = MaterialTheme.colorScheme.error)
+        LoadableSurfaceState.DISABLED -> Text("Herd actions are temporarily paused")
+        LoadableSurfaceState.IDLE -> {
+            val does = state.herd.filter { it.status == GoatStatus.ACTIVE && it.sex == GoatSex.FEMALE }
+            if (does.isEmpty()) {
+                Text("No active does on this device.")
+            } else {
+                does.forEach { row ->
+                    TextButton(onClick = { onSelectGoat(row.animalId) }, modifier = Modifier.fillMaxWidth()) {
+                        Text(goatDisplayName(row) + " · " + row.tag)
+                    }
+                }
+            }
         }
     }
 }

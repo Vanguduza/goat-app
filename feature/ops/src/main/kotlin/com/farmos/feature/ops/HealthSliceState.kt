@@ -6,4 +6,6 @@ enum class HealthEntryPage {
     TREATMENT,
     WITHDRAWALS,
     RECORD_OBSERVATION,
+    VET_VISIT,
+    LAB_RESULT,
 }

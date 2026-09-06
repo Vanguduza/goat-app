@@ -64,6 +64,8 @@ fun HealthObservationScreen(
     val treatmentBack = if (entryPage == HealthEntryPage.TREATMENT) onBack else home
     val withdrawalBack = if (entryPage == HealthEntryPage.WITHDRAWALS) onBack else home
     val observationBack = if (entryPage == HealthEntryPage.RECORD_OBSERVATION) onBack else home
+    val vetVisitBack = if (entryPage == HealthEntryPage.VET_VISIT) onBack else home
+    val labResultBack = if (entryPage == HealthEntryPage.LAB_RESULT) onBack else home
     when (page) {
         HealthPage.DASHBOARD -> {
             HealthDashboard(rows, treatments, withdrawals, packs, error, { page = it }, onBack)
@@ -118,11 +120,11 @@ fun HealthObservationScreen(
         }
 
         HealthPage.VET_VISIT -> {
-            VetVisitScreen(busy, error, onRecordVetVisit, home)
+            VetVisitScreen(busy, error, onRecordVetVisit, vetVisitBack)
         }
 
         HealthPage.LAB_RESULT -> {
-            LabResultScreen(busy, error, onRecordLab, home)
+            LabResultScreen(busy, error, onRecordLab, labResultBack)
         }
     }
 }
@@ -133,6 +135,8 @@ private fun HealthEntryPage.toHealthPage(): HealthPage =
         HealthEntryPage.TREATMENT -> HealthPage.TREATMENT
         HealthEntryPage.WITHDRAWALS -> HealthPage.WITHDRAWALS
         HealthEntryPage.RECORD_OBSERVATION -> HealthPage.RECORD_OBSERVATION
+        HealthEntryPage.VET_VISIT -> HealthPage.VET_VISIT
+        HealthEntryPage.LAB_RESULT -> HealthPage.LAB_RESULT
     }
 
 @Composable

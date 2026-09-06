@@ -5,6 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.farmos.feature.goat.GoatEntryPage
+import com.farmos.feature.ops.HealthEntryPage
+import com.farmos.feature.ops.TaskEntryPage
 
 internal enum class FarmHomePersona {
     OWNER, MANAGER, SUPERVISOR, WORKER, BREEDING, VET, FINANCE, BUYER, GENERAL,
@@ -53,7 +56,7 @@ internal fun RoleAwareFarmHomeScreen(
         FarmHomePersona.SUPERVISOR -> SpecialistRoleShell(
             farmName, "Team today",
             listOf(
-                "Team tasks" to FarmDestination.Module(FarmModule.TASKS),
+                "Team tasks" to FarmDestination.Tasks(TaskEntryPage.BOARD),
                 "People" to FarmDestination.Module(FarmModule.LABOUR),
                 "Health exceptions" to FarmDestination.Health(),
                 "Equipment" to FarmDestination.Module(FarmModule.ASSETS),
@@ -66,11 +69,15 @@ internal fun RoleAwareFarmHomeScreen(
             farmName, "Breeding programme",
             listOf(
                 "Goats" to FarmDestination.Goat(),
+                // FOS-GOAT-037
+                "Record kidding" to FarmDestination.Goat(GoatEntryPage.KIDDING),
+                // FOS-GOAT-032
+                "Record mating" to FarmDestination.Goat(GoatEntryPage.REPRODUCTION),
                 "Rabbits" to FarmDestination.Module(FarmModule.RABBIT),
                 "Sheep" to FarmDestination.Module(FarmModule.SHEEP),
                 "Cattle" to FarmDestination.Module(FarmModule.CATTLE),
                 "Poultry" to FarmDestination.Module(FarmModule.POULTRY),
-                "Due work" to FarmDestination.Module(FarmModule.TASKS),
+                "Due work" to FarmDestination.Tasks(TaskEntryPage.BOARD),
             ),
             summary, onOpen, onAnimals, onMore,
         )
@@ -78,7 +85,13 @@ internal fun RoleAwareFarmHomeScreen(
             farmName, "Health review",
             listOf(
                 "Health centre" to FarmDestination.Health(),
-                "Follow-up tasks" to FarmDestination.Module(FarmModule.TASKS),
+                "Open withdrawals" to FarmDestination.Health(HealthEntryPage.WITHDRAWALS),
+                "Add Treatment" to FarmDestination.Health(HealthEntryPage.TREATMENT),
+                // FOS-HEALTH-021
+                "Record vet visit" to FarmDestination.Health(HealthEntryPage.VET_VISIT),
+                // FOS-HEALTH-024
+                "Record lab result" to FarmDestination.Health(HealthEntryPage.LAB_RESULT),
+                "Follow-up tasks" to FarmDestination.Tasks(TaskEntryPage.BOARD),
                 "Goats" to FarmDestination.Goat(),
                 "Rabbits" to FarmDestination.Module(FarmModule.RABBIT),
                 "Sheep" to FarmDestination.Module(FarmModule.SHEEP),

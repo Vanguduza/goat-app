@@ -68,7 +68,9 @@ fun GoatModuleHost(
             val autoSelect =
                 entryPage != GoatEntryPage.WEIGHT &&
                     entryPage != GoatEntryPage.SEARCH &&
-                    entryPage != GoatEntryPage.SYNC
+                    entryPage != GoatEntryPage.SYNC &&
+                    entryPage != GoatEntryPage.KIDDING &&
+                    entryPage != GoatEntryPage.REPRODUCTION
             val effectiveId = selectedGoatId ?: loaded.firstOrNull()?.animalId?.takeIf { autoSelect }
             val chosen = effectiveId?.let { repository.getGoat(it) }
             Triple(loaded, effectiveId, chosen)

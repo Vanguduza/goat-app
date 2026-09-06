@@ -77,8 +77,20 @@ internal fun GoatExperienceScreen(
             },
         )
         GoatPage.HEALTH -> GoatHealthCaptureScreen(state, actions) { page = GoatPage.PROFILE }
-        GoatPage.REPRODUCTION -> GoatReproductionScreen(state, actions) { page = GoatPage.PROFILE }
-        GoatPage.KIDDING -> GoatKiddingScreen(state, actions) { page = GoatPage.PROFILE }
+        GoatPage.REPRODUCTION -> GoatReproductionScreen(
+            state,
+            actions,
+            onSelectGoat = actions.onSelectGoat,
+        ) {
+            if (initialPage == GoatPage.REPRODUCTION) onBackToFarm() else page = GoatPage.PROFILE
+        }
+        GoatPage.KIDDING -> GoatKiddingScreen(
+            state,
+            actions,
+            onSelectGoat = actions.onSelectGoat,
+        ) {
+            if (initialPage == GoatPage.KIDDING) onBackToFarm() else page = GoatPage.PROFILE
+        }
         GoatPage.SEARCH -> GoatSearchScreen(
             state = state,
             onSearch = actions.onSearch,
@@ -90,7 +102,9 @@ internal fun GoatExperienceScreen(
                 if (initialPage == GoatPage.SEARCH) onBackToFarm() else page = GoatPage.DASHBOARD
             },
         )
-        GoatPage.SYNC -> GoatSyncScreen(state, actions.onSyncNow) { page = GoatPage.DASHBOARD }
+        GoatPage.SYNC -> GoatSyncScreen(state, actions.onSyncNow) {
+            if (initialPage == GoatPage.SYNC) onBackToFarm() else page = GoatPage.DASHBOARD
+        }
         GoatPage.STATUS_CHANGE -> GoatStatusChangeScreen(state, actions.onSetStatus) { page = GoatPage.PROFILE }
     }
 }
@@ -129,15 +143,15 @@ private fun GoatDashboardScreen(
                 GoatMetric("Kids", kids.toString(), Modifier.weight(1f))
             }
 
-            GoatDashboardAction("Herd", "View and manage your goats") { onOpen(GoatPage.HERD) }
-            GoatDashboardAction("Register Goat", "Add a new goat") { onOpen(GoatPage.REGISTER) }
+            GoatDashboardAction("Herd", "Herd on this device") { onOpen(GoatPage.HERD) }
+            GoatDashboardAction("Register Goat", "Add a goat record") { onOpen(GoatPage.REGISTER) }
             GoatDashboardAction("Breeding", "Heat, mating and pregnancy") {
                 onOpen(if (selectedDoe != null) GoatPage.REPRODUCTION else GoatPage.HERD)
             }
             GoatDashboardAction("Kidding", "Due dates and birth records") {
                 onOpen(if (selectedDoe != null) GoatPage.KIDDING else GoatPage.HERD)
             }
-            GoatDashboardAction("Health", "Treatments, FAMACHA, BCS and SCC observations") {
+            GoatDashboardAction("Health", "FAMACHA, BCS and SCC on this device") {
                 onOpen(if (state.selected != null) GoatPage.HEALTH else GoatPage.HERD)
             }
             GoatDashboardAction("Milk", "Production and SCC") {

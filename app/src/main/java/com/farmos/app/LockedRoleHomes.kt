@@ -87,7 +87,7 @@ internal fun ManagementControlRoomScreen(
         AnimalFarmHomeBottomBar(
             onHome = {},
             onAnimals = onAnimals,
-            onTasks = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+            onTasks = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
             onMore = onMore,
         )
     }
@@ -118,7 +118,8 @@ private fun ManagementAttention(
                 title = "Due or overdue work",
                 context = "${summary.overdueTasks} open task(s) due today or earlier",
                 actionLabel = "Open tasks",
-                onAction = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+                // FOS-TASK-001 today board includes due-today and overdue open work
+                onAction = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
                 family = family,
             )
             HomeAttentionKind.PENDING_SYNC -> AnimalFarmHeroCard(
@@ -145,7 +146,7 @@ private fun ManagementSummaries(
                 title = "Work",
                 value = if (summary.openTasks == 0) "None due" else "${summary.openTasks} open",
                 detail = "${summary.overdueTasks} due now · ${summary.upcomingTasks} upcoming",
-                onClick = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+                onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
                 modifier = modifier,
                 lime = true,
             )
@@ -247,7 +248,7 @@ internal fun WorkerWorkBoardScreen(
                         title = "Work",
                         value = "${summary.overdueTasks} due now",
                         detail = "${summary.upcomingTasks} upcoming · ${summary.completedTasks} completed",
-                        onClick = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+                        onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
                         lime = true,
                     )
                     ResourceSummaryTile(summary, onOpen)
@@ -316,7 +317,7 @@ internal fun WorkerWorkBoardScreen(
         AnimalFarmHomeBottomBar(
             onHome = {},
             onAnimals = onAnimals,
-            onTasks = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+            onTasks = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
             onMore = onMore,
         )
     }
@@ -352,7 +353,7 @@ internal fun SpecialistRoleShell(
                     title = "Today",
                     value = "${summary.openTasks} open tasks",
                     detail = "${summary.activeWithdrawals} withdrawal(s) · ${summary.pendingSync} waiting to sync",
-                    onClick = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+                    onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
                     lime = true,
                 )
                 actions.forEach { (label, dest) ->
@@ -363,7 +364,7 @@ internal fun SpecialistRoleShell(
         AnimalFarmHomeBottomBar(
             onHome = {},
             onAnimals = onAnimals,
-            onTasks = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+            onTasks = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
             onMore = onMore,
         )
     }

@@ -26,4 +26,6 @@ enum class GoatEntryPage {
     WEIGHT,
     SEARCH,
     SYNC,
+    KIDDING,
+    REPRODUCTION,
 }
