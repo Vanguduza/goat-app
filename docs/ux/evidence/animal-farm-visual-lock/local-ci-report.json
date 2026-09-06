@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "evidence_class": "LOCAL_CI_ALTERNATIVE_NOT_GITHUB_HOSTED_CERTIFICATION",
-  "tested_commit": "9aebae24b9c46462bd15a240fc5e5b85cf8ce3dd",
+  "tested_commit": "b0ff7cb02f627f550b242142981650a666a19cc1",
   "runner": "local-host",
   "jobs": [
     {
