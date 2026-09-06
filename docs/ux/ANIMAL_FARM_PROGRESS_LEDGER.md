@@ -481,3 +481,9 @@ No green-gate promotion. Not GitHub-hosted certification.
 `:app:testDebugUnitTest --tests com.farmos.app.FarmDestinationTest` — PASS after failing-first vet observation and management health assertions. `:app:compileDebugKotlin` — PASS (`--offline`). Navigation and gap self-tests passed. Architecture script passed. No green-gate promotion.
 
 Rebound static inventory at `4487c16...`: 545 rows; 147 some evidence; 398 none; runtime 0. Kotlin registered IDs 116. `direct_action_scope_violations = []`.
+
+## Local CI after management health and vet observation — 2026-09-06
+
+`bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/local-ci-report.json` executed against `9aebae24b9c46462bd15a240fc5e5b85cf8ce3dd`: smoke, handover-integrity, android, edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
+
+No green-gate promotion. Not GitHub-hosted certification.
