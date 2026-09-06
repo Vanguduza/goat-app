@@ -309,18 +309,14 @@ fun GoatModuleHost(
                             "Farm access was removed. Pending local records stayed on this device and were not sent.",
                         )
                         null -> {
-                            syncMessage = when {
-                                push.conflicts > 0 -> "Conflict needs review"
-                                push.rejected > 0 -> "Server rejected a pending record"
-                                push.retrying > 0 -> "Saved locally · server retry pending"
-                                push.acknowledged > 0 && (pull?.appliedEvents ?: 0) > 0 ->
-                                    "Server accepted ${push.acknowledged} local change(s). ${pull?.appliedEvents} server change(s) applied"
-                                push.acknowledged > 0 ->
-                                    "Server accepted ${push.acknowledged} local change(s)"
-                                (pull?.appliedEvents ?: 0) > 0 ->
-                                    "${pull?.appliedEvents} server change(s) applied"
-                                else -> "No pending local changes. Server returned no new events."
-                            }
+                            syncMessage =
+                                goatManualSyncReceipt(
+                                    acknowledged = push.acknowledged,
+                                    appliedEvents = pull?.appliedEvents ?: 0,
+                                    conflicts = push.conflicts,
+                                    rejected = push.rejected,
+                                    retrying = push.retrying,
+                                )
                             refreshGoatState()
                         }
                     }
