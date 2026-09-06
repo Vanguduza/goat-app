@@ -151,19 +151,7 @@ private fun ManagementSummaries(
             )
         }
         val resources: @Composable (Modifier) -> Unit = { modifier ->
-            val resourceValue =
-                when {
-                    summary.inventoryItemCount == 0 && summary.activeWithdrawals == 0 -> "No records"
-                    summary.inventoryBelowReorder > 0 -> "${summary.inventoryBelowReorder} below reorder"
-                    else -> "${summary.inventoryItemCount} item(s)"
-                }
-            AnimalFarmSummaryTile(
-                title = "Resources",
-                value = resourceValue,
-                detail = "${summary.activeWithdrawals} withdrawal window(s)",
-                onClick = { onOpen(FarmDestination.Module(FarmModule.INVENTORY)) },
-                modifier = modifier,
-            )
+            ResourceSummaryTile(summary, onOpen, modifier)
         }
         if (stacked) {
             Column(verticalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) {
@@ -262,6 +250,7 @@ internal fun WorkerWorkBoardScreen(
                         onClick = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
                         lime = true,
                     )
+                    ResourceSummaryTile(summary, onOpen)
                     AnimalFarmStageSelector(
                         labels = listOf(
                             "Due now (${summary.overdueTasks})",
@@ -311,6 +300,8 @@ internal fun WorkerWorkBoardScreen(
                     AnimalFarmQuickAction("Record Weight", { onOpen(FarmDestination.Goat(GoatEntryPage.WEIGHT)) })
                     // FOS-HEALTH-007
                     AnimalFarmQuickAction("Add Treatment", { onOpen(FarmDestination.Health(HealthEntryPage.TREATMENT)) })
+                    // FOS-HEALTH-004
+                    AnimalFarmQuickAction("Record observation", { onOpen(FarmDestination.Health(HealthEntryPage.RECORD_OBSERVATION)) })
                     // FOS-GOAT-006 existing identification search. FOS-GOAT-007 RFID and FOS-HOME-006 are not invented.
                     AnimalFarmQuickAction("Scan Animal", { onOpen(FarmDestination.Goat(GoatEntryPage.SEARCH)) })
                     Text("Guides and areas", color = AnimalFarmTheme.colors.ink)
@@ -376,4 +367,25 @@ internal fun SpecialistRoleShell(
             onMore = onMore,
         )
     }
+}
+
+@Composable
+private fun ResourceSummaryTile(
+    summary: FarmHomeSummary,
+    onOpen: (FarmDestination) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val resourceValue =
+        when {
+            summary.inventoryItemCount == 0 && summary.activeWithdrawals == 0 -> "No records"
+            summary.inventoryBelowReorder > 0 -> "${summary.inventoryBelowReorder} below reorder"
+            else -> "${summary.inventoryItemCount} item(s)"
+        }
+    AnimalFarmSummaryTile(
+        title = "Resources",
+        value = resourceValue,
+        detail = "${summary.activeWithdrawals} withdrawal window(s)",
+        onClick = { onOpen(FarmDestination.Module(FarmModule.INVENTORY)) },
+        modifier = modifier,
+    )
 }

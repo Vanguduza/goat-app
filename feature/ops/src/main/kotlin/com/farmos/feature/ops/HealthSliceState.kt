@@ -5,4 +5,5 @@ enum class HealthEntryPage {
     DASHBOARD,
     TREATMENT,
     WITHDRAWALS,
+    RECORD_OBSERVATION,
 }

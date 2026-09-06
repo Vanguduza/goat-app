@@ -101,6 +101,8 @@ const directActionViolations = [
   ['Record Weight', 'GoatEntryPage.WEIGHT', 'FOS-GOAT-011'],
   ['Add Task', 'TaskEntryPage.CREATE', 'FOS-TASK-004'],
   ['Add Treatment', 'HealthEntryPage.TREATMENT', 'FOS-HEALTH-007'],
+  ['Record observation', 'HealthEntryPage.RECORD_OBSERVATION', 'FOS-HEALTH-004'],
+  ['Resources', 'FarmModule.INVENTORY', 'FOS-INV-001'],
   ['Scan Animal', 'GoatEntryPage.SEARCH', 'FOS-GOAT-006'],
   ['Waiting to sync', 'GoatEntryPage.SYNC', 'FOS-SYNC-002'],
   ['Continue task', 'FarmDestination.Task', 'FOS-TASK-003'],
