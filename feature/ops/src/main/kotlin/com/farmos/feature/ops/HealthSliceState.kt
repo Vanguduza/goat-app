@@ -8,4 +8,5 @@ enum class HealthEntryPage {
     RECORD_OBSERVATION,
     VET_VISIT,
     LAB_RESULT,
+    FORMULARY,
 }

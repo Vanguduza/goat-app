@@ -100,7 +100,7 @@ internal fun FarmHomeScreen(
                         if (pair.size == 1) androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
                     }
                 }
-                AnimalFarmQuickAction("Tasks", { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) })
+                AnimalFarmQuickAction("Open tasks", { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) })
                 AnimalFarmQuickAction("Health", { onOpen(FarmDestination.Health()) })
                 AnimalFarmQuickAction("Feed", { onOpen(FarmDestination.Module(FarmModule.FEED)) })
             }

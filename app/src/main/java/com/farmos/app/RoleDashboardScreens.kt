@@ -87,6 +87,8 @@ internal fun RoleAwareFarmHomeScreen(
                 "Health centre" to FarmDestination.Health(),
                 "Open withdrawals" to FarmDestination.Health(HealthEntryPage.WITHDRAWALS),
                 "Add Treatment" to FarmDestination.Health(HealthEntryPage.TREATMENT),
+                // FOS-HEALTH-013
+                "Open formulary" to FarmDestination.Health(HealthEntryPage.FORMULARY),
                 // FOS-HEALTH-021
                 "Record vet visit" to FarmDestination.Health(HealthEntryPage.VET_VISIT),
                 // FOS-HEALTH-024

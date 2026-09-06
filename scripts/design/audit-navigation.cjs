@@ -114,6 +114,7 @@ const directActionViolations = [
   ['Follow-up tasks', 'FarmDestination.Tasks(TaskEntryPage.BOARD)', 'FOS-TASK-001'],
   ['Record vet visit', 'HealthEntryPage.VET_VISIT', 'FOS-HEALTH-021'],
   ['Record lab result', 'HealthEntryPage.LAB_RESULT', 'FOS-HEALTH-024'],
+  ['Open formulary', 'HealthEntryPage.FORMULARY', 'FOS-HEALTH-013'],
   ['Record kidding', 'GoatEntryPage.KIDDING', 'FOS-GOAT-037'],
   ['Record mating', 'GoatEntryPage.REPRODUCTION', 'FOS-GOAT-032'],
 ].filter(([label, token]) => appKt.includes(`"${label}"`) && !appKt.includes(token))
