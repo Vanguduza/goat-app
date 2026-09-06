@@ -1510,11 +1510,13 @@ class RoomOpsRepository(
 
     suspend fun bindBedding(command: BindRabbitBedding, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.bedding(command)?.let { error(it) }
-        if (!command.beddingItemId.isNullOrBlank()) {
-            requireNotNull(database.inventory().item(farmId, command.beddingItemId)) { "Bedding item not found on this farm" }
+        val beddingItemId = command.beddingItemId
+        if (!beddingItemId.isNullOrBlank()) {
+            requireNotNull(database.inventory().item(farmId, beddingItemId)) { "Bedding item not found on this farm" }
         }
-        if (!command.feedItemId.isNullOrBlank()) {
-            requireNotNull(database.inventory().item(farmId, command.feedItemId)) { "Feed item not found on this farm" }
+        val feedItemId = command.feedItemId
+        if (!feedItemId.isNullOrBlank()) {
+            requireNotNull(database.inventory().item(farmId, feedItemId)) { "Feed item not found on this farm" }
         }
         enqueue(context, "rabbit.bedding_bind.v1", "farm", farmId, expectedVersion("farm", farmId), json.encodeToString(command)) {
             database.lifecycle().upsertInventoryLink(
@@ -1656,9 +1658,10 @@ class RoomOpsRepository(
 
     suspend fun recordCattleWeaning(command: RecordCattleWeaning, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.cattleWeaning(command)?.let { error(it) }
-        val aggregateId = command.animalId ?: command.groupId!!
-        if (command.animalId != null) {
-            val calf = requireNotNull(database.animals().get(farmId, command.animalId)) { "Cattle weaning needs a calf" }
+        val animalId = command.animalId
+        val aggregateId = animalId ?: command.groupId!!
+        if (animalId != null) {
+            val calf = requireNotNull(database.animals().get(farmId, animalId)) { "Cattle weaning needs a calf" }
             require(calf.speciesCode == "cattle") { "Cattle weaning needs a calf" }
         }
         enqueue(context, "cattle.record_weaning.v1", "animal", aggregateId, expectedVersion("animal", aggregateId), json.encodeToString(command)) {

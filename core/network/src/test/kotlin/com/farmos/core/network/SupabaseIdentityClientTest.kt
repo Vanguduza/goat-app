@@ -139,6 +139,7 @@ class SupabaseIdentityClientTest {
         assertFailsWith<IllegalArgumentException> {
             identity.createFarm("   ")
         }
+        Unit
     }
 
     @Test

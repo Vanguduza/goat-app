@@ -78,7 +78,6 @@ fun SpeciesHerdScreen(
                 "FOS-SHEEP",
                 FarmSpeciesVisual.SHEEP,
                 "Breeding & wool operations",
-                "FOS-SHEEP-010",
             )
         } else {
             SpeciesUiConfig(
@@ -89,7 +88,6 @@ fun SpeciesHerdScreen(
                 "FOS-CATTLE",
                 FarmSpeciesVisual.CATTLE,
                 "Breeding, dairy & beef operations",
-                "FOS-CATTLE-018",
             )
         }
     var page by remember { mutableStateOf(SpeciesPage.DASHBOARD) }
@@ -121,7 +119,7 @@ fun SpeciesHerdScreen(
         }
 
         SpeciesPage.OPERATIONS -> {
-            SpeciesOperations(config, selected, error, home, extra)
+            SpeciesOperations(selected, home, extra)
         }
 
         SpeciesPage.STATUS -> {

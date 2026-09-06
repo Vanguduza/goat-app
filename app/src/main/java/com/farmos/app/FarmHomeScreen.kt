@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -44,7 +43,7 @@ private data class SpeciesHomeCard(val module: FarmModule, val title: String, va
 
 /** FOS-HOME-001 — illustrated farm operating home derived from FOS-VREF-HOME-001. */
 @Composable
-fun FarmHomeScreen(
+internal fun FarmHomeScreen(
     farmName: String?,
     summary: FarmHomeSummary = FarmHomeSummary(),
     onOpen: (FarmModule) -> Unit,

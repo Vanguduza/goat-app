@@ -102,6 +102,7 @@ import com.farmos.feature.ops.PoultryExperienceScreen
 import com.farmos.feature.ops.SimpleCaptureScreen
 import com.farmos.feature.ops.SheepOperationsActions
 import com.farmos.feature.ops.SheepOperationsScreen
+import com.farmos.feature.ops.TaskUiRow
 import com.farmos.feature.ops.TasksBoardScreen
 import com.farmos.feature.rabbit.RabbitProgrammeScreen
 import java.time.LocalDate
@@ -121,7 +122,7 @@ fun OperatingModuleHost(
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    var taskRows by remember { mutableStateOf(emptyList<String>()) }
+    var taskRows by remember { mutableStateOf(emptyList<TaskUiRow>()) }
     var healthRows by remember { mutableStateOf(emptyList<String>()) }
     var moneyRows by remember { mutableStateOf(emptyList<String>()) }
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
@@ -167,7 +168,16 @@ fun OperatingModuleHost(
     val rabbitHerd = remember(farmId) { RoomHerdRepository(database, farmId, "rabbit") }
 
     suspend fun refreshOps() {
-        taskRows = ops.openTasks().map { "${it.id} ${it.title} · ${it.taskCode}" }
+        taskRows = (ops.openTasks() + ops.completedTasks()).map { row ->
+            TaskUiRow(
+                id = row.id,
+                title = row.title,
+                moduleCode = row.moduleCode,
+                taskCode = row.taskCode,
+                dueEpochDay = row.dueOnEpochDay,
+                status = row.status,
+            )
+        }
         healthRows = ops.recentObservations().map { "${it.speciesCode} · ${it.signs}" }
         moneyRows = ops.recentMoney().map { "${it.kind} ${it.categoryCode} ${it.amountMinor} ${it.currency}" }
         inventoryRows = ops.items().map { "${it.id} ${it.sku} · ${it.name} · ${it.quantityMilli} ${it.unit}" }

@@ -3,6 +3,7 @@ package com.farmos.app
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -122,7 +123,7 @@ fun FoundationAuthScreen(
 }
 
 @Composable
-private fun SignInState(
+private fun ColumnScope.SignInState(
     email: String,
     password: String,
     busy: Boolean,
@@ -163,7 +164,7 @@ private fun SignInState(
 }
 
 @Composable
-private fun FarmSelectionState(
+private fun ColumnScope.FarmSelectionState(
     memberships: List<FarmMembership>,
     farmNames: Map<String, String>,
     busy: Boolean,
@@ -186,7 +187,7 @@ private fun FarmSelectionState(
 }
 
 @Composable
-private fun FarmSetupWizardState(
+private fun ColumnScope.FarmSetupWizardState(
     farmName: String,
     onFarmNameChange: (String) -> Unit,
     busy: Boolean,
