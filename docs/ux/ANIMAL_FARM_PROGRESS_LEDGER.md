@@ -443,3 +443,11 @@ Rebound static inventory at `2e0b543...`: 545 rows; 146 some evidence; 399 none;
 `bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/local-ci-report.json` executed against `b57621a0481966fcae339283aceae3c8578ceb66`: smoke, handover-integrity, android, edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
 
 No green-gate promotion. This local report is not GitHub-hosted certification. GitHub-hosted `ubuntu-latest` jobs remain an external runner-assignment block.
+
+## Home sync entry reachability — 2026-09-06
+
+- `ea53caa7395d00febf20a4621d8293b1e495be79` — PAGE-PATTERNS requires sync entry to remain reachable. Management A, worker D guides, and the general home fallback now open existing `GoatEntryPage.SYNC` / FOS-SYNC-002 (FOS-HOME-009). Shared More was not given Sync now, so buyer/read-only does not gain a mutation action. `FarmModule.TASKS.toDestination()` uses `TaskEntryPage.BOARD`. Supervisor “Health exceptions” remains `Health()` — FOS-HEALTH-009 vs 001 was not guessed.
+
+`:app:testDebugUnitTest --tests com.farmos.app.FarmDestinationTest` — PASS after a failing-first `TASKS` mapping assertion. `:app:compileDebugKotlin` — PASS. Navigation self-test passed. No green-gate promotion.
+
+Rebound static inventory at `ea53caa...`: 545 rows; 147 some evidence; 398 none; runtime 0. FOS-HOME-009 is now `STATIC_CODE_ID_REFERENCE_ONLY`. Kotlin registered IDs 116.
