@@ -234,6 +234,94 @@ class SyncEngineTest {
         assertEquals(SyncState.PENDING.name, outbox.byId("second").state)
     }
 
+    @Test
+    fun `already applied acknowledgement is durable idempotency not a retry`() = runSuspend {
+        val outbox = FakeOutboxDao(mutableListOf(item(mutationId = "replay", expectedStreamVersion = 2)))
+        val versions = FakeAggregateVersionDao()
+        val transport = object : CommandTransport {
+            override suspend fun send(command: WireCommand): CommandAcknowledgement =
+                CommandAcknowledgement(
+                    code = CommandResultCode.ALREADY_APPLIED,
+                    eventId = "event-existing",
+                    streamVersion = 3,
+                )
+        }
+
+        val result = SyncEngine(outbox, versions, transport, now = { fixedNow }).drain()
+        val saved = outbox.byId("replay")
+
+        assertEquals(1, result.acknowledged)
+        assertEquals(0, result.retrying)
+        assertEquals(0, result.conflicts)
+        assertEquals(SyncState.ACKNOWLEDGED.name, saved.state)
+        assertEquals("event-existing", saved.serverEventId)
+        assertEquals(3L, saved.serverStreamVersion)
+        assertEquals(3L, versions.getVersion("farm-1", "animal", "goat-1"))
+        assertEquals("ALREADY_APPLIED", result.traces.single().result)
+    }
+
+    @Test
+    fun `validation rejected stops the mutation without a retry loop`() = runSuspend {
+        val outbox = FakeOutboxDao(mutableListOf(item(mutationId = "invalid")))
+        val transport = object : CommandTransport {
+            override suspend fun send(command: WireCommand): CommandAcknowledgement =
+                CommandAcknowledgement(
+                    code = CommandResultCode.VALIDATION_REJECTED,
+                    safeMessage = "Species rule failed",
+                )
+        }
+
+        val result = SyncEngine(outbox, FakeAggregateVersionDao(), transport, now = { fixedNow }).drain()
+        val saved = outbox.byId("invalid")
+
+        assertEquals(1, result.rejected)
+        assertEquals(0, result.retrying)
+        assertEquals(SyncState.REJECTED.name, saved.state)
+        assertEquals("VALIDATION_REJECTED", saved.lastErrorCode)
+        assertEquals("VALIDATION_REJECTED", result.traces.single().rejectionClass)
+    }
+
+    @Test
+    fun `stale client is rejected and does not advance the stream`() = runSuspend {
+        val outbox = FakeOutboxDao(mutableListOf(item(mutationId = "stale", expectedStreamVersion = 1)))
+        val versions = FakeAggregateVersionDao()
+        val transport = object : CommandTransport {
+            override suspend fun send(command: WireCommand): CommandAcknowledgement =
+                CommandAcknowledgement(
+                    code = CommandResultCode.STALE_CLIENT,
+                    streamVersion = 9,
+                )
+        }
+
+        val result = SyncEngine(outbox, versions, transport, now = { fixedNow }).drain()
+        val saved = outbox.byId("stale")
+
+        assertEquals(1, result.rejected)
+        assertEquals(0, result.acknowledged)
+        assertEquals(SyncState.REJECTED.name, saved.state)
+        assertEquals("STALE_CLIENT", saved.lastErrorCode)
+        assertNull(versions.getVersion("farm-1", "animal", "goat-1"))
+    }
+
+    @Test
+    fun `temporary failure waits then remains eligible to send again`() = runSuspend {
+        val outbox = FakeOutboxDao(mutableListOf(item(mutationId = "temp", attemptCount = 1)))
+        val transport = object : CommandTransport {
+            override suspend fun send(command: WireCommand): CommandAcknowledgement =
+                CommandAcknowledgement(code = CommandResultCode.TEMPORARY_FAILURE)
+        }
+
+        val result = SyncEngine(outbox, FakeAggregateVersionDao(), transport, now = { fixedNow }).drain()
+        val saved = outbox.byId("temp")
+
+        assertEquals(1, result.retrying)
+        assertEquals(0, result.rejected)
+        assertEquals(SyncState.RETRY_WAIT.name, saved.state)
+        assertEquals("TEMPORARY_FAILURE", saved.lastErrorCode)
+        assertEquals(2, saved.attemptCount)
+        assertEquals(fixedNow + 4_000L, saved.nextAttemptAtEpochMillis)
+    }
+
     private fun item(
         mutationId: String,
         aggregateOrdinal: Long = 1,
