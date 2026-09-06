@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "evidence_class": "LOCAL_CI_ALTERNATIVE_NOT_GITHUB_HOSTED_CERTIFICATION",
+  "tested_commit": "24b6f1ceb83c2d5870d0a6335fabf010418b7dda",
+  "runner": "local-host",
+  "jobs": [
+    {
+      "job": "smoke",
+      "status": "PASS",
+      "detail": "local runner echo"
+    },
+    {
+      "job": "handover-integrity",
+      "status": "PASS",
+      "detail": "executed on this host"
+    },
+    {
+      "job": "android",
+      "status": "PASS",
+      "detail": "executed on this host"
+    },
+    {
+      "job": "android-device-e2e",
+      "status": "UNAVAILABLE",
+      "detail": "emulator AVD and supabase CLI are not provisioned on this host"
+    },
+    {
+      "job": "edge-functions",
+      "status": "PASS",
+      "detail": "executed on this host"
+    },
+    {
+      "job": "meilisearch-contract",
+      "status": "PASS",
+      "detail": "executed on this host"
+    },
+    {
+      "job": "search-pipeline",
+      "status": "UNAVAILABLE",
+      "detail": "supabase CLI and Docker are required by verify-search-pipeline.sh"
+    },
+    {
+      "job": "supabase",
+      "status": "UNAVAILABLE",
+      "detail": "supabase CLI 2.116.0 and Docker are required for db reset/pgTAP"
+    },
+    {
+      "job": "local-nav-audit",
+      "status": "PASS",
+      "detail": "executed on this host"
+    }
+  ],
+  "counts": {
+    "PASS": 6,
+    "FAIL": 0,
+    "UNAVAILABLE": 3
+  },
+  "status_law": "UNAVAILABLE is missing host tooling, not a source pass. FAIL is a source or local-runtime defect. This report does not promote PROJECT_GREEN and does not replace GitHub-hosted ubuntu-latest."
+}

@@ -397,3 +397,25 @@ Rebound static inventory: 545 rows; 146 some evidence; 399 none; runtime 0.
 - `18a91e5bd7813f8eab785a1d4dbfaf6434df79e4` — `SyncEngineTest` now covers `ALREADY_APPLIED` idempotent ack, `VALIDATION_REJECTED`, `STALE_CLIENT`, and `TEMPORARY_FAILURE` → `RETRY_WAIT`. `DEAD_LETTER` remains unimplemented in `SyncEngine` and was not invented.
 
 `:core:sync:testDebugUnitTest --tests com.farmos.core.sync.SyncEngineTest` — PASS. No green-gate promotion.
+
+## Worker resources and observation — 2026-09-06
+
+- `c1ae45ce4a194fb9c9bbc657dce06cdc7223c650` — Worker D Resources tile opens existing inventory / FOS-INV-001. Quick record “Record observation” opens `HealthEntryPage.RECORD_OBSERVATION` / FOS-HEALTH-004. RFID and low-stock list were not invented.
+
+`:app:compileDebugKotlin` and navigation self-test passed. Static inventory rebound below. No green-gate promotion.
+
+Rebound static inventory: 545 rows; 146 some evidence; 399 none; runtime 0.
+
+## Local CI alternative — 2026-09-06
+
+GitHub-hosted `ubuntu-latest` jobs still finish with no runner and `steps: []`. Do not skip or weaken those workflows.
+
+`scripts/ci/run-local.sh` mirrors the workflow job commands on this host:
+
+```text
+bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/local-ci-report.json
+```
+
+Meilisearch contract uses the pinned `v1.53.1` Linux binary when Docker is absent. Search-pipeline, supabase pgTAP, and emulator e2e stay UNAVAILABLE until Docker + Supabase CLI + AVD exist.
+
+No green-gate promotion. This local report is not GitHub-hosted certification.
