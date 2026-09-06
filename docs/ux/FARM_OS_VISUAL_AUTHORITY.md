@@ -1,3 +1,5 @@
+> Owner-directed presentation amendment — 6 September 2026: `docs/ux/animal-farm-visual-lock/` supersedes conflicting visual descriptions below. Start with `docs/ux/ANIMAL_FARM_COLD_START_RESUME.md`. Earlier visual assets, intensity prescriptions and approval claims are historical provenance, not current Animal Farm visual authority. Screen IDs, feature scope, role authorization, domain safety, architecture, offline and evidence requirements remain binding. This checkpoint does not certify native visuals or features.
+
 # Farm OS — Illustrated Visual Authority
 
 **Authority:** canonical UI/UX visual authority for all Farm OS surfaces on `implementation/foundation-vertical-slice` and successors.

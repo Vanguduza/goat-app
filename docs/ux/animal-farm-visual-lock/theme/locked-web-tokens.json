@@ -1,0 +1,49 @@
+{
+  "version": "animal-farm-lock-2026-09-05",
+  "authority": "exact retained locked-home fragment",
+  "themes": {
+    "light": {
+      "bg": "#F3F4ED",
+      "surface": "#FFFFFF",
+      "soft": "#E8ECE3",
+      "ink": "#183328",
+      "muted": "#5B6A5E",
+      "line": "#DCE3D7",
+      "primary": "#285640",
+      "on-primary": "#FFFFFF",
+      "lime": "#DCEBBA",
+      "on-lime": "#294128",
+      "warn": "#F8E4B9",
+      "on-warn": "#67420D",
+      "earth": "#CAB48C",
+      "grass": "#C3D7A9",
+      "grass-two": "#AEC793",
+      "roof": "#7B5142",
+      "water": "#BDD6D7",
+      "scrim": "#10281980"
+    },
+    "dark": {
+      "bg": "#141B17",
+      "surface": "#222C25",
+      "soft": "#303C32",
+      "ink": "#EFF4E8",
+      "muted": "#B5C2B4",
+      "line": "#3C4A3D",
+      "primary": "#C7E9A3",
+      "on-primary": "#1B3627",
+      "lime": "#3A5130",
+      "on-lime": "#E0EFCB",
+      "warn": "#5A4422",
+      "on-warn": "#FFE1A2",
+      "earth": "#766C52",
+      "grass": "#435B3D",
+      "grass-two": "#354D35",
+      "roof": "#B48B75",
+      "water": "#3B6265",
+      "scrim": "#050B09AA"
+    }
+  },
+  "native_font": "Inter",
+  "web_font": "Segoe UI, Roboto, Arial, sans-serif",
+  "outdoor_status": "requires_native_acceptance"
+}

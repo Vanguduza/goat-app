@@ -1,0 +1,24 @@
+name: Animal Farm handover integrity
+on:
+  pull_request:
+  push:
+    branches: [implementation/animal-farm-visual-lock]
+permissions:
+  contents: read
+jobs:
+  handover-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify complete original package
+        run: node scripts/design/verify-handover.cjs
+      - name: Verify protected references and live registry identities
+        run: node docs/ux/animal-farm-visual-lock/scripts/verify-pack.cjs --self-test --registry docs/ux/FARM_OS_SCREEN_REGISTRY.yaml
+      - name: Check supplied utilities
+        run: |
+          node --check docs/ux/animal-farm-visual-lock/scripts/assemble-pack.cjs
+          node --check docs/ux/animal-farm-visual-lock/scripts/refine-registry.cjs
+          node --check docs/ux/animal-farm-visual-lock/scripts/verify-pack.cjs

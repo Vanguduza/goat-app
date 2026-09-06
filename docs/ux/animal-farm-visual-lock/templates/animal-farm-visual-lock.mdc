@@ -1,0 +1,17 @@
+---
+description: Preserve Animal Farm owner-locked A management and D+C worker design across every registered app surface
+alwaysApply: true
+---
+
+# Animal Farm visual authority
+
+- Read `docs/ux/animal-farm-visual-lock/AGENT-INSTRUCTIONS.md` before UI work.
+- Use its exact reference HTML/assets, DESIGN-SYSTEM and PAGE-PATTERNS; never substitute later mockups or existing drifted code.
+- Management is A / Control room. Worker is D shell + C Review & decide carousel, not the Today board.
+- Animal Farm name, original login lineup, personal profile photos, bottom-right Theme-only home gear and concise operational copy are locked.
+- Declare exact FOS screen IDs and feature contracts. Preserve all quantum IDs and role variants; register new routes/atoms before use.
+- Use governed tokens/components; no page-local palette, new fonts, geometric animal replacements or explanatory feature-card walls.
+- Preserve Room/outbox/RPC/RLS/reconciliation/search behavior and actual permission boundaries.
+- Render required native states/devices/font scales/themes and test interactions, not only screenshots.
+- Never self-approve references/goldens, weaken CI or mark green without commit-bound evidence and independent approval.
+- Product architecture rules still apply. This rule changes presentation authority, not domain scope or permissions.

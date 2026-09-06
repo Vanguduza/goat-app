@@ -1,3 +1,5 @@
+> Owner-directed presentation amendment — 6 September 2026: `docs/ux/animal-farm-visual-lock/` supersedes conflicting visual descriptions below. Start with `docs/ux/ANIMAL_FARM_COLD_START_RESUME.md`. Earlier visual assets, intensity prescriptions and approval claims are historical provenance, not current Animal Farm visual authority. Screen IDs, feature scope, role authorization, domain safety, architecture, offline and evidence requirements remain binding. This checkpoint does not certify native visuals or features.
+
 > **SUPERSESSION NOTICE — 05 September 2026**
 > The illustrated Farm OS visual family defined in `docs/ux/FARM_OS_VISUAL_AUTHORITY.md` and `docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md` supersedes this document wherever this v1 spec bans illustration, limits the product to a single-font visual identity, or otherwise conflicts with the locked illustrated reference family. Field usability, accessibility, data-density, safety, offline clarity and evidence gates remain binding. Existing values below are historical implementation tokens until re-derived from the canonical visual family.
 

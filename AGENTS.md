@@ -58,11 +58,11 @@ A green architecture slice authorizes implementation breadth, not uncontrolled b
 
 ## Design system
 
-`docs/ux/FARM_OS_VISUAL_AUTHORITY.md` plus `docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md` are the canonical visual/product-surface authority. The older design-system spec remains operational guidance only where compatible.
+`docs/ux/animal-farm-visual-lock/` is the current owner-directed presentation authority. Start at `docs/ux/ANIMAL_FARM_COLD_START_RESUME.md`. Earlier visual documents retain feature inventory and compatible operational rules only.
 
 - Every UI change declares its `FOS-*` Screen ID and canonical visual lineage.
 - Features use governed tokens/components; external repositories are never visual authorities.
-- The illustrated Farm OS family is mandatory for assigned I1–I3 surfaces; generic Material/SaaS/flat-vector substitutions are drift.
+- Use the Animal Farm locked A management / D+C worker family and supplied assets; earlier pastoral I1–I3 prescriptions are superseded.
 - No default Material purple/blue, emoji, marketing copy, arbitrary ungoverned radii or placeholder content.
 - Required production font/illustration assets remain visual-green blockers until approved assets are versioned; never fake certification.
 
@@ -123,3 +123,9 @@ The designated slice is:
 ## When blocked
 
 Record the blocker and the smallest owner/external action needed. Do not invent a temporary alternate architecture to make progress. Continue other unblocked work when it does not compromise the contract.
+
+## Animal Farm visual alignment — owner-directed amendment
+
+Before any UI work read `docs/ux/animal-farm-visual-lock/AGENT-INSTRUCTIONS.md`, DESIGN-SYSTEM.md, PAGE-PATTERNS.md and the affected registry entries. That pack and its exact approved home references supersede conflicting visual descriptions in prior Farm OS visual documents, but do not supersede feature scope, domain safety, offline architecture or authorization rules.
+
+Management uses A / Control room; worker uses D shell with C's Review & decide task carousel. Reuse the original Animal Farm login animals and optional individual photos. Home gear is bottom-right and Theme-only. Every quantum screen/role variant/atom requires a reviewed contract, shared-token/component lineage and native evidence. Existing code, generated mockups and old green claims are not visual authority. No implementing agent may approve its own reference/golden changes or weaken gates.

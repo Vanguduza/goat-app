@@ -5,13 +5,13 @@ alwaysApply: true
 
 # Farm OS design guardrails (binding)
 
-Authoritative source: `docs/FARM_OS_DESIGN_SYSTEM_SPEC.md` (Part J of the binder).
+Authoritative presentation source: `docs/ux/animal-farm-visual-lock/`. The older design-system spec is operational guidance only where compatible.
 Read the relevant section before writing or reviewing UI code. These are CI-enforced laws, not suggestions.
 
 ## Visual authority
 
-- The ONLY visual authority is the design system spec. External repos (nowinandroid, compose-samples, etc.) are ENGINEERING references only - never consult them for layout, spacing, colour or component choice.
-- Every screen composes one named pattern from spec §6 (`ModuleDashboard`, `TodayBoard`, `CaptureForm`, `TimelineScreen`, `InventoryList`, `PlanBoard`, `Cockpit`, `SettingsList`, `Wizard`). Inventing layouts requires a design-system EDR.
+- The current visual authority is the Animal Farm visual-lock pack. External repos (nowinandroid, compose-samples, etc.) are ENGINEERING references only - never consult them for layout, spacing, colour or component choice.
+- Every screen uses the assigned Animal Farm PAGE-PATTERNS recipe after field/action/permission review. Old named patterns do not override A management or D+C worker. New layouts require reviewed design contracts.
 
 ## Hard bans (CI fails these)
 
