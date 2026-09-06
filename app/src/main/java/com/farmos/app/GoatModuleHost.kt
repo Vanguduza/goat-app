@@ -65,7 +65,10 @@ fun GoatModuleHost(
         herdState = LoadableSurfaceState.LOADING
         runCatching {
             val loaded = repository.listGoats(500)
-            val autoSelect = entryPage != GoatEntryPage.WEIGHT && entryPage != GoatEntryPage.SEARCH
+            val autoSelect =
+                entryPage != GoatEntryPage.WEIGHT &&
+                    entryPage != GoatEntryPage.SEARCH &&
+                    entryPage != GoatEntryPage.SYNC
             val effectiveId = selectedGoatId ?: loaded.firstOrNull()?.animalId?.takeIf { autoSelect }
             val chosen = effectiveId?.let { repository.getGoat(it) }
             Triple(loaded, effectiveId, chosen)

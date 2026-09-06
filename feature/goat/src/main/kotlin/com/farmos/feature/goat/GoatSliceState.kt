@@ -25,4 +25,5 @@ enum class GoatEntryPage {
     DASHBOARD,
     WEIGHT,
     SEARCH,
+    SYNC,
 }

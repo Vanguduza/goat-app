@@ -69,4 +69,5 @@ private fun GoatEntryPage.toGoatPage(): GoatPage =
         GoatEntryPage.DASHBOARD -> GoatPage.DASHBOARD
         GoatEntryPage.WEIGHT -> GoatPage.WEIGHT
         GoatEntryPage.SEARCH -> GoatPage.SEARCH
+        GoatEntryPage.SYNC -> GoatPage.SYNC
     }

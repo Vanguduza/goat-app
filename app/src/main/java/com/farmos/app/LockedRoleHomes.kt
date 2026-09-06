@@ -122,8 +122,8 @@ private fun ManagementAttention(
                 category = "Sync",
                 title = "Waiting to sync",
                 context = "${summary.pendingSync} local change(s) stored on this device",
-                actionLabel = "Open tasks",
-                onAction = { onOpen(FarmDestination.Module(FarmModule.TASKS)) },
+                actionLabel = "Open sync status",
+                onAction = { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) },
             )
             HomeAttentionKind.NONE -> AnimalFarmEmptyState("No attention items on this device")
         }

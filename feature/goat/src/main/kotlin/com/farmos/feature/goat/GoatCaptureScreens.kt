@@ -300,7 +300,7 @@ internal fun GoatSyncScreen(
         FarmIllustratedSectionSurface {
             Text(state.syncMessage, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text("Pending local changes: ${state.pendingSyncCount}")
-            Text("Farm OS keeps successfully saved field entries on this device when the network is unavailable.")
+            Text("Saved field entries stay on this device when the network is unavailable.")
             Button(onClick = onSync, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) { Text(if (state.busy) "Syncing…" else "Sync now") }
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         }
