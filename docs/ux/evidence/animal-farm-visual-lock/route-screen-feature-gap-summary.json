@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "tested_commit": "59b1688cee4662192eb00490a36d7f61cddf62bc",
+  "tested_commit": "b38a72f096de9ec893054ebadd5844cb9fe51d99",
   "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_NOT_RUNTIME_CERTIFICATION",
   "registry_rows": 545,
   "route_evidence_counts": {
-    "NO_ROUTE_EVIDENCE": 400,
+    "NO_ROUTE_EVIDENCE": 399,
     "STATIC_AUTH_STATE_BRANCH": 4,
-    "STATIC_CODE_ID_REFERENCE_ONLY": 12,
+    "STATIC_CODE_ID_REFERENCE_ONLY": 13,
     "STATIC_GENERAL_HOME_FALLBACK": 1,
     "STATIC_HOME_NESTED_DESTINATION": 1,
     "STATIC_MAIN_ACTIVITY_SPLASH_BRANCH": 1,
@@ -14,8 +14,8 @@
     "STATIC_SOURCE_MAP_HINT_ONLY": 22,
     "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 96
   },
-  "no_route_evidence": 400,
-  "some_static_route_evidence": 145,
+  "no_route_evidence": 399,
+  "some_static_route_evidence": 146,
   "runtime_reachability_executed": 0,
   "feature_id_catalog_status": "MISSING_OR_NOT_CANONICALLY_IDENTIFIED",
   "module_gap_counts": {
@@ -129,7 +129,7 @@
     },
     "task": {
       "total": 15,
-      "no_route_evidence": 10
+      "no_route_evidence": 9
     },
     "water": {
       "total": 10,

@@ -368,4 +368,10 @@ Do not treat `runner_id: 0` as a source defect. Do not skip or weaken those jobs
 
 `:app:compileDebugKotlin` and navigation self-test passed. No green-gate promotion.
 
+## Task detail deep entry — 2026-09-06
 
+- `b38a72f096de9ec893054ebadd5844cb9fe51d99` — FOS-TASK-003 detail; worker Review & decide opens `FarmDestination.Task`. Complete is the only write. No edit/attachment/recurrence invented.
+
+`:app:compileDebugKotlin` and navigation self-test passed. Static inventory rebound below. No green-gate promotion.
+
+Rebound static inventory: 545 rows; 146 some evidence; 399 none; runtime 0.
