@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "3966b583808777650a3efbc60e65b6d6729bd2bb",
+  "tested_commit": "2e0b543e52b2f328328b8b34ae79de0be7e95f4c",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
@@ -353,7 +353,7 @@
         },
         {
           "value": "FORMULARY",
-          "refs": 2,
+          "refs": 3,
           "transition_refs": 1,
           "render_only_candidate": false
         },

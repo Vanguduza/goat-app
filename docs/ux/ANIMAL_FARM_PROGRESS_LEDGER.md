@@ -429,3 +429,11 @@ No green-gate promotion. This local report is not GitHub-hosted certification.
 `:app:compileDebugKotlin` `:feature:goat:compileDebugKotlin` `:feature:ops:compileDebugKotlin` — PASS (`--offline`). Navigation and gap self-tests passed. Architecture and visual-authority scripts passed. No green-gate promotion.
 
 Rebound static inventory at `3966b58...`: 545 rows; 146 some evidence; 399 none; runtime 0. `registered_ids_mentioned_in_kotlin` 115 (was 114): FOS-GOAT-032 is now a standalone code ID. `STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE` 98; `STATIC_SOURCE_MAP_HINT_ONLY` 20. `direct_action_scope_violations = []`.
+
+## Vet formulary deep entry — 2026-09-06
+
+- `2e0b543e52b2f328328b8b34ae79de0be7e95f4c` — Vet home “Open formulary” opens `HealthEntryPage.FORMULARY` / FOS-HEALTH-013. General home task action is verb-first “Open tasks”. Formulary item detail (FOS-HEALTH-014) was not invented.
+
+`:app:compileDebugKotlin` `:feature:ops:compileDebugKotlin` — PASS (`--offline`). Navigation self-test passed. No green-gate promotion.
+
+Rebound static inventory at `2e0b543...`: 545 rows; 146 some evidence; 399 none; runtime 0.
