@@ -19,6 +19,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Enforce Kotlin architecture stabilization guardrails
         run: bash scripts/ci/verify-kotlin-architecture.sh
+      - name: Enforce Animal Farm visual authority guardrails
+        run: bash scripts/ci/verify-visual-authority.sh
       - uses: actions/setup-java@v5
         with:
           distribution: temurin

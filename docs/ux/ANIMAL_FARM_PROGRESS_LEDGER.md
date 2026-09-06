@@ -340,4 +340,26 @@ Manual sync receipts name the server outcome or stay on local-pending language. 
 
 No green-gate promotion. Native visual evidence remains unexecuted. Peer coordinator / Drive backup remain unadopted.
 
+## GitHub Actions runner assignment — 2026-09-06
+
+Inspected `origin` runs for HEAD `a2c2ff70bfdceb808e9d35eb277f9477b8db4ce2` and earlier branch commits.
+
+Every failed job reports `runner_id: 0`, empty `runner_name`, and `steps: []`. Jobs finish in about two seconds. This includes Actions smoke, whose only step is `echo`. Android, handover-integrity, supabase, Meilisearch, search-pipeline and edge-functions therefore never checked out the repository.
+
+This is the same assignment failure seen on `agent/animal-farm-gate1-recovery` and earlier foundation PRs. It is a **GitHub-hosted runner provisioning block** on this private repository, not a compile/test verdict.
+
+Local CI-equivalent commands that did execute on this x86_64 host:
+
+- `bash scripts/ci/verify-kotlin-architecture.sh` — PASS
+- `bash scripts/ci/verify-visual-authority.sh` — PASS
+- `node scripts/design/verify-handover.cjs` — PASS
+- pack self-test — PASS (545 IDs)
+- Deno 2.9.6 `deno check` of Edge Functions and search tools — PASS
+- `deno test --allow-env supabase/functions/tests/supabase_api_keys_test.ts` — 4 passed
+- Android compile/unit tests recorded in earlier ledger sections
+
+Not executed here: `supabase start` / pgTAP, live Meilisearch Docker contract, search-pipeline script, emulator e2e. Those remain unproven, not locally failed.
+
+Do not treat `runner_id: 0` as a source defect. Do not skip or weaken those jobs to manufacture a CI green. External action required: the repository owner must restore GitHub-hosted Actions runners/minutes for `ubuntu-latest`. No self-hosted worker is connected to this cloud run.
+
 
