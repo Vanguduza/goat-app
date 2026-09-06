@@ -57,9 +57,11 @@ fun HealthObservationScreen(
     onAddPackSlot: (packId: String, slotCode: String, title: String, offset: String, fromEvent: String) -> Unit = { _, _, _, _, _ -> },
     onApplyPack: (packId: String, animalId: String, day: String) -> Unit = { _, _, _ -> },
     onBack: () -> Unit,
+    openTreatment: Boolean = false,
 ) {
-    var page by remember { mutableStateOf(HealthPage.DASHBOARD) }
+    var page by remember { mutableStateOf(if (openTreatment) HealthPage.TREATMENT else HealthPage.DASHBOARD) }
     val home = { page = HealthPage.DASHBOARD }
+    val treatmentBack = if (openTreatment) onBack else home
     when (page) {
         HealthPage.DASHBOARD -> {
             HealthDashboard(rows, treatments, withdrawals, packs, error, { page = it }, onBack)
@@ -78,7 +80,7 @@ fun HealthObservationScreen(
         }
 
         HealthPage.TREATMENT -> {
-            TreatmentScreen(formulary, treatments, busy, error, onRecordTreatment, home)
+            TreatmentScreen(formulary, treatments, busy, error, onRecordTreatment, treatmentBack)
         }
 
         HealthPage.WITHDRAWALS -> {

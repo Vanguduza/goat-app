@@ -19,3 +19,10 @@ data class GoatSliceUiState(
 )
 
 enum class LoadableSurfaceState { IDLE, LOADING, EMPTY, ERROR, DISABLED }
+
+/** Deep-entry contract for existing goat pages. RFID/global scan routes are not invented here. */
+enum class GoatEntryPage {
+    DASHBOARD,
+    WEIGHT,
+    SEARCH,
+}

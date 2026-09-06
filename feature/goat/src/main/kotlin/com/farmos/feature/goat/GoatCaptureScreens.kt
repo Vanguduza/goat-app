@@ -61,13 +61,32 @@ internal fun GoatRegisterScreen(
 internal fun GoatWeightScreen(
     state: GoatSliceUiState,
     onRecordWeight: (String) -> Unit,
+    onSelectGoat: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     var weight by remember { mutableStateOf("") }
     IllustratedGoatPage("Record weight", "FOS-GOAT-011 · I3 reference", onBack) {
         val goat = state.selected
         if (goat == null) {
-            Text("Select a goat from the herd first.")
+            Text("Select the goat to weigh.")
+            when (state.herdState) {
+                LoadableSurfaceState.LOADING -> Text("Loading herd")
+                LoadableSurfaceState.EMPTY -> Text("No goats on this device yet.")
+                LoadableSurfaceState.ERROR -> Text(state.error ?: "Herd could not be loaded", color = MaterialTheme.colorScheme.error)
+                LoadableSurfaceState.DISABLED -> Text("Herd actions are temporarily paused")
+                LoadableSurfaceState.IDLE -> {
+                    val active = state.herd.filter { it.status == GoatStatus.ACTIVE }
+                    if (active.isEmpty()) {
+                        Text("No active goats on this device.")
+                    } else {
+                        active.forEach { row ->
+                            TextButton(onClick = { onSelectGoat(row.animalId) }, modifier = Modifier.fillMaxWidth()) {
+                                Text(goatDisplayName(row) + " · " + row.tag)
+                            }
+                        }
+                    }
+                }
+            }
             return@IllustratedGoatPage
         }
         FarmIllustratedSectionSurface {

@@ -83,17 +83,30 @@ const operatingHost = read('app/src/main/java/com/farmos/app/OperatingModuleHost
 const operatingCallers = [...allKt]
   .filter((p) => fs.readFileSync(p, 'utf8').includes('OperatingModuleHost('))
   .map(rel);
-const preemptedModules = ['TASKS', 'HEALTH', 'MONEY', 'INVENTORY'].filter((module) =>
-  session.includes(`if (module == FarmModule.${module})`) && operatingHost.includes(`FarmModule.${module}`),
-);
+const dedicatedHosts = {
+  TASKS: 'TasksModuleHost(',
+  HEALTH: 'HealthModuleHost(',
+  MONEY: 'MoneyModuleHost(',
+  INVENTORY: 'InventoryModuleHost(',
+};
+const preemptedModules = Object.entries(dedicatedHosts)
+  .filter(([module, host]) => session.includes(host) && operatingHost.includes(`FarmModule.${module}`))
+  .map(([module]) => module);
 
-const roleDash = read('app/src/main/java/com/farmos/app/RoleDashboardScreens.kt');
+const appKt = allKt
+  .filter((p) => rel(p).startsWith('app/'))
+  .map((p) => fs.readFileSync(p, 'utf8'))
+  .join('\n');
 const directActionViolations = [
-  ['Record Weight', 'GOAT', 'FOS-GOAT-011'],
-  ['Add Treatment', 'HEALTH', 'FOS-HEALTH-007'],
-  ['Scan Animal', 'GOAT', 'FOS-HOME-006/FOS-GOAT-007'],
-].filter(([label, module]) => roleDash.includes(`RoleAction(FarmModule.${module}, "${label}"`))
- .map(([label, module, expected]) => ({ label, current_destination: `FarmModule.${module}`, expected_exact_owner: expected }));
+  ['Record Weight', 'GoatEntryPage.WEIGHT', 'FOS-GOAT-011'],
+  ['Add Treatment', 'openTreatment = true', 'FOS-HEALTH-007'],
+  ['Scan Animal', 'GoatEntryPage.SEARCH', 'FOS-GOAT-006'],
+].filter(([label, token]) => appKt.includes(`"${label}"`) && !appKt.includes(token))
+  .map(([label, , expected]) => ({
+    label,
+    current_destination: 'MISSING_EXACT_OWNER',
+    expected_exact_owner: expected,
+  }));
 
 const renderOnly = machines.flatMap((m) => m.states.filter((s) => s.render_only_candidate).map((s) => `${m.enum}.${s.value}`));
 const auth = read('app/src/main/java/com/farmos/app/FoundationAuthScreen.kt');
@@ -146,8 +159,9 @@ if (args.includes('--self-test')) {
   assert(report.registry.unique_entries === 545, 'registry IDs must be unique');
   assert(farmModules.length === 19, `expected 19 FarmModule values, got ${farmModules.length}`);
   assert(personas.length === 9, `expected 9 role personas, got ${personas.length}`);
-  assert(renderOnly.includes('RabbitPage.NESTS'), 'expected RabbitPage.NESTS to remain a render-only route candidate at checkpoint');
+  assert(!renderOnly.includes('RabbitPage.NESTS'), 'RabbitPage.NESTS must have a dashboard transition');
   assert(preemptedModules.length === 4, 'expected four preempted OperatingModuleHost branches');
+  assert(directActionViolations.length === 0, 'worker quick actions must use exact owning entries');
   console.log('PASS navigation source audit self-test');
 }
 if (!args.includes('--quiet')) process.stdout.write(JSON.stringify(report, null, 2) + '\n');

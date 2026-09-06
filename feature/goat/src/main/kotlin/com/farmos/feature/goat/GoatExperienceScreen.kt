@@ -41,8 +41,9 @@ internal fun GoatExperienceScreen(
     onBackToFarm: () -> Unit,
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
+    initialPage: GoatPage = GoatPage.DASHBOARD,
 ) {
-    var page by remember { mutableStateOf(GoatPage.DASHBOARD) }
+    var page by remember { mutableStateOf(initialPage) }
     val selected = state.selected
 
     when (page) {
@@ -68,7 +69,14 @@ internal fun GoatExperienceScreen(
             onBack = { page = GoatPage.DASHBOARD },
         )
         GoatPage.REGISTER -> GoatRegisterScreen(actions.onRegister) { page = GoatPage.DASHBOARD }
-        GoatPage.WEIGHT -> GoatWeightScreen(state, actions.onRecordWeight) { page = GoatPage.PROFILE }
+        GoatPage.WEIGHT -> GoatWeightScreen(
+            state = state,
+            onRecordWeight = actions.onRecordWeight,
+            onSelectGoat = actions.onSelectGoat,
+            onBack = {
+                if (initialPage == GoatPage.WEIGHT) onBackToFarm() else page = GoatPage.PROFILE
+            },
+        )
         GoatPage.HEALTH -> GoatHealthCaptureScreen(state, actions) { page = GoatPage.PROFILE }
         GoatPage.REPRODUCTION -> GoatReproductionScreen(state, actions) { page = GoatPage.PROFILE }
         GoatPage.KIDDING -> GoatKiddingScreen(state, actions) { page = GoatPage.PROFILE }
@@ -79,7 +87,9 @@ internal fun GoatExperienceScreen(
                 actions.onSelectGoat(it)
                 page = GoatPage.PROFILE
             },
-            onBack = { page = GoatPage.DASHBOARD },
+            onBack = {
+                if (initialPage == GoatPage.SEARCH) onBackToFarm() else page = GoatPage.DASHBOARD
+            },
         )
         GoatPage.SYNC -> GoatSyncScreen(state, actions.onSyncNow) { page = GoatPage.DASHBOARD }
         GoatPage.STATUS_CHANGE -> GoatStatusChangeScreen(state, actions.onSetStatus) { page = GoatPage.PROFILE }

@@ -35,9 +35,11 @@ fun GoatVerticalSliceScreen(
     onSignOut: () -> Unit,
     onBack: () -> Unit = onSignOut,
     modifier: Modifier = Modifier,
+    entryPage: GoatEntryPage = GoatEntryPage.DASHBOARD,
 ) {
     GoatExperienceScreen(
         state = state,
+        initialPage = entryPage.toGoatPage(),
         actions = GoatExperienceActions(
             onRegister = onRegister,
             onRecordWeight = onRecordWeight,
@@ -61,3 +63,10 @@ fun GoatVerticalSliceScreen(
         modifier = modifier,
     )
 }
+
+private fun GoatEntryPage.toGoatPage(): GoatPage =
+    when (this) {
+        GoatEntryPage.DASHBOARD -> GoatPage.DASHBOARD
+        GoatEntryPage.WEIGHT -> GoatPage.WEIGHT
+        GoatEntryPage.SEARCH -> GoatPage.SEARCH
+    }

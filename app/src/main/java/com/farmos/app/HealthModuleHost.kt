@@ -29,6 +29,7 @@ fun HealthModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    openTreatment: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     var observations by remember(farmId) { mutableStateOf(emptyList<String>()) }
@@ -195,5 +196,6 @@ fun HealthModuleHost(
             }
         },
         onBack = onBack,
+        openTreatment = openTreatment,
     )
 }
