@@ -20,4 +20,13 @@ class AnimalFarmFamilyArtTest {
         assertNull(animalFarmFamilyFromKey("tasks"))
         assertNull(animalFarmFamilyFromKey(null))
     }
+
+    @Test
+    fun speciesVisualMapsToApprovedFamilyPortraits() {
+        assertEquals(AnimalFarmFamily.GOAT, FarmSpeciesVisual.GOAT.toAnimalFarmFamily())
+        assertEquals(AnimalFarmFamily.RABBIT, FarmSpeciesVisual.RABBIT.toAnimalFarmFamily())
+        assertEquals(AnimalFarmFamily.SHEEP, FarmSpeciesVisual.SHEEP.toAnimalFarmFamily())
+        assertEquals(AnimalFarmFamily.CATTLE, FarmSpeciesVisual.CATTLE.toAnimalFarmFamily())
+        assertEquals(AnimalFarmFamily.POULTRY, FarmSpeciesVisual.POULTRY.toAnimalFarmFamily())
+    }
 }

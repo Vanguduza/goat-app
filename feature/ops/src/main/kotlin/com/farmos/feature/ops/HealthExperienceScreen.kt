@@ -138,7 +138,7 @@ private fun HealthDashboard(
     FarmOperationalPage(
         "FOS-HEALTH-001",
         "Health",
-        "Observe carefully. Record clearly. Escalate when needed.",
+        "Observations, treatments and withdrawals on this device.",
         FarmVisualClass.I2,
         onBack,
     ) {

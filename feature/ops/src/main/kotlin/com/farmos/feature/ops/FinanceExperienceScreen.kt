@@ -51,7 +51,7 @@ private fun FinanceDashboard(
     FarmOperationalPage(
         screenId = "FOS-FIN-001",
         title = "Finance",
-        subtitle = "Know what the farm earns, spends and costs.",
+        subtitle = "Income and expense records on this device.",
         visualClass = FarmVisualClass.I2,
         onBack = onBack,
     ) {

@@ -69,7 +69,7 @@ private fun InventoryDashboard(
     onOpen: (InventoryPage) -> Unit,
     onBack: () -> Unit,
 ) {
-    FarmOperationalPage("FOS-INV-001", "Inventory", "Know what is on hand, dated and due to reorder.", FarmVisualClass.I2, onBack) {
+    FarmOperationalPage("FOS-INV-001", "Inventory", "On-hand lots, dates and reorder points.", FarmVisualClass.I2, onBack) {
         FarmOperationalSection("Stock overview") {
             Text("${rows.size} inventory item(s)", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             TextButton(onClick = { onOpen(InventoryPage.ITEMS) }) { Text("Open inventory list") }

@@ -3,7 +3,6 @@ package com.farmos.app
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -21,15 +20,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.farmos.core.design.AnimalFarmCanvas
+import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
-import com.farmos.core.design.FarmPastoralBackdrop
 import com.farmos.core.design.FarmSpeciesVisual
-import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.FosDimens
+import com.farmos.core.design.toAnimalFarmFamily
 
 data class SpeciesAnimalRow(
     val animalId: String,
@@ -137,15 +137,16 @@ private fun SpeciesDashboard(
     onOpen: (SpeciesPage) -> Unit,
     onBack: () -> Unit,
 ) {
-    FarmPastoralBackdrop(Modifier.fillMaxSize(), heroSpecies = config.visual) {
+    AnimalFarmCanvas {
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
         ) {
-            FarmStorySurface(Modifier.fillMaxWidth()) {
-                Text(config.name, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("Biology-specific records for the ${config.plural} enterprise.", color = MaterialTheme.colorScheme.primary)
-            }
+            AnimalFarmModuleHeader(
+                title = config.name,
+                subtitle = "Individual ${config.plural} records on this device",
+                family = config.visual.toAnimalFarmFamily(),
+            )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SpeciesMetric("Total", rows.size, Modifier.weight(1f))
                 SpeciesMetric("Active", rows.count { it.active }, Modifier.weight(1f))
@@ -158,7 +159,7 @@ private fun SpeciesDashboard(
                 "Open species-native production and reproduction workflows",
             ) { onOpen(SpeciesPage.OPERATIONS) }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            TextButton(onClick = onBack) { Text("Back to farm home") }
+            TextButton(onClick = onBack) { Text("Farm home") }
         }
     }
 }

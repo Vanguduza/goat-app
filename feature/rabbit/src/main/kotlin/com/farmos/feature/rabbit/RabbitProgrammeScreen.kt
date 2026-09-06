@@ -3,7 +3,6 @@ package com.farmos.feature.rabbit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -21,13 +20,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.farmos.core.design.AnimalFarmCanvas
+import com.farmos.core.design.AnimalFarmFamily
+import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
-import com.farmos.core.design.FarmPastoralBackdrop
-import com.farmos.core.design.FarmSpeciesVisual
-import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.FosDimens
 import com.farmos.domain.rabbit.KudbatSemiIntensiveExcel
@@ -145,15 +144,16 @@ private fun RabbitDashboard(
     onOpen: (RabbitPage) -> Unit,
     onBack: () -> Unit,
 ) {
-    FarmPastoralBackdrop(Modifier.fillMaxSize(), heroSpecies = FarmSpeciesVisual.RABBIT) {
+    AnimalFarmCanvas {
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
         ) {
-            FarmStorySurface(Modifier.fillMaxWidth()) {
-                Text("Rabbitry", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("Breeding waves. Nest boxes. Litters. Market-ready rabbits.", color = MaterialTheme.colorScheme.primary)
-            }
+            AnimalFarmModuleHeader(
+                title = "Rabbitry",
+                subtitle = "Waves, cages, nests and litters",
+                family = AnimalFarmFamily.RABBIT,
+            )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 RabbitMetric("Rabbits", animals.size, Modifier.weight(1f))
                 RabbitMetric("Cages", cages.size, Modifier.weight(1f))
@@ -172,7 +172,7 @@ private fun RabbitDashboard(
             RabbitDashboardAction("Nest-box schedule", "Placement, occupancy and removal windows", { onOpen(RabbitPage.NESTS) })
             RabbitDashboardAction("GI-stasis red flag", "Flag signs and create vet-call work", { onOpen(RabbitPage.GI_STASIS) })
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            TextButton(onClick = onBack) { Text("Back to farm home") }
+            TextButton(onClick = onBack) { Text("Farm home") }
         }
     }
 }

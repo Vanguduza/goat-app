@@ -6,38 +6,33 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.farmos.core.design.FarmOsAccentMedium
-import com.farmos.core.design.FarmOsWordmark
-import com.farmos.core.design.FarmPastoralBackdrop
-import com.farmos.core.design.FarmStorySurface
+import com.farmos.core.design.AnimalFarmTheme
+import com.farmos.core.design.FarmAnimalLineup
 
-/** FOS-GLOBAL-001 — canonical illustrated Farm OS entrance. */
+/** FOS-GLOBAL-001 — canonical Animal Farm entrance. */
 @Composable
 fun FarmOsSplashScreen() {
-    FarmPastoralBackdrop(Modifier.fillMaxSize()) {
+    val colors = AnimalFarmTheme.colors
+    Surface(modifier = Modifier.fillMaxSize(), color = colors.background) {
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            FarmStorySurface(Modifier.fillMaxWidth()) {
-                FarmOsWordmark()
-                Text(
-                    "Animals. Land. People. A Better Tomorrow.",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    "Real Farms. Brighter Futures.",
-                    style = FarmOsAccentMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Text("Plan · Monitor · Grow · Sustain", style = MaterialTheme.typography.bodyLarge)
-            }
+            Text(
+                "Animal Farm",
+                color = colors.ink,
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.headlineMedium,
+            )
+            FarmAnimalLineup(Modifier.fillMaxWidth().padding(top = 16.dp))
         }
     }
 }

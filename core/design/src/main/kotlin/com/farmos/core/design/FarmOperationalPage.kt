@@ -36,7 +36,7 @@ fun FarmOperationalPage(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     key(screenId) {
-        Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Surface(modifier = modifier.fillMaxSize(), color = AnimalFarmTheme.colors.background) {
             Column(
                 Modifier
                     .fillMaxSize()
@@ -44,25 +44,23 @@ fun FarmOperationalPage(
                     .padding(FosDimens.ScreenMargin),
                 verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
             ) {
-                FarmStorySurface(Modifier.fillMaxWidth()) {
-                    FarmOsWordmark(compact = true)
-                    Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Animal Farm", style = MaterialTheme.typography.labelMedium, color = AnimalFarmTheme.colors.mutedInk)
+                    Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold)
                     Text(
                         subtitle,
-                        style = if (visualClass == FarmVisualClass.I4) MaterialTheme.typography.bodyMedium else FarmOsAccentMedium,
+                        style = MaterialTheme.typography.bodyMedium,
                         color =
-                            if (visualClass ==
-                                FarmVisualClass.I4
-                            ) {
-                                MaterialTheme.colorScheme.error
+                            if (visualClass == FarmVisualClass.I4) {
+                                AnimalFarmTheme.colors.critical
                             } else {
-                                MaterialTheme.colorScheme.primary
+                                AnimalFarmTheme.colors.mutedInk
                             },
                     )
                 }
                 content()
                 onBack?.let { back ->
-                    TextButton(onClick = back) { Text("Back to farm home") }
+                    TextButton(onClick = back) { Text("Farm home") }
                 }
             }
         }
@@ -78,7 +76,7 @@ fun FarmOperationalSection(
     FarmIllustratedSectionSurface {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         description?.let {
-            Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(it, style = MaterialTheme.typography.bodyMedium, color = AnimalFarmTheme.colors.mutedInk)
         }
         Column(
             Modifier.fillMaxWidth().padding(top = 8.dp),

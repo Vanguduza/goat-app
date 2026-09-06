@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -23,10 +22,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.farmos.core.design.AnimalFarmCanvas
+import com.farmos.core.design.AnimalFarmFamily
+import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.FarmIllustratedSectionSurface
-import com.farmos.core.design.FarmOsAccentMedium
-import com.farmos.core.design.FarmPastoralBackdrop
-import com.farmos.core.design.FarmSpeciesVisual
 import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FosDimens
 import com.farmos.domain.goat.GoatSex
@@ -112,16 +111,16 @@ private fun GoatDashboardScreen(
     val kids = active.count { goat -> goat.dateOfBirthEpochDay?.let { today - it < 365 } == true }
     val selectedDoe = state.selected?.takeIf { it.status == GoatStatus.ACTIVE && it.sex == GoatSex.FEMALE }
 
-    FarmPastoralBackdrop(modifier.fillMaxSize(), heroSpecies = FarmSpeciesVisual.GOAT) {
+    AnimalFarmCanvas(modifier) {
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            FarmStorySurface(Modifier.fillMaxWidth()) {
-                Text("Goats", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text(state.farmName ?: "Your goat herd", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text("Healthy animals. Thriving farms.", style = FarmOsAccentMedium, color = MaterialTheme.colorScheme.primary)
-            }
+            AnimalFarmModuleHeader(
+                title = "Goats",
+                subtitle = state.farmName ?: "Goat records on this device",
+                family = AnimalFarmFamily.GOAT,
+            )
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 GoatMetric("Total", active.size.toString(), Modifier.weight(1f))
@@ -373,15 +372,16 @@ internal fun IllustratedGoatPage(
     safety: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    FarmPastoralBackdrop(Modifier.fillMaxSize(), heroSpecies = if (safety) null else FarmSpeciesVisual.GOAT) {
+    AnimalFarmCanvas {
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            FarmStorySurface(Modifier.fillMaxWidth()) {
-                Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                if (safety) Text("Safety-priority surface", color = MaterialTheme.colorScheme.error)
-            }
+            AnimalFarmModuleHeader(
+                title = title,
+                subtitle = if (safety) "Safety-priority surface" else "Goat records on this device",
+                family = if (safety) null else AnimalFarmFamily.GOAT,
+            )
             content()
             TextButton(onClick = onBack) { Text("Back") }
         }

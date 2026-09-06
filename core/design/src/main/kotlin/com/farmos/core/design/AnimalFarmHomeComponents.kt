@@ -88,6 +88,36 @@ fun AnimalFarmContextHeader(
 }
 
 @Composable
+fun AnimalFarmModuleHeader(
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    family: AnimalFarmFamily? = null,
+) {
+    val colors = AnimalFarmTheme.colors
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("Animal Farm", color = colors.mutedInk, style = MaterialThemeLocal.label())
+            Text(
+                title,
+                modifier = Modifier.semantics { heading() },
+                color = colors.ink,
+                style = MaterialThemeLocal.largeTitle(),
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(subtitle, color = colors.mutedInk, style = MaterialThemeLocal.body())
+        }
+        if (family != null) {
+            AnimalFarmFamilyPortrait(family, Modifier.size(AnimalFarmHomeMetrics.compactPortrait))
+        }
+    }
+}
+
+@Composable
 fun AnimalFarmHeroCard(
     category: String,
     title: String,

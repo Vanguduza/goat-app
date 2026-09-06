@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -22,10 +21,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.farmos.core.design.AnimalFarmCanvas
+import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.FarmIllustratedSectionSurface
-import com.farmos.core.design.FarmOsAccentMedium
-import com.farmos.core.design.FarmPastoralBackdrop
-import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FosDimens
 import java.time.LocalDate
 
@@ -60,16 +58,15 @@ fun TasksBoardScreen(
         TaskTab.COMPLETED -> rows.filter { it.status == "done" }
     }
 
-    FarmPastoralBackdrop(Modifier.fillMaxSize()) {
+    AnimalFarmCanvas {
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
         ) {
-            FarmStorySurface(Modifier.fillMaxWidth()) {
-                Text("Tasks", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("Plan the work. Keep the farm moving.", style = FarmOsAccentMedium, color = MaterialTheme.colorScheme.primary)
-                Text("${rows.count { it.status == "open" }} open task(s)", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            AnimalFarmModuleHeader(
+                title = "Tasks",
+                subtitle = "${rows.count { it.status == "open" }} open task(s)",
+            )
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TaskTab.entries.forEach { option ->
@@ -103,7 +100,7 @@ fun TasksBoardScreen(
             }
 
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            TextButton(onClick = onBack, enabled = !busy) { Text("Back to farm home") }
+            TextButton(onClick = onBack, enabled = !busy) { Text("Farm home") }
         }
     }
 }

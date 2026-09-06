@@ -58,7 +58,7 @@ A green architecture slice authorizes implementation breadth, not uncontrolled b
 
 ## Design system
 
-`docs/ux/animal-farm-visual-lock/` is the current owner-directed presentation authority. Start at `docs/ux/ANIMAL_FARM_COLD_START_RESUME.md`. Earlier visual documents retain feature inventory and compatible operational rules only.
+`docs/ux/animal-farm-visual-lock/` is the current owner-directed presentation authority. Start at `docs/ux/ANIMAL_FARM_COLD_START_RESUME.md`. `docs/ux/FARM_OS_VISUAL_AUTHORITY.md` remains inventory and provenance; its pastoral presentation prescriptions are superseded.
 
 - Every UI change declares its `FOS-*` Screen ID and canonical visual lineage.
 - Features use governed tokens/components; external repositories are never visual authorities.

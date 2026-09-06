@@ -3,7 +3,6 @@ package com.farmos.feature.ops
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -21,13 +20,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.farmos.core.design.AnimalFarmCanvas
+import com.farmos.core.design.AnimalFarmFamily
+import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
-import com.farmos.core.design.FarmPastoralBackdrop
-import com.farmos.core.design.FarmSpeciesVisual
-import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.FosDimens
 import java.time.LocalDate
@@ -99,15 +98,16 @@ private fun PoultryDashboard(
     onOpen: (PoultryPage) -> Unit,
     onBack: () -> Unit,
 ) {
-    FarmPastoralBackdrop(Modifier.fillMaxSize(), heroSpecies = FarmSpeciesVisual.POULTRY) {
+    AnimalFarmCanvas {
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
         ) {
-            FarmStorySurface(Modifier.fillMaxWidth()) {
-                Text("Poultry", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("Flocks. Houses. Production. Hatchery. Biosecurity.", color = MaterialTheme.colorScheme.primary)
-            }
+            AnimalFarmModuleHeader(
+                title = "Poultry",
+                subtitle = "Houses, flocks and hatchery",
+                family = AnimalFarmFamily.POULTRY,
+            )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PoultryMetric("Kinds", enabledKinds.size, Modifier.weight(1f))
                 PoultryMetric("Houses", houses.size, Modifier.weight(1f))
@@ -127,7 +127,7 @@ private fun PoultryDashboard(
             PoultryAction("Biosecurity", "Record house/flock findings") { onOpen(PoultryPage.BIOSECURITY) }
             if (flockDays.isEmpty()) Text("No daily flock records yet.")
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            TextButton(onClick = onBack) { Text("Back to farm home") }
+            TextButton(onClick = onBack) { Text("Farm home") }
         }
     }
 }

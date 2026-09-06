@@ -87,4 +87,19 @@ if grep -q 'Species tiles open native records' app/src/main/java/com/farmos/app/
   echo 'ERROR: generic module-launcher home has returned'; exit 1
 fi
 
+# Animal Farm lock: shared primitives must not restore geometric scenery or feature slogans.
+if grep -E 'Brush\.(linear|radial|vertical)Gradient|FarmIllustratedPalette|fun drawGoat|fun drawRabbit' \
+  core/design/src/main/kotlin/com/farmos/core/design/FarmIllustratedComponents.kt; then
+  echo 'ERROR: pastoral canvas scenery returned to FarmIllustratedComponents'; exit 1
+fi
+if grep -q 'Animals. Land. People' app/src/main/java/com/farmos/app/FarmOsSplashScreen.kt; then
+  echo 'ERROR: splash slogans returned'; exit 1
+fi
+if grep -q 'Healthy animals. Thriving farms' feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatExperienceScreen.kt; then
+  echo 'ERROR: goat dashboard slogan returned'; exit 1
+fi
+if grep -q 'Plan the work. Keep the farm moving' feature/ops/src/main/kotlin/com/farmos/feature/ops/TasksBoardScreen.kt; then
+  echo 'ERROR: task board slogan returned'; exit 1
+fi
+
 echo 'Farm OS portable visual authority guardrails: PASS'
