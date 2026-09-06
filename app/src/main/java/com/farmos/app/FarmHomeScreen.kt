@@ -21,6 +21,7 @@ import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmFamilyLauncher
 import com.farmos.core.design.AnimalFarmHomeBottomBar
 import com.farmos.core.design.AnimalFarmHomeMetrics
+import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmQuickAction
 import com.farmos.core.design.AnimalFarmSummaryTile
 import java.time.LocalDate
@@ -132,7 +133,7 @@ internal fun FarmMoreScreen(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(AnimalFarmHomeMetrics.pageInset),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("More")
+            AnimalFarmModuleHeader("More", "Farm records and tools")
             cards.forEach { card ->
                 AnimalFarmQuickAction(card.title, { onOpen(card.module) })
             }

@@ -313,9 +313,13 @@ fun GoatModuleHost(
                                 push.conflicts > 0 -> "Conflict needs review"
                                 push.rejected > 0 -> "Server rejected a pending record"
                                 push.retrying > 0 -> "Saved locally · server retry pending"
-                                push.acknowledged > 0 || (pull?.appliedEvents ?: 0) > 0 ->
-                                    "Synced · ${pull?.appliedEvents ?: 0} server changes applied"
-                                else -> "Synced · no new server changes"
+                                push.acknowledged > 0 && (pull?.appliedEvents ?: 0) > 0 ->
+                                    "Server accepted ${push.acknowledged} local change(s). ${pull?.appliedEvents} server change(s) applied"
+                                push.acknowledged > 0 ->
+                                    "Server accepted ${push.acknowledged} local change(s)"
+                                (pull?.appliedEvents ?: 0) > 0 ->
+                                    "${pull?.appliedEvents} server change(s) applied"
+                                else -> "No pending local changes. Server returned no new events."
                             }
                             refreshGoatState()
                         }

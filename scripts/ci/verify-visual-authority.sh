@@ -101,5 +101,8 @@ fi
 if grep -q 'Plan the work. Keep the farm moving' feature/ops/src/main/kotlin/com/farmos/feature/ops/TasksBoardScreen.kt; then
   echo 'ERROR: task board slogan returned'; exit 1
 fi
+if grep -q 'Synced ·' app/src/main/java/com/farmos/app/GoatModuleHost.kt; then
+  echo 'ERROR: goat sync receipt claims Synced without a proven server outcome'; exit 1
+fi
 
 echo 'Farm OS portable visual authority guardrails: PASS'
