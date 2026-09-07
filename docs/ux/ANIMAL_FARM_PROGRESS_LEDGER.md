@@ -524,3 +524,9 @@ No green-gate promotion. Not GitHub-hosted certification.
 
 Rebound static inventory at `3a5a299...`: 545 rows; 147 some evidence; 398 none; runtime 0. Kotlin registered IDs 116. `direct_action_scope_violations = []`.
 
+## Local CI after worker copy and attention catalogs — 2026-09-07
+
+`bash scripts/ci/run-local.sh --out docs/ux/evidence/animal-farm-visual-lock/local-ci-report.json` executed against `e9ee53d4eb7cdbb4a4b6cf451e28ef64aa3727d6`: smoke, handover-integrity, android, edge-functions, meilisearch-contract, and local-nav-audit **PASS**. android-device-e2e, search-pipeline, and supabase **UNAVAILABLE**. FAIL count 0.
+
+No green-gate promotion. Not GitHub-hosted certification.
+
