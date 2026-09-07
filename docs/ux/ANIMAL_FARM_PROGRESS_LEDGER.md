@@ -516,3 +516,11 @@ Rebound static inventory at `b5ee183...`: 545 rows; 147 some evidence; 398 none;
 
 No green-gate promotion. Not GitHub-hosted certification.
 
+## Worker copy, area guides, and attention catalogs — 2026-09-07
+
+- `3a5a2992fea4919c57957441f67590c72df51fd2` — Public home onOpen destinations were already exhausted. This slice locks already-wired owners: worker D quick record and area guides, plus Management A attention CTAs. Button copy is verb-first sentence case (`Add task`, `Record weight`, `Add treatment`, `Scan animal`, `Open feed` / `water` / `pasture` / `assets`). Destinations are unchanged. Shared More stays buyer-safe. Worker guides still omit Groups and Waitlist. Supervisor “Health exceptions” remains `Health()`. FOS-HEALTH-010, FOS-HEALTH-009 vs 001 for supervisor, FOS-TASK-005, FOS-INV-011, FOS-GOAT-007, FOS-HOME-006, Finance/Inventory/Rabbit entry pages, DEAD_LETTER, photo/SY03, and P2P/Drive/Relay were not invented.
+
+`:app:testDebugUnitTest --tests com.farmos.app.FarmDestinationTest` — PASS after failing-first catalog assertions. `:app:compileDebugKotlin` — PASS (`--offline`). Navigation and gap self-tests passed. Architecture and visual-authority scripts passed. No green-gate promotion.
+
+Rebound static inventory at `3a5a299...`: 545 rows; 147 some evidence; 398 none; runtime 0. Kotlin registered IDs 116. `direct_action_scope_violations = []`.
+
