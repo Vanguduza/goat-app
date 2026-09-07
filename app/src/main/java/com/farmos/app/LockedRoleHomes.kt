@@ -40,8 +40,6 @@ import com.farmos.domain.ops.WorkerTaskStage
 import com.farmos.domain.ops.inferTaskSpeciesFamily
 import com.farmos.domain.ops.projectWorkerTaskStage
 import com.farmos.domain.ops.rankHomeAttention
-import com.farmos.feature.goat.GoatEntryPage
-import com.farmos.feature.ops.HealthEntryPage
 import com.farmos.feature.ops.TaskEntryPage
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -104,31 +102,38 @@ private fun ManagementAttention(
         ?.let { animalFarmFamilyFromKey(inferTaskSpeciesFamily(it.moduleCode)) }
     Column(Modifier.padding(horizontal = AnimalFarmHomeMetrics.pageInset)) {
         when (kind) {
-            HomeAttentionKind.WITHDRAWAL -> AnimalFarmHeroCard(
-                category = "Health",
-                title = "Withdrawal window open",
-                context = "${summary.activeWithdrawals} active window(s)",
-                actionLabel = "Open withdrawals",
-                // FOS-HEALTH-009
-                onAction = { onOpen(FarmDestination.Health(HealthEntryPage.WITHDRAWALS)) },
-                family = family,
-            )
-            HomeAttentionKind.OVERDUE_WORK -> AnimalFarmHeroCard(
-                category = "Work",
-                title = "Due or overdue work",
-                context = "${summary.overdueTasks} open task(s) due today or earlier",
-                actionLabel = "Open tasks",
-                // FOS-TASK-001 today board includes due-today and overdue open work
-                onAction = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
-                family = family,
-            )
-            HomeAttentionKind.PENDING_SYNC -> AnimalFarmHeroCard(
-                category = "Sync",
-                title = "Waiting to sync",
-                context = "${summary.pendingSync} local change(s) stored on this device",
-                actionLabel = "Open sync status",
-                onAction = { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) },
-            )
+            HomeAttentionKind.WITHDRAWAL -> {
+                val (label, dest) = managementAttentionAction(kind)!!
+                AnimalFarmHeroCard(
+                    category = "Health",
+                    title = "Withdrawal window open",
+                    context = "${summary.activeWithdrawals} active window(s)",
+                    actionLabel = label,
+                    onAction = { onOpen(dest) },
+                    family = family,
+                )
+            }
+            HomeAttentionKind.OVERDUE_WORK -> {
+                val (label, dest) = managementAttentionAction(kind)!!
+                AnimalFarmHeroCard(
+                    category = "Work",
+                    title = "Due or overdue work",
+                    context = "${summary.overdueTasks} open task(s) due today or earlier",
+                    actionLabel = label,
+                    onAction = { onOpen(dest) },
+                    family = family,
+                )
+            }
+            HomeAttentionKind.PENDING_SYNC -> {
+                val (label, dest) = managementAttentionAction(kind)!!
+                AnimalFarmHeroCard(
+                    category = "Sync",
+                    title = "Waiting to sync",
+                    context = "${summary.pendingSync} local change(s) stored on this device",
+                    actionLabel = label,
+                    onAction = { onOpen(dest) },
+                )
+            }
             HomeAttentionKind.NONE -> AnimalFarmEmptyState("No attention items on this device")
         }
     }
@@ -299,23 +304,14 @@ internal fun WorkerWorkBoardScreen(
                         )
                     }
                     Text("Quick record", color = AnimalFarmTheme.colors.ink)
-                    AnimalFarmQuickAction("Add Task", { onOpen(FarmDestination.Tasks(TaskEntryPage.CREATE)) })
-                    // FOS-GOAT-011
-                    AnimalFarmQuickAction("Record Weight", { onOpen(FarmDestination.Goat(GoatEntryPage.WEIGHT)) })
-                    // FOS-HEALTH-007
-                    AnimalFarmQuickAction("Add Treatment", { onOpen(FarmDestination.Health(HealthEntryPage.TREATMENT)) })
-                    // FOS-HEALTH-004
-                    AnimalFarmQuickAction("Record observation", { onOpen(FarmDestination.Health(HealthEntryPage.RECORD_OBSERVATION)) })
-                    // FOS-GOAT-006 existing identification search. FOS-GOAT-007 RFID and FOS-HOME-006 are not invented.
-                    AnimalFarmQuickAction("Scan Animal", { onOpen(FarmDestination.Goat(GoatEntryPage.SEARCH)) })
+                    workerHomeQuickActions().forEach { (label, dest) ->
+                        AnimalFarmQuickAction(label, { onOpen(dest) })
+                    }
                     Text("Guides and areas", color = AnimalFarmTheme.colors.ink)
-                    AnimalFarmQuickAction("Animals", onAnimals)
-                    AnimalFarmQuickAction("Feed", { onOpen(FarmDestination.Module(FarmModule.FEED)) })
-                    AnimalFarmQuickAction("Water", { onOpen(FarmDestination.Module(FarmModule.WATER)) })
-                    AnimalFarmQuickAction("Pasture", { onOpen(FarmDestination.Module(FarmModule.PASTURE)) })
-                    AnimalFarmQuickAction("Assets", { onOpen(FarmDestination.Module(FarmModule.ASSETS)) })
-                    // FOS-HOME-009 / FOS-SYNC-002
-                    AnimalFarmQuickAction("Open sync status", { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) })
+                    AnimalFarmQuickAction("Open animals", onAnimals)
+                    workerHomeAreaActions().forEach { (label, dest) ->
+                        AnimalFarmQuickAction(label, { onOpen(dest) })
+                    }
                 }
             }
         }

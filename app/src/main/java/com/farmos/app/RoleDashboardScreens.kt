@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.farmos.domain.ops.HomeAttentionKind
 import com.farmos.feature.goat.GoatEntryPage
 import com.farmos.feature.ops.HealthEntryPage
 import com.farmos.feature.ops.TaskEntryPage
@@ -83,7 +84,7 @@ internal fun specialistHomeActions(persona: FarmHomePersona): List<Pair<String, 
         FarmHomePersona.VET -> listOf(
             "Health centre" to FarmDestination.Health(),
             "Open withdrawals" to FarmDestination.Health(HealthEntryPage.WITHDRAWALS),
-            "Add Treatment" to FarmDestination.Health(HealthEntryPage.TREATMENT),
+            "Add treatment" to FarmDestination.Health(HealthEntryPage.TREATMENT),
             // FOS-HEALTH-004
             "Record observation" to FarmDestination.Health(HealthEntryPage.RECORD_OBSERVATION),
             // FOS-HEALTH-013
@@ -118,6 +119,46 @@ internal fun specialistHomeActions(persona: FarmHomePersona): List<Pair<String, 
     // FOS-HOME-009 / FOS-SYNC-002 — PAGE-PATTERNS keeps sync entry reachable on mutation homes.
     return core + ("Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC))
 }
+
+/** Worker D quick record. Labels stay verb-first sentence case. RFID is not invented. */
+internal fun workerHomeQuickActions(): List<Pair<String, FarmDestination>> =
+    listOf(
+        // FOS-TASK-004
+        "Add task" to FarmDestination.Tasks(TaskEntryPage.CREATE),
+        // FOS-GOAT-011
+        "Record weight" to FarmDestination.Goat(GoatEntryPage.WEIGHT),
+        // FOS-HEALTH-007
+        "Add treatment" to FarmDestination.Health(HealthEntryPage.TREATMENT),
+        // FOS-HEALTH-004
+        "Record observation" to FarmDestination.Health(HealthEntryPage.RECORD_OBSERVATION),
+        // FOS-GOAT-006 existing identification search. FOS-GOAT-007 RFID and FOS-HOME-006 are not invented.
+        "Scan animal" to FarmDestination.Goat(GoatEntryPage.SEARCH),
+    )
+
+/** Worker D guides for already-owned modules. Groups and waitlist stay off this list. */
+internal fun workerHomeAreaActions(): List<Pair<String, FarmDestination>> =
+    listOf(
+        "Open feed" to FarmDestination.Module(FarmModule.FEED),
+        "Open water" to FarmDestination.Module(FarmModule.WATER),
+        "Open pasture" to FarmDestination.Module(FarmModule.PASTURE),
+        "Open assets" to FarmDestination.Module(FarmModule.ASSETS),
+        // FOS-HOME-009 / FOS-SYNC-002
+        "Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC),
+    )
+
+/** Management A attention CTAs. Supervisor Health exceptions is not guessed here. */
+internal fun managementAttentionAction(kind: HomeAttentionKind): Pair<String, FarmDestination>? =
+    when (kind) {
+        HomeAttentionKind.WITHDRAWAL ->
+            // FOS-HEALTH-009
+            "Open withdrawals" to FarmDestination.Health(HealthEntryPage.WITHDRAWALS)
+        HomeAttentionKind.OVERDUE_WORK ->
+            // FOS-TASK-001 today board includes due-today and overdue open work
+            "Open tasks" to FarmDestination.Tasks(TaskEntryPage.BOARD)
+        HomeAttentionKind.PENDING_SYNC ->
+            "Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC)
+        HomeAttentionKind.NONE -> null
+    }
 
 /**
  * FOS-HOME-012 — role-tailored home family.

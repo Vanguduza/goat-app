@@ -98,12 +98,12 @@ const appKt = allKt
   .map((p) => fs.readFileSync(p, 'utf8'))
   .join('\n');
 const directActionViolations = [
-  ['Record Weight', 'GoatEntryPage.WEIGHT', 'FOS-GOAT-011'],
-  ['Add Task', 'TaskEntryPage.CREATE', 'FOS-TASK-004'],
-  ['Add Treatment', 'HealthEntryPage.TREATMENT', 'FOS-HEALTH-007'],
+  ['Record weight', 'GoatEntryPage.WEIGHT', 'FOS-GOAT-011'],
+  ['Add task', 'TaskEntryPage.CREATE', 'FOS-TASK-004'],
+  ['Add treatment', 'HealthEntryPage.TREATMENT', 'FOS-HEALTH-007'],
   ['Record observation', 'HealthEntryPage.RECORD_OBSERVATION', 'FOS-HEALTH-004'],
   ['Resources', 'FarmModule.INVENTORY', 'FOS-INV-001'],
-  ['Scan Animal', 'GoatEntryPage.SEARCH', 'FOS-GOAT-006'],
+  ['Scan animal', 'GoatEntryPage.SEARCH', 'FOS-GOAT-006'],
   ['Waiting to sync', 'GoatEntryPage.SYNC', 'FOS-SYNC-002'],
   ['Open sync status', 'FarmDestination.Goat(GoatEntryPage.SYNC)', 'FOS-SYNC-002'],
   ['Continue task', 'FarmDestination.Task', 'FOS-TASK-003'],
@@ -121,6 +121,8 @@ const directActionViolations = [
   ['Open health', 'FarmDestination.Health()', 'FOS-HEALTH-001'],
   ['Open feed', 'FarmModule.FEED', 'FOS-FEED-001'],
   ['Open water', 'FarmModule.WATER', 'FOS-WATER-001'],
+  ['Open pasture', 'FarmModule.PASTURE', 'FOS-PASTURE-001'],
+  ['Open assets', 'FarmModule.ASSETS', 'FOS-ASSET-001'],
   ['Open groups', 'FarmModule.GROUPS', 'FOS-GROUP-001'],
   ['Open waitlist', 'FarmModule.WAITLIST', 'FOS-RABBIT-027'],
 ].filter(([label, token]) => appKt.includes(`"${label}"`) && !appKt.includes(token))
