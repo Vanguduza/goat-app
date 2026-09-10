@@ -706,7 +706,10 @@ abstract class FarmOsDatabase : RoomDatabase() {
 
         val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("ALTER TABLE animals ADD COLUMN poultryKindCode TEXT")
+                // DEFAULT NULL is required: AnimalEntity declares
+                // @ColumnInfo(defaultValue = "NULL"), so Room compares the default and a
+                // migrated database without it fails validateMigration against schema v13.
+                db.execSQL("ALTER TABLE animals ADD COLUMN poultryKindCode TEXT DEFAULT NULL")
                 db.execSQL(
                     """
                     CREATE TABLE IF NOT EXISTS farm_tasks (
