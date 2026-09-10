@@ -17,6 +17,12 @@ surfaces:
       - farm setup currently persists farm identity only
       - account creation and password recovery are not exposed without backend contracts
     evidence_missing: [phone_golden, tablet_golden, state_matrix_goldens, accessibility_review, owner_visual_approval]
+  - file: app/src/main/java/com/farmos/app/SignOutConfirmationDialog.kt
+    target_screens: [FOS-GLOBAL-020]
+    current_role: destructive_session_exit_confirmation
+    visual_reference: docs/ux/animal-farm-visual-lock/
+    visual_state: VISUAL_IMPLEMENTED
+    evidence_missing: [phone_golden, tablet_review, accessibility_review, owner_visual_approval]
   - file: app/src/main/java/com/farmos/app/FarmHomeScreen.kt
     target_screens: [FOS-HOME-001]
     navigation_callbacks_reusable: true

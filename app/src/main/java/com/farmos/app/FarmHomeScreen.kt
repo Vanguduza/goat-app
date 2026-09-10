@@ -120,6 +120,7 @@ internal fun FarmMoreScreen(
     onBack: () -> Unit,
     onSignOut: () -> Unit,
 ) {
+    var showSignOutConfirmation by remember { mutableStateOf(false) }
     val cards = listOf(
         HomeModuleCard(FarmModule.INVENTORY, "Inventory", "Stock, lots, FEFO and reorder"),
         HomeModuleCard(FarmModule.SALES, "Sales", "Customers, animals, produce and orders"),
@@ -139,7 +140,15 @@ internal fun FarmMoreScreen(
                 AnimalFarmQuickAction(card.title, { onOpen(card.module) })
             }
             TextButton(onClick = onBack) { Text("Farm home") }
-            TextButton(onClick = onSignOut) { Text("Sign out") }
+            TextButton(onClick = { showSignOutConfirmation = true }) { Text("Sign out") }
         }
     }
+    SignOutConfirmationDialog(
+        visible = showSignOutConfirmation,
+        onDismiss = { showSignOutConfirmation = false },
+        onConfirm = {
+            showSignOutConfirmation = false
+            onSignOut()
+        },
+    )
 }
