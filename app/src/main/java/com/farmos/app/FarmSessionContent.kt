@@ -107,6 +107,13 @@ fun FarmSessionContent(
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
             )
+            FarmModule.POULTRY -> PoultryModuleHost(
+                farmId = membership.farmId,
+                ops = ops,
+                newContext = ::context,
+                enqueueSync = ::enqueueSync,
+                onBack = backHome,
+            )
             FarmModule.RABBIT -> RabbitModuleHost(
                 farmId = membership.farmId,
                 ops = ops,

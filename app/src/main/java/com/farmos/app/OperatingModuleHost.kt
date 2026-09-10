@@ -26,29 +26,21 @@ import com.farmos.domain.ops.IssueFeed
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.RecordCattleBcs
 import com.farmos.domain.ops.RecordCattleCalving
-import com.farmos.domain.ops.CandlePoultryHatch
-import com.farmos.domain.ops.CreatePoultryHouse
 import com.farmos.domain.ops.RecordCattleMilk
 import com.farmos.domain.ops.RecordCattlePd
 import com.farmos.domain.ops.RecordCattleService
-import com.farmos.domain.ops.PlacePoultryFlock
 import com.farmos.domain.ops.RecordCattleDryOff
-import com.farmos.domain.ops.RecordPoultryBiosecurity
 import com.farmos.domain.ops.RecordCattleLocomotion
 import com.farmos.domain.ops.RecordCattleScc
-import com.farmos.domain.ops.RecordPoultryHatch
-import com.farmos.domain.ops.RecordPoultryVaccination
 import com.farmos.domain.ops.RecordSheepDag
 import com.farmos.domain.ops.RecordSheepFlystrike
 import com.farmos.domain.ops.RecordSheepShearing
-import com.farmos.domain.ops.SetPoultryHatch
 import com.farmos.domain.ops.RecordSheepFootrot
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
 import com.farmos.domain.ops.RecordMoney
-import com.farmos.domain.ops.RecordPoultryFlockDay
 import com.farmos.domain.ops.RecordPurchase
 import com.farmos.domain.ops.RecordSale
 import com.farmos.domain.ops.RecordSheepJoining
@@ -61,7 +53,6 @@ import com.farmos.domain.ops.AddHealthPackSlot
 import com.farmos.domain.ops.ApplyHealthPack
 import com.farmos.domain.ops.AssignAnimalIdentifier
 import com.farmos.domain.ops.CloseCattleLot
-import com.farmos.domain.ops.EnablePoultryKind
 import com.farmos.domain.ops.IssueInventoryLot
 import com.farmos.domain.ops.LinkPedigree
 import com.farmos.domain.ops.PlaceCattleLot
@@ -91,7 +82,6 @@ import com.farmos.feature.ops.CattleOperationsScreen
 import com.farmos.feature.ops.HealthObservationScreen
 import com.farmos.feature.ops.InventoryScreen
 import com.farmos.feature.ops.MoneyCaptureScreen
-import com.farmos.feature.ops.PoultryExperienceScreen
 import com.farmos.feature.ops.SimpleCaptureScreen
 import com.farmos.feature.ops.SheepOperationsActions
 import com.farmos.feature.ops.SheepOperationsScreen
@@ -129,18 +119,12 @@ fun OperatingModuleHost(
     var saleRows by remember { mutableStateOf(emptyList<String>()) }
     var catalogRows by remember { mutableStateOf(emptyList<String>()) }
     var treatmentRows by remember { mutableStateOf(emptyList<String>()) }
-    var flockRows by remember { mutableStateOf(emptyList<String>()) }
     var packRows by remember { mutableStateOf(emptyList<String>()) }
     var withdrawalRows by remember { mutableStateOf(emptyList<String>()) }
     var supplierRows by remember { mutableStateOf(emptyList<String>()) }
     var purchaseRows by remember { mutableStateOf(emptyList<String>()) }
     var kitRows by remember { mutableStateOf(emptyList<String>()) }
     var waitlistRows by remember { mutableStateOf(emptyList<String>()) }
-    var houseRows by remember { mutableStateOf(emptyList<String>()) }
-    var hatchRows by remember { mutableStateOf(emptyList<String>()) }
-    var vaxRows by remember { mutableStateOf(emptyList<String>()) }
-    var enabledPoultryKindRows by remember { mutableStateOf(emptyList<String>()) }
-    var poultryPlacementRows by remember { mutableStateOf(emptyList<String>()) }
     var beddingLine by remember { mutableStateOf("No bedding item bound.") }
 
     val speciesCode = when (module) {
@@ -168,11 +152,6 @@ fun OperatingModuleHost(
         inventoryRows = ops.items().map { "${it.id} ${it.sku} · ${it.name} · ${it.quantityMilli} ${it.unit}" }
         kitRows = ops.kits().map { "${it.id} ${it.tempLabel} · ${it.sex} · ${it.retention} · ${it.status}" }
         waitlistRows = ops.waitlist().map { "${it.id} ${it.contactName} · qty ${it.qty} · ${it.status}" }
-        houseRows = ops.houses().map { "${it.id} ${it.code} · ${it.kind} · ${it.poultryKindCode}" }
-        hatchRows = ops.hatches().map { "${it.id} ${it.poultryKindCode} · ${it.eggsSet} eggs · ${it.status}" }
-        vaxRows = ops.vaccinations().map { "${it.id} ${it.poultryKindCode} · flock ${it.groupId} · ${it.formularyItemId}" }
-        enabledPoultryKindRows = ops.enabledPoultryKinds().map { it.poultryKindCode }
-        poultryPlacementRows = ops.placements().map { "${it.groupId} · ${it.poultryKindCode} · house ${it.houseId} · ${it.headCount} head" }
         beddingLine = ops.inventoryLink()?.let { "Bedding ${it.nestBeddingItemId ?: "none"} · ${it.nestBeddingQtyMilli} milli" }
             ?: "No bedding item bound."
         speciesRows = herd?.list()?.map { animal ->
@@ -198,7 +177,6 @@ fun OperatingModuleHost(
         saleRows = ops.recentSales().map { "${it.itemKind} · ${it.amountMinor} ${it.currency}" }
         catalogRows = ops.diseases().map { "${it.speciesCode} · ${it.displayName} · ${it.firstAid}" }
         treatmentRows = ops.recentTreatments().map { "${it.speciesCode} · ${it.reason} · formulary ${it.formularyItemId}" }
-        flockRows = ops.recentFlockDays().map { "eggs ${it.eggs} · dead ${it.dead} · culls ${it.culls} · feed ${it.feedGrams} g" }
         packRows = ops.packs().map { "${it.speciesCode} · ${it.name} · ${it.status} · ${it.acceptedByVet.orEmpty()}" }
         withdrawalRows = ops.withdrawals().map { "${it.windowKind} · ${it.product} ends day ${it.endsEpochDay}" }
         supplierRows = ops.suppliers().map { "${it.id} ${it.name} · lead ${it.leadTimeDays} d" }
@@ -224,99 +202,6 @@ fun OperatingModuleHost(
     }
 
     when (module) {
-        FarmModule.POULTRY -> PoultryExperienceScreen(
-            enabledKinds = enabledPoultryKindRows,
-            houses = houseRows,
-            placements = poultryPlacementRows,
-            flockDays = flockRows,
-            hatches = hatchRows,
-            vaccinations = vaxRows,
-            busy = busy,
-            error = error,
-            onEnableKind = { kind -> run { ops.enablePoultryKind(EnablePoultryKind(kind), newContext()) } },
-            onCreateHouse = { code, houseKind, poultryKind ->
-                run { ops.createHouse(CreatePoultryHouse(UUID.randomUUID().toString(), code, houseKind, poultryKind), newContext()) }
-            },
-            onPlaceFlock = { groupId, houseId, poultryKind, heads, day ->
-                run {
-                    ops.placeFlock(
-                        PlacePoultryFlock(
-                            UUID.randomUUID().toString(), groupId, houseId, poultryKind, heads.toIntOrNull() ?: 0,
-                            LocalDate.parse(day).toEpochDay(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                        ),
-                        newContext(),
-                    )
-                }
-            },
-            onRecordFlockDay = { groupId, eggs, dead, culls, feedGrams, day ->
-                run {
-                    ops.recordFlockDay(
-                        RecordPoultryFlockDay(
-                            UUID.randomUUID().toString(), groupId, eggs.toIntOrNull() ?: 0, dead.toIntOrNull() ?: 0,
-                            culls.toIntOrNull() ?: 0, feedGrams.toLongOrNull() ?: 0L, LocalDate.parse(day).toEpochDay(),
-                        ),
-                        newContext(),
-                    )
-                }
-            },
-            onSetEggs = { poultryKind, eggs, day, houseId, groupId ->
-                run {
-                    ops.setHatch(
-                        SetPoultryHatch(
-                            hatchId = UUID.randomUUID().toString(), poultryKindCode = poultryKind, eggsSet = eggs.toIntOrNull() ?: 0,
-                            setEpochDay = LocalDate.parse(day).toEpochDay(), houseId = houseId.trim().ifBlank { null },
-                            groupId = groupId.trim().ifBlank { null }, candleTaskId = UUID.randomUUID().toString(),
-                            lockTaskId = UUID.randomUUID().toString(), hatchTaskId = UUID.randomUUID().toString(),
-                        ),
-                        newContext(),
-                    )
-                }
-            },
-            onCandle = { hatchId, fertile, infertile, midDead, day ->
-                run {
-                    ops.candleHatch(
-                        CandlePoultryHatch(
-                            hatchId, fertile.toIntOrNull() ?: 0, infertile.toIntOrNull() ?: 0, midDead.toIntOrNull() ?: 0,
-                            LocalDate.parse(day).toEpochDay(),
-                        ),
-                        newContext(),
-                    )
-                }
-            },
-            onRecordHatch = { hatchId, hatched, culls, day ->
-                run {
-                    ops.recordHatch(
-                        RecordPoultryHatch(
-                            hatchId, hatched.toIntOrNull() ?: 0, culls.toIntOrNull() ?: 0,
-                            occurredEpochDay = LocalDate.parse(day).toEpochDay(),
-                        ),
-                        newContext(),
-                    )
-                }
-            },
-            onVaccinate = { groupId, poultryKind, formularyId, day ->
-                run {
-                    ops.recordVaccination(
-                        RecordPoultryVaccination(
-                            UUID.randomUUID().toString(), groupId, poultryKind, formularyId, LocalDate.parse(day).toEpochDay(),
-                        ),
-                        newContext(),
-                    )
-                }
-            },
-            onBiosecurity = { houseId, groupId, findings, mixedSpecies, day ->
-                run {
-                    ops.recordBiosecurity(
-                        RecordPoultryBiosecurity(
-                            UUID.randomUUID().toString(), houseId.trim().ifBlank { null }, groupId.trim().ifBlank { null }, findings,
-                            mixedSpecies, LocalDate.parse(day).toEpochDay(),
-                        ),
-                        newContext(),
-                    )
-                }
-            },
-            onBack = onBack,
-        )
         FarmModule.SHEEP, FarmModule.CATTLE -> {
             val title = when (module) {
                 FarmModule.SHEEP -> "Sheep flock"
@@ -588,17 +473,14 @@ fun OperatingModuleHost(
             val name = remember { mutableStateOf("") }
             val species = remember { mutableStateOf("goat") }
             val heads = remember { mutableStateOf("") }
-            val eggs = remember { mutableStateOf("") }
-            val dead = remember { mutableStateOf("") }
-            val feed = remember { mutableStateOf("") }
             val day = remember { mutableStateOf("") }
             val groupId = remember { mutableStateOf("") }
             SimpleCaptureScreen(
                 screenId = "FOS-GROUP-001",
                 title = "Groups",
-                help = "Groups hold a census for grazing, feed issue, and poultry flock sheets.",
+                help = "Groups hold shared animal membership and census records for farm operations.",
                 empty = "No groups on this device.",
-                rows = groupRows + flockRows,
+                rows = groupRows,
                 busy = busy,
                 error = error,
                 fields = listOf("Species" to species, "Name" to name, "Head count" to heads),
@@ -613,30 +495,8 @@ fun OperatingModuleHost(
                 },
                 onBack = onBack,
                 extra = {
-                    androidx.compose.material3.OutlinedTextField(groupId.value, { groupId.value = it }, label = { androidx.compose.material3.Text("Poultry group id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(eggs.value, { eggs.value = it }, label = { androidx.compose.material3.Text("Eggs") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(dead.value, { dead.value = it }, label = { androidx.compose.material3.Text("Dead") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(feed.value, { feed.value = it }, label = { androidx.compose.material3.Text("Feed grams") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(day.value, { day.value = it }, label = { androidx.compose.material3.Text("Flock day") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.Button(
-                        onClick = {
-                            run {
-                                ops.recordFlockDay(
-                                    RecordPoultryFlockDay(
-                                        dayId = UUID.randomUUID().toString(),
-                                        groupId = groupId.value,
-                                        eggs = eggs.value.toIntOrNull() ?: 0,
-                                        dead = dead.value.toIntOrNull() ?: 0,
-                                        culls = 0,
-                                        feedGrams = feed.value.toLongOrNull() ?: 0L,
-                                        occurredEpochDay = LocalDate.parse(day.value).toEpochDay(),
-                                    ),
-                                    newContext(),
-                                )
-                            }
-                        },
-                        enabled = !busy && groupId.value.isNotBlank() && day.value.isNotBlank(),
-                    ) { androidx.compose.material3.Text("Record poultry flock day") }
+                    androidx.compose.material3.OutlinedTextField(groupId.value, { groupId.value = it }, label = { androidx.compose.material3.Text("Group id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+                    androidx.compose.material3.OutlinedTextField(day.value, { day.value = it }, label = { androidx.compose.material3.Text("Census day") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
                     androidx.compose.material3.OutlinedTextField(heads.value, { heads.value = it }, label = { androidx.compose.material3.Text("Census head count") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
                     androidx.compose.material3.Button(
                         onClick = {
