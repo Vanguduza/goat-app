@@ -9,7 +9,7 @@ surfaces:
     visual_state: VISUAL_IMPLEMENTED
     evidence_missing: [phone_golden, tablet_review, accessibility_review, owner_visual_approval]
   - file: app/src/main/java/com/farmos/app/FoundationAuthScreen.kt
-    target_screens: [FOS-GLOBAL-002, FOS-GLOBAL-005, FOS-GLOBAL-006, FOS-GLOBAL-018]
+    target_screens: [FOS-GLOBAL-002, FOS-GLOBAL-005, FOS-GLOBAL-006, FOS-GLOBAL-016, FOS-GLOBAL-017, FOS-GLOBAL-018]
     backend_callbacks_reusable: true
     drift_before_recovery: VD-4
     visual_state: VISUAL_IMPLEMENTED

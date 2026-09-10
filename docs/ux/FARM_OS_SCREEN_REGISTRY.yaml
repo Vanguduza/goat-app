@@ -160,7 +160,7 @@ screens:
     name: Session expired
     module: global
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX
@@ -170,7 +170,7 @@ screens:
     name: Farm access revoked
     module: global
     visual_class: I4
-    implementation_audit: AUDIT_REQUIRED
+    implementation_audit: VISUAL_IMPLEMENTED
     visual_green: false
     feature_green: false
     required_states: GLOBAL_16_PLUS_STATE_MATRIX

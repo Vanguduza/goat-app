@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_fingerprint": "sha256:0673ba4b611e7932233fc489dd9e4f63e67f36e0b0faf9d5e85c479d6c87f24a",
+  "source_fingerprint": "sha256:0746187a05a3aa67bcb72f1e7ced510a9379cf52afc3e693b9a84f5ea36f2b93",
   "screen_count": 545,
   "qdu_count": 545,
   "feature_binding_status": "BLOCKED_CANONICAL_FEATURE_ID_CATALOG_NOT_FOUND",
@@ -116,7 +116,7 @@
       "module": "global",
       "feature_binding_status": "UNRESOLVED_CANONICAL_FEATURE_ID_CATALOG",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": true
       },
       "required_contracts": [
@@ -142,7 +142,7 @@
       "module": "global",
       "feature_binding_status": "UNRESOLVED_CANONICAL_FEATURE_ID_CATALOG",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": true
       },
       "required_contracts": [
@@ -402,8 +402,8 @@
       "module": "global",
       "feature_binding_status": "UNRESOLVED_CANONICAL_FEATURE_ID_CATALOG",
       "implementation_evidence": {
-        "kotlin_reference": false,
-        "implementation_map": false
+        "kotlin_reference": true,
+        "implementation_map": true
       },
       "required_contracts": [
         "purpose_and_primary_object",
@@ -419,7 +419,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-GLOBAL-017",
@@ -428,8 +428,8 @@
       "module": "global",
       "feature_binding_status": "UNRESOLVED_CANONICAL_FEATURE_ID_CATALOG",
       "implementation_evidence": {
-        "kotlin_reference": false,
-        "implementation_map": false
+        "kotlin_reference": true,
+        "implementation_map": true
       },
       "required_contracts": [
         "purpose_and_primary_object",
@@ -445,7 +445,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-GLOBAL-018",
@@ -454,7 +454,7 @@
       "module": "global",
       "feature_binding_status": "UNRESOLVED_CANONICAL_FEATURE_ID_CATALOG",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": true
       },
       "required_contracts": [

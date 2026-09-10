@@ -51,6 +51,7 @@ fun FoundationAuthScreen(
     sessionPresent: Boolean,
     memberships: List<FarmMembership>,
     farmNames: Map<String, String> = emptyMap(),
+    attention: AuthAttentionState? = null,
     onSignIn: (email: String, password: String) -> Unit,
     onSelectFarm: (FarmMembership) -> Unit,
     onCreateFarm: (name: String) -> Unit,
@@ -91,32 +92,38 @@ fun FoundationAuthScreen(
                         modifier = Modifier.padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                     ) {
-                        when {
-                            !backendConfigured -> {
-                                BackendUnavailableState()
-                            }
-
-                            memberships.isNotEmpty() -> {
-                                FarmSelectionState(
-                                    memberships = memberships,
-                                    farmNames = farmNames,
-                                    busy = busy,
-                                    onSelectFarm = onSelectFarm,
-                                    onSignOut = onSignOut,
-                                )
-                            }
-
-                            sessionPresent -> {
-                                FarmSetupWizardState(
-                                    farmName = farmName,
-                                    onFarmNameChange = { farmName = it },
-                                    busy = busy,
-                                    onCreateFarm = onCreateFarm,
-                                    onSignOut = onSignOut,
-                                )
-                            }
-
-                            else -> {
+                        val screenState = resolveFoundationAuthScreenState(
+                            backendConfigured = backendConfigured,
+                            sessionPresent = sessionPresent,
+                            membershipCount = memberships.size,
+                            attention = attention,
+                        )
+                        when (screenState) {
+                            FoundationAuthScreenState.BACKEND_UNAVAILABLE -> BackendUnavailableState()
+                            FoundationAuthScreenState.FARM_SELECTION -> FarmSelectionState(
+                                memberships = memberships,
+                                farmNames = farmNames,
+                                busy = busy,
+                                onSelectFarm = onSelectFarm,
+                                onSignOut = onSignOut,
+                            )
+                            FoundationAuthScreenState.FARM_SETUP -> FarmSetupWizardState(
+                                farmName = farmName,
+                                onFarmNameChange = { farmName = it },
+                                busy = busy,
+                                onCreateFarm = onCreateFarm,
+                                onSignOut = onSignOut,
+                            )
+                            FoundationAuthScreenState.SIGN_IN -> SignInState(
+                                email = email,
+                                password = password,
+                                busy = busy,
+                                onEmailChange = { email = it },
+                                onPasswordChange = { password = it },
+                                onSignIn = onSignIn,
+                            )
+                            FoundationAuthScreenState.SESSION_EXPIRED -> {
+                                SessionExpiredState()
                                 SignInState(
                                     email = email,
                                     password = password,
@@ -125,6 +132,14 @@ fun FoundationAuthScreen(
                                     onPasswordChange = { password = it },
                                     onSignIn = onSignIn,
                                 )
+                            }
+                            FoundationAuthScreenState.FARM_ACCESS_REVOKED -> {
+                                FarmAccessRevokedState()
+                                if (memberships.isNotEmpty()) {
+                                    FarmSelectionState(memberships, farmNames, busy, onSelectFarm, onSignOut)
+                                } else {
+                                    FarmSetupWizardState(farmName, { farmName = it }, busy, onCreateFarm, onSignOut)
+                                }
                             }
                         }
                         error?.let {
@@ -265,6 +280,24 @@ private fun ColumnScope.FarmSetupWizardState(
     ) {
         Text("Sign out")
     }
+}
+
+@Composable
+private fun SessionExpiredState() {
+    Text("Session expired", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+    Text(
+        "Your saved farm data remains on this device. Sign in again before synchronization can continue.",
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+@Composable
+private fun FarmAccessRevokedState() {
+    Text("Farm access changed", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+    Text(
+        "Pending changes for the removed farm will not be sent. Choose an available farm or create one you are authorized to manage.",
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 @Composable
