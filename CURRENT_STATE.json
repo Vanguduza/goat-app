@@ -1,9 +1,9 @@
 {
   "branch": "main",
-  "observed_at_utc": "2026-09-10T16:16:21.341223+00:00",
-  "recorded_commit_count": 247,
+  "observed_at_utc": "2026-09-10T18:29:41.639798+00:00",
+  "recorded_commit_count": 3,
   "repository": "Vanguduza/goat-app",
   "schema_version": 1,
-  "source_commit": "fe96d0d522aef5e3e4029d30dee9b2694bc0759d",
-  "source_tree": "a0c125a5d007c65b107fabbd3212463444c6702e"
+  "source_commit": "bf08b90e60e2b213d9c184f2a46e30faef8e0425",
+  "source_tree": "92471089c7c5cbdabc4dd15af7a1fe4d0411d822"
 }
