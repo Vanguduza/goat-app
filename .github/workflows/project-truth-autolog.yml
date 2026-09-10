@@ -10,6 +10,13 @@ name: Project Truth Autolog
 # The ledger branch carries an orphan history and is never merged into main.
 
 on:
+  # pull_request is required: branch protection on main requires the
+  # "project-truth" status check, so this job must report on every PR or main
+  # can never be merged. It is safe now only because the recording and
+  # publishing steps below are gated on event_name == 'push' - on a PR this
+  # runs the manifest validation and nothing else, and never writes a commit
+  # to the PR branch.
+  pull_request:
   push:
     branches: [main]
   workflow_dispatch:
