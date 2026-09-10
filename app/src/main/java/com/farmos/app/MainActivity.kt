@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
                 var selectedMembership by remember { mutableStateOf(restoredMembership) }
                 var authBusy by remember { mutableStateOf(false) }
                 var authError by remember { mutableStateOf<String?>(null) }
+                var authAttention by remember { mutableStateOf<AuthAttentionState?>(null) }
                 var sessionPresent by remember { mutableStateOf(app.sessionStore.current() != null) }
                 var farmNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
 
@@ -66,7 +67,8 @@ class MainActivity : ComponentActivity() {
                     memberships = emptyList()
                     selectedMembership = null
                     authBusy = false
-                    authError = message ?: "Your session expired. Sign in again."
+                    authAttention = AuthAttentionState.SESSION_EXPIRED
+                    authError = message
                 }
                 val requireFarmReselection: (String, List<FarmMembership>) -> Unit = { message, available ->
                     app.applyAuthorizationLoss(AuthorizationLoss.FARM_ACCESS_REVOKED)
@@ -74,7 +76,8 @@ class MainActivity : ComponentActivity() {
                     memberships = available
                     selectedMembership = null
                     authBusy = false
-                    authError = message
+                    authAttention = AuthAttentionState.FARM_ACCESS_REVOKED
+                    authError = null
                 }
 
                 DisposableEffect(Unit) {
@@ -148,6 +151,19 @@ class MainActivity : ComponentActivity() {
                         }
                 }
 
+                val signOut: () -> Unit = {
+                    scope.launch {
+                        runCatching { app.identityClient?.signOut() }
+                        app.applyAuthorizationLoss(AuthorizationLoss.SESSION_EXPIRED)
+                        sessionPresent = false
+                        memberships = emptyList()
+                        selectedMembership = null
+                        farmNames = emptyMap()
+                        authError = null
+                        authAttention = null
+                    }
+                }
+
                 val membership = selectedMembership
                 if (membership == null) {
                     FoundationAuthScreen(
@@ -157,6 +173,7 @@ class MainActivity : ComponentActivity() {
                         sessionPresent = sessionPresent,
                         memberships = memberships,
                         farmNames = farmNames,
+                        attention = authAttention,
                         onSignIn = { email, password ->
                             scope.launch {
                                 authBusy = true
@@ -173,6 +190,7 @@ class MainActivity : ComponentActivity() {
                                     memberships = available
                                     farmNames = names
                                     sessionPresent = true
+                                    authAttention = null
                                 }.onFailure { error ->
                                     if (error is AuthenticationRequiredException) {
                                         requireReauthentication(error.message)
@@ -187,6 +205,7 @@ class MainActivity : ComponentActivity() {
                             selectedMembership = chosen
                             app.rememberMembership(chosen)
                             authError = null
+                            authAttention = null
                         },
                         onCreateFarm = { name ->
                             scope.launch {
@@ -206,6 +225,7 @@ class MainActivity : ComponentActivity() {
                                     val chosen = available.firstOrNull { it.farmId == created.farmId } ?: created
                                     selectedMembership = chosen
                                     app.rememberMembership(chosen)
+                                    authAttention = null
                                 }.onFailure { error ->
                                     if (error is AuthenticationRequiredException) {
                                         requireReauthentication(error.message)
@@ -216,17 +236,7 @@ class MainActivity : ComponentActivity() {
                                 authBusy = false
                             }
                         },
-                        onSignOut = {
-                            scope.launch {
-                                runCatching { app.identityClient?.signOut() }
-                                app.applyAuthorizationLoss(AuthorizationLoss.SESSION_EXPIRED)
-                                sessionPresent = false
-                                memberships = emptyList()
-                                selectedMembership = null
-                                farmNames = emptyMap()
-                                authError = null
-                            }
-                        },
+                        onSignOut = signOut,
                     )
                 } else {
                     FarmSessionContent(
@@ -235,17 +245,7 @@ class MainActivity : ComponentActivity() {
                         farmName = farmNames[membership.farmId],
                         onRequireReauth = requireReauthentication,
                         onRequireFarmReselection = requireFarmReselection,
-                        onSignOut = {
-                            scope.launch {
-                                runCatching { app.identityClient?.signOut() }
-                                app.applyAuthorizationLoss(AuthorizationLoss.SESSION_EXPIRED)
-                                sessionPresent = false
-                                memberships = emptyList()
-                                selectedMembership = null
-                                farmNames = emptyMap()
-                                authError = null
-                            }
-                        },
+                        onSignOut = signOut,
                     )
                 }
             }
