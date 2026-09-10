@@ -3,6 +3,8 @@ name: Farm OS foundation CI
 on:
   workflow_dispatch:
   pull_request:
+  push:
+    branches: [main]
 
 concurrency:
   group: foundation-ci-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}

@@ -5,7 +5,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
@@ -28,15 +27,6 @@ object FosColors {
     val Positive = AnimalFarmColors.Light.positive
     val Info = AnimalFarmColors.Light.information
     val Withdrawal = AnimalFarmColors.Light.withdrawal
-
-    // Historical illustrated-surface migration constants. They are not new theme authority.
-    val Goat = Color(0xFFA9762B)
-    val Sage = Color(0xFF4E7F52)
-    val Leaf = Color(0xFF7FB069)
-    val Sky = Color(0xFF7ECBF5)
-    val Sunlight = Color(0xFFF4E6C7)
-    val BarnRed = Color(0xFFC9483D)
-    val Soil = Color(0xFF8B6847)
 }
 
 private val FarmShapes =

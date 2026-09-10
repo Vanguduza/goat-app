@@ -2,7 +2,7 @@ name: Animal Farm handover integrity
 on:
   pull_request:
   push:
-    branches: [implementation/animal-farm-visual-lock]
+    branches: [main]
 permissions:
   contents: read
 jobs:
