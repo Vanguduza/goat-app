@@ -1,7 +1,12 @@
 name: Project Truth Autolog
 on:
+  # Scoped to main deliberately. This workflow pushes a "[skip ci]" ledger
+  # commit back to the branch it ran on. On any branch that also runs CI that
+  # commit becomes the head, and "[skip ci]" suppresses EVERY workflow on it -
+  # including the pull_request event - so a PR's checks never report and the PR
+  # is stuck "blocked". Keeping it off PR branches keeps the gates alive.
   push:
-  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: write
