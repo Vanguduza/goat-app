@@ -1,6 +1,6 @@
 schema_version: 2
 source: FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md
-authority: docs/ux/FARM_OS_VISUAL_AUTHORITY.md
+authority: docs/ux/animal-farm-visual-lock/
 state_profile: GLOBAL_16_PLUS_STATE_MATRIX
 role_profile: OWNER_MANAGER_SUPERVISOR_WORKER_VET_FINANCE_READONLY_ADMIN
 device_profile: PHONE_PLUS_TABLET_WHERE_APPLICABLE
@@ -5457,6 +5457,6 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
 
-screen_count: 537
+screen_count: 545
 visual_green_count: 0
 feature_green_claims_from_this_registry: 0

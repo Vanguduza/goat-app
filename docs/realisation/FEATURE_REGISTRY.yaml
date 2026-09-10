@@ -1,0 +1,6 @@
+schema_version: 1
+catalog_status: BLOCKED_CANONICAL_FEATURE_ID_CATALOG_NOT_FOUND
+authority_note: Do not invent Feature IDs. Bind screens/QDUs only after an owner-approved
+  or higher-authority canonical Feature-ID catalog is established.
+feature_green_claims: 0
+features: []

@@ -63,7 +63,7 @@ registry_count=$(grep -c '^  - screen_id:' docs/ux/FARM_OS_SCREEN_REGISTRY.yaml)
 if [[ "$registry_count" -lt 500 ]]; then
   echo "ERROR: quantum screen registry collapsed below atomic coverage floor: $registry_count"; exit 1
 fi
-grep -q '^screen_count: 537$' docs/ux/FARM_OS_SCREEN_REGISTRY.yaml || {
+grep -q '^screen_count: 545$' docs/ux/FARM_OS_SCREEN_REGISTRY.yaml || {
   echo 'ERROR: generated atomic screen registry is stale; run scripts/design/generate_screen_registry.py'; exit 1;
 }
 
