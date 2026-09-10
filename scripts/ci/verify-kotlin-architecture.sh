@@ -42,6 +42,7 @@ check_max_lines "app/src/main/java/com/farmos/app/InventoryModuleHost.kt" 180
 check_max_lines "app/src/main/java/com/farmos/app/HealthModuleHost.kt" 240
 check_max_lines "app/src/main/java/com/farmos/app/RabbitModuleHost.kt" 240
 check_max_lines "app/src/main/java/com/farmos/app/PoultryModuleHost.kt" 230
+check_max_lines "app/src/main/java/com/farmos/app/GroupsModuleHost.kt" 150
 
 if grep -q 'RecordPoultryFlockDay\|recordFlockDay' "app/src/main/java/com/farmos/app/OperatingModuleHost.kt"; then
   echo "ERROR: poultry flock-day mutation/read ownership leaked back into OperatingModuleHost; keep it in PoultryModuleHost." >&2
