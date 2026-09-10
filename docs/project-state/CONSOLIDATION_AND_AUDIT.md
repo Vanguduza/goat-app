@@ -112,6 +112,46 @@ Registry integrity note carried forward from `verify-pack.cjs`: the source regis
 while 545 entries exist. No IDs are dropped; the generator must preserve the eight role variants
 before it is re-run.
 
+## 4a. CI defects found and fixed during consolidation
+
+Four defects in the CI configuration surfaced while landing this work. Three of them would have
+followed the merge onto `main` silently, and the fourth would have made `main` unmergeable forever.
+
+| # | Defect | Effect if unfixed |
+|---|---|---|
+| 1 | `animal-farm-handover.yml` triggered on push to `implementation/animal-farm-visual-lock` | The Layer 3 integrity gate dies the moment that branch is deleted |
+| 2 | `foundation-ci.yml` ran only on `pull_request` / `workflow_dispatch` | Nothing verifies a push to `main` |
+| 3 | The truth autolog pushed a `[skip ci]` ledger commit onto the branch it ran on | That commit becomes the branch head and `[skip ci]` suppresses **every** workflow on it, including the `pull_request` event. PR #4 opened with zero checks and read `blocked` — nothing failing, nothing permitted to report |
+| 4 | Scoping the autolog to `push: [main]` removed its ability to report the required `project-truth` check | `main` becomes permanently unmergeable; branch protection requires that check on every PR |
+
+Defect 3 is resolved structurally rather than by scoping: the ledger now publishes to a dedicated
+`project-truth-ledger` branch with an orphan history, never merged into `main`, so no bot commit ever
+lands on a branch head again. Defect 4 is resolved by restoring the `pull_request` trigger, which is
+safe only because recording and publishing are gated on `event_name == 'push'`.
+
+A related constraint worth recording: **a push that modifies `.github/workflows/` does not trigger any
+workflow run in this repository.** The push is accepted but no run is registered — the signature of a
+pushing credential without the `workflow` scope. Verified across three commits: `bb91302` (no workflow
+change) triggered all three workflows; `93a2111` and `00f6b55` (workflow changes) triggered none. Any
+agent editing a workflow here gets silent no-CI, so a broken workflow can reach `main` unverified.
+`animal-farm-handover.yml` has no `workflow_dispatch` trigger, so on such a commit it cannot be run at
+all.
+
+## 4b. Data-layer bug found and fixed
+
+`FarmOsDatabaseMigrationTest.version1DatabaseMigratesThroughVersion13WithoutLosingFoundationData`
+failed on the emulator with `Migration didn't properly handle: animals(AnimalEntity)`.
+
+`AnimalEntity` declares `@ColumnInfo(defaultValue = "NULL")` on `poultryKindCode`, so schema v13
+expects `poultryKindCode TEXT DEFAULT NULL`. `MIGRATION_2_3` added the column without a default, so a
+database created fresh at v13 and one migrated from v1 ended up with different schemas and Room
+rejected the migrated one. **On a real device this crashes any upgrade from schema v1 or v2.**
+
+Pre-existing on the code lineage, not introduced by the consolidation. Every
+`ALTER TABLE ... ADD COLUMN` was audited against the v13 schema: this was the only mismatch, and none
+remain. `inventory_items.reorderMilli` is not a second instance — Room compares a column default only
+when the entity declares one, and it does not there.
+
 ## 5. Verifier status on the trunk
 
 | Verifier | Result |
@@ -119,7 +159,25 @@ before it is re-run.
 | `scripts/ci/verify-visual-authority.sh` | PASS (12/12 locked tokens matched) |
 | `scripts/design/verify-handover.cjs` | PASS — 39 handover files, exact bytes |
 | `docs/ux/animal-farm-visual-lock/scripts/verify-pack.cjs --self-test` | PASS — 8 negative tests, 19 hashes, 545 IDs |
-| Gradle build / unit tests / screenshots | **Not run** — no Android SDK or Gradle wrapper in this environment |
+| Gradle build / unit tests / screenshots | Not runnable locally (no Android SDK or Gradle wrapper); **verified in CI instead** |
+
+### CI evidence at the merged head
+
+All seven checks green on `091876a`:
+
+| Check | Covers |
+|---|---|
+| `android` | Kotlin compile, domain/session/sync unit tests, and both guardrail scripts |
+| `android-device-e2e` | Emulator: Room migration/restart durability and second-device authoritative visibility |
+| `supabase` | Database reset from migrations + pgTAP contracts |
+| `search-pipeline` | Search handoff, outage recovery, tenant isolation, rebuild |
+| `meilisearch-contract` | Index contract and tenant isolation against pinned Meilisearch |
+| `edge-functions` | Deno type-check of Edge Functions, CI harness shell syntax, API-key tests |
+| `project-truth` | Canonical-state manifest validation |
+
+The new autolog was additionally smoke-tested by dispatch: manifest validation and the
+`project-truth-ledger` orphan-branch checkout both ran and passed on a real runner. Its recording and
+publishing steps are gated on `push` and therefore first execute on the merge to `main`.
 
 ## 6. Also repaired
 
