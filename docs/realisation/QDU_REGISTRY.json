@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_fingerprint": "sha256:0746187a05a3aa67bcb72f1e7ced510a9379cf52afc3e693b9a84f5ea36f2b93",
+  "source_fingerprint": "sha256:e50f0ba89b39d732721e7e83e3950a87a87448828384fafa88f8b5cbe3828ae6",
   "screen_count": 545,
   "qdu_count": 545,
   "feature_binding_status": "BLOCKED_CANONICAL_FEATURE_ID_CATALOG_NOT_FOUND",
@@ -506,8 +506,8 @@
       "module": "global",
       "feature_binding_status": "UNRESOLVED_CANONICAL_FEATURE_ID_CATALOG",
       "implementation_evidence": {
-        "kotlin_reference": false,
-        "implementation_map": false
+        "kotlin_reference": true,
+        "implementation_map": true
       },
       "required_contracts": [
         "purpose_and_primary_object",
@@ -523,7 +523,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-HOME-001",

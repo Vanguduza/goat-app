@@ -60,6 +60,8 @@ fun FoundationAuthScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var farmName by remember { mutableStateOf("") }
+    var showSignOutConfirmation by remember { mutableStateOf(false) }
+    val requestSignOut = { showSignOutConfirmation = true }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Box(
@@ -105,14 +107,14 @@ fun FoundationAuthScreen(
                                 farmNames = farmNames,
                                 busy = busy,
                                 onSelectFarm = onSelectFarm,
-                                onSignOut = onSignOut,
+                                onSignOut = requestSignOut,
                             )
                             FoundationAuthScreenState.FARM_SETUP -> FarmSetupWizardState(
                                 farmName = farmName,
                                 onFarmNameChange = { farmName = it },
                                 busy = busy,
                                 onCreateFarm = onCreateFarm,
-                                onSignOut = onSignOut,
+                                onSignOut = requestSignOut,
                             )
                             FoundationAuthScreenState.SIGN_IN -> SignInState(
                                 email = email,
@@ -136,9 +138,9 @@ fun FoundationAuthScreen(
                             FoundationAuthScreenState.FARM_ACCESS_REVOKED -> {
                                 FarmAccessRevokedState()
                                 if (memberships.isNotEmpty()) {
-                                    FarmSelectionState(memberships, farmNames, busy, onSelectFarm, onSignOut)
+                                    FarmSelectionState(memberships, farmNames, busy, onSelectFarm, requestSignOut)
                                 } else {
-                                    FarmSetupWizardState(farmName, { farmName = it }, busy, onCreateFarm, onSignOut)
+                                    FarmSetupWizardState(farmName, { farmName = it }, busy, onCreateFarm, requestSignOut)
                                 }
                             }
                         }
@@ -154,6 +156,14 @@ fun FoundationAuthScreen(
             }
         }
     }
+    SignOutConfirmationDialog(
+        visible = showSignOutConfirmation,
+        onDismiss = { showSignOutConfirmation = false },
+        onConfirm = {
+            showSignOutConfirmation = false
+            onSignOut()
+        },
+    )
 }
 
 @Composable
