@@ -14,7 +14,6 @@ import com.farmos.data.herd.RoomHerdRepository
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.AcceptHealthPack
 import com.farmos.domain.ops.CompleteFarmTask
-import com.farmos.domain.ops.CreateAnimalGroup
 import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.CreateFarmTask
 import com.farmos.domain.ops.CreateFormularyItem
@@ -60,7 +59,6 @@ import com.farmos.domain.ops.ReceiveInventoryLot
 import com.farmos.domain.ops.RecordCattleDaysOnFeed
 import com.farmos.domain.ops.RecordCattleWeaning
 import com.farmos.domain.ops.RecordFamacha
-import com.farmos.domain.ops.RecordGroupCensus
 import com.farmos.domain.ops.RecordLabResult
 import com.farmos.domain.ops.RecordOfficialMovement
 import com.farmos.domain.ops.RecordReorderAlert
@@ -109,7 +107,6 @@ fun OperatingModuleHost(
     var moneyRows by remember { mutableStateOf(emptyList<String>()) }
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
-    var groupRows by remember { mutableStateOf(emptyList<String>()) }
     var paddockRows by remember { mutableStateOf(emptyList<String>()) }
     var grazingRows by remember { mutableStateOf(emptyList<String>()) }
     var labourRows by remember { mutableStateOf(emptyList<String>()) }
@@ -167,7 +164,6 @@ fun OperatingModuleHost(
                 active = animal.status == "active",
             )
         }.orEmpty()
-        groupRows = ops.groups().map { "${it.id} ${it.name} · ${it.speciesCode} · ${it.headCount}" }
         paddockRows = ops.paddocks().map { "${it.id} ${it.code} · ${it.displayName} · ${it.waterSource}" }
         grazingRows = ops.openGrazing().map { "${it.id} paddock ${it.paddockId} · group ${it.groupId}" }
         labourRows = ops.recentLabour().map { "${it.workerName} · ${it.taskCode} · ${it.minutes} min" }
@@ -466,54 +462,6 @@ fun OperatingModuleHost(
                         )
                         else -> error("Unsupported species operations module $module")
                     }
-                },
-            )
-        }
-        FarmModule.GROUPS -> {
-            val name = remember { mutableStateOf("") }
-            val species = remember { mutableStateOf("goat") }
-            val heads = remember { mutableStateOf("") }
-            val day = remember { mutableStateOf("") }
-            val groupId = remember { mutableStateOf("") }
-            SimpleCaptureScreen(
-                screenId = "FOS-GROUP-001",
-                title = "Groups",
-                help = "Groups hold shared animal membership and census records for farm operations.",
-                empty = "No groups on this device.",
-                rows = groupRows,
-                busy = busy,
-                error = error,
-                fields = listOf("Species" to species, "Name" to name, "Head count" to heads),
-                actionLabel = "Create group",
-                onSubmit = {
-                    run {
-                        ops.createGroup(
-                            CreateAnimalGroup(UUID.randomUUID().toString(), species.value, name.value, heads.value.toIntOrNull() ?: 0),
-                            newContext(),
-                        )
-                    }
-                },
-                onBack = onBack,
-                extra = {
-                    androidx.compose.material3.OutlinedTextField(groupId.value, { groupId.value = it }, label = { androidx.compose.material3.Text("Group id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(day.value, { day.value = it }, label = { androidx.compose.material3.Text("Census day") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(heads.value, { heads.value = it }, label = { androidx.compose.material3.Text("Census head count") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.Button(
-                        onClick = {
-                            run {
-                                ops.recordCensus(
-                                    RecordGroupCensus(
-                                        UUID.randomUUID().toString(),
-                                        groupId.value,
-                                        heads.value.toIntOrNull() ?: -1,
-                                        LocalDate.parse(day.value).toEpochDay(),
-                                    ),
-                                    newContext(),
-                                )
-                            }
-                        },
-                        enabled = !busy && groupId.value.isNotBlank() && heads.value.isNotBlank() && day.value.isNotBlank(),
-                    ) { androidx.compose.material3.Text("Record census") }
                 },
             )
         }
