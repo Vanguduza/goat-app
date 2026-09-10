@@ -59,7 +59,6 @@ import com.farmos.domain.ops.RecordReorderAlert
 import com.farmos.domain.ops.RecordSheepMicron
 import com.farmos.domain.ops.RecordVetVisit
 import com.farmos.domain.ops.SetInventoryReorder
-import com.farmos.domain.ops.RecordWater
 import com.farmos.domain.rabbit.AgreeRabbitContract
 import com.farmos.domain.rabbit.BindRabbitBedding
 import com.farmos.domain.rabbit.DecideRabbitRetention
@@ -100,7 +99,6 @@ fun OperatingModuleHost(
     var moneyRows by remember { mutableStateOf(emptyList<String>()) }
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
-    var waterRows by remember { mutableStateOf(emptyList<String>()) }
     var saleRows by remember { mutableStateOf(emptyList<String>()) }
     var catalogRows by remember { mutableStateOf(emptyList<String>()) }
     var treatmentRows by remember { mutableStateOf(emptyList<String>()) }
@@ -152,7 +150,6 @@ fun OperatingModuleHost(
                 active = animal.status == "active",
             )
         }.orEmpty()
-        waterRows = ops.recentWater().map { "${it.source} · ${it.litresMilli} ml" }
         saleRows = ops.recentSales().map { "${it.itemKind} · ${it.amountMinor} ${it.currency}" }
         catalogRows = ops.diseases().map { "${it.speciesCode} · ${it.displayName} · ${it.firstAid}" }
         treatmentRows = ops.recentTreatments().map { "${it.speciesCode} · ${it.reason} · formulary ${it.formularyItemId}" }
@@ -446,32 +443,6 @@ fun OperatingModuleHost(
                         else -> error("Unsupported species operations module $module")
                     }
                 },
-            )
-        }
-        FarmModule.WATER -> {
-            val source = remember { mutableStateOf("trough") }
-            val litres = remember { mutableStateOf("") }
-            val day = remember { mutableStateOf("") }
-            SimpleCaptureScreen(
-                screenId = "FOS-WATER-001",
-                title = "Water",
-                help = "Enter litres as a figure. The device stores milli-litres.",
-                empty = "No water records on this device.",
-                rows = waterRows,
-                busy = busy,
-                error = error,
-                fields = listOf("Source" to source, "Litres" to litres, "Date" to day),
-                actionLabel = "Record water",
-                onSubmit = {
-                    run {
-                        val amount = litres.value.replace(',', '.').toDoubleOrNull() ?: error("Enter litres")
-                        ops.recordWater(
-                            RecordWater(UUID.randomUUID().toString(), source.value, (amount * 1000.0).toLong(), LocalDate.parse(day.value).toEpochDay()),
-                            newContext(),
-                        )
-                    }
-                },
-                onBack = onBack,
             )
         }
         FarmModule.WAITLIST -> {
