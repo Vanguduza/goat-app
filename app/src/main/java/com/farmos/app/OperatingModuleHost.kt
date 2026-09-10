@@ -18,9 +18,7 @@ import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.CreateFarmTask
 import com.farmos.domain.ops.CreateFormularyItem
 import com.farmos.domain.ops.CreateInventoryItem
-import com.farmos.domain.ops.CreatePaddock
 import com.farmos.domain.ops.CreateSupplier
-import com.farmos.domain.ops.EndGrazing
 import com.farmos.domain.ops.IssueFeed
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.RecordCattleBcs
@@ -66,7 +64,6 @@ import com.farmos.domain.ops.RecordSheepMicron
 import com.farmos.domain.ops.RecordVetVisit
 import com.farmos.domain.ops.SetInventoryReorder
 import com.farmos.domain.ops.RecordWater
-import com.farmos.domain.ops.StartGrazing
 import com.farmos.domain.rabbit.AgreeRabbitContract
 import com.farmos.domain.rabbit.BindRabbitBedding
 import com.farmos.domain.rabbit.DecideRabbitRetention
@@ -107,8 +104,6 @@ fun OperatingModuleHost(
     var moneyRows by remember { mutableStateOf(emptyList<String>()) }
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
-    var paddockRows by remember { mutableStateOf(emptyList<String>()) }
-    var grazingRows by remember { mutableStateOf(emptyList<String>()) }
     var labourRows by remember { mutableStateOf(emptyList<String>()) }
     var assetRows by remember { mutableStateOf(emptyList<String>()) }
     var feedRows by remember { mutableStateOf(emptyList<String>()) }
@@ -164,8 +159,6 @@ fun OperatingModuleHost(
                 active = animal.status == "active",
             )
         }.orEmpty()
-        paddockRows = ops.paddocks().map { "${it.id} ${it.code} · ${it.displayName} · ${it.waterSource}" }
-        grazingRows = ops.openGrazing().map { "${it.id} paddock ${it.paddockId} · group ${it.groupId}" }
         labourRows = ops.recentLabour().map { "${it.workerName} · ${it.taskCode} · ${it.minutes} min" }
         assetRows = ops.assets().map { "${it.id} ${it.code} · ${it.name}" }
         feedRows = ops.recentFeed().map { "${it.itemId} · ${it.quantityMilli} milli" }
@@ -462,64 +455,6 @@ fun OperatingModuleHost(
                         )
                         else -> error("Unsupported species operations module $module")
                     }
-                },
-            )
-        }
-        FarmModule.PASTURE -> {
-            val code = remember { mutableStateOf("") }
-            val display = remember { mutableStateOf("") }
-            val water = remember { mutableStateOf("trough") }
-            val paddockId = remember { mutableStateOf("") }
-            val groupId = remember { mutableStateOf("") }
-            val heads = remember { mutableStateOf("") }
-            val entered = remember { mutableStateOf("") }
-            val sessionId = remember { mutableStateOf("") }
-            val exited = remember { mutableStateOf("") }
-            SimpleCaptureScreen(
-                screenId = "FOS-PASTURE-001",
-                title = "Pasture",
-                help = "One group grazes one paddock at a time. Rest starts when the session ends.",
-                empty = "No paddocks on this device.",
-                rows = paddockRows + grazingRows,
-                busy = busy,
-                error = error,
-                fields = listOf("Code" to code, "Name" to display, "Water source" to water),
-                actionLabel = "Create paddock",
-                onSubmit = {
-                    run {
-                        ops.createPaddock(
-                            CreatePaddock(UUID.randomUUID().toString(), code.value, display.value.ifBlank { code.value }, waterSource = water.value, shade = true),
-                            newContext(),
-                        )
-                    }
-                },
-                onBack = onBack,
-                extra = {
-                    androidx.compose.material3.OutlinedTextField(paddockId.value, { paddockId.value = it }, label = { androidx.compose.material3.Text("Paddock id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(groupId.value, { groupId.value = it }, label = { androidx.compose.material3.Text("Group id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(heads.value, { heads.value = it }, label = { androidx.compose.material3.Text("Head count") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(entered.value, { entered.value = it }, label = { androidx.compose.material3.Text("Enter date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.Button(
-                        onClick = {
-                            run {
-                                ops.startGrazing(
-                                    StartGrazing(UUID.randomUUID().toString(), paddockId.value, groupId.value, heads.value.toIntOrNull() ?: 0, LocalDate.parse(entered.value).toEpochDay()),
-                                    newContext(),
-                                )
-                            }
-                        },
-                        enabled = !busy && paddockId.value.isNotBlank() && groupId.value.isNotBlank() && entered.value.isNotBlank(),
-                    ) { androidx.compose.material3.Text("Start grazing") }
-                    androidx.compose.material3.OutlinedTextField(sessionId.value, { sessionId.value = it }, label = { androidx.compose.material3.Text("Session id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(exited.value, { exited.value = it }, label = { androidx.compose.material3.Text("Exit date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.Button(
-                        onClick = {
-                            run {
-                                ops.endGrazing(EndGrazing(sessionId.value, LocalDate.parse(exited.value).toEpochDay()), newContext())
-                            }
-                        },
-                        enabled = !busy && sessionId.value.isNotBlank() && exited.value.isNotBlank(),
-                    ) { androidx.compose.material3.Text("End grazing") }
                 },
             )
         }
