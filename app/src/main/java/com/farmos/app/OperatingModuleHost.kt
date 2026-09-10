@@ -35,7 +35,6 @@ import com.farmos.domain.ops.RecordSheepShearing
 import com.farmos.domain.ops.RecordSheepFootrot
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
-import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
 import com.farmos.domain.ops.RecordMoney
 import com.farmos.domain.ops.RecordPurchase
@@ -104,7 +103,6 @@ fun OperatingModuleHost(
     var moneyRows by remember { mutableStateOf(emptyList<String>()) }
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
-    var labourRows by remember { mutableStateOf(emptyList<String>()) }
     var assetRows by remember { mutableStateOf(emptyList<String>()) }
     var feedRows by remember { mutableStateOf(emptyList<String>()) }
     var waterRows by remember { mutableStateOf(emptyList<String>()) }
@@ -159,7 +157,6 @@ fun OperatingModuleHost(
                 active = animal.status == "active",
             )
         }.orEmpty()
-        labourRows = ops.recentLabour().map { "${it.workerName} · ${it.taskCode} · ${it.minutes} min" }
         assetRows = ops.assets().map { "${it.id} ${it.code} · ${it.name}" }
         feedRows = ops.recentFeed().map { "${it.itemId} · ${it.quantityMilli} milli" }
         waterRows = ops.recentWater().map { "${it.source} · ${it.litresMilli} ml" }
@@ -456,32 +453,6 @@ fun OperatingModuleHost(
                         else -> error("Unsupported species operations module $module")
                     }
                 },
-            )
-        }
-        FarmModule.LABOUR -> {
-            val worker = remember { mutableStateOf("") }
-            val code = remember { mutableStateOf("CHECK") }
-            val minutes = remember { mutableStateOf("") }
-            val day = remember { mutableStateOf("") }
-            SimpleCaptureScreen(
-                screenId = "FOS-LABOUR-001",
-                title = "Labour",
-                help = "Minutes are whole figures. Worker name is a farm label, not a login.",
-                empty = "No labour entries on this device.",
-                rows = labourRows,
-                busy = busy,
-                error = error,
-                fields = listOf("Worker" to worker, "Task code" to code, "Minutes" to minutes, "Date" to day),
-                actionLabel = "Record labour",
-                onSubmit = {
-                    run {
-                        ops.recordLabour(
-                            RecordLabour(UUID.randomUUID().toString(), worker.value, code.value, minutes.value.toIntOrNull() ?: 0, LocalDate.parse(day.value).toEpochDay()),
-                            newContext(),
-                        )
-                    }
-                },
-                onBack = onBack,
             )
         }
         FarmModule.ASSETS -> {
