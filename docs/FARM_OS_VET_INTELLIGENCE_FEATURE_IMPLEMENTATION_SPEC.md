@@ -1,3 +1,167 @@
+# Farm OS — Vet Intelligence & Expert Research → Usable Features
+
+**Version:** 1.0 · **Date:** 22 August 2026
+**Purpose:** Turn the veterinary expert research pack (`FARM_OS_VETERINARY_EXPERT_RESEARCH_PACK.md`), the shared Health module (`FARM_OS_HEALTH_MODULE_SPEC.md`) and the embedded AI module (`FARM_OS_EMBEDDED_AI_MODULE_SPEC.md`) into **implemented, usable features**: concrete backend tables, domain engines, and screen-by-screen UX flows.
+**Governs:** WHAT ships for vet-level intelligence. HOW it ships (gates, EDRs, tenancy) is governed by `FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md`.
+**Hosting law unchanged:** app + Supabase only. AI advisory-only. Species-native UX.
+
+---
+
+## Contents
+
+| § | Title |
+|---|-------|
+| 1 | The knowledge pipeline: research pack → shipped feature |
+| 2 | Backend: knowledge base schema (seeded content + farm acceptance) |
+| 3 | Backend: clinical recording & intelligence projections |
+| 4 | Domain engines (Kotlin) |
+| 5 | UX flows: daily intelligence surfaces |
+| 6 | UX flows: clinical capture forms |
+| 7 | UX flows: protocol packs & vet acceptance |
+| 8 | UX flows: Copilot & anomaly triage |
+| 9 | Roles, safety gates & withdrawal enforcement |
+| 10 | Offline behaviour |
+| 11 | Seeding plan (what ships in the APK/Supabase on day 1) |
+| 12 | Acceptance tests & golden fixtures |
+| 13 | Traceability |
+
+---
+
+## 1. The knowledge pipeline: research pack → shipped feature
+
+The research data becomes usable only through this pipeline. Every expert fact must land in one of four sinks — never in prose alone:
+
+```
+Vet research pack / health spec / ICAR sources
+   |
+   v
+[Knowledge seed]  structured rows, versioned, shipped as SQL seeds + APK assets
+   |-- disease_catalog        (signs, first aid, vet_class, red_flag, zoonotic)
+   |-- formulary class rules  (class list; farm adds labelled products)
+   |-- health_tips            (60+ tips, season/module tagged)
+   |-- score definitions      (FAMACHA 1-5, BCS 1-5 / 1-9, locomotion, flystrike)
+   |-- kpi_definitions        (ICAR formulas: kid/lamb survival, hen-housed eggs,
+   |                           calving interval, SCC flag, FCR, hatchability)
+   |-- protocol_pack_templates (CDT, ND, RHDV..., slots + offsets per species/kind)
+   |-- copilot_skills         (module briefing Markdown, kind-aware)
+   v
+[Farm acceptance layer]  the farm's vet accepts/adapts -> health_protocol_packs (vet_accepted)
+   v
+[Task engine]  accepted packs generate WorkManager tasks at locked offsets
+   v
+[Intelligence layer]  recorded data -> charts -> Lane A anomalies -> action drafts -> Copilot explainers
+   v
+[Screens]  Health Today board, dashboard tip card, animal timeline, outbreak path, withdrawal board
+```
+
+Rules:
+
+1. A research fact with no sink is not a feature. It either maps to a seed table, a score definition, a KPI, or a Copilot skill — or it stays out of the product.
+2. Seeds are **content**, not code changes: shipped via versioned seed migrations + bundled JSON so updates don't require an APK rebuild for content-only fixes where Supabase serves the table.
+3. Farm-level clinical authority always sits in the **accepted pack**, never in the raw catalog. Catalog = education; pack = operational truth.
+
+## 2. Backend: knowledge base schema
+
+Extends the health spec §2 tables. New/changed DDL (additive, `farm_id` + RLS on all farm-scoped rows):
+
+```sql
+-- 2.1 Score definitions (global reference content, read-only to apps)
+CREATE TABLE score_definitions (
+    code TEXT PRIMARY KEY,              -- famacha_goat, bcs_ruminant_15, bcs_beef_19, locomotion_cattle, flystrike_awi
+    species_codes TEXT[] NOT NULL,
+    scale_min INT NOT NULL,
+    scale_max INT NOT NULL,
+    labels JSONB NOT NULL,              -- { "1": "...", "2": "..." } display text per step
+    interpretation JSONB NOT NULL,      -- { "4": {"risk":"anaemia likely","action_code":"selective_drench_check"} , ...}
+    source TEXT NOT NULL                -- citation from vet pack §8
+);
+
+-- 2.2 KPI definitions (ICAR etc.), computed on-device from ledger/projections
+CREATE TABLE kpi_definitions (
+    code TEXT PRIMARY KEY,              -- kid_survival_90d, hen_housed_eggs, calving_interval_d
+    species_codes TEXT[] NOT NULL,
+    formula TEXT NOT NULL,              -- human-readable + machine evaluable DSL ref
+    unit TEXT NOT NULL,
+    direction TEXT NOT NULL,            -- higher_better | lower_better
+    target_source TEXT NOT NULL,        -- farm_config | purpose_pack | none
+    source TEXT NOT NULL
+);
+
+-- 2.3 Action catalog: the closed vocabulary of corrective actions (AI spec §4.2)
+CREATE TABLE action_catalog (
+    code TEXT PRIMARY KEY,              -- open_health_pack, call_vet, reweigh_7d, fec_check, biosecurity_walk ...
+    species_codes TEXT[] NOT NULL,
+    requires_role TEXT,                 -- null=any, 'vet', 'breeding_mgr'
+    creates_task_template JSONB,        -- optional task draft shape
+    side_effect_class TEXT NOT NULL DEFAULT 'local_record'
+);
+
+-- 2.4 Copilot skills registry (skills ship as Markdown assets; registry enables per module)
+CREATE TABLE copilot_skills (
+    code TEXT PRIMARY KEY,              -- goat-kidding-briefing, poultry-house-briefing
+    module_ids TEXT[] NOT NULL,
+    asset_path TEXT NOT NULL,
+    min_role TEXT NOT NULL DEFAULT 'worker',
+    version INT NOT NULL DEFAULT 1
+);
+
+-- 2.5 Withdrawal clocks live with treatments (health spec); add sale-blocking projection:
+CREATE TABLE withdrawal_board (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    animal_id UUID REFERENCES animals(id),
+    group_id UUID REFERENCES animal_groups(id),
+    product_id UUID NOT NULL REFERENCES formulary_items(id),
+    meat_until DATE,
+    milk_until DATE,
+    egg_until DATE,
+    source_treatment_id UUID NOT NULL,
+    CHECK (animal_id IS NOT NULL OR group_id IS NOT NULL)
+);
+CREATE INDEX idx_withdrawal_board_farm_active ON withdrawal_board (farm_id, meat_until, milk_until, egg_until);
+
+-- 2.6 Seed bookkeeping
+CREATE TABLE knowledge_seed_versions (
+    seed_set TEXT PRIMARY KEY,          -- disease_catalog, health_tips, ...
+    version INT NOT NULL,
+    applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+RLS notes: `score_definitions`, `kpi_definitions`, `action_catalog`, `copilot_skills` are **global registries** (no farm_id) — readable by all authenticated users, writable only by service role during seeding. `withdrawal_board` and every farm-scoped table carries `farm_id = auth.jwt() ->> 'farm_id'`.
+
+---
+
+## 3. Backend: clinical recording & intelligence projections
+
+Already specified elsewhere; restated here **only as implementation wiring** (these are dependencies, not redesigns):
+
+- Health events, treatments, vaccination records: `FARM_OS_HEALTH_MODULE_SPEC.md` §0–§2 (event core, treatments referencing `formulary_items.id`).
+- Measurements (weight, milk, eggs, scores): master plan measurement tables; each score row references `score_definitions.code`.
+- Anomaly/recommendation projections: AI spec §8 (`analytics_anomalies`, `analytics_recommendations`, `ai_audit`).
+- Breeding programme tables: breeding programme spec §schema (nest boxes, matings, COI).
+
+New projection required by this spec:
+
+```sql
+-- Cohort baselines for Lane A (rebuildable from measurements; refreshed by worker)
+CREATE TABLE analytics_cohort_baselines (
+    farm_id UUID NOT NULL REFERENCES farms(id),
+    feature_code TEXT NOT NULL,          -- growth_adg, egg_rate, mortality_daily ...
+    species_code TEXT NOT NULL,
+    poultry_kind_code TEXT,
+    purpose_code TEXT,                   -- meat, layer, breeder, dairy...
+    window_days INT NOT NULL DEFAULT 30,
+    median NUMERIC(12,4) NOT NULL,
+    mad NUMERIC(12,4) NOT NULL,
+    n_points INT NOT NULL,
+    refreshed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (farm_id, feature_code, species_code, poultry_kind_code, purpose_code, window_days)
+);
+```
+
+Lane A detection reads baselines; recomputation is a WorkManager job after sync (idempotent upsert). Baselines are derived state — rebuildable from the ledger (handbook Ch.7).
+
 ## 4. Domain engines (Kotlin, in `:domain-*`)
 
 | Engine | Module | Responsibility | Key inputs → outputs |

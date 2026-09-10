@@ -1,0 +1,789 @@
+{
+  "schema_version": 1,
+  "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
+  "tested_commit": "3a5a2992fea4919c57957441f67590c72df51fd2",
+  "registry": {
+    "exact_entries": 545,
+    "unique_entries": 545,
+    "static_implementation_map_unique_registered_ids": 125,
+    "registered_ids_absent_from_static_implementation_map": 420,
+    "registered_ids_mentioned_in_kotlin": 116
+  },
+  "top_level": {
+    "farm_modules": [
+      "HOME",
+      "GOAT",
+      "RABBIT",
+      "SHEEP",
+      "CATTLE",
+      "POULTRY",
+      "TASKS",
+      "HEALTH",
+      "MONEY",
+      "INVENTORY",
+      "GROUPS",
+      "PASTURE",
+      "LABOUR",
+      "ASSETS",
+      "FEED",
+      "WATER",
+      "SALES",
+      "PROCUREMENT",
+      "WAITLIST"
+    ],
+    "role_personas": [
+      "OWNER",
+      "MANAGER",
+      "SUPERVISOR",
+      "WORKER",
+      "BREEDING",
+      "VET",
+      "FINANCE",
+      "BUYER",
+      "GENERAL"
+    ],
+    "auth_render_states": [
+      "BackendUnavailableState",
+      "SignInState",
+      "FarmSelectionState",
+      "FarmSetupWizardState"
+    ],
+    "home_nested_destinations": [
+      "home",
+      "animals",
+      "more"
+    ]
+  },
+  "state_machines": [
+    {
+      "enum": "GoatPage",
+      "declaration_file": "feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatExperienceModels.kt",
+      "implementation_files": [
+        "feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatExperienceModels.kt",
+        "feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatExperienceScreen.kt"
+      ],
+      "states": [
+        {
+          "value": "DASHBOARD",
+          "refs": 7,
+          "transition_refs": 6,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HERD",
+          "refs": 7,
+          "transition_refs": 6,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PROFILE",
+          "refs": 9,
+          "transition_refs": 8,
+          "render_only_candidate": false
+        },
+        {
+          "value": "REGISTER",
+          "refs": 3,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WEIGHT",
+          "refs": 4,
+          "transition_refs": 3,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HEALTH",
+          "refs": 3,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "REPRODUCTION",
+          "refs": 5,
+          "transition_refs": 4,
+          "render_only_candidate": false
+        },
+        {
+          "value": "KIDDING",
+          "refs": 4,
+          "transition_refs": 3,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SEARCH",
+          "refs": 3,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SYNC",
+          "refs": 3,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "STATUS_CHANGE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        }
+      ]
+    },
+    {
+      "enum": "RabbitPage",
+      "declaration_file": "feature/rabbit/src/main/kotlin/com/farmos/feature/rabbit/RabbitProgrammeScreen.kt",
+      "implementation_files": [
+        "feature/rabbit/src/main/kotlin/com/farmos/feature/rabbit/RabbitProgrammeScreen.kt"
+      ],
+      "states": [
+        {
+          "value": "DASHBOARD",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "ANIMALS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "REGISTER",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "CAGES",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WAVE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PALPATION",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "KINDLING",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FOSTER",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WEAN",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "OUTCOME",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "NESTS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "GI_STASIS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        }
+      ]
+    },
+    {
+      "enum": "SpeciesPage",
+      "declaration_file": "app/src/main/java/com/farmos/app/SpeciesHerdScreen.kt",
+      "implementation_files": [
+        "app/src/main/java/com/farmos/app/SpeciesHerdScreen.kt"
+      ],
+      "states": [
+        {
+          "value": "DASHBOARD",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HERD",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PROFILE",
+          "refs": 3,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "REGISTER",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WEIGHT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "OPERATIONS",
+          "refs": 3,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "STATUS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        }
+      ]
+    },
+    {
+      "enum": "InventoryPage",
+      "declaration_file": "feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryExperienceScreen.kt",
+      "implementation_files": [
+        "feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryExperienceScreen.kt"
+      ],
+      "states": [
+        {
+          "value": "DASHBOARD",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "ITEMS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "CREATE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "RECEIVE",
+          "refs": 4,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "ISSUE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "RECEIVE_LOT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FEFO_ISSUE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "REORDER_RULE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "REORDER_ALERT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        }
+      ]
+    },
+    {
+      "enum": "HealthPage",
+      "declaration_file": "feature/ops/src/main/kotlin/com/farmos/feature/ops/HealthExperienceScreen.kt",
+      "implementation_files": [
+        "feature/ops/src/main/kotlin/com/farmos/feature/ops/HealthExperienceScreen.kt"
+      ],
+      "states": [
+        {
+          "value": "DASHBOARD",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "OBSERVATIONS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "RECORD_OBSERVATION",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FORMULARY",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "TREATMENT",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WITHDRAWALS",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "REFERENCES",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PROTOCOLS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "ACCEPT_PROTOCOL",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "EDIT_PROTOCOL",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "APPLY_PROTOCOL",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "VET_VISIT",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LAB_RESULT",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        }
+      ]
+    },
+    {
+      "enum": "SheepOpsPage",
+      "declaration_file": "feature/ops/src/main/kotlin/com/farmos/feature/ops/SheepOperationsScreen.kt",
+      "implementation_files": [
+        "feature/ops/src/main/kotlin/com/farmos/feature/ops/SheepOperationsScreen.kt"
+      ],
+      "states": [
+        {
+          "value": "HOME",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "JOINING",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SCAN",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LAMBING",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "MARKING",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WEANING",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WOOL",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SHEARING",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "MICRON",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FAMACHA",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "DAG",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FOOTROT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FLYSTRIKE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "IDENTIFIER",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "MOVEMENT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PEDIGREE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        }
+      ]
+    },
+    {
+      "enum": "CattleOpsPage",
+      "declaration_file": "feature/ops/src/main/kotlin/com/farmos/feature/ops/CattleOperationsScreen.kt",
+      "implementation_files": [
+        "feature/ops/src/main/kotlin/com/farmos/feature/ops/CattleOperationsScreen.kt"
+      ],
+      "states": [
+        {
+          "value": "HOME",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SERVICE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PD",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "CALVING",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "BCS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "MILK",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LOCOMOTION",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SCC",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "DRY_OFF",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WEANING",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "IDENTIFIER",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "MOVEMENT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PEDIGREE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LOT_PLACE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "DAYS_ON_FEED",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LOT_CLOSE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        }
+      ]
+    },
+    {
+      "enum": "PoultryPage",
+      "declaration_file": "feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryExperienceScreen.kt",
+      "implementation_files": [
+        "feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryExperienceScreen.kt"
+      ],
+      "states": [
+        {
+          "value": "DASHBOARD",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "KINDS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HOUSES",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FLOCKS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PLACEMENT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "DAILY",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HATCHERY",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SET_EGGS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "CANDLING",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HATCH_RESULT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "VACCINATION",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "BIOSECURITY",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        }
+      ]
+    },
+    {
+      "enum": "FinancePage",
+      "declaration_file": "feature/ops/src/main/kotlin/com/farmos/feature/ops/FinanceExperienceScreen.kt",
+      "implementation_files": [
+        "feature/ops/src/main/kotlin/com/farmos/feature/ops/FinanceExperienceScreen.kt"
+      ],
+      "states": [
+        {
+          "value": "DASHBOARD",
+          "refs": 5,
+          "transition_refs": 3,
+          "render_only_candidate": false
+        },
+        {
+          "value": "TRANSACTIONS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "INCOME",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "EXPENSE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        }
+      ]
+    },
+    {
+      "enum": "TaskTab",
+      "declaration_file": "feature/ops/src/main/kotlin/com/farmos/feature/ops/TasksBoardScreen.kt",
+      "implementation_files": [
+        "feature/ops/src/main/kotlin/com/farmos/feature/ops/TasksBoardScreen.kt"
+      ],
+      "states": [
+        {
+          "value": "TODAY",
+          "refs": 5,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "UPCOMING",
+          "refs": 4,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "COMPLETED",
+          "refs": 4,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        }
+      ]
+    }
+  ],
+  "findings": {
+    "render_only_state_candidates": [],
+    "operating_module_host_callers": [
+      "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
+      "app/src/main/java/com/farmos/app/OperatingModuleHost.kt"
+    ],
+    "operating_module_branches_preempted_by_dedicated_hosts": [
+      "TASKS",
+      "HEALTH",
+      "MONEY",
+      "INVENTORY"
+    ],
+    "direct_action_scope_violations": [],
+    "feature_id_catalog": "NOT_FOUND: screen contract template requires feature_ids, but no canonical feature-ID catalog was found in docs/code search"
+  },
+  "limitations": [
+    "This report is derived from checked-out Kotlin state machines and source text; it is not an instrumented runtime traversal.",
+    "A composable declaration, source-map association, or FOS comment is not treated as proof of reachability.",
+    "Dialogs/sheets implemented only as local booleans may require interaction tests before they can be enumerated completely.",
+    "Authorization, restoration, deep links, return behavior, and parameter scoping remain unverified until executed tests exist."
+  ]
+}

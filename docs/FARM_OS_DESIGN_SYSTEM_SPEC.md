@@ -1,3 +1,8 @@
+> Owner-directed presentation amendment — 6 September 2026: `docs/ux/animal-farm-visual-lock/` supersedes conflicting visual descriptions below. Start with `docs/ux/ANIMAL_FARM_COLD_START_RESUME.md`. Earlier visual assets, intensity prescriptions and approval claims are historical provenance, not current Animal Farm visual authority. Screen IDs, feature scope, role authorization, domain safety, architecture, offline and evidence requirements remain binding. This checkpoint does not certify native visuals or features.
+
+> **SUPERSESSION NOTICE — 05 September 2026**
+> The illustrated Farm OS visual family defined in `docs/ux/FARM_OS_VISUAL_AUTHORITY.md` and `docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md` supersedes this document wherever this v1 spec bans illustration, limits the product to a single-font visual identity, or otherwise conflicts with the locked illustrated reference family. Field usability, accessibility, data-density, safety, offline clarity and evidence gates remain binding. Existing values below are historical implementation tokens until re-derived from the canonical visual family.
+
 # Farm OS — Design System Spec ("Field-first visual language")
 
 **Version:** 1.0 · **Date:** 22 August 2026
@@ -13,10 +18,10 @@
 |---|---|
 | Default Material purple/blue, gradient buttons | One brand colour, used sparingly; zero gradients in controls |
 | Emoji in UI copy and empty states | Never. Icons from one set; words from the voice guide |
-| Everything rounded 28dp+, floating cards everywhere | Radii scale ≤16dp; flat surfaces, hairline borders, tone-shift elevation |
+| Uncontrolled rounded geometry / floating SaaS cards | Use the locked soft Farm OS geometry: 10dp inputs, 14dp controls, 20dp cards, 24dp hero/story surfaces; elevation remains restrained |
 | Generic copy: "Welcome to your amazing farm!" | Species-correct, terse, sentence case; empty states state the next action |
 | Random spacing, mixed text sizes per screen | 4dp grid + fixed type scale; nothing off-scale |
-| Decorative illustrations, glassmorphism, neon dark mode | None. Dark mode is a true tonal counterpart, not inverted neon |
+| Uncontrolled/inconsistent illustration, glassmorphism, neon dark mode | Illustration is required where assigned by I1–I3 visual classes and must inherit the canonical Farm OS family; glassmorphism/neon remain forbidden |
 | Every screen invented ad hoc | Screens assemble from the shared component library + named patterns |
 
 ## 1. Design principles
@@ -36,15 +41,15 @@ Defined once in `:core-design/theme/FosColors.kt` (+ XML equivalent); features m
 
 | Token | Hex | Use |
 |---|---|---|
-| `brand/primary` | #2C5539 | Primary actions, active nav, links |
+| `brand/primary` | #1E4D2B | Primary actions, active nav, links |
 | `brand/onPrimary` | #FFFFFF | |
-| `brand/primaryContainer` | #DDE8DD | Selected backgrounds |
-| `surface/canvas` | #FAFAF6 | App background (warm paper, not white) |
-| `surface/card` | #FFFFFF | Cards, sheets |
+| `brand/primaryContainer` | #E2EFE3 | Selected backgrounds |
+| `surface/canvas` | #F8F5EC | App background (warm paper, not white) |
+| `surface/card` | #FFFCF3 | Cards, sheets |
 | `surface/sunken` | #F1F1EA | Wells, chart plots |
-| `text/primary` | #1B1D1A | |
-| `text/secondary` | #5A5D57 | Labels, metadata |
-| `border/hairline` | #E3E4DC | Card outlines, dividers |
+| `text/primary` | #1F2937 | |
+| `text/secondary` | #526157 | Labels, metadata |
+| `border/hairline` | #D8DED6 | Card outlines, dividers |
 | `status/critical` | #B3261E | Red flags, withdrawal breach |
 | `status/warning` | #8A5A00 | Watch anomalies, low stock |
 | `status/positive` | #2E6B34 | Positive anomaly, ready state |
@@ -70,7 +75,7 @@ Contrast floors: text 4.5:1 (7:1 outdoor), icons/status 3:1. Verified in §14 CI
 
 ## 3. Typography
 
-Single family: **Inter** (variable, bundled). Tabular figures for all numeric data. No second family anywhere.
+Operational typography is **Inter** with tabular figures for numeric data. **Caveat** is the locked handwritten accent family for approved emotional brand copy on I1/I2 surfaces only; never for critical data, forms, safety copy or tables. Both variable fonts are bundled under `core/design/src/main/res/font/` with SIL OFL licence texts in `docs/ux/licenses/`.
 
 | Style | Size/Line | Weight | Use |
 |---|---|---|---|
@@ -88,7 +93,7 @@ Rules: sentence case everywhere (no ALL CAPS headers, no title case buttons); da
 ## 4. Spacing, shape, elevation, iconography
 
 - **Grid:** 4dp base. Screen margin 16dp; card padding 16dp; list item 56dp min; intra-card gap 12dp; section gap 24dp.
-- **Radii scale (only these):** 8dp (inputs, chips), 12dp (cards, sheets), 16dp (bottom sheets max). Buttons 8dp. **No pill buttons, no 28dp cards.**
+- **Illustrated geometry scale:** 10dp (compact/input), 14dp (control), 20dp (operational card), 24dp (hero/story surface). Primary actions may use the soft rounded/capsule treatment shown in the locked reference. Do not extrapolate into bubble-heavy SaaS UI.
 - **Borders over shadows:** cards are `surface/card` + 1dp `border/hairline`. Elevation reserved for: FAB (level 1), drag states, modal sheets (level 2). No drop shadows on lists or tiles.
 - **Icons:** Material Symbols (rounded variant), one weight, 20/24dp, always with text label in buttons. Species glyphs only in identity chips. No emoji, ever.
 - **Touch targets:** ≥48dp (64dp outdoor). Primary action per screen = one filled button; everything else tonal/text.
@@ -119,7 +124,7 @@ Input chips for filters (8dp radius, hairline, selected = `primaryContainer`). S
 
 ### 5.4 Empty states
 
-Structure: icon (24dp, `text/secondary`) → one-line statement → one action button. No illustration, no apology, no emoji.
+Structure depends on visual class. I1/I2 major empty states use a canonical illustrated empty-state asset; I3/I4 operational empty states remain concise icon/text/action surfaces. No emoji or unrelated illustration family.
 
 > "No health actions today. Next task: CDT booster — 12 May." `[View schedule]`
 
@@ -229,7 +234,7 @@ A UI task is done only when:
 
 Repo consulting produced generic apps because agents (a) write UI without ever seeing rendered pixels and (b) converge on the *average* aesthetic of whatever they consult. These ten guardrails eliminate both failure modes. Binding on humans and agents.
 
-1. **Authority split — repos are engineering references, never visual ones.** Now in Android et al. are consulted for module graphs, test harnesses, sync plumbing — cited by file path in PRs. Consulting any external repo for layout, spacing, colour or component choice is forbidden; the only visual authority is this spec (`FARM_OS_DESIGN_SYSTEM_SPEC.md`). An agent needing a layout decision cites a §6 pattern code, not a repo screen.
+1. **Authority split — repos are engineering references, never visual ones.** Now in Android et al. are consulted for module graphs, test harnesses, sync plumbing — cited by file path in PRs. Consulting any external repo for layout, spacing, colour or component choice is forbidden. Canonical visual authority is `docs/ux/FARM_OS_VISUAL_AUTHORITY.md` plus the REV 2 Screen Atlas. An agent needing a layout decision cites its `FOS-*` Screen ID and canonical visual lineage, not a repo screen.
 2. **Design-before-code.** Every new screen lands in the Gallery debug app **first**, built from patterns/tokens with realistic fixtures, screenshotted, and approved by the owner **before** the integration PR exists. A screen that never appeared in the Gallery cannot ship. This converts "taste debates in code review" into cheap pixel reviews.
 3. **Realistic-fixture law.** All previews, screenshot tests, demo mode and gallery entries render the named fixture dataset — Nala (goat, FAMACHA 3, ADG 118 g/d), Cage B KudBat wave dates, August money records. Forbidden in any committed UI code or test asset: `Lorem`, `Item 1`, `Test`, `Sample`, `John Doe`, `foo`, placeholder avatars. Generic fixtures produce generic-feeling screens and hide density problems.
 4. **Screenshot-evidence gate.** UI PRs must attach Roborazzi/Paparazzi captures (light + dark + outdoor × font-scale 1.3) generated in CI; CI posts gallery diffs as PR comments. Extends handbook Ch.10: **tests green ≠ UI done** — the phase gate includes owner visual sign-off of the gallery diff, recorded in the gate report.

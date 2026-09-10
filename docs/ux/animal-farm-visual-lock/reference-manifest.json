@@ -1,0 +1,120 @@
+{
+  "version": "animal-farm-lock-2026-09-05",
+  "reference_approval": "Owner-locked home direction; no native certification implied",
+  "files": [
+    {
+      "path": "references/animal-farm-locked-homes.html",
+      "sha256": "94766ebbd122861b6c4dbfe65e6908b21895bc8ea44596475899cb45fc49fd11",
+      "bytes": 196300,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\sites\\animal-farm-views\\dist\\index.html"
+    },
+    {
+      "path": "references/HOME_DESIGN_LOCK.md",
+      "sha256": "5d16c951ad297f990294cb04ccc150beab1605d59c193cc4109868f263f404b2",
+      "bytes": 10697,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\docs\\development\\HOME_DESIGN_LOCK.md"
+    },
+    {
+      "path": "references/SCREEN_DESIGN_STANDARD.md",
+      "sha256": "d06d56b71914d28264796c8b1b50023da2561b0f3182607480b41c1317dd0929",
+      "bytes": 13946,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\docs\\planning\\implementation\\SCREEN_DESIGN_STANDARD.md"
+    },
+    {
+      "path": "references/ANIMAL_FAMILY_ART_PROVENANCE.md",
+      "sha256": "a2c4c7002ac3f49d70c8cd593917355186f3420fbfea9145655c8c501d5dd63b",
+      "bytes": 3962,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\docs\\development\\ANIMAL_FAMILY_ART_PROVENANCE.md"
+    },
+    {
+      "path": "assets/farm_animal_lineup.png",
+      "sha256": "5f708f81b099913b3499db953203f65bc0aaf7b9995a9d337514eedfa381325a",
+      "bytes": 2597623,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\res\\drawable-nodpi\\farm_animal_lineup.png"
+    },
+    {
+      "path": "assets/farm_family_portraits_v1.png",
+      "sha256": "4182899863b830a6a812d8b60df3504991f75781b9d41c85380da63d6f6d39d2",
+      "bytes": 1482356,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\res\\drawable-nodpi\\farm_family_portraits_v1.png"
+    },
+    {
+      "path": "assets/inter_variable.ttf",
+      "sha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031",
+      "bytes": 876576,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\res\\font\\inter_variable.ttf"
+    },
+    {
+      "path": "assets/Inter-OFL.txt",
+      "sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57",
+      "bytes": 4377,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\third_party\\inter\\OFL.txt"
+    },
+    {
+      "path": "registry/source-screen-registry.yaml",
+      "sha256": "6ad2d999a8085e524de2e6c7963da948768a631600cf4d140638545a1a198a14",
+      "bytes": 178942,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\audit\\farm-os-2026-09-05\\docs\\ux\\FARM_OS_SCREEN_REGISTRY.yaml"
+    },
+    {
+      "path": "registry/source-implementation-map.yaml",
+      "sha256": "c21c0b438bf9ed99901146c6ae7a3b928eeb4e2ebf80f957526bd0368cb49480",
+      "bytes": 7550,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\audit\\farm-os-2026-09-05\\docs\\ux\\FARM_OS_CURRENT_UI_IMPLEMENTATION_MAP.yaml"
+    },
+    {
+      "path": "references/quantum-atlas-rev2.md",
+      "sha256": "4e8e387846885f142bcdccfb160627effd399b716503bfefe6c1d9c546798a34",
+      "bytes": 18346,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\audit\\farm-os-2026-09-05\\docs\\ux\\FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md"
+    },
+    {
+      "path": "references/native/HomeTokens.kt",
+      "sha256": "27db89e657029cf97bb3131ac5942f35bbbcbf0301f5e28eacd3f371b5b3b403",
+      "bytes": 1034,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\kotlin\\com\\farmos\\design\\theme\\HomeTokens.kt"
+    },
+    {
+      "path": "references/native/FosTheme.kt",
+      "sha256": "d7c067a8866bd3486ae614b19bb95ae012b2de7c8cdaadc8c6f54253f5b52e92",
+      "bytes": 8394,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\kotlin\\com\\farmos\\design\\theme\\FosTheme.kt"
+    },
+    {
+      "path": "references/native/LockedHomes.kt",
+      "sha256": "0a98f7c1aa3802bba911f66e28063fd488236ccef78adda21a412447aeca6724",
+      "bytes": 23894,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\kotlin\\com\\farmos\\design\\patterns\\LockedHomes.kt"
+    },
+    {
+      "path": "references/native/AnimalPortrait.kt",
+      "sha256": "f72d6bf344b6fdd1de5bc562e7b3330352c675a86cfb49e04e53946d092f0699",
+      "bytes": 2744,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\kotlin\\com\\farmos\\design\\components\\AnimalPortrait.kt"
+    },
+    {
+      "path": "references/native/AnimalProfile.kt",
+      "sha256": "baa38e0ca70e6c57728c06c65291fa74a45f2e65231a2968ed60383a05a6c080",
+      "bytes": 4574,
+      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\kotlin\\com\\farmos\\design\\patterns\\AnimalProfile.kt"
+    },
+    {
+      "path": "theme/locked-web-tokens.json",
+      "sha256": "82c362818d33cbed1d030b6f0e86b0c70cb57059c065ca5e557b28687cf85705",
+      "bytes": 1243,
+      "source": "mechanically extracted from retained locked HTML"
+    },
+    {
+      "path": "theme/locked-web.css",
+      "sha256": "746ce1d2c9866530237db37d73d9ba2909911df418c61052caee1dd86060fa4e",
+      "bytes": 983,
+      "source": "mechanically extracted from retained locked HTML"
+    },
+    {
+      "path": "theme/source-geometry.json",
+      "sha256": "9b7262dccf45ff1897f7823f4fbd4599331946764e3369e69d95bff9063ccde2",
+      "bytes": 691,
+      "source": "mechanically extracted from retained locked HTML"
+    }
+  ]
+}

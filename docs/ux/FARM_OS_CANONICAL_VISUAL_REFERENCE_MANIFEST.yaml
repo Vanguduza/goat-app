@@ -1,0 +1,119 @@
+# Owner-directed presentation amendment — 6 September 2026: `docs/ux/animal-farm-visual-lock/` supersedes conflicting visual descriptions below. Start with `docs/ux/ANIMAL_FARM_COLD_START_RESUME.md`. Earlier visual assets, intensity prescriptions and approval claims are historical provenance, not current Animal Farm visual authority. Screen IDs, feature scope, role authorization, domain safety, architecture, offline and evidence requirements remain binding. This checkpoint does not certify native visuals or features.
+schema_version: 1
+visual_family: farm_os_illustrated
+provenance_session: "01a04f06-bfbe-7b32-bf12-f9834e900244"
+portable_authority: "docs/ux/FARM_OS_VISUAL_AUTHORITY.md"
+policy:
+  session_assets_required_at_runtime: false
+  session_access_required_for_agents: false
+  visual_lineage_required: true
+  owner_lock_required_for_i1_i2: true
+references:
+  - reference_id: FOS-VREF-ROOT-001
+    name: Locked countryside Farm OS visual family
+    role: root_visual_dna
+    authority: canonical
+    source: owner_locked_session_reference
+    status: recovered_and_verified_against_original_assets
+  source_assets:
+    - name: Farm OS Countryside Login Screen.png
+      library_file_id: file_0000000028d082089c51076042ddff41
+      sha256: 2bb779512fa5018ee5bdad7cba94a90997ca234936efde1a258a3afbfa65228f
+      role: primary_login_composition
+    - name: Farm OS Visual Style Guide.png
+      library_file_id: file_000000002d6c82089ed11e74d0610518
+      sha256: bc3cdfa4d6fa3a38e3636cbaf54a48f3d99a66b76efbd951c4e9924961e74249
+      role: cross_screen_style_and_tokens
+    - name: Farm OS Design Audit Guide.png
+      library_file_id: file_00000000d33482089366509a8d40229d
+      sha256: 83c5ba861c233f700ab43ae2e4269da6e533f56b7b0c95dc502f6504a47681c5
+      role: audit_and_extension_guide
+    required_traits:
+      - warm_painterly_agricultural_illustration
+      - layered_pastoral_depth
+      - believable_friendly_livestock
+      - cream_task_surfaces
+      - deep_farm_green_primary_actions
+      - soft_rounded_geometry
+      - clean_operational_sans
+      - restrained_handwritten_brand_accent
+  - reference_id: FOS-VREF-LOGIN-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-GLOBAL-002]
+    environment: mixed_farm_countryside
+    intensity: I1
+    status: implementation_reference
+  - reference_id: FOS-VREF-HOME-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-HOME-001, FOS-HOME-002]
+    environment: mixed_farm_operating_overview
+    intensity: I2
+    status: implementation_reference
+  - reference_id: FOS-VREF-GOAT-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-GOAT-001, FOS-GOAT-003]
+    environment: goat_paddock
+    intensity: I2
+    status: required_before_goat_visual_green
+  - reference_id: FOS-VREF-SPLASH-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-GLOBAL-001]
+    environment: mixed_farm_countryside
+    intensity: I1
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-SPECIES-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-HOME-002]
+    environment: mixed_species_gateway
+    intensity: I2
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-GOAT-WEIGHT-001
+    parent: FOS-VREF-GOAT-001
+    screen_ids: [FOS-GOAT-011]
+    environment: restrained_goat_identity
+    intensity: I3
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-GOAT-SAFETY-001
+    parent: FOS-VREF-GOAT-001
+    screen_ids: [FOS-GOAT-051]
+    environment: restrained_safety_surface
+    intensity: I4
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-TASK-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-TASK-001, FOS-TASK-004, FOS-TASK-007, FOS-TASK-008, FOS-TASK-009]
+    environment: restrained_farm_workboard
+    intensity: I2-I3
+    source: recovered_style_guide_tasks_reference
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-OPS-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-HEALTH-001, FOS-INV-001, FOS-FIN-001, FOS-GROUP-001, FOS-PASTURE-001, FOS-LABOUR-001, FOS-ASSET-001, FOS-FEED-001, FOS-WATER-001, FOS-PROC-001, FOS-SALES-001]
+    environment: content_first_farm_operations
+    intensity: I2-I4
+    source: recovered_style_guide_operational_language
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-RABBIT-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-RABBIT-001, FOS-RABBIT-002, FOS-RABBIT-005, FOS-RABBIT-006, FOS-RABBIT-009, FOS-RABBIT-011, FOS-RABBIT-012, FOS-RABBIT-013, FOS-RABBIT-017, FOS-RABBIT-020, FOS-RABBIT-022, FOS-RABBIT-034]
+    environment: illustrated_rabbitry_and_nest_cycle
+    intensity: I2-I4
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-POULTRY-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-POULTRY-001, FOS-POULTRY-002, FOS-POULTRY-004, FOS-POULTRY-006, FOS-POULTRY-008, FOS-POULTRY-009, FOS-POULTRY-014, FOS-POULTRY-016, FOS-POULTRY-017, FOS-POULTRY-018, FOS-POULTRY-020, FOS-POULTRY-021]
+    environment: illustrated_poultry_houses_range_and_hatchery
+    intensity: I2-I4
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-SHEEP-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-SHEEP-001, FOS-SHEEP-002, FOS-SHEEP-003, FOS-SHEEP-004, FOS-SHEEP-006, FOS-SHEEP-009, FOS-SHEEP-010, FOS-SHEEP-011, FOS-SHEEP-012, FOS-SHEEP-014, FOS-SHEEP-016, FOS-SHEEP-017, FOS-SHEEP-019, FOS-SHEEP-020, FOS-SHEEP-021, FOS-SHEEP-022, FOS-SHEEP-023, FOS-SHEEP-024, FOS-SHEEP-026, FOS-SHEEP-027, FOS-SHEEP-029, FOS-SHEEP-030]
+    environment: illustrated_sheep_pasture_joining_and_wool
+    intensity: I2-I4
+    status: implementation_reference_unverified
+  - reference_id: FOS-VREF-CATTLE-001
+    parent: FOS-VREF-ROOT-001
+    screen_ids: [FOS-CATTLE-001, FOS-CATTLE-002, FOS-CATTLE-003, FOS-CATTLE-004, FOS-CATTLE-005, FOS-CATTLE-006, FOS-CATTLE-008, FOS-CATTLE-010, FOS-CATTLE-013, FOS-CATTLE-015, FOS-CATTLE-017, FOS-CATTLE-018, FOS-CATTLE-019, FOS-CATTLE-021, FOS-CATTLE-023, FOS-CATTLE-024, FOS-CATTLE-026, FOS-CATTLE-028, FOS-CATTLE-029, FOS-CATTLE-030, FOS-CATTLE-032, FOS-CATTLE-034]
+    environment: illustrated_cattle_pasture_dairy_and_beef
+    intensity: I2-I4
+    status: implementation_reference_unverified

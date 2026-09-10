@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "source": "Local original animal-farm-visual-lock package dated 2026-09-05; all supplied files preserved byte-for-byte",
+  "files": [
+    {
+      "path": "docs/ux/animal-farm-visual-lock/AGENT-INSTRUCTIONS.md",
+      "bytes": 7576,
+      "sha256": "4a19c8b6de8962cd732075e336fd369eb09efac706b2a8cf692ed5ffb58ae8bc"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/assets/farm_animal_lineup.png",
+      "bytes": 2597623,
+      "sha256": "5f708f81b099913b3499db953203f65bc0aaf7b9995a9d337514eedfa381325a"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/assets/farm_family_portraits_v1.png",
+      "bytes": 1482356,
+      "sha256": "4182899863b830a6a812d8b60df3504991f75781b9d41c85380da63d6f6d39d2"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/assets/inter_variable.ttf",
+      "bytes": 876576,
+      "sha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/assets/Inter-OFL.txt",
+      "bytes": 4377,
+      "sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/DESIGN-SYSTEM.md",
+      "bytes": 11204,
+      "sha256": "d9c2a0bf2c969d01131200522643dc63304d0aec4ede9b51a05a0ef65257c486"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/DEVELOPER-START-PROMPT.md",
+      "bytes": 2554,
+      "sha256": "844825b67cf060a9710e1413c79b49b31510ece0f4076e9d983f92e9282ef100"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/MIGRATION-AND-GATES.md",
+      "bytes": 11727,
+      "sha256": "439290bee188a26d5e6aff081151bdf46adf0bd28b6313123dbed49bfd44bd4a"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/PAGE-PATTERNS.md",
+      "bytes": 17325,
+      "sha256": "88999ba78d511b779c9d244d225ef5a7d815eea2b5dfe8e1df093865607b7c86"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/reference-manifest.json",
+      "bytes": 5630,
+      "sha256": "913cb0b89522c5baf8bf7b88a585a0537aca1f39971447726b4d33ea6c8628f4"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/references/ANIMAL_FAMILY_ART_PROVENANCE.md",
+      "bytes": 3962,
+      "sha256": "a2c4c7002ac3f49d70c8cd593917355186f3420fbfea9145655c8c501d5dd63b"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/references/animal-farm-locked-homes.html",
+      "bytes": 196300,
+      "sha256": "94766ebbd122861b6c4dbfe65e6908b21895bc8ea44596475899cb45fc49fd11"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/references/HOME_DESIGN_LOCK.md",
+      "bytes": 10697,
+      "sha256": "5d16c951ad297f990294cb04ccc150beab1605d59c193cc4109868f263f404b2"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/references/native/AnimalPortrait.kt",
+      "bytes": 2744,
+      "sha256": "f72d6bf344b6fdd1de5bc562e7b3330352c675a86cfb49e04e53946d092f0699"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/references/native/AnimalProfile.kt",
+      "bytes": 4574,
+      "sha256": "baa38e0ca70e6c57728c06c65291fa74a45f2e65231a2968ed60383a05a6c080"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/references/native/FosTheme.kt",
+      "bytes": 8394,
+      "sha256": "d7c067a8866bd3486ae614b19bb95ae012b2de7c8cdaadc8c6f54253f5b52e92"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/references/native/HomeTokens.kt",
+      "bytes": 1034,
+      "sha256": "27db89e657029cf97bb3131ac5942f35bbbcbf0301f5e28eacd3f371b5b3b403"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/references/native/LockedHomes.kt",
+      "bytes": 23894,
+      "sha256": "0a98f7c1aa3802bba911f66e28063fd488236ccef78adda21a412447aeca6724"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/references/quantum-atlas-rev2.md",
+      "bytes": 18346,
+      "sha256": "4e8e387846885f142bcdccfb160627effd399b716503bfefe6c1d9c546798a34"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/references/SCREEN_DESIGN_STANDARD.md",
+      "bytes": 13946,
+      "sha256": "d06d56b71914d28264796c8b1b50023da2561b0f3182607480b41c1317dd0929"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/registry/coverage-findings.json",
+      "bytes": 930,
+      "sha256": "ef1030b3c9d792f3efe72a7dcf25115d962a81214e6be22852f5e2db13f54541"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/registry/page-alignment.csv",
+      "bytes": 58153,
+      "sha256": "c1a6484d606ff8f0a32ae32a4188aa3537998041e94791ca52392cadd991b132"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/registry/page-alignment.json",
+      "bytes": 544509,
+      "sha256": "37a4a40510b120ae2cc9796ec405b01c739ca3e086e5086188d3b7de6387a844"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/registry/PAGE-INDEX.md",
+      "bytes": 151406,
+      "sha256": "5430502571e206acc1796ecc191d2a7b2e442b2a7686df0a4c2d73181dacb083"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/registry/source-implementation-map.yaml",
+      "bytes": 7550,
+      "sha256": "c21c0b438bf9ed99901146c6ae7a3b928eeb4e2ebf80f957526bd0368cb49480"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/registry/source-screen-registry.yaml",
+      "bytes": 178942,
+      "sha256": "6ad2d999a8085e524de2e6c7963da948768a631600cf4d140638545a1a198a14"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/scripts/assemble-pack.cjs",
+      "bytes": 13801,
+      "sha256": "97ac9d35eb37202763115e2d4b11d8476bebd701192843f86e870b7309eaf6c9"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/scripts/refine-registry.cjs",
+      "bytes": 4254,
+      "sha256": "96150b6905b0f4189f0755a807187c51b746f3c92cad70e971a7204579a5c540"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/scripts/verify-pack.cjs",
+      "bytes": 7902,
+      "sha256": "5094112311ccefec19c3d677ec4405b47a1d550ecd0a1765adef6ba950328049"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/START-HERE.md",
+      "bytes": 3858,
+      "sha256": "17d3a9d7e0432de014f4a290361f07fbe62695ba2e40d2d8a874770389ceacc8"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/templates/AGENTS-ADDENDUM.md",
+      "bytes": 934,
+      "sha256": "339e84229dd0f840e1ef770e4162019913c04290516e7a32f4f92d747a70ee8f"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/templates/animal-farm-visual-lock.mdc",
+      "bytes": 1338,
+      "sha256": "e5aa46b90c22ae50a53026fd0f5a8d50417407964ca4ac2f29bb97bde4e6999b"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/templates/evidence.json",
+      "bytes": 774,
+      "sha256": "f6f5ee1f3ecae535ffd1711652f7b3109cbd059f68e9f5f507faaf5736b81da7"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/templates/PR-CHECKLIST.md",
+      "bytes": 783,
+      "sha256": "9485f19282e91f76ccc077ad8ebdcaadd317278424e849b1ef5d5e6f7dc51dea"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/templates/screen-contract.json",
+      "bytes": 1956,
+      "sha256": "8634a83635d607db98ae13538e2b28099b161d922910e59a66d130c763871d2d"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/theme/locked-web-tokens.json",
+      "bytes": 1243,
+      "sha256": "82c362818d33cbed1d030b6f0e86b0c70cb57059c065ca5e557b28687cf85705"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/theme/locked-web.css",
+      "bytes": 983,
+      "sha256": "746ce1d2c9866530237db37d73d9ba2909911df418c61052caee1dd86060fa4e"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/theme/source-geometry.json",
+      "bytes": 691,
+      "sha256": "9b7262dccf45ff1897f7823f4fbd4599331946764e3369e69d95bff9063ccde2"
+    },
+    {
+      "path": "docs/ux/animal-farm-visual-lock/VALIDATION.md",
+      "bytes": 3886,
+      "sha256": "9fe3d9c5954027554d45757c454e75a3fd8dd0d6aa826152e6ac4ab5086a9e78"
+    }
+  ]
+}

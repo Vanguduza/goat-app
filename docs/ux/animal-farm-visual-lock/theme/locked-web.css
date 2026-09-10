@@ -1,0 +1,41 @@
+/* Extracted home colors only; not an Android implementation. */
+[data-animal-farm-theme="light"] {
+  --af-bg: #F3F4ED;
+  --af-surface: #FFFFFF;
+  --af-soft: #E8ECE3;
+  --af-ink: #183328;
+  --af-muted: #5B6A5E;
+  --af-line: #DCE3D7;
+  --af-primary: #285640;
+  --af-on-primary: #FFFFFF;
+  --af-lime: #DCEBBA;
+  --af-on-lime: #294128;
+  --af-warn: #F8E4B9;
+  --af-on-warn: #67420D;
+  --af-earth: #CAB48C;
+  --af-grass: #C3D7A9;
+  --af-grass-two: #AEC793;
+  --af-roof: #7B5142;
+  --af-water: #BDD6D7;
+  --af-scrim: #10281980;
+}
+[data-animal-farm-theme="dark"] {
+  --af-bg: #141B17;
+  --af-surface: #222C25;
+  --af-soft: #303C32;
+  --af-ink: #EFF4E8;
+  --af-muted: #B5C2B4;
+  --af-line: #3C4A3D;
+  --af-primary: #C7E9A3;
+  --af-on-primary: #1B3627;
+  --af-lime: #3A5130;
+  --af-on-lime: #E0EFCB;
+  --af-warn: #5A4422;
+  --af-on-warn: #FFE1A2;
+  --af-earth: #766C52;
+  --af-grass: #435B3D;
+  --af-grass-two: #354D35;
+  --af-roof: #B48B75;
+  --af-water: #3B6265;
+  --af-scrim: #050B09AA;
+}

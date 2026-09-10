@@ -10,16 +10,63 @@
     "release_requires_provenance": true
   },
   "canonical_state": {
-    "status": "CANONICAL_DISCOVERY_REQUIRED",
+    "status": "CANONICAL_LINEAGE_ESTABLISHED",
+    "reconciled_at_utc": "2026-09-10T14:20:53.692959+00:00",
     "release_blocked": true,
+    "release_block_reason": "No certified build exists. FEATURE_GREEN/MODULE_GREEN/MVP_GREEN/VISUAL_GREEN are all unmet; 0 screens carry native visual evidence.",
     "default_branch_at_bootstrap": "main",
-    "required_ancestors": [],
-    "notes": "No branch is declared canonical by installation of this protocol. Reconcile project truth, record required ancestors/locked authorities, then explicitly clear release_blocked."
+    "canonical_branch": "main",
+    "consolidation_merge": "46585520e1c1262b3e760199d7b98ac8324815b9",
+    "required_ancestors": [
+      {
+        "sha": "12e2e8cc37d14588e09eed2085d364a879bc54fa",
+        "was": "main",
+        "holds": "Project Truth Protocol (manifest, autolog workflow, hooks, local tooling)"
+      },
+      {
+        "sha": "224340255c466960e9ea0491952db6fcc37670ce",
+        "was": "cursor/animal-farm-project-green-b11a",
+        "holds": "Tip of the code lineage; strict superset of every other code branch"
+      },
+      {
+        "sha": "c603a903b570e5519cdc571b88a2c166177900ba",
+        "was": "agent/animal-farm-gate1-recovery",
+        "holds": "contained in the tip"
+      },
+      {
+        "sha": "afc53440b305a2ea086f16155c0d9227e4030180",
+        "was": "implementation/animal-farm-visual-lock",
+        "holds": "Layer 3 visual-lock install (contained in the tip)"
+      },
+      {
+        "sha": "e86981682748605e9db1570224e8c801c35b6058",
+        "was": "implementation/foundation-vertical-slice",
+        "holds": "contained in the tip"
+      },
+      {
+        "sha": "402ee5f0299e60cc29cf8be57e5f5cd500d8e4b9",
+        "was": "cursor/docs-handbook-design-guardrails",
+        "holds": "contained in the tip"
+      }
+    ],
+    "locked_authorities": {
+      "product_truth": "docs/00_PROJECT_TRUTH.md",
+      "constitution": "docs/FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md Ch.2",
+      "visual_authority": "docs/ux/animal-farm-visual-lock/ (owner-directed, 5-6 Sep 2026)",
+      "visual_provenance_superseded": [
+        "docs/ux/FARM_OS_VISUAL_AUTHORITY.md",
+        "docs/FARM_OS_DESIGN_SYSTEM_SPEC.md v1"
+      ],
+      "accepted_edrs": "docs/truth/edr/"
+    },
+    "notes": "Every pre-consolidation branch is an ancestor of this trunk; deleting them loses no commit. Release stays blocked until certification gates are met."
   },
   "tracking": {
-    "ledger": "docs/project-state/CHANGE_LEDGER.jsonl",
-    "current_snapshot": "docs/project-state/CURRENT_STATE.json",
+    "ledger_branch": "project-truth-ledger",
+    "ledger": "project-truth-ledger:CHANGE_LEDGER.jsonl",
+    "current_snapshot": "project-truth-ledger:CURRENT_STATE.json",
     "protocol": "PROJECT_TRUTH_PROTOCOL.md",
-    "workflow": ".github/workflows/project-truth-autolog.yml"
+    "workflow": ".github/workflows/project-truth-autolog.yml",
+    "note": "The ledger lives on its own orphan branch, never merged into main. main is protected and requires pull requests, so a bot push to it is rejected; writing back to a pushed branch also made the bot's [skip ci] commit the branch head and suppressed every workflow on it."
   }
 }

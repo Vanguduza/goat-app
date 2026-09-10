@@ -1,0 +1,42 @@
+{
+  "authority": "locked HTML CSS; px values are not automatic dp/sp conversions",
+  "viewport_px": 390,
+  "hero": {
+    "radius_px": 24,
+    "padding_px": 20,
+    "title_px": 26
+  },
+  "focus_card": {
+    "radius_px": 28,
+    "padding_px": 21,
+    "title_px": 30
+  },
+  "secondary_tile_radius_px": 20,
+  "action_radius_px": 16,
+  "content_inset_px": 18,
+  "header_inset_px": 22,
+  "tile_gap_px": 10,
+  "module_gap_px": 8,
+  "native_targets_dp": {
+    "normal": 48,
+    "outdoor": 64
+  },
+  "native_text_candidate_sp": {
+    "display": [
+      28,
+      34
+    ],
+    "title": [
+      22,
+      28
+    ],
+    "body": [
+      15,
+      22
+    ],
+    "label": [
+      13,
+      18
+    ]
+  }
+}

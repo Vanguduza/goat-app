@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "tested_commit": "3a5a2992fea4919c57957441f67590c72df51fd2",
+  "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_NOT_RUNTIME_CERTIFICATION",
+  "registry_rows": 545,
+  "route_evidence_counts": {
+    "NO_ROUTE_EVIDENCE": 398,
+    "STATIC_AUTH_STATE_BRANCH": 4,
+    "STATIC_CODE_ID_REFERENCE_ONLY": 14,
+    "STATIC_GENERAL_HOME_FALLBACK": 1,
+    "STATIC_HOME_NESTED_DESTINATION": 1,
+    "STATIC_MAIN_ACTIVITY_SPLASH_BRANCH": 1,
+    "STATIC_ROLE_DISPATCH_PRESENT": 8,
+    "STATIC_SOURCE_MAP_HINT_ONLY": 20,
+    "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 98
+  },
+  "no_route_evidence": 398,
+  "some_static_route_evidence": 147,
+  "runtime_reachability_executed": 0,
+  "feature_id_catalog_status": "MISSING_OR_NOT_CANONICALLY_IDENTIFIED",
+  "module_gap_counts": {
+    "admin": {
+      "total": 25,
+      "no_route_evidence": 25
+    },
+    "ai": {
+      "total": 12,
+      "no_route_evidence": 12
+    },
+    "an": {
+      "total": 14,
+      "no_route_evidence": 14
+    },
+    "asset": {
+      "total": 12,
+      "no_route_evidence": 11
+    },
+    "atom": {
+      "total": 35,
+      "no_route_evidence": 35
+    },
+    "cap": {
+      "total": 10,
+      "no_route_evidence": 10
+    },
+    "cattle": {
+      "total": 36,
+      "no_route_evidence": 14
+    },
+    "feed": {
+      "total": 12,
+      "no_route_evidence": 11
+    },
+    "fin": {
+      "total": 13,
+      "no_route_evidence": 9
+    },
+    "gen": {
+      "total": 10,
+      "no_route_evidence": 10
+    },
+    "global": {
+      "total": 20,
+      "no_route_evidence": 15
+    },
+    "goat": {
+      "total": 55,
+      "no_route_evidence": 37
+    },
+    "group": {
+      "total": 9,
+      "no_route_evidence": 8
+    },
+    "health": {
+      "total": 30,
+      "no_route_evidence": 17
+    },
+    "home": {
+      "total": 20,
+      "no_route_evidence": 7
+    },
+    "inv": {
+      "total": 19,
+      "no_route_evidence": 10
+    },
+    "labour": {
+      "total": 9,
+      "no_route_evidence": 8
+    },
+    "pasture": {
+      "total": 11,
+      "no_route_evidence": 10
+    },
+    "poultry": {
+      "total": 27,
+      "no_route_evidence": 15
+    },
+    "proc": {
+      "total": 10,
+      "no_route_evidence": 9
+    },
+    "rabbit": {
+      "total": 36,
+      "no_route_evidence": 23
+    },
+    "report": {
+      "total": 15,
+      "no_route_evidence": 15
+    },
+    "sales": {
+      "total": 12,
+      "no_route_evidence": 11
+    },
+    "search": {
+      "total": 9,
+      "no_route_evidence": 9
+    },
+    "sheep": {
+      "total": 32,
+      "no_route_evidence": 10
+    },
+    "sim": {
+      "total": 9,
+      "no_route_evidence": 9
+    },
+    "sync": {
+      "total": 18,
+      "no_route_evidence": 16
+    },
+    "task": {
+      "total": 15,
+      "no_route_evidence": 9
+    },
+    "water": {
+      "total": 10,
+      "no_route_evidence": 9
+    }
+  },
+  "known_navigation_defects": {
+    "render_only_state_candidates": [],
+    "operating_module_host_callers": [
+      "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
+      "app/src/main/java/com/farmos/app/OperatingModuleHost.kt"
+    ],
+    "operating_module_branches_preempted_by_dedicated_hosts": [
+      "TASKS",
+      "HEALTH",
+      "MONEY",
+      "INVENTORY"
+    ],
+    "direct_action_scope_violations": [],
+    "feature_id_catalog": "NOT_FOUND: screen contract template requires feature_ids, but no canonical feature-ID catalog was found in docs/code search"
+  },
+  "status_law": "MAPPED inventory is not CONTRACT_READY, IMPLEMENTED, VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN."
+}

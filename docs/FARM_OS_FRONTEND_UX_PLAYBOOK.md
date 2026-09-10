@@ -1,3 +1,6 @@
+> **SUPERSESSION NOTICE — 05 September 2026**
+> Visual authority is now `docs/ux/FARM_OS_VISUAL_AUTHORITY.md` plus the REV 2 screen/feature/visual mapping. This playbook remains binding for evidence, accessibility, repo-mining, screenshot and drift-control practices only where compatible. The old statement that `FARM_OS_DESIGN_SYSTEM_SPEC.md` alone is visual authority is superseded.
+
 # Farm OS — Frontend & UX/UI Design Playbook: Guardrails, Skills & Tools
 
 **Version:** 1.0 · **Date:** 22 August 2026
@@ -77,7 +80,7 @@ Rule: licence check happens **before** reading code deeply, recorded in the prov
 
 Consolidated from design spec §16 plus extensions. CI-enforced items marked ⚙.
 
-1. **Visual-authority split** — the design system spec is the only visual authority; repos are engineering references (2.1). An agent needing a layout decision cites a §6 pattern code, never a repo screen.
+1. **Visual-authority split** — `docs/ux/FARM_OS_VISUAL_AUTHORITY.md`, its manifest and the REV 2 Screen Atlas are the visual authority; repos remain engineering references. An agent needing a layout decision cites its `FOS-*` Screen ID and canonical visual lineage, never an external repo screen.
 2. **Realistic-fixture law** ⚙ — named fixtures only (Nala goat, Cage B wave, August ledger); placeholder strings banned from committed code/tests.
 3. **Gallery-first design-before-code** — new screens appear in the Gallery debug entry with fixtures and receive owner pixel approval before integration PRs exist.
 4. **Screenshot-evidence gate** ⚙ — Roborazzi/Paparazzi goldens (light/dark/outdoor × font-scale 1.0/1.3/2.0) updated in the same PR; diffs block merge; tests green ≠ UI done.

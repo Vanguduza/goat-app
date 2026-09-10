@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Local CI Supabase is HTTP. Release/main manifests do not permit cleartext by default. -->
+    <application android:usesCleartextTraffic="true" />
+</manifest>

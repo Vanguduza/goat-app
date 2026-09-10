@@ -1,0 +1,240 @@
+{
+  "slice_id": "VS-GOAT-001",
+  "name": "Register Goat + Record Weight Offline + Sync + Search",
+  "updated_at": "2026-09-03",
+  "certificate": "VERTICAL_SLICE_GREEN",
+  "feature_green": false,
+  "module_green": false,
+  "mvp_green": false,
+  "fanout_authorized": true,
+  "certificate_commit": "6c7c79a93dc54c74134a70b3763549b442c22349",
+  "evidence_commit": "6c7c79a93dc54c74134a70b3763549b442c22349",
+  "evidence_run": "https://github.com/Vanguduza/goat-app/actions/runs/33801257315",
+  "evidence_lanes": [
+    "android",
+    "android-device-e2e",
+    "supabase",
+    "edge-functions",
+    "meilisearch-contract",
+    "search-pipeline"
+  ],
+  "issued_at": "2026-09-03",
+  "remaining_non_slice_limitations": [
+    "VS-03 proves file-backed Room close/reopen, not a full physical handset reboot.",
+    "Second-device proof uses two isolated Room databases on one emulator, not two physical devices.",
+    "Approved Inter font asset is not bundled; UI certification remains blocked.",
+    "No non-local staging Supabase project is configured in this repository.",
+    "Goat herd, profile, weight history, lifecycle, kidding, and farm-create fan-out are implemented but not FEATURE_GREEN.",
+    "Operating spine now has governed write paths for rabbit programme including palpation/kindling/foster/wean, nest-box cycle, kits/retention, waitlist/contracts, market-plan records (no ADG projection), bedding/feed inventory binds (no auto-issue on nest place), and GI-stasis red-flag observation plus vet-call task, sheep joining/scan/lambing/marking/weaning/wool/shearing/dag/footrot/flystrike/FAMACHA/micron, cattle service/PD/calving/BCS/milk/locomotion/SCC/dry-off/weaning/days-on-feed/lot place and close-out, goat milk/BCS/SCC/heat/mating/+45 pregnancy-check, +7 lactation follow-up, and kid records capped to live kids with a dam pedigree link, official identifiers and cattle/sheep movements, FEFO dated-lot receive/issue with no silent non-lot fallback plus reorder-point records, vet visits and lab results as records not diagnoses, poultry kind enable plus earlier flock/hatch/vax/placement/biosecurity, record-only pedigree links with no COI engine, protocol-pack slots that generate due tasks on apply, group census, procurement purchases, protocol packs, and treatment withdrawal windows, plus earlier identity/weight/status, tasks, health, pasture, labour, assets, feed, water, sales, money, and inventory. These are not FEATURE_GREEN.",
+    "AI/Copilot, genetics/COI, simulation, reports/documents, admin/audit, ration engine percentages, gallery/Roborazzi, Inter font, and mixed-farm field certification remain unimplemented or uncertified."
+  ],
+  "gates": [
+    {
+      "id": "VS-01",
+      "requirement": "Goat registration is locally durable before success UI",
+      "state": "PROVEN",
+      "evidence_type": "android_instrumentation + repository transaction",
+      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-02",
+      "requirement": "Weight capture is locally durable before success UI",
+      "state": "PROVEN",
+      "evidence_type": "android_instrumentation + repository transaction",
+      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-03",
+      "requirement": "Local durability survives process/device restart",
+      "state": "PROVEN_DB_REOPEN",
+      "evidence_type": "connected android instrumentation",
+      "tests": ["core/database/src/androidTest/kotlin/com/farmos/core/database/FarmOsDatabasePersistenceTest.kt"],
+      "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
+      "remaining_limitation": "File-backed Room close/reopen is proven. A full physical device reboot was not executed."
+    },
+    {
+      "id": "VS-04",
+      "requirement": "Outbox retry state machine is deterministic",
+      "state": "PROVEN",
+      "evidence_type": "unit",
+      "tests": ["core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt"],
+      "latest_passing_evidence": "android job on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-05",
+      "requirement": "Duplicate mutation has one authoritative effect",
+      "state": "PROVEN",
+      "evidence_type": "pgTAP",
+      "tests": ["supabase/tests/database/foundation_vertical_slice_behavior_test.sql"],
+      "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-06",
+      "requirement": "Expected stream version conflict behavior is proven",
+      "state": "PROVEN",
+      "evidence_type": "pgTAP + unit",
+      "tests": [
+        "supabase/tests/database/foundation_vertical_slice_behavior_test.sql",
+        "core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt"
+      ],
+      "latest_passing_evidence": "supabase and android jobs on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-07",
+      "requirement": "RLS attack from another farm fails",
+      "state": "PROVEN",
+      "evidence_type": "pgTAP",
+      "tests": ["supabase/tests/database/foundation_vertical_slice_behavior_test.sql"],
+      "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-08",
+      "requirement": "Cross-farm FK attack fails",
+      "state": "PROVEN",
+      "evidence_type": "pgTAP",
+      "tests": ["supabase/tests/database/foundation_vertical_slice_behavior_test.sql"],
+      "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-09",
+      "requirement": "Supabase authoritative transaction commits event/projection atomically",
+      "state": "PROVEN",
+      "evidence_type": "pgTAP",
+      "tests": [
+        "supabase/tests/database/foundation_vertical_slice_behavior_test.sql",
+        "supabase/tests/database/canonical_event_payload_test.sql"
+      ],
+      "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-10",
+      "requirement": "Monotonic pull cursor reconciles device state",
+      "state": "PROVEN",
+      "evidence_type": "android_instrumentation",
+      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-11",
+      "requirement": "Second-device visibility is proven",
+      "state": "PROVEN",
+      "evidence_type": "android_instrumentation with isolated Room databases",
+      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
+      "remaining_limitation": "Two isolated Room databases on one emulator. Same authenticated farm member on both stores."
+    },
+    {
+      "id": "VS-12",
+      "requirement": "Search indexing is eventually updated",
+      "state": "PROVEN",
+      "evidence_type": "live search pipeline",
+      "tests": ["scripts/ci/verify-search-pipeline.sh"],
+      "latest_passing_evidence": "search-pipeline job on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-13",
+      "requirement": "Meilisearch farm isolation is proven",
+      "state": "PROVEN",
+      "evidence_type": "live Meilisearch contract + search pipeline",
+      "tests": [
+        "search/meilisearch/verify-live-contract.ts",
+        "scripts/ci/verify-search-pipeline.sh"
+      ],
+      "latest_passing_evidence": "meilisearch-contract and search-pipeline jobs on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-14",
+      "requirement": "Meilisearch outage cannot block authoritative capture",
+      "state": "PROVEN",
+      "evidence_type": "live search pipeline outage/retry",
+      "tests": ["scripts/ci/verify-search-pipeline.sh"],
+      "latest_passing_evidence": "search-pipeline job on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-15",
+      "requirement": "Meilisearch rebuild is demonstrated",
+      "state": "PROVEN",
+      "evidence_type": "live search pipeline rebuild",
+      "tests": ["scripts/ci/verify-search-pipeline.sh"],
+      "latest_passing_evidence": "search-pipeline job on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-16",
+      "requirement": "Device clock drift is handled",
+      "state": "PROVEN",
+      "evidence_type": "pgTAP",
+      "tests": ["supabase/tests/database/clock_drift_behavior_test.sql"],
+      "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-17",
+      "requirement": "Supabase Auth token expiry and re-auth work",
+      "state": "PROVEN",
+      "evidence_type": "unit + live instrumentation",
+      "tests": [
+        "core/network/src/test/kotlin/com/farmos/core/network/SupabaseIdentityClientTest.kt",
+        "app/src/androidTest/kotlin/com/farmos/app/AuthRefreshAndReauthTest.kt"
+      ],
+      "latest_passing_evidence": "android and android-device-e2e on 6c7c79a / run 33801257315",
+      "remaining_limitation": "Live proof uses deterministic refresh and an invalid refresh token rather than waiting for a production access-token clock expiry."
+    },
+    {
+      "id": "VS-18",
+      "requirement": "Revoked farm access rejects pending mutations safely",
+      "state": "PROVEN",
+      "evidence_type": "pgTAP + unit + live instrumentation after server-side revoke",
+      "tests": [
+        "supabase/tests/database/revocation_behavior_test.sql",
+        "core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt",
+        "core/network/src/test/kotlin/com/farmos/core/network/FarmAccessGuardTest.kt",
+        "app/src/androidTest/kotlin/com/farmos/app/RevokedMembershipClientTest.kt"
+      ],
+      "latest_passing_evidence": "supabase, android, and android-device-e2e on 6c7c79a / run 33801257315",
+      "remaining_limitation": null
+    },
+    {
+      "id": "VS-19",
+      "requirement": "Mutation/sync/search observability exists",
+      "state": "PROVEN",
+      "evidence_type": "pgTAP + live search pipeline + structured Android sync traces",
+      "tests": [
+        "supabase/tests/database/mutation_observability_test.sql",
+        "scripts/ci/verify-search-pipeline.sh",
+        "core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt"
+      ],
+      "latest_passing_evidence": "supabase, search-pipeline, and android jobs on 6c7c79a / run 33801257315",
+      "remaining_limitation": "Structured traces omit secrets. They do not include raw access tokens, refresh tokens, or API keys."
+    },
+    {
+      "id": "VS-20",
+      "requirement": "Android + database CI pass canonical tests",
+      "state": "PROVEN",
+      "evidence_type": "canonical GitHub Actions",
+      "tests": [".github/workflows/foundation-ci.yml"],
+      "latest_passing_evidence": "run 33801257315 on 6c7c79a: android, android-device-e2e, supabase, edge-functions, meilisearch-contract, search-pipeline all success",
+      "remaining_limitation": null
+    }
+  ],
+  "activation_blockers": [
+    "Connect a non-local Supabase project/staging environment and configure publishable credentials outside git.",
+    "Provide/bundle the approved Inter font asset before UI certification.",
+    "Goat health, reproduction, and other species/shared modules have an operating spine only; FEATURE_GREEN, MODULE_GREEN, and MVP_GREEN are not claimed.",
+    "Do not convert a green architecture slice or this fan-out spine into FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN."
+  ]
+}
