@@ -7,8 +7,8 @@ This repository must never infer project truth from chat memory, the GitHub defa
 1. Read `PROJECT_CANONICAL_STATE.json` before planning, coding, merging, building, packaging, deploying, or releasing.
 2. Inspect divergent branches and source-of-truth/decision documents before declaring any implementation canonical.
 3. Preserve every locked feature and later approved change during reconciliation. Silent thinning is forbidden.
-4. Every pushed commit is automatically recorded in `docs/project-state/CHANGE_LEDGER.jsonl` by GitHub Actions, including commit SHA, parent, branch, author, timestamp, changed files, tree SHA, and diff digest.
-5. `docs/project-state/CURRENT_STATE.json` records the latest observed repository state. It is evidence, not permission to declare a branch canonical.
+4. Every commit pushed to `main` is automatically recorded by GitHub Actions in `CHANGE_LEDGER.jsonl` on the dedicated `project-truth-ledger` branch, including commit SHA, parent, branch, author, timestamp, changed files, tree SHA, and diff digest. That branch carries an orphan history, is never merged into `main`, and is machine-written only.
+5. `CURRENT_STATE.json` on the `project-truth-ledger` branch records the latest observed repository state. It is evidence, not permission to declare a branch canonical.
 6. Releases remain blocked while `canonical_state.release_blocked` is true.
 7. A release/build provenance record must identify repository, exact commit SHA, branch/ref, target/module, and canonical-state revision.
 8. If remembered state conflicts with Git, stop and reconcile the divergence. Git evidence wins over memory.

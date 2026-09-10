@@ -62,9 +62,11 @@
     "notes": "Every pre-consolidation branch is an ancestor of this trunk; deleting them loses no commit. Release stays blocked until certification gates are met."
   },
   "tracking": {
-    "ledger": "docs/project-state/CHANGE_LEDGER.jsonl",
-    "current_snapshot": "docs/project-state/CURRENT_STATE.json",
+    "ledger_branch": "project-truth-ledger",
+    "ledger": "project-truth-ledger:CHANGE_LEDGER.jsonl",
+    "current_snapshot": "project-truth-ledger:CURRENT_STATE.json",
     "protocol": "PROJECT_TRUTH_PROTOCOL.md",
-    "workflow": ".github/workflows/project-truth-autolog.yml"
+    "workflow": ".github/workflows/project-truth-autolog.yml",
+    "note": "The ledger lives on its own orphan branch, never merged into main. main is protected and requires pull requests, so a bot push to it is rejected; writing back to a pushed branch also made the bot's [skip ci] commit the branch head and suppressed every workflow on it."
   }
 }
