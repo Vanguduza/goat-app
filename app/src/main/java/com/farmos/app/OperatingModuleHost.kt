@@ -35,7 +35,6 @@ import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordMoney
 import com.farmos.domain.ops.RecordPurchase
-import com.farmos.domain.ops.RecordSale
 import com.farmos.domain.ops.RecordSheepJoining
 import com.farmos.domain.ops.RecordSheepLambing
 import com.farmos.domain.ops.RecordSheepMarking
@@ -99,7 +98,6 @@ fun OperatingModuleHost(
     var moneyRows by remember { mutableStateOf(emptyList<String>()) }
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
-    var saleRows by remember { mutableStateOf(emptyList<String>()) }
     var catalogRows by remember { mutableStateOf(emptyList<String>()) }
     var treatmentRows by remember { mutableStateOf(emptyList<String>()) }
     var packRows by remember { mutableStateOf(emptyList<String>()) }
@@ -150,7 +148,6 @@ fun OperatingModuleHost(
                 active = animal.status == "active",
             )
         }.orEmpty()
-        saleRows = ops.recentSales().map { "${it.itemKind} · ${it.amountMinor} ${it.currency}" }
         catalogRows = ops.diseases().map { "${it.speciesCode} · ${it.displayName} · ${it.firstAid}" }
         treatmentRows = ops.recentTreatments().map { "${it.speciesCode} · ${it.reason} · formulary ${it.formularyItemId}" }
         packRows = ops.packs().map { "${it.speciesCode} · ${it.name} · ${it.status} · ${it.acceptedByVet.orEmpty()}" }
@@ -635,40 +632,6 @@ fun OperatingModuleHost(
                         enabled = !busy && supplierId.value.isNotBlank() && itemId.value.isNotBlank() && qty.value.isNotBlank() && amount.value.isNotBlank() && day.value.isNotBlank(),
                     ) { androidx.compose.material3.Text("Record purchase") }
                 },
-            )
-        }
-        FarmModule.SALES -> {
-            val kind = remember { mutableStateOf("live_goat") }
-            val qty = remember { mutableStateOf("1") }
-            val amount = remember { mutableStateOf("") }
-            val day = remember { mutableStateOf("") }
-            SimpleCaptureScreen(
-                screenId = "FOS-SALES-001",
-                title = "Sales",
-                help = "A sale posts income in integer minor units. This is farm unit economics, not a statutory ledger.",
-                empty = "No sales on this device.",
-                rows = saleRows,
-                busy = busy,
-                error = error,
-                fields = listOf("Item kind" to kind, "Quantity" to qty, "Amount" to amount, "Date" to day),
-                actionLabel = "Record sale",
-                onSubmit = {
-                    run {
-                        val major = amount.value.replace(',', '.').toDoubleOrNull() ?: error("Enter an amount")
-                        val quantity = qty.value.replace(',', '.').toDoubleOrNull() ?: error("Enter a quantity")
-                        ops.recordSale(
-                            RecordSale(
-                                saleId = UUID.randomUUID().toString(),
-                                itemKind = kind.value,
-                                quantityMilli = (quantity * 1000.0).toLong(),
-                                amountMinor = (major * 100.0).toLong(),
-                                occurredEpochDay = LocalDate.parse(day.value).toEpochDay(),
-                            ),
-                            newContext(),
-                        )
-                    }
-                },
-                onBack = onBack,
             )
         }
         else -> Unit
