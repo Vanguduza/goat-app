@@ -107,6 +107,14 @@ fun FarmSessionContent(
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
             )
+            FarmModule.RABBIT -> RabbitModuleHost(
+                farmId = membership.farmId,
+                ops = ops,
+                rabbitHerd = com.farmos.data.herd.RoomHerdRepository(app.database, membership.farmId, "rabbit"),
+                newContext = ::context,
+                enqueueSync = ::enqueueSync,
+                onBack = backHome,
+            )
             FarmModule.INVENTORY -> InventoryModuleHost(
                 farmId = membership.farmId,
                 ops = ops,

@@ -40,6 +40,7 @@ check_max_lines "app/src/main/java/com/farmos/app/TasksModuleHost.kt" 120
 check_max_lines "app/src/main/java/com/farmos/app/MoneyModuleHost.kt" 120
 check_max_lines "app/src/main/java/com/farmos/app/InventoryModuleHost.kt" 180
 check_max_lines "app/src/main/java/com/farmos/app/HealthModuleHost.kt" 240
+check_max_lines "app/src/main/java/com/farmos/app/RabbitModuleHost.kt" 240
 
 if (( fail != 0 )); then
   exit 1
