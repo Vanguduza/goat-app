@@ -184,7 +184,7 @@ if (args.includes('--self-test')) {
   assert(farmModules.length === 19, `expected 19 FarmModule values, got ${farmModules.length}`);
   assert(personas.length === 9, `expected 9 role personas, got ${personas.length}`);
   assert(!renderOnly.includes('RabbitPage.NESTS'), 'RabbitPage.NESTS must have a dashboard transition');
-  assert(preemptedModules.length === 4, 'expected four preempted OperatingModuleHost branches');
+  assert(preemptedModules.length === 0, 'dedicated module hosts must not remain duplicated in OperatingModuleHost');
   assert(directActionViolations.length === 0, 'worker quick actions must use exact owning entries');
   console.log('PASS navigation source audit self-test');
 }

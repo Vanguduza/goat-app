@@ -24,9 +24,9 @@ Older documents are provenance only when they conflict with Project Truth.
 - Meilisearch as mandatory, rebuildable server search projection; local search remains available offline.
 - Full MVP scope includes all documented species and shared modules.
 
-## Current engineering branch
+## Canonical development branch
 
-`implementation/foundation-vertical-slice`
+`main` is the only development authority. `project-truth-ledger` is an orphan CI-written audit history and must never be merged into `main`.
 
 The designated architecture slice is:
 
@@ -44,7 +44,7 @@ A successful slice earns only `VERTICAL_SLICE_GREEN`. It does **not** make the g
 
 Current architecture-slice certificate: `VERTICAL_SLICE_GREEN` on `6c7c79a93dc54c74134a70b3763549b442c22349` from [canonical run 33801257315](https://github.com/Vanguduza/goat-app/actions/runs/33801257315). Fan-out of further feature work is authorized. `FEATURE_GREEN`, `MODULE_GREEN`, and `MVP_GREEN` remain false. See [`docs/realisation/VERTICAL_SLICE_GATE.json`](docs/realisation/VERTICAL_SLICE_GATE.json).
 
-Post-certificate fan-out remains intentionally uncertified until the strengthened canonical suite actually executes. Recent stabilization work adds Room v1→v13 migration-chain evidence, representative fan-out offline durability tests, broader domain-test coverage, instrumentation-source compilation, and module-specific Android state hosts. GitHub-hosted runners are currently failing before job steps begin, so those newer commits must not inherit the older green certificate.
+Post-certificate fan-out remains intentionally uncertified at feature/module/MVP level. The consolidated `main` head now passes the strengthened canonical CI suite, including Room migration/reopen durability, representative fan-out offline durability, broader domain tests, instrumentation-source compilation, Supabase pgTAP, Meilisearch and search-pipeline verification. This does not promote any feature, module, visual surface or the MVP to green; those states require their separate evidence contracts.
 
 ## Build and verification
 

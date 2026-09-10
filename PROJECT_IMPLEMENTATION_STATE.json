@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "repository": "Vanguduza/goat-app",
+  "source_fingerprint": "sha256:0673ba4b611e7932233fc489dd9e4f63e67f36e0b0faf9d5e85c479d6c87f24a",
+  "canonical_branch": "main",
+  "release_state": "BLOCKED",
+  "green_states": {
+    "vertical_slice_green": true,
+    "feature_green_count": 0,
+    "module_green_count": 0,
+    "mvp_green": false,
+    "visual_green_count": 0
+  },
+  "screen_coverage": {
+    "registered": 545,
+    "kotlin_referenced": 116,
+    "implementation_mapped": 125,
+    "qdu_states": {
+      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 139,
+      "PLANNED_NOT_IMPLEMENTED": 406
+    }
+  },
+  "module_coverage": {
+    "admin": {
+      "registered": 25,
+      "kotlin_referenced": 0,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "ai": {
+      "registered": 12,
+      "kotlin_referenced": 0,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "an": {
+      "registered": 14,
+      "kotlin_referenced": 0,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "asset": {
+      "registered": 12,
+      "kotlin_referenced": 1,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "atom": {
+      "registered": 35,
+      "kotlin_referenced": 0,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "cap": {
+      "registered": 10,
+      "kotlin_referenced": 0,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "cattle": {
+      "registered": 36,
+      "kotlin_referenced": 17,
+      "implementation_mapped": 22,
+      "visual_green": 0
+    },
+    "feed": {
+      "registered": 12,
+      "kotlin_referenced": 1,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "fin": {
+      "registered": 13,
+      "kotlin_referenced": 4,
+      "implementation_mapped": 4,
+      "visual_green": 0
+    },
+    "gen": {
+      "registered": 10,
+      "kotlin_referenced": 0,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "global": {
+      "registered": 20,
+      "kotlin_referenced": 2,
+      "implementation_mapped": 5,
+      "visual_green": 0
+    },
+    "goat": {
+      "registered": 55,
+      "kotlin_referenced": 12,
+      "implementation_mapped": 17,
+      "visual_green": 0
+    },
+    "group": {
+      "registered": 9,
+      "kotlin_referenced": 1,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "health": {
+      "registered": 30,
+      "kotlin_referenced": 13,
+      "implementation_mapped": 13,
+      "visual_green": 0
+    },
+    "home": {
+      "registered": 20,
+      "kotlin_referenced": 5,
+      "implementation_mapped": 2,
+      "visual_green": 0
+    },
+    "inv": {
+      "registered": 19,
+      "kotlin_referenced": 9,
+      "implementation_mapped": 9,
+      "visual_green": 0
+    },
+    "labour": {
+      "registered": 9,
+      "kotlin_referenced": 1,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "pasture": {
+      "registered": 11,
+      "kotlin_referenced": 1,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "poultry": {
+      "registered": 27,
+      "kotlin_referenced": 12,
+      "implementation_mapped": 12,
+      "visual_green": 0
+    },
+    "proc": {
+      "registered": 10,
+      "kotlin_referenced": 1,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "rabbit": {
+      "registered": 36,
+      "kotlin_referenced": 13,
+      "implementation_mapped": 12,
+      "visual_green": 0
+    },
+    "report": {
+      "registered": 15,
+      "kotlin_referenced": 0,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "sales": {
+      "registered": 12,
+      "kotlin_referenced": 1,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "search": {
+      "registered": 9,
+      "kotlin_referenced": 0,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "sheep": {
+      "registered": 32,
+      "kotlin_referenced": 17,
+      "implementation_mapped": 22,
+      "visual_green": 0
+    },
+    "sim": {
+      "registered": 9,
+      "kotlin_referenced": 0,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    },
+    "sync": {
+      "registered": 18,
+      "kotlin_referenced": 1,
+      "implementation_mapped": 2,
+      "visual_green": 0
+    },
+    "task": {
+      "registered": 15,
+      "kotlin_referenced": 3,
+      "implementation_mapped": 5,
+      "visual_green": 0
+    },
+    "water": {
+      "registered": 10,
+      "kotlin_referenced": 1,
+      "implementation_mapped": 0,
+      "visual_green": 0
+    }
+  },
+  "blocking_authority_gaps": [
+    "CANONICAL_FEATURE_ID_CATALOG_NOT_FOUND"
+  ],
+  "status_law": "Code or static mapping is implementation evidence only; it is not route reachability, FEATURE_GREEN, MODULE_GREEN, VISUAL_GREEN, or MVP_GREEN."
+}

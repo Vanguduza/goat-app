@@ -35,7 +35,7 @@ MODULES = {
 
 I1 = {"FOS-GLOBAL-001","FOS-GLOBAL-002","FOS-GLOBAL-003","FOS-GLOBAL-006","FOS-GLOBAL-007","FOS-GLOBAL-014"}
 I2 = {
-"FOS-GLOBAL-005","FOS-GLOBAL-008","FOS-HOME-001","FOS-HOME-002","FOS-HOME-003","FOS-HOME-008",
+"FOS-GLOBAL-005","FOS-GLOBAL-008","FOS-HOME-001","FOS-HOME-002","FOS-HOME-003","FOS-HOME-008","FOS-HOME-012",
 "FOS-GOAT-001","FOS-GOAT-003","FOS-GOAT-018","FOS-GOAT-025","FOS-GOAT-030","FOS-GOAT-035","FOS-GOAT-036","FOS-GOAT-040","FOS-GOAT-041","FOS-GOAT-044",
 "FOS-RABBIT-001","FOS-RABBIT-003","FOS-RABBIT-004","FOS-RABBIT-006","FOS-RABBIT-009","FOS-RABBIT-013","FOS-RABBIT-016","FOS-RABBIT-018","FOS-RABBIT-026","FOS-RABBIT-031",
 "FOS-SHEEP-001","FOS-SHEEP-003","FOS-SHEEP-010","FOS-SHEEP-013","FOS-SHEEP-015","FOS-SHEEP-018","FOS-SHEEP-026",
@@ -53,7 +53,7 @@ I4 = {
 }
 
 IMPLEMENTED = {
-"FOS-GLOBAL-001","FOS-GLOBAL-002","FOS-GLOBAL-005","FOS-GLOBAL-006","FOS-GLOBAL-018","FOS-HOME-001","FOS-HOME-002",
+"FOS-GLOBAL-001","FOS-GLOBAL-002","FOS-GLOBAL-005","FOS-GLOBAL-006","FOS-GLOBAL-018","FOS-HOME-001","FOS-HOME-002","FOS-HOME-012",
 "FOS-GOAT-001","FOS-GOAT-002","FOS-GOAT-003","FOS-GOAT-004","FOS-GOAT-006","FOS-GOAT-011","FOS-GOAT-016","FOS-GOAT-017","FOS-GOAT-020","FOS-GOAT-022","FOS-GOAT-031","FOS-GOAT-032","FOS-GOAT-034","FOS-GOAT-037","FOS-GOAT-039","FOS-GOAT-043","FOS-GOAT-051",
 "FOS-TASK-001","FOS-TASK-004","FOS-TASK-007","FOS-TASK-008","FOS-TASK-009",
 "FOS-HEALTH-001","FOS-HEALTH-003","FOS-HEALTH-004","FOS-HEALTH-007","FOS-HEALTH-009","FOS-HEALTH-013","FOS-HEALTH-015","FOS-HEALTH-017","FOS-HEALTH-018","FOS-HEALTH-019","FOS-HEALTH-021","FOS-HEALTH-024","FOS-HEALTH-026",
@@ -81,13 +81,24 @@ def visual_class(sid: str) -> str:
 lines = [
 "schema_version: 2",
 "source: FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md",
-"authority: docs/ux/FARM_OS_VISUAL_AUTHORITY.md",
+"authority: docs/ux/animal-farm-visual-lock/",
 "state_profile: GLOBAL_16_PLUS_STATE_MATRIX",
 "role_profile: OWNER_MANAGER_SUPERVISOR_WORKER_VET_FINANCE_READONLY_ADMIN",
 "device_profile: PHONE_PLUS_TABLET_WHERE_APPLICABLE",
 "certification_law: VISUAL_GREEN_requires_reference_goldens_states_accessibility_drift_review_and_approval",
 "screens:",
 ]
+ROLE_VARIANTS = [
+    ("FOS-HOME-012-A", "Owner Dashboard", "FARM_OWNER", "PHONE_AND_TABLET_MANAGER_OPTIMISED"),
+    ("FOS-HOME-012-B", "Farm Manager Dashboard", "FARM_MANAGER", "PHONE_AND_TABLET_MANAGER_OPTIMISED"),
+    ("FOS-HOME-012-C", "Supervisor Dashboard", "SUPERVISOR", "PHONE_AND_TABLET"),
+    ("FOS-HOME-012-D", "Worker My Day Dashboard", "FARM_WORKER", "PHONE_FIRST_FIELD_GRADE"),
+    ("FOS-HOME-012-E", "Breeding Manager Dashboard", "BREEDING_MANAGER", "PHONE_AND_TABLET"),
+    ("FOS-HOME-012-F", "Vet Health Dashboard", "VET_HEALTH", "PHONE_AND_TABLET"),
+    ("FOS-HOME-012-G", "Finance Dashboard", "FINANCE_ADMIN", "TABLET_PREFERRED_PHONE_ADAPTIVE"),
+    ("FOS-HOME-012-H", "Buyer Read-only Dashboard", "BUYER_READ_ONLY", "PHONE_AND_TABLET"),
+]
+
 count = 0
 for module, names in MODULES.items():
     for i, name in enumerate(names, 1):
@@ -106,6 +117,21 @@ for module, names in MODULES.items():
             "    required_devices: DEVICE_MATRIX_APPLIES",
         ]
         count += 1
+        if sid == "FOS-HOME-012":
+            for variant_sid, variant_name, role, devices in ROLE_VARIANTS:
+                lines += [
+                    f"  - screen_id: {variant_sid}",
+                    f"    name: {variant_name}",
+                    "    module: home",
+                    "    visual_class: I2",
+                    "    implementation_audit: VISUAL_IMPLEMENTED",
+                    "    visual_green: false",
+                    "    feature_green: false",
+                    "    required_states: GLOBAL_16_PLUS_STATE_MATRIX",
+                    f"    required_roles: {role}",
+                    f"    required_devices: {devices}",
+                ]
+                count += 1
 lines += ["", f"screen_count: {count}", "visual_green_count: 0", "feature_green_claims_from_this_registry: 0", ""]
 Path("docs/ux/FARM_OS_SCREEN_REGISTRY.yaml").write_text("\n".join(lines), encoding="utf-8")
 print(f"generated {count} atomic screen records")

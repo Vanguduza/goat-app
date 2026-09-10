@@ -14,6 +14,8 @@ check_max_lines() {
   fi
 }
 
+python3 scripts/development/verify_quantum_control_plane.py --check
+
 echo "Checking Kotlin files for duplicate imports"
 while IFS= read -r -d '' file; do
   duplicates=$(grep '^import ' "$file" | sort | uniq -d || true)

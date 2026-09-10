@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "3a5a2992fea4919c57957441f67590c72df51fd2",
+  "tested_commit": "fe96d0d522aef5e3e4029d30dee9b2694bc0759d",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
@@ -771,12 +771,7 @@
       "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
       "app/src/main/java/com/farmos/app/OperatingModuleHost.kt"
     ],
-    "operating_module_branches_preempted_by_dedicated_hosts": [
-      "TASKS",
-      "HEALTH",
-      "MONEY",
-      "INVENTORY"
-    ],
+    "operating_module_branches_preempted_by_dedicated_hosts": [],
     "direct_action_scope_violations": [],
     "feature_id_catalog": "NOT_FOUND: screen contract template requires feature_ids, but no canonical feature-ID catalog was found in docs/code search"
   },
