@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
-import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -20,8 +20,17 @@ FEATURE_OUT = ROOT / "docs/realisation/FEATURE_REGISTRY.yaml"
 SCREEN_RE = re.compile(r"FOS-[A-Z]+-[0-9]{3}(?:-[A-Z])?")
 
 
-def head_sha() -> str:
-    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+def source_fingerprint() -> str:
+    digest = hashlib.sha256()
+    inputs = [REGISTRY, IMPL_MAP]
+    for base in ("app", "core", "data", "domain", "feature"):
+        inputs.extend(sorted((ROOT / base).rglob("*.kt")))
+    for path in inputs:
+        digest.update(str(path.relative_to(ROOT)).encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return "sha256:" + digest.hexdigest()
 
 
 def kotlin_ids() -> set[str]:
@@ -101,7 +110,7 @@ def build() -> tuple[dict, dict, dict]:
     }
     qdu_registry = {
         "schema_version": 1,
-        "tested_commit": head_sha(),
+        "source_fingerprint": source_fingerprint(),
         "screen_count": 545,
         "qdu_count": len(qdus),
         "feature_binding_status": feature_registry["catalog_status"],
@@ -110,7 +119,7 @@ def build() -> tuple[dict, dict, dict]:
     state = {
         "schema_version": 1,
         "repository": "Vanguduza/goat-app",
-        "tested_commit": head_sha(),
+        "source_fingerprint": source_fingerprint(),
         "canonical_branch": "main",
         "release_state": "BLOCKED",
         "green_states": {

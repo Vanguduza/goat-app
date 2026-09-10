@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tested_commit": "fe96d0d522aef5e3e4029d30dee9b2694bc0759d",
+  "source_fingerprint": "sha256:0673ba4b611e7932233fc489dd9e4f63e67f36e0b0faf9d5e85c479d6c87f24a",
   "screen_count": 545,
   "qdu_count": 545,
   "feature_binding_status": "BLOCKED_CANONICAL_FEATURE_ID_CATALOG_NOT_FOUND",
