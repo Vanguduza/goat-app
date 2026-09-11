@@ -167,6 +167,13 @@ fun FarmSessionContent(
                 onOpen = { destination = it },
                 onSignOut = onSignOut,
             )
+            FarmModule.FEED -> FeedModuleHost(
+                farmId = membership.farmId,
+                ops = ops,
+                newContext = ::context,
+                enqueueSync = ::enqueueSync,
+                onBack = backHome,
+            )
             else -> OperatingModuleHost(
                 module = dest.module,
                 farmId = membership.farmId,

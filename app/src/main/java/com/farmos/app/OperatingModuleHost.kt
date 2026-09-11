@@ -18,7 +18,6 @@ import com.farmos.domain.ops.CreateFarmTask
 import com.farmos.domain.ops.CreateFormularyItem
 import com.farmos.domain.ops.CreateInventoryItem
 import com.farmos.domain.ops.CreateSupplier
-import com.farmos.domain.ops.IssueFeed
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.RecordCattleBcs
 import com.farmos.domain.ops.RecordCattleCalving
@@ -101,7 +100,6 @@ fun OperatingModuleHost(
     var moneyRows by remember { mutableStateOf(emptyList<String>()) }
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
-    var feedRows by remember { mutableStateOf(emptyList<String>()) }
     var waterRows by remember { mutableStateOf(emptyList<String>()) }
     var saleRows by remember { mutableStateOf(emptyList<String>()) }
     var catalogRows by remember { mutableStateOf(emptyList<String>()) }
@@ -154,7 +152,6 @@ fun OperatingModuleHost(
                 active = animal.status == "active",
             )
         }.orEmpty()
-        feedRows = ops.recentFeed().map { "${it.itemId} · ${it.quantityMilli} milli" }
         waterRows = ops.recentWater().map { "${it.source} · ${it.litresMilli} ml" }
         saleRows = ops.recentSales().map { "${it.itemKind} · ${it.amountMinor} ${it.currency}" }
         catalogRows = ops.diseases().map { "${it.speciesCode} · ${it.displayName} · ${it.firstAid}" }
@@ -449,32 +446,6 @@ fun OperatingModuleHost(
                         else -> error("Unsupported species operations module $module")
                     }
                 },
-            )
-        }
-        FarmModule.FEED -> {
-            val itemId = remember { mutableStateOf("") }
-            val qty = remember { mutableStateOf("") }
-            val day = remember { mutableStateOf("") }
-            SimpleCaptureScreen(
-                screenId = "FOS-FEED-001",
-                title = "Feed",
-                help = "Issuing feed deducts inventory in milli-units. Ration percentages stay advisory drafts.",
-                empty = "No feed issues on this device.",
-                rows = feedRows + inventoryRows,
-                busy = busy,
-                error = error,
-                fields = listOf("Item id" to itemId, "Quantity" to qty, "Date" to day),
-                actionLabel = "Issue feed",
-                onSubmit = {
-                    run {
-                        val amount = qty.value.replace(',', '.').toDoubleOrNull() ?: error("Enter a quantity")
-                        ops.issueFeed(
-                            IssueFeed(UUID.randomUUID().toString(), itemId.value, null, (amount * 1000.0).toLong(), LocalDate.parse(day.value).toEpochDay()),
-                            newContext(),
-                        )
-                    }
-                },
-                onBack = onBack,
             )
         }
         FarmModule.WATER -> {
