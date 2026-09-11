@@ -17,7 +17,6 @@ import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateFarmTask
 import com.farmos.domain.ops.CreateFormularyItem
 import com.farmos.domain.ops.CreateInventoryItem
-import com.farmos.domain.ops.CreateSupplier
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.RecordCattleBcs
 import com.farmos.domain.ops.RecordCattleCalving
@@ -34,7 +33,6 @@ import com.farmos.domain.ops.RecordSheepFootrot
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordMoney
-import com.farmos.domain.ops.RecordPurchase
 import com.farmos.domain.ops.RecordSheepJoining
 import com.farmos.domain.ops.RecordSheepLambing
 import com.farmos.domain.ops.RecordSheepMarking
@@ -102,8 +100,6 @@ fun OperatingModuleHost(
     var treatmentRows by remember { mutableStateOf(emptyList<String>()) }
     var packRows by remember { mutableStateOf(emptyList<String>()) }
     var withdrawalRows by remember { mutableStateOf(emptyList<String>()) }
-    var supplierRows by remember { mutableStateOf(emptyList<String>()) }
-    var purchaseRows by remember { mutableStateOf(emptyList<String>()) }
     var kitRows by remember { mutableStateOf(emptyList<String>()) }
     var waitlistRows by remember { mutableStateOf(emptyList<String>()) }
     var beddingLine by remember { mutableStateOf("No bedding item bound.") }
@@ -152,8 +148,6 @@ fun OperatingModuleHost(
         treatmentRows = ops.recentTreatments().map { "${it.speciesCode} · ${it.reason} · formulary ${it.formularyItemId}" }
         packRows = ops.packs().map { "${it.speciesCode} · ${it.name} · ${it.status} · ${it.acceptedByVet.orEmpty()}" }
         withdrawalRows = ops.withdrawals().map { "${it.windowKind} · ${it.product} ends day ${it.endsEpochDay}" }
-        supplierRows = ops.suppliers().map { "${it.id} ${it.name} · lead ${it.leadTimeDays} d" }
-        purchaseRows = ops.purchases().map { "${it.id} item ${it.itemId} · ${it.quantityMilli} milli · ${it.amountMinor} ${it.currency}" }
     }
 
     LaunchedEffect(module) { runCatching { refreshOps() } }
@@ -575,62 +569,6 @@ fun OperatingModuleHost(
                         },
                         enabled = !busy && bedQty.value.isNotBlank(),
                     ) { androidx.compose.material3.Text("Bind bedding") }
-                },
-            )
-        }
-        FarmModule.PROCUREMENT -> {
-            val name = remember { mutableStateOf("") }
-            val lead = remember { mutableStateOf("0") }
-            val supplierId = remember { mutableStateOf("") }
-            val itemId = remember { mutableStateOf("") }
-            val qty = remember { mutableStateOf("") }
-            val amount = remember { mutableStateOf("") }
-            val day = remember { mutableStateOf("") }
-            SimpleCaptureScreen(
-                screenId = "FOS-PROC-001",
-                title = "Procurement",
-                help = "A purchase receives inventory and posts an expense in integer minor units.",
-                empty = "No suppliers on this device.",
-                rows = supplierRows + purchaseRows,
-                busy = busy,
-                error = error,
-                fields = listOf("Supplier name" to name, "Lead time days" to lead),
-                actionLabel = "Create supplier",
-                onSubmit = {
-                    run {
-                        ops.createSupplier(
-                            CreateSupplier(UUID.randomUUID().toString(), name.value, lead.value.toIntOrNull() ?: 0),
-                            newContext(),
-                        )
-                    }
-                },
-                onBack = onBack,
-                extra = {
-                    androidx.compose.material3.OutlinedTextField(supplierId.value, { supplierId.value = it }, label = { androidx.compose.material3.Text("Supplier id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(itemId.value, { itemId.value = it }, label = { androidx.compose.material3.Text("Inventory item id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(qty.value, { qty.value = it }, label = { androidx.compose.material3.Text("Quantity") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(amount.value, { amount.value = it }, label = { androidx.compose.material3.Text("Amount") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(day.value, { day.value = it }, label = { androidx.compose.material3.Text("Date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.Button(
-                        onClick = {
-                            run {
-                                val quantity = qty.value.replace(',', '.').toDoubleOrNull() ?: error("Enter a quantity")
-                                val major = amount.value.replace(',', '.').toDoubleOrNull() ?: error("Enter an amount")
-                                ops.recordPurchase(
-                                    RecordPurchase(
-                                        purchaseId = UUID.randomUUID().toString(),
-                                        supplierId = supplierId.value,
-                                        itemId = itemId.value,
-                                        quantityMilli = (quantity * 1000.0).toLong(),
-                                        amountMinor = (major * 100.0).toLong(),
-                                        occurredEpochDay = LocalDate.parse(day.value).toEpochDay(),
-                                    ),
-                                    newContext(),
-                                )
-                            }
-                        },
-                        enabled = !busy && supplierId.value.isNotBlank() && itemId.value.isNotBlank() && qty.value.isNotBlank() && amount.value.isNotBlank() && day.value.isNotBlank(),
-                    ) { androidx.compose.material3.Text("Record purchase") }
                 },
             )
         }

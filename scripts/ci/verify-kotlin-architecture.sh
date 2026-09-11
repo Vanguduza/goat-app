@@ -45,6 +45,7 @@ check_max_lines "app/src/main/java/com/farmos/app/PoultryModuleHost.kt" 230
 check_max_lines "app/src/main/java/com/farmos/app/FeedModuleHost.kt" 140
 check_max_lines "app/src/main/java/com/farmos/app/WaterModuleHost.kt" 120
 check_max_lines "app/src/main/java/com/farmos/app/SalesModuleHost.kt" 120
+check_max_lines "app/src/main/java/com/farmos/app/ProcurementModuleHost.kt" 160
 check_max_lines "app/src/main/java/com/farmos/app/GroupsModuleHost.kt" 150
 check_max_lines "app/src/main/java/com/farmos/app/PastureModuleHost.kt" 170
 check_max_lines "app/src/main/java/com/farmos/app/LabourModuleHost.kt" 110
