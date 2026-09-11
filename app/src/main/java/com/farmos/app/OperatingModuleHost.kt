@@ -14,7 +14,6 @@ import com.farmos.data.herd.RoomHerdRepository
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.AcceptHealthPack
 import com.farmos.domain.ops.CompleteFarmTask
-import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.CreateFarmTask
 import com.farmos.domain.ops.CreateFormularyItem
 import com.farmos.domain.ops.CreateInventoryItem
@@ -35,7 +34,6 @@ import com.farmos.domain.ops.RecordSheepShearing
 import com.farmos.domain.ops.RecordSheepFootrot
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
-import com.farmos.domain.ops.RecordMaintenance
 import com.farmos.domain.ops.RecordMoney
 import com.farmos.domain.ops.RecordPurchase
 import com.farmos.domain.ops.RecordSale
@@ -103,7 +101,6 @@ fun OperatingModuleHost(
     var moneyRows by remember { mutableStateOf(emptyList<String>()) }
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
-    var assetRows by remember { mutableStateOf(emptyList<String>()) }
     var feedRows by remember { mutableStateOf(emptyList<String>()) }
     var waterRows by remember { mutableStateOf(emptyList<String>()) }
     var saleRows by remember { mutableStateOf(emptyList<String>()) }
@@ -157,7 +154,6 @@ fun OperatingModuleHost(
                 active = animal.status == "active",
             )
         }.orEmpty()
-        assetRows = ops.assets().map { "${it.id} ${it.code} · ${it.name}" }
         feedRows = ops.recentFeed().map { "${it.itemId} · ${it.quantityMilli} milli" }
         waterRows = ops.recentWater().map { "${it.source} · ${it.litresMilli} ml" }
         saleRows = ops.recentSales().map { "${it.itemKind} · ${it.amountMinor} ${it.currency}" }
@@ -452,47 +448,6 @@ fun OperatingModuleHost(
                         )
                         else -> error("Unsupported species operations module $module")
                     }
-                },
-            )
-        }
-        FarmModule.ASSETS -> {
-            val code = remember { mutableStateOf("") }
-            val name = remember { mutableStateOf("") }
-            val kind = remember { mutableStateOf("equipment") }
-            val assetId = remember { mutableStateOf("") }
-            val title = remember { mutableStateOf("") }
-            val day = remember { mutableStateOf("") }
-            SimpleCaptureScreen(
-                screenId = "FOS-ASSET-001",
-                title = "Assets",
-                help = "Record equipment and maintenance. This is not a depreciation ledger.",
-                empty = "No assets on this device.",
-                rows = assetRows,
-                busy = busy,
-                error = error,
-                fields = listOf("Code" to code, "Name" to name, "Kind" to kind),
-                actionLabel = "Create asset",
-                onSubmit = {
-                    run {
-                        ops.createAsset(CreateFarmAsset(UUID.randomUUID().toString(), code.value, name.value, kind.value), newContext())
-                    }
-                },
-                onBack = onBack,
-                extra = {
-                    androidx.compose.material3.OutlinedTextField(assetId.value, { assetId.value = it }, label = { androidx.compose.material3.Text("Asset id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(title.value, { title.value = it }, label = { androidx.compose.material3.Text("Maintenance title") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.OutlinedTextField(day.value, { day.value = it }, label = { androidx.compose.material3.Text("Date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-                    androidx.compose.material3.Button(
-                        onClick = {
-                            run {
-                                ops.recordMaintenance(
-                                    RecordMaintenance(UUID.randomUUID().toString(), assetId.value, title.value, LocalDate.parse(day.value).toEpochDay()),
-                                    newContext(),
-                                )
-                            }
-                        },
-                        enabled = !busy && assetId.value.isNotBlank() && title.value.isNotBlank() && day.value.isNotBlank(),
-                    ) { androidx.compose.material3.Text("Record maintenance") }
                 },
             )
         }
