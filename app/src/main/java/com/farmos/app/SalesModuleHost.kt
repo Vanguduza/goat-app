@@ -44,7 +44,16 @@ fun SalesModuleHost(
         onSubmit = { run {
             val major = amount.value.replace(',', '.').toDoubleOrNull() ?: error("Enter an amount")
             val quantity = qty.value.replace(',', '.').toDoubleOrNull() ?: error("Enter a quantity")
-            ops.recordSale(RecordSale(UUID.randomUUID().toString(), kind.value, (quantity * 1000.0).toLong(), (major * 100.0).toLong(), LocalDate.parse(day.value).toEpochDay()), newContext())
+            ops.recordSale(
+                RecordSale(
+                    saleId = UUID.randomUUID().toString(),
+                    itemKind = kind.value,
+                    quantityMilli = (quantity * 1000.0).toLong(),
+                    amountMinor = (major * 100.0).toLong(),
+                    occurredEpochDay = LocalDate.parse(day.value).toEpochDay(),
+                ),
+                newContext(),
+            )
         } },
         onBack = onBack,
     )
