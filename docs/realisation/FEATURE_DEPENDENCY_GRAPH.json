@@ -1,0 +1,2237 @@
+{
+  "schema_version": 1,
+  "authority": "docs/00_PROJECT_TRUTH.md + owner deterministic completion plan",
+  "feature_catalog": "docs/realisation/FEATURE_REGISTRY.yaml",
+  "semantics": "depends_on is a completion prerequisite, not a runtime call graph and not a green claim.",
+  "summary": {
+    "node_count": 156,
+    "edge_count": 332,
+    "root_count": 7,
+    "roots": [
+      "FTR-ATOM-001",
+      "FTR-ATOM-002",
+      "FTR-ATOM-003",
+      "FTR-ATOM-004",
+      "FTR-ATOM-005",
+      "FTR-ATOM-006",
+      "FTR-GLOBAL-001"
+    ],
+    "cycle_free": true,
+    "phase_monotonic": true
+  },
+  "global_programme_gates": [
+    {
+      "gate_id": "PLATFORM_DECIMAL_SCALING_EXACT",
+      "status": "OPEN",
+      "blocking_phase": 3,
+      "evidence": [
+        "app/src/main/java/com/farmos/app/SalesModuleHost.kt",
+        "app/src/main/java/com/farmos/app/ProcurementModuleHost.kt",
+        "app/src/main/java/com/farmos/app/RabbitCommerceModuleHost.kt"
+      ],
+      "requirement": "Replace floating-point scale-and-truncate input conversion with exact checked decimal-to-minor/milli parsing and tests."
+    },
+    {
+      "gate_id": "PLATFORM_SYNC_SINGLE_OWNER_ATOMIC_CLAIM",
+      "status": "OPEN",
+      "blocking_phase": 3,
+      "evidence": [
+        "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
+        "core/database/src/main/kotlin/com/farmos/core/database/FarmOsDatabase.kt",
+        "core/sync/src/main/kotlin/com/farmos/core/sync/SyncEngine.kt"
+      ],
+      "requirement": "Serialize on-demand sync scheduling and atomically claim eligible outbox rows so concurrent drains cannot send the same mutation."
+    },
+    {
+      "gate_id": "PLATFORM_SESSION_REVOCATION",
+      "status": "OPEN",
+      "blocking_phase": 3,
+      "evidence": [
+        "core/network/src/main/kotlin/com/farmos/core/network/SupabaseClients.kt"
+      ],
+      "requirement": "Define and implement server-backed user sign-out/revocation semantics while preserving deterministic local credential clearing and offline recovery."
+    }
+  ],
+  "nodes": [
+    {
+      "feature_id": "FTR-GLOBAL-001",
+      "module": "global",
+      "name": "Session entry and resilience",
+      "completion_phase": 6,
+      "depends_on": [],
+      "blocks": [
+        "FTR-ADMIN-007",
+        "FTR-GLOBAL-002",
+        "FTR-GLOBAL-003",
+        "FTR-GLOBAL-005",
+        "FTR-SEARCH-001",
+        "FTR-SYNC-001",
+        "FTR-SYNC-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-GLOBAL-002",
+      "module": "global",
+      "name": "Account lifecycle",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-001"
+      ],
+      "blocks": [
+        "FTR-GLOBAL-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-GLOBAL-003",
+      "module": "global",
+      "name": "Farm onboarding and membership",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-001",
+        "FTR-GLOBAL-002"
+      ],
+      "blocks": [
+        "FTR-ADMIN-001",
+        "FTR-ADMIN-002",
+        "FTR-ADMIN-003",
+        "FTR-AI-001",
+        "FTR-ASSET-001",
+        "FTR-FIN-001",
+        "FTR-GLOBAL-004",
+        "FTR-GLOBAL-005",
+        "FTR-GROUP-001",
+        "FTR-HEALTH-001",
+        "FTR-HOME-001",
+        "FTR-HOME-002",
+        "FTR-HOME-006",
+        "FTR-INV-001",
+        "FTR-LABOUR-001",
+        "FTR-PASTURE-001",
+        "FTR-PROC-001",
+        "FTR-REPORT-001",
+        "FTR-SALES-001",
+        "FTR-SEARCH-001",
+        "FTR-SYNC-001",
+        "FTR-SYNC-003",
+        "FTR-TASK-001",
+        "FTR-WATER-001"
+      ]
+    },
+    {
+      "feature_id": "FTR-GLOBAL-004",
+      "module": "global",
+      "name": "Device permission onboarding",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-GLOBAL-005",
+      "module": "global",
+      "name": "Farm access revocation",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-001",
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-HOME-001",
+      "module": "home",
+      "name": "Farm command centre",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-HEALTH-001",
+        "FTR-HOME-002",
+        "FTR-HOME-003",
+        "FTR-HOME-004",
+        "FTR-HOME-005",
+        "FTR-HOME-006",
+        "FTR-HOME-007",
+        "FTR-SIM-001",
+        "FTR-TASK-001"
+      ]
+    },
+    {
+      "feature_id": "FTR-HOME-002",
+      "module": "home",
+      "name": "Species navigation",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-003",
+        "FTR-HOME-001"
+      ],
+      "blocks": [
+        "FTR-CATTLE-001",
+        "FTR-GOAT-001",
+        "FTR-POULTRY-001",
+        "FTR-RABBIT-001",
+        "FTR-SHEEP-001"
+      ]
+    },
+    {
+      "feature_id": "FTR-HOME-003",
+      "module": "home",
+      "name": "Global discovery",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-HOME-001",
+        "FTR-SEARCH-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-HOME-004",
+      "module": "home",
+      "name": "Quick capture",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-HOME-001",
+        "FTR-ATOM-001",
+        "FTR-ATOM-002"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-HOME-005",
+      "module": "home",
+      "name": "Sync status entry",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-HOME-001",
+        "FTR-SYNC-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-HOME-006",
+      "module": "home",
+      "name": "Farm switching",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-HOME-001",
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-HOME-007",
+      "module": "home",
+      "name": "Notification centre",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-HOME-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-GOAT-001",
+      "module": "goat",
+      "name": "Goat identity and records",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-HOME-002",
+        "FTR-SEARCH-001",
+        "FTR-GROUP-001"
+      ],
+      "blocks": [
+        "FTR-CAP-001",
+        "FTR-GEN-001",
+        "FTR-GOAT-002",
+        "FTR-GOAT-003",
+        "FTR-GOAT-004",
+        "FTR-GOAT-005",
+        "FTR-GOAT-007",
+        "FTR-GOAT-008",
+        "FTR-GOAT-009"
+      ]
+    },
+    {
+      "feature_id": "FTR-GOAT-002",
+      "module": "goat",
+      "name": "Growth and body condition",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-GOAT-001"
+      ],
+      "blocks": [
+        "FTR-GOAT-010"
+      ]
+    },
+    {
+      "feature_id": "FTR-GOAT-003",
+      "module": "goat",
+      "name": "Milk and lactation",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-GOAT-001"
+      ],
+      "blocks": [
+        "FTR-GOAT-010"
+      ]
+    },
+    {
+      "feature_id": "FTR-GOAT-004",
+      "module": "goat",
+      "name": "Goat health and parasite control",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-GOAT-001",
+        "FTR-HEALTH-001",
+        "FTR-HEALTH-002"
+      ],
+      "blocks": [
+        "FTR-GOAT-010"
+      ]
+    },
+    {
+      "feature_id": "FTR-GOAT-005",
+      "module": "goat",
+      "name": "Doe reproduction and pregnancy",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-GOAT-001"
+      ],
+      "blocks": [
+        "FTR-GOAT-006",
+        "FTR-GOAT-007",
+        "FTR-GOAT-010"
+      ]
+    },
+    {
+      "feature_id": "FTR-GOAT-006",
+      "module": "goat",
+      "name": "Kidding and offspring",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-GOAT-005"
+      ],
+      "blocks": [
+        "FTR-GOAT-007",
+        "FTR-GOAT-010"
+      ]
+    },
+    {
+      "feature_id": "FTR-GOAT-007",
+      "module": "goat",
+      "name": "Pedigree and breeding decisions",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-GOAT-001",
+        "FTR-GOAT-005",
+        "FTR-GOAT-006"
+      ],
+      "blocks": [
+        "FTR-GOAT-010"
+      ]
+    },
+    {
+      "feature_id": "FTR-GOAT-008",
+      "module": "goat",
+      "name": "Groups movement and identification",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-GOAT-001",
+        "FTR-GROUP-001",
+        "FTR-PASTURE-002"
+      ],
+      "blocks": [
+        "FTR-GOAT-010"
+      ]
+    },
+    {
+      "feature_id": "FTR-GOAT-009",
+      "module": "goat",
+      "name": "Lifecycle status and exits",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-GOAT-001"
+      ],
+      "blocks": [
+        "FTR-GOAT-010"
+      ]
+    },
+    {
+      "feature_id": "FTR-GOAT-010",
+      "module": "goat",
+      "name": "Goat reporting",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-GOAT-002",
+        "FTR-GOAT-003",
+        "FTR-GOAT-004",
+        "FTR-GOAT-005",
+        "FTR-GOAT-006",
+        "FTR-GOAT-007",
+        "FTR-GOAT-008",
+        "FTR-GOAT-009"
+      ],
+      "blocks": [
+        "FTR-AN-001",
+        "FTR-REPORT-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-RABBIT-001",
+      "module": "rabbit",
+      "name": "Rabbit identity and breeding stock",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-HOME-002",
+        "FTR-SEARCH-001",
+        "FTR-GROUP-001"
+      ],
+      "blocks": [
+        "FTR-CAP-001",
+        "FTR-GEN-001",
+        "FTR-RABBIT-002",
+        "FTR-RABBIT-003",
+        "FTR-RABBIT-006",
+        "FTR-RABBIT-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-RABBIT-002",
+      "module": "rabbit",
+      "name": "Cage and occupancy management",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-RABBIT-001"
+      ],
+      "blocks": [
+        "FTR-RABBIT-003",
+        "FTR-RABBIT-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-RABBIT-003",
+      "module": "rabbit",
+      "name": "Breeding pregnancy and kindling",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-RABBIT-001",
+        "FTR-RABBIT-002"
+      ],
+      "blocks": [
+        "FTR-RABBIT-004",
+        "FTR-RABBIT-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-RABBIT-004",
+      "module": "rabbit",
+      "name": "Litter and kit lifecycle",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-RABBIT-003"
+      ],
+      "blocks": [
+        "FTR-RABBIT-005",
+        "FTR-RABBIT-006",
+        "FTR-RABBIT-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-RABBIT-005",
+      "module": "rabbit",
+      "name": "Market waitlist reservations and sales",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-RABBIT-004"
+      ],
+      "blocks": [
+        "FTR-RABBIT-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-RABBIT-006",
+      "module": "rabbit",
+      "name": "Rabbit lineage growth and health",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-RABBIT-001",
+        "FTR-RABBIT-004",
+        "FTR-HEALTH-001"
+      ],
+      "blocks": [
+        "FTR-RABBIT-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-RABBIT-007",
+      "module": "rabbit",
+      "name": "Rabbit reporting",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-RABBIT-001",
+        "FTR-RABBIT-002",
+        "FTR-RABBIT-003",
+        "FTR-RABBIT-004",
+        "FTR-RABBIT-005",
+        "FTR-RABBIT-006"
+      ],
+      "blocks": [
+        "FTR-AN-001",
+        "FTR-REPORT-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-SHEEP-001",
+      "module": "sheep",
+      "name": "Sheep identity and flock management",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-HOME-002",
+        "FTR-SEARCH-001",
+        "FTR-GROUP-001"
+      ],
+      "blocks": [
+        "FTR-CAP-001",
+        "FTR-GEN-001",
+        "FTR-SHEEP-002",
+        "FTR-SHEEP-003",
+        "FTR-SHEEP-004",
+        "FTR-SHEEP-005",
+        "FTR-SHEEP-006",
+        "FTR-SHEEP-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-SHEEP-002",
+      "module": "sheep",
+      "name": "Growth condition and parasite scoring",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-SHEEP-001"
+      ],
+      "blocks": [
+        "FTR-SHEEP-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-SHEEP-003",
+      "module": "sheep",
+      "name": "Joining pregnancy and lambing",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-SHEEP-001"
+      ],
+      "blocks": [
+        "FTR-SHEEP-006",
+        "FTR-SHEEP-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-SHEEP-004",
+      "module": "sheep",
+      "name": "Wool and fleece production",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-SHEEP-001"
+      ],
+      "blocks": [
+        "FTR-SHEEP-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-SHEEP-005",
+      "module": "sheep",
+      "name": "Sheep welfare and health",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-SHEEP-001",
+        "FTR-HEALTH-001",
+        "FTR-HEALTH-002"
+      ],
+      "blocks": [
+        "FTR-SHEEP-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-SHEEP-006",
+      "module": "sheep",
+      "name": "Lineage movement and lifecycle",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-SHEEP-001",
+        "FTR-SHEEP-003",
+        "FTR-GROUP-001",
+        "FTR-PASTURE-002"
+      ],
+      "blocks": [
+        "FTR-SHEEP-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-SHEEP-007",
+      "module": "sheep",
+      "name": "Sheep reporting",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-SHEEP-001",
+        "FTR-SHEEP-002",
+        "FTR-SHEEP-003",
+        "FTR-SHEEP-004",
+        "FTR-SHEEP-005",
+        "FTR-SHEEP-006"
+      ],
+      "blocks": [
+        "FTR-AN-001",
+        "FTR-REPORT-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-CATTLE-001",
+      "module": "cattle",
+      "name": "Cattle identity and herd management",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-HOME-002",
+        "FTR-SEARCH-001",
+        "FTR-GROUP-001"
+      ],
+      "blocks": [
+        "FTR-CAP-001",
+        "FTR-CATTLE-002",
+        "FTR-CATTLE-003",
+        "FTR-CATTLE-004",
+        "FTR-CATTLE-005",
+        "FTR-CATTLE-006",
+        "FTR-CATTLE-007",
+        "FTR-GEN-001"
+      ]
+    },
+    {
+      "feature_id": "FTR-CATTLE-002",
+      "module": "cattle",
+      "name": "Growth and condition",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-CATTLE-001"
+      ],
+      "blocks": [
+        "FTR-CATTLE-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-CATTLE-003",
+      "module": "cattle",
+      "name": "Breeding pregnancy and calving",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-CATTLE-001"
+      ],
+      "blocks": [
+        "FTR-CATTLE-006",
+        "FTR-CATTLE-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-CATTLE-004",
+      "module": "cattle",
+      "name": "Dairy production and udder health",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-CATTLE-001"
+      ],
+      "blocks": [
+        "FTR-CATTLE-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-CATTLE-005",
+      "module": "cattle",
+      "name": "Beef and feedlot production",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-CATTLE-001",
+        "FTR-FEED-002"
+      ],
+      "blocks": [
+        "FTR-CATTLE-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-CATTLE-006",
+      "module": "cattle",
+      "name": "Movement lineage health and lifecycle",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-CATTLE-001",
+        "FTR-CATTLE-003",
+        "FTR-GROUP-001",
+        "FTR-HEALTH-001"
+      ],
+      "blocks": [
+        "FTR-CATTLE-007"
+      ]
+    },
+    {
+      "feature_id": "FTR-CATTLE-007",
+      "module": "cattle",
+      "name": "Cattle reporting",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-CATTLE-001",
+        "FTR-CATTLE-002",
+        "FTR-CATTLE-003",
+        "FTR-CATTLE-004",
+        "FTR-CATTLE-005",
+        "FTR-CATTLE-006"
+      ],
+      "blocks": [
+        "FTR-AN-001",
+        "FTR-REPORT-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-POULTRY-001",
+      "module": "poultry",
+      "name": "Poultry configuration flocks and housing",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-HOME-002",
+        "FTR-SEARCH-001",
+        "FTR-GROUP-001"
+      ],
+      "blocks": [
+        "FTR-CAP-001",
+        "FTR-POULTRY-002",
+        "FTR-POULTRY-003",
+        "FTR-POULTRY-004",
+        "FTR-POULTRY-005",
+        "FTR-POULTRY-006"
+      ]
+    },
+    {
+      "feature_id": "FTR-POULTRY-002",
+      "module": "poultry",
+      "name": "Mortality eggs and feed performance",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-POULTRY-001",
+        "FTR-FEED-001"
+      ],
+      "blocks": [
+        "FTR-POULTRY-006"
+      ]
+    },
+    {
+      "feature_id": "FTR-POULTRY-003",
+      "module": "poultry",
+      "name": "Vaccination and biosecurity",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-POULTRY-001",
+        "FTR-HEALTH-001"
+      ],
+      "blocks": [
+        "FTR-POULTRY-006"
+      ]
+    },
+    {
+      "feature_id": "FTR-POULTRY-004",
+      "module": "poultry",
+      "name": "Hatchery and incubation",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-POULTRY-001"
+      ],
+      "blocks": [
+        "FTR-POULTRY-006"
+      ]
+    },
+    {
+      "feature_id": "FTR-POULTRY-005",
+      "module": "poultry",
+      "name": "Flock movement closeout and health",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-POULTRY-001",
+        "FTR-HEALTH-001"
+      ],
+      "blocks": [
+        "FTR-POULTRY-006"
+      ]
+    },
+    {
+      "feature_id": "FTR-POULTRY-006",
+      "module": "poultry",
+      "name": "Poultry reporting",
+      "completion_phase": 8,
+      "depends_on": [
+        "FTR-POULTRY-001",
+        "FTR-POULTRY-002",
+        "FTR-POULTRY-003",
+        "FTR-POULTRY-004",
+        "FTR-POULTRY-005"
+      ],
+      "blocks": [
+        "FTR-AN-001",
+        "FTR-REPORT-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-HEALTH-001",
+      "module": "health",
+      "name": "Health triage observations and cases",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-GLOBAL-003",
+        "FTR-HOME-001"
+      ],
+      "blocks": [
+        "FTR-CATTLE-006",
+        "FTR-GOAT-004",
+        "FTR-GROUP-002",
+        "FTR-HEALTH-002",
+        "FTR-HEALTH-003",
+        "FTR-HEALTH-004",
+        "FTR-HEALTH-006",
+        "FTR-HEALTH-007",
+        "FTR-HEALTH-008",
+        "FTR-HEALTH-009",
+        "FTR-POULTRY-003",
+        "FTR-POULTRY-005",
+        "FTR-RABBIT-006",
+        "FTR-SHEEP-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-HEALTH-002",
+      "module": "health",
+      "name": "Treatment and withdrawal control",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-HEALTH-001",
+        "FTR-INV-003"
+      ],
+      "blocks": [
+        "FTR-GOAT-004",
+        "FTR-HEALTH-005",
+        "FTR-HEALTH-009",
+        "FTR-SHEEP-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-HEALTH-003",
+      "module": "health",
+      "name": "Vaccination management",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-HEALTH-001",
+        "FTR-INV-003"
+      ],
+      "blocks": [
+        "FTR-HEALTH-005",
+        "FTR-HEALTH-009"
+      ]
+    },
+    {
+      "feature_id": "FTR-HEALTH-004",
+      "module": "health",
+      "name": "Formulary governance",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-HEALTH-001"
+      ],
+      "blocks": [
+        "FTR-HEALTH-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-HEALTH-005",
+      "module": "health",
+      "name": "Protocol packs and application",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-HEALTH-002",
+        "FTR-HEALTH-003",
+        "FTR-HEALTH-004",
+        "FTR-TASK-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-HEALTH-006",
+      "module": "health",
+      "name": "Veterinary visits",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-HEALTH-001"
+      ],
+      "blocks": [
+        "FTR-HEALTH-009"
+      ]
+    },
+    {
+      "feature_id": "FTR-HEALTH-007",
+      "module": "health",
+      "name": "Laboratory results",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-HEALTH-001"
+      ],
+      "blocks": [
+        "FTR-HEALTH-009"
+      ]
+    },
+    {
+      "feature_id": "FTR-HEALTH-008",
+      "module": "health",
+      "name": "Clinical reference and emergency guidance",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-HEALTH-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-HEALTH-009",
+      "module": "health",
+      "name": "Health timeline and reporting",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-HEALTH-001",
+        "FTR-HEALTH-002",
+        "FTR-HEALTH-003",
+        "FTR-HEALTH-006",
+        "FTR-HEALTH-007"
+      ],
+      "blocks": [
+        "FTR-AN-002",
+        "FTR-REPORT-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-TASK-001",
+      "module": "task",
+      "name": "Task board and task lifecycle",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-GLOBAL-003",
+        "FTR-HOME-001"
+      ],
+      "blocks": [
+        "FTR-ASSET-002",
+        "FTR-HEALTH-005",
+        "FTR-LABOUR-002",
+        "FTR-TASK-002",
+        "FTR-TASK-003",
+        "FTR-TASK-004",
+        "FTR-WATER-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-TASK-002",
+      "module": "task",
+      "name": "Scheduling calendar and recurrence",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-TASK-001"
+      ],
+      "blocks": [
+        "FTR-FEED-002",
+        "FTR-TASK-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-TASK-003",
+      "module": "task",
+      "name": "Task evidence and attachments",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-TASK-001",
+        "FTR-ATOM-002"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-TASK-004",
+      "module": "task",
+      "name": "Generated lifecycle and protocol tasks",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-TASK-001",
+        "FTR-TASK-002"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-INV-001",
+      "module": "inv",
+      "name": "Inventory catalogue and discovery",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-GLOBAL-003",
+        "FTR-SEARCH-001"
+      ],
+      "blocks": [
+        "FTR-FEED-001",
+        "FTR-INV-002",
+        "FTR-INV-003",
+        "FTR-INV-004",
+        "FTR-INV-005",
+        "FTR-INV-006",
+        "FTR-PROC-002",
+        "FTR-SALES-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-INV-002",
+      "module": "inv",
+      "name": "Receiving and lot traceability",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-INV-001"
+      ],
+      "blocks": [
+        "FTR-INV-003",
+        "FTR-INV-005",
+        "FTR-PROC-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-INV-003",
+      "module": "inv",
+      "name": "Issuing FEFO and expiry",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-INV-001",
+        "FTR-INV-002"
+      ],
+      "blocks": [
+        "FTR-FEED-003",
+        "FTR-HEALTH-002",
+        "FTR-HEALTH-003",
+        "FTR-INV-005",
+        "FTR-SALES-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-INV-004",
+      "module": "inv",
+      "name": "Reorder and supplier binding",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-INV-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-INV-005",
+      "module": "inv",
+      "name": "Stock control and reconciliation",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-INV-001",
+        "FTR-INV-002",
+        "FTR-INV-003"
+      ],
+      "blocks": [
+        "FTR-INV-006"
+      ]
+    },
+    {
+      "feature_id": "FTR-INV-006",
+      "module": "inv",
+      "name": "Inventory reporting",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-INV-001",
+        "FTR-INV-005"
+      ],
+      "blocks": [
+        "FTR-REPORT-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-FEED-001",
+      "module": "feed",
+      "name": "Feed inventory",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-INV-001"
+      ],
+      "blocks": [
+        "FTR-CAP-001",
+        "FTR-FEED-002",
+        "FTR-FEED-003",
+        "FTR-FEED-004",
+        "FTR-FEED-005",
+        "FTR-POULTRY-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-FEED-002",
+      "module": "feed",
+      "name": "Feed planning and schedules",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-FEED-001",
+        "FTR-TASK-002"
+      ],
+      "blocks": [
+        "FTR-CATTLE-005",
+        "FTR-FEED-004",
+        "FTR-FEED-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-FEED-003",
+      "module": "feed",
+      "name": "Feed consumption and costing",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-FEED-001",
+        "FTR-INV-003"
+      ],
+      "blocks": [
+        "FTR-FEED-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-FEED-004",
+      "module": "feed",
+      "name": "Ration formulation and analysis",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-FEED-001",
+        "FTR-FEED-002"
+      ],
+      "blocks": [
+        "FTR-FEED-005",
+        "FTR-SIM-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-FEED-005",
+      "module": "feed",
+      "name": "Feed alerts and reporting",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-FEED-001",
+        "FTR-FEED-002",
+        "FTR-FEED-003",
+        "FTR-FEED-004"
+      ],
+      "blocks": [
+        "FTR-AN-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-WATER-001",
+      "module": "water",
+      "name": "Water assets and points",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-CAP-001",
+        "FTR-WATER-002",
+        "FTR-WATER-003",
+        "FTR-WATER-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-WATER-002",
+      "module": "water",
+      "name": "Water consumption quality and inspection",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-WATER-001"
+      ],
+      "blocks": [
+        "FTR-WATER-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-WATER-003",
+      "module": "water",
+      "name": "Water issues maintenance and history",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-WATER-001",
+        "FTR-TASK-001"
+      ],
+      "blocks": [
+        "FTR-WATER-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-WATER-004",
+      "module": "water",
+      "name": "Water reporting",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-WATER-001",
+        "FTR-WATER-002",
+        "FTR-WATER-003"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-PASTURE-001",
+      "module": "pasture",
+      "name": "Paddock inventory",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-CAP-001",
+        "FTR-PASTURE-002",
+        "FTR-PASTURE-003",
+        "FTR-PASTURE-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-PASTURE-002",
+      "module": "pasture",
+      "name": "Grazing rotation movement and rest",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-PASTURE-001",
+        "FTR-GROUP-001"
+      ],
+      "blocks": [
+        "FTR-GOAT-008",
+        "FTR-PASTURE-003",
+        "FTR-PASTURE-004",
+        "FTR-SHEEP-006"
+      ]
+    },
+    {
+      "feature_id": "FTR-PASTURE-003",
+      "module": "pasture",
+      "name": "Capacity condition history and mapping",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-PASTURE-001",
+        "FTR-PASTURE-002"
+      ],
+      "blocks": [
+        "FTR-PASTURE-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-PASTURE-004",
+      "module": "pasture",
+      "name": "Pasture reporting",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-PASTURE-001",
+        "FTR-PASTURE-002",
+        "FTR-PASTURE-003"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-GROUP-001",
+      "module": "group",
+      "name": "Group definition and membership",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-CATTLE-001",
+        "FTR-CATTLE-006",
+        "FTR-GOAT-001",
+        "FTR-GOAT-008",
+        "FTR-GROUP-002",
+        "FTR-GROUP-003",
+        "FTR-PASTURE-002",
+        "FTR-POULTRY-001",
+        "FTR-RABBIT-001",
+        "FTR-SHEEP-001",
+        "FTR-SHEEP-006"
+      ]
+    },
+    {
+      "feature_id": "FTR-GROUP-002",
+      "module": "group",
+      "name": "Group census movement and health",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-GROUP-001",
+        "FTR-HEALTH-001"
+      ],
+      "blocks": [
+        "FTR-GROUP-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-GROUP-003",
+      "module": "group",
+      "name": "Group timeline",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-GROUP-001",
+        "FTR-GROUP-002"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-LABOUR-001",
+      "module": "labour",
+      "name": "Workforce directory",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-GLOBAL-003",
+        "FTR-ADMIN-002"
+      ],
+      "blocks": [
+        "FTR-LABOUR-002",
+        "FTR-LABOUR-003",
+        "FTR-LABOUR-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-LABOUR-002",
+      "module": "labour",
+      "name": "Assignment worklog and availability",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-LABOUR-001",
+        "FTR-TASK-001"
+      ],
+      "blocks": [
+        "FTR-LABOUR-003",
+        "FTR-LABOUR-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-LABOUR-003",
+      "module": "labour",
+      "name": "Labour cost and workload",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-LABOUR-001",
+        "FTR-LABOUR-002"
+      ],
+      "blocks": [
+        "FTR-LABOUR-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-LABOUR-004",
+      "module": "labour",
+      "name": "Labour reporting",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-LABOUR-001",
+        "FTR-LABOUR-002",
+        "FTR-LABOUR-003"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-ASSET-001",
+      "module": "asset",
+      "name": "Asset register",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-ASSET-002",
+        "FTR-ASSET-003",
+        "FTR-ASSET-004",
+        "FTR-CAP-001"
+      ]
+    },
+    {
+      "feature_id": "FTR-ASSET-002",
+      "module": "asset",
+      "name": "Usage maintenance and service",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-ASSET-001",
+        "FTR-TASK-001"
+      ],
+      "blocks": [
+        "FTR-ASSET-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-ASSET-003",
+      "module": "asset",
+      "name": "Asset documents and media",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-ASSET-001",
+        "FTR-ATOM-002"
+      ],
+      "blocks": [
+        "FTR-ASSET-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-ASSET-004",
+      "module": "asset",
+      "name": "Asset reporting",
+      "completion_phase": 7,
+      "depends_on": [
+        "FTR-ASSET-001",
+        "FTR-ASSET-002",
+        "FTR-ASSET-003"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-FIN-001",
+      "module": "fin",
+      "name": "Financial transactions",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-GLOBAL-003",
+        "FTR-ADMIN-003"
+      ],
+      "blocks": [
+        "FTR-FIN-002",
+        "FTR-FIN-003",
+        "FTR-FIN-004",
+        "FTR-PROC-002",
+        "FTR-SALES-002",
+        "FTR-SALES-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-FIN-002",
+      "module": "fin",
+      "name": "Profitability and cost attribution",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-FIN-001"
+      ],
+      "blocks": [
+        "FTR-FIN-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-FIN-003",
+      "module": "fin",
+      "name": "Cashflow budget and variance",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-FIN-001"
+      ],
+      "blocks": [
+        "FTR-FIN-004",
+        "FTR-SIM-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-FIN-004",
+      "module": "fin",
+      "name": "Finance reporting and export",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-FIN-001",
+        "FTR-FIN-002",
+        "FTR-FIN-003"
+      ],
+      "blocks": [
+        "FTR-AN-003",
+        "FTR-REPORT-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-SALES-001",
+      "module": "sales",
+      "name": "Customer management",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-SALES-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-SALES-002",
+      "module": "sales",
+      "name": "Orders and sales execution",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-SALES-001",
+        "FTR-FIN-001",
+        "FTR-INV-001"
+      ],
+      "blocks": [
+        "FTR-SALES-003",
+        "FTR-SALES-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-SALES-003",
+      "module": "sales",
+      "name": "Fulfilment and sales history",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-SALES-002",
+        "FTR-INV-003"
+      ],
+      "blocks": [
+        "FTR-SALES-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-SALES-004",
+      "module": "sales",
+      "name": "Sales reporting",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-SALES-002",
+        "FTR-SALES-003",
+        "FTR-FIN-001"
+      ],
+      "blocks": [
+        "FTR-AN-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-PROC-001",
+      "module": "proc",
+      "name": "Supplier management",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-PROC-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-PROC-002",
+      "module": "proc",
+      "name": "Purchase orders and receipt",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-PROC-001",
+        "FTR-INV-001",
+        "FTR-FIN-001"
+      ],
+      "blocks": [
+        "FTR-PROC-003",
+        "FTR-PROC-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-PROC-003",
+      "module": "proc",
+      "name": "Purchase inventory integration",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-PROC-002",
+        "FTR-INV-002"
+      ],
+      "blocks": [
+        "FTR-PROC-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-PROC-004",
+      "module": "proc",
+      "name": "Procurement reporting",
+      "completion_phase": 9,
+      "depends_on": [
+        "FTR-PROC-002",
+        "FTR-PROC-003"
+      ],
+      "blocks": [
+        "FTR-AN-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-CAP-001",
+      "module": "cap",
+      "name": "Capacity overview",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-FEED-001",
+        "FTR-WATER-001",
+        "FTR-PASTURE-001",
+        "FTR-ASSET-001",
+        "FTR-GOAT-001",
+        "FTR-RABBIT-001",
+        "FTR-SHEEP-001",
+        "FTR-CATTLE-001",
+        "FTR-POULTRY-001"
+      ],
+      "blocks": [
+        "FTR-CAP-002",
+        "FTR-CAP-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-CAP-002",
+      "module": "cap",
+      "name": "Resource capacity models",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-CAP-001"
+      ],
+      "blocks": [
+        "FTR-CAP-003",
+        "FTR-SIM-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-CAP-003",
+      "module": "cap",
+      "name": "Capacity forecast and alerts",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-CAP-001",
+        "FTR-CAP-002"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-GEN-001",
+      "module": "gen",
+      "name": "Pedigree and parentage",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-GOAT-001",
+        "FTR-RABBIT-001",
+        "FTR-SHEEP-001",
+        "FTR-CATTLE-001"
+      ],
+      "blocks": [
+        "FTR-GEN-002",
+        "FTR-GEN-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-GEN-002",
+      "module": "gen",
+      "name": "Relationship and inbreeding analysis",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-GEN-001"
+      ],
+      "blocks": [
+        "FTR-GEN-003",
+        "FTR-GEN-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-GEN-003",
+      "module": "gen",
+      "name": "Mate and candidate decisions",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-GEN-001",
+        "FTR-GEN-002"
+      ],
+      "blocks": [
+        "FTR-GEN-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-GEN-004",
+      "module": "gen",
+      "name": "Genetic warnings and reporting",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-GEN-002",
+        "FTR-GEN-003"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-AN-001",
+      "module": "an",
+      "name": "Farm and species performance",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-GOAT-010",
+        "FTR-RABBIT-007",
+        "FTR-SHEEP-007",
+        "FTR-CATTLE-007",
+        "FTR-POULTRY-006"
+      ],
+      "blocks": [
+        "FTR-AN-002",
+        "FTR-AN-004",
+        "FTR-AN-006"
+      ]
+    },
+    {
+      "feature_id": "FTR-AN-002",
+      "module": "an",
+      "name": "Biological and production analytics",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-AN-001",
+        "FTR-HEALTH-009",
+        "FTR-FEED-005"
+      ],
+      "blocks": [
+        "FTR-AN-004",
+        "FTR-AN-005",
+        "FTR-SIM-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-AN-003",
+      "module": "an",
+      "name": "Financial analytics",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-FIN-004",
+        "FTR-SALES-004",
+        "FTR-PROC-004"
+      ],
+      "blocks": [
+        "FTR-AN-004",
+        "FTR-AN-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-AN-004",
+      "module": "an",
+      "name": "Benchmarking",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-AN-001",
+        "FTR-AN-002",
+        "FTR-AN-003"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-AN-005",
+      "module": "an",
+      "name": "Anomaly detection and forecasts",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-AN-002",
+        "FTR-AN-003"
+      ],
+      "blocks": [
+        "FTR-AI-003",
+        "FTR-AN-006"
+      ]
+    },
+    {
+      "feature_id": "FTR-AN-006",
+      "module": "an",
+      "name": "Insight evidence drilldown",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-AN-001",
+        "FTR-AN-005"
+      ],
+      "blocks": [
+        "FTR-AI-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-SIM-001",
+      "module": "sim",
+      "name": "Simulation workspace",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-HOME-001"
+      ],
+      "blocks": [
+        "FTR-SIM-002"
+      ]
+    },
+    {
+      "feature_id": "FTR-SIM-002",
+      "module": "sim",
+      "name": "Domain scenario modelling",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-SIM-001",
+        "FTR-CAP-002",
+        "FTR-AN-002",
+        "FTR-FIN-003",
+        "FTR-FEED-004"
+      ],
+      "blocks": [
+        "FTR-SIM-003",
+        "FTR-SIM-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-SIM-003",
+      "module": "sim",
+      "name": "Scenario comparison and persistence",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-SIM-002"
+      ],
+      "blocks": [
+        "FTR-SIM-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-SIM-004",
+      "module": "sim",
+      "name": "Simulation reporting",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-SIM-002",
+        "FTR-SIM-003"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-SEARCH-001",
+      "module": "search",
+      "name": "Search query results and filtering",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-001",
+        "FTR-GLOBAL-003",
+        "FTR-ATOM-003"
+      ],
+      "blocks": [
+        "FTR-ADMIN-004",
+        "FTR-CATTLE-001",
+        "FTR-GOAT-001",
+        "FTR-HOME-003",
+        "FTR-INV-001",
+        "FTR-POULTRY-001",
+        "FTR-RABBIT-001",
+        "FTR-SEARCH-002",
+        "FTR-SEARCH-003",
+        "FTR-SEARCH-004",
+        "FTR-SHEEP-001"
+      ]
+    },
+    {
+      "feature_id": "FTR-SEARCH-002",
+      "module": "search",
+      "name": "Offline and degraded search",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-SEARCH-001",
+        "FTR-SYNC-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-SEARCH-003",
+      "module": "search",
+      "name": "RFID QR and barcode lookup",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-SEARCH-001",
+        "FTR-ATOM-002"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-SEARCH-004",
+      "module": "search",
+      "name": "Recent searches",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-SEARCH-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-AI-001",
+      "module": "ai",
+      "name": "Copilot conversation",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-AI-002",
+        "FTR-AI-003",
+        "FTR-AI-004",
+        "FTR-AI-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-AI-002",
+      "module": "ai",
+      "name": "Insights and evidence",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-AI-001",
+        "FTR-AN-006"
+      ],
+      "blocks": [
+        "FTR-AI-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-AI-003",
+      "module": "ai",
+      "name": "Suggested action review and anomaly review",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-AI-001",
+        "FTR-AI-002",
+        "FTR-AN-005"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-AI-004",
+      "module": "ai",
+      "name": "Model provider connection",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-AI-001",
+        "FTR-ADMIN-006"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-AI-005",
+      "module": "ai",
+      "name": "AI privacy controls and degraded state",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-AI-001",
+        "FTR-ADMIN-006",
+        "FTR-ADMIN-007"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-REPORT-001",
+      "module": "report",
+      "name": "Reports hub",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-REPORT-002",
+        "FTR-REPORT-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-REPORT-002",
+      "module": "report",
+      "name": "Domain reporting",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-REPORT-001",
+        "FTR-GOAT-010",
+        "FTR-RABBIT-007",
+        "FTR-SHEEP-007",
+        "FTR-CATTLE-007",
+        "FTR-POULTRY-006",
+        "FTR-HEALTH-009",
+        "FTR-INV-006",
+        "FTR-FIN-004"
+      ],
+      "blocks": [
+        "FTR-REPORT-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-REPORT-003",
+      "module": "report",
+      "name": "Export and generated documents",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-REPORT-001",
+        "FTR-REPORT-002"
+      ],
+      "blocks": [
+        "FTR-REPORT-004",
+        "FTR-REPORT-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-REPORT-004",
+      "module": "report",
+      "name": "Share and print",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-REPORT-003",
+        "FTR-ATOM-006"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-REPORT-005",
+      "module": "report",
+      "name": "Certificates",
+      "completion_phase": 10,
+      "depends_on": [
+        "FTR-REPORT-003",
+        "FTR-ADMIN-009"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-ADMIN-001",
+      "module": "admin",
+      "name": "Settings and farm profile",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-ADMIN-002",
+        "FTR-ADMIN-003",
+        "FTR-ADMIN-004",
+        "FTR-ADMIN-005",
+        "FTR-ADMIN-006",
+        "FTR-ADMIN-007",
+        "FTR-ADMIN-008",
+        "FTR-ADMIN-009",
+        "FTR-ADMIN-010"
+      ]
+    },
+    {
+      "feature_id": "FTR-ADMIN-002",
+      "module": "admin",
+      "name": "Membership roles and permissions",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-003",
+        "FTR-ADMIN-001"
+      ],
+      "blocks": [
+        "FTR-ADMIN-009",
+        "FTR-LABOUR-001"
+      ]
+    },
+    {
+      "feature_id": "FTR-ADMIN-003",
+      "module": "admin",
+      "name": "Species locations units and currency",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-003",
+        "FTR-ADMIN-001"
+      ],
+      "blocks": [
+        "FTR-FIN-001"
+      ]
+    },
+    {
+      "feature_id": "FTR-ADMIN-004",
+      "module": "admin",
+      "name": "Notification sync and search settings",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-ADMIN-001",
+        "FTR-SYNC-001",
+        "FTR-SEARCH-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-ADMIN-005",
+      "module": "admin",
+      "name": "Integrations and hardware",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-ADMIN-001",
+        "FTR-ATOM-002"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-ADMIN-006",
+      "module": "admin",
+      "name": "AI provider administration",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-ADMIN-001"
+      ],
+      "blocks": [
+        "FTR-AI-004",
+        "FTR-AI-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-ADMIN-007",
+      "module": "admin",
+      "name": "Security and sessions",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-001",
+        "FTR-ADMIN-001"
+      ],
+      "blocks": [
+        "FTR-AI-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-ADMIN-008",
+      "module": "admin",
+      "name": "Data export and restore",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-ADMIN-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-ADMIN-009",
+      "module": "admin",
+      "name": "Audit log",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-ADMIN-001",
+        "FTR-ADMIN-002"
+      ],
+      "blocks": [
+        "FTR-REPORT-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-ADMIN-010",
+      "module": "admin",
+      "name": "Version and about",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-ADMIN-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-SYNC-001",
+      "module": "sync",
+      "name": "Offline and sync queue status",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-001",
+        "FTR-GLOBAL-003"
+      ],
+      "blocks": [
+        "FTR-ADMIN-004",
+        "FTR-HOME-005",
+        "FTR-SEARCH-002",
+        "FTR-SYNC-002",
+        "FTR-SYNC-003",
+        "FTR-SYNC-004",
+        "FTR-SYNC-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-SYNC-002",
+      "module": "sync",
+      "name": "Conflict rejection and dead letter",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-SYNC-001"
+      ],
+      "blocks": [
+        "FTR-SYNC-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-SYNC-003",
+      "module": "sync",
+      "name": "Authentication access and service outages",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-GLOBAL-001",
+        "FTR-GLOBAL-003",
+        "FTR-SYNC-001"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-SYNC-004",
+      "module": "sync",
+      "name": "Local safety and manual sync",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-SYNC-001"
+      ],
+      "blocks": [
+        "FTR-SYNC-005"
+      ]
+    },
+    {
+      "feature_id": "FTR-SYNC-005",
+      "module": "sync",
+      "name": "Sync history reconciliation and trace",
+      "completion_phase": 6,
+      "depends_on": [
+        "FTR-SYNC-001",
+        "FTR-SYNC-002",
+        "FTR-SYNC-004"
+      ],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-ATOM-001",
+      "module": "atom",
+      "name": "Core selectors",
+      "completion_phase": 6,
+      "depends_on": [],
+      "blocks": [
+        "FTR-HOME-004"
+      ]
+    },
+    {
+      "feature_id": "FTR-ATOM-002",
+      "module": "atom",
+      "name": "Capture pickers and scanners",
+      "completion_phase": 6,
+      "depends_on": [],
+      "blocks": [
+        "FTR-ADMIN-005",
+        "FTR-ASSET-003",
+        "FTR-HOME-004",
+        "FTR-SEARCH-003",
+        "FTR-TASK-003"
+      ]
+    },
+    {
+      "feature_id": "FTR-ATOM-003",
+      "module": "atom",
+      "name": "Filtering sorting and bulk actions",
+      "completion_phase": 6,
+      "depends_on": [],
+      "blocks": [
+        "FTR-SEARCH-001"
+      ]
+    },
+    {
+      "feature_id": "FTR-ATOM-004",
+      "module": "atom",
+      "name": "Confirmations conflict and permissions",
+      "completion_phase": 6,
+      "depends_on": [],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-ATOM-005",
+      "module": "atom",
+      "name": "Export and share atoms",
+      "completion_phase": 6,
+      "depends_on": [],
+      "blocks": []
+    },
+    {
+      "feature_id": "FTR-ATOM-006",
+      "module": "atom",
+      "name": "Empty loading error and sync receipts",
+      "completion_phase": 6,
+      "depends_on": [],
+      "blocks": [
+        "FTR-REPORT-004"
+      ]
+    }
+  ]
+}
