@@ -173,7 +173,7 @@ def build() -> tuple[dict, dict, dict, dict]:
         "authority": {"project_truth": "docs/00_PROJECT_TRUTH.md", "feature_catalog": "docs/realisation/FEATURE_REGISTRY.yaml", "feature_dependency_graph": "docs/realisation/FEATURE_DEPENDENCY_GRAPH.json", "screen_registry": "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml", "visual_authority": "docs/ux/animal-farm-visual-lock/", "catalog_authority": CATALOG_AUTHORITY},
         "phase_status": {
             "phase_0_completion_control_plane": "COMPLETE", "phase_1_canonical_feature_id_catalog": "COMPLETE", "phase_2_dependency_graph": "COMPLETE",
-            "phase_3_platform_correctness": "NEXT", "phase_4_visual_foundation_certification": "PENDING", "phase_5_runtime_navigation_reachability": "PENDING",
+            "phase_3_platform_correctness": "IN_PROGRESS", "phase_4_visual_foundation_certification": "PENDING", "phase_5_runtime_navigation_reachability": "PENDING",
             "phase_6_shared_foundation_modules": "PENDING", "phase_7_shared_operational_modules": "PENDING", "phase_8_species_modules": "PENDING",
             "phase_9_commercial_layer": "PENDING", "phase_10_intelligence_and_advanced_modules": "PENDING", "phase_11_feature_certification_sweep": "PENDING",
             "phase_12_visual_completion_sweep": "PENDING", "phase_13_module_certification": "PENDING", "phase_14_whole_product_certification": "PENDING",
@@ -184,7 +184,7 @@ def build() -> tuple[dict, dict, dict, dict]:
         "dependency_graph": {"node_count": dependency_graph["summary"]["node_count"], "edge_count": dependency_graph["summary"]["edge_count"], "root_count": dependency_graph["summary"]["root_count"], "cycle_free": dependency_graph["summary"]["cycle_free"], "phase_monotonic": dependency_graph["summary"]["phase_monotonic"]},
         "global_programme_gates": dependency_graph["global_programme_gates"],
         "features": [{"feature_id": f["feature_id"], "module": f["module"], "name": f["name"], "completion_phase": f["completion_phase"], "screen_count": len(f["screen_ids"]), "contract_status": "OPEN", "feature_green": False} for f in features],
-        "next_action": "PHASE_3_CLOSE_PLATFORM_DECIMAL_SCALING_SYNC_ATOMICITY_AND_SESSION_REVOCATION_GATES",
+        "next_action": "PHASE_3_VERIFY_IMPLEMENTED_PLATFORM_GATES_AND_AUDIT_REMAINING_PLATFORM_CORRECTNESS",
         "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
     }
     return feature_registry, qdu_registry, state, completion
@@ -213,6 +213,7 @@ def main() -> None:
         expected = {FEATURE_OUT: feature, QDU_OUT: qdu, STATE_OUT: state, COMPLETION_OUT: completion, DEPENDENCY_OUT: build_graph()}
         stale = [str(path.relative_to(ROOT)) for path, obj in expected.items() if not path.exists() or load_semantic(path) != obj]
         if stale:
+            print(f"expected source_fingerprint: {state['source_fingerprint']}")
             raise SystemExit("stale completion control-plane outputs: " + ", ".join(stale))
         print(f"PASS completion control plane: 545 screens -> {len(feature['features'])} canonical features; dependency DAG verified; zero invented green claims")
         return
