@@ -378,7 +378,7 @@ private fun GoatProfileActions(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
             add("Lifecycle" to GoatPage.STATUS_CHANGE)
         }
         BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val stacked = maxWidth < 420.dp && LocalDensity.current.fontScale >= 1.5f
+            val stacked = maxWidth < 480.dp
             if (stacked) {
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     actions.forEach { (label, page) ->
@@ -447,7 +447,7 @@ private fun GoatStatusChangeScreen(
         Text(goatDisplayName(goat), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text("A lifecycle change removes this goat from the active herd. Existing history remains on the record.")
         BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val stacked = maxWidth < 420.dp && LocalDensity.current.fontScale >= 1.5f
+            val stacked = maxWidth < 480.dp
             val changes = listOf(
                 "Mark sold" to GoatStatus.SOLD,
                 "Mark deceased" to GoatStatus.DEAD,
