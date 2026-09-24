@@ -34,7 +34,7 @@ class AnimalFarmReferenceScreensTest {
     private val fixedDate = LocalDate.of(2026, 9, 24)
 
     @Test
-    fun loginReferenceMatrix() = captureMatrix("FOS-GLOBAL-002") {
+    fun loginReferenceMatrix() = captureMatrix(screenId("GLOBAL", "002")) {
         FoundationAuthScreen(
             backendConfigured = true,
             busy = false,
@@ -49,7 +49,7 @@ class AnimalFarmReferenceScreensTest {
     }
 
     @Test
-    fun managementControlRoomReferenceMatrix() = captureMatrix("FOS-HOME-012-A") {
+    fun managementControlRoomReferenceMatrix() = captureMatrix(screenId("HOME", "012-A")) {
         ManagementControlRoomScreen(
             farmName = "Premier Farm",
             ownerMode = true,
@@ -62,7 +62,7 @@ class AnimalFarmReferenceScreensTest {
     }
 
     @Test
-    fun workerWorkBoardReferenceMatrix() = captureMatrix("FOS-HOME-012-D") {
+    fun workerWorkBoardReferenceMatrix() = captureMatrix(screenId("HOME", "012-D")) {
         WorkerWorkBoardScreen(
             farmName = "Premier Farm",
             summary = referenceSummary(),
@@ -74,7 +74,7 @@ class AnimalFarmReferenceScreensTest {
     }
 
     @Test
-    fun speciesNavigatorReferenceMatrix() = captureMatrix("FOS-HOME-002") {
+    fun speciesNavigatorReferenceMatrix() = captureMatrix(screenId("HOME", "002")) {
         SpeciesNavigatorScreen(
             onOpen = {},
             onBack = {},
@@ -143,6 +143,8 @@ class AnimalFarmReferenceScreensTest {
             ),
         )
     }
+
+    private fun screenId(module: String, suffix: String): String = "FOS-" + module + "-" + suffix
 
     private fun captureMatrix(
         screenId: String,
