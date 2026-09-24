@@ -63,3 +63,38 @@ if (( fail != 0 )); then
 fi
 
 echo "Kotlin architecture stabilization checks passed"
+
+
+echo "Checking exact persisted decimal boundaries"
+for file in   app/src/main/java/com/farmos/app/SalesModuleHost.kt   app/src/main/java/com/farmos/app/ProcurementModuleHost.kt   app/src/main/java/com/farmos/app/RabbitCommerceModuleHost.kt   app/src/main/java/com/farmos/app/FeedModuleHost.kt   app/src/main/java/com/farmos/app/WaterModuleHost.kt   app/src/main/java/com/farmos/app/OperatingModuleHost.kt
+do
+  if grep -Fq 'toDoubleOrNull()' "$file"; then
+    echo "ERROR: floating-point parsing remains on a persisted decimal boundary in $file" >&2
+    fail=1
+  fi
+done
+
+if grep -Fq 'WorkManager.getInstance(app).enqueue(' app/src/main/java/com/farmos/app/FarmSessionContent.kt; then
+  echo "ERROR: on-demand sync must use unique work rather than plain enqueue" >&2
+  fail=1
+fi
+if ! grep -Fq 'enqueueUniqueWork(' app/src/main/java/com/farmos/app/FarmSessionContent.kt; then
+  echo "ERROR: on-demand sync unique-work serialization is missing" >&2
+  fail=1
+fi
+if ! grep -Fq 'suspend fun claim(' core/database/src/main/kotlin/com/farmos/core/database/FarmOsDatabase.kt; then
+  echo "ERROR: atomic outbox claim DAO contract is missing" >&2
+  fail=1
+fi
+if ! grep -Fq 'outbox.claim(' core/sync/src/main/kotlin/com/farmos/core/sync/SyncEngine.kt; then
+  echo "ERROR: SyncEngine must claim a mutation before transport" >&2
+  fail=1
+fi
+if ! grep -Fq '/auth/v1/logout?scope=' core/network/src/main/kotlin/com/farmos/core/network/SupabaseClients.kt; then
+  echo "ERROR: user sign-out must attempt Supabase server session revocation" >&2
+  fail=1
+fi
+
+if (( fail != 0 )); then
+  exit 1
+fi
