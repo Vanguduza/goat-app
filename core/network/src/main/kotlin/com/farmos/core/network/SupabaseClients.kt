@@ -14,7 +14,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import com.farmos.core.model.CommandAcknowledgement
 import com.farmos.core.model.CommandResultCode
-import kotlinx.coroutines.CancellationException
+import java.util.concurrent.CancellationException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
