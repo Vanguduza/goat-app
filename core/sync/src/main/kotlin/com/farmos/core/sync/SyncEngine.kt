@@ -34,16 +34,14 @@ class SyncEngine(
             if (items.isEmpty()) break
 
             for (item in items) {
-                attempted++
-                outbox.updateState(
+                val claimNow = now()
+                val claimed = outbox.claim(
                     mutationId = item.mutationId,
-                    state = SyncState.IN_FLIGHT.name,
-                    attemptCount = item.attemptCount,
-                    nextAttemptAt = null,
-                    errorCode = null,
-                    serverEventId = item.serverEventId,
-                    serverStreamVersion = item.serverStreamVersion,
+                    now = claimNow,
+                    leaseUntil = claimNow + IN_FLIGHT_LEASE_MILLIS,
                 )
+                if (claimed != 1) continue
+                attempted++
 
                 try {
                     val wire = item.toWireCommand(json)
@@ -206,6 +204,7 @@ class SyncEngine(
 
     companion object {
         private const val AUTH_RETRY_DELAY_MILLIS = 60_000L
+        private const val IN_FLIGHT_LEASE_MILLIS = 5 * 60_000L
         private const val MAX_BACKOFF_EXPONENT = 8
     }
 }
