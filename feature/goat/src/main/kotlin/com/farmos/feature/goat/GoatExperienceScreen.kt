@@ -41,6 +41,7 @@ internal fun GoatExperienceScreen(
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
     initialPage: GoatPage = GoatPage.DASHBOARD,
+    today: LocalDate = LocalDate.now(),
 ) {
     var page by remember { mutableStateOf(initialPage) }
     val selected = state.selected
@@ -52,6 +53,7 @@ internal fun GoatExperienceScreen(
             onBackToFarm = onBackToFarm,
             onSignOut = onSignOut,
             modifier = modifier,
+            today = today,
         )
         GoatPage.HERD -> GoatHerdScreen(
             state = state,
@@ -117,12 +119,13 @@ private fun GoatDashboardScreen(
     onBackToFarm: () -> Unit,
     onSignOut: () -> Unit,
     modifier: Modifier,
+    today: LocalDate,
 ) {
     val active = state.herd.filter { it.status == GoatStatus.ACTIVE }
     val does = active.count { it.sex == GoatSex.FEMALE }
     val bucks = active.count { it.sex == GoatSex.MALE }
-    val today = LocalDate.now().toEpochDay()
-    val kids = active.count { goat -> goat.dateOfBirthEpochDay?.let { today - it < 365 } == true }
+    val todayEpochDay = today.toEpochDay()
+    val kids = active.count { goat -> goat.dateOfBirthEpochDay?.let { todayEpochDay - it < 365 } == true }
     val selectedDoe = state.selected?.takeIf { it.status == GoatStatus.ACTIVE && it.sex == GoatSex.FEMALE }
 
     AnimalFarmCanvas(modifier) {
