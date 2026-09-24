@@ -25,3 +25,12 @@ Development state remains evidence-derived: `REGISTERED -> CONTRACT_READY -> IMP
 The DAG is not a runtime call graph and does not manufacture implementation or green status. It answers only which completion contracts must be satisfied before another feature can be certified.
 
 Phase 2 establishes 156 feature nodes and 332 prerequisite edges. The graph also records global programme gates that must be closed before broad feature fan-out.
+
+
+## Phase 3 certified closure
+
+Phase 3 platform correctness is certified complete against canonical main commit `f553fc2c1a59e79895d69f2b875e13fccc1dec84` and GitHub Actions run `35985454568`, which completed successfully on 24 September 2026.
+
+The certified programme gates are exact decimal scaling, unique/atomic leased sync ownership, server-backed session revocation, the Gradle 9.3.1 reproducible wrapper, debug APK assembly and hashing, immutable GitHub Action pins, and bounded reconciliation source decomposition.
+
+This closes platform correctness only. It creates no FEATURE_GREEN, VISUAL_GREEN, MODULE_GREEN or MVP_GREEN claims. Phase 4 is the next programme phase and must establish the native Animal Farm reference set with deterministic visual/state/accessibility evidence and independent approval.
