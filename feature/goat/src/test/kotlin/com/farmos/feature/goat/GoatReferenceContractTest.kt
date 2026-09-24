@@ -18,6 +18,7 @@ import com.farmos.domain.goat.GoatSnapshot
 import com.farmos.domain.goat.GoatStatus
 import com.farmos.domain.goat.WeightSample
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicReference
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -107,12 +108,12 @@ class GoatReferenceContractTest {
 
     @Test
     fun lifecycleChangeCancelIsNonDestructive() {
-        var status: GoatStatus? = null
+        val status = AtomicReference<GoatStatus?>(null)
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 GoatExperienceScreen(
                     state = state,
-                    actions = noOpActions(onStatus = { status = it }),
+                    actions = noOpActions(onStatus = status::set),
                     onBackToFarm = {},
                     onSignOut = {},
                     initialPage = GoatPage.STATUS_CHANGE,
@@ -122,21 +123,21 @@ class GoatReferenceContractTest {
         }
 
         compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
-        compose.runOnIdle { assertNull(status) }
+        compose.runOnIdle { assertNull(status.get()) }
         compose.onNodeWithText("Confirm sold").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Cancel")).performClick()
-        compose.runOnIdle { assertNull(status) }
+        compose.runOnIdle { assertNull(status.get()) }
         assertNamedClickTargets()
     }
 
     @Test
     fun lifecycleChangeRequiresExplicitConfirmation() {
-        var status: GoatStatus? = null
+        val status = AtomicReference<GoatStatus?>(null)
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 GoatExperienceScreen(
                     state = state,
-                    actions = noOpActions(onStatus = { status = it }),
+                    actions = noOpActions(onStatus = status::set),
                     onBackToFarm = {},
                     onSignOut = {},
                     initialPage = GoatPage.STATUS_CHANGE,
@@ -146,10 +147,10 @@ class GoatReferenceContractTest {
         }
 
         compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
-        compose.runOnIdle { assertNull(status) }
+        compose.runOnIdle { assertNull(status.get()) }
         compose.onNodeWithText("Confirm sold").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Confirm status change")).performClick()
-        compose.runOnIdle { assertEquals(GoatStatus.SOLD, status) }
+        compose.runOnIdle { assertEquals(GoatStatus.SOLD, status.get()) }
         assertNamedClickTargets()
     }
 
