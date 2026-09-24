@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmModuleHeader
+import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.AnimalFarmWarningSurface
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmStorySurface
@@ -200,13 +202,13 @@ private fun GoatDashboardScreen(
             FarmIllustratedSectionSurface {
                 Text(state.syncMessage, style = MaterialTheme.typography.bodyMedium)
                 Text("${state.pendingSyncCount} local change(s) waiting", style = MaterialTheme.typography.labelMedium)
-                TextButton(onClick = { onOpen(GoatPage.SYNC) }) { Text("Open sync status") }
+                TextButton(onClick = { onOpen(GoatPage.SYNC) }, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Open sync status") }
             }
 
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = onBackToFarm) { Text("Farm home") }
-                TextButton(onClick = onSignOut) { Text("Sign out") }
+                TextButton(onClick = onBackToFarm, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Farm home") }
+                TextButton(onClick = onSignOut, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Sign out") }
             }
         }
     }
@@ -282,7 +284,7 @@ private fun GoatHerdScreen(
                 Text("No ${filter.name.lowercase()} goats on this device.")
             } else rows.forEach { goat -> GoatHerdRow(goat) { onSelect(goat.animalId) } }
         }
-        Button(onClick = onRegister, modifier = Modifier.fillMaxWidth()) { Text("Register goat") }
+        Button(onClick = onRegister, modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Register goat") }
     }
 }
 
@@ -295,7 +297,7 @@ private fun GoatHerdFilterButton(
 ) {
     TextButton(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
     ) {
         val label = option.name.lowercase()
@@ -386,7 +388,7 @@ private fun GoatProfileActions(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
                         TextButton(
                             onClick = { onOpen(page) },
                             enabled = enabled,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
                         ) {
                             Text(label, maxLines = 1, softWrap = false)
                         }
@@ -399,7 +401,7 @@ private fun GoatProfileActions(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
                             TextButton(
                                 onClick = { onOpen(page) },
                                 enabled = enabled,
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(1f).heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
                                 contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
                             ) {
                                 Text(label, maxLines = 1, softWrap = false)
@@ -461,7 +463,7 @@ private fun GoatStatusChangeScreen(
                     changes.forEach { (label, status) ->
                         TextButton(
                             onClick = { pending = status },
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
                         ) {
                             Text(label, maxLines = 1, softWrap = false)
                         }
@@ -472,7 +474,7 @@ private fun GoatStatusChangeScreen(
                     changes.forEach { (label, status) ->
                         TextButton(
                             onClick = { pending = status },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
                             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
                         ) {
                             Text(label, maxLines = 1, softWrap = false)
@@ -491,9 +493,9 @@ private fun GoatStatusChangeScreen(
                         pending = null
                     },
                     enabled = !state.busy,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
                 ) { Text("Confirm status change") }
-                TextButton(onClick = { pending = null }, enabled = !state.busy) { Text("Cancel") }
+                TextButton(onClick = { pending = null }, enabled = !state.busy, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Cancel") }
             }
         }
     }
@@ -518,7 +520,7 @@ internal fun IllustratedGoatPage(
                 family = if (safety) null else AnimalFarmFamily.GOAT,
             )
             content()
-            TextButton(onClick = onBack) { Text("Back") }
+            TextButton(onClick = onBack, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Back") }
         }
     }
 }
