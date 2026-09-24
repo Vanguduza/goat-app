@@ -2,8 +2,6 @@
 set -euo pipefail
 
 required=(
-  docs/ux/FARM_OS_VISUAL_AUTHORITY.md
-  docs/ux/FARM_OS_CANONICAL_VISUAL_REFERENCE_MANIFEST.yaml
   docs/ux/FARM_OS_SCREEN_REGISTRY.yaml
   docs/ux/FARM_OS_CURRENT_UI_IMPLEMENTATION_MAP.yaml
   docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md
@@ -27,8 +25,8 @@ for path in "${required[@]}"; do
   [[ -s "$path" ]] || { echo "ERROR: missing visual authority artifact: $path"; exit 1; }
 done
 
-grep -q 'FARM_OS_VISUAL_AUTHORITY.md' AGENTS.md || {
-  echo 'ERROR: AGENTS.md does not bind agents to canonical visual authority'; exit 1;
+grep -q 'animal-farm-visual-lock' AGENTS.md || {
+  echo 'ERROR: AGENTS.md does not bind agents to the sole Animal Farm visual authority'; exit 1;
 }
 grep -q '## 11A. Visual product law' docs/00_PROJECT_TRUTH.md || {
   echo 'ERROR: Project Truth does not contain the visual product law'; exit 1;
@@ -106,11 +104,21 @@ if grep -q 'Synced ·' app/src/main/java/com/farmos/app/GoatModuleHost.kt; then
 fi
 
 # ---------------------------------------------------------------------------
-# Animal Farm visual lock (current owner-directed authority, 5-6 Sep 2026).
-# The checks above predate the lock and bind only the superseded pastoral
-# authority. These bind the lock itself so deleting a branch, renaming a pack
-# file or drifting a token cannot quietly retire it.
+# Animal Farm visual lock — sole owner-directed presentation authority.
+# Superseded style authorities and runtime artifacts must stay deleted.
 # ---------------------------------------------------------------------------
+
+forbidden_visual_artifacts=(
+  docs/ux/FARM_OS_VISUAL_AUTHORITY.md
+  docs/ux/FARM_OS_CANONICAL_VISUAL_REFERENCE_MANIFEST.yaml
+  docs/FARM_OS_DESIGN_SYSTEM_SPEC.md
+  docs/FARM_OS_FRONTEND_UX_PLAYBOOK.md
+  core/design/src/main/res/font/caveat_variable.ttf
+  docs/ux/licenses/CAVEAT_OFL.txt
+)
+for path in "${forbidden_visual_artifacts[@]}"; do
+  [[ ! -e "$path" ]] || { echo "ERROR: superseded visual artifact returned: $path"; exit 1; }
+done
 
 lock_required=(
   docs/ux/ANIMAL_FARM_COLD_START_RESUME.md
@@ -167,4 +175,4 @@ if grep -rniE 'caveat' --include=*.kt --include=*.xml app/ core/ feature/ 2>/dev
   echo 'ERROR: Caveat handwritten family is not part of the Animal Farm lock'; exit 1
 fi
 
-echo 'Farm OS portable visual authority guardrails: PASS'
+echo 'Animal Farm single visual authority guardrails: PASS'
