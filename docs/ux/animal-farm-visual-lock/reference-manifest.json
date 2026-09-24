@@ -1,6 +1,6 @@
 {
   "version": "animal-farm-lock-2026-09-24-single-visual-truth",
-  "reference_approval": "Owner-locked A management / D+C worker direction; no native certification implied",
+  "reference_approval": "Owner-locked visual references; mutable implementation guidance is intentionally excluded from the immutable hash set; no native certification implied",
   "authority": "docs/ux/animal-farm-visual-lock/",
   "policy": {
     "single_visual_authority": true,
@@ -19,12 +19,6 @@
       "sha256": "5d16c951ad297f990294cb04ccc150beab1605d59c193cc4109868f263f404b2",
       "bytes": 10697,
       "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\docs\\development\\HOME_DESIGN_LOCK.md"
-    },
-    {
-      "path": "references/SCREEN_DESIGN_STANDARD.md",
-      "sha256": "d06d56b71914d28264796c8b1b50023da2561b0f3182607480b41c1317dd0929",
-      "bytes": 13946,
-      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\docs\\planning\\implementation\\SCREEN_DESIGN_STANDARD.md"
     },
     {
       "path": "references/ANIMAL_FAMILY_ART_PROVENANCE.md",
