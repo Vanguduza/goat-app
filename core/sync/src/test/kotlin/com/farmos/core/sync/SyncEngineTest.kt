@@ -406,11 +406,12 @@ private class FakeOutboxDao(
         val index = items.indexOfFirst { it.mutationId == mutationId }
         if (index < 0) return 0
         val item = items[index]
+        val eligibleAt = item.nextAttemptAtEpochMillis
         val eligible = when (item.state) {
             SyncState.PENDING.name, SyncState.RETRY_WAIT.name ->
-                item.nextAttemptAtEpochMillis == null || item.nextAttemptAtEpochMillis <= now
+                eligibleAt == null || eligibleAt <= now
             SyncState.IN_FLIGHT.name ->
-                item.nextAttemptAtEpochMillis == null || item.nextAttemptAtEpochMillis <= now
+                eligibleAt == null || eligibleAt <= now
             else -> false
         }
         if (!eligible) return 0
