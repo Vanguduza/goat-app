@@ -52,7 +52,7 @@ class GoatReferenceContractTest {
             }
         }
 
-        compose.onNodeWithText("Herd").performClick()
+        compose.onNode(hasClickAction() and hasText("Herd")).performClick()
         compose.onNodeWithText("Register goat").assertIsDisplayed()
         assertNamedClickTargets()
     }
@@ -96,10 +96,10 @@ class GoatReferenceContractTest {
             }
         }
 
-        compose.onNodeWithText("Weight").performClick()
+        compose.onNode(hasClickAction() and hasText("Weight")).performClick()
         compose.onNodeWithText("Record weight").assertIsDisplayed()
         compose.onAllNodes(hasSetTextAction())[0].performTextInput("55.4")
-        compose.onNodeWithText("Record weight").assertIsEnabled().performClick()
+        compose.onNode(hasClickAction() and hasText("Record weight")).assertIsEnabled().performClick()
 
         assertEquals("55.4", weight)
         assertNamedClickTargets()
