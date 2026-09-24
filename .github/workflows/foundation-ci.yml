@@ -48,6 +48,7 @@ jobs:
           :core:network:testDebugUnitTest
           :core:sync:testDebugUnitTest
           :app:testDebugUnitTest
+          :feature:goat:testDebugUnitTest
           :app:compileDebugKotlin
           :app:assembleDebug
           :core:database:compileDebugAndroidTestKotlin
@@ -57,6 +58,54 @@ jobs:
         run: |
           test -s app/build/outputs/apk/debug/app-debug.apk
           sha256sum app/build/outputs/apk/debug/app-debug.apk
+
+  visual-reference-evidence:
+    needs: android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Configure Android command-line tools
+        run: |
+          sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          sdkmanager_path="$(find "$sdk_root/cmdline-tools" -type f -path '*/bin/sdkmanager' | sort -V | tail -n 1)"
+          test -x "$sdkmanager_path"
+          echo "$(dirname "$sdkmanager_path")" >> "$GITHUB_PATH"
+          echo "ANDROID_SDK_ROOT=$sdk_root" >> "$GITHUB_ENV"
+      - name: Install Android SDK
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
+      - name: Record deterministic native reference evidence
+        run: >-
+          ./gradlew
+          :app:recordRoborazziDebug
+          :feature:goat:recordRoborazziDebug
+          -Proborazzi.dumpUiTree=true
+          --stacktrace
+      - name: Verify reference matrix artifact count
+        run: |
+          count="$(find app/build/outputs/roborazzi feature/goat/build/outputs/roborazzi -type f -name '*.png' | wc -l)"
+          echo "native PNG evidence count: $count"
+          test "$count" -ge 270
+      - name: Upload unapproved native reference bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: animal-farm-native-reference-unapproved
+          path: |
+            app/build/outputs/roborazzi/**
+            app/build/reports/roborazzi/**
+            app/build/test-results/**
+            feature/goat/build/outputs/roborazzi/**
+            feature/goat/build/reports/roborazzi/**
+            feature/goat/build/test-results/**
+          if-no-files-found: error
+          retention-days: 14
 
   android-device-e2e:
     needs: android
