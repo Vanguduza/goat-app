@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -366,11 +367,11 @@ fun AnimalFarmCarouselControls(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TextButton(onClick = onPrevious, enabled = previousEnabled, modifier = Modifier.heightIn(min = minTouch)) {
+        TextButton(onClick = onPrevious, enabled = previousEnabled, modifier = Modifier.sizeIn(minWidth = minTouch, minHeight = minTouch)) {
             Text("Previous")
         }
         Text(positionLabel, style = MaterialThemeLocal.label())
-        TextButton(onClick = onNext, enabled = nextEnabled, modifier = Modifier.heightIn(min = minTouch)) {
+        TextButton(onClick = onNext, enabled = nextEnabled, modifier = Modifier.sizeIn(minWidth = minTouch, minHeight = minTouch)) {
             Text("Next")
         }
     }
