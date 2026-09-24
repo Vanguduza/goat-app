@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Farm OS design guardrails (binding)
 
-Authoritative presentation source: `docs/ux/animal-farm-visual-lock/`. The older design-system spec is operational guidance only where compatible.
+Sole presentation source: `docs/ux/animal-farm-visual-lock/`. Superseded visual specifications were removed and must not be reconstructed as parallel guidance.
 Read the relevant section before writing or reviewing UI code. These are CI-enforced laws, not suggestions.
 
 ## Visual authority
