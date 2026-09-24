@@ -9,7 +9,10 @@
     "sdk": 36,
     "java_runtime": 21,
     "app_jvm_bytecode_target": 17,
-    "note": "Robolectric API 36 requires Java 21 at test runtime; production Kotlin/JVM bytecode remains targeted to Java 17."
+    "note": "Robolectric API 36 requires Java 21 at test runtime; production Kotlin/JVM bytecode remains targeted to Java 17.",
+    "java_test_runtime": 21,
+    "production_jvm_target": 17,
+    "compatibility_note": "Robolectric 4.17 requires Java 21 for Android SDK 36 sandboxes; production Kotlin/JVM target remains 17."
   },
   "deterministic_fixture_date": "2026-09-24",
   "matrix": {
