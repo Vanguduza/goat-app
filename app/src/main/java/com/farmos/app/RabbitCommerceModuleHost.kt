@@ -134,13 +134,13 @@ fun RabbitCommerceModuleHost(
                     androidx.compose.material3.Button(
                         onClick = {
                             run {
-                                val major = amount.value.replace(',', '.').toDoubleOrNull() ?: error("Enter an amount")
+                                val amountMinor = amount.value.toScaledLongExact(2, "Amount")
                                 ops.agreeContract(
                                     AgreeRabbitContract(
                                         contractId = UUID.randomUUID().toString(),
                                         waitlistId = waitlistId.value.trim().ifBlank { null },
                                         buyerName = buyer.value,
-                                        amountMinor = (major * 100.0).toLong(),
+                                        amountMinor = amountMinor,
                                         occurredEpochDay = LocalDate.parse(day.value).toEpochDay(),
                                     ),
                                     newContext(),
