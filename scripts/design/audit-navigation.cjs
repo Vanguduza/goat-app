@@ -160,7 +160,7 @@ const report = {
     operating_module_host_callers: operatingCallers,
     operating_module_branches_preempted_by_dedicated_hosts: preemptedModules,
     direct_action_scope_violations: directActionViolations,
-    feature_id_catalog: 'NOT_FOUND: screen contract template requires feature_ids, but no canonical feature-ID catalog was found in docs/code search',
+    feature_id_catalog: 'CANONICAL: docs/realisation/FEATURE_REGISTRY.yaml; 545-screen coverage is enforced by the completion control plane',
   },
   limitations: [
     'This report is derived from checked-out Kotlin state machines and source text; it is not an instrumented runtime traversal.',
