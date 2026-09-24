@@ -27,6 +27,7 @@ import java.util.Locale
 fun SpeciesNavigatorScreen(
     onOpen: (FarmModule) -> Unit,
     onBack: () -> Unit,
+    today: LocalDate = LocalDate.now(),
 ) {
     val families = listOf(
         Triple(AnimalFarmFamily.GOAT, FarmModule.GOAT, "Herd, growth, kidding"),
@@ -42,7 +43,7 @@ fun SpeciesNavigatorScreen(
         ) {
             AnimalFarmContextHeader(
                 farmName = null,
-                dateLabel = LocalDate.now().format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.UK)),
+                dateLabel = today.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.UK)),
                 title = "Choose a species",
                 modifier = Modifier.padding(top = 16.dp),
             )
