@@ -88,11 +88,11 @@ jobs:
           :feature:goat:recordRoborazziDebug
           -Proborazzi.dumpUiTree=true
           --stacktrace
-      - name: Verify reference matrix artifact count
-        run: |
-          count="$(find app/build/outputs/roborazzi feature/goat/build/outputs/roborazzi -type f -name '*.png' | wc -l)"
-          echo "native PNG evidence count: $count"
-          test "$count" -ge 270
+      - name: Verify deterministic native reference matrix and accessibility bounds
+        run: >-
+          python3 scripts/design/verify-native-reference-evidence.py
+          --ledger docs/ux/evidence/animal-farm-visual-lock/phase4-native-reference-ledger.json
+          --roots app/build/outputs/roborazzi feature/goat/build/outputs/roborazzi
       - name: Upload unapproved native reference bundle
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
