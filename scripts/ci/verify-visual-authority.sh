@@ -120,6 +120,18 @@ for path in "${forbidden_visual_artifacts[@]}"; do
   [[ ! -e "$path" ]] || { echo "ERROR: superseded visual artifact returned: $path"; exit 1; }
 done
 
+authoritative_control_files=(
+  AGENTS.md
+  README.md
+  docs/00_PROJECT_TRUTH.md
+  docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md
+  docs/ux/FARM_OS_ROLE_DASHBOARD_CONTRACT.md
+  .cursor/rules/farmos-design-guardrails.mdc
+)
+if grep -nE 'FARM_OS_VISUAL_AUTHORITY\.md|FARM_OS_DESIGN_SYSTEM_SPEC\.md|FARM_OS_FRONTEND_UX_PLAYBOOK\.md' "${authoritative_control_files[@]}"; then
+  echo 'ERROR: live authority file still points at a superseded visual source'; exit 1
+fi
+
 lock_required=(
   docs/ux/ANIMAL_FARM_COLD_START_RESUME.md
   docs/ux/animal-farm-visual-lock/START-HERE.md
