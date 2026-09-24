@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -149,7 +150,7 @@ class GoatReferenceContractTest {
         compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
         compose.runOnIdle { assertNull(status.get()) }
         compose.onNodeWithText("Confirm sold").assertIsDisplayed()
-        compose.onNode(hasClickAction() and hasText("Confirm status change")).performClick()
+        compose.onNodeWithTag("goat-lifecycle-confirm").assertIsEnabled().performClick()
         compose.runOnIdle {
             val emitted = status.get()?.name
             assertEquals("Expected SOLD lifecycle callback; actual=$emitted", "SOLD", emitted)
