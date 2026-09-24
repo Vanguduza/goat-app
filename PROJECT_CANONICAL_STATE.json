@@ -56,9 +56,10 @@
       "visual_authority": "docs/ux/animal-farm-visual-lock/ (sole owner-directed presentation authority; 24 Sep 2026 cleanup)",
       "accepted_edrs": "docs/truth/edr/",
       "feature_catalog": "docs/realisation/FEATURE_REGISTRY.yaml",
-      "completion_state": "PROJECT_COMPLETION_STATE.json"
+      "completion_state": "PROJECT_COMPLETION_STATE.json",
+      "feature_dependency_graph": "docs/realisation/FEATURE_DEPENDENCY_GRAPH.json"
     },
-    "notes": "Canonical trunk is main. Superseded visual authorities and unused style artifacts are retired. The owner-authorized completion control plane binds all 545 registered screens to 156 mandatory Feature IDs. Release remains blocked until feature, module, visual and whole-product certification gates are met."
+    "notes": "Canonical trunk is main. The owner-authorized completion control plane binds all 545 screens to 156 mandatory Feature IDs. The Phase 2 dependency DAG contains 156 nodes and 332 prerequisite edges with zero cycles and phase inversions. Release remains blocked; Phase 3 platform correctness is next."
   },
   "tracking": {
     "canonical_branch": "main",
