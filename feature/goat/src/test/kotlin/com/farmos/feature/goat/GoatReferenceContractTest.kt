@@ -122,17 +122,14 @@ class GoatReferenceContractTest {
         }
 
         compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
-        assertNull(status)
+        compose.runOnIdle { assertNull(status) }
         compose.onNodeWithText("Confirm sold").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Cancel")).performClick()
-        compose.waitForIdle()
-        assertNull(status)
+        compose.runOnIdle { assertNull(status) }
 
         compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
         compose.onNode(hasClickAction() and hasText("Confirm status change")).performClick()
-        compose.waitForIdle()
-
-        assertEquals(GoatStatus.SOLD, status)
+        compose.runOnIdle { assertEquals(GoatStatus.SOLD, status) }
         assertNamedClickTargets()
     }
 
