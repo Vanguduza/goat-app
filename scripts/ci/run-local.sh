@@ -9,12 +9,11 @@ cd "$ROOT"
 
 JAVA_HOME="${JAVA_HOME:-${HOME}/.local/jdk/jdk-17.0.20.1+1}"
 ANDROID_HOME="${ANDROID_HOME:-${HOME}/.local/android-sdk}"
-GRADLE_HOME="${GRADLE_HOME:-${HOME}/.local/gradle/gradle-9.3.1}"
 DENO_HOME="${DENO_HOME:-${HOME}/.local/deno}"
 MEILI_BIN="${MEILI_BIN:-${HOME}/.local/meilisearch/meilisearch-v1.53.1}"
 MEILI_VERSION="v1.53.1"
 export JAVA_HOME ANDROID_HOME
-export PATH="${JAVA_HOME}/bin:${GRADLE_HOME}/bin:${DENO_HOME}/bin:${PATH}"
+export PATH="${JAVA_HOME}/bin:${DENO_HOME}/bin:${PATH}"
 
 if [[ ! -f local.properties && -d "${ANDROID_HOME}" ]]; then
   printf 'sdk.dir=%s\n' "${ANDROID_HOME}" > local.properties
@@ -87,7 +86,7 @@ job_android() {
   run_job "android" bash -lc '
     bash scripts/ci/verify-kotlin-architecture.sh &&
     bash scripts/ci/verify-visual-authority.sh &&
-    gradle :domain:goat:test :domain:rabbit:test :domain:ops:test :core:network:testDebugUnitTest :core:sync:testDebugUnitTest :app:compileDebugKotlin :core:database:compileDebugAndroidTestKotlin :app:compileDebugAndroidTestKotlin --stacktrace --offline
+    ./gradlew :domain:goat:test :domain:rabbit:test :domain:ops:test :core:network:testDebugUnitTest :core:sync:testDebugUnitTest :app:compileDebugKotlin :core:database:compileDebugAndroidTestKotlin :app:compileDebugAndroidTestKotlin --stacktrace --offline
   '
 }
 

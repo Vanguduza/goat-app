@@ -16,6 +16,7 @@ check_max_lines() {
 
 python3 scripts/development/verify_quantum_control_plane.py --check
 python3 scripts/development/feature_dependencies.py --check
+bash scripts/ci/verify-actions-pinned.sh
 
 echo "Checking Kotlin files for duplicate imports"
 while IFS= read -r -d '' file; do
@@ -29,7 +30,9 @@ done < <(find app core data domain feature -type f -name '*.kt' -print0)
 
 # These are no-growth ceilings, not desired end-state sizes. They stop further
 # expansion until the current large orchestration files are decomposed.
-check_max_lines "data/herd/src/main/kotlin/com/farmos/data/herd/FarmOsPullReconciler.kt" 2400
+check_max_lines "data/herd/src/main/kotlin/com/farmos/data/herd/FarmOsPullReconciler.kt" 1200
+check_max_lines "data/herd/src/main/kotlin/com/farmos/data/herd/RoomOpsRepository.kt" 1400
+check_max_lines "data/herd/src/main/kotlin/com/farmos/data/herd/FarmOsDataHelpers.kt" 300
 check_max_lines "app/src/main/java/com/farmos/app/OperatingModuleHost.kt" 1900
 check_max_lines "app/src/main/java/com/farmos/app/MainActivity.kt" 260
 check_max_lines "app/src/main/java/com/farmos/app/FarmSessionContent.kt" 450
