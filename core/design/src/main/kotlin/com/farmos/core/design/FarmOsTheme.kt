@@ -7,28 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.dp
 
-/**
- * Legacy visual constants retained only while older surfaces are migrated to semantic tokens.
- * New Animal Farm surfaces must consume [AnimalFarmTheme] / MaterialTheme instead.
- */
-@Deprecated("Use AnimalFarmTheme semantic tokens")
-object FosColors {
-    val Primary = AnimalFarmColors.Light.primary
-    val OnPrimary = AnimalFarmColors.Light.onPrimary
-    val PrimaryContainer = AnimalFarmColors.Light.lime
-    val Canvas = AnimalFarmColors.Light.background
-    val Card = AnimalFarmColors.Light.surface
-    val Sunken = AnimalFarmColors.Light.softSurface
-    val TextPrimary = AnimalFarmColors.Light.ink
-    val TextSecondary = AnimalFarmColors.Light.mutedInk
-    val Hairline = AnimalFarmColors.Light.divider
-    val Critical = AnimalFarmColors.Light.critical
-    val Warning = AnimalFarmColors.Light.onWarning
-    val Positive = AnimalFarmColors.Light.positive
-    val Info = AnimalFarmColors.Light.information
-    val Withdrawal = AnimalFarmColors.Light.withdrawal
-}
-
 private val FarmShapes =
     Shapes(
         extraSmall =
