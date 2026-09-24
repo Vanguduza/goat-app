@@ -7,12 +7,15 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
+import sys
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / 'docs/ux/FARM_OS_SCREEN_REGISTRY.yaml'
 IMPL_MAP = ROOT / 'docs/ux/FARM_OS_CURRENT_UI_IMPLEMENTATION_MAP.yaml'
 AUDIT = ROOT / 'docs/ux/evidence/animal-farm-visual-lock/navigation-source-audit.json'
+sys.path.insert(0, str(ROOT / 'scripts' / 'development'))
+from feature_catalog import CATALOG_STATUS, feature_ids_for_screen
 
 
 def git_sha():
@@ -121,7 +124,7 @@ def main():
             'return_restoration': 'UNEXECUTED',
             'authorization': 'UNEXECUTED',
             'deep_link': 'UNEXECUTED',
-            'feature_ids': 'UNRESOLVED_CANONICAL_FEATURE_ID_CATALOG',
+            'feature_ids': '|'.join(feature_ids_for_screen(sid)),
             'feature_contract': 'OPEN',
             'visual_status': 'NOT_GREEN',
             'feature_status': 'NOT_GREEN',
@@ -154,7 +157,7 @@ def main():
         'no_route_evidence': evidence_counts['NO_ROUTE_EVIDENCE'],
         'some_static_route_evidence': len(rows) - evidence_counts['NO_ROUTE_EVIDENCE'],
         'runtime_reachability_executed': 0,
-        'feature_id_catalog_status': 'MISSING_OR_NOT_CANONICALLY_IDENTIFIED',
+        'feature_id_catalog_status': CATALOG_STATUS,
         'module_gap_counts': dict(sorted(module_gaps.items())),
         'known_navigation_defects': audit['findings'],
         'status_law': 'MAPPED inventory is not CONTRACT_READY, IMPLEMENTED, VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN.',
@@ -166,7 +169,7 @@ def main():
         assert len(rows) == 545
         assert len({row['screen_id'] for row in rows}) == 545
         assert all(row['runtime_reachability'] == 'UNEXECUTED' for row in rows)
-        assert all(row['feature_ids'] == 'UNRESOLVED_CANONICAL_FEATURE_ID_CATALOG' for row in rows)
+        assert all(row['feature_ids'].startswith('FTR-') for row in rows)
         assert all(row['visual_status'] == 'NOT_GREEN' and row['feature_status'] == 'NOT_GREEN' for row in rows)
         print('PASS route-screen-feature gap inventory self-test')
         temp_dir.cleanup()

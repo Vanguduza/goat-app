@@ -54,9 +54,11 @@
       "product_truth": "docs/00_PROJECT_TRUTH.md",
       "constitution": "docs/FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md Ch.2",
       "visual_authority": "docs/ux/animal-farm-visual-lock/ (sole owner-directed presentation authority; 24 Sep 2026 cleanup)",
-      "accepted_edrs": "docs/truth/edr/"
+      "accepted_edrs": "docs/truth/edr/",
+      "feature_catalog": "docs/realisation/FEATURE_REGISTRY.yaml",
+      "completion_state": "PROJECT_COMPLETION_STATE.json"
     },
-    "notes": "Canonical trunk is main. Superseded visual authorities and unused style artifacts were removed. The former orphan truth-ledger branch is preserved as a frozen snapshot in main and retired. Release remains blocked until certification gates are met."
+    "notes": "Canonical trunk is main. Superseded visual authorities and unused style artifacts are retired. The owner-authorized completion control plane binds all 545 registered screens to 156 mandatory Feature IDs. Release remains blocked until feature, module, visual and whole-product certification gates are met."
   },
   "tracking": {
     "canonical_branch": "main",
