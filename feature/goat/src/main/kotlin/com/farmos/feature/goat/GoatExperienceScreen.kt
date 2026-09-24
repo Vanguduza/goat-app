@@ -521,7 +521,13 @@ internal fun IllustratedGoatPage(
                 family = if (safety) null else AnimalFarmFamily.GOAT,
             )
             content()
-            TextButton(\n                onClick = onBack,\n                modifier = Modifier.sizeIn(\n                    minWidth = AnimalFarmTheme.minimumTouchDp.dp,\n                    minHeight = AnimalFarmTheme.minimumTouchDp.dp,\n                ),\n            ) { Text("Back") }
+            TextButton(
+                onClick = onBack,
+                modifier = Modifier.sizeIn(
+                    minWidth = AnimalFarmTheme.minimumTouchDp.dp,
+                    minHeight = AnimalFarmTheme.minimumTouchDp.dp,
+                ),
+            ) { Text("Back") }
         }
     }
 }
