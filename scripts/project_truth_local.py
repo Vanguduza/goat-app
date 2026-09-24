@@ -13,9 +13,9 @@ def cfiles(s):
 def cdig(s):
  p=par(s); a=('diff','--binary','--no-ext-diff','--no-renames',p,s,'--','.',*X) if p else ('show','--binary','--format=','--no-ext-diff',s,'--','.',*X); return hashlib.sha256(g(*a,b=True).stdout).hexdigest()
 def local_rows():
- # The authoritative ledger lives on the project-truth-ledger branch, written by
- # CI. This local file is the pre-push evidence the guard checks against; it is
- # untracked, so it can no longer be read out of each commit.
+ # This local ledger is checkout-scoped pre-push evidence. Canonical remote truth
+ # is main Git history plus pull-request and required CI evidence; no auxiliary
+ # ledger branch exists.
  r=[]
  if L.exists():
   for q in L.read_text().splitlines():
@@ -34,14 +34,14 @@ def record():
   e={'schema_version':1,'kind':'precommit-staged-diff','recorded_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),'branch':o('rev-parse','--abbrev-ref','HEAD'),'source_parent':p,'changed_files':f,'diff_sha256':d,'actor':os.getenv('USER') or os.getenv('USERNAME') or 'unknown'}; L.parent.mkdir(parents=True,exist_ok=True)
   with L.open('a') as z:z.write(json.dumps(e,sort_keys=True,separators=(',',':'))+'\n')
   C.write_text(json.dumps({'schema_version':1,'state':'PENDING_COMMIT',**e},indent=2,sort_keys=True)+'\n')
- return 0  # local ledger is untracked evidence; the branch ledger is authoritative
+ return 0  # local ledger is untracked checkout evidence; main history is authoritative
 B=R/'.project-truth/BASELINE'
 def install():
  # Scope: only commits made after the hooks were installed on THIS checkout can
  # carry a local pre-commit record. The baseline is recorded on first run so
- # pre-existing history is not retroactively flagged. The authoritative ledger
- # is CI-written on the project-truth-ledger branch; this guard only proves the
- # local pre-commit hook was not bypassed going forward.
+ # pre-existing history is not retroactively flagged. This local guard proves
+ # the checkout's pre-commit evidence was not bypassed going forward; canonical
+ # remote truth remains main + PR/CI evidence.
  if B.exists():
   v=B.read_text().strip()
   if v and g('cat-file','-e',v+'^{commit}',check=False).returncode==0: return v

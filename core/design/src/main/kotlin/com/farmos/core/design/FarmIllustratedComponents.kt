@@ -3,14 +3,10 @@
 package com.farmos.core.design
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,21 +45,6 @@ fun FarmOsWordmark(
         style = if (compact) MaterialTheme.typography.titleLarge else MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.SemiBold,
         color = colors.ink,
-    )
-}
-
-@Composable
-fun FarmPastoralBackdrop(
-    modifier: Modifier = Modifier,
-    @Suppress("UNUSED_PARAMETER") heroSpecies: FarmSpeciesVisual? = null,
-    content: @Composable BoxScope.() -> Unit,
-) {
-    Box(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(AnimalFarmTheme.colors.background),
-        content = content,
     )
 }
 

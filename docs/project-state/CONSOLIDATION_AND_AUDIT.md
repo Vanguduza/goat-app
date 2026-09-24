@@ -1,3 +1,5 @@
+> **Historical consolidation evidence — not visual authority.** References to removed pastoral/Caveat-era files describe prior defects only. Current presentation truth is exclusively `docs/ux/animal-farm-visual-lock/`.
+
 # Farm OS — Consolidation & feature/page audit
 
 **Date:** 10 September 2026

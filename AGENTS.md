@@ -58,13 +58,14 @@ A green architecture slice authorizes implementation breadth, not uncontrolled b
 
 ## Design system
 
-`docs/ux/animal-farm-visual-lock/` is the current owner-directed presentation authority. Start at `docs/ux/ANIMAL_FARM_COLD_START_RESUME.md`. `docs/ux/FARM_OS_VISUAL_AUTHORITY.md` remains inventory and provenance; its pastoral presentation prescriptions are superseded.
+`docs/ux/animal-farm-visual-lock/` is the sole presentation authority. Start at `docs/ux/animal-farm-visual-lock/START-HERE.md`, then read `DESIGN-SYSTEM.md`, `PAGE-PATTERNS.md` and the affected registry entries. The owner decision of 24 September 2026 removed superseded visual authorities and their unused runtime artifacts; do not recreate, quote as active guidance, or reintroduce them.
 
 - Every UI change declares its `FOS-*` Screen ID and canonical visual lineage.
-- Features use governed tokens/components; external repositories are never visual authorities.
-- Use the Animal Farm locked A management / D+C worker family and supplied assets; earlier pastoral I1–I3 prescriptions are superseded.
+- Features use governed Animal Farm tokens/components; external repositories are never visual authorities.
+- Management uses the locked A / Control room family. Worker uses the locked D shell + C Review & decide family.
+- Inter is the single production font family. Handwritten/script fonts are not part of the lock.
 - No default Material purple/blue, emoji, marketing copy, arbitrary ungoverned radii or placeholder content.
-- Required production font/illustration assets remain visual-green blockers until approved assets are versioned; never fake certification.
+- Required production illustration assets and native evidence remain visual-green blockers until approved; never fake certification.
 
 ## Donor repositories
 
@@ -126,6 +127,6 @@ Record the blocker and the smallest owner/external action needed. Do not invent 
 
 ## Animal Farm visual alignment — owner-directed amendment
 
-Before any UI work read `docs/ux/animal-farm-visual-lock/AGENT-INSTRUCTIONS.md`, DESIGN-SYSTEM.md, PAGE-PATTERNS.md and the affected registry entries. That pack and its exact approved home references supersede conflicting visual descriptions in prior Farm OS visual documents, but do not supersede feature scope, domain safety, offline architecture or authorization rules.
+Before any UI work read `docs/ux/animal-farm-visual-lock/AGENT-INSTRUCTIONS.md`, DESIGN-SYSTEM.md, PAGE-PATTERNS.md and the affected registry entries. That pack and its exact approved home references are the only visual truth. Superseded visual documents were removed; historical logs may mention them only as provenance and never as instructions. The lock does not supersede feature scope, domain safety, offline architecture or authorization rules.
 
 Management uses A / Control room; worker uses D shell with C's Review & decide task carousel. Reuse the original Animal Farm login animals and optional individual photos. Home gear is bottom-right and Theme-only. Every quantum screen/role variant/atom requires a reviewed contract, shared-token/component lineage and native evidence. Existing code, generated mockups and old green claims are not visual authority. No implementing agent may approve its own reference/golden changes or weaken gates.

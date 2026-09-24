@@ -1,6 +1,12 @@
 {
-  "version": "animal-farm-lock-2026-09-05",
-  "reference_approval": "Owner-locked home direction; no native certification implied",
+  "version": "animal-farm-lock-2026-09-24-single-visual-truth",
+  "reference_approval": "Owner-locked visual references; mutable implementation guidance is intentionally excluded from the immutable hash set; no native certification implied",
+  "authority": "docs/ux/animal-farm-visual-lock/",
+  "policy": {
+    "single_visual_authority": true,
+    "superseded_native_theme_snapshots_present": false,
+    "historical_provenance_in_git_history": true
+  },
   "files": [
     {
       "path": "references/animal-farm-locked-homes.html",
@@ -13,12 +19,6 @@
       "sha256": "5d16c951ad297f990294cb04ccc150beab1605d59c193cc4109868f263f404b2",
       "bytes": 10697,
       "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\docs\\development\\HOME_DESIGN_LOCK.md"
-    },
-    {
-      "path": "references/SCREEN_DESIGN_STANDARD.md",
-      "sha256": "d06d56b71914d28264796c8b1b50023da2561b0f3182607480b41c1317dd0929",
-      "bytes": 13946,
-      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\docs\\planning\\implementation\\SCREEN_DESIGN_STANDARD.md"
     },
     {
       "path": "references/ANIMAL_FAMILY_ART_PROVENANCE.md",
@@ -49,54 +49,6 @@
       "sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57",
       "bytes": 4377,
       "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\third_party\\inter\\OFL.txt"
-    },
-    {
-      "path": "registry/source-screen-registry.yaml",
-      "sha256": "6ad2d999a8085e524de2e6c7963da948768a631600cf4d140638545a1a198a14",
-      "bytes": 178942,
-      "source": "C:\\Users\\Admin\\Documents\\Goat app\\audit\\farm-os-2026-09-05\\docs\\ux\\FARM_OS_SCREEN_REGISTRY.yaml"
-    },
-    {
-      "path": "registry/source-implementation-map.yaml",
-      "sha256": "c21c0b438bf9ed99901146c6ae7a3b928eeb4e2ebf80f957526bd0368cb49480",
-      "bytes": 7550,
-      "source": "C:\\Users\\Admin\\Documents\\Goat app\\audit\\farm-os-2026-09-05\\docs\\ux\\FARM_OS_CURRENT_UI_IMPLEMENTATION_MAP.yaml"
-    },
-    {
-      "path": "references/quantum-atlas-rev2.md",
-      "sha256": "4e8e387846885f142bcdccfb160627effd399b716503bfefe6c1d9c546798a34",
-      "bytes": 18346,
-      "source": "C:\\Users\\Admin\\Documents\\Goat app\\audit\\farm-os-2026-09-05\\docs\\ux\\FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md"
-    },
-    {
-      "path": "references/native/HomeTokens.kt",
-      "sha256": "27db89e657029cf97bb3131ac5942f35bbbcbf0301f5e28eacd3f371b5b3b403",
-      "bytes": 1034,
-      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\kotlin\\com\\farmos\\design\\theme\\HomeTokens.kt"
-    },
-    {
-      "path": "references/native/FosTheme.kt",
-      "sha256": "d7c067a8866bd3486ae614b19bb95ae012b2de7c8cdaadc8c6f54253f5b52e92",
-      "bytes": 8394,
-      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\kotlin\\com\\farmos\\design\\theme\\FosTheme.kt"
-    },
-    {
-      "path": "references/native/LockedHomes.kt",
-      "sha256": "0a98f7c1aa3802bba911f66e28063fd488236ccef78adda21a412447aeca6724",
-      "bytes": 23894,
-      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\kotlin\\com\\farmos\\design\\patterns\\LockedHomes.kt"
-    },
-    {
-      "path": "references/native/AnimalPortrait.kt",
-      "sha256": "f72d6bf344b6fdd1de5bc562e7b3330352c675a86cfb49e04e53946d092f0699",
-      "bytes": 2744,
-      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\kotlin\\com\\farmos\\design\\components\\AnimalPortrait.kt"
-    },
-    {
-      "path": "references/native/AnimalProfile.kt",
-      "sha256": "baa38e0ca70e6c57728c06c65291fa74a45f2e65231a2968ed60383a05a6c080",
-      "bytes": 4574,
-      "source": "C:\\Users\\Admin\\Documents\\Goat app\\Goat App\\core-design\\src\\main\\kotlin\\com\\farmos\\design\\patterns\\AnimalProfile.kt"
     },
     {
       "path": "theme/locked-web-tokens.json",

@@ -2,15 +2,15 @@
 
 # Farm OS — Quantum-Complete Screen / Feature / Visual-Realisation Mapping — REV 2
 
-**Authority purpose:** realign the current implementation to the locked illustrated Farm OS product family and prevent future drift.
+**Authority purpose:** preserve complete Screen IDs, feature scope, role/device law and evidence mapping while presentation is governed exclusively by the Animal Farm visual lock.
 **Visual provenance:** session `01a04f06-bfbe-7b32-bf12-f9834e900244`.
-**Portable visual authority:** `docs/ux/FARM_OS_VISUAL_AUTHORITY.md`.
+**Sole visual authority:** `docs/ux/animal-farm-visual-lock/`.
 **Machine registry:** `docs/ux/FARM_OS_SCREEN_REGISTRY.yaml`.
 **Current-code map:** `docs/ux/FARM_OS_CURRENT_UI_IMPLEMENTATION_MAP.yaml`.
 
 ## Cold-start execution prompt
 
-Reconstruct branch/PR/HEAD before writes. Do not treat existing UI code as visual authority. Preserve working Room/outbox/RPC/RLS/reconciliation/search behavior. Map every UI surface to a registered `FOS-*` Screen ID. Rebuild presentation around stable state/command contracts. Do not add an unregistered route. Do not claim `VISUAL_GREEN` or `FEATURE_GREEN` from code existence. The illustrated visual family in `FARM_OS_VISUAL_AUTHORITY.md` is mandatory and supersedes contradictory anti-illustration rules.
+Reconstruct branch/PR/HEAD before writes. Do not treat existing UI code as visual authority. Preserve working Room/outbox/RPC/RLS/reconciliation/search behavior. Map every UI surface to a registered `FOS-*` Screen ID. Rebuild presentation around stable state/command contracts. Do not add an unregistered route. Do not claim `VISUAL_GREEN` or `FEATURE_GREEN` from code existence. The Animal Farm visual lock is mandatory; this mapping cannot introduce or revive a parallel presentation system.
 
 Before broad UI fan-out, establish and approve Splash, Login, Farm Selector, Farm Setup, Farm Home, Species Navigator, Goat Dashboard, Goat Profile, one I3 capture surface, one I4 safety surface and one tablet adaptive surface.
 
@@ -139,8 +139,8 @@ Canonical roles: FARM_OWNER, FARM_MANAGER, SUPERVISOR, FARM_WORKER, VET/VET_ADJA
 
 Phone prioritises capture, identification, quick history, tasks, health and offline operation. Tablet prioritises analytics, breeding, finance, reports, large tables, planning, comparison, capacity and administration. Required tablet layouts must use master/detail, split planning or data-table patterns rather than merely stretching phone composition.
 
-## Visual intensity inheritance
-I1 uses the full illustrated scene system. I2 uses environment/species heroes plus operational dashboards. I3 uses content-first surfaces with Farm OS illustration identity in headers, portraits, section art and empty states. I4 suppresses decorative scene weight so treatment, mortality, withdrawal, biosecurity and destructive decisions remain unambiguous.
+## Visual authority binding
+Presentation is defined only by `docs/ux/animal-farm-visual-lock/`. Legacy I1–I4 values in this mapping are retained solely as historical classification metadata for evidence migration; they do not authorize palettes, typography, illustration intensity, scenery, layout families or component styling. Every screen instead resolves to the locked A management, D+C worker, or applicable page-pattern recipe with the safety/accessibility constraints defined by the current lock.
 
 ## Completion law
 Every documented feature maps to at least one Screen ID or is explicitly `headless/system-only`. Every Screen ID maps back to a feature contract. Orphan features and orphan screens block completion. A screen that matches the theme but lacks working feature contracts is not feature green; a working feature rendered in a drifted UI is not visual green.

@@ -26,7 +26,7 @@ Older documents are provenance only when they conflict with Project Truth.
 
 ## Canonical development branch
 
-`main` is the only development authority. `project-truth-ledger` is an orphan CI-written audit history and must never be merged into `main`.
+`main` is the sole persistent branch and the only development authority. Temporary implementation branches may exist only while an active pull request is under review and must be deleted immediately after merge. The former orphan `project-truth-ledger` branch was frozen into `docs/project-state/project-truth-ledger-snapshot/` and retired on 24 September 2026 so repository truth no longer depends on a second branch.
 
 The designated architecture slice is:
 

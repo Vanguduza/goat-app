@@ -12,10 +12,10 @@ Read this entire pack before coding. Inspect the exact locked HTML visually and 
 2. The supplied `references/animal-farm-locked-homes.html` and the original home decision govern the selected home compositions and animal identity treatment. The screenshot with a geometric goat was a section/layout reference; the subsequent explicit animal-lineup decision governs final imagery.
 3. This pack translates the lock into app-wide rules. Its proposed page recipes, specialist variants and native adaptations must be reviewed before certification; they are not historical owner approvals.
 4. Current project truth, feature contracts, quantum IDs and architecture continue to govern scope, permissions and behavior. An attractive design never grants a role permission or changes a task transition.
-5. Existing `FARM_OS_VISUAL_AUTHORITY.md`, role dashboard contract, visual reference manifest and quantum document intensity descriptions must be amended where they contradict the recovered owner lock. Their feature inventory remains valuable. A comment claiming “locked session lineage” is not evidence of a visual match.
-6. Existing implementation, later generated mockups, external themes, the unselected B view and standalone C home are not substitute authorities. The motor-spares adaptation discussed separately does not alter Animal Farm branding.
+5. The 24 September 2026 owner cleanup removed superseded visual authorities, manifests, fonts and native-theme references from the working tree. Git history preserves provenance; do not restore those files as active guidance.
+6. Existing implementation, historical snapshots, later generated mockups, external themes, the unselected B view and standalone C home are not substitute authorities. The motor-spares adaptation discussed separately does not alter Animal Farm branding.
 
-Do not delete earlier authorities. Record an explicit owner-decision amendment, point them to the new authority, preserve their historical context, and update conflicting always-on rules so agents do not receive two incompatible instructions.
+There is exactly one presentation authority: this `animal-farm-visual-lock` package. Historical logs may describe superseded systems but must never be used to style production UI.
 
 ## Non-negotiable presentation rules
 
@@ -33,7 +33,7 @@ Do not delete earlier authorities. Record an explicit owner-decision amendment, 
 
 ## Per-change working protocol
 
-1. Record branch, HEAD, dirty files, affected feature IDs and exact screen IDs. Preserve others' changes.
+1. Record `main` HEAD, any active pull-request branch, affected feature IDs and exact screen IDs. Preserve others' changes; temporary PR branches are deleted after merge.
 2. Compare the live quantum registry to the supplied snapshot. Preserve all IDs. Register newly discovered routes, dialogs, role variants and system-only contracts before implementing them.
 3. Read the per-ID recipe and module rules. Resolve every provisional mapping against actual fields, actions and navigation. Copy `templates/screen-contract.json` to the repository's screen-contract directory and complete it. A registry entry is not a complete screen brief.
 4. Bind the page to approved components and semantic tokens. Explain deviations in a decision record before changing the shared design.

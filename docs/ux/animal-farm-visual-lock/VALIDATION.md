@@ -3,13 +3,13 @@
 ## Checked for this handoff
 
 - 545 exact registry IDs/names/modules are represented, including all eight role variants.
-- 19 copied-reference/extracted-theme hash entries validate.
+- The canonical reference manifest validates only the locked HTML, owner decision/provenance documents, approved images, Inter font/license, and locked theme/geometry artifacts.
 - The supplied locked HTML remains byte-identical, with sandbox and Content-Security-Policy intact.
 - Eight in-memory negative tests reject missing IDs, duplicates, renamed identities, invalid recipes, wrong worker pattern, stale evidence, path escape and altered reference bytes.
 - All three supplied JavaScript scripts pass `node --check`.
 - The page recipes were inventory-reviewed and 35 initial name-based assignments corrected. They still require feature-level contract review: a broad registry name does not establish exact fields, permissions or route behavior.
 
-No Android build, screenshot suite, live route export, physical-device test, media persistence or full feature certification is claimed by this handoff. Static source inspection is not a pixel audit. No implementation-repo product code or remote branch protection was changed.
+No Android build, screenshot suite, live route export, physical-device test, media persistence or full feature certification is claimed by the authority package itself. Static source inspection is not a pixel audit. Repository implementation and CI evidence remain separate gates.
 
 ## Use
 
@@ -42,6 +42,6 @@ An optional `--routes PATH_TO_EXPORT_JSON` compares the exact `screen_ids` set w
 
 ## Installation boundary
 
-Copy the entire pack to the active repository, preserving assets and manifest. Merge, do not overwrite, root AGENTS.md and existing rules. Install the optional `.mdc` template under `.cursor/rules/` only when that agent runtime uses it; the root AGENTS addendum is the portable entry point for compatible agents. Configure required CI and independent approval ownership explicitly. Do not assume the templates are active merely because they exist inside this folder.
+This pack is already installed in the active repository. Preserve the locked HTML/assets/theme manifest and keep root AGENTS.md plus the always-on design rule aligned with it. Configure required CI and independent approval ownership explicitly. Templates are examples until deliberately installed or instantiated.
 
-The original reference documents and native files retain historical relative paths and package names. They are read-only provenance, not compile-ready source at their packaged locations. Port approved components deliberately into the actual design module, retaining licensing and replacing demo adapters with production state.
+Superseded native-theme source snapshots are intentionally absent from the working tree. Git history is sufficient for forensic provenance; production design work must use the current governed design module and this package only.

@@ -70,6 +70,3 @@ val FarmOsTypography =
         labelSmall = AnimalFarmLabel,
     )
 
-/** Compatibility aliases for pre-lock surfaces; intentionally Inter, never script. */
-val FarmOsAccentLarge = AnimalFarmDisplay
-val FarmOsAccentMedium = AnimalFarmLargeTitle.copy(fontWeight = FontWeight.Medium)

@@ -1,6 +1,6 @@
 # Screen design standard — thoughtful workflows throughout
 
-31 August 2026 · Applies to the catalogue and every subsequent screen brief. Design-system spec and frontend playbook remain the visual authority except for the explicit [owner-locked home and animal imagery amendment](../../development/HOME_DESIGN_LOCK.md).
+31 August 2026 · Current authority amendment: 24 September 2026. Applies to the catalogue and every subsequent screen brief. `docs/ux/animal-farm-visual-lock/` is the sole presentation authority; this standard supplies workflow, state, accessibility and screen-contract requirements only.
 
 ## 1. Screen brief contract
 

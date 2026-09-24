@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify complete original package
+      - name: Verify sole installed visual authority
         run: node scripts/design/verify-handover.cjs
       - name: Verify protected references and live registry identities
         run: node docs/ux/animal-farm-visual-lock/scripts/verify-pack.cjs --self-test --registry docs/ux/FARM_OS_SCREEN_REGISTRY.yaml

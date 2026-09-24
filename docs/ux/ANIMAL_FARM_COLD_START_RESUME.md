@@ -1,6 +1,6 @@
 # Animal Farm — repository cold-start development resume
 
-Repository: Vanguduza/goat-app. Canonical development branch: `main`. The only other permanent branch is the orphan CI-written `project-truth-ledger`, which is audit history and must never be merged into `main`.
+Repository: Vanguduza/goat-app. `main` is the sole persistent branch and canonical development authority. Temporary branches exist only for active pull requests and are deleted after merge. The retired project-truth ledger is frozen under `docs/project-state/project-truth-ledger-snapshot/`.
 Installed source-of-truth package: [animal-farm-visual-lock/START-HERE.md](animal-farm-visual-lock/START-HERE.md).
 Read [HANDOVER-CHECKPOINT.md](HANDOVER-CHECKPOINT.md) for provenance, validation and limitations.
 

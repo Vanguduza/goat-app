@@ -4,10 +4,11 @@
   "policy": {
     "default_branch_is_not_authority": true,
     "newest_commit_is_not_authority": true,
-    "every_pushed_commit_is_auto_logged": true,
     "canonical_lineage_must_be_verified_before_release": true,
     "silent_feature_thinning_forbidden": true,
-    "release_requires_provenance": true
+    "release_requires_provenance": true,
+    "main_is_only_persistent_branch": true,
+    "project_truth_guard_required": true
   },
   "canonical_state": {
     "status": "CANONICAL_LINEAGE_ESTABLISHED",
@@ -52,21 +53,17 @@
     "locked_authorities": {
       "product_truth": "docs/00_PROJECT_TRUTH.md",
       "constitution": "docs/FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md Ch.2",
-      "visual_authority": "docs/ux/animal-farm-visual-lock/ (owner-directed, 5-6 Sep 2026)",
-      "visual_provenance_superseded": [
-        "docs/ux/FARM_OS_VISUAL_AUTHORITY.md",
-        "docs/FARM_OS_DESIGN_SYSTEM_SPEC.md v1"
-      ],
+      "visual_authority": "docs/ux/animal-farm-visual-lock/ (sole owner-directed presentation authority; 24 Sep 2026 cleanup)",
       "accepted_edrs": "docs/truth/edr/"
     },
-    "notes": "Every pre-consolidation branch is an ancestor of this trunk; deleting them loses no commit. Release stays blocked until certification gates are met."
+    "notes": "Canonical trunk is main. Superseded visual authorities and unused style artifacts were removed. The former orphan truth-ledger branch is preserved as a frozen snapshot in main and retired. Release remains blocked until certification gates are met."
   },
   "tracking": {
-    "ledger_branch": "project-truth-ledger",
-    "ledger": "project-truth-ledger:CHANGE_LEDGER.jsonl",
-    "current_snapshot": "project-truth-ledger:CURRENT_STATE.json",
+    "canonical_branch": "main",
+    "historical_ledger_snapshot": "docs/project-state/project-truth-ledger-snapshot/CHANGE_LEDGER.jsonl",
+    "historical_state_snapshot": "docs/project-state/project-truth-ledger-snapshot/CURRENT_STATE.json",
     "protocol": "PROJECT_TRUTH_PROTOCOL.md",
     "workflow": ".github/workflows/project-truth-autolog.yml",
-    "note": "The ledger lives on its own orphan branch, never merged into main. main is protected and requires pull requests, so a bot push to it is rejected; writing back to a pushed branch also made the bot's [skip ci] commit the branch head and suppressed every workflow on it."
+    "note": "Project truth now uses main Git history, PR review and the required project-truth check. No permanent auxiliary branch is permitted."
   }
 }
