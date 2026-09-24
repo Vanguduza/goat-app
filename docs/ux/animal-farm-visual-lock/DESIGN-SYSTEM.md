@@ -6,7 +6,7 @@
 
 “Farm themed” means recognizable animal identity and grounded colors, not barns, hills, clouds, script slogans and decorative scenery behind all content. “Modern interactive” means that the user can filter, select, inspect, record and recover—not that every page becomes a carousel or a wall of identical cards.
 
-## Exact colors versus native baseline
+## Exact colors and semantic native adaptation
 
 The locked HTML is the visual reference for homes. Its exact light palette is:
 
@@ -18,9 +18,9 @@ The locked HTML is the visual reference for homes. Its exact light palette is:
 
 The exact dark counterparts are in `theme/locked-web-tokens.json` and `theme/locked-web.css`, extracted from the retained HTML—not approximated from a photograph of a monitor. Use semantic foreground/background pairs together.
 
-The older native theme uses nearby but **different** values, including canvas `#FAFAF6`, home hero `#285744`, lime `#DFEDBA`, native general primary `#2C5539`. Those values are retained in `references/native/FosTheme.kt` and `HomeTokens.kt` for migration context; do not call them byte-exact HTML colors. For the new common theme, use the locked web colors for the visual home match, retain Inter and native accessibility semantics, then freeze the approved native token manifest. Any change to those reference colors requires a recorded decision, not silent averaging of palettes.
+There is no second native palette authority. Production Android semantic colors are derived from the locked web tokens plus explicit accessibility/safety roles in `AnimalFarmThemeTokens.kt`. Superseded native palettes were removed from the working tree so their nearby values cannot be mistaken for alternatives. Git history preserves provenance when forensic comparison is needed. Any governed color change requires an explicit owner decision and new evidence.
 
-Outdoor is required by the existing screen standard but has no approved outdoor web preview. Retain the older native outdoor baseline (white canvas, black ink, dark green `#23432D`, 64dp targets) as a **candidate requiring native acceptance**. Do not certify it from light-mode screenshots. Semantic error, success, information and withdrawal colors may be adapted from the native baseline, with measured contrast and non-color indicators.
+Outdoor is required by the existing screen standard but has no approved outdoor web preview. The production `AnimalFarmThemeTokens.kt` outdoor palette is therefore an explicit **candidate requiring native acceptance**, not a separate visual family. Do not certify it from light-mode screenshots. Semantic error, success, information and withdrawal roles require measured contrast and non-color indicators.
 
 The extracted web file includes unused exploration tokens/styles because the supplied HTML is preserved exactly. Their presence does not authorize B's atlas or another page style. Use only components defined by the selected lock and the approved recipes.
 
@@ -64,7 +64,7 @@ Preserve current sign-in/session/farm-membership callbacks. Account creation, re
 
 The pack contains `farm_animal_lineup.png` (1536×1024) and `farm_family_portraits_v1.png` (1774×887). The derivative is opaque pale ivory, not transparent. Do not recolor or regenerate it for dark mode. Use a deliberate image plate consistent with the approved native review. Preserve proportions and species silhouette; do not crop ears/horns accidentally.
 
-The retained `AnimalPortrait.kt` documents source-sheet crop windows. Reuse the windows as evidence, then visually verify the crop at actual display sizes. Do not assume another resized image uses the same coordinates. Exact asset hashes are in `reference-manifest.json`.
+Production family-crop behavior lives in the governed `core/design` implementation and must be visually verified at actual display sizes against the locked source sheet. Do not import historical native reference code or assume a resized image uses identical crop geometry. Exact locked asset hashes are in `reference-manifest.json`.
 
 Family mapping: goat→Goats; rabbit→Rabbits; sheep→Sheep; cow→Cattle; hen→Poultry family launcher. A duck/turkey/goose workflow must not display a chicken as its subject. Use correct approved kind imagery or a neutral labeled placeholder until available. The synthetic brand animal is not a photograph of Nala.
 
