@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.FarmAnimalLineup
 import com.farmos.core.network.FarmMembership
 
@@ -176,6 +178,7 @@ private fun ColumnScope.SignInState(
     onSignIn: (String, String) -> Unit,
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
+    val touchTarget = AnimalFarmTheme.minimumTouchDp.dp
     OutlinedTextField(
         value = email,
         onValueChange = onEmailChange,
@@ -191,7 +194,7 @@ private fun ColumnScope.SignInState(
         label = { Text("Password") },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
-            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+            IconButton(onClick = { passwordVisible = !passwordVisible }, modifier = Modifier.size(touchTarget)) {
                 Icon(
                     imageVector = if (passwordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
                     contentDescription = if (passwordVisible) "Hide password" else "Show password",
@@ -206,7 +209,7 @@ private fun ColumnScope.SignInState(
     Button(
         onClick = { onSignIn(email, password) },
         enabled = !busy && email.isNotBlank() && password.isNotBlank(),
-        modifier = Modifier.align(Alignment.CenterHorizontally).widthIn(min = 160.dp),
+        modifier = Modifier.align(Alignment.CenterHorizontally).widthIn(min = 160.dp).heightIn(min = touchTarget),
     ) {
         Text(if (busy) "Signing in…" else "Sign in")
     }
@@ -220,12 +223,13 @@ private fun ColumnScope.FarmSelectionState(
     onSelectFarm: (FarmMembership) -> Unit,
     onSignOut: () -> Unit,
 ) {
+    val touchTarget = AnimalFarmTheme.minimumTouchDp.dp
     Text("Choose your farm", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
     memberships.forEach { membership ->
         Button(
             onClick = { onSelectFarm(membership) },
             enabled = !busy,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().heightIn(min = touchTarget),
         ) {
             val name = farmNames[membership.farmId] ?: "${membership.farmId.take(8)}…"
             Text("$name · ${membership.role.replace('_', ' ')}")
@@ -234,7 +238,7 @@ private fun ColumnScope.FarmSelectionState(
     TextButton(
         onClick = onSignOut,
         enabled = !busy,
-        modifier = Modifier.align(Alignment.CenterHorizontally),
+        modifier = Modifier.align(Alignment.CenterHorizontally).heightIn(min = touchTarget),
     ) {
         Text("Sign out")
     }
@@ -249,6 +253,7 @@ private fun ColumnScope.FarmSetupWizardState(
     onSignOut: () -> Unit,
 ) {
     var step by remember { mutableStateOf(0) }
+    val touchTarget = AnimalFarmTheme.minimumTouchDp.dp
     Text("Create your farm", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
     Text("Step ${step + 1} of 2", color = MaterialTheme.colorScheme.onSurfaceVariant)
 
@@ -264,7 +269,7 @@ private fun ColumnScope.FarmSetupWizardState(
         Button(
             onClick = { step = 1 },
             enabled = !busy && farmName.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().heightIn(min = touchTarget),
         ) {
             Text("Review setup")
         }
@@ -277,11 +282,11 @@ private fun ColumnScope.FarmSetupWizardState(
         Button(
             onClick = { onCreateFarm(farmName) },
             enabled = !busy && farmName.isNotBlank(),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().heightIn(min = touchTarget),
         ) {
             Text(if (busy) "Creating…" else "Create farm")
         }
-        TextButton(onClick = { step = 0 }, enabled = !busy) { Text("Back") }
+        TextButton(onClick = { step = 0 }, enabled = !busy, modifier = Modifier.heightIn(min = touchTarget)) { Text("Back") }
     }
     TextButton(
         onClick = onSignOut,
