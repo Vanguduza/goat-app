@@ -14,10 +14,10 @@ unset ADMIN_API_KEY SERVICE_ROLE_KEY SECRET_KEY
 adb reverse tcp:54321 tcp:54321
 
 echo "Proving Room restart durability"
-gradle :core:database:connectedDebugAndroidTest --stacktrace
+./gradlew :core:database:connectedDebugAndroidTest --stacktrace
 
 echo "Proving live refresh/re-auth and second-device authoritative visibility"
-gradle :app:connectedDebugAndroidTest \
+./gradlew :app:connectedDebugAndroidTest \
   -Pandroid.testInstrumentationRunnerArguments.notClass=com.farmos.app.RevokedMembershipClientTest \
   --stacktrace
 
@@ -41,6 +41,6 @@ jq -e 'length == 0' >/dev/null <<<"${REMAINING}" || {
 unset E2E_ADMIN_API_KEY
 
 echo "Proving revoked membership is rejected by client sync and remembered farm context is cleared"
-gradle :app:connectedDebugAndroidTest \
+./gradlew :app:connectedDebugAndroidTest \
   -Pandroid.testInstrumentationRunnerArguments.class=com.farmos.app.RevokedMembershipClientTest \
   --stacktrace
