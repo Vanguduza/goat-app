@@ -18,7 +18,7 @@
     "phase_1_canonical_feature_id_catalog": "COMPLETE",
     "phase_2_dependency_graph": "COMPLETE",
     "phase_3_platform_correctness": "COMPLETE",
-    "phase_4_visual_foundation_certification": "NEXT",
+    "phase_4_visual_foundation_certification": "IN_PROGRESS",
     "phase_5_runtime_navigation_reachability": "PENDING",
     "phase_6_shared_foundation_modules": "PENDING",
     "phase_7_shared_operational_modules": "PENDING",
@@ -1598,7 +1598,7 @@
       "feature_green": false
     }
   ],
-  "next_action": "PHASE_4_BUILD_AND_CERTIFY_NATIVE_ANIMAL_FARM_REFERENCE_SET_WITH_DETERMINISTIC_VISUAL_EVIDENCE",
+  "next_action": "PHASE_4_GENERATE_NATIVE_REFERENCE_BUNDLE_THEN_REVIEW_BEFORE_ANY_VISUAL_GREEN_PROMOTION",
   "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
   "dependency_graph": {
     "node_count": 156,
@@ -1730,5 +1730,14 @@
         "conclusion": "success"
       }
     }
-  ]
+  ],
+  "visual_foundation": {
+    "status": "MACHINE_EVIDENCE_IN_PROGRESS",
+    "reference_ledger": "docs/ux/evidence/animal-farm-visual-lock/phase4-native-reference-ledger.json",
+    "reference_surface_count": 10,
+    "expected_png_minimum": 270,
+    "approved_goldens": 0,
+    "visual_green_promotions": 0,
+    "approval_state": "OWNER_AND_INDEPENDENT_REVIEW_REQUIRED"
+  }
 }
