@@ -150,7 +150,10 @@ class GoatReferenceContractTest {
         compose.runOnIdle { assertNull(status.get()) }
         compose.onNodeWithText("Confirm sold").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Confirm status change")).performClick()
-        compose.runOnIdle { assertEquals(GoatStatus.SOLD, status.get()) }
+        compose.runOnIdle {
+            val emitted = status.get()?.name
+            assertEquals("Expected SOLD lifecycle callback; actual=$emitted", "SOLD", emitted)
+        }
         assertNamedClickTargets()
     }
 
