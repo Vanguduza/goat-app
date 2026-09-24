@@ -14,6 +14,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import com.farmos.core.model.CommandAcknowledgement
 import com.farmos.core.model.CommandResultCode
+import java.util.concurrent.CancellationException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -36,6 +37,18 @@ private data class PasswordLogin(val email: String, val password: String)
 
 @Serializable
 private data class RefreshRequest(@SerialName("refresh_token") val refreshToken: String)
+
+enum class SignOutScope(val wireValue: String) {
+    LOCAL("local"),
+    GLOBAL("global"),
+    OTHERS("others"),
+}
+
+enum class SignOutOutcome {
+    REMOTE_REVOKED,
+    LOCAL_CLEARED_REMOTE_UNCONFIRMED,
+    NO_SESSION,
+}
 
 @Serializable
 data class FarmMembership(
@@ -130,8 +143,35 @@ class SupabaseIdentityClient(
         return session
     }
 
-    fun signOut() {
+    fun clearLocalSession() {
         sessionStore.set(null)
+    }
+
+    suspend fun signOut(scope: SignOutScope = SignOutScope.LOCAL): SignOutOutcome {
+        val current = sessionStore.current()
+        if (current == null) {
+            sessionStore.set(null)
+            return SignOutOutcome.NO_SESSION
+        }
+        return try {
+            val response = client.post(
+                "${supabaseUrl.trimEnd('/')}/auth/v1/logout?scope=${scope.wireValue}",
+            ) {
+                header("apikey", publishableKey)
+                header(HttpHeaders.Authorization, "Bearer ${current.accessToken}")
+            }
+            if (response.status.value in 200..299) {
+                SignOutOutcome.REMOTE_REVOKED
+            } else {
+                SignOutOutcome.LOCAL_CLEARED_REMOTE_UNCONFIRMED
+            }
+        } catch (failure: CancellationException) {
+            throw failure
+        } catch (_: Exception) {
+            SignOutOutcome.LOCAL_CLEARED_REMOTE_UNCONFIRMED
+        } finally {
+            sessionStore.set(null)
+        }
     }
 
     suspend fun refresh(): SupabaseSession {

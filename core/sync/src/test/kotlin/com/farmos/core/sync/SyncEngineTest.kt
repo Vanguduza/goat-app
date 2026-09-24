@@ -23,6 +23,31 @@ class SyncEngineTest {
     private val fixedNow = 1_700_000_000_000L
 
     @Test
+    fun `atomic claim allows only one worker to own a mutation lease`() = runSuspend {
+        val outbox = FakeOutboxDao(mutableListOf(item(mutationId = "race")))
+
+        assertEquals(1, outbox.claim("race", fixedNow, fixedNow + 300_000L))
+        assertEquals(0, outbox.claim("race", fixedNow, fixedNow + 300_000L))
+        assertEquals(SyncState.IN_FLIGHT.name, outbox.byId("race").state)
+        assertEquals(fixedNow + 300_000L, outbox.byId("race").nextAttemptAtEpochMillis)
+    }
+
+    @Test
+    fun `expired inflight lease is reclaimable after worker death`() = runSuspend {
+        val outbox = FakeOutboxDao(
+            mutableListOf(
+                item(mutationId = "stale").copy(
+                    state = SyncState.IN_FLIGHT.name,
+                    nextAttemptAtEpochMillis = fixedNow - 1,
+                ),
+            ),
+        )
+
+        assertEquals(1, outbox.claim("stale", fixedNow, fixedNow + 300_000L))
+        assertEquals(fixedNow + 300_000L, outbox.byId("stale").nextAttemptAtEpochMillis)
+    }
+
+    @Test
     fun `accepted commands advance stream versions and preserve aggregate order`() = runSuspend {
         val outbox = FakeOutboxDao(
             mutableListOf(
@@ -376,6 +401,27 @@ private class FakeOutboxDao(
             }
             .sortedWith(compareBy<OutboxEntity> { it.aggregateOrdinal }.thenBy { it.mutationId })
             .take(limit)
+
+    override suspend fun claim(mutationId: String, now: Long, leaseUntil: Long): Int {
+        val index = items.indexOfFirst { it.mutationId == mutationId }
+        if (index < 0) return 0
+        val item = items[index]
+        val eligibleAt = item.nextAttemptAtEpochMillis
+        val eligible = when (item.state) {
+            SyncState.PENDING.name, SyncState.RETRY_WAIT.name ->
+                eligibleAt == null || eligibleAt <= now
+            SyncState.IN_FLIGHT.name ->
+                eligibleAt == null || eligibleAt <= now
+            else -> false
+        }
+        if (!eligible) return 0
+        items[index] = item.copy(
+            state = SyncState.IN_FLIGHT.name,
+            nextAttemptAtEpochMillis = leaseUntil,
+            lastErrorCode = null,
+        )
+        return 1
+    }
 
     override suspend fun nextAggregateOrdinal(
         farmId: String,

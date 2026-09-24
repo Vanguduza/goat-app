@@ -312,6 +312,26 @@ interface OutboxDao {
     suspend fun pending(now: Long, limit: Int): List<OutboxEntity>
 
     @Query("""
+        UPDATE sync_outbox
+        SET state = 'IN_FLIGHT',
+            nextAttemptAtEpochMillis = :leaseUntil,
+            lastErrorCode = NULL
+        WHERE mutationId = :mutationId
+          AND (
+              (state IN ('PENDING','RETRY_WAIT')
+                AND (nextAttemptAtEpochMillis IS NULL OR nextAttemptAtEpochMillis <= :now))
+              OR
+              (state = 'IN_FLIGHT'
+                AND (nextAttemptAtEpochMillis IS NULL OR nextAttemptAtEpochMillis <= :now))
+          )
+    """)
+    suspend fun claim(
+        mutationId: String,
+        now: Long,
+        leaseUntil: Long,
+    ): Int
+
+    @Query("""
         SELECT COALESCE(MAX(aggregateOrdinal), 0) + 1
         FROM sync_outbox
         WHERE farmId = :farmId

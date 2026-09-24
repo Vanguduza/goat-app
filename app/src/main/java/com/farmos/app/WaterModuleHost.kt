@@ -46,8 +46,8 @@ fun WaterModuleHost(
         fields = listOf("Source" to source, "Litres" to litres, "Date" to day),
         actionLabel = "Record water",
         onSubmit = { run {
-            val amount = litres.value.replace(',', '.').toDoubleOrNull() ?: error("Enter litres")
-            ops.recordWater(RecordWater(UUID.randomUUID().toString(), source.value, (amount * 1000.0).toLong(), LocalDate.parse(day.value).toEpochDay()), newContext())
+            val milliLitres = litres.value.toScaledLongExact(3, "Litres")
+            ops.recordWater(RecordWater(UUID.randomUUID().toString(), source.value, milliLitres, LocalDate.parse(day.value).toEpochDay()), newContext())
         } },
         onBack = onBack,
     )

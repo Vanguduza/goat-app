@@ -42,14 +42,14 @@ fun SalesModuleHost(
         fields = listOf("Item kind" to kind, "Quantity" to qty, "Amount" to amount, "Date" to day),
         actionLabel = "Record sale",
         onSubmit = { run {
-            val major = amount.value.replace(',', '.').toDoubleOrNull() ?: error("Enter an amount")
-            val quantity = qty.value.replace(',', '.').toDoubleOrNull() ?: error("Enter a quantity")
+            val amountMinor = amount.value.toScaledLongExact(2, "Amount")
+            val quantityMilli = qty.value.toScaledLongExact(3, "Quantity")
             ops.recordSale(
                 RecordSale(
                     saleId = UUID.randomUUID().toString(),
                     itemKind = kind.value,
-                    quantityMilli = (quantity * 1000.0).toLong(),
-                    amountMinor = (major * 100.0).toLong(),
+                    quantityMilli = quantityMilli,
+                    amountMinor = amountMinor,
                     occurredEpochDay = LocalDate.parse(day.value).toEpochDay(),
                 ),
                 newContext(),

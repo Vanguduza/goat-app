@@ -49,6 +49,7 @@ jobs:
           :domain:ops:test
           :core:network:testDebugUnitTest
           :core:sync:testDebugUnitTest
+          :app:testDebugUnitTest
           :app:compileDebugKotlin
           :core:database:compileDebugAndroidTestKotlin
           :app:compileDebugAndroidTestKotlin

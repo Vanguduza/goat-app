@@ -58,9 +58,9 @@ fun FeedModuleHost(
         actionLabel = "Issue feed",
         onSubmit = {
             run {
-                val amount = qty.value.replace(',', '.').toDoubleOrNull() ?: error("Enter a quantity")
+                val quantityMilli = qty.value.toScaledLongExact(3, "Quantity")
                 ops.issueFeed(
-                    IssueFeed(UUID.randomUUID().toString(), itemId.value, null, (amount * 1000.0).toLong(), LocalDate.parse(day.value).toEpochDay()),
+                    IssueFeed(UUID.randomUUID().toString(), itemId.value, null, quantityMilli, LocalDate.parse(day.value).toEpochDay()),
                     newContext(),
                 )
             }

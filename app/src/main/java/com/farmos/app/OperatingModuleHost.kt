@@ -184,12 +184,11 @@ fun OperatingModuleHost(
                 },
                 onRecordWeight = { animalId, weightText ->
                     run {
-                        val kg = weightText.replace(',', '.').toDoubleOrNull()
-                            ?: error("Enter a valid weight in kg")
+                        val weightGrams = weightText.toScaledLongExact(3, "Weight")
                         herd?.recordWeight(
                             animalId = animalId,
                             measurementId = UUID.randomUUID().toString(),
-                            weightGrams = (kg * 1_000.0).toLong(),
+                            weightGrams = weightGrams,
                             measuredAtEpochMillis = System.currentTimeMillis(),
                             context = newContext(),
                         )

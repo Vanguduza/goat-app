@@ -198,7 +198,7 @@ class FarmOsApplication : Application(), SyncEngineOwner {
 
     fun applyAuthorizationLoss(reason: AuthorizationLoss) {
         if (reason == AuthorizationLoss.SESSION_EXPIRED) {
-            identityClient?.signOut() ?: sessionStore.set(null)
+            identityClient?.clearLocalSession() ?: sessionStore.set(null)
         }
         clearRememberedMembership()
     }
@@ -282,6 +282,7 @@ class FarmOsApplication : Application(), SyncEngineOwner {
         private const val LAST_FARM_ID = "farm_id"
         private const val LAST_FARM_ROLE = "role"
         private const val PERIODIC_SYNC_WORK_NAME = "farm-os-authoritative-sync"
+        const val ON_DEMAND_SYNC_WORK_NAME = "farm-os-on-demand-sync"
         const val SYNC_WORK_TAG = "farm-os-sync"
         private const val SYNC_LOG_TAG = "FarmOsSync"
     }

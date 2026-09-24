@@ -72,18 +72,63 @@ class SupabaseIdentityClientTest {
     }
 
     @Test
-    fun `sign out clears local credentials without waiting for network logout`() = runBlocking {
+    fun `sign out revokes the current server session and clears local credentials`() = runBlocking {
+        val store = MutableSessionStore(now = { 1_000L })
+        store.set(initialSession)
+        var requestedUrl = ""
+        var authorization = ""
+        val client = HttpClient(
+            MockEngine { request ->
+                requestedUrl = request.url.toString()
+                authorization = request.headers[HttpHeaders.Authorization].orEmpty()
+                respond(content = "", status = HttpStatusCode.NoContent)
+            },
+        )
+        val identity = SupabaseIdentityClient(
+            supabaseUrl = "https://farm-os.test",
+            publishableKey = "publishable",
+            sessionStore = store,
+            client = client,
+        )
+
+        val outcome = identity.signOut()
+
+        assertEquals(SignOutOutcome.REMOTE_REVOKED, outcome)
+        assertTrue(requestedUrl.endsWith("/auth/v1/logout?scope=local"))
+        assertEquals("Bearer old-access", authorization)
+        assertEquals(null, store.current())
+        assertEquals(0L, store.expiryEpochMillis())
+    }
+
+    @Test
+    fun `offline sign out still clears local credentials and reports unconfirmed revocation`() = runBlocking {
         val store = MutableSessionStore(now = { 1_000L })
         store.set(initialSession)
         val identity = SupabaseIdentityClient(
             supabaseUrl = "https://farm-os.test",
             publishableKey = "publishable",
             sessionStore = store,
-            client = mockClient(HttpStatusCode.OK, "{}"),
+            client = mockClient(HttpStatusCode.ServiceUnavailable, """{"error":"offline"}"""),
         )
 
-        identity.signOut()
+        val outcome = identity.signOut()
 
+        assertEquals(SignOutOutcome.LOCAL_CLEARED_REMOTE_UNCONFIRMED, outcome)
+        assertEquals(null, store.current())
+        assertEquals(0L, store.expiryEpochMillis())
+    }
+
+    @Test
+    fun `sign out without a session is idempotent and local`() = runBlocking {
+        val store = MutableSessionStore(now = { 1_000L })
+        val identity = SupabaseIdentityClient(
+            supabaseUrl = "https://farm-os.test",
+            publishableKey = "publishable",
+            sessionStore = store,
+            client = mockClient(HttpStatusCode.InternalServerError, "{}"),
+        )
+
+        assertEquals(SignOutOutcome.NO_SESSION, identity.signOut())
         assertEquals(null, store.current())
         assertEquals(0L, store.expiryEpochMillis())
     }
