@@ -46,16 +46,28 @@ fun HomeThemeButton(modifier: Modifier = Modifier) {
             onDismissRequest = { open = false },
             title = { Text("Theme") },
             text = {
-                Column {
-                    ThemeChoice("Light", AnimalFarmThemeMode.LIGHT, mode, onModeChange)
-                    ThemeChoice("Dark", AnimalFarmThemeMode.DARK, mode, onModeChange)
-                    ThemeChoice("Outdoor", AnimalFarmThemeMode.OUTDOOR, mode, onModeChange)
-                }
+                AnimalFarmThemeSelectionPanel(
+                    selected = mode,
+                    onModeChange = onModeChange,
+                )
             },
             confirmButton = {
                 TextButton(onClick = { open = false }) { Text("Done") }
             },
         )
+    }
+}
+
+/** Canonical Theme-only choice panel used by the home dialog and native reference evidence. */
+@Composable
+fun AnimalFarmThemeSelectionPanel(
+    selected: AnimalFarmThemeMode,
+    onModeChange: (AnimalFarmThemeMode) -> Unit,
+) {
+    Column {
+        ThemeChoice("Light", AnimalFarmThemeMode.LIGHT, selected, onModeChange)
+        ThemeChoice("Dark", AnimalFarmThemeMode.DARK, selected, onModeChange)
+        ThemeChoice("Outdoor", AnimalFarmThemeMode.OUTDOOR, selected, onModeChange)
     }
 }
 
