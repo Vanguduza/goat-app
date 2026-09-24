@@ -55,8 +55,8 @@ internal fun ManagementControlRoomScreen(
     onOpen: (FarmDestination) -> Unit,
     onAnimals: () -> Unit,
     onMore: () -> Unit,
+    today: LocalDate = LocalDate.now(),
 ) {
-    val today = LocalDate.now()
     val title = if (ownerMode) "Control room" else "Farm control"
     AnimalFarmCanvas {
         Column(
@@ -221,8 +221,8 @@ internal fun WorkerWorkBoardScreen(
     onOpen: (FarmDestination) -> Unit,
     onAnimals: () -> Unit,
     onMore: () -> Unit,
+    today: LocalDate = LocalDate.now(),
 ) {
-    val today = LocalDate.now()
     val stages = WorkerTaskStage.entries
     var stageIndex by rememberSaveable { mutableIntStateOf(0) }
     var cardIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -333,8 +333,8 @@ internal fun SpecialistRoleShell(
     onOpen: (FarmDestination) -> Unit,
     onAnimals: () -> Unit,
     onMore: () -> Unit,
+    today: LocalDate = LocalDate.now(),
 ) {
-    val today = LocalDate.now()
     AnimalFarmCanvas {
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 12.dp),

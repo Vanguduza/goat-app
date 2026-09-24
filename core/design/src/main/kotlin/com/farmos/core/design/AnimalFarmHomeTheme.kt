@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -24,6 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.unit.dp
 
 /** Home-only settings affordance. It intentionally exposes Theme and nothing else. */
@@ -46,16 +49,28 @@ fun HomeThemeButton(modifier: Modifier = Modifier) {
             onDismissRequest = { open = false },
             title = { Text("Theme") },
             text = {
-                Column {
-                    ThemeChoice("Light", AnimalFarmThemeMode.LIGHT, mode, onModeChange)
-                    ThemeChoice("Dark", AnimalFarmThemeMode.DARK, mode, onModeChange)
-                    ThemeChoice("Outdoor", AnimalFarmThemeMode.OUTDOOR, mode, onModeChange)
-                }
+                AnimalFarmThemeSelectionPanel(
+                    selected = mode,
+                    onModeChange = onModeChange,
+                )
             },
             confirmButton = {
-                TextButton(onClick = { open = false }) { Text("Done") }
+                TextButton(onClick = { open = false }, modifier = Modifier.heightIn(min = target)) { Text("Done") }
             },
         )
+    }
+}
+
+/** Canonical Theme-only choice panel used by the home dialog and native reference evidence. */
+@Composable
+fun AnimalFarmThemeSelectionPanel(
+    selected: AnimalFarmThemeMode,
+    onModeChange: (AnimalFarmThemeMode) -> Unit,
+) {
+    Column {
+        ThemeChoice("Light", AnimalFarmThemeMode.LIGHT, selected, onModeChange)
+        ThemeChoice("Dark", AnimalFarmThemeMode.DARK, selected, onModeChange)
+        ThemeChoice("Outdoor", AnimalFarmThemeMode.OUTDOOR, selected, onModeChange)
     }
 }
 
@@ -67,15 +82,19 @@ private fun ThemeChoice(
     onModeChange: (AnimalFarmThemeMode) -> Unit,
 ) {
     val suffix = if (value.requiresNativeAcceptance) " · native candidate" else ""
+    val isSelected = selected == value
+    val target = AnimalFarmTheme.minimumTouchDp.dp
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .heightIn(min = target)
                 .clickable(role = Role.RadioButton) { onModeChange(value) }
+                .semantics { this.selected = isSelected }
                 .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        RadioButton(selected = selected == value, onClick = { onModeChange(value) })
+        RadioButton(selected = isSelected, onClick = null)
         Text("$label$suffix", modifier = Modifier.padding(start = 8.dp))
     }
 }

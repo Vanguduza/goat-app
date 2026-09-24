@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +19,7 @@ import com.farmos.core.design.AnimalFarmContextHeader
 import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmFamilyLauncher
 import com.farmos.core.design.AnimalFarmHomeMetrics
+import com.farmos.core.design.AnimalFarmTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -27,6 +29,7 @@ import java.util.Locale
 fun SpeciesNavigatorScreen(
     onOpen: (FarmModule) -> Unit,
     onBack: () -> Unit,
+    today: LocalDate = LocalDate.now(),
 ) {
     val families = listOf(
         Triple(AnimalFarmFamily.GOAT, FarmModule.GOAT, "Herd, growth, kidding"),
@@ -42,7 +45,7 @@ fun SpeciesNavigatorScreen(
         ) {
             AnimalFarmContextHeader(
                 farmName = null,
-                dateLabel = LocalDate.now().format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.UK)),
+                dateLabel = today.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale.UK)),
                 title = "Choose a species",
                 modifier = Modifier.padding(top = 16.dp),
             )
@@ -58,7 +61,7 @@ fun SpeciesNavigatorScreen(
                         if (pair.size == 1) Spacer(Modifier.weight(1f))
                     }
                 }
-                TextButton(onClick = onBack) { Text("Farm home") }
+                TextButton(onClick = onBack, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Farm home") }
             }
         }
     }

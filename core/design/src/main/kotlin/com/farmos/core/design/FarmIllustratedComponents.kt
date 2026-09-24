@@ -83,3 +83,29 @@ fun FarmIllustratedSectionSurface(
         Column(Modifier.padding(FosDimens.CardPadding), verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
     }
 }
+
+
+/**
+ * Semantic warning surface for irreversible or safety-priority review.
+ * Uses only the locked Animal Farm warning tokens and does not imply authorization.
+ */
+@Composable
+fun AnimalFarmWarningSurface(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val colors = AnimalFarmTheme.colors
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(AnimalFarmHomeMetrics.tileRadius),
+        color = colors.warningSurface,
+        contentColor = colors.onWarning,
+        border = BorderStroke(1.dp, colors.onWarning.copy(alpha = 0.28f)),
+    ) {
+        Column(
+            Modifier.padding(FosDimens.CardPadding),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            content = content,
+        )
+    }
+}
