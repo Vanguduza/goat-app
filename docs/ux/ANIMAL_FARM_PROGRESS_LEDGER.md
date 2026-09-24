@@ -1,3 +1,5 @@
+> **Historical visual migration log — not visual authority.** Superseded visual documents named below were deleted on 24 September 2026. Only `docs/ux/animal-farm-visual-lock/` may define presentation.
+
 # Animal Farm visual-lock progress ledger
 
 ## Recovery checkpoint — 2026-09-06
