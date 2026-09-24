@@ -139,8 +139,8 @@ Canonical roles: FARM_OWNER, FARM_MANAGER, SUPERVISOR, FARM_WORKER, VET/VET_ADJA
 
 Phone prioritises capture, identification, quick history, tasks, health and offline operation. Tablet prioritises analytics, breeding, finance, reports, large tables, planning, comparison, capacity and administration. Required tablet layouts must use master/detail, split planning or data-table patterns rather than merely stretching phone composition.
 
-## Visual intensity inheritance
-I1 uses the full illustrated scene system. I2 uses environment/species heroes plus operational dashboards. I3 uses content-first surfaces with Farm OS illustration identity in headers, portraits, section art and empty states. I4 suppresses decorative scene weight so treatment, mortality, withdrawal, biosecurity and destructive decisions remain unambiguous.
+## Visual authority binding
+Presentation is defined only by `docs/ux/animal-farm-visual-lock/`. Legacy I1–I4 values in this mapping are retained solely as historical classification metadata for evidence migration; they do not authorize palettes, typography, illustration intensity, scenery, layout families or component styling. Every screen instead resolves to the locked A management, D+C worker, or applicable page-pattern recipe with the safety/accessibility constraints defined by the current lock.
 
 ## Completion law
 Every documented feature maps to at least one Screen ID or is explicitly `headless/system-only`. Every Screen ID maps back to a feature contract. Orphan features and orphan screens block completion. A screen that matches the theme but lacks working feature contracts is not feature green; a working feature rendered in a drifted UI is not visual green.
