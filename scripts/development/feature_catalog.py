@@ -2,12 +2,13 @@
 """Canonical owner-authorized Farm OS Feature-ID catalogue."""
 from __future__ import annotations
 from copy import deepcopy
+import json
 
 CATALOG_STATUS = "CANONICAL_OWNER_AUTHORIZED"
 CATALOG_AUTHORITY = "owner-directed deterministic completion plan, 24 September 2026"
 SCOPE_LAW = "ALL_545_REGISTERED_SCREENS_MUST_HAVE_EXACTLY_ONE_PRIMARY_MANDATORY_FEATURE"
 
-FEATURES = [
+FEATURES = json.loads(r'''[
   {
     "feature_id": "FTR-GLOBAL-001",
     "module": "global",
@@ -2269,7 +2270,7 @@ FEATURES = [
     "contract_status": "OPEN",
     "feature_green": false
   }
-]
+]''' )
 
 _SCREEN_TO_FEATURE: dict[str, str] = {}
 for _feature in FEATURES:
