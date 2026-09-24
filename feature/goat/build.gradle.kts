@@ -73,6 +73,7 @@ dependencies {
     testImplementation("androidx.test:core-ktx:1.7.0")
     testImplementation("androidx.test.ext:junit:1.2.1")
     testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
     testImplementation("io.github.takahirom.roborazzi:roborazzi:1.75.0")
     testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.75.0")
 }
