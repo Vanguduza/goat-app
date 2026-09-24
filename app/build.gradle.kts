@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("io.github.takahirom.roborazzi")
 }
 
 val supabaseUrl = providers.gradleProperty("FARM_OS_SUPABASE_URL")
@@ -45,6 +46,16 @@ android {
         compose = true
         buildConfig = true
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
+                it.maxHeapSize = "4096m"
+            }
+        }
+    }
 }
 
 kotlin { jvmToolchain(17) }
@@ -73,6 +84,12 @@ dependencies {
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:2.2.10")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.17")
+    testImplementation("androidx.test:core-ktx:1.7.0")
+    testImplementation("androidx.test.ext:junit:1.2.1")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.75.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.75.0")
     androidTestImplementation("androidx.test:core-ktx:1.7.0")
     androidTestImplementation("androidx.test:runner:1.7.0")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
