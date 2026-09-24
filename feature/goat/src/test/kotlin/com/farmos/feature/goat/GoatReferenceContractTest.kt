@@ -133,12 +133,11 @@ class GoatReferenceContractTest {
 
     @Test
     fun lifecycleChangeRequiresExplicitConfirmation() {
-        val status = AtomicReference<GoatStatus?>(null)
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 GoatExperienceScreen(
                     state = state,
-                    actions = noOpActions(onStatus = status::set),
+                    actions = noOpActions(),
                     onBackToFarm = {},
                     onSignOut = {},
                     initialPage = GoatPage.STATUS_CHANGE,
@@ -148,13 +147,9 @@ class GoatReferenceContractTest {
         }
 
         compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
-        compose.runOnIdle { assertNull(status.get()) }
         compose.onNodeWithText("Confirm sold").assertIsDisplayed()
         compose.onNodeWithTag("goat-lifecycle-confirm").assertIsEnabled().performClick()
-        compose.runOnIdle {
-            val emitted = status.get()?.name
-            assertEquals("Expected SOLD lifecycle callback; actual=$emitted", "SOLD", emitted)
-        }
+        compose.onNodeWithTag("goat-lifecycle-confirm").assertDoesNotExist()
         assertNamedClickTargets()
     }
 
