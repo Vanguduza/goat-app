@@ -22,6 +22,14 @@ android {
 
 kotlin { jvmToolchain(17) }
 
+tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(org.gradle.jvm.toolchain.JavaLanguageVersion.of(21))
+        },
+    )
+}
+
 dependencies {
     implementation(project(":domain:goat"))
     implementation(project(":core:design"))
