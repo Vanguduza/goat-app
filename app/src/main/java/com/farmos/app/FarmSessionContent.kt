@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -37,11 +38,14 @@ fun FarmSessionContent(
         )
     }
     fun enqueueSync() {
-        WorkManager.getInstance(app).enqueue(
-            OneTimeWorkRequestBuilder<SyncWorker>()
-                .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
-                .addTag(FarmOsApplication.SYNC_WORK_TAG)
-                .build(),
+        val request = OneTimeWorkRequestBuilder<SyncWorker>()
+            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+            .addTag(FarmOsApplication.SYNC_WORK_TAG)
+            .build()
+        WorkManager.getInstance(app).enqueueUniqueWork(
+            FarmOsApplication.ON_DEMAND_SYNC_WORK_NAME,
+            ExistingWorkPolicy.KEEP,
+            request,
         )
     }
     val backHome = { destination = FarmDestination.Home }
