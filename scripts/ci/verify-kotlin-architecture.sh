@@ -15,6 +15,7 @@ check_max_lines() {
 }
 
 python3 scripts/development/verify_quantum_control_plane.py --check
+python3 scripts/development/feature_dependencies.py --check
 
 echo "Checking Kotlin files for duplicate imports"
 while IFS= read -r -d '' file; do

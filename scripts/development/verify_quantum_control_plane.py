@@ -12,6 +12,7 @@ from pathlib import Path
 import yaml
 
 from feature_catalog import CATALOG_AUTHORITY, CATALOG_STATUS, SCOPE_LAW, catalog_features, feature_ids_for_screen, validate_screen_coverage
+from feature_dependencies import build_graph
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml"
@@ -20,6 +21,7 @@ QDU_OUT = ROOT / "docs/realisation/QDU_REGISTRY.json"
 STATE_OUT = ROOT / "PROJECT_IMPLEMENTATION_STATE.json"
 COMPLETION_OUT = ROOT / "PROJECT_COMPLETION_STATE.json"
 FEATURE_OUT = ROOT / "docs/realisation/FEATURE_REGISTRY.yaml"
+DEPENDENCY_OUT = ROOT / "docs/realisation/FEATURE_DEPENDENCY_GRAPH.json"
 SCREEN_RE = re.compile(r"FOS-[A-Z]+-[0-9]{3}(?:-[A-Z])?")
 
 
@@ -164,13 +166,14 @@ def build() -> tuple[dict, dict, dict, dict]:
         ],
         "status_law": "Feature binding is scope accounting only; it is not route reachability, FEATURE_GREEN, MODULE_GREEN, VISUAL_GREEN, or MVP_GREEN.",
     }
+    dependency_graph = build_graph()
     completion = {
         "schema_version": 1, "repository": "Vanguduza/goat-app", "canonical_branch": "main",
         "source_fingerprint": source_fingerprint(), "programme_status": "ACTIVE_DETERMINISTIC_COMPLETION", "release_blocked": True,
-        "authority": {"project_truth": "docs/00_PROJECT_TRUTH.md", "feature_catalog": "docs/realisation/FEATURE_REGISTRY.yaml", "screen_registry": "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml", "visual_authority": "docs/ux/animal-farm-visual-lock/", "catalog_authority": CATALOG_AUTHORITY},
+        "authority": {"project_truth": "docs/00_PROJECT_TRUTH.md", "feature_catalog": "docs/realisation/FEATURE_REGISTRY.yaml", "feature_dependency_graph": "docs/realisation/FEATURE_DEPENDENCY_GRAPH.json", "screen_registry": "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml", "visual_authority": "docs/ux/animal-farm-visual-lock/", "catalog_authority": CATALOG_AUTHORITY},
         "phase_status": {
-            "phase_0_completion_control_plane": "COMPLETE", "phase_1_canonical_feature_id_catalog": "COMPLETE", "phase_2_dependency_graph": "NEXT",
-            "phase_3_platform_correctness": "PENDING", "phase_4_visual_foundation_certification": "PENDING", "phase_5_runtime_navigation_reachability": "PENDING",
+            "phase_0_completion_control_plane": "COMPLETE", "phase_1_canonical_feature_id_catalog": "COMPLETE", "phase_2_dependency_graph": "COMPLETE",
+            "phase_3_platform_correctness": "NEXT", "phase_4_visual_foundation_certification": "PENDING", "phase_5_runtime_navigation_reachability": "PENDING",
             "phase_6_shared_foundation_modules": "PENDING", "phase_7_shared_operational_modules": "PENDING", "phase_8_species_modules": "PENDING",
             "phase_9_commercial_layer": "PENDING", "phase_10_intelligence_and_advanced_modules": "PENDING", "phase_11_feature_certification_sweep": "PENDING",
             "phase_12_visual_completion_sweep": "PENDING", "phase_13_module_certification": "PENDING", "phase_14_whole_product_certification": "PENDING",
@@ -178,8 +181,10 @@ def build() -> tuple[dict, dict, dict, dict]:
         },
         "coverage": {"screens_registered": 545, "screens_feature_bound": 545, "features_mandatory": len(features), "features_green": 0, "modules_total": len(modules), "modules_green": 0, "visual_green_screens": 0, "qdu_states": dict(sorted(counts.items()))},
         "module_plan": modules,
+        "dependency_graph": {"node_count": dependency_graph["summary"]["node_count"], "edge_count": dependency_graph["summary"]["edge_count"], "root_count": dependency_graph["summary"]["root_count"], "cycle_free": dependency_graph["summary"]["cycle_free"], "phase_monotonic": dependency_graph["summary"]["phase_monotonic"]},
+        "global_programme_gates": dependency_graph["global_programme_gates"],
         "features": [{"feature_id": f["feature_id"], "module": f["module"], "name": f["name"], "completion_phase": f["completion_phase"], "screen_count": len(f["screen_ids"]), "contract_status": "OPEN", "feature_green": False} for f in features],
-        "next_action": "PHASE_2_BUILD_EXPLICIT_FEATURE_DEPENDENCY_GRAPH_THEN_ENTER_PHASE_3_PLATFORM_CORRECTNESS",
+        "next_action": "PHASE_3_CLOSE_PLATFORM_DECIMAL_SCALING_SYNC_ATOMICITY_AND_SESSION_REVOCATION_GATES",
         "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
     }
     return feature_registry, qdu_registry, state, completion
@@ -190,6 +195,7 @@ def write_outputs(feature_registry: dict, qdu_registry: dict, state: dict, compl
     QDU_OUT.write_text(json.dumps(qdu_registry, indent=2) + "\n", encoding="utf-8")
     STATE_OUT.write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
     COMPLETION_OUT.write_text(json.dumps(completion, indent=2) + "\n", encoding="utf-8")
+    DEPENDENCY_OUT.write_text(json.dumps(build_graph(), indent=2) + "\n", encoding="utf-8")
 
 
 def load_semantic(path: Path):
@@ -204,11 +210,11 @@ def main() -> None:
     args = parser.parse_args()
     feature, qdu, state, completion = build()
     if args.check:
-        expected = {FEATURE_OUT: feature, QDU_OUT: qdu, STATE_OUT: state, COMPLETION_OUT: completion}
+        expected = {FEATURE_OUT: feature, QDU_OUT: qdu, STATE_OUT: state, COMPLETION_OUT: completion, DEPENDENCY_OUT: build_graph()}
         stale = [str(path.relative_to(ROOT)) for path, obj in expected.items() if not path.exists() or load_semantic(path) != obj]
         if stale:
             raise SystemExit("stale completion control-plane outputs: " + ", ".join(stale))
-        print(f"PASS completion control plane: 545 screens -> {len(feature['features'])} canonical features; zero invented green claims")
+        print(f"PASS completion control plane: 545 screens -> {len(feature['features'])} canonical features; dependency DAG verified; zero invented green claims")
         return
     write_outputs(feature, qdu, state, completion)
     print(f"generated completion control plane: 545 screens -> {len(feature['features'])} canonical features")

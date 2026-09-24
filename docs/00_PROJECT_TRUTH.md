@@ -178,3 +178,12 @@ The canonical Feature-ID catalogue is `docs/realisation/FEATURE_REGISTRY.yaml`, 
 Every one of the 545 registered `FOS-*` screens must resolve to exactly one primary mandatory Feature ID in the completion control plane. Cross-feature effects and dependencies remain explicit in Feature Implementation Contracts and the dependency graph; primary ownership is not a claim that a screen has no cross-module effects.
 
 `PROJECT_COMPLETION_STATE.json` is generated evidence for programme progress. Green states may only derive from the existing evidence laws: mapping, code existence, static references or catalogue membership cannot manufacture `VISUAL_GREEN`, `FEATURE_GREEN`, `MODULE_GREEN` or `MVP_GREEN`.
+
+
+## 11C. Dependency-graph law
+
+The canonical feature completion dependency graph is `docs/realisation/FEATURE_DEPENDENCY_GRAPH.json`. Every mandatory Feature ID must occur exactly once. `depends_on` denotes a completion prerequisite, not a runtime call graph, UI navigation edge or permission to merge feature scope.
+
+The graph must be acyclic and phase-monotonic. CI must reject unknown Feature IDs, self-dependencies, duplicate dependencies, cycles and prerequisites assigned to a later completion phase.
+
+Global programme gates may block an entire development phase even when individual Feature-ID dependencies are otherwise satisfied. At the Phase 2 closure checkpoint, the confirmed Phase 3 gates cover exact decimal scaling, single-owner/atomic outbox synchronization and server-backed session revocation.

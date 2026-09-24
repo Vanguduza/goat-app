@@ -10,13 +10,14 @@
     "feature_catalog": "docs/realisation/FEATURE_REGISTRY.yaml",
     "screen_registry": "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml",
     "visual_authority": "docs/ux/animal-farm-visual-lock/",
-    "catalog_authority": "owner-directed deterministic completion plan, 24 September 2026"
+    "catalog_authority": "owner-directed deterministic completion plan, 24 September 2026",
+    "feature_dependency_graph": "docs/realisation/FEATURE_DEPENDENCY_GRAPH.json"
   },
   "phase_status": {
     "phase_0_completion_control_plane": "COMPLETE",
     "phase_1_canonical_feature_id_catalog": "COMPLETE",
-    "phase_2_dependency_graph": "NEXT",
-    "phase_3_platform_correctness": "PENDING",
+    "phase_2_dependency_graph": "COMPLETE",
+    "phase_3_platform_correctness": "NEXT",
     "phase_4_visual_foundation_certification": "PENDING",
     "phase_5_runtime_navigation_reachability": "PENDING",
     "phase_6_shared_foundation_modules": "PENDING",
@@ -1597,6 +1598,46 @@
       "feature_green": false
     }
   ],
-  "next_action": "PHASE_2_BUILD_EXPLICIT_FEATURE_DEPENDENCY_GRAPH_THEN_ENTER_PHASE_3_PLATFORM_CORRECTNESS",
-  "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone."
+  "next_action": "PHASE_3_CLOSE_PLATFORM_DECIMAL_SCALING_SYNC_ATOMICITY_AND_SESSION_REVOCATION_GATES",
+  "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
+  "dependency_graph": {
+    "node_count": 156,
+    "edge_count": 332,
+    "root_count": 7,
+    "cycle_free": true,
+    "phase_monotonic": true
+  },
+  "global_programme_gates": [
+    {
+      "gate_id": "PLATFORM_DECIMAL_SCALING_EXACT",
+      "status": "OPEN",
+      "blocking_phase": 3,
+      "evidence": [
+        "app/src/main/java/com/farmos/app/SalesModuleHost.kt",
+        "app/src/main/java/com/farmos/app/ProcurementModuleHost.kt",
+        "app/src/main/java/com/farmos/app/RabbitCommerceModuleHost.kt"
+      ],
+      "requirement": "Replace floating-point scale-and-truncate input conversion with exact checked decimal-to-minor/milli parsing and tests."
+    },
+    {
+      "gate_id": "PLATFORM_SYNC_SINGLE_OWNER_ATOMIC_CLAIM",
+      "status": "OPEN",
+      "blocking_phase": 3,
+      "evidence": [
+        "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
+        "core/database/src/main/kotlin/com/farmos/core/database/FarmOsDatabase.kt",
+        "core/sync/src/main/kotlin/com/farmos/core/sync/SyncEngine.kt"
+      ],
+      "requirement": "Serialize on-demand sync scheduling and atomically claim eligible outbox rows so concurrent drains cannot send the same mutation."
+    },
+    {
+      "gate_id": "PLATFORM_SESSION_REVOCATION",
+      "status": "OPEN",
+      "blocking_phase": 3,
+      "evidence": [
+        "core/network/src/main/kotlin/com/farmos/core/network/SupabaseClients.kt"
+      ],
+      "requirement": "Define and implement server-backed user sign-out/revocation semantics while preserving deterministic local credential clearing and offline recovery."
+    }
+  ]
 }
