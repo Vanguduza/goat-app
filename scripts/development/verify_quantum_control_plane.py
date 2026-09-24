@@ -184,6 +184,15 @@ def build() -> tuple[dict, dict, dict, dict]:
         "dependency_graph": {"node_count": dependency_graph["summary"]["node_count"], "edge_count": dependency_graph["summary"]["edge_count"], "root_count": dependency_graph["summary"]["root_count"], "cycle_free": dependency_graph["summary"]["cycle_free"], "phase_monotonic": dependency_graph["summary"]["phase_monotonic"]},
         "global_programme_gates": dependency_graph["global_programme_gates"],
         "features": [{"feature_id": f["feature_id"], "module": f["module"], "name": f["name"], "completion_phase": f["completion_phase"], "screen_count": len(f["screen_ids"]), "contract_status": "OPEN", "feature_green": False} for f in features],
+        "visual_foundation": {
+            "status": "MACHINE_EVIDENCE_IN_PROGRESS",
+            "reference_ledger": "docs/ux/evidence/animal-farm-visual-lock/phase4-native-reference-ledger.json",
+            "reference_surface_count": 10,
+            "expected_png_minimum": 270,
+            "approved_goldens": 0,
+            "visual_green_promotions": 0,
+            "approval_state": "OWNER_AND_INDEPENDENT_REVIEW_REQUIRED",
+        },
         "next_action": "PHASE_4_GENERATE_NATIVE_REFERENCE_BUNDLE_THEN_REVIEW_BEFORE_ANY_VISUAL_GREEN_PROMOTION",
         "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
     }
