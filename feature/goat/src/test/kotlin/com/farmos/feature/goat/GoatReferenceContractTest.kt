@@ -1,7 +1,6 @@
 package com.farmos.feature.goat
 
 import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasClickAction
