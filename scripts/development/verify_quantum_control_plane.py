@@ -184,7 +184,7 @@ def build() -> tuple[dict, dict, dict, dict]:
         "dependency_graph": {"node_count": dependency_graph["summary"]["node_count"], "edge_count": dependency_graph["summary"]["edge_count"], "root_count": dependency_graph["summary"]["root_count"], "cycle_free": dependency_graph["summary"]["cycle_free"], "phase_monotonic": dependency_graph["summary"]["phase_monotonic"]},
         "global_programme_gates": dependency_graph["global_programme_gates"],
         "features": [{"feature_id": f["feature_id"], "module": f["module"], "name": f["name"], "completion_phase": f["completion_phase"], "screen_count": len(f["screen_ids"]), "contract_status": "OPEN", "feature_green": False} for f in features],
-        "next_action": "PHASE_3_VERIFY_IMPLEMENTED_PLATFORM_GATES_AND_AUDIT_REMAINING_PLATFORM_CORRECTNESS",
+        "next_action": "PHASE_3_VERIFY_REPRODUCIBLE_WRAPPER_APK_ASSEMBLY_IMMUTABLE_ACTIONS_AND_RECONCILER_DECOMPOSITION",
         "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
     }
     return feature_registry, qdu_registry, state, completion
