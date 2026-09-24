@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "phase": "phase_4_visual_foundation_certification",
+  "status": "IN_PROGRESS_MACHINE_EVIDENCE",
+  "visual_authority": "docs/ux/animal-farm-visual-lock/",
+  "reference_toolchain": {
+    "roborazzi": "1.75.0",
+    "robolectric": "4.17",
+    "sdk": 36
+  },
+  "deterministic_fixture_date": "2026-09-24",
+  "matrix": {
+    "themes": [
+      "LIGHT",
+      "DARK",
+      "OUTDOOR"
+    ],
+    "widths_dp": [
+      360,
+      411,
+      780
+    ],
+    "font_scales": [
+      1,
+      1.3,
+      2
+    ],
+    "combinations_per_surface": 27,
+    "reference_surfaces": [
+      {
+        "screen_id": "FOS-GLOBAL-002",
+        "purpose": "login"
+      },
+      {
+        "screen_id": "FOS-HOME-012-A",
+        "purpose": "management A control room"
+      },
+      {
+        "screen_id": "FOS-HOME-012-D",
+        "purpose": "worker D+C work board"
+      },
+      {
+        "screen_id": "FOS-HOME-002",
+        "purpose": "species navigator"
+      },
+      {
+        "screen_id": "FOS-ATOM-THEME",
+        "purpose": "Theme-only selection control; supporting reference, not a registered Screen ID"
+      },
+      {
+        "screen_id": "FOS-GOAT-001",
+        "purpose": "goat dashboard"
+      },
+      {
+        "screen_id": "FOS-GOAT-002",
+        "purpose": "scoped herd list/filter"
+      },
+      {
+        "screen_id": "FOS-GOAT-003",
+        "purpose": "goat profile and >=720dp adaptive two-pane reference"
+      },
+      {
+        "screen_id": "FOS-GOAT-011",
+        "purpose": "weight capture"
+      },
+      {
+        "screen_id": "FOS-GOAT-051",
+        "purpose": "safety-priority lifecycle status review"
+      }
+    ],
+    "expected_png_minimum": 270
+  },
+  "evidence": {
+    "ci_artifact_name": "animal-farm-native-reference-unapproved",
+    "machine_capture_status": "PENDING_EXACT_HEAD_CI",
+    "ui_tree_sidecars": true,
+    "approved_goldens": false,
+    "screenshot_diff_baseline": false,
+    "accessibility_certified": false,
+    "route_certified": false,
+    "interaction_certified": false
+  },
+  "approvals": {
+    "baseline_approval": null,
+    "independent_review": null,
+    "owner_pixel_acceptance": null,
+    "outdoor_native_acceptance": null
+  },
+  "green_claims": {
+    "visual_green_screens": 0,
+    "feature_green": 0,
+    "module_green": 0,
+    "mvp_green": false
+  },
+  "law": "Machine-generated screenshots and UI-tree evidence are review inputs only. They cannot become approved goldens or VISUAL_GREEN without the evidence contract, owner/baseline approval and independent review."
+}
