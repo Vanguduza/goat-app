@@ -17,8 +17,8 @@
     "phase_0_completion_control_plane": "COMPLETE",
     "phase_1_canonical_feature_id_catalog": "COMPLETE",
     "phase_2_dependency_graph": "COMPLETE",
-    "phase_3_platform_correctness": "IN_PROGRESS",
-    "phase_4_visual_foundation_certification": "PENDING",
+    "phase_3_platform_correctness": "COMPLETE",
+    "phase_4_visual_foundation_certification": "NEXT",
     "phase_5_runtime_navigation_reachability": "PENDING",
     "phase_6_shared_foundation_modules": "PENDING",
     "phase_7_shared_operational_modules": "PENDING",
@@ -1598,7 +1598,7 @@
       "feature_green": false
     }
   ],
-  "next_action": "PHASE_3_VERIFY_REPRODUCIBLE_WRAPPER_APK_ASSEMBLY_IMMUTABLE_ACTIONS_AND_RECONCILER_DECOMPOSITION",
+  "next_action": "PHASE_4_BUILD_AND_CERTIFY_NATIVE_ANIMAL_FARM_REFERENCE_SET_WITH_DETERMINISTIC_VISUAL_EVIDENCE",
   "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
   "dependency_graph": {
     "node_count": 156,
@@ -1666,7 +1666,7 @@
     },
     {
       "gate_id": "PLATFORM_GRADLE_REPRODUCIBLE_WRAPPER",
-      "status": "IMPLEMENTED_UNVERIFIED",
+      "status": "VERIFIED_ON_MAIN",
       "blocking_phase": 3,
       "evidence": [
         "gradlew",
@@ -1675,20 +1675,30 @@
         "gradle/wrapper/gradle-wrapper.properties",
         "scripts/ci/verify-actions-pinned.sh"
       ],
-      "requirement": "Repository ships the standard Gradle 9.3.1 wrapper and verifies the Gradle distribution SHA-256; CI and local Android scripts execute through ./gradlew."
+      "requirement": "Repository ships the standard Gradle 9.3.1 wrapper and verifies the Gradle distribution SHA-256; CI and local Android scripts execute through ./gradlew.",
+      "verification": {
+        "commit_sha": "f553fc2c1a59e79895d69f2b875e13fccc1dec84",
+        "workflow_run_id": 35985454568,
+        "conclusion": "success"
+      }
     },
     {
       "gate_id": "PLATFORM_ANDROID_ARTIFACT_ASSEMBLY",
-      "status": "IMPLEMENTED_UNVERIFIED",
+      "status": "VERIFIED_ON_MAIN",
       "blocking_phase": 3,
       "evidence": [
         ".github/workflows/foundation-ci.yml"
       ],
-      "requirement": "Canonical CI must assemble a non-empty debug APK from the wrapper-driven build and hash the resulting artifact."
+      "requirement": "Canonical CI must assemble a non-empty debug APK from the wrapper-driven build and hash the resulting artifact.",
+      "verification": {
+        "commit_sha": "f553fc2c1a59e79895d69f2b875e13fccc1dec84",
+        "workflow_run_id": 35985454568,
+        "conclusion": "success"
+      }
     },
     {
       "gate_id": "PLATFORM_CI_ACTIONS_IMMUTABLE",
-      "status": "IMPLEMENTED_UNVERIFIED",
+      "status": "VERIFIED_ON_MAIN",
       "blocking_phase": 3,
       "evidence": [
         ".github/workflows/foundation-ci.yml",
@@ -1696,11 +1706,16 @@
         ".github/workflows/project-truth-autolog.yml",
         "scripts/ci/verify-actions-pinned.sh"
       ],
-      "requirement": "Every GitHub Action reference in canonical workflows is pinned to an immutable 40-character commit SHA."
+      "requirement": "Every GitHub Action reference in canonical workflows is pinned to an immutable 40-character commit SHA.",
+      "verification": {
+        "commit_sha": "f553fc2c1a59e79895d69f2b875e13fccc1dec84",
+        "workflow_run_id": 35985454568,
+        "conclusion": "success"
+      }
     },
     {
       "gate_id": "PLATFORM_RECONCILER_DECOMPOSITION",
-      "status": "IMPLEMENTED_UNVERIFIED",
+      "status": "VERIFIED_ON_MAIN",
       "blocking_phase": 3,
       "evidence": [
         "data/herd/src/main/kotlin/com/farmos/data/herd/FarmOsPullReconciler.kt",
@@ -1708,7 +1723,12 @@
         "data/herd/src/main/kotlin/com/farmos/data/herd/FarmOsDataHelpers.kt",
         "scripts/ci/verify-kotlin-architecture.sh"
       ],
-      "requirement": "Pull reconciliation, local ops mutation orchestration and shared data helpers are separate bounded source units with CI no-growth ceilings."
+      "requirement": "Pull reconciliation, local ops mutation orchestration and shared data helpers are separate bounded source units with CI no-growth ceilings.",
+      "verification": {
+        "commit_sha": "f553fc2c1a59e79895d69f2b875e13fccc1dec84",
+        "workflow_run_id": 35985454568,
+        "conclusion": "success"
+      }
     }
   ]
 }
