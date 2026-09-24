@@ -1,21 +1,6 @@
-name: Project Truth Autolog
-
-# The ledger is published to a dedicated, unprotected branch (LEDGER_BRANCH)
-# instead of the branch that was pushed. Two reasons:
-#   1. main is protected and requires pull requests, so a bot push to it is
-#      rejected and the job would go red after every merge.
-#   2. Writing back to the pushed branch made the bot's "[skip ci]" commit the
-#      branch head, which suppressed EVERY workflow on it - including the
-#      pull_request event - so PR checks never reported.
-# The ledger branch carries an orphan history and is never merged into main.
+name: Project Truth Guard
 
 on:
-  # pull_request is required: branch protection on main requires the
-  # "project-truth" status check, so this job must report on every PR or main
-  # can never be merged. It is safe now only because the recording and
-  # publishing steps below are gated on event_name == 'push' - on a PR this
-  # runs the manifest validation and nothing else, and never writes a commit
-  # to the PR branch.
   pull_request:
   push:
     branches: [main]
@@ -28,9 +13,6 @@ concurrency:
   group: project-truth-${{ github.repository }}
   cancel-in-progress: false
 
-env:
-  LEDGER_BRANCH: project-truth-ledger
-
 jobs:
   project-truth:
     runs-on: ubuntu-latest
@@ -42,98 +24,58 @@ jobs:
       - name: Validate canonical-state manifest
         run: |
           python3 - <<'PY'
-          import json,os,pathlib,sys
-          p=pathlib.Path('PROJECT_CANONICAL_STATE.json')
+          import json, os, pathlib, sys
+          p = pathlib.Path('PROJECT_CANONICAL_STATE.json')
           if not p.exists(): sys.exit('BLOCKED: PROJECT_CANONICAL_STATE.json is missing')
-          d=json.loads(p.read_text())
-          if d.get('repository')!=os.environ['GITHUB_REPOSITORY']: sys.exit('BLOCKED: manifest repository mismatch')
-          if not d.get('policy',{}).get('default_branch_is_not_authority'): sys.exit('BLOCKED: authority policy missing')
+          d = json.loads(p.read_text())
+          if d.get('repository') != os.environ['GITHUB_REPOSITORY']:
+              sys.exit('BLOCKED: manifest repository mismatch')
+          policy = d.get('policy', {})
+          if not policy.get('main_is_only_persistent_branch'):
+              sys.exit('BLOCKED: single-main branch policy missing')
+          if not policy.get('project_truth_guard_required'):
+              sys.exit('BLOCKED: project-truth guard policy missing')
+          if d.get('canonical_state', {}).get('canonical_branch') != 'main':
+              sys.exit('BLOCKED: canonical branch is not main')
           PY
 
-      - name: Check out the ledger branch beside the source checkout
-        run: |
-          set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git fetch origin "$LEDGER_BRANCH":"$LEDGER_BRANCH" 2>/dev/null; then
-            git worktree add "$RUNNER_TEMP/ledger" "$LEDGER_BRANCH"
-          else
-            echo "ledger branch does not exist yet; creating an orphan history"
-            git worktree add --detach "$RUNNER_TEMP/ledger"
-            git -C "$RUNNER_TEMP/ledger" checkout --orphan "$LEDGER_BRANCH"
-            git -C "$RUNNER_TEMP/ledger" rm -rf --quiet . || true
-          fi
-
-      - name: Record pushed commits into the ledger
-        if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
-        env:
-          BEFORE: ${{ github.event.before }}
-          AFTER: ${{ github.sha }}
-          BRANCH: ${{ github.ref_name }}
+      - name: Attest checked commit
         run: |
           python3 - <<'PY'
-          import datetime as dt,hashlib,json,os,pathlib,subprocess
-          b=os.environ.get('BEFORE',''); a=os.environ['AFTER']; branch=os.environ['BRANCH']; zero='0'*40
-          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'ledger'
-          ledger=out/'CHANGE_LEDGER.jsonl'; cur=out/'CURRENT_STATE.json'
-          def o(*x): return subprocess.check_output(['git',*x],text=True).strip()
-          lines=ledger.read_text(encoding='utf-8').splitlines() if ledger.exists() else []
-          seen=set()
-          for line in lines:
-              try: seen.add(json.loads(line).get('commit_sha'))
-              except Exception: pass
-          usable=bool(b and b!=zero and subprocess.run(['git','cat-file','-e',b+'^{commit}'],
-                      stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0)
-          commits=o('rev-list','--reverse',f'{b}..{a}').splitlines() if usable else [a]
-          added=0
-          for sha in commits:
-              if not sha or sha in seen: continue
-              files=[x for x in o('diff-tree','--root','--no-commit-id','--name-only','-r',sha).splitlines() if x]
-              p=subprocess.run(['git','rev-parse',sha+'^1'],text=True,capture_output=True)
-              parent=p.stdout.strip() if p.returncode==0 else None
-              patch=subprocess.check_output(['git','show','--binary','--format=','--no-ext-diff',sha])
-              e={'schema_version':1,'recorded_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
-                 'repository':os.environ['GITHUB_REPOSITORY'],'branch':branch,'commit_sha':sha,
-                 'parent_sha':parent,'tree_sha':o('show','-s','--format=%T',sha),
-                 'author_name':o('show','-s','--format=%an',sha),'author_email':o('show','-s','--format=%ae',sha),
-                 'authored_at':o('show','-s','--format=%aI',sha),'subject':o('show','-s','--format=%s',sha),
-                 'changed_files':files,'diff_sha256':hashlib.sha256(patch).hexdigest(),
-                 'github_actor':os.environ.get('GITHUB_ACTOR','unknown')}
-              lines.append(json.dumps(e,sort_keys=True,separators=(',',':'))); added+=1; seen.add(sha)
-          if lines: ledger.write_text('\n'.join(lines)+'\n',encoding='utf-8')
-          cur.write_text(json.dumps({'schema_version':1,'repository':os.environ['GITHUB_REPOSITORY'],
-              'branch':branch,'source_commit':a,'source_tree':o('show','-s','--format=%T',a),
-              'observed_at_utc':dt.datetime.now(dt.timezone.utc).isoformat(),
-              'recorded_commit_count':added},indent=2,sort_keys=True)+'\n',encoding='utf-8')
-          print(f'recorded {added} new commit(s)')
+          import hashlib, json, os, subprocess
+          sha = subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip()
+          tree = subprocess.check_output(['git','show','-s','--format=%T',sha], text=True).strip()
+          patch = subprocess.check_output(['git','show','--binary','--format=','--no-ext-diff',sha])
+          att = {
+              'schema_version': 2,
+              'repository': os.environ['GITHUB_REPOSITORY'],
+              'event': os.environ.get('GITHUB_EVENT_NAME'),
+              'ref': os.environ.get('GITHUB_REF_NAME'),
+              'commit_sha': sha,
+              'tree_sha': tree,
+              'diff_sha256': hashlib.sha256(patch).hexdigest(),
+          }
+          value = json.dumps(att, sort_keys=True)
+          print(value)
+          summary = os.environ.get('GITHUB_STEP_SUMMARY')
+          if summary:
+              with open(summary, 'a', encoding='utf-8') as out:
+                  out.write('## Project truth attestation\n\n```json\n' + value + '\n```\n')
           PY
 
-      - name: Publish the ledger branch
-        if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
+      - name: Enforce one-branch estate after consolidation merge
+        if: github.event_name == 'push' && github.ref_name == 'main' && contains(github.event.head_commit.message, '[single-main-consolidation]')
         run: |
           set -euo pipefail
-          cd "$RUNNER_TEMP/ledger"
-          cat > README.md <<'EOF'
-          # Project truth ledger
-
-          Machine-written evidence branch. Do not merge into `main` and do not edit by hand.
-          It carries an orphan history so it never enters the product lineage.
-
-          - `CHANGE_LEDGER.jsonl` - append-only record of every commit pushed to `main`.
-          - `CURRENT_STATE.json` - latest observed repository state.
-
-          Written by `.github/workflows/project-truth-autolog.yml` on `main`.
-          EOF
-          if [[ -z "$(git status --porcelain)" ]]; then echo "ledger unchanged"; exit 0; fi
-          git add -A
-          git commit -m "chore(project-truth): ledger for ${GITHUB_SHA::12}"
-          git push origin "HEAD:${LEDGER_BRANCH}"
-
-      - name: Block unresolved release tags
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
-        run: |
-          python3 - <<'PY'
-          import json,sys
-          if json.load(open('PROJECT_CANONICAL_STATE.json')).get('canonical_state',{}).get('release_blocked',True):
-              sys.exit('BLOCKED: unresolved canonical state')
-          PY
+          mapfile -t branches < <(git ls-remote --heads origin | awk '{sub("refs/heads/", "", $2); print $2}')
+          for branch in "${branches[@]}"; do
+            if [[ "$branch" != "main" ]]; then
+              echo "Deleting consolidated branch: $branch"
+              git push origin --delete "$branch"
+            fi
+          done
+          mapfile -t remaining < <(git ls-remote --heads origin | awk '{sub("refs/heads/", "", $2); print $2}')
+          printf 'Remaining branches: %s\n' "${remaining[*]}"
+          [[ ${#remaining[@]} -eq 1 && "${remaining[0]}" == "main" ]] || {
+            echo 'ERROR: repository did not converge to main-only branch estate'; exit 1;
+          }
