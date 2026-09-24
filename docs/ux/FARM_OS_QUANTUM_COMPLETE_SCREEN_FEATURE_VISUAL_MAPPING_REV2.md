@@ -2,15 +2,15 @@
 
 # Farm OS — Quantum-Complete Screen / Feature / Visual-Realisation Mapping — REV 2
 
-**Authority purpose:** realign the current implementation to the locked illustrated Farm OS product family and prevent future drift.
+**Authority purpose:** preserve complete Screen IDs, feature scope, role/device law and evidence mapping while presentation is governed exclusively by the Animal Farm visual lock.
 **Visual provenance:** session `01a04f06-bfbe-7b32-bf12-f9834e900244`.
-**Portable visual authority:** `docs/ux/FARM_OS_VISUAL_AUTHORITY.md`.
+**Sole visual authority:** `docs/ux/animal-farm-visual-lock/`.
 **Machine registry:** `docs/ux/FARM_OS_SCREEN_REGISTRY.yaml`.
 **Current-code map:** `docs/ux/FARM_OS_CURRENT_UI_IMPLEMENTATION_MAP.yaml`.
 
 ## Cold-start execution prompt
 
-Reconstruct branch/PR/HEAD before writes. Do not treat existing UI code as visual authority. Preserve working Room/outbox/RPC/RLS/reconciliation/search behavior. Map every UI surface to a registered `FOS-*` Screen ID. Rebuild presentation around stable state/command contracts. Do not add an unregistered route. Do not claim `VISUAL_GREEN` or `FEATURE_GREEN` from code existence. The illustrated visual family in `FARM_OS_VISUAL_AUTHORITY.md` is mandatory and supersedes contradictory anti-illustration rules.
+Reconstruct branch/PR/HEAD before writes. Do not treat existing UI code as visual authority. Preserve working Room/outbox/RPC/RLS/reconciliation/search behavior. Map every UI surface to a registered `FOS-*` Screen ID. Rebuild presentation around stable state/command contracts. Do not add an unregistered route. Do not claim `VISUAL_GREEN` or `FEATURE_GREEN` from code existence. The Animal Farm visual lock is mandatory; this mapping cannot introduce or revive a parallel presentation system.
 
 Before broad UI fan-out, establish and approve Splash, Login, Farm Selector, Farm Setup, Farm Home, Species Navigator, Goat Dashboard, Goat Profile, one I3 capture surface, one I4 safety surface and one tablet adaptive surface.
 
