@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +19,7 @@ import com.farmos.core.design.AnimalFarmContextHeader
 import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmFamilyLauncher
 import com.farmos.core.design.AnimalFarmHomeMetrics
+import com.farmos.core.design.AnimalFarmTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -59,7 +61,7 @@ fun SpeciesNavigatorScreen(
                         if (pair.size == 1) Spacer(Modifier.weight(1f))
                     }
                 }
-                TextButton(onClick = onBack) { Text("Farm home") }
+                TextButton(onClick = onBack, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Farm home") }
             }
         }
     }
