@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
@@ -139,11 +141,31 @@ private fun GoatDashboardScreen(
                 family = AnimalFarmFamily.GOAT,
             )
 
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                GoatMetric("Total", active.size.toString(), Modifier.weight(1f))
-                GoatMetric("Does", does.toString(), Modifier.weight(1f))
-                GoatMetric("Bucks", bucks.toString(), Modifier.weight(1f))
-                GoatMetric("Kids", kids.toString(), Modifier.weight(1f))
+            val metrics = listOf(
+                "Total" to active.size.toString(),
+                "Does" to does.toString(),
+                "Bucks" to bucks.toString(),
+                "Kids" to kids.toString(),
+            )
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val twoColumns = maxWidth < 420.dp && LocalDensity.current.fontScale >= 1.5f
+                if (twoColumns) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        metrics.chunked(2).forEach { pair ->
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                pair.forEach { (label, value) ->
+                                    GoatMetric(label, value, Modifier.weight(1f))
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        metrics.forEach { (label, value) ->
+                            GoatMetric(label, value, Modifier.weight(1f))
+                        }
+                    }
+                }
             }
 
             GoatDashboardAction("Herd", "Herd on this device") { onOpen(GoatPage.HERD) }
@@ -229,10 +251,24 @@ private fun GoatHerdScreen(
         }
     }
     IllustratedGoatPage("Herd", "FOS-GOAT-002", onBack) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            GoatHerdFilter.entries.forEach { option ->
-                TextButton(onClick = { filter = option }) {
-                    Text(if (filter == option) "${option.name.lowercase()} · selected" else option.name.lowercase())
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val wrapFilters = maxWidth < 520.dp || LocalDensity.current.fontScale >= 1.5f
+            val rows = if (wrapFilters) GoatHerdFilter.entries.chunked(3) else listOf(GoatHerdFilter.entries)
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                rows.forEach { options ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        options.forEach { option ->
+                            GoatHerdFilterButton(
+                                option = option,
+                                selected = filter == option,
+                                onClick = { filter = option },
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        repeat(3 - options.size) {
+                            if (wrapFilters) androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+                        }
+                    }
                 }
             }
         }
@@ -246,6 +282,29 @@ private fun GoatHerdScreen(
             } else rows.forEach { goat -> GoatHerdRow(goat) { onSelect(goat.animalId) } }
         }
         Button(onClick = onRegister, modifier = Modifier.fillMaxWidth()) { Text("Register goat") }
+    }
+}
+
+@Composable
+private fun GoatHerdFilterButton(
+    option: GoatHerdFilter,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+    ) {
+        val label = option.name.lowercase()
+        Text(
+            if (selected) "$label ✓" else label,
+            maxLines = 1,
+            softWrap = false,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            style = MaterialTheme.typography.labelMedium,
+        )
     }
 }
 
@@ -310,18 +369,47 @@ private fun GoatIdentityCard(goat: GoatSnapshot) {
 private fun GoatProfileActions(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
     FarmIllustratedSectionSurface {
         Text("Record", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            TextButton(onClick = { onOpen(GoatPage.WEIGHT) }, enabled = goat.status == GoatStatus.ACTIVE) { Text("Weight") }
-            TextButton(onClick = { onOpen(GoatPage.HEALTH) }, enabled = goat.status == GoatStatus.ACTIVE) { Text("Health") }
-            if (goat.sex == GoatSex.FEMALE) {
-                TextButton(onClick = { onOpen(GoatPage.REPRODUCTION) }, enabled = goat.status == GoatStatus.ACTIVE) { Text("Reproduction") }
-            }
+        val enabled = goat.status == GoatStatus.ACTIVE
+        val actions = buildList {
+            add("Weight" to GoatPage.WEIGHT)
+            add("Health" to GoatPage.HEALTH)
+            if (goat.sex == GoatSex.FEMALE) add("Reproduction" to GoatPage.REPRODUCTION)
+            if (goat.sex == GoatSex.FEMALE) add("Kidding" to GoatPage.KIDDING)
+            add("Lifecycle" to GoatPage.STATUS_CHANGE)
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            if (goat.sex == GoatSex.FEMALE) {
-                TextButton(onClick = { onOpen(GoatPage.KIDDING) }, enabled = goat.status == GoatStatus.ACTIVE) { Text("Kidding") }
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val stacked = maxWidth < 420.dp && LocalDensity.current.fontScale >= 1.5f
+            if (stacked) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    actions.forEach { (label, page) ->
+                        TextButton(
+                            onClick = { onOpen(page) },
+                            enabled = enabled,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(label, maxLines = 1, softWrap = false)
+                        }
+                    }
+                }
+            } else {
+                actions.chunked(3).forEach { rowActions ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        rowActions.forEach { (label, page) ->
+                            TextButton(
+                                onClick = { onOpen(page) },
+                                enabled = enabled,
+                                modifier = Modifier.weight(1f),
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                            ) {
+                                Text(label, maxLines = 1, softWrap = false)
+                            }
+                        }
+                        repeat(3 - rowActions.size) {
+                            androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
             }
-            TextButton(onClick = { onOpen(GoatPage.STATUS_CHANGE) }, enabled = goat.status == GoatStatus.ACTIVE) { Text("Lifecycle") }
         }
     }
 }
@@ -358,10 +446,37 @@ private fun GoatStatusChangeScreen(
         }
         Text(goatDisplayName(goat), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text("A lifecycle change removes this goat from the active herd. Existing history remains on the record.")
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            TextButton(onClick = { pending = GoatStatus.SOLD }) { Text("Mark sold") }
-            TextButton(onClick = { pending = GoatStatus.DEAD }) { Text("Mark deceased") }
-            TextButton(onClick = { pending = GoatStatus.CULLED }) { Text("Mark culled") }
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val stacked = maxWidth < 420.dp && LocalDensity.current.fontScale >= 1.5f
+            val changes = listOf(
+                "Mark sold" to GoatStatus.SOLD,
+                "Mark deceased" to GoatStatus.DEAD,
+                "Mark culled" to GoatStatus.CULLED,
+            )
+            if (stacked) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    changes.forEach { (label, status) ->
+                        TextButton(
+                            onClick = { pending = status },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text(label, maxLines = 1, softWrap = false)
+                        }
+                    }
+                }
+            } else {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    changes.forEach { (label, status) ->
+                        TextButton(
+                            onClick = { pending = status },
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                        ) {
+                            Text(label, maxLines = 1, softWrap = false)
+                        }
+                    }
+                }
+            }
         }
         pending?.let { next ->
             FarmIllustratedSectionSurface {
