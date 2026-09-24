@@ -6,7 +6,10 @@
   "reference_toolchain": {
     "roborazzi": "1.75.0",
     "robolectric": "4.17",
-    "sdk": 36
+    "sdk": 36,
+    "java_runtime": 21,
+    "app_jvm_bytecode_target": 17,
+    "note": "Robolectric API 36 requires Java 21 at test runtime; production Kotlin/JVM bytecode remains targeted to Java 17."
   },
   "deterministic_fixture_date": "2026-09-24",
   "matrix": {
