@@ -1,6 +1,7 @@
 package com.farmos.core.design
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
@@ -38,6 +39,7 @@ fun FarmOsTheme(
         LocalAnimalFarmPalette provides colors,
         LocalAnimalFarmThemeMode provides mode,
         LocalAnimalFarmThemeChange provides onModeChange,
+        LocalMinimumInteractiveComponentSize provides AnimalFarmTouchTarget.minimumDp(mode).dp,
     ) {
         MaterialTheme(
             colorScheme = colors.materialScheme(mode),
