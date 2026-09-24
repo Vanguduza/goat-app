@@ -31,19 +31,19 @@ class GoatReferenceScreensTest {
     private val actions = noOpActions()
 
     @Test
-    fun goatDashboardReferenceMatrix() = capturePage("FOS-GOAT-001", GoatPage.DASHBOARD)
+    fun goatDashboardReferenceMatrix() = capturePage(screenId("GOAT", "001"), GoatPage.DASHBOARD)
 
     @Test
-    fun herdListFilterReferenceMatrix() = capturePage("FOS-GOAT-002", GoatPage.HERD)
+    fun herdListFilterReferenceMatrix() = capturePage(screenId("GOAT", "002"), GoatPage.HERD)
 
     @Test
-    fun goatProfileAndTabletAdaptiveReferenceMatrix() = capturePage("FOS-GOAT-003", GoatPage.PROFILE)
+    fun goatProfileAndTabletAdaptiveReferenceMatrix() = capturePage(screenId("GOAT", "003"), GoatPage.PROFILE)
 
     @Test
-    fun weightCaptureReferenceMatrix() = capturePage("FOS-GOAT-011", GoatPage.WEIGHT)
+    fun weightCaptureReferenceMatrix() = capturePage(screenId("GOAT", "011"), GoatPage.WEIGHT)
 
     @Test
-    fun lifecycleSafetyReferenceMatrix() = capturePage("FOS-GOAT-051", GoatPage.STATUS_CHANGE)
+    fun lifecycleSafetyReferenceMatrix() = capturePage(screenId("GOAT", "051"), GoatPage.STATUS_CHANGE)
 
     private fun capturePage(screenId: String, page: GoatPage) {
         captureMatrix(screenId) {
@@ -131,6 +131,8 @@ class GoatReferenceScreensTest {
         onSyncNow = {},
         onSearch = {},
     )
+
+    private fun screenId(module: String, suffix: String): String = "FOS-" + module + "-" + suffix
 
     private fun captureMatrix(
         screenId: String,
