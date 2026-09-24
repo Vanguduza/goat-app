@@ -29,11 +29,12 @@ def source_fingerprint() -> str:
     digest = hashlib.sha256()
     inputs = [REGISTRY, IMPL_MAP]
     for base in ("app", "core", "data", "domain", "feature"):
-        inputs.extend(sorted((ROOT / base).rglob("*.kt")))
+        inputs.extend(sorted((ROOT / base).rglob("*.kt"), key=lambda path: path.relative_to(ROOT).as_posix()))
     for path in inputs:
-        digest.update(str(path.relative_to(ROOT)).encode())
+        digest.update(path.relative_to(ROOT).as_posix().encode())
         digest.update(b"\0")
-        digest.update(path.read_bytes())
+        canonical = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        digest.update(canonical)
         digest.update(b"\0")
     return "sha256:" + digest.hexdigest()
 
