@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "repository": "Vanguduza/goat-app",
-  "source_fingerprint": "sha256:17a3cb424adf2c251695660ec10788b3942f5be606b763d0d56a842294b7ee0b",
+  "source_fingerprint": "sha256:600eb3792833eb719105d3dbad30cb41d8a60b77e3155811a2931669271b7639",
   "canonical_branch": "main",
   "release_state": "BLOCKED",
   "green_states": {
