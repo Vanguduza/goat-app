@@ -18,12 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Enforce Kotlin architecture stabilization guardrails
         run: bash scripts/ci/verify-kotlin-architecture.sh
       - name: Enforce Animal Farm visual authority guardrails
         run: bash scripts/ci/verify-visual-authority.sh
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: '17'
@@ -38,12 +38,10 @@ jobs:
         run: |
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.3.1'
-      - name: Domain, session and sync tests + Kotlin compile
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
+      - name: Domain, session, sync tests + reproducible APK assembly
         run: >-
-          gradle
+          ./gradlew
           :domain:goat:test
           :domain:rabbit:test
           :domain:ops:test
@@ -51,17 +49,22 @@ jobs:
           :core:sync:testDebugUnitTest
           :app:testDebugUnitTest
           :app:compileDebugKotlin
+          :app:assembleDebug
           :core:database:compileDebugAndroidTestKotlin
           :app:compileDebugAndroidTestKotlin
           --stacktrace
+      - name: Verify assembled debug APK
+        run: |
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          sha256sum app/build/outputs/apk/debug/app-debug.apk
 
   android-device-e2e:
     needs: android
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: '17'
@@ -76,10 +79,8 @@ jobs:
         run: |
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.3.1'
-      - uses: supabase/setup-cli@v2
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
+      - uses: supabase/setup-cli@afb1b15109756ea5cf9d8985a359d9095235ca2b # v2
         with:
           version: 2.116.0
       - name: Enable KVM
@@ -93,7 +94,7 @@ jobs:
             /usr/local/lib/android/sdk/ndk /usr/local/lib/android/sdk/sources || true
           df -h
       - name: Prove Room migration/restart durability and second-device authoritative visibility
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
           api-level: 36
           target: google_apis
@@ -111,14 +112,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
         with:
           deno-version: 2.9.6
       - name: Validate CI harness shell syntax
         run: >-
           bash -n
           scripts/ci/verify-kotlin-architecture.sh
+          scripts/ci/verify-actions-pinned.sh
           scripts/ci/verify-search-pipeline.sh
           scripts/ci/prepare-two-device-e2e.sh
           scripts/ci/run-two-device-e2e.sh
@@ -141,8 +143,8 @@ jobs:
       MEILI_MASTER_KEY: farm-os-ci-master-key-32-bytes-minimum
       MEILI_INDEX_PREFIX: farm-os
     steps:
-      - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
         with:
           deno-version: 2.9.6
       - name: Start pinned Meilisearch
@@ -163,11 +165,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
         with:
           deno-version: 2.9.6
-      - uses: supabase/setup-cli@v2
+      - uses: supabase/setup-cli@afb1b15109756ea5cf9d8985a359d9095235ca2b # v2
         with:
           version: 2.116.0
       - name: Prove authoritative search handoff, outage recovery, tenant isolation and rebuild
@@ -177,8 +179,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: supabase/setup-cli@afb1b15109756ea5cf9d8985a359d9095235ca2b # v2
         with:
           version: 2.116.0
       - name: Start local Supabase
