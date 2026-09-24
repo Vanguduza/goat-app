@@ -149,6 +149,7 @@ class GoatReferenceContractTest {
         compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
         compose.onNodeWithText("Confirm sold").assertIsDisplayed()
         compose.onNodeWithTag("goat-lifecycle-confirm").assertIsEnabled().performClick()
+        compose.waitForIdle()
         compose.onNodeWithTag("goat-lifecycle-confirm").assertDoesNotExist()
         assertNamedClickTargets()
     }
