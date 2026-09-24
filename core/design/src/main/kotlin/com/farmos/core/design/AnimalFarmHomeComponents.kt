@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -234,23 +236,60 @@ fun AnimalFarmStageSelector(
 ) {
     val colors = AnimalFarmTheme.colors
     val minTouch = AnimalFarmTheme.minimumTouchDp.dp
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        labels.forEachIndexed { index, label ->
-            val selected = index == selectedIndex
-            Surface(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .heightIn(min = minTouch)
-                        .clip(RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius))
-                        .clickable(role = Role.Tab) { onSelect(index) },
-                color = if (selected) colors.primary else colors.surface,
-                contentColor = if (selected) colors.onPrimary else colors.ink,
-            ) {
-                Box(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
-                    Text(label, style = MaterialThemeLocal.label(), textAlign = TextAlign.Center)
+    val fontScale = LocalDensity.current.fontScale
+    BoxWithConstraints(modifier.fillMaxWidth()) {
+        val stacked = maxWidth < 390.dp && fontScale >= 1.5f
+        if (stacked) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                labels.forEachIndexed { index, label ->
+                    AnimalFarmStageSelectorItem(
+                        label = label,
+                        selected = index == selectedIndex,
+                        onClick = { onSelect(index) },
+                        modifier = Modifier.fillMaxWidth(),
+                        minTouch = minTouch,
+                    )
                 }
             }
+        } else {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                labels.forEachIndexed { index, label ->
+                    AnimalFarmStageSelectorItem(
+                        label = label,
+                        selected = index == selectedIndex,
+                        onClick = { onSelect(index) },
+                        modifier = Modifier.weight(1f),
+                        minTouch = minTouch,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnimalFarmStageSelectorItem(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier,
+    minTouch: androidx.compose.ui.unit.Dp,
+) {
+    val colors = AnimalFarmTheme.colors
+    Surface(
+        modifier =
+            modifier
+                .heightIn(min = minTouch)
+                .clip(RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius))
+                .clickable(role = Role.Tab, onClick = onClick),
+        color = if (selected) colors.primary else colors.surface,
+        contentColor = if (selected) colors.onPrimary else colors.ink,
+    ) {
+        Box(
+            Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(label, style = MaterialThemeLocal.label(), textAlign = TextAlign.Center)
         }
     }
 }
@@ -292,7 +331,9 @@ fun AnimalFarmReviewTaskCard(
             familyLabel?.let {
                 Text(it, style = MaterialThemeLocal.label(), textAlign = TextAlign.Center)
             }
-            Text(title, style = MaterialThemeLocal.largeTitle(), textAlign = TextAlign.Center)
+            if (title != subjectName) {
+                Text(title, style = MaterialThemeLocal.largeTitle(), textAlign = TextAlign.Center)
+            }
             Text(fact, style = MaterialThemeLocal.body(), textAlign = TextAlign.Center)
             Button(
                 onClick = onAction,
@@ -363,19 +404,42 @@ fun AnimalFarmHomeBottomBar(
     modifier: Modifier = Modifier,
 ) {
     val colors = AnimalFarmTheme.colors
+    val fontScale = LocalDensity.current.fontScale
     Surface(modifier = modifier.fillMaxWidth(), color = colors.surface) {
-        Row(
+        BoxWithConstraints(
             Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            HomeNavItem("Home", onHome, Modifier.weight(1f))
-            HomeNavItem("Animals", onAnimals, Modifier.weight(1f))
-            HomeNavItem("Tasks", onTasks, Modifier.weight(1f))
-            HomeNavItem("More", onMore, Modifier.weight(1f))
-            HomeThemeButton()
+            val largeTextNarrow = maxWidth < 420.dp && fontScale >= 1.5f
+            if (largeTextNarrow) {
+                Column {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        HomeNavItem("Home", onHome, Modifier.weight(1f))
+                        HomeNavItem("Animals", onAnimals, Modifier.weight(1f))
+                        HomeNavItem("Tasks", onTasks, Modifier.weight(1f))
+                        HomeNavItem("More", onMore, Modifier.weight(1f))
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        HomeThemeButton()
+                    }
+                }
+            } else {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HomeNavItem("Home", onHome, Modifier.weight(1f))
+                    HomeNavItem("Animals", onAnimals, Modifier.weight(1f))
+                    HomeNavItem("Tasks", onTasks, Modifier.weight(1f))
+                    HomeNavItem("More", onMore, Modifier.weight(1f))
+                    HomeThemeButton()
+                }
+            }
         }
     }
 }
@@ -387,8 +451,12 @@ private fun HomeNavItem(
     modifier: Modifier = Modifier,
 ) {
     val minTouch = AnimalFarmTheme.minimumTouchDp.dp
-    TextButton(onClick = onClick, modifier = modifier.heightIn(min = minTouch)) {
-        Text(label)
+    TextButton(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = minTouch),
+        contentPadding = PaddingValues(horizontal = 2.dp, vertical = 0.dp),
+    ) {
+        Text(label, maxLines = 1, softWrap = false, style = MaterialThemeLocal.label())
     }
 }
 
