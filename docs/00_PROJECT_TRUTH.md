@@ -169,3 +169,12 @@ If an older document says goats/rabbits are the only MVP system-of-record specie
 Farm OS has one presentation authority: `docs/ux/animal-farm-visual-lock/`. Start at `START-HERE.md`, then `DESIGN-SYSTEM.md`, `PAGE-PATTERNS.md`, and the relevant registry entries. Management is the owner-locked A / Control room family; worker is the D shell with C Review & decide family. Inter is the single production font family. Earlier pastoral palettes, Caveat/script accents, field-first anti-illustration rules, visual-intensity styling prescriptions, and other superseded presentation systems are not authorities and must not be restored.
 
 `docs/ux/FARM_OS_QUANTUM_COMPLETE_SCREEN_FEATURE_VISUAL_MAPPING_REV2.md` remains authoritative only for Screen IDs, feature scope, role/device law and evidence requirements. Any legacy I1–I4 intensity labels inside registries are classification metadata and do not define a second visual style. Existing UI code is implementation evidence, not visual authority. Every product screen must have a registered `FOS-*` Screen ID and lineage to the Animal Farm lock. Visual certification remains separate from feature/module/MVP green states.
+
+
+## 11B. Completion control-plane law
+
+The canonical Feature-ID catalogue is `docs/realisation/FEATURE_REGISTRY.yaml`, established on 24 September 2026 under the owner's deterministic completion instruction. Feature IDs are stable completion-control identities over already-approved scope; they do not create permission to delete, merge away, defer, or silently thin a Screen ID, domain workflow, safety constraint, backend authority rule or visual requirement.
+
+Every one of the 545 registered `FOS-*` screens must resolve to exactly one primary mandatory Feature ID in the completion control plane. Cross-feature effects and dependencies remain explicit in Feature Implementation Contracts and the dependency graph; primary ownership is not a claim that a screen has no cross-module effects.
+
+`PROJECT_COMPLETION_STATE.json` is generated evidence for programme progress. Green states may only derive from the existing evidence laws: mapping, code existence, static references or catalogue membership cannot manufacture `VISUAL_GREEN`, `FEATURE_GREEN`, `MODULE_GREEN` or `MVP_GREEN`.
