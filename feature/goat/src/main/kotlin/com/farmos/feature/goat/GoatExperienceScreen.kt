@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmModuleHeader
+import com.farmos.core.design.AnimalFarmWarningSurface
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FosDimens
@@ -444,8 +445,10 @@ private fun GoatStatusChangeScreen(
             Text("No goat selected.")
             return@IllustratedGoatPage
         }
-        Text(goatDisplayName(goat), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Text("A lifecycle change removes this goat from the active herd. Existing history remains on the record.")
+        AnimalFarmWarningSurface {
+            Text(goatDisplayName(goat), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text("A lifecycle change removes this goat from the active herd. Existing history remains on the record.")
+        }
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val stacked = maxWidth < 480.dp
             val changes = listOf(
@@ -479,7 +482,7 @@ private fun GoatStatusChangeScreen(
             }
         }
         pending?.let { next ->
-            FarmIllustratedSectionSurface {
+            AnimalFarmWarningSurface {
                 Text("Confirm ${goatStatusLabel(next).lowercase()}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text("This is an authoritative farm record after sync. Check the animal and status before continuing.")
                 Button(
