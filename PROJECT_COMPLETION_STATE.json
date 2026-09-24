@@ -1598,7 +1598,7 @@
       "feature_green": false
     }
   ],
-  "next_action": "PHASE_3_VERIFY_IMPLEMENTED_PLATFORM_GATES_AND_AUDIT_REMAINING_PLATFORM_CORRECTNESS",
+  "next_action": "PHASE_3_VERIFY_REPRODUCIBLE_WRAPPER_APK_ASSEMBLY_IMMUTABLE_ACTIONS_AND_RECONCILER_DECOMPOSITION",
   "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
   "dependency_graph": {
     "node_count": 156,
@@ -1610,7 +1610,7 @@
   "global_programme_gates": [
     {
       "gate_id": "PLATFORM_DECIMAL_SCALING_EXACT",
-      "status": "IMPLEMENTED_UNVERIFIED",
+      "status": "VERIFIED_ON_MAIN",
       "blocking_phase": 3,
       "evidence": [
         "app/src/main/java/com/farmos/app/ExactDecimalInput.kt",
@@ -1622,11 +1622,16 @@
         "app/src/main/java/com/farmos/app/WaterModuleHost.kt",
         "app/src/main/java/com/farmos/app/OperatingModuleHost.kt"
       ],
-      "requirement": "All persisted human decimal inputs use exact checked decimal-to-integer scaling; floating-point scale-and-truncate conversion is forbidden."
+      "requirement": "All persisted human decimal inputs use exact checked decimal-to-integer scaling; floating-point scale-and-truncate conversion is forbidden.",
+      "verification": {
+        "commit_sha": "4925b3eabb4acc44edcca7c5627b237dfd76ab27",
+        "workflow_run_id": 35979597036,
+        "conclusion": "success"
+      }
     },
     {
       "gate_id": "PLATFORM_SYNC_SINGLE_OWNER_ATOMIC_CLAIM",
-      "status": "IMPLEMENTED_UNVERIFIED",
+      "status": "VERIFIED_ON_MAIN",
       "blocking_phase": 3,
       "evidence": [
         "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
@@ -1635,11 +1640,16 @@
         "core/sync/src/main/kotlin/com/farmos/core/sync/SyncEngine.kt",
         "core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt"
       ],
-      "requirement": "On-demand sync is unique-work serialized and every transport send requires a successful atomic leased outbox claim; expired leases remain recoverable."
+      "requirement": "On-demand sync is unique-work serialized and every transport send requires a successful atomic leased outbox claim; expired leases remain recoverable.",
+      "verification": {
+        "commit_sha": "4925b3eabb4acc44edcca7c5627b237dfd76ab27",
+        "workflow_run_id": 35979597036,
+        "conclusion": "success"
+      }
     },
     {
       "gate_id": "PLATFORM_SESSION_REVOCATION",
-      "status": "IMPLEMENTED_UNVERIFIED",
+      "status": "VERIFIED_ON_MAIN",
       "blocking_phase": 3,
       "evidence": [
         "core/network/src/main/kotlin/com/farmos/core/network/SupabaseClients.kt",
@@ -1647,7 +1657,58 @@
         "app/src/main/java/com/farmos/app/FarmOsApplication.kt",
         "app/src/main/java/com/farmos/app/MainActivity.kt"
       ],
-      "requirement": "Explicit user sign-out attempts Supabase server session revocation with local scope and always clears local credentials; authorization-loss clearing remains local-only."
+      "requirement": "Explicit user sign-out attempts Supabase server session revocation with local scope and always clears local credentials; authorization-loss clearing remains local-only.",
+      "verification": {
+        "commit_sha": "4925b3eabb4acc44edcca7c5627b237dfd76ab27",
+        "workflow_run_id": 35979597036,
+        "conclusion": "success"
+      }
+    },
+    {
+      "gate_id": "PLATFORM_GRADLE_REPRODUCIBLE_WRAPPER",
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocking_phase": 3,
+      "evidence": [
+        "gradlew",
+        "gradlew.bat",
+        "gradle/wrapper/gradle-wrapper.jar",
+        "gradle/wrapper/gradle-wrapper.properties",
+        "scripts/ci/verify-actions-pinned.sh"
+      ],
+      "requirement": "Repository ships the standard Gradle 9.3.1 wrapper and verifies the Gradle distribution SHA-256; CI and local Android scripts execute through ./gradlew."
+    },
+    {
+      "gate_id": "PLATFORM_ANDROID_ARTIFACT_ASSEMBLY",
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocking_phase": 3,
+      "evidence": [
+        ".github/workflows/foundation-ci.yml"
+      ],
+      "requirement": "Canonical CI must assemble a non-empty debug APK from the wrapper-driven build and hash the resulting artifact."
+    },
+    {
+      "gate_id": "PLATFORM_CI_ACTIONS_IMMUTABLE",
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocking_phase": 3,
+      "evidence": [
+        ".github/workflows/foundation-ci.yml",
+        ".github/workflows/animal-farm-handover.yml",
+        ".github/workflows/project-truth-autolog.yml",
+        "scripts/ci/verify-actions-pinned.sh"
+      ],
+      "requirement": "Every GitHub Action reference in canonical workflows is pinned to an immutable 40-character commit SHA."
+    },
+    {
+      "gate_id": "PLATFORM_RECONCILER_DECOMPOSITION",
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "blocking_phase": 3,
+      "evidence": [
+        "data/herd/src/main/kotlin/com/farmos/data/herd/FarmOsPullReconciler.kt",
+        "data/herd/src/main/kotlin/com/farmos/data/herd/RoomOpsRepository.kt",
+        "data/herd/src/main/kotlin/com/farmos/data/herd/FarmOsDataHelpers.kt",
+        "scripts/ci/verify-kotlin-architecture.sh"
+      ],
+      "requirement": "Pull reconciliation, local ops mutation orchestration and shared data helpers are separate bounded source units with CI no-growth ceilings."
     }
   ]
 }
