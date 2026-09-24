@@ -106,7 +106,7 @@ class GoatReferenceContractTest {
     }
 
     @Test
-    fun lifecycleChangeRequiresExplicitConfirmationAndCancelIsNonDestructive() {
+    fun lifecycleChangeCancelIsNonDestructive() {
         var status: GoatStatus? = null
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
@@ -126,8 +126,28 @@ class GoatReferenceContractTest {
         compose.onNodeWithText("Confirm sold").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Cancel")).performClick()
         compose.runOnIdle { assertNull(status) }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun lifecycleChangeRequiresExplicitConfirmation() {
+        var status: GoatStatus? = null
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(onStatus = { status = it }),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.STATUS_CHANGE,
+                    today = fixedDate,
+                )
+            }
+        }
 
         compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
+        compose.runOnIdle { assertNull(status) }
+        compose.onNodeWithText("Confirm sold").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Confirm status change")).performClick()
         compose.runOnIdle { assertEquals(GoatStatus.SOLD, status) }
         assertNamedClickTargets()
