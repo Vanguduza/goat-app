@@ -3,6 +3,7 @@ package com.farmos.feature.goat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -17,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.GoatStatus
@@ -80,7 +82,7 @@ internal fun GoatWeightScreen(
                         Text("No active goats on this device.")
                     } else {
                         active.forEach { row ->
-                            TextButton(onClick = { onSelectGoat(row.animalId) }, modifier = Modifier.fillMaxWidth()) {
+                            TextButton(onClick = { onSelectGoat(row.animalId) }, modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) {
                                 Text(goatDisplayName(row) + " · " + row.tag)
                             }
                         }
@@ -107,7 +109,7 @@ internal fun GoatWeightScreen(
             Button(
                 onClick = { onRecordWeight(weight) },
                 enabled = !state.busy && goat.status == GoatStatus.ACTIVE && weight.toDoubleOrNull()?.let { it > 0.0 } == true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
             ) { Text("Record weight") }
             if (goat.syncPending || state.pendingSyncCount > 0) {
                 Text("Local entries waiting to sync: ${state.pendingSyncCount}", color = MaterialTheme.colorScheme.primary)
