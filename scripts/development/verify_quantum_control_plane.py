@@ -161,7 +161,7 @@ def main() -> None:
         }
         stale = [str(path.relative_to(ROOT)) for path, text in expected.items() if not path.exists() or path.read_text() != text]
         if stale:
-            raise SystemExit("stale quantum control-plane outputs: " + ", ".join(stale) + "; expected source_fingerprint=" + source_fingerprint())
+            raise SystemExit("stale quantum control-plane outputs: " + ", ".join(stale))
         print("PASS quantum development control plane: 545 screens, 545 QDUs, zero invented green claims")
         return
     write_outputs(feature, qdu, state)
