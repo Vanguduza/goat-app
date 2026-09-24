@@ -1,32 +1,24 @@
 # Existing implementation alignment and anti-drift gates
 
-## Evidence-backed starting point
+## Current post-cleanup baseline
 
-Inspected source snapshot: `e86981682748605e9db1570224e8c801c35b6058`. This is static code/document inspection, not a completed device-level visual or functional audit. The supplied registry's `VISUAL_IMPLEMENTED` labels are claims of code existence, not visual acceptance.
+The 24 September 2026 owner-directed consolidation removed competing visual authorities, Caveat/script runtime assets, legacy palette aliases, the old pastoral backdrop compatibility entry point, and superseded native-theme reference code. The only presentation authority is this `animal-farm-visual-lock` package.
 
-Current source differences that must be addressed:
+Production theme truth is `core/design/.../AnimalFarmThemeTokens.kt` plus Inter typography and the locked images in `core/design/src/main/res/`. Historical visual material remains available through Git history only; it must not be restored into the working tree as an alternate palette, font, layout family or design specification.
 
-- `app/.../FoundationAuthScreen.kt` uses `FarmPastoralBackdrop`/`FarmOsWordmark` and includes “Sign in to your farm.” Restore Animal Farm + exact lineup + centered Sign in while preserving membership and auth callbacks. Remove redundant engineering explanations from the production screen; keep truthful concise recovery states.
-- `app/.../RoleDashboardScreens.kt` management uses a pastoral backdrop, story surface, slogan and explanatory action grid. Worker uses a generic My Tasks section, explanatory copy and quick links rather than the locked stage-filtered D+C card. Rebuild composition using P02/P03; retain valid state adapters and exact permissions. “Record Weight”/scan must resolve to subject-scoped routes, not merely the goat module. Inspect “Add Treatment” authorization rather than inferring safety from visibility.
-- `core/design/.../FarmIllustratedComponents.kt` draws backdrop/animals with Canvas and fixed cream surfaces. Replace brand identity with approved raster assets and semantic theme surfaces. Retain generic useful primitives only after restyling. A code-drawn goat is not the supplied animal. Fixed light surfaces create a dark-theme consistency risk that requires native verification.
-- `core/design/.../FarmOsTheme.kt` and `FarmOsTypography.kt` contain a different visual system, including Caveat accent usage in the app. Consolidate one governed family around the recovered lock, preserve Inter, add outdoor mode and test all Material fallback roles. Do not change theme globally without checking dialogs, menus, fields and safety colors.
-- `FarmHomeScreen.kt`, `SpeciesNavigatorScreen.kt`, `SpeciesHerdScreen.kt`, `GoatExperienceScreen.kt`, `GoatCaptureScreens.kt`, `TasksBoardScreen.kt` and the rabbit/health/inventory/finance/poultry/sheep/cattle operating screens need a route-by-route composition review. Their source-to-ID claims are preserved in the registry index. Do not assume a filename serving several IDs has implemented every state or navigation path.
-- `docs/ux/FARM_OS_CURRENT_UI_IMPLEMENTATION_MAP.yaml` cites an older baseline (`5e9335...`) and does not enumerate the later role dashboard file in its surface list. Rebuild the map from actual routes and feature contracts at the current HEAD.
-- The quantum YAML contains the base atlas plus eight role variants while its footer says 537. The old generator only enumerates base modules and would drop those variants if run unchanged. Compute counts from IDs and make registry round-trip tests preserve variants; never change scope to satisfy a hard-coded count.
+The remaining work is implementation/evidence work, not authority selection: route-by-route conformance, complete registered-screen realization, native state/device/accessibility evidence, owner review, and functional feature gates.
 
 ## Migration sequence
 
-### Gate 0 — Recover authority and inventory
+### Gate 0 — Confirm authority and inventory
 
-Import this pack into `docs/ux/animal-farm-visual-lock/` of the actual implementation checkout. Merge the rule snippet into AGENTS.md; optionally install the always-on `.mdc` rule. Amend conflicting visual authority, role contracts, reference manifests and CI comments. Do not replace product architecture truth.
-
-Capture live SHA, dirty work and route inventory. Compare all current registry IDs with this snapshot. Distinguish route, role variant, alias and reusable atomic surface. Join each feature to at least one route or an explicit headless contract. Repair the source registry/generator mismatch without renumbering. Keep green flags false until real evidence exists.
+Confirm `main` plus any active pull request, then verify that this package is the sole presentation authority and the anti-drift guard rejects superseded visual artifacts. Compare all current registry IDs with the snapshot. Distinguish route, role variant, alias and reusable atomic surface. Join each feature to at least one route or an explicit headless contract. Repair registry/generator mismatches without renumbering. Keep green flags false until real evidence exists.
 
 ### Gate 1 — Shared foundation and native reference set
 
 Create the semantic token layer and shared components. Bundle exact assets/font/license. Preserve fallback identity and dark-mode image plates. Establish native reference screens: login, management A, worker D+C, species navigator, goat dashboard/profile, weight capture, safety/status review, list/filter, a tablet master/detail and Theme/outdoor selection.
 
-Render against deterministic fixtures. Match locked homes visually and behaviorally. Freeze owner-approved native goldens and token version before broad fan-out. Native reference source in this pack is historical and partially implemented; it is not a drop-in complete module and not a certified golden. Do not bulk-copy its debug demo data or in-memory photo implementation.
+Render against deterministic fixtures. Match locked homes visually and behaviorally. Freeze owner-approved native goldens and token version before broad fan-out. Do not reconstruct deleted historical native themes from Git history or old screenshots. Build only from the locked assets, semantic tokens, current shared components and reviewed screen contracts.
 
 ### Gate 2 — Restyle implemented routes without regression
 
