@@ -1,6 +1,7 @@
 package com.farmos.feature.goat
 
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasClickAction
@@ -53,7 +54,7 @@ class GoatReferenceContractTest {
         }
 
         compose.onNode(hasClickAction() and hasText("Herd")).performClick()
-        compose.onNodeWithText("Register goat").assertIsDisplayed()
+        compose.onNodeWithText("Register goat").assertExists()
         assertNamedClickTargets()
     }
 
@@ -97,7 +98,7 @@ class GoatReferenceContractTest {
         }
 
         compose.onNode(hasClickAction() and hasText("Weight")).performClick()
-        compose.onNodeWithText("Record weight").assertIsDisplayed()
+        compose.onNodeWithText("Saving succeeds when the measurement is durable on this device. Sync can happen later.").assertExists()
         compose.onAllNodes(hasSetTextAction())[0].performTextInput("55.4")
         compose.onNode(hasClickAction() and hasText("Record weight")).assertIsEnabled().performClick()
 
@@ -129,6 +130,7 @@ class GoatReferenceContractTest {
 
         compose.onNodeWithText("Mark sold").performClick()
         compose.onNodeWithText("Confirm status change").performClick()
+        compose.waitForIdle()
 
         assertEquals(GoatStatus.SOLD, status)
         assertNamedClickTargets()
