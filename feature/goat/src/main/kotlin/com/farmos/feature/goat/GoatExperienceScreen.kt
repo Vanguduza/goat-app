@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -520,7 +521,7 @@ internal fun IllustratedGoatPage(
                 family = if (safety) null else AnimalFarmFamily.GOAT,
             )
             content()
-            TextButton(onClick = onBack, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Back") }
+            TextButton(\n                onClick = onBack,\n                modifier = Modifier.sizeIn(\n                    minWidth = AnimalFarmTheme.minimumTouchDp.dp,\n                    minHeight = AnimalFarmTheme.minimumTouchDp.dp,\n                ),\n            ) { Text("Back") }
         }
     }
 }
