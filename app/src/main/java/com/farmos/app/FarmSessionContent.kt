@@ -1,6 +1,9 @@
 package com.farmos.app
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,7 +52,9 @@ fun FarmSessionContent(
         )
     }
     val backHome = { destination = FarmDestination.Home }
-    when (val dest = destination) {
+    val runtimeRoute = destination.runtimeRouteContract()
+    Box(Modifier.testTag(runtimeRoute.testTag)) {
+        when (val dest = destination) {
         FarmDestination.Home -> FarmHomeHost(
             farmName = farmName,
             membershipRole = membership.role,
@@ -203,6 +208,7 @@ fun FarmSessionContent(
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
             )
+        }
         }
     }
 }
