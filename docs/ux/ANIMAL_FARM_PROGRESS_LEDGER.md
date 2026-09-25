@@ -532,3 +532,24 @@ Rebound static inventory at `3a5a299...`: 545 rows; 147 some evidence; 398 none;
 
 No green-gate promotion. Not GitHub-hosted certification.
 
+
+
+## Phase 5 runtime route-ownership control plane — 2026-09-25
+
+PR #28 merged to main as `c0c0842568e12d747491ab94cb74825d80ef964a` after exact-head hosted CI. Its certified runtime ledger is bound to tested head `736d06ba43ba962d2fbd861ff52ee10bc7d3eb5a` / Farm OS foundation run `36109290111` and source fingerprint `sha256:ff9ad5b0798d19e311481b24acecf78160d93dda78fa6ee8f717317b31272779`.
+
+The corrected evidence classes are deliberately separate:
+- 75 Screen IDs have rendered destination traversal plus return/restoration evidence.
+- 19 Screen IDs have exact top-level entry-action destination evidence; this does not substitute for rendered traversal.
+- 32 Screen IDs have typed route-owner contract evidence, including scoped task identity; this does not substitute for rendered traversal.
+- the union is 101 unique CI-proven route-owner Screen IDs.
+
+Phase 5B adds a source/evidence-derived route export and mandatory-feature route coverage control plane:
+- `docs/ux/evidence/animal-farm-visual-lock/runtime-route-export.json` contains only the 101 CI-proven route-owner IDs; registry membership alone cannot populate it;
+- 444/545 registered Screen IDs remain unresolved by CI-proven route ownership;
+- `docs/realisation/FEATURE_ROUTE_COVERAGE.json` preserves all 156 mandatory features;
+- 49/156 mandatory features currently have at least one route-evidenced Screen ID; 107/156 have none; zero features are fully route-bound across all of their Screen IDs at this checkpoint;
+- explicit headless contracts = 0. No headless status is inferred from missing UI or used to hide a route gap;
+- `verify-pack.cjs --routes` is expected to fail closed until actual route/composable ownership reaches all 545 registered IDs.
+
+The completion control plane therefore reports `phase_5_runtime_navigation_reachability = IN_PROGRESS`, never COMPLETE. No `VISUAL_GREEN`, `FEATURE_GREEN`, `MODULE_GREEN`, or `MVP_GREEN` promotion is made. The next Phase 5 work is to realise unresolved routes and exact feature route contracts in coherent implementation batches, preserving authorization, parameters, return/restoration and product ownership.

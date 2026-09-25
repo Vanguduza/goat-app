@@ -23,6 +23,8 @@ COMPLETION_OUT = ROOT / "PROJECT_COMPLETION_STATE.json"
 FEATURE_OUT = ROOT / "docs/realisation/FEATURE_REGISTRY.yaml"
 DEPENDENCY_OUT = ROOT / "docs/realisation/FEATURE_DEPENDENCY_GRAPH.json"
 PHASE4_LEDGER = ROOT / "docs/ux/evidence/animal-farm-visual-lock/phase4-native-reference-ledger.json"
+PHASE5_ROUTE_EXPORT = ROOT / "docs/ux/evidence/animal-farm-visual-lock/runtime-route-export.json"
+PHASE5_FEATURE_ROUTE = ROOT / "docs/realisation/FEATURE_ROUTE_COVERAGE.json"
 SCREEN_RE = re.compile(r"FOS-[A-Z]+-[0-9]{3}(?:-[A-Z])?")
 
 
@@ -129,6 +131,56 @@ def phase4_visual_foundation_state() -> tuple[dict, str]:
     return visual_foundation, next_action
 
 
+def phase5_runtime_navigation_state(current_fingerprint: str) -> dict:
+    if not PHASE5_ROUTE_EXPORT.exists() or not PHASE5_FEATURE_ROUTE.exists():
+        return {
+            "status": "PENDING",
+            "route_screen_count": 0,
+            "unresolved_screen_count": 545,
+            "features_with_route_evidence": 0,
+            "features_without_route_evidence": 156,
+            "route_gate_ready": False,
+            "next_action": "PHASE_5_BUILD_SOURCE_DERIVED_ROUTE_EXPORT_AND_FEATURE_ROUTE_COVERAGE",
+        }
+
+    route = json.loads(PHASE5_ROUTE_EXPORT.read_text(encoding="utf-8"))
+    feature = json.loads(PHASE5_FEATURE_ROUTE.read_text(encoding="utf-8"))
+    if route.get("source_fingerprint") != current_fingerprint:
+        raise SystemExit("Phase 5 route export source fingerprint is stale")
+    if feature.get("source_fingerprint") != current_fingerprint:
+        raise SystemExit("Phase 5 feature-route coverage source fingerprint is stale")
+    if int(route.get("registry_screen_count") or 0) != 545:
+        raise SystemExit("Phase 5 route export must preserve all 545 registry identities")
+    if int(feature.get("feature_count") or 0) != 156:
+        raise SystemExit("Phase 5 feature-route coverage must preserve all 156 mandatory features")
+    if int(feature.get("explicit_headless_contracts") or 0) != 0:
+        raise SystemExit("Phase 5 cannot infer headless contracts without reviewed explicit authority")
+
+    route_count = int(route.get("route_screen_count") or 0)
+    unresolved = int(route.get("unresolved_screen_count") or 0)
+    with_route = int(feature.get("features_with_route_evidence") or 0)
+    without_route = int(feature.get("features_without_route_evidence") or 0)
+    ready = bool(route.get("coverage_complete")) and bool(feature.get("route_gate_ready"))
+    status = "READY_FOR_COMPLETION_REVIEW" if ready else ("IN_PROGRESS" if route_count else "PENDING")
+    next_action = (
+        "PHASE_5_REVIEW_COMPLETE_ROUTE_EXPORT_BEFORE_STATUS_PROMOTION"
+        if ready
+        else "PHASE_5_REALISE_UNRESOLVED_ROUTES_AND_FEATURE_ROUTE_CONTRACTS_WITHOUT_INVENTING_HEADLESS_COVERAGE"
+    )
+    return {
+        "status": status,
+        "route_export": str(PHASE5_ROUTE_EXPORT.relative_to(ROOT)).replace("\\", "/"),
+        "feature_route_coverage": str(PHASE5_FEATURE_ROUTE.relative_to(ROOT)).replace("\\", "/"),
+        "route_screen_count": route_count,
+        "unresolved_screen_count": unresolved,
+        "features_with_route_evidence": with_route,
+        "features_without_route_evidence": without_route,
+        "explicit_headless_contracts": int(feature.get("explicit_headless_contracts") or 0),
+        "route_gate_ready": ready,
+        "next_action": next_action,
+    }
+
+
 def build() -> tuple[dict, dict, dict, dict]:
     registry = yaml.safe_load(REGISTRY.read_text()) or {}
     screens = registry.get("screens") or []
@@ -215,13 +267,14 @@ def build() -> tuple[dict, dict, dict, dict]:
         "modules": modules,
         "features": features,
     }
+    current_fingerprint = source_fingerprint()
     qdu_registry = {
-        "schema_version": 2, "source_fingerprint": source_fingerprint(), "screen_count": 545,
+        "schema_version": 2, "source_fingerprint": current_fingerprint, "screen_count": 545,
         "qdu_count": len(qdus), "feature_count": len(features),
         "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND", "qdus": qdus,
     }
     state = {
-        "schema_version": 2, "repository": "Vanguduza/goat-app", "source_fingerprint": source_fingerprint(),
+        "schema_version": 2, "repository": "Vanguduza/goat-app", "source_fingerprint": current_fingerprint,
         "canonical_branch": "main", "release_state": "BLOCKED",
         "green_states": {"vertical_slice_green": True, "feature_green_count": 0, "module_green_count": 0, "mvp_green": False, "visual_green_count": 0},
         "completion_control_plane": {"catalog_status": CATALOG_STATUS, "feature_count": len(features), "mandatory_feature_count": len(features), "bound_screen_count": len(qdus), "completion_state": "PROJECT_COMPLETION_STATE.json"},
@@ -243,13 +296,14 @@ def build() -> tuple[dict, dict, dict, dict]:
     }
     dependency_graph = build_graph()
     visual_foundation, next_action = phase4_visual_foundation_state()
+    runtime_navigation = phase5_runtime_navigation_state(current_fingerprint)
     completion = {
         "schema_version": 1, "repository": "Vanguduza/goat-app", "canonical_branch": "main",
-        "source_fingerprint": source_fingerprint(), "programme_status": "ACTIVE_DETERMINISTIC_COMPLETION", "release_blocked": True,
+        "source_fingerprint": current_fingerprint, "programme_status": "ACTIVE_DETERMINISTIC_COMPLETION", "release_blocked": True,
         "authority": {"project_truth": "docs/00_PROJECT_TRUTH.md", "feature_catalog": "docs/realisation/FEATURE_REGISTRY.yaml", "feature_dependency_graph": "docs/realisation/FEATURE_DEPENDENCY_GRAPH.json", "screen_registry": "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml", "visual_authority": "docs/ux/animal-farm-visual-lock/", "catalog_authority": CATALOG_AUTHORITY},
         "phase_status": {
             "phase_0_completion_control_plane": "COMPLETE", "phase_1_canonical_feature_id_catalog": "COMPLETE", "phase_2_dependency_graph": "COMPLETE",
-            "phase_3_platform_correctness": "COMPLETE", "phase_4_visual_foundation_certification": "IN_PROGRESS", "phase_5_runtime_navigation_reachability": "PENDING",
+            "phase_3_platform_correctness": "COMPLETE", "phase_4_visual_foundation_certification": "IN_PROGRESS", "phase_5_runtime_navigation_reachability": runtime_navigation["status"],
             "phase_6_shared_foundation_modules": "PENDING", "phase_7_shared_operational_modules": "PENDING", "phase_8_species_modules": "PENDING",
             "phase_9_commercial_layer": "PENDING", "phase_10_intelligence_and_advanced_modules": "PENDING", "phase_11_feature_certification_sweep": "PENDING",
             "phase_12_visual_completion_sweep": "PENDING", "phase_13_module_certification": "PENDING", "phase_14_whole_product_certification": "PENDING",
@@ -261,6 +315,7 @@ def build() -> tuple[dict, dict, dict, dict]:
         "global_programme_gates": dependency_graph["global_programme_gates"],
         "features": [{"feature_id": f["feature_id"], "module": f["module"], "name": f["name"], "completion_phase": f["completion_phase"], "screen_count": len(f["screen_ids"]), "contract_status": "OPEN", "feature_green": False} for f in features],
         "visual_foundation": visual_foundation,
+        "runtime_navigation": runtime_navigation,
         "next_action": next_action,
         "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
     }
