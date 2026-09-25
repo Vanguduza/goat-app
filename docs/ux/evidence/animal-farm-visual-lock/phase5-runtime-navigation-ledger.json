@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "d76343d79ca83c8a191de8293369e4087a21a4f2",
-  "source_fingerprint": "sha256:1b0483eb3ad3032f0eb0de9362c1cc74b59dac60a6187f63e9972299e184a16e",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36130146356,
+  "tested_commit": "a7d65d472757b39e19508abece9575d1656e6ae2",
+  "source_fingerprint": "sha256:9ddae5a4673aaa7cead6ccd44a8e33a8b4be55145376a5251fe0f58c99b64d57",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -14,8 +14,10 @@
         "FOS-FEED-001",
         "FOS-FIN-001",
         "FOS-GOAT-001",
+        "FOS-GOAT-007",
         "FOS-GROUP-001",
         "FOS-HEALTH-001",
+        "FOS-HOME-006",
         "FOS-INV-001",
         "FOS-LABOUR-001",
         "FOS-PASTURE-001",
@@ -137,6 +139,10 @@
         "FOS-HOME-002",
         "FOS-HOME-009"
       ],
+      "app/src/test/java/com/farmos/app/GlobalSearchContractTest.kt": [
+        "FOS-HOME-006",
+        "FOS-HOME-007"
+      ],
       "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt": [
         "FOS-CATTLE-018",
         "FOS-SHEEP-010"
@@ -146,6 +152,7 @@
         "FOS-GOAT-002",
         "FOS-GOAT-003",
         "FOS-GOAT-004",
+        "FOS-GOAT-007",
         "FOS-GOAT-011",
         "FOS-GOAT-016",
         "FOS-GOAT-017",
@@ -169,6 +176,7 @@
         "FOS-FIN-001",
         "FOS-GOAT-001",
         "FOS-GOAT-006",
+        "FOS-GOAT-007",
         "FOS-GOAT-011",
         "FOS-GOAT-032",
         "FOS-GOAT-037",
@@ -181,6 +189,7 @@
         "FOS-HEALTH-021",
         "FOS-HEALTH-024",
         "FOS-HOME-001",
+        "FOS-HOME-006",
         "FOS-INV-001",
         "FOS-LABOUR-001",
         "FOS-PASTURE-001",
@@ -219,19 +228,21 @@
   },
   "coverage": {
     "registered_screen_count": 545,
-    "entry_action_screen_count": 19,
+    "entry_action_screen_count": 21,
     "rendered_traversal_screen_count": 89,
-    "rendered_owner_screen_count": 24,
-    "route_contract_screen_count": 47,
-    "combined_screen_count": 148,
+    "rendered_owner_screen_count": 27,
+    "route_contract_screen_count": 49,
+    "combined_screen_count": 151,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
       "FOS-FEED-001",
       "FOS-FIN-001",
       "FOS-GOAT-001",
+      "FOS-GOAT-007",
       "FOS-GROUP-001",
       "FOS-HEALTH-001",
+      "FOS-HOME-006",
       "FOS-INV-001",
       "FOS-LABOUR-001",
       "FOS-PASTURE-001",
@@ -345,6 +356,7 @@
       "FOS-GOAT-002",
       "FOS-GOAT-003",
       "FOS-GOAT-004",
+      "FOS-GOAT-007",
       "FOS-GOAT-011",
       "FOS-GOAT-016",
       "FOS-GOAT-017",
@@ -358,6 +370,8 @@
       "FOS-GOAT-043",
       "FOS-GOAT-051",
       "FOS-HOME-002",
+      "FOS-HOME-006",
+      "FOS-HOME-007",
       "FOS-HOME-009",
       "FOS-SHEEP-010",
       "FOS-SYNC-003"
@@ -375,6 +389,7 @@
       "FOS-GLOBAL-018",
       "FOS-GOAT-001",
       "FOS-GOAT-006",
+      "FOS-GOAT-007",
       "FOS-GOAT-011",
       "FOS-GOAT-032",
       "FOS-GOAT-037",
@@ -387,6 +402,7 @@
       "FOS-HEALTH-021",
       "FOS-HEALTH-024",
       "FOS-HOME-001",
+      "FOS-HOME-006",
       "FOS-HOME-012",
       "FOS-HOME-012-A",
       "FOS-HOME-012-B",
@@ -434,12 +450,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 89,
-    "entry_action_emission_executed": 19,
-    "rendered_surface_owners_executed": 24,
-    "route_contracts_executed": 47,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 89,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {

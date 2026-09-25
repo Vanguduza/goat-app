@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "d76343d79ca83c8a191de8293369e4087a21a4f2",
+  "tested_commit": "a7d65d472757b39e19508abece9575d1656e6ae2",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 150
+    "registered_ids_mentioned_in_kotlin": 151
   },
   "top_level": {
     "farm_modules": [
@@ -65,8 +65,8 @@
       "states": [
         {
           "value": "DASHBOARD",
-          "refs": 7,
-          "transition_refs": 6,
+          "refs": 8,
+          "transition_refs": 7,
           "render_only_candidate": false
         },
         {
@@ -77,8 +77,8 @@
         },
         {
           "value": "PROFILE",
-          "refs": 9,
-          "transition_refs": 8,
+          "refs": 10,
+          "transition_refs": 9,
           "render_only_candidate": false
         },
         {
@@ -113,6 +113,12 @@
         },
         {
           "value": "SEARCH",
+          "refs": 3,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SCAN",
           "refs": 3,
           "transition_refs": 2,
           "render_only_candidate": false
