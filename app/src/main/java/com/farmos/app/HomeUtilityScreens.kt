@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmHomeMetrics
 import com.farmos.core.design.AnimalFarmModuleHeader
