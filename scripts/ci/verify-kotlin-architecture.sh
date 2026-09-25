@@ -16,6 +16,8 @@ check_max_lines() {
 
 python3 scripts/development/verify_quantum_control_plane.py --check
 python3 scripts/development/feature_dependencies.py --check
+python3 scripts/design/build-runtime-navigation-evidence.py --self-test
+python3 scripts/design/build-route-screen-feature-gap.py --self-test
 bash scripts/ci/verify-actions-pinned.sh
 
 echo "Checking Kotlin files for duplicate imports"

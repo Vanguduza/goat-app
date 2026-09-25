@@ -12,8 +12,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml"
-UI_TESTS = (
+COMPLETION_STATE = ROOT / "PROJECT_COMPLETION_STATE.json"
+ENTRY_ACTION_TESTS = (
     "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt",
+)
+RENDERED_TRAVERSAL_TESTS = (
     "app/src/test/java/com/farmos/app/RabbitRuntimeNavigationTest.kt",
     "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt",
 )
@@ -43,12 +46,18 @@ def git_head() -> str:
     ).strip()
 
 
+def source_fingerprint() -> str:
+    return json.loads(COMPLETION_STATE.read_text(encoding="utf-8"))["source_fingerprint"]
+
+
 def build(status: str, run_id: int | None) -> dict:
-    ui_sources = ids_in(UI_TESTS)
+    entry_sources = ids_in(ENTRY_ACTION_TESTS)
+    traversal_sources = ids_in(RENDERED_TRAVERSAL_TESTS)
     contract_sources = ids_in(ROUTE_CONTRACT_TESTS)
-    ui_ids = sorted({x for values in ui_sources.values() for x in values})
+    entry_ids = sorted({x for values in entry_sources.values() for x in values})
+    traversal_ids = sorted({x for values in traversal_sources.values() for x in values})
     contract_ids = sorted({x for values in contract_sources.values() for x in values})
-    all_ids = sorted(set(ui_ids) | set(contract_ids))
+    all_ids = sorted(set(entry_ids) | set(traversal_ids) | set(contract_ids))
     known = registry_ids()
     missing = sorted(set(all_ids) - known)
 
@@ -57,27 +66,32 @@ def build(status: str, run_id: int | None) -> dict:
         "phase": "phase_5_runtime_navigation_reachability",
         "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
         "tested_commit": git_head(),
+        "source_fingerprint": source_fingerprint(),
         "ci_status": status,
         "foundation_run_id": run_id,
         "test_sources": {
-            "ui_traversal": ui_sources,
+            "entry_action_emission": entry_sources,
+            "rendered_destination_traversal": traversal_sources,
             "route_contract": contract_sources,
         },
         "coverage": {
             "registered_screen_count": len(known),
-            "ui_traversal_screen_count": len(ui_ids),
+            "entry_action_screen_count": len(entry_ids),
+            "rendered_traversal_screen_count": len(traversal_ids),
             "route_contract_screen_count": len(contract_ids),
             "combined_screen_count": len(all_ids),
-            "ui_traversal_screen_ids": ui_ids,
+            "entry_action_screen_ids": entry_ids,
+            "rendered_traversal_screen_ids": traversal_ids,
             "route_contract_screen_ids": contract_ids,
-            "route_contract_only_screen_ids": sorted(set(contract_ids) - set(ui_ids)),
+            "route_contract_only_screen_ids": sorted(set(contract_ids) - set(entry_ids) - set(traversal_ids)),
             "missing_registry_ids": missing,
         },
         "certification": {
-            "runtime_reachability_executed": len(ui_ids) if status == "PASS_EXACT_HEAD_CI" else 0,
+            "runtime_reachability_executed": len(traversal_ids) if status == "PASS_EXACT_HEAD_CI" else 0,
+            "entry_action_emission_executed": len(entry_ids) if status == "PASS_EXACT_HEAD_CI" else 0,
             "route_contracts_executed": len(contract_ids) if status == "PASS_EXACT_HEAD_CI" else 0,
             "parameter_scope_executed": status == "PASS_EXACT_HEAD_CI" and "FOS-TASK-003" in contract_ids,
-            "return_restoration_executed": len(ui_ids) if status == "PASS_EXACT_HEAD_CI" else 0,
+            "return_restoration_executed": len(traversal_ids) if status == "PASS_EXACT_HEAD_CI" else 0,
             "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE",
         },
         "green_claims": {
@@ -87,10 +101,11 @@ def build(status: str, run_id: int | None) -> dict:
             "mvp_green": False,
         },
         "law": (
-            "A Screen ID is runtime-reachable here only when an executable Compose traversal "
-            "test names it and the recorded exact-head CI run passes. Route-contract tests are "
-            "reported separately and never substitute for UI traversal. This evidence makes no "
-            "VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN claim."
+            "A Screen ID is runtime-reachable here only when an executable Compose test renders "
+            "the destination, asserts its canonical Screen ID, and exercises return/restoration "
+            "under the recorded exact-head CI run. Top-level entry-action emission and route-contract "
+            "tests are reported separately and never substitute for rendered traversal. This evidence "
+            "makes no VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN claim."
         ),
     }
 
@@ -109,15 +124,18 @@ def main() -> int:
     payload = build(args.status, args.run_id)
     if payload["coverage"]["missing_registry_ids"]:
         raise SystemExit(f"unregistered screen ids in runtime evidence: {payload['coverage']['missing_registry_ids']}")
-    if payload["coverage"]["ui_traversal_screen_count"] < 80:
-        raise SystemExit("runtime UI traversal evidence unexpectedly below 80 Screen IDs")
+    if payload["coverage"]["rendered_traversal_screen_count"] < 70:
+        raise SystemExit("rendered runtime traversal evidence unexpectedly below 70 Screen IDs")
+    if payload["coverage"]["entry_action_screen_count"] < 15:
+        raise SystemExit("entry-action evidence unexpectedly below 15 Screen IDs")
     if payload["coverage"]["route_contract_screen_count"] < 30:
         raise SystemExit("runtime route-contract evidence unexpectedly below 30 Screen IDs")
 
     if args.self_test:
         print(
             "PASS runtime navigation evidence self-test: "
-            f"{payload['coverage']['ui_traversal_screen_count']} UI-traversed / "
+            f"{payload['coverage']['rendered_traversal_screen_count']} rendered-traversed / "
+            f"{payload['coverage']['entry_action_screen_count']} entry-action / "
             f"{payload['coverage']['route_contract_screen_count']} route-contract Screen IDs"
         )
         return 0

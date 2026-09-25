@@ -2,11 +2,12 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "21be378a5d04c7d8809f4e55bfb562ea3dee4922",
-  "ci_status": "CI_PENDING",
-  "foundation_run_id": null,
+  "tested_commit": "736d06ba43ba962d2fbd861ff52ee10bc7d3eb5a",
+  "source_fingerprint": "sha256:ff9ad5b0798d19e311481b24acecf78160d93dda78fa6ee8f717317b31272779",
+  "ci_status": "PASS_EXACT_HEAD_CI",
+  "foundation_run_id": 36109290111,
   "test_sources": {
-    "ui_traversal": {
+    "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
         "FOS-ASSET-001",
         "FOS-CATTLE-001",
@@ -27,7 +28,9 @@
         "FOS-SYNC-002",
         "FOS-TASK-001",
         "FOS-WATER-001"
-      ],
+      ]
+    },
+    "rendered_destination_traversal": {
       "app/src/test/java/com/farmos/app/RabbitRuntimeNavigationTest.kt": [
         "FOS-RABBIT-002",
         "FOS-RABBIT-005",
@@ -147,12 +150,32 @@
   },
   "coverage": {
     "registered_screen_count": 545,
-    "ui_traversal_screen_count": 94,
+    "entry_action_screen_count": 19,
+    "rendered_traversal_screen_count": 75,
     "route_contract_screen_count": 32,
     "combined_screen_count": 101,
-    "ui_traversal_screen_ids": [
+    "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
+      "FOS-FEED-001",
+      "FOS-FIN-001",
+      "FOS-GOAT-001",
+      "FOS-GROUP-001",
+      "FOS-HEALTH-001",
+      "FOS-INV-001",
+      "FOS-LABOUR-001",
+      "FOS-PASTURE-001",
+      "FOS-POULTRY-001",
+      "FOS-PROC-001",
+      "FOS-RABBIT-001",
+      "FOS-RABBIT-027",
+      "FOS-SALES-001",
+      "FOS-SHEEP-001",
+      "FOS-SYNC-002",
+      "FOS-TASK-001",
+      "FOS-WATER-001"
+    ],
+    "rendered_traversal_screen_ids": [
       "FOS-CATTLE-005",
       "FOS-CATTLE-008",
       "FOS-CATTLE-010",
@@ -168,14 +191,9 @@
       "FOS-CATTLE-029",
       "FOS-CATTLE-030",
       "FOS-CATTLE-032",
-      "FOS-FEED-001",
-      "FOS-FIN-001",
       "FOS-FIN-002",
       "FOS-FIN-004",
       "FOS-FIN-005",
-      "FOS-GOAT-001",
-      "FOS-GROUP-001",
-      "FOS-HEALTH-001",
       "FOS-HEALTH-003",
       "FOS-HEALTH-004",
       "FOS-HEALTH-007",
@@ -188,7 +206,6 @@
       "FOS-HEALTH-021",
       "FOS-HEALTH-024",
       "FOS-HEALTH-026",
-      "FOS-INV-001",
       "FOS-INV-002",
       "FOS-INV-004",
       "FOS-INV-005",
@@ -197,9 +214,6 @@
       "FOS-INV-008",
       "FOS-INV-012",
       "FOS-INV-013",
-      "FOS-LABOUR-001",
-      "FOS-PASTURE-001",
-      "FOS-POULTRY-001",
       "FOS-POULTRY-002",
       "FOS-POULTRY-004",
       "FOS-POULTRY-006",
@@ -211,8 +225,6 @@
       "FOS-POULTRY-018",
       "FOS-POULTRY-020",
       "FOS-POULTRY-021",
-      "FOS-PROC-001",
-      "FOS-RABBIT-001",
       "FOS-RABBIT-002",
       "FOS-RABBIT-005",
       "FOS-RABBIT-006",
@@ -223,10 +235,7 @@
       "FOS-RABBIT-017",
       "FOS-RABBIT-020",
       "FOS-RABBIT-022",
-      "FOS-RABBIT-027",
       "FOS-RABBIT-034",
-      "FOS-SALES-001",
-      "FOS-SHEEP-001",
       "FOS-SHEEP-009",
       "FOS-SHEEP-011",
       "FOS-SHEEP-012",
@@ -241,10 +250,7 @@
       "FOS-SHEEP-024",
       "FOS-SHEEP-026",
       "FOS-SHEEP-027",
-      "FOS-SHEEP-029",
-      "FOS-SYNC-002",
-      "FOS-TASK-001",
-      "FOS-WATER-001"
+      "FOS-SHEEP-029"
     ],
     "route_contract_screen_ids": [
       "FOS-ASSET-001",
@@ -292,10 +298,11 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 0,
-    "route_contracts_executed": 0,
-    "parameter_scope_executed": false,
-    "return_restoration_executed": 0,
+    "runtime_reachability_executed": 75,
+    "entry_action_emission_executed": 19,
+    "route_contracts_executed": 32,
+    "parameter_scope_executed": true,
+    "return_restoration_executed": 75,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
@@ -304,5 +311,5 @@
     "module_green": 0,
     "mvp_green": false
   },
-  "law": "A Screen ID is runtime-reachable here only when an executable Compose traversal test names it and the recorded exact-head CI run passes. Route-contract tests are reported separately and never substitute for UI traversal. This evidence makes no VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN claim."
+  "law": "A Screen ID is runtime-reachable here only when an executable Compose test renders the destination, asserts its canonical Screen ID, and exercises return/restoration under the recorded exact-head CI run. Top-level entry-action emission and route-contract tests are reported separately and never substitute for rendered traversal. This evidence makes no VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN claim."
 }
