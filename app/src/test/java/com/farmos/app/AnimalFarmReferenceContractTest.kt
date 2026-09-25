@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -53,6 +54,7 @@ class AnimalFarmReferenceContractTest {
             }
         }
 
+        compose.onNodeWithTag("farm-screen:FOS-GLOBAL-002").assertIsDisplayed()
         val fields = compose.onAllNodes(hasSetTextAction())
         fields[0].performTextInput("owner@example.com")
         fields[1].performTextInput("correct-horse")
@@ -134,6 +136,7 @@ class AnimalFarmReferenceContractTest {
             }
         }
 
+        compose.onNodeWithTag("farm-screen:FOS-HOME-002").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Goats"))
             .performScrollTo()
             .assertIsDisplayed()
@@ -150,6 +153,24 @@ class AnimalFarmReferenceContractTest {
             assertTrue(backed)
         }
         assertNamedClickTargets()
+    }
+
+    @Test
+    fun signOutConfirmationRendersItsCanonicalOwnerAndConfirmsExplicitly() {
+        var confirmed = false
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                SignOutConfirmationDialog(
+                    visible = true,
+                    onDismiss = {},
+                    onConfirm = { confirmed = true },
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GLOBAL-020").assertIsDisplayed()
+        compose.onNode(hasClickAction() and hasText("Sign out")).performClick()
+        compose.runOnIdle { assertTrue(confirmed) }
     }
 
     @Test

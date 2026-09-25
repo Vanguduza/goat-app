@@ -55,7 +55,9 @@ class GoatReferenceContractTest {
             }
         }
 
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-001").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Herd")).performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-002").assertIsDisplayed()
         compose.onNodeWithText("Register goat").assertExists()
         assertNamedClickTargets()
     }
@@ -76,9 +78,11 @@ class GoatReferenceContractTest {
             }
         }
 
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-002").assertIsDisplayed()
         compose.onNodeWithText("Nala").performClick()
 
         assertEquals("goat-nala", selectedId)
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-003").assertIsDisplayed()
         compose.onNodeWithText("Goat profile").assertIsDisplayed()
         assertNamedClickTargets()
     }
@@ -99,7 +103,9 @@ class GoatReferenceContractTest {
             }
         }
 
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-003").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Weight")).performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-011").assertIsDisplayed()
         compose.onNodeWithText("Saving succeeds when the measurement is durable on this device. Sync can happen later.").assertExists()
         compose.onAllNodes(hasSetTextAction())[0].performTextInput("55.4")
         compose.onNode(hasClickAction() and hasText("Record weight")).assertIsEnabled().performClick()
@@ -124,11 +130,32 @@ class GoatReferenceContractTest {
             }
         }
 
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-051").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
         compose.runOnIdle { assertNull(status.get()) }
         compose.onNodeWithText("Confirm sold").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Cancel")).performClick()
         compose.runOnIdle { assertNull(status.get()) }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun registerSurfaceRendersItsCanonicalOwner() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.REGISTER,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-004").assertIsDisplayed()
+        compose.onNodeWithText("Register goat").assertIsDisplayed()
         assertNamedClickTargets()
     }
 

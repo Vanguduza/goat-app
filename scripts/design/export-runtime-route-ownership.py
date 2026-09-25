@@ -9,6 +9,7 @@ Registry membership or a static implementation-map hint is never sufficient.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -18,9 +19,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml"
+IMPL_MAP = ROOT / "docs/ux/FARM_OS_CURRENT_UI_IMPLEMENTATION_MAP.yaml"
 FEATURES = ROOT / "docs/realisation/FEATURE_REGISTRY.yaml"
 RUNTIME = ROOT / "docs/ux/evidence/animal-farm-visual-lock/phase5-runtime-navigation-ledger.json"
-COMPLETION = ROOT / "PROJECT_COMPLETION_STATE.json"
 VERIFY_PACK = ROOT / "docs/ux/animal-farm-visual-lock/scripts/verify-pack.cjs"
 ROUTE_OUT = ROOT / "docs/ux/evidence/animal-farm-visual-lock/runtime-route-export.json"
 FEATURE_OUT = ROOT / "docs/realisation/FEATURE_ROUTE_COVERAGE.json"
@@ -35,28 +36,45 @@ def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def source_fingerprint() -> str:
+    digest = hashlib.sha256()
+    inputs = [REGISTRY, IMPL_MAP]
+    for base in ("app", "core", "data", "domain", "feature"):
+        inputs.extend(sorted((ROOT / base).rglob("*.kt"), key=lambda path: path.relative_to(ROOT).as_posix()))
+    for path in inputs:
+        digest.update(path.relative_to(ROOT).as_posix().encode())
+        digest.update(b"\0")
+        canonical = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+        digest.update(canonical)
+        digest.update(b"\0")
+    return "sha256:" + digest.hexdigest()
+
+
 def payloads() -> tuple[dict, dict]:
     registry = registry_ids()
     features = load_json(FEATURES)["features"]
     runtime = load_json(RUNTIME)
-    completion = load_json(COMPLETION)
-
-    if runtime.get("ci_status") != "PASS_EXACT_HEAD_CI":
-        raise SystemExit("runtime route evidence is not exact-head CI certified")
-    if runtime.get("source_fingerprint") != completion.get("source_fingerprint"):
+    current_fingerprint = source_fingerprint()
+    ci_status = runtime.get("ci_status")
+    if ci_status not in {"CI_PENDING", "PASS_EXACT_HEAD_CI"}:
+        raise SystemExit(f"unsupported runtime evidence state: {ci_status}")
+    if runtime.get("source_fingerprint") != current_fingerprint:
         raise SystemExit("runtime route evidence source fingerprint is stale")
+    certified = ci_status == "PASS_EXACT_HEAD_CI"
 
     proof_sources: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
     kind_to_class = {
         "rendered_destination_traversal": "RENDERED_DESTINATION_TRAVERSAL",
+        "rendered_surface_owner": "RENDERED_SURFACE_OWNER",
         "entry_action_emission": "ENTRY_ACTION_DESTINATION",
         "route_contract": "TYPED_ROUTE_OWNER",
     }
-    for kind, source_map in runtime["test_sources"].items():
-        proof_class = kind_to_class[kind]
-        for source, ids in source_map.items():
-            for sid in ids:
-                proof_sources[sid][proof_class].add(source)
+    if certified:
+        for kind, source_map in runtime["test_sources"].items():
+            proof_class = kind_to_class[kind]
+            for source, ids in source_map.items():
+                for sid in ids:
+                    proof_sources[sid][proof_class].add(source)
 
     route_ids = sorted(proof_sources)
     unknown = sorted(set(route_ids) - registry)
@@ -79,8 +97,9 @@ def payloads() -> tuple[dict, dict]:
 
     unresolved = sorted(registry - set(route_ids))
     route_export = {
-        "schema_version": 1,
-        "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
+        "schema_version": 2,
+        "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET" if certified else "CI_PENDING_ZERO_CLAIM_ROUTE_EXPORT",
+        "certification_status": ci_status,
         "source_fingerprint": runtime["source_fingerprint"],
         "runtime_evidence_tested_commit": runtime["tested_commit"],
         "runtime_evidence_run_id": runtime["foundation_run_id"],
@@ -94,8 +113,9 @@ def payloads() -> tuple[dict, dict]:
         "aliases": [],
         "alias_status": "NONE_CI_PROVEN",
         "law": (
-            "screen_ids contains only CI-proven rendered destinations, exact entry-action "
-            "destinations, or typed route owners. Registry membership alone is forbidden. "
+            "screen_ids contains only exact-head CI-proven rendered traversals, rendered surface "
+            "owners, entry-action destinations, or typed route owners. CI_PENDING exports contain zero "
+            "certified route IDs. Registry membership alone is forbidden. "
             "This export must fail verify-pack --routes until all 545 Screen IDs have actual "
             "navigation/composable ownership evidence."
         ),
@@ -135,8 +155,9 @@ def payloads() -> tuple[dict, dict]:
         )
 
     feature_export = {
-        "schema_version": 1,
-        "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
+        "schema_version": 2,
+        "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS" if certified else "ROUTE_EVIDENCE_PENDING_CI",
+        "certification_status": ci_status,
         "source_fingerprint": runtime["source_fingerprint"],
         "feature_count": len(feature_rows),
         "mandatory_feature_count": sum(1 for row in feature_rows if row["mandatory"]),

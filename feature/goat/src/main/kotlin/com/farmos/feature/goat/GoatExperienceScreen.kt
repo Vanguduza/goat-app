@@ -135,7 +135,7 @@ private fun GoatDashboardScreen(
     val kids = active.count { goat -> goat.dateOfBirthEpochDay?.let { todayEpochDay - it < 365 } == true }
     val selectedDoe = state.selected?.takeIf { it.status == GoatStatus.ACTIVE && it.sex == GoatSex.FEMALE }
 
-    AnimalFarmCanvas(modifier) {
+    AnimalFarmCanvas(modifier.testTag("farm-screen:FOS-GOAT-001")) {
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -514,7 +514,10 @@ internal fun IllustratedGoatPage(
     safety: Boolean = false,
     content: @Composable () -> Unit,
 ) {
-    AnimalFarmCanvas {
+    val canonicalScreenId = screenId.substringBefore(" ").takeIf { it.startsWith("FOS-") && "/" !in it }
+    AnimalFarmCanvas(
+        canonicalScreenId?.let { Modifier.testTag("farm-screen:$it") } ?: Modifier,
+    ) {
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),

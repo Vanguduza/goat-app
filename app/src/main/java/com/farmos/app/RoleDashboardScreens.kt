@@ -1,14 +1,19 @@
 package com.farmos.app
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.farmos.domain.ops.HomeAttentionKind
 import com.farmos.feature.goat.GoatEntryPage
 import com.farmos.feature.ops.HealthEntryPage
 import com.farmos.feature.ops.TaskEntryPage
+
+internal const val ROLE_HOME_FAMILY_SCREEN_ID = "FOS-HOME-012"
 
 internal enum class FarmHomePersona {
     OWNER, MANAGER, SUPERVISOR, WORKER, BREEDING, VET, FINANCE, BUYER, GENERAL,
@@ -25,6 +30,19 @@ internal fun resolveFarmHomePersona(role: String): FarmHomePersona = when (role.
     "buyer", "read_only" -> FarmHomePersona.BUYER
     else -> FarmHomePersona.GENERAL
 }
+
+internal fun FarmHomePersona.canonicalHomeScreenId(): String? =
+    when (this) {
+        FarmHomePersona.OWNER -> "FOS-HOME-012-A"
+        FarmHomePersona.MANAGER -> "FOS-HOME-012-B"
+        FarmHomePersona.SUPERVISOR -> "FOS-HOME-012-C"
+        FarmHomePersona.WORKER -> "FOS-HOME-012-D"
+        FarmHomePersona.BREEDING -> "FOS-HOME-012-E"
+        FarmHomePersona.VET -> "FOS-HOME-012-F"
+        FarmHomePersona.FINANCE -> "FOS-HOME-012-G"
+        FarmHomePersona.BUYER -> "FOS-HOME-012-H"
+        FarmHomePersona.GENERAL -> null
+    }
 
 /** Reachable module entries on the general home fallback. Shared More stays buyer-safe. */
 internal fun generalHomeActions(): List<Pair<String, FarmDestination>> =
@@ -183,36 +201,44 @@ internal fun RoleAwareFarmHomeScreen(
     }
     val onAnimals = { destination = "animals" }
     val onMore = { destination = "more" }
+    val persona = resolveFarmHomePersona(role)
+    val variantScreenId = persona.canonicalHomeScreenId()
 
-    when (resolveFarmHomePersona(role)) {
-        FarmHomePersona.OWNER -> ManagementControlRoomScreen(farmName, true, summary, onOpen, onAnimals, onMore)
-        FarmHomePersona.MANAGER -> ManagementControlRoomScreen(farmName, false, summary, onOpen, onAnimals, onMore)
-        FarmHomePersona.WORKER -> WorkerWorkBoardScreen(farmName, summary, onOpen, onAnimals, onMore)
-        FarmHomePersona.SUPERVISOR -> SpecialistRoleShell(
-            farmName, "Team today",
-            specialistHomeActions(FarmHomePersona.SUPERVISOR),
-            summary, onOpen, onAnimals, onMore,
-        )
-        FarmHomePersona.BREEDING -> SpecialistRoleShell(
-            farmName, "Breeding programme",
-            specialistHomeActions(FarmHomePersona.BREEDING),
-            summary, onOpen, onAnimals, onMore,
-        )
-        FarmHomePersona.VET -> SpecialistRoleShell(
-            farmName, "Health review",
-            specialistHomeActions(FarmHomePersona.VET),
-            summary, onOpen, onAnimals, onMore,
-        )
-        FarmHomePersona.FINANCE -> SpecialistRoleShell(
-            farmName, "Farm business",
-            specialistHomeActions(FarmHomePersona.FINANCE),
-            summary, onOpen, onAnimals, onMore,
-        )
-        FarmHomePersona.BUYER -> SpecialistRoleShell(
-            farmName, "Purchasing",
-            specialistHomeActions(FarmHomePersona.BUYER),
-            summary, onOpen, onAnimals, onMore,
-        )
-        FarmHomePersona.GENERAL -> FarmHomeScreen(farmName, summary, onOpen, onSignOut)
+    Box(Modifier.testTag("farm-screen:$ROLE_HOME_FAMILY_SCREEN_ID")) {
+        Box(
+            if (variantScreenId != null) Modifier.testTag("farm-screen:$variantScreenId") else Modifier,
+        ) {
+            when (persona) {
+                FarmHomePersona.OWNER -> ManagementControlRoomScreen(farmName, true, summary, onOpen, onAnimals, onMore)
+                FarmHomePersona.MANAGER -> ManagementControlRoomScreen(farmName, false, summary, onOpen, onAnimals, onMore)
+                FarmHomePersona.WORKER -> WorkerWorkBoardScreen(farmName, summary, onOpen, onAnimals, onMore)
+                FarmHomePersona.SUPERVISOR -> SpecialistRoleShell(
+                    farmName, "Team today",
+                    specialistHomeActions(FarmHomePersona.SUPERVISOR),
+                    summary, onOpen, onAnimals, onMore,
+                )
+                FarmHomePersona.BREEDING -> SpecialistRoleShell(
+                    farmName, "Breeding programme",
+                    specialistHomeActions(FarmHomePersona.BREEDING),
+                    summary, onOpen, onAnimals, onMore,
+                )
+                FarmHomePersona.VET -> SpecialistRoleShell(
+                    farmName, "Health review",
+                    specialistHomeActions(FarmHomePersona.VET),
+                    summary, onOpen, onAnimals, onMore,
+                )
+                FarmHomePersona.FINANCE -> SpecialistRoleShell(
+                    farmName, "Farm business",
+                    specialistHomeActions(FarmHomePersona.FINANCE),
+                    summary, onOpen, onAnimals, onMore,
+                )
+                FarmHomePersona.BUYER -> SpecialistRoleShell(
+                    farmName, "Purchasing",
+                    specialistHomeActions(FarmHomePersona.BUYER),
+                    summary, onOpen, onAnimals, onMore,
+                )
+                FarmHomePersona.GENERAL -> FarmHomeScreen(farmName, summary, onOpen, onSignOut)
+            }
+        }
     }
 }
