@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "7df2d637faf88aa02012447dc05e75fc6bb21a9f",
-  "source_fingerprint": "sha256:708ef4dd42c0e54b17140c87e5495a9731490aa5d88867f4aaa42a3fecd282f4",
+  "tested_commit": "9120c9893db5cddea704711c4c030fa7bf62c9f0",
+  "source_fingerprint": "sha256:c2beab69a4629c838c3b06e0a608c2a6114e8a50d31dae59aa54ec78af271b66",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36160800527,
+  "foundation_run_id": 36165038237,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -129,6 +129,12 @@
         "FOS-TASK-007",
         "FOS-TASK-008",
         "FOS-TASK-009"
+      ],
+      "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt": [
+        "FOS-HOME-003",
+        "FOS-HOME-004",
+        "FOS-HOME-008",
+        "FOS-HOME-012-A"
       ]
     },
     "rendered_surface_owner": {
@@ -189,7 +195,10 @@
         "FOS-HEALTH-021",
         "FOS-HEALTH-024",
         "FOS-HOME-001",
+        "FOS-HOME-003",
+        "FOS-HOME-004",
         "FOS-HOME-006",
+        "FOS-HOME-008",
         "FOS-INV-001",
         "FOS-LABOUR-001",
         "FOS-PASTURE-001",
@@ -229,10 +238,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 21,
-    "rendered_traversal_screen_count": 89,
+    "rendered_traversal_screen_count": 93,
     "rendered_owner_screen_count": 27,
-    "route_contract_screen_count": 49,
-    "combined_screen_count": 151,
+    "route_contract_screen_count": 52,
+    "combined_screen_count": 154,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -292,6 +301,10 @@
       "FOS-HEALTH-021",
       "FOS-HEALTH-024",
       "FOS-HEALTH-026",
+      "FOS-HOME-003",
+      "FOS-HOME-004",
+      "FOS-HOME-008",
+      "FOS-HOME-012-A",
       "FOS-INV-002",
       "FOS-INV-004",
       "FOS-INV-005",
@@ -402,7 +415,10 @@
       "FOS-HEALTH-021",
       "FOS-HEALTH-024",
       "FOS-HOME-001",
+      "FOS-HOME-003",
+      "FOS-HOME-004",
       "FOS-HOME-006",
+      "FOS-HOME-008",
       "FOS-HOME-012",
       "FOS-HOME-012-A",
       "FOS-HOME-012-B",
@@ -436,7 +452,6 @@
       "FOS-GOAT-006",
       "FOS-HOME-001",
       "FOS-HOME-012",
-      "FOS-HOME-012-A",
       "FOS-HOME-012-B",
       "FOS-HOME-012-C",
       "FOS-HOME-012-D",
@@ -450,12 +465,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 89,
+    "runtime_reachability_executed": 93,
     "entry_action_emission_executed": 21,
     "rendered_surface_owners_executed": 27,
-    "route_contracts_executed": 49,
+    "route_contracts_executed": 52,
     "parameter_scope_executed": true,
-    "return_restoration_executed": 89,
+    "return_restoration_executed": 93,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {

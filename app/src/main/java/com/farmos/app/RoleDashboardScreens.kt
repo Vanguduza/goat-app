@@ -53,8 +53,15 @@ internal fun FarmHomePersona.canonicalHomeScreenId(): String? =
     }
 
 /** Reachable module entries on the general home fallback. Shared More stays buyer-safe. */
+internal fun homeUtilityActions(includeCapture: Boolean = true): List<Pair<String, FarmDestination>> =
+    buildList {
+        add("Today summary" to FarmDestination.HomePanel(HomeSurface.TODAY_SUMMARY))
+        add("Farm alerts" to FarmDestination.HomePanel(HomeSurface.ALERTS))
+        if (includeCapture) add("Quick capture" to FarmDestination.HomePanel(HomeSurface.QUICK_CAPTURE))
+    }
+
 internal fun generalHomeActions(): List<Pair<String, FarmDestination>> =
-    listOf(
+    homeUtilityActions() + listOf(
         "Open tasks" to FarmDestination.Tasks(TaskEntryPage.BOARD),
         "Open health" to FarmDestination.Health(),
         "Open feed" to FarmDestination.Module(FarmModule.FEED),
@@ -66,7 +73,7 @@ internal fun generalHomeActions(): List<Pair<String, FarmDestination>> =
 
 /** Reachable module entries on Management A. Shared More stays buyer-safe. */
 internal fun managementHomeActions(): List<Pair<String, FarmDestination>> =
-    listOf(
+    homeUtilityActions() + listOf(
         // FOS-HOME-009 / FOS-SYNC-002 — reachable even when pending-sync is not the ranked hero
         "Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC),
         // FOS-HEALTH-001 — More is shared with buyer, so health stays on management home
@@ -141,14 +148,16 @@ internal fun specialistHomeActions(persona: FarmHomePersona): List<Pair<String, 
         )
         else -> emptyList()
     }
-    if (persona == FarmHomePersona.BUYER || core.isEmpty()) return core
+    if (core.isEmpty()) return core
+    val utilities = homeUtilityActions(includeCapture = persona != FarmHomePersona.BUYER)
+    if (persona == FarmHomePersona.BUYER) return utilities + core
     // FOS-HOME-009 / FOS-SYNC-002 — PAGE-PATTERNS keeps sync entry reachable on mutation homes.
-    return core + ("Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC))
+    return utilities + core + ("Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC))
 }
 
 /** Worker D quick record. Labels stay verb-first sentence case. RFID is not invented. */
 internal fun workerHomeQuickActions(): List<Pair<String, FarmDestination>> =
-    listOf(
+    homeUtilityActions() + listOf(
         // FOS-TASK-004
         "Add task" to FarmDestination.Tasks(TaskEntryPage.CREATE),
         // FOS-GOAT-011
@@ -199,6 +208,23 @@ internal fun RoleAwareFarmHomeScreen(
     onSignOut: () -> Unit,
 ) {
     var destination by remember { mutableStateOf("home") }
+    var homeSurface by remember { mutableStateOf<HomeSurface?>(null) }
+    val openDestination: (FarmDestination) -> Unit = { target ->
+        if (target is FarmDestination.HomePanel) {
+            homeSurface = target.surface
+        } else {
+            onOpen(target)
+        }
+    }
+    homeSurface?.let { surface ->
+        HomeUtilityScreen(
+            surface = surface,
+            summary = summary,
+            onOpen = openDestination,
+            onBack = { homeSurface = null },
+        )
+        return
+    }
     if (destination == "animals") {
         SpeciesNavigatorScreen(onOpen = { onOpen(it.toDestination()) }, onBack = { destination = "home" })
         return
@@ -217,35 +243,35 @@ internal fun RoleAwareFarmHomeScreen(
             if (variantScreenId != null) Modifier.testTag("farm-screen:$variantScreenId") else Modifier,
         ) {
             when (persona) {
-                FarmHomePersona.OWNER -> ManagementControlRoomScreen(farmName, true, summary, onOpen, onAnimals, onMore)
-                FarmHomePersona.MANAGER -> ManagementControlRoomScreen(farmName, false, summary, onOpen, onAnimals, onMore)
-                FarmHomePersona.WORKER -> WorkerWorkBoardScreen(farmName, summary, onOpen, onAnimals, onMore)
+                FarmHomePersona.OWNER -> ManagementControlRoomScreen(farmName, true, summary, openDestination, onAnimals, onMore)
+                FarmHomePersona.MANAGER -> ManagementControlRoomScreen(farmName, false, summary, openDestination, onAnimals, onMore)
+                FarmHomePersona.WORKER -> WorkerWorkBoardScreen(farmName, summary, openDestination, onAnimals, onMore)
                 FarmHomePersona.SUPERVISOR -> SpecialistRoleShell(
                     farmName, "Team today",
                     specialistHomeActions(FarmHomePersona.SUPERVISOR),
-                    summary, onOpen, onAnimals, onMore,
+                    summary, openDestination, onAnimals, onMore,
                 )
                 FarmHomePersona.BREEDING -> SpecialistRoleShell(
                     farmName, "Breeding programme",
                     specialistHomeActions(FarmHomePersona.BREEDING),
-                    summary, onOpen, onAnimals, onMore,
+                    summary, openDestination, onAnimals, onMore,
                 )
                 FarmHomePersona.VET -> SpecialistRoleShell(
                     farmName, "Health review",
                     specialistHomeActions(FarmHomePersona.VET),
-                    summary, onOpen, onAnimals, onMore,
+                    summary, openDestination, onAnimals, onMore,
                 )
                 FarmHomePersona.FINANCE -> SpecialistRoleShell(
                     farmName, "Farm business",
                     specialistHomeActions(FarmHomePersona.FINANCE),
-                    summary, onOpen, onAnimals, onMore,
+                    summary, openDestination, onAnimals, onMore,
                 )
                 FarmHomePersona.BUYER -> SpecialistRoleShell(
                     farmName, "Purchasing",
                     specialistHomeActions(FarmHomePersona.BUYER),
-                    summary, onOpen, onAnimals, onMore,
+                    summary, openDestination, onAnimals, onMore,
                 )
-                FarmHomePersona.GENERAL -> FarmHomeScreen(farmName, summary, onOpen, onSignOut)
+                FarmHomePersona.GENERAL -> FarmHomeScreen(farmName, summary, openDestination, onSignOut)
             }
         }
     }

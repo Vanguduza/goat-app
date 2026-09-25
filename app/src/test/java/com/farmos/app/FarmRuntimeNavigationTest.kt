@@ -86,7 +86,7 @@ class FarmRuntimeNavigationTest {
             Triple("Open water", FarmDestination.Module(FarmModule.WATER), "FOS-WATER-001"),
             Triple("Open sync status", FarmDestination.Goat(GoatEntryPage.SYNC), "FOS-SYNC-002"),
         )
-        assertEquals(general.map { it.first to it.second }, generalHomeActions())
+        assertEquals(homeUtilityActions() + general.map { it.first to it.second }, generalHomeActions())
         general.forEach { (label, expected, screenId) ->
             opened.set(null)
             compose.onNode(hasClickAction() and hasText(label))

@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:708ef4dd42c0e54b17140c87e5495a9731490aa5d88867f4aaa42a3fecd282f4",
-  "runtime_evidence_tested_commit": "7df2d637faf88aa02012447dc05e75fc6bb21a9f",
-  "runtime_evidence_run_id": 36160800527,
+  "source_fingerprint": "sha256:c2beab69a4629c838c3b06e0a608c2a6114e8a50d31dae59aa54ec78af271b66",
+  "runtime_evidence_tested_commit": "9120c9893db5cddea704711c4c030fa7bf62c9f0",
+  "runtime_evidence_run_id": 36165038237,
   "registry_screen_count": 545,
-  "route_screen_count": 151,
-  "unresolved_screen_count": 394,
+  "route_screen_count": 154,
+  "unresolved_screen_count": 391,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -80,8 +80,11 @@
     "FOS-HEALTH-026",
     "FOS-HOME-001",
     "FOS-HOME-002",
+    "FOS-HOME-003",
+    "FOS-HOME-004",
     "FOS-HOME-006",
     "FOS-HOME-007",
+    "FOS-HOME-008",
     "FOS-HOME-009",
     "FOS-HOME-012",
     "FOS-HOME-012-A",
@@ -1014,6 +1017,36 @@
       }
     },
     {
+      "screen_id": "FOS-HOME-003",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-HOME-004",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-HOME-006",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -1044,6 +1077,21 @@
       }
     },
     {
+      "screen_id": "FOS-HOME-008",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-HOME-009",
       "proof_classes": [
         "RENDERED_SURFACE_OWNER"
@@ -1068,9 +1116,13 @@
     {
       "screen_id": "FOS-HOME-012-A",
       "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL",
         "TYPED_ROUTE_OWNER"
       ],
       "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt"
+        ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/RoleHomeRouteContractTest.kt"
         ]
@@ -2191,10 +2243,7 @@
     "FOS-HEALTH-028",
     "FOS-HEALTH-029",
     "FOS-HEALTH-030",
-    "FOS-HOME-003",
-    "FOS-HOME-004",
     "FOS-HOME-005",
-    "FOS-HOME-008",
     "FOS-HOME-010",
     "FOS-HOME-011",
     "FOS-INV-003",

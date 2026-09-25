@@ -4,9 +4,16 @@ import com.farmos.feature.goat.GoatEntryPage
 import com.farmos.feature.ops.HealthEntryPage
 import com.farmos.feature.ops.TaskEntryPage
 
+enum class HomeSurface {
+    TODAY_SUMMARY,
+    ALERTS,
+    QUICK_CAPTURE,
+}
+
 sealed class FarmDestination {
     data object Home : FarmDestination()
     data object Search : FarmDestination()
+    data class HomePanel(val surface: HomeSurface) : FarmDestination()
 
     data class Module(
         val module: FarmModule,
