@@ -90,7 +90,8 @@ def phase4_visual_foundation_state() -> tuple[dict, str]:
     if evidence.get("approved_goldens") and not approvals_complete:
         raise SystemExit("approved native goldens require all recorded Phase 4 approvals")
 
-    ledger_sha = "sha256:" + hashlib.sha256(PHASE4_LEDGER.read_bytes()).hexdigest()
+    canonical_ledger = PHASE4_LEDGER.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    ledger_sha = "sha256:" + hashlib.sha256(canonical_ledger).hexdigest()
     status = ledger.get("status") or "IN_PROGRESS_MACHINE_EVIDENCE"
     next_action = (
         "PHASE_4_OWNER_AND_INDEPENDENT_VISUAL_APPROVALS_PENDING_CONTINUE_UNRELATED_UNBLOCKED_WORK"

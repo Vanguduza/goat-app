@@ -1734,7 +1734,7 @@
   "visual_foundation": {
     "status": "MACHINE_EVIDENCE_COMPLETE_AWAITING_APPROVALS",
     "reference_ledger": "docs/ux/evidence/animal-farm-visual-lock/phase4-native-reference-ledger.json",
-    "reference_ledger_sha256": "sha256:b4218ec2c4de8f0f454f53934a0d47d8c0f1c4b950376d3bf925fa71438251e6",
+    "reference_ledger_sha256": "sha256:d89dc1223a9af1824375cce025f652e14a4a5a69fced0b61ac4d5474b6a81361",
     "reference_surface_count": 10,
     "expected_png_minimum": 270,
     "machine_capture_status": "COMPLETE_EXACT_MAIN_CI",
