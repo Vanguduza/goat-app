@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
@@ -494,7 +495,10 @@ private fun GoatStatusChangeScreen(
                         pending = null
                     },
                     enabled = !state.busy,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
+                        .testTag("goat-lifecycle-confirm"),
                 ) { Text("Confirm status change") }
                 TextButton(onClick = { pending = null }, enabled = !state.busy, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Cancel") }
             }
