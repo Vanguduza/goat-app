@@ -164,6 +164,12 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                val chooseFarm = { chosen: com.farmos.core.network.FarmMembership ->
+                    selectedMembership = chosen
+                    app.rememberMembership(chosen)
+                    authError = null
+                    authAttention = null
+                }
                 val membership = selectedMembership
                 if (membership == null) {
                     FoundationAuthScreen(
@@ -201,12 +207,7 @@ class MainActivity : ComponentActivity() {
                                 authBusy = false
                             }
                         },
-                        onSelectFarm = { chosen ->
-                            selectedMembership = chosen
-                            app.rememberMembership(chosen)
-                            authError = null
-                            authAttention = null
-                        },
+                        onSelectFarm = chooseFarm,
                         onCreateFarm = { name ->
                             scope.launch {
                                 authBusy = true
@@ -243,6 +244,9 @@ class MainActivity : ComponentActivity() {
                         app = app,
                         membership = membership,
                         farmName = farmNames[membership.farmId],
+                        memberships = memberships,
+                        farmNames = farmNames,
+                        onSwitchFarm = chooseFarm,
                         onRequireReauth = requireReauthentication,
                         onRequireFarmReselection = requireFarmReselection,
                         onSignOut = signOut,
