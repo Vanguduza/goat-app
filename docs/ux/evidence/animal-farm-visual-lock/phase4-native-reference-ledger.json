@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "phase": "phase_4_visual_foundation_certification",
-  "status": "IN_PROGRESS_MACHINE_EVIDENCE",
+  "status": "MACHINE_EVIDENCE_COMPLETE_AWAITING_APPROVALS",
   "visual_authority": "docs/ux/animal-farm-visual-lock/",
   "reference_toolchain": {
     "roborazzi": "1.75.0",
@@ -79,7 +79,17 @@
   },
   "evidence": {
     "ci_artifact_name": "animal-farm-native-reference-unapproved",
-    "machine_capture_status": "PENDING_EXACT_HEAD_CI",
+    "ci_artifact_id": 10847389857,
+    "machine_capture_status": "COMPLETE_EXACT_MAIN_CI",
+    "pr_head_sha": "134c86b292998a9709580d730cf92646be40ff6f",
+    "pr_foundation_run_id": 36097199251,
+    "merged_main_sha": "d5c3a2ec06d41350fb83465b1c5f36d980b97d15",
+    "main_foundation_run_id": 36097802722,
+    "native_reference_matrix_verified": true,
+    "accessibility_bounds_verified": true,
+    "route_contracts_verified": true,
+    "interaction_contracts_verified": true,
+    "device_e2e_verified": true,
     "ui_tree_sidecars": true,
     "approved_goldens": false,
     "screenshot_diff_baseline": false,
