@@ -2,22 +2,27 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:68b40915ca5238fcb753d6074adcab5be748091041f82ea12dd551ff995429cb",
-  "runtime_evidence_tested_commit": "94fc6337dce2c75636fde99f7e7fb1d03bddc438",
-  "runtime_evidence_run_id": 36116517457,
+  "source_fingerprint": "sha256:d9b34dc64c9599cffcaa1ccf91062bc304239b750630c0cf1c096672bc2ebe08",
+  "runtime_evidence_tested_commit": "44ba6c5d94dd168164ac4d1cbff8fb4615aad0bf",
+  "runtime_evidence_run_id": 36124553944,
   "registry_screen_count": 545,
-  "route_screen_count": 122,
-  "unresolved_screen_count": 423,
+  "route_screen_count": 143,
+  "unresolved_screen_count": 402,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
     "FOS-CATTLE-001",
+    "FOS-CATTLE-002",
+    "FOS-CATTLE-003",
+    "FOS-CATTLE-004",
     "FOS-CATTLE-005",
+    "FOS-CATTLE-006",
     "FOS-CATTLE-008",
     "FOS-CATTLE-010",
     "FOS-CATTLE-013",
     "FOS-CATTLE-015",
     "FOS-CATTLE-017",
+    "FOS-CATTLE-018",
     "FOS-CATTLE-019",
     "FOS-CATTLE-021",
     "FOS-CATTLE-023",
@@ -27,6 +32,7 @@
     "FOS-CATTLE-029",
     "FOS-CATTLE-030",
     "FOS-CATTLE-032",
+    "FOS-CATTLE-034",
     "FOS-FEED-001",
     "FOS-FIN-001",
     "FOS-FIN-002",
@@ -45,8 +51,16 @@
     "FOS-GOAT-004",
     "FOS-GOAT-006",
     "FOS-GOAT-011",
+    "FOS-GOAT-016",
+    "FOS-GOAT-017",
+    "FOS-GOAT-020",
+    "FOS-GOAT-022",
+    "FOS-GOAT-031",
     "FOS-GOAT-032",
+    "FOS-GOAT-034",
     "FOS-GOAT-037",
+    "FOS-GOAT-039",
+    "FOS-GOAT-043",
     "FOS-GOAT-051",
     "FOS-GROUP-001",
     "FOS-HEALTH-001",
@@ -112,7 +126,12 @@
     "FOS-RABBIT-034",
     "FOS-SALES-001",
     "FOS-SHEEP-001",
+    "FOS-SHEEP-002",
+    "FOS-SHEEP-003",
+    "FOS-SHEEP-004",
+    "FOS-SHEEP-006",
     "FOS-SHEEP-009",
+    "FOS-SHEEP-010",
     "FOS-SHEEP-011",
     "FOS-SHEEP-012",
     "FOS-SHEEP-014",
@@ -127,7 +146,9 @@
     "FOS-SHEEP-026",
     "FOS-SHEEP-027",
     "FOS-SHEEP-029",
+    "FOS-SHEEP-030",
     "FOS-SYNC-002",
+    "FOS-SYNC-003",
     "FOS-TASK-001",
     "FOS-TASK-003",
     "FOS-TASK-004",
@@ -165,6 +186,39 @@
       }
     },
     {
+      "screen_id": "FOS-CATTLE-002",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-CATTLE-003",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-CATTLE-004",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-CATTLE-005",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -172,6 +226,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-CATTLE-006",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -227,6 +292,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-CATTLE-018",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt"
         ]
       }
     },
@@ -326,6 +402,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-CATTLE-034",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -552,24 +639,120 @@
       }
     },
     {
+      "screen_id": "FOS-GOAT-016",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-017",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-020",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-022",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-031",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-GOAT-032",
       "proof_classes": [
+        "RENDERED_SURFACE_OWNER",
         "TYPED_ROUTE_OWNER"
       ],
       "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
         ]
       }
     },
     {
+      "screen_id": "FOS-GOAT-034",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-GOAT-037",
       "proof_classes": [
+        "RENDERED_SURFACE_OWNER",
         "TYPED_ROUTE_OWNER"
       ],
       "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-039",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-043",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
         ]
       }
     },
@@ -1357,6 +1540,50 @@
       }
     },
     {
+      "screen_id": "FOS-SHEEP-002",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SHEEP-003",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SHEEP-004",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SHEEP-006",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-SHEEP-009",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -1364,6 +1591,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SHEEP-010",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt"
         ]
       }
     },
@@ -1522,6 +1760,17 @@
       }
     },
     {
+      "screen_id": "FOS-SHEEP-030",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-SYNC-002",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -1533,6 +1782,17 @@
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SYNC-003",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
         ]
       }
     },
@@ -1697,24 +1957,18 @@
     "FOS-CAP-008",
     "FOS-CAP-009",
     "FOS-CAP-010",
-    "FOS-CATTLE-002",
-    "FOS-CATTLE-003",
-    "FOS-CATTLE-004",
-    "FOS-CATTLE-006",
     "FOS-CATTLE-007",
     "FOS-CATTLE-009",
     "FOS-CATTLE-011",
     "FOS-CATTLE-012",
     "FOS-CATTLE-014",
     "FOS-CATTLE-016",
-    "FOS-CATTLE-018",
     "FOS-CATTLE-020",
     "FOS-CATTLE-022",
     "FOS-CATTLE-025",
     "FOS-CATTLE-027",
     "FOS-CATTLE-031",
     "FOS-CATTLE-033",
-    "FOS-CATTLE-034",
     "FOS-CATTLE-035",
     "FOS-CATTLE-036",
     "FOS-FEED-002",
@@ -1769,13 +2023,9 @@
     "FOS-GOAT-013",
     "FOS-GOAT-014",
     "FOS-GOAT-015",
-    "FOS-GOAT-016",
-    "FOS-GOAT-017",
     "FOS-GOAT-018",
     "FOS-GOAT-019",
-    "FOS-GOAT-020",
     "FOS-GOAT-021",
-    "FOS-GOAT-022",
     "FOS-GOAT-023",
     "FOS-GOAT-024",
     "FOS-GOAT-025",
@@ -1784,17 +2034,13 @@
     "FOS-GOAT-028",
     "FOS-GOAT-029",
     "FOS-GOAT-030",
-    "FOS-GOAT-031",
     "FOS-GOAT-033",
-    "FOS-GOAT-034",
     "FOS-GOAT-035",
     "FOS-GOAT-036",
     "FOS-GOAT-038",
-    "FOS-GOAT-039",
     "FOS-GOAT-040",
     "FOS-GOAT-041",
     "FOS-GOAT-042",
-    "FOS-GOAT-043",
     "FOS-GOAT-044",
     "FOS-GOAT-045",
     "FOS-GOAT-046",
@@ -1950,20 +2196,14 @@
     "FOS-SEARCH-007",
     "FOS-SEARCH-008",
     "FOS-SEARCH-009",
-    "FOS-SHEEP-002",
-    "FOS-SHEEP-003",
-    "FOS-SHEEP-004",
     "FOS-SHEEP-005",
-    "FOS-SHEEP-006",
     "FOS-SHEEP-007",
     "FOS-SHEEP-008",
-    "FOS-SHEEP-010",
     "FOS-SHEEP-013",
     "FOS-SHEEP-015",
     "FOS-SHEEP-018",
     "FOS-SHEEP-025",
     "FOS-SHEEP-028",
-    "FOS-SHEEP-030",
     "FOS-SHEEP-031",
     "FOS-SHEEP-032",
     "FOS-SIM-001",
@@ -1976,7 +2216,6 @@
     "FOS-SIM-008",
     "FOS-SIM-009",
     "FOS-SYNC-001",
-    "FOS-SYNC-003",
     "FOS-SYNC-004",
     "FOS-SYNC-005",
     "FOS-SYNC-006",

@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "94fc6337dce2c75636fde99f7e7fb1d03bddc438",
-  "source_fingerprint": "sha256:68b40915ca5238fcb753d6074adcab5be748091041f82ea12dd551ff995429cb",
+  "tested_commit": "44ba6c5d94dd168164ac4d1cbff8fb4615aad0bf",
+  "source_fingerprint": "sha256:d9b34dc64c9599cffcaa1ccf91062bc304239b750630c0cf1c096672bc2ebe08",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36116517457,
+  "foundation_run_id": 36124553944,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -109,6 +109,18 @@
         "FOS-SHEEP-026",
         "FOS-SHEEP-027",
         "FOS-SHEEP-029"
+      ],
+      "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt": [
+        "FOS-CATTLE-002",
+        "FOS-CATTLE-003",
+        "FOS-CATTLE-004",
+        "FOS-CATTLE-006",
+        "FOS-CATTLE-034",
+        "FOS-SHEEP-002",
+        "FOS-SHEEP-003",
+        "FOS-SHEEP-004",
+        "FOS-SHEEP-006",
+        "FOS-SHEEP-030"
       ]
     },
     "rendered_surface_owner": {
@@ -117,13 +129,28 @@
         "FOS-GLOBAL-020",
         "FOS-HOME-002"
       ],
+      "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt": [
+        "FOS-CATTLE-018",
+        "FOS-SHEEP-010"
+      ],
       "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt": [
         "FOS-GOAT-001",
         "FOS-GOAT-002",
         "FOS-GOAT-003",
         "FOS-GOAT-004",
         "FOS-GOAT-011",
-        "FOS-GOAT-051"
+        "FOS-GOAT-016",
+        "FOS-GOAT-017",
+        "FOS-GOAT-020",
+        "FOS-GOAT-022",
+        "FOS-GOAT-031",
+        "FOS-GOAT-032",
+        "FOS-GOAT-034",
+        "FOS-GOAT-037",
+        "FOS-GOAT-039",
+        "FOS-GOAT-043",
+        "FOS-GOAT-051",
+        "FOS-SYNC-003"
       ]
     },
     "route_contract": {
@@ -185,10 +212,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 19,
-    "rendered_traversal_screen_count": 75,
-    "rendered_owner_screen_count": 9,
+    "rendered_traversal_screen_count": 85,
+    "rendered_owner_screen_count": 22,
     "route_contract_screen_count": 47,
-    "combined_screen_count": 122,
+    "combined_screen_count": 143,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -211,7 +238,11 @@
       "FOS-WATER-001"
     ],
     "rendered_traversal_screen_ids": [
+      "FOS-CATTLE-002",
+      "FOS-CATTLE-003",
+      "FOS-CATTLE-004",
       "FOS-CATTLE-005",
+      "FOS-CATTLE-006",
       "FOS-CATTLE-008",
       "FOS-CATTLE-010",
       "FOS-CATTLE-013",
@@ -226,6 +257,7 @@
       "FOS-CATTLE-029",
       "FOS-CATTLE-030",
       "FOS-CATTLE-032",
+      "FOS-CATTLE-034",
       "FOS-FIN-002",
       "FOS-FIN-004",
       "FOS-FIN-005",
@@ -271,6 +303,10 @@
       "FOS-RABBIT-020",
       "FOS-RABBIT-022",
       "FOS-RABBIT-034",
+      "FOS-SHEEP-002",
+      "FOS-SHEEP-003",
+      "FOS-SHEEP-004",
+      "FOS-SHEEP-006",
       "FOS-SHEEP-009",
       "FOS-SHEEP-011",
       "FOS-SHEEP-012",
@@ -285,9 +321,11 @@
       "FOS-SHEEP-024",
       "FOS-SHEEP-026",
       "FOS-SHEEP-027",
-      "FOS-SHEEP-029"
+      "FOS-SHEEP-029",
+      "FOS-SHEEP-030"
     ],
     "rendered_owner_screen_ids": [
+      "FOS-CATTLE-018",
       "FOS-GLOBAL-002",
       "FOS-GLOBAL-020",
       "FOS-GOAT-001",
@@ -295,8 +333,20 @@
       "FOS-GOAT-003",
       "FOS-GOAT-004",
       "FOS-GOAT-011",
+      "FOS-GOAT-016",
+      "FOS-GOAT-017",
+      "FOS-GOAT-020",
+      "FOS-GOAT-022",
+      "FOS-GOAT-031",
+      "FOS-GOAT-032",
+      "FOS-GOAT-034",
+      "FOS-GOAT-037",
+      "FOS-GOAT-039",
+      "FOS-GOAT-043",
       "FOS-GOAT-051",
-      "FOS-HOME-002"
+      "FOS-HOME-002",
+      "FOS-SHEEP-010",
+      "FOS-SYNC-003"
     ],
     "route_contract_screen_ids": [
       "FOS-ASSET-001",
@@ -354,8 +404,6 @@
       "FOS-GLOBAL-017",
       "FOS-GLOBAL-018",
       "FOS-GOAT-006",
-      "FOS-GOAT-032",
-      "FOS-GOAT-037",
       "FOS-HOME-001",
       "FOS-HOME-012",
       "FOS-HOME-012-A",
@@ -372,12 +420,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 75,
+    "runtime_reachability_executed": 85,
     "entry_action_emission_executed": 19,
-    "rendered_surface_owners_executed": 9,
+    "rendered_surface_owners_executed": 22,
     "route_contracts_executed": 47,
     "parameter_scope_executed": true,
-    "return_restoration_executed": 75,
+    "return_restoration_executed": 85,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
