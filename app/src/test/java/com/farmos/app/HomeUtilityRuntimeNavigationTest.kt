@@ -51,7 +51,7 @@ class HomeUtilityRuntimeNavigationTest {
 
         open("Farm alerts")
         compose.onNodeWithTag("farm-screen:FOS-HOME-004").assertExists()
-        compose.onNodeWithText("1 overdue task(s)").assertExists()
+        compose.onNodeWithText("• 1 overdue task(s)").assertExists()
         restoreHome()
 
         open("Quick capture")
