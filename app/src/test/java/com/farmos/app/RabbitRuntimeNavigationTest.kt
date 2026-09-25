@@ -1,4 +1,4 @@
-package com.farmos.feature.rabbit
+package com.farmos.app
 
 import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.hasClickAction
@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.feature.rabbit.RabbitProgrammeScreen
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

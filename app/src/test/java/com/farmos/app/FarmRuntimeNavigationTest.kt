@@ -46,19 +46,22 @@ class FarmRuntimeNavigationTest {
         compose.onNodeWithText("Choose a species").assertIsDisplayed()
 
         val species = listOf(
-            "Goats" to FarmDestination.Goat(),
-            "Rabbits" to FarmDestination.Module(FarmModule.RABBIT),
-            "Sheep" to FarmDestination.Module(FarmModule.SHEEP),
-            "Cattle" to FarmDestination.Module(FarmModule.CATTLE),
-            "Poultry" to FarmDestination.Module(FarmModule.POULTRY),
+            Triple("Goats", FarmDestination.Goat(), "FOS-GOAT-001"),
+            Triple("Rabbits", FarmDestination.Module(FarmModule.RABBIT), "FOS-RABBIT-001"),
+            Triple("Sheep", FarmDestination.Module(FarmModule.SHEEP), "FOS-SHEEP-001"),
+            Triple("Cattle", FarmDestination.Module(FarmModule.CATTLE), "FOS-CATTLE-001"),
+            Triple("Poultry", FarmDestination.Module(FarmModule.POULTRY), "FOS-POULTRY-001"),
         )
-        species.forEach { (label, expected) ->
+        species.forEach { (label, expected, screenId) ->
             opened.set(null)
             compose.onNode(hasClickAction() and hasText(label))
                 .performScrollTo()
                 .assertIsDisplayed()
                 .performClick()
-            compose.runOnIdle { assertEquals(expected, opened.get()) }
+            compose.runOnIdle {
+                assertEquals(expected, opened.get())
+                assertEquals(screenId, opened.get()!!.runtimeRouteContract().screenId)
+            }
         }
 
         compose.onNode(hasClickAction() and hasText("Farm home"))
@@ -66,40 +69,54 @@ class FarmRuntimeNavigationTest {
             .performClick()
         compose.onNodeWithText("Farm home").assertIsDisplayed()
 
-        val general = generalHomeActions()
-        general.forEach { (label, expected) ->
+        val general = listOf(
+            Triple("Open tasks", FarmDestination.Tasks(TaskEntryPage.BOARD), "FOS-TASK-001"),
+            Triple("Open health", FarmDestination.Health(), "FOS-HEALTH-001"),
+            Triple("Open feed", FarmDestination.Module(FarmModule.FEED), "FOS-FEED-001"),
+            Triple("Open water", FarmDestination.Module(FarmModule.WATER), "FOS-WATER-001"),
+            Triple("Open sync status", FarmDestination.Goat(GoatEntryPage.SYNC), "FOS-SYNC-002"),
+        )
+        assertEquals(general.map { it.first to it.second }, generalHomeActions())
+        general.forEach { (label, expected, screenId) ->
             opened.set(null)
             compose.onNode(hasClickAction() and hasText(label))
                 .performScrollTo()
                 .assertIsDisplayed()
                 .performClick()
-            compose.runOnIdle { assertEquals(expected, opened.get()) }
+            compose.runOnIdle {
+                assertEquals(expected, opened.get())
+                assertEquals(screenId, opened.get()!!.runtimeRouteContract().screenId)
+            }
         }
 
         opened.set(null)
         compose.onNode(hasClickAction() and hasText("Tasks")).performClick()
         compose.runOnIdle {
             assertEquals(FarmDestination.Tasks(TaskEntryPage.BOARD), opened.get())
+            assertEquals("FOS-TASK-001", opened.get()!!.runtimeRouteContract().screenId)
         }
         compose.onNode(hasClickAction() and hasText("More")).performClick()
         compose.onNodeWithText("Farm records and tools").assertIsDisplayed()
 
         val more = listOf(
-            "Inventory" to FarmDestination.Module(FarmModule.INVENTORY),
-            "Sales" to FarmDestination.Module(FarmModule.SALES),
-            "Procurement" to FarmDestination.Module(FarmModule.PROCUREMENT),
-            "Finance" to FarmDestination.Module(FarmModule.MONEY),
-            "Pasture" to FarmDestination.Module(FarmModule.PASTURE),
-            "Labour" to FarmDestination.Module(FarmModule.LABOUR),
-            "Assets" to FarmDestination.Module(FarmModule.ASSETS),
+            Triple("Inventory", FarmDestination.Module(FarmModule.INVENTORY), "FOS-INV-001"),
+            Triple("Sales", FarmDestination.Module(FarmModule.SALES), "FOS-SALES-001"),
+            Triple("Procurement", FarmDestination.Module(FarmModule.PROCUREMENT), "FOS-PROC-001"),
+            Triple("Finance", FarmDestination.Module(FarmModule.MONEY), "FOS-FIN-001"),
+            Triple("Pasture", FarmDestination.Module(FarmModule.PASTURE), "FOS-PASTURE-001"),
+            Triple("Labour", FarmDestination.Module(FarmModule.LABOUR), "FOS-LABOUR-001"),
+            Triple("Assets", FarmDestination.Module(FarmModule.ASSETS), "FOS-ASSET-001"),
         )
-        more.forEach { (label, expected) ->
+        more.forEach { (label, expected, screenId) ->
             opened.set(null)
             compose.onNode(hasClickAction() and hasText(label))
                 .performScrollTo()
                 .assertIsDisplayed()
                 .performClick()
-            compose.runOnIdle { assertEquals(expected, opened.get()) }
+            compose.runOnIdle {
+                assertEquals(expected, opened.get())
+                assertEquals(screenId, opened.get()!!.runtimeRouteContract().screenId)
+            }
         }
 
         compose.onNode(hasClickAction() and hasText("Farm home"))
@@ -125,17 +142,20 @@ class FarmRuntimeNavigationTest {
         }
 
         val remaining = listOf(
-            "Open groups" to FarmDestination.Module(FarmModule.GROUPS),
-            "Open waitlist" to FarmDestination.Module(FarmModule.WAITLIST),
-            "Open sync status" to FarmDestination.Goat(GoatEntryPage.SYNC),
+            Triple("Open groups", FarmDestination.Module(FarmModule.GROUPS), "FOS-GROUP-001"),
+            Triple("Open waitlist", FarmDestination.Module(FarmModule.WAITLIST), "FOS-RABBIT-027"),
+            Triple("Open sync status", FarmDestination.Goat(GoatEntryPage.SYNC), "FOS-SYNC-002"),
         )
-        remaining.forEach { (label, expected) ->
+        remaining.forEach { (label, expected, screenId) ->
             opened.set(null)
             compose.onNode(hasClickAction() and hasText(label))
                 .performScrollTo()
                 .assertIsDisplayed()
                 .performClick()
-            compose.runOnIdle { assertEquals(expected, opened.get()) }
+            compose.runOnIdle {
+                assertEquals(expected, opened.get())
+                assertEquals(screenId, opened.get()!!.runtimeRouteContract().screenId)
+            }
         }
     }
 }

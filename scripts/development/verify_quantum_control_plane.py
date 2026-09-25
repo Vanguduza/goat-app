@@ -41,9 +41,17 @@ def source_fingerprint() -> str:
 
 
 def kotlin_ids() -> set[str]:
+    """Production Kotlin Screen-ID references only.
+
+    Unit/instrumentation tests are evidence about implementation; they are not
+    implementation themselves and must never inflate production coverage.
+    """
     found: set[str] = set()
     for base in ("app", "core", "data", "domain", "feature"):
         for path in (ROOT / base).rglob("*.kt"):
+            relative = path.relative_to(ROOT).as_posix()
+            if "/src/main/" not in relative:
+                continue
             found.update(SCREEN_RE.findall(path.read_text(errors="ignore")))
     return found
 

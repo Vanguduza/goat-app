@@ -1,4 +1,4 @@
-package com.farmos.feature.ops
+package com.farmos.app
 
 import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.hasClickAction
@@ -10,6 +10,14 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.feature.ops.CattleOperationsActions
+import com.farmos.feature.ops.CattleOperationsScreen
+import com.farmos.feature.ops.HealthObservationScreen
+import com.farmos.feature.ops.InventoryScreen
+import com.farmos.feature.ops.MoneyCaptureScreen
+import com.farmos.feature.ops.PoultryExperienceScreen
+import com.farmos.feature.ops.SheepOperationsActions
+import com.farmos.feature.ops.SheepOperationsScreen
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
