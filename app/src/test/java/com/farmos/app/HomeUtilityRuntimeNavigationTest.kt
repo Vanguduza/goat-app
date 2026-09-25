@@ -46,7 +46,7 @@ class HomeUtilityRuntimeNavigationTest {
 
         open("Today summary")
         compose.onNodeWithTag("farm-screen:FOS-HOME-003").assertExists()
-        compose.onNodeWithText("Open tasks").assertExists()
+        compose.onNode(hasClickAction() and hasText("Open tasks")).assertExists()
         restoreHome()
 
         open("Farm alerts")
