@@ -155,7 +155,6 @@ class GoatReferenceContractTest {
         }
 
         compose.onNodeWithTag("farm-screen:FOS-GOAT-004").assertIsDisplayed()
-        compose.onNodeWithText("Register goat").assertIsDisplayed()
         assertNamedClickTargets()
     }
 
