@@ -20,9 +20,11 @@ ENTRY_ACTION_TESTS = (
 RENDERED_TRAVERSAL_TESTS = (
     "app/src/test/java/com/farmos/app/RabbitRuntimeNavigationTest.kt",
     "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt",
+    "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt",
 )
 RENDERED_OWNER_TESTS = (
     "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt",
+    "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt",
 )
 ROUTE_CONTRACT_TESTS = (

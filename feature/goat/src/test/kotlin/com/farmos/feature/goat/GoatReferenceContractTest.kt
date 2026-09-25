@@ -159,6 +159,87 @@ class GoatReferenceContractTest {
     }
 
     @Test
+    fun healthObservationAtomsRenderCanonicalOwners() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.HEALTH,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        listOf("FOS-GOAT-022", "FOS-GOAT-016", "FOS-GOAT-020").forEach { screenId ->
+            compose.onNodeWithTag("farm-screen:$screenId").performScrollTo().assertIsDisplayed()
+        }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun reproductionAtomsRenderCanonicalOwners() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.REPRODUCTION,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        listOf("FOS-GOAT-017", "FOS-GOAT-031", "FOS-GOAT-032", "FOS-GOAT-034", "FOS-GOAT-043").forEach { screenId ->
+            compose.onNodeWithTag("farm-screen:$screenId").performScrollTo().assertIsDisplayed()
+        }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun kiddingAtomsRenderCanonicalOwners() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.KIDDING,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-037").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-039").performScrollTo().assertIsDisplayed()
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun syncPendingChangesAtomRendersCanonicalOwner() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.SYNC,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-003").assertIsDisplayed()
+        assertNamedClickTargets()
+    }
+
+    @Test
     fun lifecycleChangeRequiresExplicitConfirmation() {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {

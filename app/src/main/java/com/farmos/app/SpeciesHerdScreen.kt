@@ -39,6 +39,14 @@ data class SpeciesAnimalRow(
 
 private enum class SpeciesPage { DASHBOARD, HERD, PROFILE, REGISTER, WEIGHT, OPERATIONS, STATUS }
 
+private data class SpeciesScreenIds(
+    val herd: String,
+    val profile: String,
+    val register: String,
+    val weight: String,
+    val status: String,
+)
+
 private data class SpeciesUiConfig(
     val name: String,
     val plural: String,
@@ -47,6 +55,7 @@ private data class SpeciesUiConfig(
     val prefix: String,
     val visual: FarmSpeciesVisual,
     val operationsTitle: String,
+    val screenIds: SpeciesScreenIds,
 )
 
 @Composable
@@ -78,6 +87,13 @@ fun SpeciesHerdScreen(
                 "FOS-SHEEP",
                 FarmSpeciesVisual.SHEEP,
                 "Breeding & wool operations",
+                SpeciesScreenIds(
+                    herd = "FOS-SHEEP-002",
+                    profile = "FOS-SHEEP-003",
+                    register = "FOS-SHEEP-004",
+                    weight = "FOS-SHEEP-006",
+                    status = "FOS-SHEEP-030",
+                ),
             )
         } else {
             SpeciesUiConfig(
@@ -88,6 +104,13 @@ fun SpeciesHerdScreen(
                 "FOS-CATTLE",
                 FarmSpeciesVisual.CATTLE,
                 "Breeding, dairy & beef operations",
+                SpeciesScreenIds(
+                    herd = "FOS-CATTLE-002",
+                    profile = "FOS-CATTLE-003",
+                    register = "FOS-CATTLE-004",
+                    weight = "FOS-CATTLE-006",
+                    status = "FOS-CATTLE-034",
+                ),
             )
         }
     var page by remember { mutableStateOf(SpeciesPage.DASHBOARD) }
@@ -185,7 +208,7 @@ private fun SpeciesAction(
     FarmIllustratedSectionSurface(Modifier.fillMaxWidth()) {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        TextButton(onClick = onClick) { Text("Open") }
+        TextButton(onClick = onClick) { Text("Open $title") }
     }
 }
 
@@ -198,7 +221,7 @@ private fun SpeciesHerdList(
     onSelect: (String) -> Unit,
     onBack: () -> Unit,
 ) {
-    val id = "${config.prefix}-002"
+    val id = config.screenIds.herd
     FarmOperationalPage(
         id,
         "${config.name} ${if (config.prefix.endsWith("SHEEP")) "mob / flock" else "herd"}",
@@ -230,7 +253,7 @@ private fun SpeciesProfile(
     onBack: () -> Unit,
 ) {
     FarmOperationalPage(
-        "${config.prefix}-003",
+        config.screenIds.profile,
         "${config.name} profile",
         "Identity, current state and species-native actions.",
         FarmVisualClass.I2,
@@ -268,7 +291,7 @@ private fun SpeciesRegister(
     var name by remember { mutableStateOf("") }
     var sex by remember { mutableStateOf("FEMALE") }
     FarmOperationalPage(
-        "${config.prefix}-004",
+        config.screenIds.register,
         "Register ${config.name.lowercase()}",
         "Create an individual animal record.",
         onBack = onBack,
@@ -334,7 +357,7 @@ private fun SpeciesWeight(
     onBack: () -> Unit,
 ) {
     var weight by remember { mutableStateOf("") }
-    val id = "${config.prefix}-006"
+    val id = config.screenIds.weight
     FarmOperationalPage(id, "Record weight", "Capture live weight in kilograms.", onBack = onBack) {
         if (selected == null) {
             FarmOperationalRows(emptyList(), "No animal selected", null)
@@ -378,7 +401,7 @@ private fun SpeciesStatus(
     onBack: () -> Unit,
 ) {
     var pending by remember { mutableStateOf<String?>(null) }
-    val id = if (config.prefix.endsWith("SHEEP")) "FOS-SHEEP-030" else "FOS-CATTLE-034"
+    val id = config.screenIds.status
     FarmOperationalPage(
         id,
         "Lifecycle status",
