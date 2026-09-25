@@ -208,7 +208,8 @@ private fun SpeciesAction(
     FarmIllustratedSectionSurface(Modifier.fillMaxWidth()) {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        TextButton(onClick = onClick) { Text("Open $title") }
+        val actionLabel = if (title.startsWith("Open ")) title else "Open $title"
+        TextButton(onClick = onClick) { Text(actionLabel) }
     }
 }
 
