@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -55,7 +56,7 @@ class AnimalFarmReferenceContractTest {
         val fields = compose.onAllNodes(hasSetTextAction())
         fields[0].performTextInput("owner@example.com")
         fields[1].performTextInput("correct-horse")
-        compose.onNodeWithText("Sign in")
+        compose.onNode(hasClickAction() and hasText("Sign in"))
             .performScrollTo()
             .assertIsDisplayed()
             .assertIsEnabled()
@@ -108,7 +109,7 @@ class AnimalFarmReferenceContractTest {
             }
         }
 
-        compose.onNodeWithText("Continue task")
+        compose.onNode(hasClickAction() and hasText("Continue task"))
             .performScrollTo()
             .assertIsDisplayed()
             .performClick()
@@ -133,7 +134,7 @@ class AnimalFarmReferenceContractTest {
             }
         }
 
-        compose.onNodeWithText("Goats")
+        compose.onNode(hasClickAction() and hasText("Goats"))
             .performScrollTo()
             .assertIsDisplayed()
             .performClick()
@@ -141,7 +142,7 @@ class AnimalFarmReferenceContractTest {
             assertEquals(FarmModule.GOAT, opened)
         }
 
-        compose.onNodeWithText("Farm home")
+        compose.onNode(hasClickAction() and hasText("Farm home"))
             .performScrollTo()
             .assertIsDisplayed()
             .performClick()

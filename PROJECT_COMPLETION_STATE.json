@@ -2,7 +2,7 @@
   "schema_version": 1,
   "repository": "Vanguduza/goat-app",
   "canonical_branch": "main",
-  "source_fingerprint": "sha256:3c73c302a360df95e731f1206ea5b4a41dd9a753254a059fda4a2e3399625cd8",
+  "source_fingerprint": "sha256:01075facae68d98bda3115c77122399e44e7fa28005f2670e1a49f642ce8a6b7",
   "programme_status": "ACTIVE_DETERMINISTIC_COMPLETION",
   "release_blocked": true,
   "authority": {
@@ -1598,7 +1598,7 @@
       "feature_green": false
     }
   ],
-  "next_action": "PHASE_4_GENERATE_NATIVE_REFERENCE_BUNDLE_THEN_REVIEW_BEFORE_ANY_VISUAL_GREEN_PROMOTION",
+  "next_action": "PHASE_4_OWNER_AND_INDEPENDENT_VISUAL_APPROVALS_PENDING_CONTINUE_UNRELATED_UNBLOCKED_WORK",
   "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
   "dependency_graph": {
     "node_count": 156,
@@ -1732,11 +1732,20 @@
     }
   ],
   "visual_foundation": {
-    "status": "MACHINE_EVIDENCE_IN_PROGRESS",
+    "status": "MACHINE_EVIDENCE_COMPLETE_AWAITING_APPROVALS",
     "reference_ledger": "docs/ux/evidence/animal-farm-visual-lock/phase4-native-reference-ledger.json",
+    "reference_ledger_sha256": "sha256:d89dc1223a9af1824375cce025f652e14a4a5a69fced0b61ac4d5474b6a81361",
     "reference_surface_count": 10,
     "expected_png_minimum": 270,
+    "machine_capture_status": "COMPLETE_EXACT_MAIN_CI",
+    "machine_evidence_complete": true,
+    "tested_main_sha": "d5c3a2ec06d41350fb83465b1c5f36d980b97d15",
+    "main_foundation_run_id": 36097802722,
+    "ci_artifact_id": 10847389857,
     "approved_goldens": 0,
+    "accessibility_certified": false,
+    "route_certified": false,
+    "interaction_certified": false,
     "visual_green_promotions": 0,
     "approval_state": "OWNER_AND_INDEPENDENT_REVIEW_REQUIRED"
   }
