@@ -111,6 +111,17 @@ internal fun GoatExperienceScreen(
                 if (initialPage == GoatPage.SEARCH) onBackToFarm() else page = GoatPage.DASHBOARD
             },
         )
+        GoatPage.SCAN -> GoatScanScreen(
+            state = state,
+            onScan = actions.onScanIdentifier,
+            onSelect = {
+                actions.onSelectGoat(it)
+                page = GoatPage.PROFILE
+            },
+            onBack = {
+                if (initialPage == GoatPage.SCAN) onBackToFarm() else page = GoatPage.DASHBOARD
+            },
+        )
         GoatPage.SYNC -> GoatSyncScreen(state, actions.onSyncNow) {
             if (initialPage == GoatPage.SYNC) onBackToFarm() else page = GoatPage.DASHBOARD
         }
@@ -191,6 +202,7 @@ private fun GoatDashboardScreen(
                 onOpen(if (state.selected != null) GoatPage.WEIGHT else GoatPage.HERD)
             }
             GoatDashboardAction("Search", state.searchMessage) { onOpen(GoatPage.SEARCH) }
+            GoatDashboardAction("Scan tag", "RFID, EID or animal tag") { onOpen(GoatPage.SCAN) }
 
             state.selected?.let { goat ->
                 FarmIllustratedSectionSurface(Modifier.clickable { onOpen(GoatPage.PROFILE) }) {

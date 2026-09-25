@@ -22,6 +22,7 @@ data class FarmRuntimeRoute(
 fun FarmDestination.runtimeRouteContract(): FarmRuntimeRoute =
     when (this) {
         FarmDestination.Home -> FarmRuntimeRoute("home", "FOS-HOME-001")
+        FarmDestination.Search -> FarmRuntimeRoute("home.search", "FOS-HOME-006")
         is FarmDestination.Module -> module.runtimeRouteContract()
         is FarmDestination.Goat -> entry.runtimeRouteContract()
         is FarmDestination.Health -> entry.runtimeRouteContract()
@@ -65,6 +66,7 @@ private fun GoatEntryPage.runtimeRouteContract(): FarmRuntimeRoute =
             GoatEntryPage.DASHBOARD -> "FOS-GOAT-001"
             GoatEntryPage.WEIGHT -> "FOS-GOAT-011"
             GoatEntryPage.SEARCH -> "FOS-GOAT-006"
+            GoatEntryPage.SCAN -> "FOS-GOAT-007"
             GoatEntryPage.SYNC -> "FOS-SYNC-002"
             GoatEntryPage.KIDDING -> "FOS-GOAT-037"
             GoatEntryPage.REPRODUCTION -> "FOS-GOAT-032"

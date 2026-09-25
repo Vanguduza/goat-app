@@ -69,6 +69,16 @@ class FarmRuntimeNavigationTest {
             .performClick()
         compose.onNodeWithText("Farm home").assertIsDisplayed()
 
+        opened.set(null)
+        compose.onNode(hasClickAction() and hasText("Search farm"))
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+        compose.runOnIdle {
+            assertEquals(FarmDestination.Search, opened.get())
+            assertEquals("FOS-HOME-006", opened.get()!!.runtimeRouteContract().screenId)
+        }
+
         val general = listOf(
             Triple("Open tasks", FarmDestination.Tasks(TaskEntryPage.BOARD), "FOS-TASK-001"),
             Triple("Open health", FarmDestination.Health(), "FOS-HEALTH-001"),
@@ -124,6 +134,32 @@ class FarmRuntimeNavigationTest {
             .performClick()
         compose.onNodeWithText("Farm home").assertIsDisplayed()
     }
+    @Test
+    fun workerHomeScanActionOpensCanonicalRfidRoute() {
+        val opened = AtomicReference<FarmDestination?>(null)
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                WorkerWorkBoardScreen(
+                    farmName = "Premier Farm",
+                    summary = FarmHomeSummary(),
+                    onOpen = opened::set,
+                    onAnimals = {},
+                    onMore = {},
+                    today = LocalDate.of(2026, 9, 24),
+                )
+            }
+        }
+
+        compose.onNode(hasClickAction() and hasText("Scan animal"))
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+        compose.runOnIdle {
+            assertEquals(FarmDestination.Goat(GoatEntryPage.SCAN), opened.get())
+            assertEquals("FOS-GOAT-007", opened.get()!!.runtimeRouteContract().screenId)
+        }
+    }
+
     @Test
     fun managementHomeExposesTheRemainingExactModuleOwners() {
         val opened = AtomicReference<FarmDestination?>(null)

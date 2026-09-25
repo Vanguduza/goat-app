@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:1b0483eb3ad3032f0eb0de9362c1cc74b59dac60a6187f63e9972299e184a16e",
-  "runtime_evidence_tested_commit": "d76343d79ca83c8a191de8293369e4087a21a4f2",
-  "runtime_evidence_run_id": 36130146356,
+  "source_fingerprint": "sha256:708ef4dd42c0e54b17140c87e5495a9731490aa5d88867f4aaa42a3fecd282f4",
+  "runtime_evidence_tested_commit": "7df2d637faf88aa02012447dc05e75fc6bb21a9f",
+  "runtime_evidence_run_id": 36160800527,
   "registry_screen_count": 545,
-  "route_screen_count": 148,
-  "unresolved_screen_count": 397,
+  "route_screen_count": 151,
+  "unresolved_screen_count": 394,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -51,6 +51,7 @@
     "FOS-GOAT-003",
     "FOS-GOAT-004",
     "FOS-GOAT-006",
+    "FOS-GOAT-007",
     "FOS-GOAT-011",
     "FOS-GOAT-016",
     "FOS-GOAT-017",
@@ -79,6 +80,8 @@
     "FOS-HEALTH-026",
     "FOS-HOME-001",
     "FOS-HOME-002",
+    "FOS-HOME-006",
+    "FOS-HOME-007",
     "FOS-HOME-009",
     "FOS-HOME-012",
     "FOS-HOME-012-A",
@@ -640,6 +643,25 @@
       }
     },
     {
+      "screen_id": "FOS-GOAT-007",
+      "proof_classes": [
+        "ENTRY_ACTION_DESTINATION",
+        "RENDERED_SURFACE_OWNER",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "ENTRY_ACTION_DESTINATION": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-GOAT-011",
       "proof_classes": [
         "RENDERED_SURFACE_OWNER",
@@ -988,6 +1010,36 @@
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
           "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-HOME-006",
+      "proof_classes": [
+        "ENTRY_ACTION_DESTINATION",
+        "RENDERED_SURFACE_OWNER",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "ENTRY_ACTION_DESTINATION": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/GlobalSearchContractTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-HOME-007",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/GlobalSearchContractTest.kt"
         ]
       }
     },
@@ -2078,7 +2130,6 @@
     "FOS-GLOBAL-015",
     "FOS-GLOBAL-019",
     "FOS-GOAT-005",
-    "FOS-GOAT-007",
     "FOS-GOAT-008",
     "FOS-GOAT-009",
     "FOS-GOAT-010",
@@ -2143,8 +2194,6 @@
     "FOS-HOME-003",
     "FOS-HOME-004",
     "FOS-HOME-005",
-    "FOS-HOME-006",
-    "FOS-HOME-007",
     "FOS-HOME-008",
     "FOS-HOME-010",
     "FOS-HOME-011",

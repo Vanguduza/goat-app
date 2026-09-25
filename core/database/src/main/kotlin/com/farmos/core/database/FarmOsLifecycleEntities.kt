@@ -374,6 +374,16 @@ interface LifecycleDao {
     @Upsert suspend fun upsertPregnancy(row: GoatPregnancyEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertIdentifier(row: AnimalIdentifierEntity)
     @Upsert suspend fun upsertIdentifier(row: AnimalIdentifierEntity)
+    @Query("""
+        SELECT * FROM animal_identifiers
+        WHERE farmId = :farmId
+          AND isActive = 1
+          AND type IN ('rfid', 'eid', 'ear_tag', 'farm_id', 'official_id', 'registration')
+          AND value = :value COLLATE NOCASE
+        ORDER BY assignedEpochDay DESC, id
+        LIMIT 1
+    """)
+    suspend fun activeIdentifierByValue(farmId: String, value: String): AnimalIdentifierEntity?
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMovement(row: OfficialMovementEntity)
     @Upsert suspend fun upsertMovement(row: OfficialMovementEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertLot(row: InventoryLotEntity)
