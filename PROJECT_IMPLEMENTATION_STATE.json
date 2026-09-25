@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "repository": "Vanguduza/goat-app",
-  "source_fingerprint": "sha256:68b40915ca5238fcb753d6074adcab5be748091041f82ea12dd551ff995429cb",
+  "source_fingerprint": "sha256:4d1e4b560e9ae30cb7b06ce90ea234062a60ba5de43639cb993c285aa8750293",
   "canonical_branch": "main",
   "release_state": "BLOCKED",
   "green_states": {
@@ -13,7 +13,7 @@
   },
   "screen_coverage": {
     "registered": 545,
-    "kotlin_referenced": 132,
+    "kotlin_referenced": 147,
     "implementation_mapped": 128,
     "qdu_states": {
       "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 150,
@@ -72,7 +72,7 @@
     },
     "cattle": {
       "registered": 36,
-      "kotlin_referenced": 18,
+      "kotlin_referenced": 22,
       "implementation_mapped": 22,
       "visual_green": 0,
       "feature_count": 7,
@@ -112,7 +112,7 @@
     },
     "goat": {
       "registered": 55,
-      "kotlin_referenced": 12,
+      "kotlin_referenced": 18,
       "implementation_mapped": 17,
       "visual_green": 0,
       "feature_count": 10,
@@ -216,7 +216,7 @@
     },
     "sheep": {
       "registered": 32,
-      "kotlin_referenced": 18,
+      "kotlin_referenced": 22,
       "implementation_mapped": 22,
       "visual_green": 0,
       "feature_count": 7,
@@ -232,7 +232,7 @@
     },
     "sync": {
       "registered": 18,
-      "kotlin_referenced": 1,
+      "kotlin_referenced": 2,
       "implementation_mapped": 2,
       "visual_green": 0,
       "feature_count": 5,
