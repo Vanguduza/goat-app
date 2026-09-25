@@ -2,7 +2,7 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "59d8065c3e7d47dbb68f0353c2fb0812bdfccb29",
+  "tested_commit": "21be378a5d04c7d8809f4e55bfb562ea3dee4922",
   "ci_status": "CI_PENDING",
   "foundation_run_id": null,
   "test_sources": {
