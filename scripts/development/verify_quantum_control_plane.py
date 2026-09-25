@@ -22,6 +22,7 @@ STATE_OUT = ROOT / "PROJECT_IMPLEMENTATION_STATE.json"
 COMPLETION_OUT = ROOT / "PROJECT_COMPLETION_STATE.json"
 FEATURE_OUT = ROOT / "docs/realisation/FEATURE_REGISTRY.yaml"
 DEPENDENCY_OUT = ROOT / "docs/realisation/FEATURE_DEPENDENCY_GRAPH.json"
+PHASE4_LEDGER = ROOT / "docs/ux/evidence/animal-farm-visual-lock/phase4-native-reference-ledger.json"
 SCREEN_RE = re.compile(r"FOS-[A-Z]+-[0-9]{3}(?:-[A-Z])?")
 
 
@@ -53,6 +54,70 @@ def mapped_ids() -> set[str]:
     for surface in data.get("surfaces", []):
         found.update(surface.get("target_screens") or [])
     return found
+
+
+def phase4_visual_foundation_state() -> tuple[dict, str]:
+    ledger = json.loads(PHASE4_LEDGER.read_text(encoding="utf-8"))
+    if ledger.get("phase") != "phase_4_visual_foundation_certification":
+        raise SystemExit("Phase 4 evidence ledger has an unexpected phase identity")
+
+    evidence = ledger.get("evidence") or {}
+    matrix = ledger.get("matrix") or {}
+    approvals = ledger.get("approvals") or {}
+    green_claims = ledger.get("green_claims") or {}
+
+    if (
+        int(green_claims.get("visual_green_screens") or 0) != 0
+        or int(green_claims.get("feature_green") or 0) != 0
+        or int(green_claims.get("module_green") or 0) != 0
+        or bool(green_claims.get("mvp_green"))
+    ):
+        raise SystemExit("Phase 4 evidence ledger cannot manufacture green-state promotions")
+
+    machine_complete = (
+        ledger.get("status") == "MACHINE_EVIDENCE_COMPLETE_AWAITING_APPROVALS"
+        and evidence.get("machine_capture_status") == "COMPLETE_EXACT_MAIN_CI"
+        and bool(evidence.get("native_reference_matrix_verified"))
+        and bool(evidence.get("accessibility_bounds_verified"))
+        and bool(evidence.get("route_contracts_verified"))
+        and bool(evidence.get("interaction_contracts_verified"))
+        and bool(evidence.get("device_e2e_verified"))
+    )
+    approvals_complete = all(
+        approvals.get(key) is not None
+        for key in ("baseline_approval", "independent_review", "owner_pixel_acceptance", "outdoor_native_acceptance")
+    )
+    if evidence.get("approved_goldens") and not approvals_complete:
+        raise SystemExit("approved native goldens require all recorded Phase 4 approvals")
+
+    ledger_sha = "sha256:" + hashlib.sha256(PHASE4_LEDGER.read_bytes()).hexdigest()
+    status = ledger.get("status") or "IN_PROGRESS_MACHINE_EVIDENCE"
+    next_action = (
+        "PHASE_4_OWNER_AND_INDEPENDENT_VISUAL_APPROVALS_PENDING_CONTINUE_UNRELATED_UNBLOCKED_WORK"
+        if machine_complete and not approvals_complete
+        else "PHASE_4_REVIEW_AND_CERTIFY_APPROVED_GOLDENS_BEFORE_ANY_VISUAL_GREEN_PROMOTION"
+        if machine_complete
+        else "PHASE_4_GENERATE_NATIVE_REFERENCE_BUNDLE_THEN_REVIEW_BEFORE_ANY_VISUAL_GREEN_PROMOTION"
+    )
+    visual_foundation = {
+        "status": status,
+        "reference_ledger": str(PHASE4_LEDGER.relative_to(ROOT)).replace("\\", "/"),
+        "reference_ledger_sha256": ledger_sha,
+        "reference_surface_count": len(matrix.get("reference_surfaces") or []),
+        "expected_png_minimum": int(matrix.get("expected_png_minimum") or 0),
+        "machine_capture_status": evidence.get("machine_capture_status"),
+        "machine_evidence_complete": machine_complete,
+        "tested_main_sha": evidence.get("merged_main_sha"),
+        "main_foundation_run_id": evidence.get("main_foundation_run_id"),
+        "ci_artifact_id": evidence.get("ci_artifact_id"),
+        "approved_goldens": int(bool(evidence.get("approved_goldens"))),
+        "accessibility_certified": bool(evidence.get("accessibility_certified")),
+        "route_certified": bool(evidence.get("route_certified")),
+        "interaction_certified": bool(evidence.get("interaction_certified")),
+        "visual_green_promotions": int(green_claims.get("visual_green_screens") or 0),
+        "approval_state": "COMPLETE" if approvals_complete else "OWNER_AND_INDEPENDENT_REVIEW_REQUIRED",
+    }
+    return visual_foundation, next_action
 
 
 def build() -> tuple[dict, dict, dict, dict]:
@@ -168,6 +233,7 @@ def build() -> tuple[dict, dict, dict, dict]:
         "status_law": "Feature binding is scope accounting only; it is not route reachability, FEATURE_GREEN, MODULE_GREEN, VISUAL_GREEN, or MVP_GREEN.",
     }
     dependency_graph = build_graph()
+    visual_foundation, next_action = phase4_visual_foundation_state()
     completion = {
         "schema_version": 1, "repository": "Vanguduza/goat-app", "canonical_branch": "main",
         "source_fingerprint": source_fingerprint(), "programme_status": "ACTIVE_DETERMINISTIC_COMPLETION", "release_blocked": True,
@@ -185,16 +251,8 @@ def build() -> tuple[dict, dict, dict, dict]:
         "dependency_graph": {"node_count": dependency_graph["summary"]["node_count"], "edge_count": dependency_graph["summary"]["edge_count"], "root_count": dependency_graph["summary"]["root_count"], "cycle_free": dependency_graph["summary"]["cycle_free"], "phase_monotonic": dependency_graph["summary"]["phase_monotonic"]},
         "global_programme_gates": dependency_graph["global_programme_gates"],
         "features": [{"feature_id": f["feature_id"], "module": f["module"], "name": f["name"], "completion_phase": f["completion_phase"], "screen_count": len(f["screen_ids"]), "contract_status": "OPEN", "feature_green": False} for f in features],
-        "visual_foundation": {
-            "status": "MACHINE_EVIDENCE_IN_PROGRESS",
-            "reference_ledger": "docs/ux/evidence/animal-farm-visual-lock/phase4-native-reference-ledger.json",
-            "reference_surface_count": 10,
-            "expected_png_minimum": 270,
-            "approved_goldens": 0,
-            "visual_green_promotions": 0,
-            "approval_state": "OWNER_AND_INDEPENDENT_REVIEW_REQUIRED",
-        },
-        "next_action": "PHASE_4_GENERATE_NATIVE_REFERENCE_BUNDLE_THEN_REVIEW_BEFORE_ANY_VISUAL_GREEN_PROMOTION",
+        "visual_foundation": visual_foundation,
+        "next_action": next_action,
         "status_law": "Counts are generated from canonical registries and evidence. No status may be promoted manually or by code existence alone.",
     }
     return feature_registry, qdu_registry, state, completion
