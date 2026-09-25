@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "7df2d637faf88aa02012447dc05e75fc6bb21a9f",
+  "tested_commit": "fb76940d66ac0dcbd28fb007f88d9db33b0ff8d4",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 151
+    "registered_ids_mentioned_in_kotlin": 154
   },
   "top_level": {
     "farm_modules": [
