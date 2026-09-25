@@ -18,6 +18,7 @@ python3 scripts/development/verify_quantum_control_plane.py --check
 python3 scripts/development/feature_dependencies.py --check
 python3 scripts/design/build-runtime-navigation-evidence.py --self-test
 python3 scripts/design/build-route-screen-feature-gap.py --self-test
+python3 scripts/design/export-runtime-route-ownership.py --self-test --check
 bash scripts/ci/verify-actions-pinned.sh
 
 echo "Checking Kotlin files for duplicate imports"
