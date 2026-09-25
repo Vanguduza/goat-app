@@ -25,9 +25,22 @@ class FoundationAuthStateTest {
     }
 
     @Test
-    fun ordinaryEntranceStatesRemainStable() {
-        assertEquals(FoundationAuthScreenState.FARM_SELECTION, resolveFoundationAuthScreenState(true, true, 1, null))
-        assertEquals(FoundationAuthScreenState.FARM_SETUP, resolveFoundationAuthScreenState(true, true, 0, null))
-        assertEquals(FoundationAuthScreenState.SIGN_IN, resolveFoundationAuthScreenState(true, false, 0, null))
+    fun ordinaryEntranceStatesRemainStableAndOwnRegisteredScreens() {
+        assertEquals(
+            "FOS-GLOBAL-005",
+            resolveFoundationAuthScreenState(true, true, 1, null).screenId,
+        )
+        assertEquals(
+            "FOS-GLOBAL-006",
+            resolveFoundationAuthScreenState(true, true, 0, null).screenId,
+        )
+        assertEquals(
+            "FOS-GLOBAL-002",
+            resolveFoundationAuthScreenState(true, false, 0, null).screenId,
+        )
+        assertEquals(
+            "FOS-GLOBAL-018",
+            resolveFoundationAuthScreenState(false, false, 0, null).screenId,
+        )
     }
 }

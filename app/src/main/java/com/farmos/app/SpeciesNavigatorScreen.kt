@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmContextHeader
@@ -40,7 +41,7 @@ fun SpeciesNavigatorScreen(
     )
     AnimalFarmCanvas {
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 12.dp),
+            Modifier.testTag("farm-screen:FOS-HOME-002").weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AnimalFarmContextHeader(

@@ -49,6 +49,7 @@ def runtime_evidence():
     empty = {
         'ledger': None,
         'rendered': set(),
+        'rendered_owner': set(),
         'entry': set(),
         'contract': set(),
         'parameter_scope': False,
@@ -66,6 +67,7 @@ def runtime_evidence():
     return {
         'ledger': ledger,
         'rendered': set(coverage.get('rendered_traversal_screen_ids', [])),
+        'rendered_owner': set(coverage.get('rendered_owner_screen_ids', [])),
         'entry': set(coverage.get('entry_action_screen_ids', [])),
         'contract': set(coverage.get('route_contract_screen_ids', [])),
         'parameter_scope': bool(certification.get('parameter_scope_executed')),
@@ -148,10 +150,13 @@ def main():
         sid = screen['screen_id']
         evidence = route_evidence(sid, mapped, code, role_ids)
         rendered = sid in runtime['rendered']
+        rendered_owner = sid in runtime['rendered_owner']
         entry = sid in runtime['entry']
         contract = sid in runtime['contract']
         if rendered:
             note = 'Rendered destination traversal and return/restoration passed exact-head CI.'
+        elif rendered_owner:
+            note = 'Rendered surface asserted its exact canonical Screen ID under exact-head CI; return/restoration is not claimed.'
         elif entry:
             note = 'Entry action emitted the exact typed destination in CI; rendered target traversal remains unexecuted.'
         elif contract:
@@ -205,6 +210,7 @@ def main():
         'no_route_evidence': evidence_counts['NO_ROUTE_EVIDENCE'],
         'some_static_route_evidence': len(rows) - evidence_counts['NO_ROUTE_EVIDENCE'],
         'runtime_reachability_executed': len(runtime['rendered']),
+        'rendered_surface_owners_executed': len(runtime['rendered_owner']),
         'entry_action_emission_executed': len(runtime['entry']),
         'route_contracts_executed': len(runtime['contract']),
         'runtime_evidence': (
@@ -236,6 +242,7 @@ def main():
         print(
             'PASS route-screen-feature gap inventory self-test: '
             f"{len(runtime['rendered'])} rendered runtime / "
+            f"{len(runtime['rendered_owner'])} rendered-owner / "
             f"{len(runtime['entry'])} entry-action / "
             f"{len(runtime['contract'])} route-contract"
         )

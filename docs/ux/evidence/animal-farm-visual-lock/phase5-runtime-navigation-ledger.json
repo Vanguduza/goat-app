@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "736d06ba43ba962d2fbd861ff52ee10bc7d3eb5a",
-  "source_fingerprint": "sha256:ff9ad5b0798d19e311481b24acecf78160d93dda78fa6ee8f717317b31272779",
+  "tested_commit": "94fc6337dce2c75636fde99f7e7fb1d03bddc438",
+  "source_fingerprint": "sha256:68b40915ca5238fcb753d6074adcab5be748091041f82ea12dd551ff995429cb",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36109290111,
+  "foundation_run_id": 36116517457,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -111,6 +111,21 @@
         "FOS-SHEEP-029"
       ]
     },
+    "rendered_surface_owner": {
+      "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt": [
+        "FOS-GLOBAL-002",
+        "FOS-GLOBAL-020",
+        "FOS-HOME-002"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt": [
+        "FOS-GOAT-001",
+        "FOS-GOAT-002",
+        "FOS-GOAT-003",
+        "FOS-GOAT-004",
+        "FOS-GOAT-011",
+        "FOS-GOAT-051"
+      ]
+    },
     "route_contract": {
       "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt": [
         "FOS-ASSET-001",
@@ -145,6 +160,25 @@
         "FOS-TASK-003",
         "FOS-TASK-004",
         "FOS-WATER-001"
+      ],
+      "app/src/test/java/com/farmos/app/FoundationAuthStateTest.kt": [
+        "FOS-GLOBAL-002",
+        "FOS-GLOBAL-005",
+        "FOS-GLOBAL-006",
+        "FOS-GLOBAL-016",
+        "FOS-GLOBAL-017",
+        "FOS-GLOBAL-018"
+      ],
+      "app/src/test/java/com/farmos/app/RoleHomeRouteContractTest.kt": [
+        "FOS-HOME-012",
+        "FOS-HOME-012-A",
+        "FOS-HOME-012-B",
+        "FOS-HOME-012-C",
+        "FOS-HOME-012-D",
+        "FOS-HOME-012-E",
+        "FOS-HOME-012-F",
+        "FOS-HOME-012-G",
+        "FOS-HOME-012-H"
       ]
     }
   },
@@ -152,8 +186,9 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 19,
     "rendered_traversal_screen_count": 75,
-    "route_contract_screen_count": 32,
-    "combined_screen_count": 101,
+    "rendered_owner_screen_count": 9,
+    "route_contract_screen_count": 47,
+    "combined_screen_count": 122,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -252,11 +287,28 @@
       "FOS-SHEEP-027",
       "FOS-SHEEP-029"
     ],
+    "rendered_owner_screen_ids": [
+      "FOS-GLOBAL-002",
+      "FOS-GLOBAL-020",
+      "FOS-GOAT-001",
+      "FOS-GOAT-002",
+      "FOS-GOAT-003",
+      "FOS-GOAT-004",
+      "FOS-GOAT-011",
+      "FOS-GOAT-051",
+      "FOS-HOME-002"
+    ],
     "route_contract_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
       "FOS-FEED-001",
       "FOS-FIN-001",
+      "FOS-GLOBAL-002",
+      "FOS-GLOBAL-005",
+      "FOS-GLOBAL-006",
+      "FOS-GLOBAL-016",
+      "FOS-GLOBAL-017",
+      "FOS-GLOBAL-018",
       "FOS-GOAT-001",
       "FOS-GOAT-006",
       "FOS-GOAT-011",
@@ -271,6 +323,15 @@
       "FOS-HEALTH-021",
       "FOS-HEALTH-024",
       "FOS-HOME-001",
+      "FOS-HOME-012",
+      "FOS-HOME-012-A",
+      "FOS-HOME-012-B",
+      "FOS-HOME-012-C",
+      "FOS-HOME-012-D",
+      "FOS-HOME-012-E",
+      "FOS-HOME-012-F",
+      "FOS-HOME-012-G",
+      "FOS-HOME-012-H",
       "FOS-INV-001",
       "FOS-LABOUR-001",
       "FOS-PASTURE-001",
@@ -287,11 +348,24 @@
       "FOS-WATER-001"
     ],
     "route_contract_only_screen_ids": [
+      "FOS-GLOBAL-005",
+      "FOS-GLOBAL-006",
+      "FOS-GLOBAL-016",
+      "FOS-GLOBAL-017",
+      "FOS-GLOBAL-018",
       "FOS-GOAT-006",
-      "FOS-GOAT-011",
       "FOS-GOAT-032",
       "FOS-GOAT-037",
       "FOS-HOME-001",
+      "FOS-HOME-012",
+      "FOS-HOME-012-A",
+      "FOS-HOME-012-B",
+      "FOS-HOME-012-C",
+      "FOS-HOME-012-D",
+      "FOS-HOME-012-E",
+      "FOS-HOME-012-F",
+      "FOS-HOME-012-G",
+      "FOS-HOME-012-H",
       "FOS-TASK-003",
       "FOS-TASK-004"
     ],
@@ -300,7 +374,8 @@
   "certification": {
     "runtime_reachability_executed": 75,
     "entry_action_emission_executed": 19,
-    "route_contracts_executed": 32,
+    "rendered_surface_owners_executed": 9,
+    "route_contracts_executed": 47,
     "parameter_scope_executed": true,
     "return_restoration_executed": 75,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
@@ -311,5 +386,5 @@
     "module_green": 0,
     "mvp_green": false
   },
-  "law": "A Screen ID is runtime-reachable here only when an executable Compose test renders the destination, asserts its canonical Screen ID, and exercises return/restoration under the recorded exact-head CI run. Top-level entry-action emission and route-contract tests are reported separately and never substitute for rendered traversal. This evidence makes no VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN claim."
+  "law": "Rendered destination traversal, rendered surface ownership, top-level entry-action emission, and typed route ownership are distinct evidence classes. Only traversal implies return/restoration. Every class requires an executable test naming the exact registered Screen ID under the recorded exact-head CI run. No class substitutes for another. This evidence makes no VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN claim."
 }

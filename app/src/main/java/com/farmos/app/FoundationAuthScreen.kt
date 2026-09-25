@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -64,8 +65,17 @@ fun FoundationAuthScreen(
     var farmName by remember { mutableStateOf("") }
     var showSignOutConfirmation by remember { mutableStateOf(false) }
     val requestSignOut = { showSignOutConfirmation = true }
+    val screenState = resolveFoundationAuthScreenState(
+        backendConfigured = backendConfigured,
+        sessionPresent = sessionPresent,
+        membershipCount = memberships.size,
+        attention = attention,
+    )
 
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    Surface(
+        modifier = Modifier.fillMaxSize().testTag("farm-screen:${screenState.screenId}"),
+        color = MaterialTheme.colorScheme.background,
+    ) {
         Box(
             modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 24.dp),
             contentAlignment = Alignment.Center,
@@ -96,12 +106,6 @@ fun FoundationAuthScreen(
                         modifier = Modifier.padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp),
                     ) {
-                        val screenState = resolveFoundationAuthScreenState(
-                            backendConfigured = backendConfigured,
-                            sessionPresent = sessionPresent,
-                            membershipCount = memberships.size,
-                            attention = attention,
-                        )
                         when (screenState) {
                             FoundationAuthScreenState.BACKEND_UNAVAILABLE -> BackendUnavailableState()
                             FoundationAuthScreenState.FARM_SELECTION -> FarmSelectionState(
