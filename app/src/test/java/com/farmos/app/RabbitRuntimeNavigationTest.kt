@@ -1,6 +1,5 @@
 package com.farmos.app
 
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
