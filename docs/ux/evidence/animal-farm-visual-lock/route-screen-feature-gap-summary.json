@@ -1,23 +1,32 @@
 {
-  "schema_version": 1,
-  "tested_commit": "3a5a2992fea4919c57957441f67590c72df51fd2",
-  "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_NOT_RUNTIME_CERTIFICATION",
+  "schema_version": 2,
+  "tested_commit": "ce40df5ac9d328c337f902efe9f74dd9d9636b8b",
+  "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_WITH_SEPARATE_RUNTIME_EVIDENCE",
   "registry_rows": 545,
   "route_evidence_counts": {
-    "NO_ROUTE_EVIDENCE": 398,
+    "NO_ROUTE_EVIDENCE": 395,
     "STATIC_AUTH_STATE_BRANCH": 4,
     "STATIC_CODE_ID_REFERENCE_ONLY": 14,
     "STATIC_GENERAL_HOME_FALLBACK": 1,
     "STATIC_HOME_NESTED_DESTINATION": 1,
     "STATIC_MAIN_ACTIVITY_SPLASH_BRANCH": 1,
     "STATIC_ROLE_DISPATCH_PRESENT": 8,
-    "STATIC_SOURCE_MAP_HINT_ONLY": 20,
-    "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 98
+    "STATIC_SOURCE_MAP_HINT_ONLY": 18,
+    "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 103
   },
-  "no_route_evidence": 398,
-  "some_static_route_evidence": 147,
-  "runtime_reachability_executed": 0,
-  "feature_id_catalog_status": "MISSING_OR_NOT_CANONICALLY_IDENTIFIED",
+  "no_route_evidence": 395,
+  "some_static_route_evidence": 150,
+  "runtime_reachability_executed": 75,
+  "entry_action_emission_executed": 19,
+  "route_contracts_executed": 32,
+  "runtime_evidence": {
+    "ledger": "docs/ux/evidence/animal-farm-visual-lock/phase5-runtime-navigation-ledger.json",
+    "tested_commit": "736d06ba43ba962d2fbd861ff52ee10bc7d3eb5a",
+    "source_fingerprint": "sha256:ff9ad5b0798d19e311481b24acecf78160d93dda78fa6ee8f717317b31272779",
+    "foundation_run_id": 36109290111,
+    "ci_status": "PASS_EXACT_HEAD_CI"
+  },
+  "feature_id_catalog_status": "CANONICAL_OWNER_AUTHORIZED",
   "module_gap_counts": {
     "admin": {
       "total": 25,
@@ -61,7 +70,7 @@
     },
     "global": {
       "total": 20,
-      "no_route_evidence": 15
+      "no_route_evidence": 12
     },
     "goat": {
       "total": 55,
@@ -142,14 +151,9 @@
       "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
       "app/src/main/java/com/farmos/app/OperatingModuleHost.kt"
     ],
-    "operating_module_branches_preempted_by_dedicated_hosts": [
-      "TASKS",
-      "HEALTH",
-      "MONEY",
-      "INVENTORY"
-    ],
+    "operating_module_branches_preempted_by_dedicated_hosts": [],
     "direct_action_scope_violations": [],
-    "feature_id_catalog": "NOT_FOUND: screen contract template requires feature_ids, but no canonical feature-ID catalog was found in docs/code search"
+    "feature_id_catalog": "CANONICAL: docs/realisation/FEATURE_REGISTRY.yaml; 545-screen coverage is enforced by the completion control plane"
   },
-  "status_law": "MAPPED inventory is not CONTRACT_READY, IMPLEMENTED, VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN."
+  "status_law": "MAPPED inventory is not CONTRACT_READY, IMPLEMENTED, VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN. Entry-action and route-contract evidence do not substitute for rendered traversal."
 }

@@ -153,7 +153,7 @@ private fun PoultryAction(
     FarmIllustratedSectionSurface(Modifier.fillMaxWidth()) {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
         Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        TextButton(onClick = onClick) { Text("Open") }
+        TextButton(onClick = onClick) { Text("Open $title") }
     }
 }
 

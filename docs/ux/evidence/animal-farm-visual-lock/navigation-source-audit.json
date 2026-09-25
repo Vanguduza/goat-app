@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "bf08b90e60e2b213d9c184f2a46e30faef8e0425",
+  "tested_commit": "ce40df5ac9d328c337f902efe9f74dd9d9636b8b",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
-    "static_implementation_map_unique_registered_ids": 127,
-    "registered_ids_absent_from_static_implementation_map": 418,
-    "registered_ids_mentioned_in_kotlin": 121
+    "static_implementation_map_unique_registered_ids": 128,
+    "registered_ids_absent_from_static_implementation_map": 417,
+    "registered_ids_mentioned_in_kotlin": 124
   },
   "top_level": {
     "farm_modules": [
@@ -90,13 +90,13 @@
         {
           "value": "WEIGHT",
           "refs": 4,
-          "transition_refs": 3,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
           "value": "HEALTH",
           "refs": 3,
-          "transition_refs": 2,
+          "transition_refs": 1,
           "render_only_candidate": false
         },
         {
@@ -126,7 +126,7 @@
         {
           "value": "STATUS_CHANGE",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         }
       ]
@@ -773,7 +773,7 @@
     ],
     "operating_module_branches_preempted_by_dedicated_hosts": [],
     "direct_action_scope_violations": [],
-    "feature_id_catalog": "NOT_FOUND: screen contract template requires feature_ids, but no canonical feature-ID catalog was found in docs/code search"
+    "feature_id_catalog": "CANONICAL: docs/realisation/FEATURE_REGISTRY.yaml; 545-screen coverage is enforced by the completion control plane"
   },
   "limitations": [
     "This report is derived from checked-out Kotlin state machines and source text; it is not an instrumented runtime traversal.",
