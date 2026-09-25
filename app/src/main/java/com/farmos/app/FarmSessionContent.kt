@@ -72,6 +72,7 @@ fun FarmSessionContent(
             onBack = backHome,
             onRequireReauth = onRequireReauth,
         )
+        is FarmDestination.HomePanel -> error("Home panels are nested owners and must be intercepted by RoleAwareFarmHomeScreen")
         is FarmDestination.Goat -> GoatModuleHost(
             app = app,
             membership = membership,

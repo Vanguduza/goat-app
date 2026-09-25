@@ -22,6 +22,7 @@ RENDERED_TRAVERSAL_TESTS = (
     "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt",
     "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt",
     "app/src/test/java/com/farmos/app/TaskViewRuntimeNavigationTest.kt",
+    "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt",
 )
 RENDERED_OWNER_TESTS = (
     "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt",

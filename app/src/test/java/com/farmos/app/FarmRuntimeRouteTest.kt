@@ -96,6 +96,18 @@ class FarmRuntimeRouteTest {
     }
 
     @Test
+    fun homeUtilityPanelsResolveToExactOwners() {
+        val expected = mapOf(
+            HomeSurface.TODAY_SUMMARY to "FOS-HOME-003",
+            HomeSurface.ALERTS to "FOS-HOME-004",
+            HomeSurface.QUICK_CAPTURE to "FOS-HOME-008",
+        )
+        expected.forEach { (surface, screenId) ->
+            assertEquals(screenId, FarmDestination.HomePanel(surface).runtimeRouteContract().screenId)
+        }
+    }
+
+    @Test
     fun homeAndGlobalSearchHaveStableRuntimeOwners() {
         assertEquals(
             FarmRuntimeRoute("home", "FOS-HOME-001"),
