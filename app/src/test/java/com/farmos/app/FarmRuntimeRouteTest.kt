@@ -100,6 +100,9 @@ class FarmRuntimeRouteTest {
         val expected = mapOf(
             HomeSurface.TODAY_SUMMARY to "FOS-HOME-003",
             HomeSurface.ALERTS to "FOS-HOME-004",
+            HomeSurface.ACTIVITY_STREAM to "FOS-HOME-005",
+            HomeSurface.FARM_SWITCHER to "FOS-HOME-010",
+            HomeSurface.NOTIFICATIONS to "FOS-HOME-011",
             HomeSurface.QUICK_CAPTURE to "FOS-HOME-008",
         )
         expected.forEach { (surface, screenId) ->

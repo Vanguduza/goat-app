@@ -243,6 +243,14 @@ class MainActivity : ComponentActivity() {
                         app = app,
                         membership = membership,
                         farmName = farmNames[membership.farmId],
+                        memberships = memberships,
+                        farmNames = farmNames,
+                        onSwitchFarm = { chosen ->
+                            selectedMembership = chosen
+                            app.rememberMembership(chosen)
+                            authError = null
+                            authAttention = null
+                        },
                         onRequireReauth = requireReauthentication,
                         onRequireFarmReselection = requireFarmReselection,
                         onSignOut = signOut,
