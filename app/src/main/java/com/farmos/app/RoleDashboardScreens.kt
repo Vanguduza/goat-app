@@ -14,6 +14,7 @@ import com.farmos.feature.ops.HealthEntryPage
 import com.farmos.feature.ops.TaskEntryPage
 
 internal const val ROLE_HOME_FAMILY_SCREEN_ID = "FOS-HOME-012"
+internal const val SYNC_STATUS_HOME_ENTRY_SCREEN_ID = "FOS-HOME-009"
 
 internal enum class FarmHomePersona {
     OWNER, MANAGER, SUPERVISOR, WORKER, BREEDING, VET, FINANCE, BUYER, GENERAL,
@@ -30,6 +31,13 @@ internal fun resolveFarmHomePersona(role: String): FarmHomePersona = when (role.
     "buyer", "read_only" -> FarmHomePersona.BUYER
     else -> FarmHomePersona.GENERAL
 }
+
+internal fun syncStatusEntryModifier(label: String): Modifier =
+    if (label == "Open sync status") {
+        Modifier.testTag("farm-screen:$SYNC_STATUS_HOME_ENTRY_SCREEN_ID")
+    } else {
+        Modifier
+    }
 
 internal fun FarmHomePersona.canonicalHomeScreenId(): String? =
     when (this) {

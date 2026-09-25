@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmTheme
@@ -20,7 +21,7 @@ import com.farmos.core.design.FarmAnimalLineup
 @Composable
 fun FarmOsSplashScreen() {
     val colors = AnimalFarmTheme.colors
-    Surface(modifier = Modifier.fillMaxSize(), color = colors.background) {
+    Surface(modifier = Modifier.fillMaxSize().testTag("farm-screen:FOS-GLOBAL-001"), color = colors.background) {
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

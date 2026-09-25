@@ -132,6 +132,7 @@ private fun ManagementAttention(
                     context = "${summary.pendingSync} local change(s) stored on this device",
                     actionLabel = label,
                     onAction = { onOpen(dest) },
+                    modifier = syncStatusEntryModifier(label),
                 )
             }
             HomeAttentionKind.NONE -> AnimalFarmEmptyState("No attention items on this device")
@@ -209,7 +210,11 @@ private fun ManagementFamilies(
             }
         }
         managementHomeActions().forEach { (label, dest) ->
-            AnimalFarmQuickAction(label, { onOpen(dest) })
+            AnimalFarmQuickAction(
+                label,
+                { onOpen(dest) },
+                modifier = syncStatusEntryModifier(label),
+            )
         }
     }
 }
@@ -310,7 +315,11 @@ internal fun WorkerWorkBoardScreen(
                     Text("Guides and areas", color = AnimalFarmTheme.colors.ink)
                     AnimalFarmQuickAction("Open animals", onAnimals)
                     workerHomeAreaActions().forEach { (label, dest) ->
-                        AnimalFarmQuickAction(label, { onOpen(dest) })
+                        AnimalFarmQuickAction(
+                            label,
+                            { onOpen(dest) },
+                            modifier = syncStatusEntryModifier(label),
+                        )
                     }
                 }
             }
@@ -358,7 +367,11 @@ internal fun SpecialistRoleShell(
                     lime = true,
                 )
                 actions.forEach { (label, dest) ->
-                    AnimalFarmQuickAction(label, { onOpen(dest) })
+                    AnimalFarmQuickAction(
+                        label,
+                        { onOpen(dest) },
+                        modifier = syncStatusEntryModifier(label),
+                    )
                 }
             }
         }

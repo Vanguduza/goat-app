@@ -16,6 +16,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.AnimalFarmThemeSelectionPanel
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.feature.goat.GoatEntryPage
 import com.farmos.feature.ops.TaskEntryPage
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
@@ -34,6 +35,17 @@ class AnimalFarmReferenceContractTest {
     val compose = createComposeRule()
 
     private val fixedDate = LocalDate.of(2026, 9, 24)
+
+    @Test
+    fun splashRendersItsCanonicalOwner() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                FarmOsSplashScreen()
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GLOBAL-001").assertIsDisplayed()
+    }
 
     @Test
     fun loginSubmitsTheEnteredCredentialsAndKeepsControlsNamed() {
@@ -91,6 +103,34 @@ class AnimalFarmReferenceContractTest {
 
         compose.runOnIdle {
             assertEquals(FarmDestination.Tasks(TaskEntryPage.BOARD), opened)
+        }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun managementSyncEntryRendersCanonicalOwnerAndOpensSync() {
+        var opened: FarmDestination? = null
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                ManagementControlRoomScreen(
+                    farmName = "Premier Farm",
+                    ownerMode = true,
+                    summary = referenceSummary(),
+                    onOpen = { opened = it },
+                    onAnimals = {},
+                    onMore = {},
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-HOME-009")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+
+        compose.runOnIdle {
+            assertEquals(FarmDestination.Goat(GoatEntryPage.SYNC), opened)
         }
         assertNamedClickTargets()
     }
