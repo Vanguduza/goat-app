@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "tested_commit": "fb76940d66ac0dcbd28fb007f88d9db33b0ff8d4",
+  "tested_commit": "8111abf3f5358ac92ca2d870dde50eae56b8c55a",
   "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_WITH_SEPARATE_RUNTIME_EVIDENCE",
   "registry_rows": 545,
   "route_evidence_counts": {
