@@ -1,12 +1,14 @@
 package com.farmos.app
 
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
@@ -53,7 +55,11 @@ class AnimalFarmReferenceContractTest {
         val fields = compose.onAllNodes(hasSetTextAction())
         fields[0].performTextInput("owner@example.com")
         fields[1].performTextInput("correct-horse")
-        compose.onNodeWithText("Sign in").assertIsEnabled().performClick()
+        compose.onNodeWithText("Sign in")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .performClick()
 
         assertEquals("owner@example.com" to "correct-horse", submitted)
         assertNamedClickTargets()
@@ -98,7 +104,10 @@ class AnimalFarmReferenceContractTest {
             }
         }
 
-        compose.onNodeWithText("Continue task").performClick()
+        compose.onNodeWithText("Continue task")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
 
         assertEquals(FarmDestination.Task("task-health-nala"), opened)
         assertNamedClickTargets()
@@ -118,10 +127,16 @@ class AnimalFarmReferenceContractTest {
             }
         }
 
-        compose.onNodeWithText("Goats").performClick()
+        compose.onNodeWithText("Goats")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
         assertEquals(FarmModule.GOAT, opened)
 
-        compose.onNodeWithText("Back").performClick()
+        compose.onNodeWithText("Farm home")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
         assertTrue(backed)
         assertNamedClickTargets()
     }
