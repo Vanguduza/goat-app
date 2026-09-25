@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "source_fingerprint": "sha256:ff9ad5b0798d19e311481b24acecf78160d93dda78fa6ee8f717317b31272779",
+  "source_fingerprint": "sha256:33be5a7a16150eacc930b2cf3d9eebb99e707d99eadc20e5aba26c78ed362772",
   "screen_count": 545,
   "qdu_count": 545,
   "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
@@ -940,7 +940,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -957,7 +957,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-001"
       ]
@@ -969,7 +969,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -986,7 +986,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-001"
       ]
@@ -998,7 +998,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -1015,7 +1015,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-001"
       ]
@@ -1027,7 +1027,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -1044,7 +1044,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-001"
       ]
@@ -1056,7 +1056,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -1073,7 +1073,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-001"
       ]
@@ -1085,7 +1085,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -1102,7 +1102,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-001"
       ]
@@ -1114,7 +1114,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -1131,7 +1131,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-001"
       ]
@@ -1143,7 +1143,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -1160,7 +1160,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-001"
       ]

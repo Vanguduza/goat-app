@@ -1,12 +1,13 @@
 {
-  "schema_version": 1,
-  "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
-  "source_fingerprint": "sha256:ff9ad5b0798d19e311481b24acecf78160d93dda78fa6ee8f717317b31272779",
+  "schema_version": 2,
+  "catalog_status": "ROUTE_EVIDENCE_PENDING_CI",
+  "certification_status": "CI_PENDING",
+  "source_fingerprint": "sha256:33be5a7a16150eacc930b2cf3d9eebb99e707d99eadc20e5aba26c78ed362772",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 49,
+  "features_with_route_evidence": 0,
   "features_fully_route_bound": 0,
-  "features_without_route_evidence": 107,
+  "features_without_route_evidence": 156,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -140,10 +141,9 @@
         "FOS-HOME-012-G",
         "FOS-HOME-012-H"
       ],
-      "route_screen_ids": [
-        "FOS-HOME-001"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-HOME-001",
         "FOS-HOME-003",
         "FOS-HOME-004",
         "FOS-HOME-005",
@@ -158,7 +158,7 @@
         "FOS-HOME-012-H"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -276,22 +276,21 @@
         "FOS-GOAT-009",
         "FOS-GOAT-010"
       ],
-      "route_screen_ids": [
-        "FOS-GOAT-001",
-        "FOS-GOAT-006"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-GOAT-001",
         "FOS-GOAT-002",
         "FOS-GOAT-003",
         "FOS-GOAT-004",
         "FOS-GOAT-005",
+        "FOS-GOAT-006",
         "FOS-GOAT-007",
         "FOS-GOAT-008",
         "FOS-GOAT-009",
         "FOS-GOAT-010"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -307,10 +306,9 @@
         "FOS-GOAT-015",
         "FOS-GOAT-016"
       ],
-      "route_screen_ids": [
-        "FOS-GOAT-011"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-GOAT-011",
         "FOS-GOAT-012",
         "FOS-GOAT-013",
         "FOS-GOAT-014",
@@ -318,7 +316,7 @@
         "FOS-GOAT-016"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -389,19 +387,18 @@
         "FOS-GOAT-035",
         "FOS-GOAT-036"
       ],
-      "route_screen_ids": [
-        "FOS-GOAT-032"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-GOAT-030",
         "FOS-GOAT-031",
+        "FOS-GOAT-032",
         "FOS-GOAT-033",
         "FOS-GOAT-034",
         "FOS-GOAT-035",
         "FOS-GOAT-036"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -418,10 +415,9 @@
         "FOS-GOAT-042",
         "FOS-GOAT-043"
       ],
-      "route_screen_ids": [
-        "FOS-GOAT-037"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-GOAT-037",
         "FOS-GOAT-038",
         "FOS-GOAT-039",
         "FOS-GOAT-040",
@@ -430,7 +426,7 @@
         "FOS-GOAT-043"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -525,17 +521,16 @@
         "FOS-RABBIT-004",
         "FOS-RABBIT-005"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
         "FOS-RABBIT-001",
         "FOS-RABBIT-002",
+        "FOS-RABBIT-003",
+        "FOS-RABBIT-004",
         "FOS-RABBIT-005"
       ],
-      "unresolved_screen_ids": [
-        "FOS-RABBIT-003",
-        "FOS-RABBIT-004"
-      ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -548,15 +543,14 @@
         "FOS-RABBIT-007",
         "FOS-RABBIT-008"
       ],
-      "route_screen_ids": [
-        "FOS-RABBIT-006"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-RABBIT-006",
         "FOS-RABBIT-007",
         "FOS-RABBIT-008"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -575,21 +569,20 @@
         "FOS-RABBIT-016",
         "FOS-RABBIT-017"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
         "FOS-RABBIT-009",
+        "FOS-RABBIT-010",
         "FOS-RABBIT-011",
         "FOS-RABBIT-012",
         "FOS-RABBIT-013",
-        "FOS-RABBIT-017"
-      ],
-      "unresolved_screen_ids": [
-        "FOS-RABBIT-010",
         "FOS-RABBIT-014",
         "FOS-RABBIT-015",
-        "FOS-RABBIT-016"
+        "FOS-RABBIT-016",
+        "FOS-RABBIT-017"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -607,20 +600,19 @@
         "FOS-RABBIT-024",
         "FOS-RABBIT-025"
       ],
-      "route_screen_ids": [
-        "FOS-RABBIT-020",
-        "FOS-RABBIT-022"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-RABBIT-018",
         "FOS-RABBIT-019",
+        "FOS-RABBIT-020",
         "FOS-RABBIT-021",
+        "FOS-RABBIT-022",
         "FOS-RABBIT-023",
         "FOS-RABBIT-024",
         "FOS-RABBIT-025"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -635,17 +627,16 @@
         "FOS-RABBIT-029",
         "FOS-RABBIT-030"
       ],
-      "route_screen_ids": [
-        "FOS-RABBIT-027"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-RABBIT-026",
+        "FOS-RABBIT-027",
         "FOS-RABBIT-028",
         "FOS-RABBIT-029",
         "FOS-RABBIT-030"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -660,17 +651,16 @@
         "FOS-RABBIT-034",
         "FOS-RABBIT-035"
       ],
-      "route_screen_ids": [
-        "FOS-RABBIT-034"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-RABBIT-031",
         "FOS-RABBIT-032",
         "FOS-RABBIT-033",
+        "FOS-RABBIT-034",
         "FOS-RABBIT-035"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -701,17 +691,16 @@
         "FOS-SHEEP-004",
         "FOS-SHEEP-005"
       ],
-      "route_screen_ids": [
-        "FOS-SHEEP-001"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-SHEEP-001",
         "FOS-SHEEP-002",
         "FOS-SHEEP-003",
         "FOS-SHEEP-004",
         "FOS-SHEEP-005"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -725,16 +714,15 @@
         "FOS-SHEEP-008",
         "FOS-SHEEP-009"
       ],
-      "route_screen_ids": [
-        "FOS-SHEEP-009"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-SHEEP-006",
         "FOS-SHEEP-007",
-        "FOS-SHEEP-008"
+        "FOS-SHEEP-008",
+        "FOS-SHEEP-009"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -752,20 +740,19 @@
         "FOS-SHEEP-016",
         "FOS-SHEEP-017"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
+        "FOS-SHEEP-010",
         "FOS-SHEEP-011",
         "FOS-SHEEP-012",
+        "FOS-SHEEP-013",
         "FOS-SHEEP-014",
+        "FOS-SHEEP-015",
         "FOS-SHEEP-016",
         "FOS-SHEEP-017"
       ],
-      "unresolved_screen_ids": [
-        "FOS-SHEEP-010",
-        "FOS-SHEEP-013",
-        "FOS-SHEEP-015"
-      ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -780,17 +767,16 @@
         "FOS-SHEEP-021",
         "FOS-SHEEP-022"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
+        "FOS-SHEEP-018",
         "FOS-SHEEP-019",
         "FOS-SHEEP-020",
         "FOS-SHEEP-021",
         "FOS-SHEEP-022"
       ],
-      "unresolved_screen_ids": [
-        "FOS-SHEEP-018"
-      ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -803,15 +789,14 @@
         "FOS-SHEEP-024",
         "FOS-SHEEP-025"
       ],
-      "route_screen_ids": [
-        "FOS-SHEEP-023",
-        "FOS-SHEEP-024"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-SHEEP-023",
+        "FOS-SHEEP-024",
         "FOS-SHEEP-025"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -827,18 +812,17 @@
         "FOS-SHEEP-030",
         "FOS-SHEEP-031"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
         "FOS-SHEEP-026",
         "FOS-SHEEP-027",
-        "FOS-SHEEP-029"
-      ],
-      "unresolved_screen_ids": [
         "FOS-SHEEP-028",
+        "FOS-SHEEP-029",
         "FOS-SHEEP-030",
         "FOS-SHEEP-031"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -869,17 +853,16 @@
         "FOS-CATTLE-004",
         "FOS-CATTLE-005"
       ],
-      "route_screen_ids": [
-        "FOS-CATTLE-001",
-        "FOS-CATTLE-005"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-CATTLE-001",
         "FOS-CATTLE-002",
         "FOS-CATTLE-003",
-        "FOS-CATTLE-004"
+        "FOS-CATTLE-004",
+        "FOS-CATTLE-005"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -892,15 +875,14 @@
         "FOS-CATTLE-007",
         "FOS-CATTLE-008"
       ],
-      "route_screen_ids": [
-        "FOS-CATTLE-008"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-CATTLE-006",
-        "FOS-CATTLE-007"
+        "FOS-CATTLE-007",
+        "FOS-CATTLE-008"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -919,21 +901,20 @@
         "FOS-CATTLE-016",
         "FOS-CATTLE-017"
       ],
-      "route_screen_ids": [
-        "FOS-CATTLE-010",
-        "FOS-CATTLE-013",
-        "FOS-CATTLE-015",
-        "FOS-CATTLE-017"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-CATTLE-009",
+        "FOS-CATTLE-010",
         "FOS-CATTLE-011",
         "FOS-CATTLE-012",
+        "FOS-CATTLE-013",
         "FOS-CATTLE-014",
-        "FOS-CATTLE-016"
+        "FOS-CATTLE-015",
+        "FOS-CATTLE-016",
+        "FOS-CATTLE-017"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -950,19 +931,18 @@
         "FOS-CATTLE-023",
         "FOS-CATTLE-024"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
+        "FOS-CATTLE-018",
         "FOS-CATTLE-019",
+        "FOS-CATTLE-020",
         "FOS-CATTLE-021",
+        "FOS-CATTLE-022",
         "FOS-CATTLE-023",
         "FOS-CATTLE-024"
       ],
-      "unresolved_screen_ids": [
-        "FOS-CATTLE-018",
-        "FOS-CATTLE-020",
-        "FOS-CATTLE-022"
-      ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -977,17 +957,16 @@
         "FOS-CATTLE-028",
         "FOS-CATTLE-029"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
+        "FOS-CATTLE-025",
         "FOS-CATTLE-026",
+        "FOS-CATTLE-027",
         "FOS-CATTLE-028",
         "FOS-CATTLE-029"
       ],
-      "unresolved_screen_ids": [
-        "FOS-CATTLE-025",
-        "FOS-CATTLE-027"
-      ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1003,18 +982,17 @@
         "FOS-CATTLE-034",
         "FOS-CATTLE-035"
       ],
-      "route_screen_ids": [
-        "FOS-CATTLE-030",
-        "FOS-CATTLE-032"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-CATTLE-030",
         "FOS-CATTLE-031",
+        "FOS-CATTLE-032",
         "FOS-CATTLE-033",
         "FOS-CATTLE-034",
         "FOS-CATTLE-035"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1048,20 +1026,19 @@
         "FOS-POULTRY-007",
         "FOS-POULTRY-008"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
         "FOS-POULTRY-001",
         "FOS-POULTRY-002",
+        "FOS-POULTRY-003",
         "FOS-POULTRY-004",
+        "FOS-POULTRY-005",
         "FOS-POULTRY-006",
+        "FOS-POULTRY-007",
         "FOS-POULTRY-008"
       ],
-      "unresolved_screen_ids": [
-        "FOS-POULTRY-003",
-        "FOS-POULTRY-005",
-        "FOS-POULTRY-007"
-      ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1075,16 +1052,15 @@
         "FOS-POULTRY-011",
         "FOS-POULTRY-012"
       ],
-      "route_screen_ids": [
-        "FOS-POULTRY-009"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-POULTRY-009",
         "FOS-POULTRY-010",
         "FOS-POULTRY-011",
         "FOS-POULTRY-012"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1098,16 +1074,15 @@
         "FOS-POULTRY-015",
         "FOS-POULTRY-016"
       ],
-      "route_screen_ids": [
-        "FOS-POULTRY-014",
-        "FOS-POULTRY-016"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-POULTRY-013",
-        "FOS-POULTRY-015"
+        "FOS-POULTRY-014",
+        "FOS-POULTRY-015",
+        "FOS-POULTRY-016"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1122,17 +1097,16 @@
         "FOS-POULTRY-020",
         "FOS-POULTRY-021"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
         "FOS-POULTRY-017",
         "FOS-POULTRY-018",
+        "FOS-POULTRY-019",
         "FOS-POULTRY-020",
         "FOS-POULTRY-021"
       ],
-      "unresolved_screen_ids": [
-        "FOS-POULTRY-019"
-      ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1187,17 +1161,16 @@
         "FOS-HEALTH-004",
         "FOS-HEALTH-005"
       ],
-      "route_screen_ids": [
-        "FOS-HEALTH-001",
-        "FOS-HEALTH-003",
-        "FOS-HEALTH-004"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-HEALTH-001",
         "FOS-HEALTH-002",
+        "FOS-HEALTH-003",
+        "FOS-HEALTH-004",
         "FOS-HEALTH-005"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1212,17 +1185,16 @@
         "FOS-HEALTH-009",
         "FOS-HEALTH-010"
       ],
-      "route_screen_ids": [
-        "FOS-HEALTH-007",
-        "FOS-HEALTH-009"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-HEALTH-006",
+        "FOS-HEALTH-007",
         "FOS-HEALTH-008",
+        "FOS-HEALTH-009",
         "FOS-HEALTH-010"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1252,14 +1224,13 @@
         "FOS-HEALTH-013",
         "FOS-HEALTH-014"
       ],
-      "route_screen_ids": [
-        "FOS-HEALTH-013"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-HEALTH-013",
         "FOS-HEALTH-014"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1274,17 +1245,16 @@
         "FOS-HEALTH-018",
         "FOS-HEALTH-019"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
         "FOS-HEALTH-015",
+        "FOS-HEALTH-016",
         "FOS-HEALTH-017",
         "FOS-HEALTH-018",
         "FOS-HEALTH-019"
       ],
-      "unresolved_screen_ids": [
-        "FOS-HEALTH-016"
-      ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1297,15 +1267,14 @@
         "FOS-HEALTH-021",
         "FOS-HEALTH-022"
       ],
-      "route_screen_ids": [
-        "FOS-HEALTH-021"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-HEALTH-020",
+        "FOS-HEALTH-021",
         "FOS-HEALTH-022"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1318,15 +1287,14 @@
         "FOS-HEALTH-024",
         "FOS-HEALTH-025"
       ],
-      "route_screen_ids": [
-        "FOS-HEALTH-024"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-HEALTH-023",
+        "FOS-HEALTH-024",
         "FOS-HEALTH-025"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1339,15 +1307,14 @@
         "FOS-HEALTH-027",
         "FOS-HEALTH-028"
       ],
-      "route_screen_ids": [
-        "FOS-HEALTH-026"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-HEALTH-026",
         "FOS-HEALTH-027",
         "FOS-HEALTH-028"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1384,13 +1351,12 @@
         "FOS-TASK-008",
         "FOS-TASK-009"
       ],
-      "route_screen_ids": [
-        "FOS-TASK-001",
-        "FOS-TASK-003",
-        "FOS-TASK-004"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-TASK-001",
         "FOS-TASK-002",
+        "FOS-TASK-003",
+        "FOS-TASK-004",
         "FOS-TASK-005",
         "FOS-TASK-006",
         "FOS-TASK-007",
@@ -1398,7 +1364,7 @@
         "FOS-TASK-009"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1467,17 +1433,16 @@
         "FOS-INV-004",
         "FOS-INV-017"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
         "FOS-INV-001",
         "FOS-INV-002",
-        "FOS-INV-004"
-      ],
-      "unresolved_screen_ids": [
         "FOS-INV-003",
+        "FOS-INV-004",
         "FOS-INV-017"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1490,15 +1455,14 @@
         "FOS-INV-006",
         "FOS-INV-009"
       ],
-      "route_screen_ids": [
-        "FOS-INV-005",
-        "FOS-INV-006"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-INV-005",
+        "FOS-INV-006",
         "FOS-INV-009"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1511,15 +1475,14 @@
         "FOS-INV-008",
         "FOS-INV-010"
       ],
-      "route_screen_ids": [
-        "FOS-INV-007",
-        "FOS-INV-008"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-INV-007",
+        "FOS-INV-008",
         "FOS-INV-010"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1533,16 +1496,15 @@
         "FOS-INV-013",
         "FOS-INV-018"
       ],
-      "route_screen_ids": [
-        "FOS-INV-012",
-        "FOS-INV-013"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-INV-011",
+        "FOS-INV-012",
+        "FOS-INV-013",
         "FOS-INV-018"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1591,15 +1553,14 @@
         "FOS-FEED-002",
         "FOS-FEED-003"
       ],
-      "route_screen_ids": [
-        "FOS-FEED-001"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-FEED-001",
         "FOS-FEED-002",
         "FOS-FEED-003"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1686,15 +1647,14 @@
         "FOS-WATER-002",
         "FOS-WATER-003"
       ],
-      "route_screen_ids": [
-        "FOS-WATER-001"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-WATER-001",
         "FOS-WATER-002",
         "FOS-WATER-003"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1763,15 +1723,14 @@
         "FOS-PASTURE-002",
         "FOS-PASTURE-003"
       ],
-      "route_screen_ids": [
-        "FOS-PASTURE-001"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-PASTURE-001",
         "FOS-PASTURE-002",
         "FOS-PASTURE-003"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1844,17 +1803,16 @@
         "FOS-GROUP-004",
         "FOS-GROUP-005"
       ],
-      "route_screen_ids": [
-        "FOS-GROUP-001"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-GROUP-001",
         "FOS-GROUP-002",
         "FOS-GROUP-003",
         "FOS-GROUP-004",
         "FOS-GROUP-005"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1903,15 +1861,14 @@
         "FOS-LABOUR-002",
         "FOS-LABOUR-003"
       ],
-      "route_screen_ids": [
-        "FOS-LABOUR-001"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-LABOUR-001",
         "FOS-LABOUR-002",
         "FOS-LABOUR-003"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1979,16 +1936,15 @@
         "FOS-ASSET-003",
         "FOS-ASSET-004"
       ],
-      "route_screen_ids": [
-        "FOS-ASSET-001"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-ASSET-001",
         "FOS-ASSET-002",
         "FOS-ASSET-003",
         "FOS-ASSET-004"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -2061,17 +2017,16 @@
         "FOS-FIN-004",
         "FOS-FIN-005"
       ],
-      "route_screen_ids": [
+      "route_screen_ids": [],
+      "unresolved_screen_ids": [
         "FOS-FIN-001",
         "FOS-FIN-002",
+        "FOS-FIN-003",
         "FOS-FIN-004",
         "FOS-FIN-005"
       ],
-      "unresolved_screen_ids": [
-        "FOS-FIN-003"
-      ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -2142,15 +2097,14 @@
         "FOS-SALES-002",
         "FOS-SALES-003"
       ],
-      "route_screen_ids": [
-        "FOS-SALES-001"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-SALES-001",
         "FOS-SALES-002",
         "FOS-SALES-003"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -2223,15 +2177,14 @@
         "FOS-PROC-002",
         "FOS-PROC-003"
       ],
-      "route_screen_ids": [
-        "FOS-PROC-001"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
+        "FOS-PROC-001",
         "FOS-PROC-002",
         "FOS-PROC-003"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -3084,17 +3037,16 @@
         "FOS-SYNC-004",
         "FOS-SYNC-005"
       ],
-      "route_screen_ids": [
-        "FOS-SYNC-002"
-      ],
+      "route_screen_ids": [],
       "unresolved_screen_ids": [
         "FOS-SYNC-001",
+        "FOS-SYNC-002",
         "FOS-SYNC-003",
         "FOS-SYNC-004",
         "FOS-SYNC-005"
       ],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "NO_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
