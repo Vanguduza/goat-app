@@ -1,6 +1,5 @@
 package com.farmos.app
 
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
@@ -15,6 +14,7 @@ import com.farmos.core.design.FarmOsTheme
 import com.farmos.feature.ops.TaskUiRow
 import com.farmos.feature.ops.TasksBoardScreen
 import java.time.LocalDate
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,24 +51,24 @@ class TaskViewRuntimeNavigationTest {
 
         compose.onNodeWithTag("farm-screen:FOS-TASK-001").assertIsDisplayed()
         compose.onNodeWithText("Today check").assertIsDisplayed()
-        compose.onNodeWithText("Past check").assertDoesNotExist()
+        assertTextAbsent("Past check")
 
         openTab("Scheduled")
         compose.onNodeWithTag("farm-screen:FOS-TASK-007").assertIsDisplayed()
         compose.onNodeWithText("Future check").assertIsDisplayed()
-        compose.onNodeWithText("Past check").assertDoesNotExist()
+        assertTextAbsent("Past check")
         restoreToday()
 
         openTab("Overdue")
         compose.onNodeWithTag("farm-screen:FOS-TASK-008").assertIsDisplayed()
         compose.onNodeWithText("Past check").assertIsDisplayed()
-        compose.onNodeWithText("Today check").assertDoesNotExist()
+        assertTextAbsent("Today check")
         restoreToday()
 
         openTab("Completed")
         compose.onNodeWithTag("farm-screen:FOS-TASK-009").assertIsDisplayed()
         compose.onNodeWithText("Done check").assertIsDisplayed()
-        compose.onNodeWithText("Future check").assertDoesNotExist()
+        assertTextAbsent("Future check")
         restoreToday()
     }
 
@@ -82,5 +82,13 @@ class TaskViewRuntimeNavigationTest {
         openTab("Today")
         compose.onNodeWithTag("farm-screen:FOS-TASK-001").assertIsDisplayed()
         compose.onNodeWithText("Today check").assertIsDisplayed()
+    }
+
+    private fun assertTextAbsent(text: String) {
+        compose.waitForIdle()
+        assertTrue(
+            "Expected '$text' to be absent",
+            compose.onAllNodes(hasText(text)).fetchSemanticsNodes().isEmpty(),
+        )
     }
 }
