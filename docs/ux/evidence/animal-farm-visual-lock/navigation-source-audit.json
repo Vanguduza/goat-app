@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "7d23a6fde060c9ff67bc9ffe62069c03d7d2b0eb",
+  "tested_commit": "ce40df5ac9d328c337f902efe9f74dd9d9636b8b",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
