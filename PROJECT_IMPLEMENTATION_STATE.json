@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "repository": "Vanguduza/goat-app",
-  "source_fingerprint": "sha256:d9b34dc64c9599cffcaa1ccf91062bc304239b750630c0cf1c096672bc2ebe08",
+  "source_fingerprint": "sha256:63435a33de2bc3f8771b59ee441ee974bd6327e63add72643ab00a407e2734d2",
   "canonical_branch": "main",
   "release_state": "BLOCKED",
   "green_states": {
@@ -13,7 +13,7 @@
   },
   "screen_coverage": {
     "registered": 545,
-    "kotlin_referenced": 147,
+    "kotlin_referenced": 150,
     "implementation_mapped": 128,
     "qdu_states": {
       "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 150,
@@ -240,7 +240,7 @@
     },
     "task": {
       "registered": 15,
-      "kotlin_referenced": 3,
+      "kotlin_referenced": 6,
       "implementation_mapped": 5,
       "visual_green": 0,
       "feature_count": 4,

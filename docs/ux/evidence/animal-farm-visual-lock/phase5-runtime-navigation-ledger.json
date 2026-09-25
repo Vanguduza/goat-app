@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "44ba6c5d94dd168164ac4d1cbff8fb4615aad0bf",
-  "source_fingerprint": "sha256:d9b34dc64c9599cffcaa1ccf91062bc304239b750630c0cf1c096672bc2ebe08",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36124553944,
+  "tested_commit": "44754c0f161dcbcf611e0ccf60973fae12ae8d71",
+  "source_fingerprint": "sha256:63435a33de2bc3f8771b59ee441ee974bd6327e63add72643ab00a407e2734d2",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -121,13 +121,21 @@
         "FOS-SHEEP-004",
         "FOS-SHEEP-006",
         "FOS-SHEEP-030"
+      ],
+      "app/src/test/java/com/farmos/app/TaskViewRuntimeNavigationTest.kt": [
+        "FOS-TASK-001",
+        "FOS-TASK-007",
+        "FOS-TASK-008",
+        "FOS-TASK-009"
       ]
     },
     "rendered_surface_owner": {
       "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt": [
+        "FOS-GLOBAL-001",
         "FOS-GLOBAL-002",
         "FOS-GLOBAL-020",
-        "FOS-HOME-002"
+        "FOS-HOME-002",
+        "FOS-HOME-009"
       ],
       "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt": [
         "FOS-CATTLE-018",
@@ -212,10 +220,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 19,
-    "rendered_traversal_screen_count": 85,
-    "rendered_owner_screen_count": 22,
+    "rendered_traversal_screen_count": 89,
+    "rendered_owner_screen_count": 24,
     "route_contract_screen_count": 47,
-    "combined_screen_count": 143,
+    "combined_screen_count": 148,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -322,10 +330,15 @@
       "FOS-SHEEP-026",
       "FOS-SHEEP-027",
       "FOS-SHEEP-029",
-      "FOS-SHEEP-030"
+      "FOS-SHEEP-030",
+      "FOS-TASK-001",
+      "FOS-TASK-007",
+      "FOS-TASK-008",
+      "FOS-TASK-009"
     ],
     "rendered_owner_screen_ids": [
       "FOS-CATTLE-018",
+      "FOS-GLOBAL-001",
       "FOS-GLOBAL-002",
       "FOS-GLOBAL-020",
       "FOS-GOAT-001",
@@ -345,6 +358,7 @@
       "FOS-GOAT-043",
       "FOS-GOAT-051",
       "FOS-HOME-002",
+      "FOS-HOME-009",
       "FOS-SHEEP-010",
       "FOS-SYNC-003"
     ],
@@ -420,12 +434,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 85,
-    "entry_action_emission_executed": 19,
-    "rendered_surface_owners_executed": 22,
-    "route_contracts_executed": 47,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 85,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
