@@ -61,7 +61,9 @@ class AnimalFarmReferenceContractTest {
             .assertIsEnabled()
             .performClick()
 
-        assertEquals("owner@example.com" to "correct-horse", submitted)
+        compose.runOnIdle {
+            assertEquals("owner@example.com" to "correct-horse", submitted)
+        }
         assertNamedClickTargets()
     }
 
@@ -84,7 +86,9 @@ class AnimalFarmReferenceContractTest {
 
         compose.onNodeWithText("Open tasks").performClick()
 
-        assertEquals(FarmDestination.Tasks(TaskEntryPage.BOARD), opened)
+        compose.runOnIdle {
+            assertEquals(FarmDestination.Tasks(TaskEntryPage.BOARD), opened)
+        }
         assertNamedClickTargets()
     }
 
@@ -109,7 +113,9 @@ class AnimalFarmReferenceContractTest {
             .assertIsDisplayed()
             .performClick()
 
-        assertEquals(FarmDestination.Task("task-health-nala"), opened)
+        compose.runOnIdle {
+            assertEquals(FarmDestination.Task("task-health-nala"), opened)
+        }
         assertNamedClickTargets()
     }
 
@@ -131,13 +137,17 @@ class AnimalFarmReferenceContractTest {
             .performScrollTo()
             .assertIsDisplayed()
             .performClick()
-        assertEquals(FarmModule.GOAT, opened)
+        compose.runOnIdle {
+            assertEquals(FarmModule.GOAT, opened)
+        }
 
         compose.onNodeWithText("Farm home")
             .performScrollTo()
             .assertIsDisplayed()
             .performClick()
-        assertTrue(backed)
+        compose.runOnIdle {
+            assertTrue(backed)
+        }
         assertNamedClickTargets()
     }
 
@@ -155,7 +165,9 @@ class AnimalFarmReferenceContractTest {
 
         compose.onNodeWithText("Dark").performClick()
 
-        assertEquals(AnimalFarmThemeMode.DARK, selected)
+        compose.runOnIdle {
+            assertEquals(AnimalFarmThemeMode.DARK, selected)
+        }
         assertNamedClickTargets()
     }
 
