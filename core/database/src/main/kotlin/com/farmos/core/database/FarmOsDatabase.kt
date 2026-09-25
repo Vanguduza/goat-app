@@ -270,6 +270,28 @@ interface AnimalDao {
         query: String,
         limit: Int,
     ): List<AnimalEntity>
+
+    @Query("""
+        SELECT * FROM animals
+        WHERE farmId = :farmId
+          AND status != 'closed'
+          AND (
+              :query = ''
+              OR tag LIKE '%' || :query || '%' COLLATE NOCASE
+              OR COALESCE(name, '') LIKE '%' || :query || '%' COLLATE NOCASE
+              OR speciesCode LIKE '%' || :query || '%' COLLATE NOCASE
+          )
+        ORDER BY
+            CASE WHEN tag = :query COLLATE NOCASE THEN 0 ELSE 1 END,
+            speciesCode,
+            tag
+        LIMIT :limit
+    """)
+    suspend fun searchAll(
+        farmId: String,
+        query: String,
+        limit: Int,
+    ): List<AnimalEntity>
 }
 
 @Dao

@@ -65,6 +65,13 @@ fun FarmSessionContent(
             onOpen = { destination = it },
             onSignOut = onSignOut,
         )
+        FarmDestination.Search -> GlobalSearchHost(
+            app = app,
+            farmId = membership.farmId,
+            onOpen = { destination = it },
+            onBack = backHome,
+            onRequireReauth = onRequireReauth,
+        )
         is FarmDestination.Goat -> GoatModuleHost(
             app = app,
             membership = membership,

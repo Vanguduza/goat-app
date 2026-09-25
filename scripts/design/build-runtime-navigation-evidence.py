@@ -25,6 +25,7 @@ RENDERED_TRAVERSAL_TESTS = (
 )
 RENDERED_OWNER_TESTS = (
     "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt",
+    "app/src/test/java/com/farmos/app/GlobalSearchContractTest.kt",
     "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt",
 )

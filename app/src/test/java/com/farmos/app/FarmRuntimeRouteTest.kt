@@ -48,6 +48,7 @@ class FarmRuntimeRouteTest {
             GoatEntryPage.DASHBOARD to "FOS-GOAT-001",
             GoatEntryPage.WEIGHT to "FOS-GOAT-011",
             GoatEntryPage.SEARCH to "FOS-GOAT-006",
+            GoatEntryPage.SCAN to "FOS-GOAT-007",
             GoatEntryPage.SYNC to "FOS-SYNC-002",
             GoatEntryPage.KIDDING to "FOS-GOAT-037",
             GoatEntryPage.REPRODUCTION to "FOS-GOAT-032",
@@ -95,10 +96,14 @@ class FarmRuntimeRouteTest {
     }
 
     @Test
-    fun homeHasStableRuntimeOwner() {
+    fun homeAndGlobalSearchHaveStableRuntimeOwners() {
         assertEquals(
             FarmRuntimeRoute("home", "FOS-HOME-001"),
             FarmDestination.Home.runtimeRouteContract(),
+        )
+        assertEquals(
+            FarmRuntimeRoute("home.search", "FOS-HOME-006"),
+            FarmDestination.Search.runtimeRouteContract(),
         )
     }
 }

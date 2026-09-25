@@ -100,6 +100,7 @@ internal fun FarmHomeScreen(
                         if (pair.size == 1) androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
                     }
                 }
+                AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
                 generalHomeActions().forEach { (label, dest) ->
                     AnimalFarmQuickAction(
                         label,

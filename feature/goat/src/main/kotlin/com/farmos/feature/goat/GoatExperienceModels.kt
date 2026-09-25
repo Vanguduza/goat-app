@@ -16,6 +16,7 @@ internal enum class GoatPage {
     REPRODUCTION,
     KIDDING,
     SEARCH,
+    SCAN,
     SYNC,
     STATUS_CHANGE,
 }
@@ -37,6 +38,7 @@ internal data class GoatExperienceActions(
     val onSelectGoat: (String) -> Unit,
     val onSyncNow: () -> Unit,
     val onSearch: (String) -> Unit,
+    val onScanIdentifier: (String) -> Unit = {},
 )
 
 internal fun goatDisplayName(goat: GoatSnapshot): String = goat.name?.takeIf { it.isNotBlank() } ?: goat.tag

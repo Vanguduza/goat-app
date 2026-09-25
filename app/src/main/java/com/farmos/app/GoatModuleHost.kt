@@ -68,6 +68,7 @@ fun GoatModuleHost(
             val autoSelect =
                 entryPage != GoatEntryPage.WEIGHT &&
                     entryPage != GoatEntryPage.SEARCH &&
+                    entryPage != GoatEntryPage.SCAN &&
                     entryPage != GoatEntryPage.SYNC &&
                     entryPage != GoatEntryPage.KIDDING &&
                     entryPage != GoatEntryPage.REPRODUCTION
@@ -370,6 +371,85 @@ fun GoatModuleHost(
                         }
                     }
                 }.onFailure(::handleFailure)
+            }
+        },
+        onScanIdentifier = { rawIdentifier ->
+            scope.launch {
+                val identifier = rawIdentifier.trim()
+                if (identifier.isBlank()) return@launch
+                busy = true
+                error = null
+                searchResults = emptyList()
+                searchMessage = "Looking up identifier"
+
+                val localOutcome = runCatching {
+                    val assigned = app.database.lifecycle().activeIdentifierByValue(membership.farmId, identifier)
+                    val assignedAnimal = assigned?.let { app.database.animals().get(membership.farmId, it.animalId) }
+                    when {
+                        assignedAnimal != null && assignedAnimal.speciesCode != "goat" ->
+                            Pair<GoatSearchResult?, String>(
+                                null,
+                                "Identifier belongs to ${assignedAnimal.speciesCode}, not a goat",
+                            )
+                        assignedAnimal != null ->
+                            Pair(
+                                GoatSearchResult(
+                                    animalId = assignedAnimal.id,
+                                    tag = assignedAnimal.tag,
+                                    name = assignedAnimal.name,
+                                    status = assignedAnimal.status,
+                                    source = SearchSource.LOCAL,
+                                ),
+                                "Matched local ${assigned?.type ?: "identifier"}",
+                            )
+                        else -> {
+                            val exactTag = repository.searchGoats(identifier, 25)
+                                .firstOrNull { it.tag.equals(identifier, ignoreCase = true) }
+                            Pair(exactTag, if (exactTag != null) "Matched local goat tag" else "No local match")
+                        }
+                    }
+                }
+
+                localOutcome.onSuccess { (localMatch, localMessage) ->
+                    if (localMatch != null || localMessage.startsWith("Identifier belongs")) {
+                        searchResults = listOfNotNull(localMatch)
+                        searchMessage = localMessage
+                    } else {
+                        runCatching {
+                            app.farmSearchClient
+                                ?.searchAnimals(membership.farmId, identifier, 25)
+                                ?.firstOrNull {
+                                    (it.speciesCode == null || it.speciesCode == "goat") &&
+                                        it.tag?.equals(identifier, ignoreCase = true) == true
+                                }
+                        }.onSuccess { hit ->
+                            if (hit == null) {
+                                searchMessage = "No goat matched this RFID, EID or tag"
+                            } else {
+                                searchResults = listOf(
+                                    GoatSearchResult(
+                                        animalId = hit.id,
+                                        tag = hit.tag ?: identifier,
+                                        name = hit.displayName?.takeUnless { it == hit.tag },
+                                        status = hit.status ?: "active",
+                                        source = SearchSource.MEILISEARCH,
+                                    ),
+                                )
+                                searchMessage = "Matched online goat tag"
+                            }
+                        }.onFailure { failure ->
+                            if (failure is AuthenticationRequiredException) {
+                                onRequireReauth(failure.message)
+                            } else {
+                                searchMessage = "No local match · online lookup unavailable"
+                            }
+                        }
+                    }
+                }.onFailure { failure ->
+                    error = failure.message
+                    searchMessage = "Identifier lookup failed"
+                }
+                busy = false
             }
         },
         onSignOut = onSignOut,

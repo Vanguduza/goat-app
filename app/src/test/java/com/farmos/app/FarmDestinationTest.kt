@@ -162,7 +162,7 @@ class FarmDestinationTest {
             actions.first { it.first == "Record observation" }.second,
         )
         assertEquals(
-            FarmDestination.Goat(GoatEntryPage.SEARCH),
+            FarmDestination.Goat(GoatEntryPage.SCAN),
             actions.first { it.first == "Scan animal" }.second,
         )
         actions.forEach { (label, _) ->

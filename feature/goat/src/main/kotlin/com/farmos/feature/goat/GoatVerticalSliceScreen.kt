@@ -32,6 +32,7 @@ fun GoatVerticalSliceScreen(
     onSelectGoat: (animalId: String) -> Unit,
     onSyncNow: () -> Unit,
     onSearch: (query: String) -> Unit,
+    onScanIdentifier: (identifier: String) -> Unit = onSearch,
     onSignOut: () -> Unit,
     onBack: () -> Unit = onSignOut,
     modifier: Modifier = Modifier,
@@ -57,6 +58,7 @@ fun GoatVerticalSliceScreen(
             onSelectGoat = onSelectGoat,
             onSyncNow = onSyncNow,
             onSearch = onSearch,
+            onScanIdentifier = onScanIdentifier,
         ),
         onBackToFarm = onBack,
         onSignOut = onSignOut,
@@ -69,6 +71,7 @@ private fun GoatEntryPage.toGoatPage(): GoatPage =
         GoatEntryPage.DASHBOARD -> GoatPage.DASHBOARD
         GoatEntryPage.WEIGHT -> GoatPage.WEIGHT
         GoatEntryPage.SEARCH -> GoatPage.SEARCH
+        GoatEntryPage.SCAN -> GoatPage.SCAN
         GoatEntryPage.SYNC -> GoatPage.SYNC
         GoatEntryPage.KIDDING -> GoatPage.KIDDING
         GoatEntryPage.REPRODUCTION -> GoatPage.REPRODUCTION

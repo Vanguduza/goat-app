@@ -157,8 +157,8 @@ internal fun workerHomeQuickActions(): List<Pair<String, FarmDestination>> =
         "Add treatment" to FarmDestination.Health(HealthEntryPage.TREATMENT),
         // FOS-HEALTH-004
         "Record observation" to FarmDestination.Health(HealthEntryPage.RECORD_OBSERVATION),
-        // FOS-GOAT-006 existing identification search. FOS-GOAT-007 RFID and FOS-HOME-006 are not invented.
-        "Scan animal" to FarmDestination.Goat(GoatEntryPage.SEARCH),
+        // FOS-GOAT-007 — RFID/EID/tag scan resolves local identifiers before network fallback.
+        "Scan animal" to FarmDestination.Goat(GoatEntryPage.SCAN),
     )
 
 /** Worker D guides for already-owned modules. Groups and waitlist stay off this list. */

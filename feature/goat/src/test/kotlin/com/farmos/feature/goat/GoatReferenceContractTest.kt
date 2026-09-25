@@ -15,6 +15,8 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.core.model.SearchSource
+import com.farmos.domain.goat.GoatSearchResult
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.GoatSnapshot
 import com.farmos.domain.goat.GoatStatus
@@ -155,6 +157,41 @@ class GoatReferenceContractTest {
         }
 
         compose.onNodeWithTag("farm-screen:FOS-GOAT-004").assertIsDisplayed()
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun rfidOrTagScanRendersCanonicalOwnerAndSubmitsIdentifier() {
+        var scanned: String? = null
+        val scanState = state.copy(
+            searchMessage = "Matched local rfid",
+            searchResults = listOf(
+                GoatSearchResult(
+                    animalId = "goat-nala",
+                    tag = "GT-024",
+                    name = "Nala",
+                    status = "active",
+                    source = SearchSource.LOCAL,
+                ),
+            ),
+        )
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = scanState,
+                    actions = noOpActions(onScan = { scanned = it }),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.SCAN,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-007").assertIsDisplayed()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("RFID-00024")
+        compose.onNode(hasClickAction() and hasText("Find goat")).assertIsEnabled().performClick()
+        compose.runOnIdle { assertEquals("RFID-00024", scanned) }
         assertNamedClickTargets()
     }
 
@@ -325,6 +362,7 @@ class GoatReferenceContractTest {
         onWeight: (String) -> Unit = {},
         onStatus: (GoatStatus) -> Unit = {},
         onSelect: (String) -> Unit = {},
+        onScan: (String) -> Unit = {},
     ) = GoatExperienceActions(
         onRegister = { _, _, _, _ -> },
         onRecordWeight = onWeight,
@@ -342,5 +380,6 @@ class GoatReferenceContractTest {
         onSelectGoat = onSelect,
         onSyncNow = {},
         onSearch = {},
+        onScanIdentifier = onScan,
     )
 }

@@ -6,6 +6,7 @@ import com.farmos.feature.ops.TaskEntryPage
 
 sealed class FarmDestination {
     data object Home : FarmDestination()
+    data object Search : FarmDestination()
 
     data class Module(
         val module: FarmModule,

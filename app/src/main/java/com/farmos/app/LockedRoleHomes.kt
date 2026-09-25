@@ -209,6 +209,7 @@ private fun ManagementFamilies(
                 repeat(3 - row.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
             }
         }
+        AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
         managementHomeActions().forEach { (label, dest) ->
             AnimalFarmQuickAction(
                 label,
@@ -313,6 +314,7 @@ internal fun WorkerWorkBoardScreen(
                         AnimalFarmQuickAction(label, { onOpen(dest) })
                     }
                     Text("Guides and areas", color = AnimalFarmTheme.colors.ink)
+                    AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
                     AnimalFarmQuickAction("Open animals", onAnimals)
                     workerHomeAreaActions().forEach { (label, dest) ->
                         AnimalFarmQuickAction(
@@ -366,6 +368,7 @@ internal fun SpecialistRoleShell(
                     onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
                     lime = true,
                 )
+                AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
                 actions.forEach { (label, dest) ->
                     AnimalFarmQuickAction(
                         label,

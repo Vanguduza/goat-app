@@ -353,6 +353,47 @@ internal fun GoatSearchScreen(
 }
 
 @Composable
+internal fun GoatScanScreen(
+    state: GoatSliceUiState,
+    onScan: (String) -> Unit,
+    onSelect: (String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var identifier by remember { mutableStateOf("") }
+    IllustratedGoatPage("Scan RFID or tag", "FOS-GOAT-007 · I3", onBack) {
+        FarmIllustratedSectionSurface {
+            Text(
+                "Use an RFID/EID reader that types into this field, or enter an identifier manually.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OutlinedTextField(
+                identifier,
+                { identifier = it },
+                label = { Text("RFID, EID or tag") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            Button(
+                onClick = { onScan(identifier.trim()) },
+                enabled = !state.busy && identifier.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Find goat")
+            }
+            Text(state.searchMessage)
+            state.searchResults.firstOrNull()?.let { result ->
+                TextButton(
+                    onClick = { onSelect(result.animalId) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Open " + herdSearchLabel(result))
+                }
+            }
+        }
+    }
+}
+
+@Composable
 internal fun GoatSyncScreen(
     state: GoatSliceUiState,
     onSync: () -> Unit,
