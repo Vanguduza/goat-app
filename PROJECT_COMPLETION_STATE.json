@@ -2,7 +2,7 @@
   "schema_version": 1,
   "repository": "Vanguduza/goat-app",
   "canonical_branch": "main",
-  "source_fingerprint": "sha256:d9b34dc64c9599cffcaa1ccf91062bc304239b750630c0cf1c096672bc2ebe08",
+  "source_fingerprint": "sha256:1b0483eb3ad3032f0eb0de9362c1cc74b59dac60a6187f63e9972299e184a16e",
   "programme_status": "ACTIVE_DETERMINISTIC_COMPLETION",
   "release_blocked": true,
   "authority": {
@@ -1753,10 +1753,10 @@
     "status": "IN_PROGRESS",
     "route_export": "docs/ux/evidence/animal-farm-visual-lock/runtime-route-export.json",
     "feature_route_coverage": "docs/realisation/FEATURE_ROUTE_COVERAGE.json",
-    "route_screen_count": 143,
-    "unresolved_screen_count": 402,
-    "features_with_route_evidence": 57,
-    "features_without_route_evidence": 99,
+    "route_screen_count": 148,
+    "unresolved_screen_count": 397,
+    "features_with_route_evidence": 58,
+    "features_without_route_evidence": 98,
     "explicit_headless_contracts": 0,
     "route_gate_ready": false,
     "next_action": "PHASE_5_REALISE_UNRESOLVED_ROUTES_AND_FEATURE_ROUTE_CONTRACTS_WITHOUT_INVENTING_HEADLESS_COVERAGE"

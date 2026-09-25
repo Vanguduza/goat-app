@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
@@ -39,7 +40,7 @@ data class TaskUiRow(
     val status: String,
 )
 
-private enum class TaskTab { TODAY, UPCOMING, COMPLETED }
+private enum class TaskTab { TODAY, SCHEDULED, OVERDUE, COMPLETED }
 
 /** FOS-TASK-001 / 002 / 003 / 004 — shared Farm OS task reference family. */
 @Composable
@@ -61,8 +62,9 @@ fun TasksBoardScreen(
     var showCreate by remember { mutableStateOf(false) }
     val today = LocalDate.now().toEpochDay()
     val visible = when (tab) {
-        TaskTab.TODAY -> rows.filter { it.status == "open" && it.dueEpochDay <= today }
-        TaskTab.UPCOMING -> rows.filter { it.status == "open" && it.dueEpochDay > today }
+        TaskTab.TODAY -> rows.filter { it.status == "open" && it.dueEpochDay == today }
+        TaskTab.SCHEDULED -> rows.filter { it.status == "open" && it.dueEpochDay > today }
+        TaskTab.OVERDUE -> rows.filter { it.status == "open" && it.dueEpochDay < today }
         TaskTab.COMPLETED -> rows.filter { it.status == "done" }
     }
 
@@ -84,20 +86,25 @@ fun TasksBoardScreen(
                 }
             }
 
-            if (visible.isEmpty()) {
-                FarmIllustratedSectionSurface {
-                    Text(emptyTaskMessage(tab), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    Text(emptyTaskHint(tab), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            } else {
-                visible.forEach { task ->
-                    TaskCard(
-                        task = task,
-                        today = today,
-                        busy = busy,
-                        onComplete = onComplete,
-                        onOpen = { onOpenDetail(task.id) },
-                    )
+            Column(
+                Modifier.fillMaxWidth().testTag("farm-screen:${taskTabScreenId(tab)}"),
+                verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
+            ) {
+                if (visible.isEmpty()) {
+                    FarmIllustratedSectionSurface {
+                        Text(emptyTaskMessage(tab), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Text(emptyTaskHint(tab), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                } else {
+                    visible.forEach { task ->
+                        TaskCard(
+                            task = task,
+                            today = today,
+                            busy = busy,
+                            onComplete = onComplete,
+                            onOpen = { onOpenDetail(task.id) },
+                        )
+                    }
                 }
             }
 
@@ -200,10 +207,18 @@ private fun CreateTaskCard(
     }
 }
 
+private fun taskTabScreenId(tab: TaskTab): String = when (tab) {
+    TaskTab.TODAY -> "FOS-TASK-001"
+    TaskTab.SCHEDULED -> "FOS-TASK-007"
+    TaskTab.OVERDUE -> "FOS-TASK-008"
+    TaskTab.COMPLETED -> "FOS-TASK-009"
+}
+
 private fun taskTabLabel(tab: TaskTab, selected: Boolean): String {
     val label = when (tab) {
         TaskTab.TODAY -> "Today"
-        TaskTab.UPCOMING -> "Upcoming"
+        TaskTab.SCHEDULED -> "Scheduled"
+        TaskTab.OVERDUE -> "Overdue"
         TaskTab.COMPLETED -> "Completed"
     }
     return if (selected) "$label · selected" else label
@@ -211,13 +226,15 @@ private fun taskTabLabel(tab: TaskTab, selected: Boolean): String {
 
 private fun emptyTaskMessage(tab: TaskTab): String = when (tab) {
     TaskTab.TODAY -> "No tasks due today"
-    TaskTab.UPCOMING -> "No upcoming tasks"
+    TaskTab.SCHEDULED -> "No scheduled tasks"
+    TaskTab.OVERDUE -> "No overdue tasks"
     TaskTab.COMPLETED -> "No completed tasks yet"
 }
 
 private fun emptyTaskHint(tab: TaskTab): String = when (tab) {
-    TaskTab.TODAY -> "Your open work for today will appear here."
-    TaskTab.UPCOMING -> "Scheduled farm work will appear here."
+    TaskTab.TODAY -> "Your open work due today will appear here."
+    TaskTab.SCHEDULED -> "Future scheduled farm work will appear here."
+    TaskTab.OVERDUE -> "Open work past its due date will appear here."
     TaskTab.COMPLETED -> "Finished work remains visible for farm history."
 }
 

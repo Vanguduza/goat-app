@@ -101,7 +101,11 @@ internal fun FarmHomeScreen(
                     }
                 }
                 generalHomeActions().forEach { (label, dest) ->
-                    AnimalFarmQuickAction(label, { onOpen(dest) })
+                    AnimalFarmQuickAction(
+                        label,
+                        { onOpen(dest) },
+                        modifier = syncStatusEntryModifier(label),
+                    )
                 }
             }
         }

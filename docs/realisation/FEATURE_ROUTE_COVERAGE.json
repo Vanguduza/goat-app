@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:d9b34dc64c9599cffcaa1ccf91062bc304239b750630c0cf1c096672bc2ebe08",
+  "source_fingerprint": "sha256:1b0483eb3ad3032f0eb0de9362c1cc74b59dac60a6187f63e9972299e184a16e",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 57,
-  "features_fully_route_bound": 3,
-  "features_without_route_evidence": 99,
+  "features_with_route_evidence": 58,
+  "features_fully_route_bound": 5,
+  "features_without_route_evidence": 98,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -23,15 +23,14 @@
         "FOS-GLOBAL-018"
       ],
       "route_screen_ids": [
+        "FOS-GLOBAL-001",
         "FOS-GLOBAL-002",
         "FOS-GLOBAL-016",
         "FOS-GLOBAL-018"
       ],
-      "unresolved_screen_ids": [
-        "FOS-GLOBAL-001"
-      ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -223,12 +222,12 @@
       "screen_ids": [
         "FOS-HOME-009"
       ],
-      "route_screen_ids": [],
-      "unresolved_screen_ids": [
+      "route_screen_ids": [
         "FOS-HOME-009"
       ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -1393,15 +1392,15 @@
       "route_screen_ids": [
         "FOS-TASK-001",
         "FOS-TASK-003",
-        "FOS-TASK-004"
+        "FOS-TASK-004",
+        "FOS-TASK-007",
+        "FOS-TASK-008",
+        "FOS-TASK-009"
       ],
       "unresolved_screen_ids": [
         "FOS-TASK-002",
         "FOS-TASK-005",
-        "FOS-TASK-006",
-        "FOS-TASK-007",
-        "FOS-TASK-008",
-        "FOS-TASK-009"
+        "FOS-TASK-006"
       ],
       "headless_contract": null,
       "coverage_state": "PARTIAL_ROUTE_COVERAGE",
