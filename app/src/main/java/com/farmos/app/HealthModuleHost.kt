@@ -43,6 +43,7 @@ fun HealthModuleHost(
     var treatments by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var formulary by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var formularyOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
+    var acceptedPacks by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
     var packs by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var withdrawals by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var busy by remember { mutableStateOf(false) }
@@ -57,9 +58,12 @@ fun HealthModuleHost(
         treatments = ops.recentTreatments().map { row ->
             "${row.speciesCode} · ${row.reason} · formulary ${row.formularyItemId}"
         }
-        packs = ops.packs().map { row ->
+        val packRows = ops.packs()
+        packs = packRows.map { row ->
             "${row.speciesCode} · ${row.name} · ${row.status} · ${row.acceptedByVet.orEmpty()}"
         }
+        acceptedPacks = packRows.filter { it.status == "vet_accepted" }
+            .map { row -> FarmSelectorOption(row.id, row.name, "${row.speciesCode} · accepted by ${row.acceptedByVet.orEmpty()}") }
         withdrawals = ops.withdrawals().map { row ->
             "${row.windowKind} · ${row.product} ends day ${row.endsEpochDay}"
         }
@@ -94,6 +98,7 @@ fun HealthModuleHost(
         formulary = formulary,
         formularyOptions = formularyOptions,
         speciesCodes = FarmSpeciesCodes.ALL,
+        acceptedPacks = acceptedPacks,
         packs = packs,
         withdrawals = withdrawals,
         busy = busy,

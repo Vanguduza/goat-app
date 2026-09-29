@@ -11,11 +11,13 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.FormularyItemEntity
+import com.farmos.core.database.HealthPackEntity
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.core.model.LocalCommandContext
@@ -54,6 +56,8 @@ class HealthCaptureOwnerTest {
         runBlocking {
             database.formulary().insert(FormularyItemEntity("form-ivo", farm, "Ivermectin 1%", "goat", "prescription", 35, 40, null, true))
             database.formulary().insert(FormularyItemEntity("form-draft", farm, "Unapproved drench", "goat", "prescription", 14, 14, null, false))
+            database.lifecycle().insertPack(HealthPackEntity("pack-kid", farm, "goat", "Kid health", "vet_accepted", "Dr Moyo"))
+            database.lifecycle().insertPack(HealthPackEntity("pack-draft", farm, "goat", "Draft pack", "draft", null))
             database.formulary().insert(FormularyItemEntity("form-other", otherFarm, "Other farm product", "goat", "prescription", 7, 7, null, true))
         }
     }
@@ -95,6 +99,28 @@ class HealthCaptureOwnerTest {
 
         compose.waitUntil(10_000) { runBlocking { database.healthObservations().recent(farm, 10) }.isNotEmpty() }
         assertEquals("cattle", runBlocking { database.healthObservations().recent(farm, 10) }.single().speciesCode)
+        compose.waitUntil(10_000) { syncRequests == 1 }
+    }
+
+    @Test
+    fun protocolSlotIsAddedOnlyToAVetAcceptedPack() {
+        var syncRequests = 0
+        render(HealthEntryPage.DASHBOARD) { syncRequests++ }
+        compose.onNode(hasClickAction() and hasText("Add protocol slot")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-019").assertExists()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("health-pack-selector:option:pack-kid").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("health-pack-selector:option:pack-draft").assertDoesNotExist()
+
+        compose.onNodeWithTag("health-pack-selector:option:pack-kid").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction() and hasText("Slot code")).performScrollTo().performTextInput("DEWORM")
+        compose.onNode(hasSetTextAction() and hasText("Title")).performScrollTo().performTextInput("Deworm kids")
+        compose.onNode(hasSetTextAction() and hasText("Offset days")).performScrollTo().performTextReplacement("14")
+        compose.onNode(hasClickAction() and hasText("Add protocol slot")).performScrollTo().performClick()
+
+        compose.waitUntil(10_000) { runBlocking { database.lifecycle().packSlots(farm) }.isNotEmpty() }
+        val slot = runBlocking { database.lifecycle().packSlots(farm) }.single()
+        assertEquals("pack-kid", slot.packId)
+        assertEquals(14, slot.offsetDays)
         compose.waitUntil(10_000) { syncRequests == 1 }
     }
 
