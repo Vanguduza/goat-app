@@ -7,11 +7,12 @@ import com.farmos.feature.ops.CattleRecords
 import com.farmos.feature.ops.CattleSccRow
 import com.farmos.feature.ops.CattleTimelineRow
 import com.farmos.feature.ops.CattleWithdrawalRow
-import com.farmos.feature.ops.cattleLitres
 import java.time.Instant
 import java.time.ZoneOffset
 
 /** Farm-scoped, read-only records for one cattle animal. Timeline order: newest day first, then record family. */
+private fun litres(milli: Long): String = java.math.BigDecimal.valueOf(milli, 3).stripTrailingZeros().toPlainString() + " L"
+
 internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String, animalId: String): CattleRecords {
     val lifecycle = database.lifecycle()
     fun day(epochMillis: Long) = Instant.ofEpochMilli(epochMillis).atZone(ZoneOffset.UTC).toLocalDate().toEpochDay()
@@ -31,7 +32,7 @@ internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String,
         pds.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "Pregnancy diagnosis", it.result)) }
         calvings.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "Calving", "${it.bornCount} born · ${it.liveCount} live · ${it.deadCount} dead")) }
         bcs.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "BCS", "${it.scoreTenths / 10}.${it.scoreTenths % 10} (${it.scale})")) }
-        milk.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "Milk", cattleLitres(it.litresMilli))) }
+        milk.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "Milk", litres(it.litresMilli))) }
         locomotion.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "Locomotion", "Score ${it.score}")) }
         scc.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "SCC", "%,d cells/mL".format(it.cellsPerMl))) }
         dryOffs.forEach { row ->
