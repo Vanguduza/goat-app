@@ -177,6 +177,7 @@ import com.farmos.domain.ops.RecordSheepWeaning
 import com.farmos.domain.ops.RecordSheepWool
 import com.farmos.domain.ops.RecordWater
 import com.farmos.domain.ops.StartGrazing
+import com.farmos.domain.rabbit.RabbitNestBoxCycle
 import com.farmos.domain.rabbit.RabbitProgrammeValidator
 import com.farmos.domain.rabbit.CreateRabbitCage
 import com.farmos.domain.rabbit.CreateRabbitNestBox
@@ -225,13 +226,7 @@ internal suspend fun consumeLotsFefo(
     database.inventory().setQuantity(farmId, itemId, item.quantityMilli - quantityMilli, updatedAt)
 }
 
-internal fun nestTransitionAllowed(from: String, to: String): Boolean = when (from) {
-    "available", "sanitized" -> to == "assigned" || to == "in_cage"
-    "assigned" -> to == "in_cage" || to == "dirty"
-    "in_cage" -> to == "dirty"
-    "dirty" -> to == "sanitized" || to == "available"
-    else -> false
-}
+internal fun nestTransitionAllowed(from: String, to: String): Boolean = RabbitNestBoxCycle.allowed(from, to)
 
 internal fun JsonObject.optionalText(key: String): String? {
     val value = this[key] ?: return null

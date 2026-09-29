@@ -18,6 +18,7 @@ import com.farmos.domain.rabbit.CreateRabbitCage
 import com.farmos.domain.rabbit.CreateRabbitNestBox
 import com.farmos.domain.rabbit.CreateRabbitWave
 import com.farmos.domain.rabbit.RecordRabbitGiStasis
+import com.farmos.feature.rabbit.RabbitNestBoxChoice
 import com.farmos.feature.rabbit.RabbitProgrammeScreen
 import com.farmos.feature.rabbit.RabbitRecords
 import java.time.LocalDate
@@ -45,6 +46,7 @@ fun RabbitModuleHost(
     var selectedCageId by remember { mutableStateOf<String?>(null) }
     var rabbitRows by remember { mutableStateOf(emptyList<String>()) }
     var nestBoxRows by remember { mutableStateOf(emptyList<String>()) }
+    var nestBoxChoices by remember(farmId) { mutableStateOf(emptyList<RabbitNestBoxChoice>()) }
     var records by remember(farmId) { mutableStateOf(RabbitRecords()) }
     var rabbitCount by remember(farmId) { mutableStateOf<Int?>(null) }
 
@@ -56,7 +58,9 @@ fun RabbitModuleHost(
         waves = waveRows.map { "${it.id} · ${it.doeCount} does · mating day ${it.matingEpochDay}" }
         waveOptions = waveRows.map { FarmSelectorOption(it.id, "Mated ${LocalDate.ofEpochDay(it.matingEpochDay)}", "${it.doeCount} does") }
         boxes = selectedCageId?.let { ops.availableBoxes(it) } ?: 0
-        nestBoxRows = ops.nestBoxes().map { "${it.id} ${it.code} · ${it.status}" }
+        val boxRows = ops.nestBoxes()
+        nestBoxRows = boxRows.map { "${it.id} ${it.code} · ${it.status}" }
+        nestBoxChoices = boxRows.map { RabbitNestBoxChoice(it.id, it.code, it.status) }
         rabbitRows = rabbitHerd.list().map { animal ->
             buildString {
                 append(animal.tag)
@@ -89,6 +93,7 @@ fun RabbitModuleHost(
 
     RabbitProgrammeScreen(
         waveOptions = waveOptions,
+        nestBoxChoices = nestBoxChoices,
         cages = cages,
         waves = waves,
         availableBoxes = boxes,

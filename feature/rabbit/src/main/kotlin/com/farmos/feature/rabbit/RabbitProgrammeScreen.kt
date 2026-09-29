@@ -33,6 +33,7 @@ import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.FosDimens
 import com.farmos.domain.rabbit.KudbatSemiIntensiveExcel
+import com.farmos.domain.rabbit.RabbitNestBoxCycle
 import java.time.LocalDate
 
 private enum class RabbitPage {
@@ -83,6 +84,8 @@ fun RabbitProgrammeScreen(
     rabbitCount: Int? = null,
     /** This farm's breeding waves; every wave event command accepts only one of these. */
     waveOptions: List<FarmSelectorOption> = emptyList(),
+    /** This farm's nest boxes with their current status; the next status is limited to the governed cycle. */
+    nestBoxChoices: List<RabbitNestBoxChoice> = emptyList(),
 ) {
     var page by remember { mutableStateOf(RabbitPage.DASHBOARD) }
     val home = { page = RabbitPage.DASHBOARD }
@@ -118,6 +121,7 @@ fun RabbitProgrammeScreen(
                 onCreateNestBox,
                 onSetNestStatus,
                 home,
+                nestBoxChoices,
             )
         }
 
@@ -305,11 +309,12 @@ private fun RabbitCagesScreen(
     onCreateNestBox: (String, String) -> Unit,
     onSetNestStatus: (String, String) -> Unit,
     onBack: () -> Unit,
+    nestBoxChoices: List<RabbitNestBoxChoice>,
 ) {
     var cageCode by remember { mutableStateOf("") }
     var boxCode by remember { mutableStateOf("") }
     var boxId by remember { mutableStateOf("") }
-    var boxStatus by remember { mutableStateOf("in_cage") }
+    var boxStatus by remember { mutableStateOf("") }
     FarmOperationalPage("FOS-RABBIT-006", "Cages & nest boxes", "Rabbit housing and nest-box availability.", FarmVisualClass.I2, onBack) {
         FarmOperationalRows(cages, "No cages yet", "Create a cage before starting a breeding wave.")
         FarmOperationalSection(
@@ -340,15 +345,33 @@ private fun RabbitCagesScreen(
         }
         FarmOperationalRows(nestBoxes, "No nest boxes yet", null)
         FarmOperationalSection("Nest-box cycle", "Available/sanitized → assigned → in cage → dirty → sanitize.") {
-            OutlinedTextField(boxId, {
-                boxId = it
-            }, label = { Text("Nest box id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-            OutlinedTextField(boxStatus, {
-                boxStatus = it
-            }, label = { Text("Next status") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FarmEntitySelector(
+                atomTag = "rabbit-nest-box-selector",
+                title = "Nest box",
+                options = nestBoxChoices.map { FarmSelectorOption(it.id, it.code, nestStatusLabel(it.status)) },
+                selectedId = boxId.ifBlank { null },
+                onSelect = {
+                    boxId = it
+                    boxStatus = ""
+                },
+                emptyText = "Add a nest box first.",
+                enabled = !busy,
+            )
+            val current = nestBoxChoices.firstOrNull { it.id == boxId }?.status
+            if (current != null) {
+                FarmEntitySelector(
+                    atomTag = "rabbit-nest-status-selector",
+                    title = "Next status",
+                    options = RabbitNestBoxCycle.nextStatuses(current).map { FarmSelectorOption(it, nestStatusLabel(it)) },
+                    selectedId = boxStatus.ifBlank { null },
+                    onSelect = { boxStatus = it },
+                    emptyText = "This box has no allowed next status.",
+                    enabled = !busy,
+                )
+            }
             Button(onClick = {
                 onSetNestStatus(boxId, boxStatus)
-            }, enabled = !busy && boxId.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Set nest status") }
+            }, enabled = !busy && boxId.isNotBlank() && boxStatus.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Set nest status") }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
@@ -639,3 +662,8 @@ private fun RabbitWaveSelector(
         enabled = !busy,
     )
 }
+
+/** One nest box as the cycle selector sees it: its id, code and current status. */
+data class RabbitNestBoxChoice(val id: String, val code: String, val status: String)
+
+private fun nestStatusLabel(status: String): String = status.replace('_', ' ').replaceFirstChar { it.uppercase() }
