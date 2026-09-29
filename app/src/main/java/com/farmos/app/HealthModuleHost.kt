@@ -17,6 +17,7 @@ import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordLabResult
 import com.farmos.domain.ops.RecordVetVisit
+import com.farmos.feature.ops.HealthReadModel
 import com.farmos.feature.ops.HealthEntryPage
 import com.farmos.feature.ops.HealthObservationScreen
 import java.time.LocalDate
@@ -31,8 +32,10 @@ fun HealthModuleHost(
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
     entryPage: HealthEntryPage = HealthEntryPage.DASHBOARD,
+    loadReadModel: suspend () -> HealthReadModel = { HealthReadModel() },
 ) {
     val scope = rememberCoroutineScope()
+    var readModel by remember(farmId) { mutableStateOf(HealthReadModel()) }
     var observations by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var catalog by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var treatments by remember(farmId) { mutableStateOf(emptyList<String>()) }
@@ -55,6 +58,7 @@ fun HealthModuleHost(
         withdrawals = ops.withdrawals().map { row ->
             "${row.windowKind} · ${row.product} ends day ${row.endsEpochDay}"
         }
+        readModel = loadReadModel()
     }
 
     fun runWrite(block: suspend () -> Unit) {
@@ -198,5 +202,6 @@ fun HealthModuleHost(
         },
         onBack = onBack,
         entryPage = entryPage,
+        readModel = readModel,
     )
 }

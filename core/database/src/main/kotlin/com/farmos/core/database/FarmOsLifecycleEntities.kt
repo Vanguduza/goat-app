@@ -417,6 +417,10 @@ interface LifecycleDao {
     @Upsert suspend fun upsertVetVisit(row: VetVisitEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertLab(row: LabResultEntity)
     @Upsert suspend fun upsertLab(row: LabResultEntity)
+    @Query("SELECT * FROM vet_visits WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun vetVisits(farmId: String, limit: Int): List<VetVisitEntity>
+    @Query("SELECT * FROM lab_results WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun labResults(farmId: String, limit: Int): List<LabResultEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertCattleWeaning(row: CattleWeaningEntity)
     @Upsert suspend fun upsertCattleWeaning(row: CattleWeaningEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMicron(row: SheepMicronEntity)

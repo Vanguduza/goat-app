@@ -112,6 +112,7 @@ fun FarmSessionContent(
             enqueueSync = ::enqueueSync,
             onBack = backHome,
             entryPage = dest.entry,
+            loadReadModel = { loadHealthReadModel(app.database, membership.farmId) },
         )
         is FarmDestination.Task -> TasksModuleHost(
             farmId = membership.farmId,
