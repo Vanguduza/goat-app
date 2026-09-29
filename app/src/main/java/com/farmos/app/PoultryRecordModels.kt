@@ -87,6 +87,7 @@ internal suspend fun loadPoultryRecords(database: FarmOsDatabase, farmId: String
         },
         walks = walks,
         walkCount = lifecycle.poultryWalkCount(farmId),
+        flockCount = flocks.size,
         mixedSpeciesWalkCount = lifecycle.poultryMixedSpeciesWalkCount(farmId),
     )
 }

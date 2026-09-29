@@ -87,6 +87,8 @@ data class PoultryRecords(
     /** Exhaustive farm-scoped walk counts; [walks] may be only the latest rows. */
     val walkCount: Int? = null,
     val mixedSpeciesWalkCount: Int? = null,
+    /** Exhaustive count of distinct flocks with a recorded placement; null until loaded. */
+    val flockCount: Int? = null,
 )
 
 internal object PoultryRecordMath {

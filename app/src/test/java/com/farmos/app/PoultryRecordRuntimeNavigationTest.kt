@@ -121,6 +121,18 @@ class PoultryRecordRuntimeNavigationTest {
     }
 
     @Test
+    fun dashboardFlockMetricUsesTheExhaustiveFlockCount() {
+        render(records().copy(flockCount = 37))
+        compose.onNodeWithText("37").assertExists()
+    }
+
+    @Test
+    fun dashboardFlockMetricIsUnknownUntilLoaded() {
+        render(PoultryRecords())
+        compose.onNodeWithText("—").assertExists()
+    }
+
+    @Test
     fun emptyRecordsSayNothingIsRecorded() {
         render(PoultryRecords())
         traverse("Flock profiles", "FOS-POULTRY-005") {
