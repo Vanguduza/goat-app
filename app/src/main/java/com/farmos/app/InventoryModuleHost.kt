@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreateInventoryItem
@@ -33,13 +34,18 @@ fun InventoryModuleHost(
 ) {
     val scope = rememberCoroutineScope()
     var rows by remember(farmId) { mutableStateOf(emptyList<String>()) }
+    var itemOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
     var readModel by remember(farmId) { mutableStateOf(InventoryReadModel()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
     suspend fun refresh() {
-        rows = ops.items().map { item ->
+        val items = ops.items()
+        rows = items.map { item ->
             "${item.id} ${item.sku} · ${item.name} · ${item.quantityMilli} ${item.unit}"
+        }
+        itemOptions = items.map { item ->
+            FarmSelectorOption(item.id, "${item.name} · ${item.sku}", "${BigDecimal.valueOf(item.quantityMilli, 3).stripTrailingZeros().toPlainString()} ${item.unit} on hand")
         }
         readModel = loadReadModel()
     }
@@ -71,6 +77,7 @@ fun InventoryModuleHost(
 
     InventoryScreen(
         rows = rows,
+        itemOptions = itemOptions,
         busy = busy,
         error = error,
         onCreate = { sku, name, unit ->
