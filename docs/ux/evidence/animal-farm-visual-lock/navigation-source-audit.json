@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "b6aa87d77079ea5d2b7bf65e431511ec3bdb80df",
+  "tested_commit": "7b1e61b752f132f872b90f7420aabdbf02edf842",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 246
+    "registered_ids_mentioned_in_kotlin": 247
   },
   "top_level": {
     "farm_modules": [
@@ -1130,6 +1130,12 @@
         },
         {
           "value": "ALL",
+          "refs": 6,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "CALENDAR",
           "refs": 6,
           "transition_refs": 1,
           "render_only_candidate": false
