@@ -20,6 +20,7 @@ import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.design.FarmVisualClass
 import java.time.LocalDate
+import java.time.ZoneId
 
 private enum class HealthPage {
     DASHBOARD,
@@ -35,6 +36,13 @@ private enum class HealthPage {
     APPLY_PROTOCOL,
     VET_VISIT,
     LAB_RESULT,
+    TREATMENT_RECORDS,
+    TREATMENT_DETAIL,
+    WITHDRAWAL_DETAIL,
+    VET_VISITS,
+    VET_VISIT_DETAIL,
+    LAB_RESULTS,
+    LAB_RESULT_DETAIL,
 }
 
 /** Governed Health family. Advisory/recording only; this surface does not prescribe dose or diagnose. */
@@ -58,9 +66,26 @@ fun HealthObservationScreen(
     onApplyPack: (packId: String, animalId: String, day: String) -> Unit = { _, _, _ -> },
     onBack: () -> Unit,
     entryPage: HealthEntryPage = HealthEntryPage.DASHBOARD,
+    readModel: HealthReadModel = HealthReadModel(),
+    today: LocalDate = LocalDate.now(),
+    zone: ZoneId = ZoneId.systemDefault(),
 ) {
     var page by remember { mutableStateOf(entryPage.toHealthPage()) }
-    val home = { page = HealthPage.DASHBOARD }
+    var backStack by remember { mutableStateOf(emptyList<HealthPage>()) }
+    var selectedRecordId by remember { mutableStateOf<String?>(null) }
+    val home = {
+        backStack = emptyList()
+        page = HealthPage.DASHBOARD
+    }
+    fun openRecord(next: HealthPage, id: String? = selectedRecordId) {
+        backStack = backStack + page
+        selectedRecordId = id
+        page = next
+    }
+    val recordBack = {
+        page = backStack.lastOrNull() ?: HealthPage.DASHBOARD
+        backStack = backStack.dropLast(1)
+    }
     val treatmentBack = if (entryPage == HealthEntryPage.TREATMENT) onBack else home
     val withdrawalBack = if (entryPage == HealthEntryPage.WITHDRAWALS) onBack else home
     val observationBack = if (entryPage == HealthEntryPage.RECORD_OBSERVATION) onBack else home
@@ -69,8 +94,23 @@ fun HealthObservationScreen(
     val formularyBack = if (entryPage == HealthEntryPage.FORMULARY) onBack else home
     when (page) {
         HealthPage.DASHBOARD -> {
-            HealthDashboard(rows, treatments, withdrawals, packs, error, { page = it }, onBack)
+            HealthDashboard(rows, treatments, withdrawals, packs, error, { openRecord(it) }, onBack)
         }
+
+        HealthPage.TREATMENT_RECORDS -> HealthTreatmentListScreen(readModel, zone, { openRecord(HealthPage.TREATMENT_DETAIL, it) }, recordBack)
+        HealthPage.TREATMENT_DETAIL -> HealthTreatmentDetailScreen(
+            readModel,
+            selectedRecordId,
+            today,
+            zone,
+            { openRecord(HealthPage.WITHDRAWAL_DETAIL, it) },
+            recordBack,
+        )
+        HealthPage.WITHDRAWAL_DETAIL -> HealthWithdrawalDetailScreen(readModel, selectedRecordId, today, { openRecord(HealthPage.TREATMENT_DETAIL, it) }, recordBack)
+        HealthPage.VET_VISITS -> HealthVetVisitListScreen(readModel, { openRecord(HealthPage.VET_VISIT_DETAIL, it) }, recordBack)
+        HealthPage.VET_VISIT_DETAIL -> HealthVetVisitDetailScreen(readModel, selectedRecordId, recordBack)
+        HealthPage.LAB_RESULTS -> HealthLabResultListScreen(readModel, { openRecord(HealthPage.LAB_RESULT_DETAIL, it) }, recordBack)
+        HealthPage.LAB_RESULT_DETAIL -> HealthLabResultDetailScreen(readModel, selectedRecordId, recordBack)
 
         HealthPage.OBSERVATIONS -> {
             HealthRows("FOS-HEALTH-003", "Observations", rows, "No observations yet", error, home)
@@ -179,6 +219,11 @@ private fun HealthDashboard(
             TextButton(onClick = { onOpen(HealthPage.WITHDRAWALS) }) { Text("Withdrawal windows") }
             TextButton(onClick = { onOpen(HealthPage.VET_VISIT) }) { Text("Record vet visit") }
             TextButton(onClick = { onOpen(HealthPage.LAB_RESULT) }) { Text("Record lab result") }
+        }
+        FarmOperationalSection("Health records", "Recorded history on this device. Records only; no diagnosis or dosing.") {
+            TextButton(onClick = { onOpen(HealthPage.TREATMENT_RECORDS) }) { Text("Treatment records") }
+            TextButton(onClick = { onOpen(HealthPage.VET_VISITS) }) { Text("Vet visits") }
+            TextButton(onClick = { onOpen(HealthPage.LAB_RESULTS) }) { Text("Lab results") }
         }
         FarmOperationalSection("Protocol packs") {
             Text("${packs.size} accepted pack(s)")

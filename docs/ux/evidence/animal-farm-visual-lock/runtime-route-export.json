@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:23ed083b552408ac66d7fa658249401a80efcd26cf26db928afcffbf088d06d1",
-  "runtime_evidence_tested_commit": "8a28e86d7ea80ac41a43bbfd5d8af134df79cc9e",
-  "runtime_evidence_run_id": 36521891700,
+  "source_fingerprint": "sha256:662105dfdb55eadaad4ea3fee34746472e01c01a6ba00796976f842421a60092",
+  "runtime_evidence_tested_commit": "1e44f2bd7b4b8119992fdc61f5be725838350b0e",
+  "runtime_evidence_run_id": 36523547727,
   "registry_screen_count": 545,
-  "route_screen_count": 183,
-  "unresolved_screen_count": 362,
+  "route_screen_count": 190,
+  "unresolved_screen_count": 355,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -84,15 +84,22 @@
     "FOS-HEALTH-001",
     "FOS-HEALTH-003",
     "FOS-HEALTH-004",
+    "FOS-HEALTH-006",
     "FOS-HEALTH-007",
+    "FOS-HEALTH-008",
     "FOS-HEALTH-009",
+    "FOS-HEALTH-010",
     "FOS-HEALTH-013",
     "FOS-HEALTH-015",
     "FOS-HEALTH-017",
     "FOS-HEALTH-018",
     "FOS-HEALTH-019",
+    "FOS-HEALTH-020",
     "FOS-HEALTH-021",
+    "FOS-HEALTH-022",
+    "FOS-HEALTH-023",
     "FOS-HEALTH-024",
+    "FOS-HEALTH-025",
     "FOS-HEALTH-026",
     "FOS-HOME-001",
     "FOS-HOME-002",
@@ -1070,6 +1077,17 @@
       }
     },
     {
+      "screen_id": "FOS-HEALTH-006",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-HEALTH-007",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL",
@@ -1085,6 +1103,17 @@
       }
     },
     {
+      "screen_id": "FOS-HEALTH-008",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-HEALTH-009",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL",
@@ -1096,6 +1125,17 @@
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-HEALTH-010",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -1159,6 +1199,17 @@
       }
     },
     {
+      "screen_id": "FOS-HEALTH-020",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-HEALTH-021",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL",
@@ -1174,6 +1225,28 @@
       }
     },
     {
+      "screen_id": "FOS-HEALTH-022",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-HEALTH-023",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-HEALTH-024",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL",
@@ -1185,6 +1258,17 @@
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-HEALTH-025",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -2604,17 +2688,10 @@
     "FOS-GROUP-009",
     "FOS-HEALTH-002",
     "FOS-HEALTH-005",
-    "FOS-HEALTH-006",
-    "FOS-HEALTH-008",
-    "FOS-HEALTH-010",
     "FOS-HEALTH-011",
     "FOS-HEALTH-012",
     "FOS-HEALTH-014",
     "FOS-HEALTH-016",
-    "FOS-HEALTH-020",
-    "FOS-HEALTH-022",
-    "FOS-HEALTH-023",
-    "FOS-HEALTH-025",
     "FOS-HEALTH-027",
     "FOS-HEALTH-028",
     "FOS-HEALTH-029",
