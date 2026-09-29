@@ -121,6 +121,26 @@ class PoultryRecordRuntimeNavigationTest {
     }
 
     @Test
+    fun feedPageListsRecordedFeedPerFlockWithoutARatio() {
+        render(records())
+        traverse("Feed", "FOS-POULTRY-012") {
+            compose.onNodeWithText("layers-a · chicken · 22.5 kg").assertExists()
+            compose.onNodeWithText("12 kg").assertExists()
+            compose.onNodeWithText("10.5 kg").assertExists()
+            compose.onNodeWithTag("poultry-feed-no-fcr").assertExists()
+            compose.onNodeWithTag("poultry-feed:layers-b:${day(9, 1)}").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun feedPageSaysWhenNoFeedIsRecorded() {
+        render(PoultryRecords())
+        traverse("Feed", "FOS-POULTRY-012") {
+            compose.onNodeWithText("No feed recorded on this device.").assertExists()
+        }
+    }
+
+    @Test
     fun dashboardFlockMetricUsesTheExhaustiveFlockCount() {
         render(records().copy(flockCount = 37))
         compose.onNodeWithText("37").assertExists()
