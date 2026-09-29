@@ -13,6 +13,8 @@ import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.RecordMaintenance
+import com.farmos.feature.ops.AssetRecordNavigator
+import com.farmos.feature.ops.AssetRecords
 import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
@@ -26,14 +28,17 @@ fun AssetsModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadRecords: suspend () -> AssetRecords = { AssetRecords() },
 ) {
     val scope = rememberCoroutineScope()
     var rows by remember { mutableStateOf(emptyList<String>()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var records by remember(farmId) { mutableStateOf(AssetRecords()) }
 
     suspend fun refresh() {
         rows = ops.assets().map { "${it.id} ${it.code} · ${it.name}" }
+        records = loadRecords()
     }
 
     LaunchedEffect(farmId) { runCatching { refresh() } }
@@ -58,7 +63,7 @@ fun AssetsModuleHost(
     val title = remember { mutableStateOf("") }
     val day = remember { mutableStateOf("") }
 
-    SimpleCaptureScreen(
+    AssetRecordNavigator(records) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-ASSET-001",
         title = "Assets",
         help = "Record equipment and maintenance. This is not a depreciation ledger.",
@@ -73,6 +78,7 @@ fun AssetsModuleHost(
         },
         onBack = onBack,
         extra = {
+            recordActions()
             androidx.compose.material3.OutlinedTextField(assetId.value, { assetId.value = it }, label = { androidx.compose.material3.Text("Asset id") }, modifier = Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(title.value, { title.value = it }, label = { androidx.compose.material3.Text("Maintenance title") }, modifier = Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(day.value, { day.value = it }, label = { androidx.compose.material3.Text("Date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth())
@@ -88,5 +94,5 @@ fun AssetsModuleHost(
                 enabled = !busy && assetId.value.isNotBlank() && title.value.isNotBlank() && day.value.isNotBlank(),
             ) { androidx.compose.material3.Text("Record maintenance") }
         },
-    )
+    ) }
 }
