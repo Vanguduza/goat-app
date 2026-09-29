@@ -589,6 +589,9 @@ interface InventoryDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertMovement(movement: InventoryMovementEntity): Long
+
+    @Query("SELECT * FROM inventory_movements WHERE farmId = :farmId ORDER BY occurredAtEpochMillis DESC, id LIMIT :limit")
+    suspend fun movements(farmId: String, limit: Int): List<InventoryMovementEntity>
 }
 
 @Dao

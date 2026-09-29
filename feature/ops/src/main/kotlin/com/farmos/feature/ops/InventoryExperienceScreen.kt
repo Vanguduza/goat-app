@@ -20,6 +20,7 @@ import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.design.FarmVisualClass
 import java.time.LocalDate
+import java.time.ZoneId
 
 private enum class InventoryPage {
     DASHBOARD,
@@ -31,9 +32,15 @@ private enum class InventoryPage {
     FEFO_ISSUE,
     REORDER_RULE,
     REORDER_ALERT,
+    ITEM_DETAIL,
+    LOT_DETAIL,
+    EXPIRY_QUEUE,
+    LOW_STOCK,
+    MOVEMENTS,
+    SEARCH,
 }
 
-/** FOS-INV-001/002/004/005/006/007/008/012/013 — inventory operating reference family. */
+/** FOS-INV-001..014/017 — inventory operating reference family; 003/009/010/011/014/017 are read-only records. */
 @Composable
 fun InventoryScreen(
     rows: List<String>,
@@ -46,11 +53,42 @@ fun InventoryScreen(
     onSetReorder: (itemId: String, quantity: String) -> Unit = { _, _ -> },
     onRecordReorder: (itemId: String, day: String) -> Unit = { _, _ -> },
     onBack: () -> Unit,
+    readModel: InventoryReadModel = InventoryReadModel(),
+    today: LocalDate = LocalDate.now(),
+    zone: ZoneId = ZoneId.systemDefault(),
 ) {
     var page by remember { mutableStateOf(InventoryPage.DASHBOARD) }
-    val home = { page = InventoryPage.DASHBOARD }
+    var backStack by remember { mutableStateOf(emptyList<InventoryPage>()) }
+    var selectedItemId by remember { mutableStateOf<String?>(null) }
+    var selectedLotId by remember { mutableStateOf<String?>(null) }
+    val home = {
+        backStack = emptyList()
+        page = InventoryPage.DASHBOARD
+    }
+    fun open(next: InventoryPage) {
+        backStack = backStack + page
+        page = next
+    }
+    val back = {
+        page = backStack.lastOrNull() ?: InventoryPage.DASHBOARD
+        backStack = backStack.dropLast(1)
+    }
+    val openItem = { id: String ->
+        selectedItemId = id
+        open(InventoryPage.ITEM_DETAIL)
+    }
+    val openLot = { id: String ->
+        selectedLotId = id
+        open(InventoryPage.LOT_DETAIL)
+    }
     when (page) {
-        InventoryPage.DASHBOARD -> InventoryDashboard(rows, error, { page = it }, onBack)
+        InventoryPage.DASHBOARD -> InventoryDashboard(rows, error, { open(it) }, onBack)
+        InventoryPage.ITEM_DETAIL -> InventoryItemDetailScreen(readModel, selectedItemId, today, zone, openLot, back)
+        InventoryPage.LOT_DETAIL -> InventoryLotDetailScreen(readModel, selectedLotId, today, back)
+        InventoryPage.EXPIRY_QUEUE -> InventoryExpiryQueueScreen(readModel, today, openLot, back)
+        InventoryPage.LOW_STOCK -> InventoryLowStockScreen(readModel, openItem, back)
+        InventoryPage.MOVEMENTS -> InventoryMovementHistoryScreen(readModel, zone, openItem, back)
+        InventoryPage.SEARCH -> InventorySearchScreen(readModel, openItem, back)
         InventoryPage.ITEMS -> InventoryRows(rows, error, home)
         InventoryPage.CREATE -> CreateInventoryItemScreen(busy, error, onCreate, home)
         InventoryPage.RECEIVE -> InventoryMoveScreen("receive", busy, error, onMove, home)
@@ -84,6 +122,12 @@ private fun InventoryDashboard(
         FarmOperationalSection("Dated lots and FEFO") {
             TextButton(onClick = { onOpen(InventoryPage.RECEIVE_LOT) }) { Text("Receive dated lot") }
             TextButton(onClick = { onOpen(InventoryPage.FEFO_ISSUE) }) { Text("Issue oldest-expiry lot") }
+        }
+        FarmOperationalSection("Stock records") {
+            TextButton(onClick = { onOpen(InventoryPage.SEARCH) }) { Text("Search inventory") }
+            TextButton(onClick = { onOpen(InventoryPage.LOW_STOCK) }) { Text("Low stock") }
+            TextButton(onClick = { onOpen(InventoryPage.EXPIRY_QUEUE) }) { Text("Expiry queue") }
+            TextButton(onClick = { onOpen(InventoryPage.MOVEMENTS) }) { Text("Movement history") }
         }
         FarmOperationalSection("Reorder") {
             TextButton(onClick = { onOpen(InventoryPage.REORDER_RULE) }) { Text("Set reorder point") }

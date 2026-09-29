@@ -409,6 +409,8 @@ interface LifecycleDao {
     suspend fun lot(farmId: String, lotId: String): InventoryLotEntity?
     @Query("SELECT * FROM inventory_lots WHERE farmId = :farmId AND itemId = :itemId AND quantityMilli > 0 ORDER BY expiresEpochDay, id")
     suspend fun lotsFor(farmId: String, itemId: String): List<InventoryLotEntity>
+    @Query("SELECT * FROM inventory_lots WHERE farmId = :farmId AND quantityMilli > 0 ORDER BY expiresEpochDay, id")
+    suspend fun openLots(farmId: String): List<InventoryLotEntity>
     @Query("UPDATE inventory_lots SET quantityMilli = :quantityMilli WHERE farmId = :farmId AND id = :lotId")
     suspend fun setLotQuantity(farmId: String, lotId: String, quantityMilli: Long)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertVetVisit(row: VetVisitEntity)
