@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "repository": "Vanguduza/goat-app",
-  "source_fingerprint": "sha256:f252a243f2bca432b8a09ebded9d2d7e2be86d4ce6b90dbef07f408c3a7e2ff7",
+  "source_fingerprint": "sha256:ced88395712c64baa7702e7d00a2706f24f49166f0f52f4356f9ea1e45db8b0c",
   "canonical_branch": "main",
   "release_state": "BLOCKED",
   "green_states": {
@@ -13,11 +13,11 @@
   },
   "screen_coverage": {
     "registered": 545,
-    "kotlin_referenced": 224,
+    "kotlin_referenced": 228,
     "implementation_mapped": 128,
     "qdu_states": {
-      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 224,
-      "PLANNED_NOT_IMPLEMENTED": 321
+      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 228,
+      "PLANNED_NOT_IMPLEMENTED": 317
     },
     "feature_bound": 545
   },
@@ -72,7 +72,7 @@
     },
     "cattle": {
       "registered": 36,
-      "kotlin_referenced": 26,
+      "kotlin_referenced": 27,
       "implementation_mapped": 22,
       "visual_green": 0,
       "feature_count": 7,
@@ -168,7 +168,7 @@
     },
     "poultry": {
       "registered": 27,
-      "kotlin_referenced": 17,
+      "kotlin_referenced": 19,
       "implementation_mapped": 12,
       "visual_green": 0,
       "feature_count": 6,
@@ -216,7 +216,7 @@
     },
     "sheep": {
       "registered": 32,
-      "kotlin_referenced": 25,
+      "kotlin_referenced": 26,
       "implementation_mapped": 22,
       "visual_green": 0,
       "feature_count": 7,
@@ -267,7 +267,7 @@
   "blocking_completion_gaps": [
     "156 mandatory features remain not FEATURE_GREEN",
     "545 registered screens remain not VISUAL_GREEN until native evidence and independent approval exist",
-    "321 registered screens remain PLANNED_NOT_IMPLEMENTED at this implementation fingerprint",
+    "317 registered screens remain PLANNED_NOT_IMPLEMENTED at this implementation fingerprint",
     "whole-product MODULE_GREEN and MVP_GREEN certification remains outstanding"
   ]
 }
