@@ -160,6 +160,23 @@ data class RecordRabbitMarketPlan(
     val purpose: String,
 )
 
+/**
+ * The governed nest-box cycle, matching `rabbit_nest_box_set_status_v1`:
+ * available/sanitized -> assigned or in_cage; assigned -> in_cage or dirty; in_cage -> dirty;
+ * dirty -> sanitized or available. Any other change is rejected.
+ */
+object RabbitNestBoxCycle {
+    fun nextStatuses(from: String): List<String> = when (from) {
+        "available", "sanitized" -> listOf("assigned", "in_cage")
+        "assigned" -> listOf("in_cage", "dirty")
+        "in_cage" -> listOf("dirty")
+        "dirty" -> listOf("sanitized", "available")
+        else -> emptyList()
+    }
+
+    fun allowed(from: String, to: String): Boolean = to in nextStatuses(from)
+}
+
 object RabbitProgrammeValidator {
     fun cage(command: CreateRabbitCage): String? =
         if (command.code.isBlank()) "Cage code is required" else null

@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "9fe6f187ff76a8fb36324628f1c4e2f87f728836",
-  "source_fingerprint": "sha256:15ab7f3fc5721dac7138334e79893caaeb8e1f5950d0778ec46e14fe2c7b7f7e",
+  "tested_commit": "ea2d89b3373fa5939eb474fb5631bc269c560f5e",
+  "source_fingerprint": "sha256:1470669285bc7c0414ea74178f61c1eb381ef0bb34fd285f0a8378bff1f7187c",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36640207642,
+  "foundation_run_id": 36642252125,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -373,6 +373,7 @@
         "FOS-INV-012"
       ],
       "app/src/test/java/com/farmos/app/RabbitCaptureOwnerTest.kt": [
+        "FOS-RABBIT-006",
         "FOS-RABBIT-011"
       ]
     },
@@ -449,7 +450,7 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
     "rendered_traversal_screen_count": 192,
-    "rendered_owner_screen_count": 58,
+    "rendered_owner_screen_count": 59,
     "route_contract_screen_count": 60,
     "combined_screen_count": 265,
     "entry_action_screen_ids": [
@@ -725,6 +726,7 @@
       "FOS-POULTRY-016",
       "FOS-POULTRY-020",
       "FOS-PROC-001",
+      "FOS-RABBIT-006",
       "FOS-RABBIT-011",
       "FOS-SHEEP-010",
       "FOS-SYNC-003",
@@ -820,7 +822,7 @@
   "certification": {
     "runtime_reachability_executed": 192,
     "entry_action_emission_executed": 26,
-    "rendered_surface_owners_executed": 58,
+    "rendered_surface_owners_executed": 59,
     "route_contracts_executed": 60,
     "parameter_scope_executed": true,
     "return_restoration_executed": 192,
