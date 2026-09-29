@@ -15,9 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
+import com.farmos.core.design.FarmSelectionAtoms
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.design.FarmVisualClass
 import java.time.LocalDate
 import java.time.ZoneId
@@ -56,6 +59,8 @@ fun InventoryScreen(
     readModel: InventoryReadModel = InventoryReadModel(),
     today: LocalDate = LocalDate.now(),
     zone: ZoneId = ZoneId.systemDefault(),
+    /** This farm's inventory items; every stock command references one of these, never a typed id. */
+    itemOptions: List<FarmSelectorOption> = emptyList(),
 ) {
     var page by remember { mutableStateOf(InventoryPage.DASHBOARD) }
     var backStack by remember { mutableStateOf(emptyList<InventoryPage>()) }
@@ -91,12 +96,12 @@ fun InventoryScreen(
         InventoryPage.SEARCH -> InventorySearchScreen(readModel, openItem, back)
         InventoryPage.ITEMS -> InventoryRows(rows, error, home)
         InventoryPage.CREATE -> CreateInventoryItemScreen(busy, error, onCreate, home)
-        InventoryPage.RECEIVE -> InventoryMoveScreen("receive", busy, error, onMove, home)
-        InventoryPage.ISSUE -> InventoryMoveScreen("issue", busy, error, onMove, home)
-        InventoryPage.RECEIVE_LOT -> InventoryLotReceiveScreen(busy, error, onReceiveLot, home)
-        InventoryPage.FEFO_ISSUE -> InventoryFefoIssueScreen(busy, error, onIssueLot, home)
-        InventoryPage.REORDER_RULE -> InventoryReorderRuleScreen(busy, error, onSetReorder, home)
-        InventoryPage.REORDER_ALERT -> InventoryReorderAlertScreen(busy, error, onRecordReorder, home)
+        InventoryPage.RECEIVE -> InventoryMoveScreen("receive", itemOptions, busy, error, onMove, home)
+        InventoryPage.ISSUE -> InventoryMoveScreen("issue", itemOptions, busy, error, onMove, home)
+        InventoryPage.RECEIVE_LOT -> InventoryLotReceiveScreen(itemOptions, busy, error, onReceiveLot, home)
+        InventoryPage.FEFO_ISSUE -> InventoryFefoIssueScreen(itemOptions, busy, error, onIssueLot, home)
+        InventoryPage.REORDER_RULE -> InventoryReorderRuleScreen(itemOptions, busy, error, onSetReorder, home)
+        InventoryPage.REORDER_ALERT -> InventoryReorderAlertScreen(itemOptions, busy, error, onRecordReorder, home)
     }
 }
 
@@ -196,6 +201,7 @@ private fun CreateInventoryItemScreen(
 @Composable
 private fun InventoryMoveScreen(
     kind: String,
+    itemOptions: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onMove: (String, String, String) -> Unit,
@@ -211,9 +217,7 @@ private fun InventoryMoveScreen(
         onBack = onBack,
     ) {
         FarmOperationalSection("Stock movement") {
-            OutlinedTextField(itemId, {
-                itemId = it
-            }, label = { Text("Item id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            InventoryItemSelector(itemOptions, itemId, busy) { itemId = it }
             OutlinedTextField(quantity, {
                 quantity = it
             }, label = { Text("Quantity") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -229,6 +233,7 @@ private fun InventoryMoveScreen(
 
 @Composable
 private fun InventoryLotReceiveScreen(
+    itemOptions: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onReceive: (String, String, String, String) -> Unit,
@@ -240,9 +245,7 @@ private fun InventoryLotReceiveScreen(
     var quantity by remember { mutableStateOf("") }
     FarmOperationalPage("FOS-INV-006", "Receive dated lot", "Capture lot identity, expiry and quantity.", onBack = onBack) {
         FarmOperationalSection("Lot details") {
-            OutlinedTextField(itemId, {
-                itemId = it
-            }, label = { Text("Item id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            InventoryItemSelector(itemOptions, itemId, busy) { itemId = it }
             OutlinedTextField(lotCode, {
                 lotCode = it
             }, label = { Text("Lot code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -268,6 +271,7 @@ private fun InventoryLotReceiveScreen(
 
 @Composable
 private fun InventoryFefoIssueScreen(
+    itemOptions: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onIssue: (String, String) -> Unit,
@@ -277,9 +281,7 @@ private fun InventoryFefoIssueScreen(
     var quantity by remember { mutableStateOf("") }
     FarmOperationalPage("FOS-INV-008", "FEFO issue", "Issue from the oldest-expiry dated lot first.", FarmVisualClass.I4, onBack) {
         FarmOperationalSection("Issue dated stock", "Non-lot stock is not substituted for this operation.") {
-            OutlinedTextField(itemId, {
-                itemId = it
-            }, label = { Text("Item id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            InventoryItemSelector(itemOptions, itemId, busy) { itemId = it }
             OutlinedTextField(quantity, {
                 quantity = it
             }, label = { Text("Quantity") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -297,6 +299,7 @@ private fun InventoryFefoIssueScreen(
 
 @Composable
 private fun InventoryReorderRuleScreen(
+    itemOptions: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onSet: (String, String) -> Unit,
@@ -306,9 +309,7 @@ private fun InventoryReorderRuleScreen(
     var quantity by remember { mutableStateOf("") }
     FarmOperationalPage("FOS-INV-012", "Reorder rules", "Set the on-hand point that should trigger attention.", onBack = onBack) {
         FarmOperationalSection("Reorder point") {
-            OutlinedTextField(itemId, {
-                itemId = it
-            }, label = { Text("Item id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            InventoryItemSelector(itemOptions, itemId, busy) { itemId = it }
             OutlinedTextField(quantity, {
                 quantity = it
             }, label = { Text("Reorder quantity") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -326,6 +327,7 @@ private fun InventoryReorderRuleScreen(
 
 @Composable
 private fun InventoryReorderAlertScreen(
+    itemOptions: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String) -> Unit,
@@ -335,9 +337,7 @@ private fun InventoryReorderAlertScreen(
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage("FOS-INV-013", "Reorder alert", "Record that stock reached its reorder point.", FarmVisualClass.I4, onBack) {
         FarmOperationalSection("Alert record", "This is an auditable record, not a forecast engine.") {
-            OutlinedTextField(itemId, {
-                itemId = it
-            }, label = { Text("Item id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            InventoryItemSelector(itemOptions, itemId, busy) { itemId = it }
             OutlinedTextField(
                 day,
                 { day = it },
@@ -355,4 +355,18 @@ private fun InventoryReorderAlertScreen(
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
+}
+
+/** FOS-ATOM-009 over this farm's inventory items, so a stock command never carries a mistyped id. */
+@Composable
+private fun InventoryItemSelector(itemOptions: List<FarmSelectorOption>, selected: String, busy: Boolean, onSelect: (String) -> Unit) {
+    FarmEntitySelector(
+        atomTag = FarmSelectionAtoms.INVENTORY_ITEM_SELECTOR,
+        title = "Item",
+        options = itemOptions,
+        selectedId = selected.ifBlank { null },
+        onSelect = onSelect,
+        emptyText = "Create an inventory item first.",
+        enabled = !busy,
+    )
 }

@@ -2,9 +2,9 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:80c19e1f7ac4d593f05a3889ec0be126e4370205906c30e04ba43dd9792be030",
-  "runtime_evidence_tested_commit": "4723fd8e5a947c4362f76a4ede542758f3990ce6",
-  "runtime_evidence_run_id": 36630917090,
+  "source_fingerprint": "sha256:cbe4ab769e76a34323c348f5b2d2f7645b5b49422612dd71833806788f3f686e",
+  "runtime_evidence_tested_commit": "c76e8f0f2fb0a8170ceb54eae3edfc63a803bef8",
+  "runtime_evidence_run_id": 36633187085,
   "registry_screen_count": 545,
   "route_screen_count": 265,
   "unresolved_screen_count": 280,
@@ -406,6 +406,7 @@
       ],
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/InventoryCaptureOwnerTest.kt",
           "app/src/test/java/com/farmos/app/ProcurementCaptureOwnerTest.kt"
         ]
       }
@@ -2128,11 +2129,15 @@
     {
       "screen_id": "FOS-INV-005",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/InventoryCaptureOwnerTest.kt"
         ]
       }
     },
@@ -2205,11 +2210,15 @@
     {
       "screen_id": "FOS-INV-012",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/InventoryCaptureOwnerTest.kt"
         ]
       }
     },
