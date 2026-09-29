@@ -173,6 +173,7 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadRecords = { loadLabourRecords(app.database, membership.farmId) },
             )
             FarmModule.ASSETS -> AssetsModuleHost(
                 farmId = membership.farmId,
@@ -223,9 +224,11 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadRecords = { loadWaterRecords(app.database, membership.farmId) },
             )
             FarmModule.SALES -> SalesModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
+                loadRecords = { loadSalesRecords(app.database, membership.farmId) },
             )
             FarmModule.PROCUREMENT -> ProcurementModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,

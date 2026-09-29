@@ -8,6 +8,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.RecordSale
+import com.farmos.feature.ops.SalesRecordNavigator
+import com.farmos.feature.ops.SalesRecords
 import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
@@ -21,12 +23,17 @@ fun SalesModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadRecords: suspend () -> SalesRecords = { SalesRecords() },
 ) {
     val scope = rememberCoroutineScope()
     val busy = remember { mutableStateOf(false) }
     val error = remember { mutableStateOf<String?>(null) }
     val rows = remember { mutableStateOf(emptyList<String>()) }
-    suspend fun refresh() { rows.value = ops.recentSales().map { "${it.itemKind} · ${it.amountMinor} ${it.currency}" } }
+    val records = remember(farmId) { mutableStateOf(SalesRecords()) }
+    suspend fun refresh() {
+        rows.value = ops.recentSales().map { "${it.itemKind} · ${it.amountMinor} ${it.currency}" }
+        records.value = loadRecords()
+    }
     LaunchedEffect(farmId) { runCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
         scope.launch { busy.value = true; error.value = null; runCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error.value = it.message }; busy.value = false }
@@ -35,7 +42,7 @@ fun SalesModuleHost(
     val qty = remember { mutableStateOf("1") }
     val amount = remember { mutableStateOf("") }
     val day = remember { mutableStateOf("") }
-    SimpleCaptureScreen(
+    SalesRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-SALES-001", title = "Sales",
         help = "A sale posts income in integer minor units. This is farm unit economics, not a statutory ledger.",
         empty = "No sales on this device.", rows = rows.value, busy = busy.value, error = error.value,
@@ -56,5 +63,6 @@ fun SalesModuleHost(
             )
         } },
         onBack = onBack,
-    )
+        extra = { recordActions() },
+    ) }
 }

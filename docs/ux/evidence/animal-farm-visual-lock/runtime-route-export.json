@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:88bd5a35b670d19497156120434398286b99ac0835c5bcd5902310664bfa74d1",
-  "runtime_evidence_tested_commit": "1d50da9906d0d811029ff98d2d7686ae1fea7cbb",
-  "runtime_evidence_run_id": 36540394173,
+  "source_fingerprint": "sha256:d93df6c68fefadb567947a06ff627ce42bdacc9ee74c4c3bea8f9f7a1a620e35",
+  "runtime_evidence_tested_commit": "45df71eb969c46e17ceb4cdbaf9805003be05126",
+  "runtime_evidence_run_id": 36542804502,
   "registry_screen_count": 545,
-  "route_screen_count": 214,
-  "unresolved_screen_count": 331,
+  "route_screen_count": 218,
+  "unresolved_screen_count": 327,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -144,6 +144,7 @@
     "FOS-INV-014",
     "FOS-INV-017",
     "FOS-LABOUR-001",
+    "FOS-LABOUR-005",
     "FOS-PASTURE-001",
     "FOS-POULTRY-001",
     "FOS-POULTRY-002",
@@ -186,6 +187,8 @@
     "FOS-RABBIT-027",
     "FOS-RABBIT-034",
     "FOS-SALES-001",
+    "FOS-SALES-005",
+    "FOS-SALES-011",
     "FOS-SHEEP-001",
     "FOS-SHEEP-002",
     "FOS-SHEEP-003",
@@ -223,7 +226,8 @@
     "FOS-TASK-007",
     "FOS-TASK-008",
     "FOS-TASK-009",
-    "FOS-WATER-001"
+    "FOS-WATER-001",
+    "FOS-WATER-009"
   ],
   "routes": [
     {
@@ -1825,6 +1829,17 @@
       }
     },
     {
+      "screen_id": "FOS-LABOUR-005",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/LabourRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-PASTURE-001",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -2311,6 +2326,28 @@
       }
     },
     {
+      "screen_id": "FOS-SALES-005",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SalesRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SALES-011",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SalesRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-SHEEP-001",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -2779,6 +2816,17 @@
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
         ]
       }
+    },
+    {
+      "screen_id": "FOS-WATER-009",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/WaterRecordRuntimeNavigationTest.kt"
+        ]
+      }
     }
   ],
   "unresolved_registry_screen_ids": [
@@ -2984,7 +3032,6 @@
     "FOS-LABOUR-002",
     "FOS-LABOUR-003",
     "FOS-LABOUR-004",
-    "FOS-LABOUR-005",
     "FOS-LABOUR-006",
     "FOS-LABOUR-007",
     "FOS-LABOUR-008",
@@ -3050,13 +3097,11 @@
     "FOS-SALES-002",
     "FOS-SALES-003",
     "FOS-SALES-004",
-    "FOS-SALES-005",
     "FOS-SALES-006",
     "FOS-SALES-007",
     "FOS-SALES-008",
     "FOS-SALES-009",
     "FOS-SALES-010",
-    "FOS-SALES-011",
     "FOS-SALES-012",
     "FOS-SEARCH-001",
     "FOS-SEARCH-002",
@@ -3111,7 +3156,6 @@
     "FOS-WATER-006",
     "FOS-WATER-007",
     "FOS-WATER-008",
-    "FOS-WATER-009",
     "FOS-WATER-010"
   ],
   "aliases": [],

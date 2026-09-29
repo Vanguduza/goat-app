@@ -10,6 +10,8 @@ import androidx.compose.runtime.setValue
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.RecordLabour
+import com.farmos.feature.ops.LabourRecordNavigator
+import com.farmos.feature.ops.LabourRecords
 import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
@@ -23,14 +25,17 @@ fun LabourModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadRecords: suspend () -> LabourRecords = { LabourRecords() },
 ) {
     val scope = rememberCoroutineScope()
     var rows by remember { mutableStateOf(emptyList<String>()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var records by remember(farmId) { mutableStateOf(LabourRecords()) }
 
     suspend fun refresh() {
         rows = ops.recentLabour().map { "${it.workerName} · ${it.taskCode} · ${it.minutes} min" }
+        records = loadRecords()
     }
 
     LaunchedEffect(farmId) { runCatching { refresh() } }
@@ -53,7 +58,7 @@ fun LabourModuleHost(
     val minutes = remember { mutableStateOf("") }
     val day = remember { mutableStateOf("") }
 
-    SimpleCaptureScreen(
+    LabourRecordNavigator(records) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-LABOUR-001",
         title = "Labour",
         help = "Minutes are whole figures. Worker name is a farm label, not a login.",
@@ -78,5 +83,6 @@ fun LabourModuleHost(
             }
         },
         onBack = onBack,
-    )
+        extra = { recordActions() },
+    ) }
 }

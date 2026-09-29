@@ -220,7 +220,21 @@ interface LabourDao {
 
     @Query("SELECT * FROM labour_entries WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id DESC LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<LabourEntryEntity>
+
+    @Query("SELECT COUNT(*) FROM labour_entries WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    @Query(
+        """
+        SELECT workerName, SUM(minutes) AS minutes, COUNT(*) AS entryCount, MAX(occurredEpochDay) AS latestEpochDay
+        FROM labour_entries WHERE farmId = :farmId GROUP BY workerName ORDER BY workerName
+        """,
+    )
+    suspend fun totalsByWorkerName(farmId: String): List<LabourWorkerTotal>
 }
+
+/** Exhaustive minutes per recorded worker label; the label is a farm label, not a login or roster entry. */
+data class LabourWorkerTotal(val workerName: String, val minutes: Long, val entryCount: Int, val latestEpochDay: Long)
 
 @Dao
 interface AssetDao {
@@ -280,9 +294,24 @@ interface WaterDao {
     @Upsert
     suspend fun upsertFromServer(record: WaterRecordEntity)
 
-    @Query("SELECT * FROM water_records WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
+    @Query("SELECT * FROM water_records WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<WaterRecordEntity>
+
+    @Query("SELECT COUNT(*) FROM water_records WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    @Query(
+        """
+        SELECT source, SUM(litresMilli) AS litresMilli, COUNT(*) AS recordCount,
+            MIN(occurredEpochDay) AS firstEpochDay, MAX(occurredEpochDay) AS latestEpochDay
+        FROM water_records WHERE farmId = :farmId GROUP BY source ORDER BY source
+        """,
+    )
+    suspend fun totalsBySource(farmId: String): List<WaterSourceTotal>
 }
+
+/** Exhaustive per-source water aggregate over every recorded row; not bounded by any list limit. */
+data class WaterSourceTotal(val source: String, val litresMilli: Long, val recordCount: Int, val firstEpochDay: Long, val latestEpochDay: Long)
 
 @Dao
 interface SaleDao {
@@ -292,9 +321,23 @@ interface SaleDao {
     @Upsert
     suspend fun upsertFromServer(record: SaleRecordEntity)
 
-    @Query("SELECT * FROM sales_records WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
+    @Query("SELECT * FROM sales_records WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<SaleRecordEntity>
+
+    @Query("SELECT COUNT(*) FROM sales_records WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    @Query(
+        """
+        SELECT currency, SUM(amountMinor) AS amountMinor, COUNT(*) AS saleCount
+        FROM sales_records WHERE farmId = :farmId GROUP BY currency ORDER BY currency
+        """,
+    )
+    suspend fun totalsByCurrency(farmId: String): List<SaleCurrencyTotal>
 }
+
+/** Exhaustive per-currency sales aggregate; currencies are never summed together. */
+data class SaleCurrencyTotal(val currency: String, val amountMinor: Long, val saleCount: Int)
 
 @Dao
 interface FormularyDao {

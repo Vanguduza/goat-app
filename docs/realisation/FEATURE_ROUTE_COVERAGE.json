@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:88bd5a35b670d19497156120434398286b99ac0835c5bcd5902310664bfa74d1",
+  "source_fingerprint": "sha256:d93df6c68fefadb567947a06ff627ce42bdacc9ee74c4c3bea8f9f7a1a620e35",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 68,
+  "features_with_route_evidence": 72,
   "features_fully_route_bound": 22,
-  "features_without_route_evidence": 88,
+  "features_without_route_evidence": 84,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -1722,14 +1722,15 @@
         "FOS-WATER-008",
         "FOS-WATER-009"
       ],
-      "route_screen_ids": [],
-      "unresolved_screen_ids": [
-        "FOS-WATER-007",
-        "FOS-WATER-008",
+      "route_screen_ids": [
         "FOS-WATER-009"
       ],
+      "unresolved_screen_ids": [
+        "FOS-WATER-007",
+        "FOS-WATER-008"
+      ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -1919,14 +1920,15 @@
         "FOS-LABOUR-005",
         "FOS-LABOUR-006"
       ],
-      "route_screen_ids": [],
+      "route_screen_ids": [
+        "FOS-LABOUR-005"
+      ],
       "unresolved_screen_ids": [
         "FOS-LABOUR-004",
-        "FOS-LABOUR-005",
         "FOS-LABOUR-006"
       ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -2162,17 +2164,18 @@
         "FOS-SALES-008",
         "FOS-SALES-009"
       ],
-      "route_screen_ids": [],
+      "route_screen_ids": [
+        "FOS-SALES-005"
+      ],
       "unresolved_screen_ids": [
         "FOS-SALES-004",
-        "FOS-SALES-005",
         "FOS-SALES-006",
         "FOS-SALES-007",
         "FOS-SALES-008",
         "FOS-SALES-009"
       ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -2184,13 +2187,14 @@
         "FOS-SALES-010",
         "FOS-SALES-011"
       ],
-      "route_screen_ids": [],
-      "unresolved_screen_ids": [
-        "FOS-SALES-010",
+      "route_screen_ids": [
         "FOS-SALES-011"
       ],
+      "unresolved_screen_ids": [
+        "FOS-SALES-010"
+      ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
