@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "b9cd2c8bcdcea4f781eb7ed67b30e1ecebf6f819",
-  "source_fingerprint": "sha256:9c8d6da60212dce392abc291aeccdce5785d42aac658f10a1905851b078ef513",
+  "tested_commit": "b06174063c4cd91735c9a66acfbd02631906cdd4",
+  "source_fingerprint": "sha256:4af5a054942dc0d7054d11a138f3e4809d4f5dd8635118003403ad1f07af397d",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36572000688,
+  "foundation_run_id": 36575051248,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -197,6 +197,7 @@
         "FOS-CATTLE-022",
         "FOS-CATTLE-025",
         "FOS-CATTLE-027",
+        "FOS-CATTLE-031",
         "FOS-CATTLE-033",
         "FOS-CATTLE-035"
       ],
@@ -378,10 +379,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
-    "rendered_traversal_screen_count": 175,
+    "rendered_traversal_screen_count": 176,
     "rendered_owner_screen_count": 32,
     "route_contract_screen_count": 60,
-    "combined_screen_count": 240,
+    "combined_screen_count": 241,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -437,6 +438,7 @@
       "FOS-CATTLE-028",
       "FOS-CATTLE-029",
       "FOS-CATTLE-030",
+      "FOS-CATTLE-031",
       "FOS-CATTLE-032",
       "FOS-CATTLE-033",
       "FOS-CATTLE-034",
@@ -705,12 +707,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 175,
+    "runtime_reachability_executed": 176,
     "entry_action_emission_executed": 26,
     "rendered_surface_owners_executed": 32,
     "route_contracts_executed": 60,
     "parameter_scope_executed": true,
-    "return_restoration_executed": 175,
+    "return_restoration_executed": 176,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
