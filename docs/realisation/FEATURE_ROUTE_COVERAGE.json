@@ -2,11 +2,11 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:e7bbafaa9f752fb1066a0d683899d06ae847e3691128ffb1865117bb7d165568",
+  "source_fingerprint": "sha256:f8fa4bd2f042916584737c3301d3d8d15ba7204a7aed51b69c804c57d93593bd",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 65,
-  "features_fully_route_bound": 20,
+  "features_fully_route_bound": 21,
   "features_without_route_evidence": 91,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
@@ -555,14 +555,13 @@
         "FOS-RABBIT-008"
       ],
       "route_screen_ids": [
-        "FOS-RABBIT-006"
-      ],
-      "unresolved_screen_ids": [
+        "FOS-RABBIT-006",
         "FOS-RABBIT-007",
         "FOS-RABBIT-008"
       ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -586,13 +585,13 @@
         "FOS-RABBIT-011",
         "FOS-RABBIT-012",
         "FOS-RABBIT-013",
+        "FOS-RABBIT-016",
         "FOS-RABBIT-017"
       ],
       "unresolved_screen_ids": [
         "FOS-RABBIT-010",
         "FOS-RABBIT-014",
-        "FOS-RABBIT-015",
-        "FOS-RABBIT-016"
+        "FOS-RABBIT-015"
       ],
       "headless_contract": null,
       "coverage_state": "PARTIAL_ROUTE_COVERAGE",
@@ -614,12 +613,12 @@
         "FOS-RABBIT-025"
       ],
       "route_screen_ids": [
+        "FOS-RABBIT-018",
+        "FOS-RABBIT-019",
         "FOS-RABBIT-020",
         "FOS-RABBIT-022"
       ],
       "unresolved_screen_ids": [
-        "FOS-RABBIT-018",
-        "FOS-RABBIT-019",
         "FOS-RABBIT-021",
         "FOS-RABBIT-023",
         "FOS-RABBIT-024",

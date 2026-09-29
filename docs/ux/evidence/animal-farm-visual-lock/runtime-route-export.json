@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:e7bbafaa9f752fb1066a0d683899d06ae847e3691128ffb1865117bb7d165568",
-  "runtime_evidence_tested_commit": "db4c4ec6bcd0e0f0863eeac18ff37c9dc787b026",
-  "runtime_evidence_run_id": 36529254131,
+  "source_fingerprint": "sha256:f8fa4bd2f042916584737c3301d3d8d15ba7204a7aed51b69c804c57d93593bd",
+  "runtime_evidence_tested_commit": "1c24a0aaa0c49e72780107b320078412fd4fe217",
+  "runtime_evidence_run_id": 36532980225,
   "registry_screen_count": 545,
-  "route_screen_count": 202,
-  "unresolved_screen_count": 343,
+  "route_screen_count": 207,
+  "unresolved_screen_count": 338,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -164,11 +164,16 @@
     "FOS-RABBIT-002",
     "FOS-RABBIT-005",
     "FOS-RABBIT-006",
+    "FOS-RABBIT-007",
+    "FOS-RABBIT-008",
     "FOS-RABBIT-009",
     "FOS-RABBIT-011",
     "FOS-RABBIT-012",
     "FOS-RABBIT-013",
+    "FOS-RABBIT-016",
     "FOS-RABBIT-017",
+    "FOS-RABBIT-018",
+    "FOS-RABBIT-019",
     "FOS-RABBIT-020",
     "FOS-RABBIT-022",
     "FOS-RABBIT-027",
@@ -2049,6 +2054,28 @@
       }
     },
     {
+      "screen_id": "FOS-RABBIT-007",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/RabbitRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-RABBIT-008",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/RabbitRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-RABBIT-009",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -2093,6 +2120,17 @@
       }
     },
     {
+      "screen_id": "FOS-RABBIT-016",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/RabbitRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-RABBIT-017",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -2100,6 +2138,28 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/RabbitRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-RABBIT-018",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/RabbitRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-RABBIT-019",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/RabbitRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -2879,14 +2939,9 @@
     "FOS-PROC-010",
     "FOS-RABBIT-003",
     "FOS-RABBIT-004",
-    "FOS-RABBIT-007",
-    "FOS-RABBIT-008",
     "FOS-RABBIT-010",
     "FOS-RABBIT-014",
     "FOS-RABBIT-015",
-    "FOS-RABBIT-016",
-    "FOS-RABBIT-018",
-    "FOS-RABBIT-019",
     "FOS-RABBIT-021",
     "FOS-RABBIT-023",
     "FOS-RABBIT-024",

@@ -188,6 +188,7 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadRecords = { loadRabbitRecords(app.database, membership.farmId) },
             )
             FarmModule.INVENTORY -> InventoryModuleHost(
                 farmId = membership.farmId,

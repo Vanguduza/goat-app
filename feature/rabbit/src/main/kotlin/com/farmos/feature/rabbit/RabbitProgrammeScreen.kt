@@ -45,6 +45,11 @@ private enum class RabbitPage {
     OUTCOME,
     NESTS,
     GI_STASIS,
+    CAGE_OCCUPANCY,
+    CAGE_DETAIL,
+    KINDLING_DUE,
+    LITTER_PROFILE,
+    KIT_CENSUS,
 }
 
 /** Rabbit biology is wave/cage/litter-first; this is not a Goat layout with rabbit labels. */
@@ -69,6 +74,8 @@ fun RabbitProgrammeScreen(
     onRecordOutcome: (waveId: String, outcome: String, day: String) -> Unit = { _, _, _ -> },
     onRecordGiStasis: (animalId: String, signs: String, day: String) -> Unit = { _, _, _ -> },
     onBack: () -> Unit,
+    records: RabbitRecords = RabbitRecords(),
+    today: LocalDate = LocalDate.now(),
 ) {
     var page by remember { mutableStateOf(RabbitPage.DASHBOARD) }
     val home = { page = RabbitPage.DASHBOARD }
@@ -130,6 +137,12 @@ fun RabbitProgrammeScreen(
         RabbitPage.GI_STASIS -> {
             RabbitGiStasisScreen(busy, error, onRecordGiStasis, home)
         }
+
+        RabbitPage.CAGE_OCCUPANCY -> RabbitCageOccupancyScreen(records, home)
+        RabbitPage.CAGE_DETAIL -> RabbitCageDetailScreen(records, home)
+        RabbitPage.KINDLING_DUE -> RabbitKindlingDueScreen(records, today, home)
+        RabbitPage.LITTER_PROFILE -> RabbitLitterProfileScreen(records, home)
+        RabbitPage.KIT_CENSUS -> RabbitKitCensusScreen(records, home)
     }
 }
 
@@ -171,6 +184,11 @@ private fun RabbitDashboard(
             RabbitDashboardAction("Mating outcome", "Record false pregnancy or outcome", { onOpen(RabbitPage.OUTCOME) })
             RabbitDashboardAction("Nest-box schedule", "Placement, occupancy and removal windows", { onOpen(RabbitPage.NESTS) })
             RabbitDashboardAction("GI-stasis red flag", "Flag signs and create vet-call work", { onOpen(RabbitPage.GI_STASIS) })
+            RabbitDashboardAction("Cage occupancy", "Recorded capacity, nest boxes and waves per cage", { onOpen(RabbitPage.CAGE_OCCUPANCY) })
+            RabbitDashboardAction("Cage detail", "Nest boxes and waves for one cage", { onOpen(RabbitPage.CAGE_DETAIL) })
+            RabbitDashboardAction("Kindling due", "Waves with no kindling recorded yet", { onOpen(RabbitPage.KINDLING_DUE) })
+            RabbitDashboardAction("Litter profiles", "Schedule, events and kits per wave", { onOpen(RabbitPage.LITTER_PROFILE) })
+            RabbitDashboardAction("Kit census", "Individual kits by wave", { onOpen(RabbitPage.KIT_CENSUS) })
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             TextButton(onClick = onBack) { Text("Farm home") }
         }

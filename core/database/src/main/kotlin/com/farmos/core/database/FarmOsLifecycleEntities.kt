@@ -323,6 +323,18 @@ interface LifecycleDao {
     suspend fun kits(farmId: String): List<RabbitKitEntity>
     @Query("SELECT * FROM rabbit_kits WHERE farmId = :farmId AND id = :kitId LIMIT 1")
     suspend fun kit(farmId: String, kitId: String): RabbitKitEntity?
+    @Query("SELECT * FROM rabbit_palpations WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun rabbitPalpations(farmId: String): List<RabbitPalpationEntity>
+    @Query("SELECT * FROM rabbit_kindlings WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun rabbitKindlings(farmId: String): List<RabbitKindlingEntity>
+    @Query("SELECT DISTINCT waveId FROM rabbit_kindlings WHERE farmId = :farmId ORDER BY waveId")
+    suspend fun rabbitKindledWaveIds(farmId: String): List<String>
+    @Query("SELECT * FROM rabbit_fosters WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun rabbitFosters(farmId: String): List<RabbitFosterEntity>
+    @Query("SELECT * FROM rabbit_weans WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun rabbitWeans(farmId: String): List<RabbitWeanEntity>
+    @Query("SELECT * FROM rabbit_mating_outcomes WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun rabbitMatingOutcomes(farmId: String): List<RabbitMatingOutcomeEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertRetention(row: RabbitRetentionEntity)
     @Upsert suspend fun upsertRetention(row: RabbitRetentionEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertWaitlist(row: RabbitWaitlistEntity)

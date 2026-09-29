@@ -18,6 +18,7 @@ import com.farmos.domain.rabbit.CreateRabbitNestBox
 import com.farmos.domain.rabbit.CreateRabbitWave
 import com.farmos.domain.rabbit.RecordRabbitGiStasis
 import com.farmos.feature.rabbit.RabbitProgrammeScreen
+import com.farmos.feature.rabbit.RabbitRecords
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ fun RabbitModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadRecords: suspend () -> RabbitRecords = { RabbitRecords() },
 ) {
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
@@ -41,6 +43,7 @@ fun RabbitModuleHost(
     var selectedCageId by remember { mutableStateOf<String?>(null) }
     var rabbitRows by remember { mutableStateOf(emptyList<String>()) }
     var nestBoxRows by remember { mutableStateOf(emptyList<String>()) }
+    var records by remember(farmId) { mutableStateOf(RabbitRecords()) }
 
     suspend fun refresh() {
         val cageEntities = ops.cages()
@@ -57,6 +60,7 @@ fun RabbitModuleHost(
                 append(" · ").append(animal.status)
             }
         }
+        records = loadRecords()
     }
 
     LaunchedEffect(farmId) { runCatching { refresh() } }
@@ -193,5 +197,6 @@ fun RabbitModuleHost(
             }
         },
         onBack = onBack,
+        records = records,
     )
 }
