@@ -86,6 +86,10 @@ fun PoultryExperienceScreen(
     houseOptions: List<FarmSelectorOption> = emptyList(),
     /** Vet-approved poultry formulary items; vaccination accepts only these. */
     poultryFormulary: List<FarmSelectorOption> = emptyList(),
+    /** Hatches still in `set` status; candling accepts only these. */
+    setHatches: List<FarmSelectorOption> = emptyList(),
+    /** Hatches in `candled` status; a hatch result accepts only these. */
+    candledHatches: List<FarmSelectorOption> = emptyList(),
 ) {
     var page by remember { mutableStateOf(PoultryPage.DASHBOARD) }
     val home = { page = PoultryPage.DASHBOARD }
@@ -97,11 +101,11 @@ fun PoultryExperienceScreen(
         PoultryPage.PLACEMENT -> PoultryPlacement(flockGroups, houseOptions, busy, error, onPlaceFlock, home)
         PoultryPage.DAILY -> PoultryDaily(flockDays, flockGroups, busy, error, onRecordFlockDay, home)
         PoultryPage.HATCHERY -> PoultryRows("FOS-POULTRY-017", "Hatchery", hatches, "No hatch batches yet", error, home, FarmVisualClass.I2)
-        PoultryPage.SET_EGGS -> PoultrySetEggs(busy, error, onSetEggs, home)
-        PoultryPage.CANDLING -> PoultryCandling(busy, error, onCandle, home)
-        PoultryPage.HATCH_RESULT -> PoultryHatchResult(busy, error, onRecordHatch, home)
+        PoultryPage.SET_EGGS -> PoultrySetEggs(houseOptions, flockGroups, busy, error, onSetEggs, home)
+        PoultryPage.CANDLING -> PoultryCandling(setHatches, busy, error, onCandle, home)
+        PoultryPage.HATCH_RESULT -> PoultryHatchResult(candledHatches, busy, error, onRecordHatch, home)
         PoultryPage.VACCINATION -> PoultryVaccination(vaccinations, flockGroups, poultryFormulary, busy, error, onVaccinate, home)
-        PoultryPage.BIOSECURITY -> PoultryBiosecurity(busy, error, onBiosecurity, home)
+        PoultryPage.BIOSECURITY -> PoultryBiosecurity(houseOptions, flockGroups, busy, error, onBiosecurity, home)
         PoultryPage.FLOCK_PROFILE -> PoultryFlockProfileScreen(records, home)
         PoultryPage.HOUSE_DETAIL -> PoultryHouseDetailScreen(records, home)
         PoultryPage.EGG_PRODUCTION -> PoultryEggProductionScreen(records, home)
@@ -394,6 +398,8 @@ private fun PoultryDaily(
 
 @Composable
 private fun PoultrySetEggs(
+    houseOptions: List<FarmSelectorOption>,
+    flockGroups: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onSet: (String, String, String, String, String) -> Unit,
@@ -425,12 +431,8 @@ private fun PoultrySetEggs(
                 enabled = !busy,
                 singleLine = true,
             )
-            OutlinedTextField(house, {
-                house = it
-            }, label = { Text("House id (optional)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-            OutlinedTextField(group, {
-                group = it
-            }, label = { Text("Flock id (optional)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OptionalPoultrySelector(FarmSelectionAtoms.LOCATION_SELECTOR, "House (optional)", "No house", houseOptions, house, busy) { house = it }
+            OptionalPoultrySelector(FarmSelectionAtoms.GROUP_SELECTOR, "Flock (optional)", "No flock", flockGroups, group, busy) { group = it }
             Button(onClick = {
                 onSet(kind, eggs, day, house, group)
             }, enabled = !busy && eggs.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Set eggs") }
@@ -441,6 +443,7 @@ private fun PoultrySetEggs(
 
 @Composable
 private fun PoultryCandling(
+    hatches: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String, String, String) -> Unit,
@@ -453,9 +456,7 @@ private fun PoultryCandling(
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage("FOS-POULTRY-020", "Candling", "Record incubation evidence without inventing a diagnosis.", onBack = onBack) {
         FarmOperationalSection("Candling result") {
-            OutlinedTextField(hatch, {
-                hatch = it
-            }, label = { Text("Hatch id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            HatchSelector(hatches, hatch, busy) { hatch = it }
             OutlinedTextField(fertile, {
                 fertile = it
             }, label = { Text("Fertile") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -486,6 +487,7 @@ private fun PoultryCandling(
 
 @Composable
 private fun PoultryHatchResult(
+    hatches: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String, String) -> Unit,
@@ -503,9 +505,7 @@ private fun PoultryHatchResult(
         onBack,
     ) {
         FarmOperationalSection("Hatch outcome") {
-            OutlinedTextField(hatch, {
-                hatch = it
-            }, label = { Text("Hatch id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            HatchSelector(hatches, hatch, busy) { hatch = it }
             OutlinedTextField(hatched, {
                 hatched = it
             }, label = { Text("Hatched") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -586,6 +586,8 @@ private fun PoultryVaccination(
 
 @Composable
 private fun PoultryBiosecurity(
+    houseOptions: List<FarmSelectorOption>,
+    flockGroups: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String, Boolean, String) -> Unit,
@@ -604,12 +606,9 @@ private fun PoultryBiosecurity(
         onBack,
     ) {
         FarmOperationalSection("Walk findings") {
-            OutlinedTextField(house, {
-                house = it
-            }, label = { Text("House id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-            OutlinedTextField(group, {
-                group = it
-            }, label = { Text("Flock id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Text("Record against a house, a flock, or both.")
+            OptionalPoultrySelector(FarmSelectionAtoms.LOCATION_SELECTOR, "House", "No house", houseOptions, house, busy) { house = it }
+            OptionalPoultrySelector(FarmSelectionAtoms.GROUP_SELECTOR, "Flock", "No flock", flockGroups, group, busy) { group = it }
             OutlinedTextField(
                 findings,
                 { findings = it },
@@ -653,4 +652,42 @@ private fun FlockGroupSelector(flockGroups: List<FarmSelectorOption>, selected: 
     )
 }
 
+/** Hatch selector limited to the hatches in the status the owning command accepts. */
+@Composable
+private fun HatchSelector(hatches: List<FarmSelectorOption>, selected: String, busy: Boolean, onSelect: (String) -> Unit) {
+    FarmEntitySelector(
+        atomTag = POULTRY_HATCH_SELECTOR,
+        title = "Hatch",
+        options = hatches,
+        selectedId = selected.ifBlank { null },
+        onSelect = onSelect,
+        emptyText = "No hatch is at this stage.",
+        enabled = !busy,
+    )
+}
+
+/** An optional house or flock reference: an explicit "none" option sends no id, any other option this farm's id. */
+@Composable
+private fun OptionalPoultrySelector(
+    atomTag: String,
+    title: String,
+    noneLabel: String,
+    options: List<FarmSelectorOption>,
+    selected: String,
+    busy: Boolean,
+    onSelect: (String) -> Unit,
+) {
+    FarmEntitySelector(
+        atomTag = atomTag,
+        title = title,
+        options = listOf(FarmSelectorOption(NO_SELECTION, noneLabel)) + options,
+        selectedId = selected.ifBlank { NO_SELECTION },
+        onSelect = { onSelect(if (it == NO_SELECTION) "" else it) },
+        emptyText = "",
+        enabled = !busy,
+    )
+}
+
 private const val POULTRY_FORMULARY_SELECTOR = "poultry-formulary-selector"
+private const val POULTRY_HATCH_SELECTOR = "poultry-hatch-selector"
+private const val NO_SELECTION = "none"

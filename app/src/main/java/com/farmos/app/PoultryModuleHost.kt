@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.farmos.core.database.PoultryHatchEntity
 import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
@@ -50,6 +51,8 @@ fun PoultryModuleHost(
     var flockGroups by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
     var houseOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
     var poultryFormulary by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
+    var setHatches by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
+    var candledHatches by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
 
     suspend fun refresh() {
         enabledKinds = ops.enabledPoultryKinds().map { it.poultryKindCode }
@@ -60,7 +63,12 @@ fun PoultryModuleHost(
             .map { FarmSelectorOption(it.id, it.productName, it.vetClass) }
         placements = ops.placements().map { "${it.groupId} · ${it.poultryKindCode} · house ${it.houseId} · ${it.headCount} head" }
         flockDays = ops.recentFlockDays().map { "eggs ${it.eggs} · dead ${it.dead} · culls ${it.culls} · feed ${it.feedGrams} g" }
-        hatches = ops.hatches().map { "${it.id} ${it.poultryKindCode} · ${it.eggsSet} eggs · ${it.status}" }
+        val hatchRows = ops.hatches()
+        hatches = hatchRows.map { "${it.id} ${it.poultryKindCode} · ${it.eggsSet} eggs · ${it.status}" }
+        fun hatchOption(row: PoultryHatchEntity) =
+            FarmSelectorOption(row.id, "${row.poultryKindCode} · ${row.eggsSet} eggs", "Set ${LocalDate.ofEpochDay(row.setEpochDay)}")
+        setHatches = hatchRows.filter { it.status == "set" }.map(::hatchOption)
+        candledHatches = hatchRows.filter { it.status == "candled" }.map(::hatchOption)
         vaccinations = ops.vaccinations().map { "${it.id} ${it.poultryKindCode} · flock ${it.groupId} · ${it.formularyItemId}" }
         flockGroups = ops.groups().filter { it.speciesCode == "poultry" }
             .map { FarmSelectorOption(it.id, it.name, "${it.headCount} head recorded") }
@@ -86,6 +94,8 @@ fun PoultryModuleHost(
         flockGroups = flockGroups,
         houseOptions = houseOptions,
         poultryFormulary = poultryFormulary,
+        setHatches = setHatches,
+        candledHatches = candledHatches,
         enabledKinds = enabledKinds,
         houses = houses,
         placements = placements,
