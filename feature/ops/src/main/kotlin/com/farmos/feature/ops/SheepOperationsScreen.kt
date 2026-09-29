@@ -54,6 +54,9 @@ private enum class SheepOpsPage {
     IDENTIFIER,
     MOVEMENT,
     PEDIGREE,
+    HEALTH_SUMMARY,
+    TIMELINE,
+    WOOL_DASHBOARD,
 }
 
 @Composable
@@ -63,6 +66,9 @@ fun SheepOperationsScreen(
     error: String?,
     actions: SheepOperationsActions,
     onBack: () -> Unit,
+    loadRecords: suspend (String) -> SheepAnimalRecords = { SheepAnimalRecords() },
+    loadWool: suspend () -> SheepWoolRecords = { SheepWoolRecords() },
+    today: LocalDate = LocalDate.now(),
 ) {
     var page by remember { mutableStateOf(SheepOpsPage.HOME) }
     val home = { page = SheepOpsPage.HOME }
@@ -187,6 +193,10 @@ fun SheepOperationsScreen(
         SheepOpsPage.PEDIGREE -> {
             SheepPedigreeScreen(selectedAnimalId, busy, error, actions.onPedigree, home)
         }
+
+        SheepOpsPage.HEALTH_SUMMARY -> SheepHealthSummaryScreen(selectedAnimalId, today, loadRecords, home)
+        SheepOpsPage.TIMELINE -> SheepTimelineScreen(selectedAnimalId, loadRecords, home)
+        SheepOpsPage.WOOL_DASHBOARD -> SheepWoolDashboardScreen(loadWool, home)
     }
 }
 
@@ -216,6 +226,11 @@ private fun SheepOpsHome(
             SheepNav("Fleece record") { onOpen(SheepOpsPage.WOOL) }
             SheepNav("Shearing") { onOpen(SheepOpsPage.SHEARING) }
             SheepNav("Micron / fibre result") { onOpen(SheepOpsPage.MICRON) }
+            SheepNav("Wool dashboard") { onOpen(SheepOpsPage.WOOL_DASHBOARD) }
+        }
+        FarmOperationalSection("Sheep records") {
+            SheepNav("Health summary") { onOpen(SheepOpsPage.HEALTH_SUMMARY) }
+            SheepNav("Timeline") { onOpen(SheepOpsPage.TIMELINE) }
         }
         FarmOperationalSection("Field health") {
             SheepNav("FAMACHA") { onOpen(SheepOpsPage.FAMACHA) }

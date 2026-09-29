@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:59f40bae2b52a72c517157c6c7a66225700fc1244daa1a7134143370ab0e8aea",
-  "runtime_evidence_tested_commit": "729d2725efbf9c2fbca3e30d6534a892485223c4",
-  "runtime_evidence_run_id": 36525625548,
+  "source_fingerprint": "sha256:2b3da270dcc526a763a6f1c7b43416864cd2e3e15f4f6fb5a54817aaf4eb992c",
+  "runtime_evidence_tested_commit": "348a2d62f172a21166fdcc235cbe13787d7e4f88",
+  "runtime_evidence_run_id": 36527280738,
   "registry_screen_count": 545,
-  "route_screen_count": 194,
-  "unresolved_screen_count": 351,
+  "route_screen_count": 197,
+  "unresolved_screen_count": 348,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -181,16 +181,19 @@
     "FOS-SHEEP-014",
     "FOS-SHEEP-016",
     "FOS-SHEEP-017",
+    "FOS-SHEEP-018",
     "FOS-SHEEP-019",
     "FOS-SHEEP-020",
     "FOS-SHEEP-021",
     "FOS-SHEEP-022",
     "FOS-SHEEP-023",
     "FOS-SHEEP-024",
+    "FOS-SHEEP-025",
     "FOS-SHEEP-026",
     "FOS-SHEEP-027",
     "FOS-SHEEP-029",
     "FOS-SHEEP-030",
+    "FOS-SHEEP-031",
     "FOS-SYNC-002",
     "FOS-SYNC-003",
     "FOS-SYNC-004",
@@ -2240,6 +2243,17 @@
       }
     },
     {
+      "screen_id": "FOS-SHEEP-018",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SheepRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-SHEEP-019",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -2306,6 +2320,17 @@
       }
     },
     {
+      "screen_id": "FOS-SHEEP-025",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SheepRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-SHEEP-026",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -2346,6 +2371,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SHEEP-031",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SheepRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -2849,10 +2885,7 @@
     "FOS-SHEEP-008",
     "FOS-SHEEP-013",
     "FOS-SHEEP-015",
-    "FOS-SHEEP-018",
-    "FOS-SHEEP-025",
     "FOS-SHEEP-028",
-    "FOS-SHEEP-031",
     "FOS-SHEEP-032",
     "FOS-SIM-001",
     "FOS-SIM-002",
