@@ -54,4 +54,17 @@ class RabbitRecordQueryTest {
         assertEquals(listOf("o1"), lifecycle.rabbitMatingOutcomes(farmA).map { it.id })
         assertEquals(listOf("o2"), lifecycle.rabbitMatingOutcomes(farmB).map { it.id })
     }
+
+    @Test
+    fun sameDayWaveFactsOrderNewestFirstThenById() = runBlocking {
+        val lifecycle = database.lifecycle()
+        lifecycle.insertMatingOutcome(RabbitMatingOutcomeEntity("o-a", farmA, "w1", "pregnant", 10))
+        lifecycle.insertMatingOutcome(RabbitMatingOutcomeEntity("o-c", farmA, "w1", "open", 20))
+        lifecycle.insertMatingOutcome(RabbitMatingOutcomeEntity("o-b", farmA, "w1", "false_pregnancy", 20))
+        lifecycle.insertPalpation(RabbitPalpationEntity("p-b", farmA, "w1", "open", 15))
+        lifecycle.insertPalpation(RabbitPalpationEntity("p-a", farmA, "w1", "pregnant", 15))
+
+        assertEquals(listOf("o-b", "o-c", "o-a"), lifecycle.rabbitMatingOutcomes(farmA).map { it.id })
+        assertEquals(listOf("p-a", "p-b"), lifecycle.rabbitPalpations(farmA).map { it.id })
+    }
 }

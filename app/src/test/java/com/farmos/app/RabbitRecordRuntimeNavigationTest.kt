@@ -1,8 +1,10 @@
 package com.farmos.app
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -55,10 +57,11 @@ class RabbitRecordRuntimeNavigationTest {
             compose.onNodeWithText("No breeding waves recorded for this cage.").assertExists()
         }
         traverse("Kindling due", "FOS-RABBIT-016") {
-            compose.onNodeWithTag("rabbit-kindling-past").assertExists()
-            compose.onNodeWithText("Kindling 2026-09-20 · 4 days past scheduled date · palpation open · outcome false_pregnancy").assertExists()
-            compose.onNodeWithText("Kindling 2026-10-11 · in 17 days · no palpation recorded").assertExists()
+            // w1's latest outcome is false_pregnancy, w0 has a kindling record: neither is due.
+            compose.onNodeWithTag("rabbit-kindling-due:w1").assertDoesNotExist()
             compose.onNodeWithTag("rabbit-kindling-due:w0").assertDoesNotExist()
+            compose.onNodeWithText("Kindling 2026-10-11 · in 17 days · no outcome recorded · no palpation recorded").assertExists()
+            compose.onNodeWithTag("rabbit-kindling-past").assertDoesNotExist()
         }
         traverse("Litter profiles", "FOS-RABBIT-018") {
             compose.onNodeWithTag("rabbit-option:w0").performScrollTo().performClick()
@@ -71,6 +74,40 @@ class RabbitRecordRuntimeNavigationTest {
             compose.onNodeWithTag("rabbit-kits-total").assertExists()
             compose.onNodeWithText("weaned · retain · tag R-17").assertExists()
             compose.onNodeWithText("Wave not on this device · 1").assertExists()
+        }
+    }
+
+    @Test
+    fun kindlingDueListsOnlyWavesAwaitingKindling() {
+        render(
+            RabbitRecords(
+                waves = listOf(
+                    wave("fp", day(8, 20), day(9, 20), emptyList(), kindled = false, outcome = "false_pregnancy"),
+                    wave("op", day(8, 20), day(9, 20), emptyList(), kindled = false, palpation = "pregnant", outcome = "open"),
+                    wave("pg", day(8, 20), day(9, 20), emptyList(), kindled = false, palpation = "pregnant", outcome = "pregnant"),
+                    wave("nn", day(9, 10), day(10, 11), emptyList(), kindled = false),
+                    wave("ko", day(8, 1), day(8, 31), emptyList(), kindled = false, outcome = "kindled"),
+                    wave("kr", day(7, 1), day(7, 31), emptyList(), kindled = true, palpation = "open", outcome = "open"),
+                ),
+            ),
+        )
+        traverse("Kindling due", "FOS-RABBIT-016") {
+            compose.onNodeWithText("Awaiting kindling record · 2").assertExists()
+            compose.onNodeWithText("Kindling 2026-09-20 · 4 days past scheduled date · outcome pregnant · palpation pregnant").assertExists()
+            compose.onNodeWithText("Kindling 2026-10-11 · in 17 days · no outcome recorded · no palpation recorded").assertExists()
+            listOf("fp", "op", "ko", "kr").forEach { compose.onNodeWithTag("rabbit-kindling-due:$it").assertDoesNotExist() }
+            compose.onNodeWithTag("rabbit-kindling-past").assertExists()
+            compose.onNodeWithText("1 wave(s) have a kindled outcome but no kindling record. See the litter profile.").assertExists()
+        }
+        traverse("Litter profiles", "FOS-RABBIT-018") {
+            compose.onNodeWithTag("rabbit-option:ko").performScrollTo().performClick()
+            compose.onNodeWithTag("rabbit-litter-inconsistent").assertExists()
+            compose.onAllNodesWithText("Outcome kindled, but no kindling record on this device").assertCountEquals(2)
+            compose.onNodeWithTag("rabbit-option:kr").performScrollTo().performClick()
+            compose.onNodeWithText("Kindling recorded").assertExists()
+            compose.onNodeWithTag("rabbit-litter-inconsistent").assertDoesNotExist()
+            compose.onNodeWithTag("rabbit-option:fp").performScrollTo().performClick()
+            compose.onNodeWithText("Not pregnant · outcome false_pregnancy").assertExists()
         }
     }
 

@@ -42,6 +42,8 @@ internal suspend fun loadRabbitRecords(database: FarmOsDatabase, farmId: String)
         }
     }.groupBy({ it.first }, { it.second })
     val kindledWaves = lifecycle.rabbitKindledWaveIds(farmId).toSet()
+    val latestPalpations = latestPerWave(palpations.map { RabbitWaveFact(it.waveId, it.occurredEpochDay, it.id, it.result) })
+    val latestOutcomes = latestPerWave(outcomes.map { RabbitWaveFact(it.waveId, it.occurredEpochDay, it.id, it.outcome) })
     return RabbitRecords(
         cages = cages.map { cage ->
             RabbitCageView(
@@ -65,10 +67,22 @@ internal suspend fun loadRabbitRecords(database: FarmOsDatabase, farmId: String)
                 weanEpochDay = wave.weanEpochDay,
                 events = events[wave.id].orEmpty().sortedWith(compareByDescending<RabbitWaveEventView> { it.epochDay }.thenBy { it.id }),
                 kindlingRecorded = wave.id in kindledWaves,
-                latestPalpation = palpations.firstOrNull { it.waveId == wave.id }?.result,
-                latestOutcome = outcomes.firstOrNull { it.waveId == wave.id }?.outcome,
+                latestPalpation = latestPalpations[wave.id],
+                latestOutcome = latestOutcomes[wave.id],
             )
         },
         kits = lifecycle.kits(farmId).map { RabbitKitView(it.id, it.waveId, it.tempLabel, it.sex, it.status, it.retention, it.earTag) },
     )
 }
+
+/** One recorded per-wave fact; [value] is the recorded result or outcome. */
+internal data class RabbitWaveFact(val waveId: String, val epochDay: Long, val id: String, val value: String)
+
+/**
+ * Latest recorded value per wave, independent of input order: the latest day wins, and a same-day
+ * tie resolves to the lowest id, matching the DAO's `occurredEpochDay DESC, id` convention.
+ */
+internal fun latestPerWave(facts: List<RabbitWaveFact>): Map<String, String> =
+    facts.groupBy { it.waveId }.mapValues { (_, rows) ->
+        rows.sortedWith(compareByDescending<RabbitWaveFact> { it.epochDay }.thenBy { it.id }).first().value
+    }

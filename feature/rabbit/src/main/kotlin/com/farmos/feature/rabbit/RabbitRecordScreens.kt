@@ -52,6 +52,46 @@ data class RabbitWaveView(
     val latestOutcome: String? = null,
 )
 
+/**
+ * Read-model kindling classification of a wave, derived only from recorded facts. Not persisted.
+ * Mating outcomes are the canonical false_pregnancy / open / pregnant / kindled; palpation is
+ * supporting evidence only and never makes a wave pregnant on its own.
+ */
+enum class RabbitKindlingState {
+    /** No kindling recorded and the latest outcome is pregnant, or no outcome is recorded. */
+    AWAITING_KINDLING,
+
+    /** Latest recorded outcome is false_pregnancy or open. */
+    NOT_PREGNANT_RECORDED,
+
+    /** A kindling event is recorded for the wave. */
+    KINDLED_RECORDED,
+
+    /** Latest outcome says kindled but no kindling event is recorded: a record inconsistency. */
+    KINDLED_OUTCOME_WITHOUT_KINDLING_RECORD,
+
+    /** Latest outcome is not one of the canonical values; shown as recorded, never treated as due. */
+    OUTCOME_NOT_RECOGNISED,
+}
+
+fun rabbitKindlingState(kindlingRecorded: Boolean, latestOutcome: String?): RabbitKindlingState = when {
+    kindlingRecorded -> RabbitKindlingState.KINDLED_RECORDED
+    latestOutcome == null || latestOutcome == "pregnant" -> RabbitKindlingState.AWAITING_KINDLING
+    latestOutcome == "false_pregnancy" || latestOutcome == "open" -> RabbitKindlingState.NOT_PREGNANT_RECORDED
+    latestOutcome == "kindled" -> RabbitKindlingState.KINDLED_OUTCOME_WITHOUT_KINDLING_RECORD
+    else -> RabbitKindlingState.OUTCOME_NOT_RECOGNISED
+}
+
+val RabbitWaveView.kindlingState: RabbitKindlingState get() = rabbitKindlingState(kindlingRecorded, latestOutcome)
+
+private fun RabbitKindlingState.label(outcome: String?): String = when (this) {
+    RabbitKindlingState.AWAITING_KINDLING -> if (outcome == null) "Awaiting kindling · no outcome recorded" else "Awaiting kindling · outcome pregnant"
+    RabbitKindlingState.NOT_PREGNANT_RECORDED -> "Not pregnant · outcome $outcome"
+    RabbitKindlingState.KINDLED_RECORDED -> "Kindling recorded"
+    RabbitKindlingState.KINDLED_OUTCOME_WITHOUT_KINDLING_RECORD -> "Outcome kindled, but no kindling record on this device"
+    RabbitKindlingState.OUTCOME_NOT_RECOGNISED -> "Outcome not recognised: $outcome"
+}
+
 data class RabbitCageView(val id: String, val code: String, val doeCapacity: Int, val nestBoxes: List<RabbitNestBoxView>, val waveIds: List<String>)
 
 data class RabbitKitView(val id: String, val waveId: String, val label: String, val sex: String, val status: String, val retention: String, val earTag: String?)
@@ -144,11 +184,23 @@ internal fun RabbitCageDetailScreen(records: RabbitRecords, onBack: () -> Unit) 
     }
 }
 
-/** FOS-RABBIT-016 — waves without a recorded kindling, by the kindling date stored on the wave. */
+/** FOS-RABBIT-016 — waves awaiting a kindling record, by the kindling date stored on the wave. */
 @Composable
 internal fun RabbitKindlingDueScreen(records: RabbitRecords, today: LocalDate, onBack: () -> Unit) {
-    FarmOperationalPage("FOS-RABBIT-016", "Kindling due", "Waves with no kindling recorded, by the kindling date stored on the wave. Palpation and outcome are shown as recorded.", FarmVisualClass.I2, onBack) {
-        val due = records.waves.filterNot { it.kindlingRecorded }.sortedBy { it.kindlingEpochDay }
+    FarmOperationalPage(
+        "FOS-RABBIT-016",
+        "Kindling due",
+        "Waves with no kindling recorded whose latest outcome is pregnant or not yet recorded, by the kindling date stored on the wave.",
+        FarmVisualClass.I2,
+        onBack,
+    ) {
+        val due = records.waves.filter { it.kindlingState == RabbitKindlingState.AWAITING_KINDLING }.sortedWith(compareBy<RabbitWaveView>({ it.kindlingEpochDay }, { it.id }))
+        val inconsistent = records.waves.count { it.kindlingState == RabbitKindlingState.KINDLED_OUTCOME_WITHOUT_KINDLING_RECORD }
+        if (inconsistent > 0) {
+            AnimalFarmWarningSurface(Modifier.testTag("rabbit-kindling-inconsistent")) {
+                Text("$inconsistent wave(s) have a kindled outcome but no kindling record. See the litter profile.", fontWeight = FontWeight.Bold)
+            }
+        }
         if (due.isEmpty()) {
             AnimalFarmEmptyState("No waves awaiting a kindling record on this device.")
             return@FarmOperationalPage
@@ -168,9 +220,9 @@ internal fun RabbitKindlingDueScreen(records: RabbitRecords, today: LocalDate, o
                     days == 0L -> "scheduled today"
                     else -> "${-days} days past scheduled date"
                 }
-                val recorded = listOfNotNull(
+                val recorded = listOf(
+                    wave.latestOutcome?.let { "outcome $it" } ?: "no outcome recorded",
                     wave.latestPalpation?.let { "palpation $it" } ?: "no palpation recorded",
-                    wave.latestOutcome?.let { "outcome $it" },
                 ).joinToString(" · ")
                 RabbitRecordRow(waveLabel(wave), "Kindling ${date(wave.kindlingEpochDay)} · $relative · $recorded", "rabbit-kindling-due:${wave.id}")
             }
@@ -189,6 +241,16 @@ internal fun RabbitLitterProfileScreen(records: RabbitRecords, onBack: () -> Uni
         }
         RabbitSwitcher("Waves", records.waves.map { it.id to waveLabel(it) }, selectedId) { selectedId = it }
         val wave = records.waves.firstOrNull { it.id == selectedId } ?: return@FarmOperationalPage
+        val state = wave.kindlingState
+        if (state == RabbitKindlingState.KINDLED_OUTCOME_WITHOUT_KINDLING_RECORD || state == RabbitKindlingState.OUTCOME_NOT_RECOGNISED) {
+            AnimalFarmWarningSurface(Modifier.testTag("rabbit-litter-inconsistent")) {
+                Text(state.label(wave.latestOutcome), fontWeight = FontWeight.Bold)
+            }
+        }
+        FarmOperationalSection("Kindling status") {
+            RabbitRecordRow("Recorded state", state.label(wave.latestOutcome), "rabbit-litter-state")
+            RabbitRecordRow("Latest palpation", wave.latestPalpation ?: "No palpation recorded", "rabbit-litter-palpation")
+        }
         FarmOperationalSection("Schedule stored on the wave") {
             RabbitRecordRow("Mating", date(wave.matingEpochDay), "rabbit-litter-mating")
             RabbitRecordRow("Nest in", date(wave.nestInEpochDay), "rabbit-litter-nest-in")
