@@ -302,7 +302,29 @@ data class GoatSnapshot(
     val matingHistory: List<GoatMatingSample> = emptyList(),
     val pregnancyHistory: List<GoatPregnancySample> = emptyList(),
     val pedigree: GoatPedigree = GoatPedigree(),
+    /** Kids registered from each of this doe's kiddings, keyed by kidding id. */
+    val kidsByKidding: Map<String, List<GoatRegisteredKid>> = emptyMap(),
+    /** Present when this goat was registered as a kid from a recorded kidding. */
+    val birthRecord: GoatBirthRecord? = null,
     val syncPending: Boolean,
+)
+
+data class GoatRegisteredKid(
+    val animalId: String,
+    val label: String,
+    val sex: GoatSex?,
+)
+
+data class GoatBirthRecord(
+    val kiddingId: String,
+    val damId: String,
+    /** Tag or name of the dam when that animal is on this device. */
+    val damLabel: String?,
+    /** Null when the kidding event itself is not on this device. */
+    val kiddingEpochDay: Long?,
+    val bornCount: Int?,
+    val liveCount: Int?,
+    val littermates: List<GoatRegisteredKid>,
 )
 
 data class GoatHeatSample(val heatId: String, val occurredEpochDay: Long)

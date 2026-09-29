@@ -51,6 +51,7 @@ internal fun GoatExperienceScreen(
     today: LocalDate = LocalDate.now(),
 ) {
     var page by remember { mutableStateOf(initialPage) }
+    var selectedKiddingId by remember { mutableStateOf<String?>(null) }
     val selected = state.selected
 
     when (page) {
@@ -134,7 +135,26 @@ internal fun GoatExperienceScreen(
             },
             onBack = { page = GoatPage.DASHBOARD },
         )
-        in goatHistoryPages -> GoatHistoryPage(page, state.selected, today, onOpen = { page = it }) { page = GoatPage.PROFILE }
+        GoatPage.KID_COHORT -> GoatKidCohortScreen(
+            herd = state.herd,
+            onSelectKid = {
+                actions.onSelectGoat(it)
+                page = GoatPage.KID_PROFILE
+            },
+            onBack = { page = GoatPage.DASHBOARD },
+        )
+        in goatHistoryPages -> GoatHistoryPage(
+            page = page,
+            goat = state.selected,
+            today = today,
+            onOpen = { page = it },
+            onBack = { page = if (page == GoatPage.KIDDING_DETAIL) GoatPage.DOE_REPRODUCTION else GoatPage.PROFILE },
+            selectedKiddingId = selectedKiddingId,
+            onOpenKidding = {
+                selectedKiddingId = it
+                page = GoatPage.KIDDING_DETAIL
+            },
+        )
         else -> error("Unhandled goat page $page")
     }
 }
@@ -212,6 +232,7 @@ private fun GoatDashboardScreen(
                 onOpen(if (state.selected != null) GoatPage.WEIGHT else GoatPage.HERD)
             }
             GoatDashboardAction("Pregnancy", "Breeding status of active does") { onOpen(GoatPage.PREGNANCY_DASHBOARD) }
+            GoatDashboardAction("Kids", "Registered kids by kidding") { onOpen(GoatPage.KID_COHORT) }
             GoatDashboardAction("Search", state.searchMessage) { onOpen(GoatPage.SEARCH) }
             GoatDashboardAction("Scan tag", "RFID, EID or animal tag") { onOpen(GoatPage.SCAN) }
 

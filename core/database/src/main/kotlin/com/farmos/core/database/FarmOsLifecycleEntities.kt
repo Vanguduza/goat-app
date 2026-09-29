@@ -452,4 +452,8 @@ interface LifecycleDao {
     @Upsert suspend fun upsertKid(row: GoatKidEntity)
     @Query("SELECT COUNT(*) FROM goat_kid_records WHERE farmId = :farmId AND kiddingId = :kiddingId")
     suspend fun kidCount(farmId: String, kiddingId: String): Long
+    @Query("SELECT * FROM goat_kid_records WHERE farmId = :farmId AND kiddingId = :kiddingId ORDER BY animalId")
+    suspend fun kidsForKidding(farmId: String, kiddingId: String): List<GoatKidEntity>
+    @Query("SELECT * FROM goat_kid_records WHERE farmId = :farmId AND animalId = :animalId LIMIT 1")
+    suspend fun kidRecordFor(farmId: String, animalId: String): GoatKidEntity?
 }

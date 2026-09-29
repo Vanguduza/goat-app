@@ -55,6 +55,8 @@ internal val goatHistoryPages = setOf(
     GoatPage.WITHDRAWAL_STATUS,
     GoatPage.DOE_REPRODUCTION,
     GoatPage.PEDIGREE,
+    GoatPage.KIDDING_DETAIL,
+    GoatPage.KID_PROFILE,
 )
 
 @Composable
@@ -64,6 +66,8 @@ internal fun GoatHistoryPage(
     today: LocalDate,
     onOpen: (GoatPage) -> Unit,
     onBack: () -> Unit,
+    selectedKiddingId: String? = null,
+    onOpenKidding: (String) -> Unit = {},
 ) {
     when (page) {
         GoatPage.TIMELINE -> GoatTimelineScreen(goat, onBack)
@@ -76,7 +80,9 @@ internal fun GoatHistoryPage(
         GoatPage.HEALTH_SUMMARY -> GoatHealthSummaryScreen(goat, today, onOpen, onBack)
         GoatPage.TREATMENT_HISTORY -> GoatTreatmentHistoryScreen(goat, onBack)
         GoatPage.WITHDRAWAL_STATUS -> GoatWithdrawalStatusScreen(goat, today, onBack)
-        GoatPage.DOE_REPRODUCTION -> GoatDoeReproductionScreen(goat, onOpen, onBack)
+        GoatPage.DOE_REPRODUCTION -> GoatDoeReproductionScreen(goat, onOpen, onOpenKidding, onBack)
+        GoatPage.KIDDING_DETAIL -> GoatKiddingDetailScreen(goat, selectedKiddingId, onBack)
+        GoatPage.KID_PROFILE -> GoatKidProfileScreen(goat, onBack)
         GoatPage.PEDIGREE -> GoatPedigreeScreen(goat, onBack)
         else -> error("$page is not a goat history page")
     }
@@ -98,6 +104,7 @@ internal fun GoatRecordLinks(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
             add("Withdrawal status" to GoatPage.WITHDRAWAL_STATUS)
             if (goat.sex == GoatSex.FEMALE) add("Breeding records" to GoatPage.DOE_REPRODUCTION)
             add("Pedigree" to GoatPage.PEDIGREE)
+            if (goat.birthRecord != null) add("Birth record" to GoatPage.KID_PROFILE)
             if (goat.sex == GoatSex.FEMALE) add("Milk history" to GoatPage.LACTATION_HISTORY)
             if (goat.sex == GoatSex.FEMALE) add("SCC history" to GoatPage.SCC_HISTORY)
         }
