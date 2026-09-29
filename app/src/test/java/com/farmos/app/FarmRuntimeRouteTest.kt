@@ -129,6 +129,7 @@ class FarmRuntimeRouteTest {
             SyncQueueView.RETRY_WAITING to "FOS-SYNC-005",
             SyncQueueView.CONFLICTS to "FOS-SYNC-006",
             SyncQueueView.REJECTED to "FOS-SYNC-008",
+            SyncQueueView.DEAD_LETTER to "FOS-SYNC-009",
         )
         assertEquals(SyncQueueView.entries.toSet(), expected.keys)
         expected.forEach { (view, screenId) ->

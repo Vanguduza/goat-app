@@ -93,6 +93,11 @@ fun FarmSessionContent(
             loadRows = { view -> app.database.outbox().listForFarmInState(membership.farmId, view.state.name, SYNC_QUEUE_LIMIT) },
             onSelectView = { destination = FarmDestination.SyncQueue(it) },
             onBack = backHome,
+            loadTotal = { view -> loadSyncQueueCounts()?.get(view) },
+            traceOnServer = app.mutationTraceClient?.let { client ->
+                val trace: suspend (String) -> ServerMutationTrace = { client.trace(membership.farmId, it).toServerMutationTrace() }
+                trace
+            },
         )
         is FarmDestination.HomePanel -> error("Home panels are nested owners and must be intercepted by RoleAwareFarmHomeScreen")
         is FarmDestination.Goat -> GoatModuleHost(

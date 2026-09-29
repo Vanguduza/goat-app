@@ -73,6 +73,32 @@ class SyncQueueOwnerContractTest {
     }
 
     @Test
+    fun deadLetterQueueRendersStoppedChanges() {
+        render(SyncQueueView.DEAD_LETTER, listOf(row("m-dead", "DEAD_LETTER", attempts = 9, error = "VALIDATION_REJECTED")))
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-009").assertIsDisplayed()
+        compose.onNodeWithTag("sync-queue-row:m-dead").assertExists()
+        compose.onNodeWithText("Failed server validation").assertExists()
+        compose.onNodeWithText("Kept on this device and not applied to the farm record.").assertExists()
+    }
+
+    @Test
+    fun emptyDeadLetterQueueSaysSo() {
+        render(SyncQueueView.DEAD_LETTER, emptyList())
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-009").assertIsDisplayed()
+        compose.onNodeWithText("No changes have stopped retrying.").assertExists()
+    }
+
+    @Test
+    fun boundedQueueStatesTheExhaustiveTotal() {
+        render(SyncQueueView.RETRY_WAITING, listOf(row("m-retry", "RETRY_WAIT", attempts = 1)), total = 240L)
+        compose.onNodeWithText("Latest 1 of 240 changes").assertExists()
+        assertEquals("Latest 100 of 240 changes", syncQueueCountLabel(100, 240L))
+        assertEquals("3 change(s)", syncQueueCountLabel(3, 3L))
+        assertEquals("Latest 100 changes", syncQueueCountLabel(100, null))
+        assertEquals("2 change(s)", syncQueueCountLabel(2, null))
+    }
+
+    @Test
     fun emptyQueueSaysSoAndSwitcherSelectsAnotherView() {
         val selected = AtomicReference<SyncQueueView?>(null)
         render(SyncQueueView.CONFLICTS, emptyList(), onSelect = selected::set)
@@ -131,6 +157,7 @@ class SyncQueueOwnerContractTest {
         view: SyncQueueView,
         rows: List<OutboxEntity>?,
         onSelect: (SyncQueueView) -> Unit = {},
+        total: Long? = null,
     ) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
@@ -141,6 +168,7 @@ class SyncQueueOwnerContractTest {
                     onSelectView = onSelect,
                     onBack = {},
                     zone = ZoneOffset.UTC,
+                    loadTotal = { total },
                 )
             }
         }
