@@ -10,6 +10,8 @@ import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreateSupplier
 import com.farmos.domain.ops.RecordPurchase
+import com.farmos.feature.ops.ProcurementRecordNavigator
+import com.farmos.feature.ops.ProcurementRecords
 import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
@@ -23,15 +25,18 @@ fun ProcurementModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadRecords: suspend () -> ProcurementRecords = { ProcurementRecords() },
 ) {
     val scope = rememberCoroutineScope()
     val busy = remember { mutableStateOf(false) }
     val error = remember { mutableStateOf<String?>(null) }
     val rows = remember { mutableStateOf(emptyList<String>()) }
+    val records = remember(farmId) { mutableStateOf(ProcurementRecords()) }
     suspend fun refresh() {
         val suppliers = ops.suppliers().map { "${it.id} ${it.name} · lead ${it.leadTimeDays} d" }
         val purchases = ops.purchases().map { "${it.id} item ${it.itemId} · ${it.quantityMilli} milli · ${it.amountMinor} ${it.currency}" }
         rows.value = suppliers + purchases
+        records.value = loadRecords()
     }
     LaunchedEffect(farmId) { runCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
@@ -40,7 +45,7 @@ fun ProcurementModuleHost(
     val name = remember { mutableStateOf("") }; val lead = remember { mutableStateOf("0") }
     val supplierId = remember { mutableStateOf("") }; val itemId = remember { mutableStateOf("") }
     val qty = remember { mutableStateOf("") }; val amount = remember { mutableStateOf("") }; val day = remember { mutableStateOf("") }
-    SimpleCaptureScreen(
+    ProcurementRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-PROC-001", title = "Procurement",
         help = "A purchase receives inventory and posts an expense in integer minor units.",
         empty = "No suppliers on this device.", rows = rows.value, busy = busy.value, error = error.value,
@@ -53,7 +58,8 @@ fun ProcurementModuleHost(
             androidx.compose.material3.OutlinedTextField(qty.value,{qty.value=it},label={androidx.compose.material3.Text("Quantity")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(amount.value,{amount.value=it},label={androidx.compose.material3.Text("Amount")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(day.value,{day.value=it},label={androidx.compose.material3.Text("Date")},placeholder={androidx.compose.material3.Text("YYYY-MM-DD")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
+            recordActions()
             androidx.compose.material3.Button(onClick={run { val quantityMilli=qty.value.toScaledLongExact(3,"Quantity"); val amountMinor=amount.value.toScaledLongExact(2,"Amount"); ops.recordPurchase(RecordPurchase(purchaseId = UUID.randomUUID().toString(), supplierId = supplierId.value, itemId = itemId.value, quantityMilli = quantityMilli, amountMinor = amountMinor, occurredEpochDay = LocalDate.parse(day.value).toEpochDay()), newContext()) }},enabled=!busy.value&&supplierId.value.isNotBlank()&&itemId.value.isNotBlank()&&qty.value.isNotBlank()&&amount.value.isNotBlank()&&day.value.isNotBlank()){androidx.compose.material3.Text("Record purchase")}
         },
-    )
+    ) }
 }

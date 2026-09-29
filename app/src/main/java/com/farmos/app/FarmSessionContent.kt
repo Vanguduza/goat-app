@@ -228,6 +228,7 @@ fun FarmSessionContent(
             )
             FarmModule.PROCUREMENT -> ProcurementModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
+                loadRecords = { loadProcurementRecords(app.database, membership.farmId) },
             )
             FarmModule.WAITLIST -> RabbitCommerceModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
