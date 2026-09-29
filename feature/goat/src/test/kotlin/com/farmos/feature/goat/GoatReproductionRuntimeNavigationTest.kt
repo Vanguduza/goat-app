@@ -99,6 +99,7 @@ class GoatReproductionRuntimeNavigationTest {
             recorded.set(Triple(method, sire, day))
         }
         compose.onNodeWithTag("farm-screen:FOS-GOAT-032").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-033").assertExists()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-008").assertExists()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:goat-zuri").assertDoesNotExist()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:no-sire").assertIsSelected()
