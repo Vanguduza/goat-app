@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.farmos.core.network.FarmMembership
 import com.farmos.domain.ops.HomeAttentionKind
 import com.farmos.feature.goat.GoatEntryPage
 import com.farmos.feature.ops.HealthEntryPage
@@ -57,6 +58,9 @@ internal fun homeUtilityActions(includeCapture: Boolean = true): List<Pair<Strin
     buildList {
         add("Today summary" to FarmDestination.HomePanel(HomeSurface.TODAY_SUMMARY))
         add("Farm alerts" to FarmDestination.HomePanel(HomeSurface.ALERTS))
+        add("Farm activity" to FarmDestination.HomePanel(HomeSurface.ACTIVITY_STREAM))
+        add("Switch farm" to FarmDestination.HomePanel(HomeSurface.FARM_SWITCHER))
+        add("Notifications" to FarmDestination.HomePanel(HomeSurface.NOTIFICATIONS))
         if (includeCapture) add("Quick capture" to FarmDestination.HomePanel(HomeSurface.QUICK_CAPTURE))
     }
 
@@ -206,6 +210,10 @@ internal fun RoleAwareFarmHomeScreen(
     summary: FarmHomeSummary,
     onOpen: (FarmDestination) -> Unit,
     onSignOut: () -> Unit,
+    memberships: List<FarmMembership> = emptyList(),
+    farmNames: Map<String, String> = emptyMap(),
+    currentFarmId: String? = null,
+    onSwitchFarm: (FarmMembership) -> Unit = {},
 ) {
     var destination by remember { mutableStateOf("home") }
     var homeSurface by remember { mutableStateOf<HomeSurface?>(null) }
@@ -222,6 +230,13 @@ internal fun RoleAwareFarmHomeScreen(
             summary = summary,
             onOpen = openDestination,
             onBack = { homeSurface = null },
+            memberships = memberships,
+            farmNames = farmNames,
+            currentFarmId = currentFarmId,
+            onSwitchFarm = { selected ->
+                homeSurface = null
+                onSwitchFarm(selected)
+            },
         )
         return
     }

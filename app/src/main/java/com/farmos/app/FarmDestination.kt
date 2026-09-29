@@ -7,6 +7,9 @@ import com.farmos.feature.ops.TaskEntryPage
 enum class HomeSurface {
     TODAY_SUMMARY,
     ALERTS,
+    ACTIVITY_STREAM,
+    FARM_SWITCHER,
+    NOTIFICATIONS,
     QUICK_CAPTURE,
 }
 

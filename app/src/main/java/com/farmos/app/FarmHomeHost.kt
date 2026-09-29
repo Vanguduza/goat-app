@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.farmos.core.network.FarmMembership
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.projectWorkerTaskStage
 import java.time.LocalDate
@@ -45,6 +46,9 @@ fun FarmHomeHost(
     loadPendingSync: suspend () -> Long,
     onOpen: (FarmDestination) -> Unit,
     onSignOut: () -> Unit,
+    memberships: List<FarmMembership> = emptyList(),
+    farmNames: Map<String, String> = emptyMap(),
+    onSwitchFarm: (FarmMembership) -> Unit = {},
 ) {
     var summary by remember(farmId) { mutableStateOf(FarmHomeSummary(loading = true)) }
     LaunchedEffect(ops, farmId) {
@@ -89,5 +93,9 @@ fun FarmHomeHost(
         summary = summary,
         onOpen = onOpen,
         onSignOut = onSignOut,
+        memberships = memberships,
+        farmNames = farmNames,
+        currentFarmId = farmId,
+        onSwitchFarm = onSwitchFarm,
     )
 }

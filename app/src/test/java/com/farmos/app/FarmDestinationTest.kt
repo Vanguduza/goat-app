@@ -51,11 +51,17 @@ class FarmDestinationTest {
         val ownerActions = managementHomeActions()
         assertTrue(ownerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.TODAY_SUMMARY) })
         assertTrue(ownerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.ALERTS) })
+        assertTrue(ownerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.ACTIVITY_STREAM) })
+        assertTrue(ownerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.FARM_SWITCHER) })
+        assertTrue(ownerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.NOTIFICATIONS) })
         assertTrue(ownerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.QUICK_CAPTURE) })
 
         val buyerActions = specialistHomeActions(FarmHomePersona.BUYER)
         assertTrue(buyerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.TODAY_SUMMARY) })
         assertTrue(buyerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.ALERTS) })
+        assertTrue(buyerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.ACTIVITY_STREAM) })
+        assertTrue(buyerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.FARM_SWITCHER) })
+        assertTrue(buyerActions.any { it.second == FarmDestination.HomePanel(HomeSurface.NOTIFICATIONS) })
         assertTrue(buyerActions.none { it.second == FarmDestination.HomePanel(HomeSurface.QUICK_CAPTURE) })
     }
 

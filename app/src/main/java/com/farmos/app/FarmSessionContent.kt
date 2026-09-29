@@ -23,11 +23,14 @@ fun FarmSessionContent(
     app: FarmOsApplication,
     membership: FarmMembership,
     farmName: String?,
+    memberships: List<FarmMembership>,
+    farmNames: Map<String, String>,
+    onSwitchFarm: (FarmMembership) -> Unit,
     onRequireReauth: (String?) -> Unit,
     onRequireFarmReselection: (String, List<FarmMembership>) -> Unit,
     onSignOut: () -> Unit,
 ) {
-    var destination by remember { mutableStateOf<FarmDestination>(FarmDestination.Home) }
+    var destination by remember(membership.farmId) { mutableStateOf<FarmDestination>(FarmDestination.Home) }
     val repository = remember(membership.farmId) { app.goatRepository(membership.farmId) }
     val ops = remember(membership.farmId) { app.opsRepository(membership.farmId) }
     fun context(): LocalCommandContext {
@@ -64,6 +67,9 @@ fun FarmSessionContent(
             loadPendingSync = { app.database.outbox().countUnacknowledgedForFarm(membership.farmId) },
             onOpen = { destination = it },
             onSignOut = onSignOut,
+            memberships = memberships,
+            farmNames = farmNames,
+            onSwitchFarm = onSwitchFarm,
         )
         FarmDestination.Search -> GlobalSearchHost(
             app = app,

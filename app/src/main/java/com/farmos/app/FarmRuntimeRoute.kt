@@ -40,6 +40,9 @@ private fun HomeSurface.runtimeRouteContract(): FarmRuntimeRoute =
         screenId = when (this) {
             HomeSurface.TODAY_SUMMARY -> "FOS-HOME-003"
             HomeSurface.ALERTS -> "FOS-HOME-004"
+            HomeSurface.ACTIVITY_STREAM -> "FOS-HOME-005"
+            HomeSurface.FARM_SWITCHER -> "FOS-HOME-010"
+            HomeSurface.NOTIFICATIONS -> "FOS-HOME-011"
             HomeSurface.QUICK_CAPTURE -> "FOS-HOME-008"
         },
     )

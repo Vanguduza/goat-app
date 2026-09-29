@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "source_fingerprint": "sha256:c2beab69a4629c838c3b06e0a608c2a6114e8a50d31dae59aa54ec78af271b66",
+  "source_fingerprint": "sha256:101c71240c0849f9627725b4e2d0e0fddf59be8026b974f6b8a91ffc06851b2e",
   "screen_count": 545,
   "qdu_count": 545,
   "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
@@ -708,7 +708,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -725,7 +725,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-001"
       ]
@@ -853,7 +853,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -870,7 +870,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-006"
       ]
@@ -882,7 +882,7 @@
       "module": "home",
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -899,7 +899,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED",
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN",
       "feature_ids": [
         "FTR-HOME-007"
       ]
