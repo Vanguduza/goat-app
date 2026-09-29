@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:c05e484781c457b822902ac39d5cfebb58dd2f7bf799aea79ff6bc3eaa4559c6",
-  "runtime_evidence_tested_commit": "98bf74634162e515efef89be8322bd54a784da29",
-  "runtime_evidence_run_id": 36622464173,
+  "source_fingerprint": "sha256:256bfb61952e2f4c8f5ee6a90e85e2fffe2ea3023acb7c0d1c258e9400ba9f49",
+  "runtime_evidence_tested_commit": "5f9aaf8611429f863508e92627fadcb8d30c7045",
+  "runtime_evidence_run_id": 36624968081,
   "registry_screen_count": 545,
-  "route_screen_count": 264,
-  "unresolved_screen_count": 281,
+  "route_screen_count": 265,
+  "unresolved_screen_count": 280,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -102,6 +102,7 @@
     "FOS-GOAT-030",
     "FOS-GOAT-031",
     "FOS-GOAT-032",
+    "FOS-GOAT-033",
     "FOS-GOAT-034",
     "FOS-GOAT-035",
     "FOS-GOAT-037",
@@ -358,7 +359,8 @@
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
           "app/src/test/java/com/farmos/app/GroupsCaptureOwnerTest.kt",
-          "app/src/test/java/com/farmos/app/PastureCaptureOwnerTest.kt"
+          "app/src/test/java/com/farmos/app/PastureCaptureOwnerTest.kt",
+          "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt"
         ]
       }
     },
@@ -1346,6 +1348,17 @@
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-033",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -2385,11 +2398,15 @@
     {
       "screen_id": "FOS-POULTRY-009",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt"
         ]
       }
     },
@@ -3564,7 +3581,6 @@
     "FOS-GOAT-010",
     "FOS-GOAT-012",
     "FOS-GOAT-023",
-    "FOS-GOAT-033",
     "FOS-GOAT-036",
     "FOS-GOAT-042",
     "FOS-GOAT-045",

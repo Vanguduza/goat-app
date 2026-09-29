@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CandlePoultryHatch
@@ -46,6 +47,7 @@ fun PoultryModuleHost(
     var flockDays by remember { mutableStateOf(emptyList<String>()) }
     var hatches by remember { mutableStateOf(emptyList<String>()) }
     var vaccinations by remember { mutableStateOf(emptyList<String>()) }
+    var flockGroups by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
 
     suspend fun refresh() {
         enabledKinds = ops.enabledPoultryKinds().map { it.poultryKindCode }
@@ -54,6 +56,8 @@ fun PoultryModuleHost(
         flockDays = ops.recentFlockDays().map { "eggs ${it.eggs} · dead ${it.dead} · culls ${it.culls} · feed ${it.feedGrams} g" }
         hatches = ops.hatches().map { "${it.id} ${it.poultryKindCode} · ${it.eggsSet} eggs · ${it.status}" }
         vaccinations = ops.vaccinations().map { "${it.id} ${it.poultryKindCode} · flock ${it.groupId} · ${it.formularyItemId}" }
+        flockGroups = ops.groups().filter { it.speciesCode == "poultry" }
+            .map { FarmSelectorOption(it.id, it.name, "${it.headCount} head recorded") }
         records = loadRecords()
     }
 
@@ -73,6 +77,7 @@ fun PoultryModuleHost(
     }
 
     PoultryExperienceScreen(
+        flockGroups = flockGroups,
         enabledKinds = enabledKinds,
         houses = houses,
         placements = placements,

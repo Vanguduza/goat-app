@@ -23,10 +23,13 @@ import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmModuleHeader
+import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
+import com.farmos.core.design.FarmSelectionAtoms
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.FosDimens
 import java.time.LocalDate
@@ -77,6 +80,8 @@ fun PoultryExperienceScreen(
     onBack: () -> Unit,
     records: PoultryRecords = PoultryRecords(),
     loadFlock: suspend (String) -> PoultryFlockRecords = { PoultryFlockRecords() },
+    /** This farm's poultry groups; placement, flock-day and vaccination commands accept only these. */
+    flockGroups: List<FarmSelectorOption> = emptyList(),
 ) {
     var page by remember { mutableStateOf(PoultryPage.DASHBOARD) }
     val home = { page = PoultryPage.DASHBOARD }
@@ -85,13 +90,13 @@ fun PoultryExperienceScreen(
         PoultryPage.KINDS -> PoultryKinds(enabledKinds, busy, error, onEnableKind, home)
         PoultryPage.HOUSES -> PoultryHouses(houses, busy, error, onCreateHouse, home)
         PoultryPage.FLOCKS -> PoultryRows("FOS-POULTRY-004", "Flocks", placements, "No flock placements yet", error, home)
-        PoultryPage.PLACEMENT -> PoultryPlacement(busy, error, onPlaceFlock, home)
-        PoultryPage.DAILY -> PoultryDaily(flockDays, busy, error, onRecordFlockDay, home)
+        PoultryPage.PLACEMENT -> PoultryPlacement(flockGroups, busy, error, onPlaceFlock, home)
+        PoultryPage.DAILY -> PoultryDaily(flockDays, flockGroups, busy, error, onRecordFlockDay, home)
         PoultryPage.HATCHERY -> PoultryRows("FOS-POULTRY-017", "Hatchery", hatches, "No hatch batches yet", error, home, FarmVisualClass.I2)
         PoultryPage.SET_EGGS -> PoultrySetEggs(busy, error, onSetEggs, home)
         PoultryPage.CANDLING -> PoultryCandling(busy, error, onCandle, home)
         PoultryPage.HATCH_RESULT -> PoultryHatchResult(busy, error, onRecordHatch, home)
-        PoultryPage.VACCINATION -> PoultryVaccination(vaccinations, busy, error, onVaccinate, home)
+        PoultryPage.VACCINATION -> PoultryVaccination(vaccinations, flockGroups, busy, error, onVaccinate, home)
         PoultryPage.BIOSECURITY -> PoultryBiosecurity(busy, error, onBiosecurity, home)
         PoultryPage.FLOCK_PROFILE -> PoultryFlockProfileScreen(records, home)
         PoultryPage.HOUSE_DETAIL -> PoultryHouseDetailScreen(records, home)
@@ -271,6 +276,7 @@ private fun PoultryHouses(
 
 @Composable
 private fun PoultryPlacement(
+    flockGroups: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onPlace: (String, String, String, String, String) -> Unit,
@@ -283,9 +289,7 @@ private fun PoultryPlacement(
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage("FOS-POULTRY-008", "Flock placement", "Place a flock into a configured house.", onBack = onBack) {
         FarmOperationalSection("Placement") {
-            OutlinedTextField(group, {
-                group = it
-            }, label = { Text("Flock group id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FlockGroupSelector(flockGroups, group, busy) { group = it }
             OutlinedTextField(house, {
                 house = it
             }, label = { Text("House id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -312,6 +316,7 @@ private fun PoultryPlacement(
 @Composable
 private fun PoultryDaily(
     rows: List<String>,
+    flockGroups: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String, String, String, String) -> Unit,
@@ -332,9 +337,7 @@ private fun PoultryDaily(
     ) {
         FarmOperationalRows(rows, "No daily flock records", null)
         FarmOperationalSection("Flock day") {
-            OutlinedTextField(group, {
-                group = it
-            }, label = { Text("Flock group id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FlockGroupSelector(flockGroups, group, busy) { group = it }
             OutlinedTextField(
                 eggs,
                 { eggs = it },
@@ -522,6 +525,7 @@ private fun PoultryHatchResult(
 @Composable
 private fun PoultryVaccination(
     rows: List<String>,
+    flockGroups: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String, String) -> Unit,
@@ -540,9 +544,7 @@ private fun PoultryVaccination(
     ) {
         FarmOperationalRows(rows, "No poultry vaccinations recorded", null)
         FarmOperationalSection("Vaccination record") {
-            OutlinedTextField(group, {
-                group = it
-            }, label = { Text("Flock group id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FlockGroupSelector(flockGroups, group, busy) { group = it }
             OutlinedTextField(kind, {
                 kind = it
             }, label = { Text("Poultry kind") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -617,4 +619,18 @@ private fun PoultryBiosecurity(
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
+}
+
+/** FOS-ATOM-005 over this farm's poultry groups, so a flock command never carries a mistyped id. */
+@Composable
+private fun FlockGroupSelector(flockGroups: List<FarmSelectorOption>, selected: String, busy: Boolean, onSelect: (String) -> Unit) {
+    FarmEntitySelector(
+        atomTag = FarmSelectionAtoms.GROUP_SELECTOR,
+        title = "Flock",
+        options = flockGroups,
+        selectedId = selected.ifBlank { null },
+        onSelect = onSelect,
+        emptyText = "Create a poultry group in Groups first.",
+        enabled = !busy,
+    )
 }

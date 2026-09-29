@@ -197,7 +197,7 @@ internal fun GoatReproductionScreen(
     var pregResult by remember { mutableStateOf("pregnant") }
     var pregDay by remember { mutableStateOf("") }
     var lactationDay by remember { mutableStateOf("") }
-    IllustratedGoatPage("Reproduction & milk", "FOS-GOAT-017/031/032/034/043 · I3", onBack) {
+    IllustratedGoatPage("Reproduction & milk", "FOS-GOAT-017/031/032/033/034/043 · I3", onBack) {
         val goat = state.selected
         if (goat == null || goat.sex != GoatSex.FEMALE) {
             GoatDoePicker(
@@ -236,17 +236,20 @@ internal fun GoatReproductionScreen(
                             detail = goatStatusLabel(buck.status),
                         )
                     }
-                FarmEntitySelector(
-                    atomTag = FarmSelectionAtoms.SIRE_DAM_SELECTOR,
-                    title = "Sire (optional)",
-                    options = sireOptions,
-                    selectedId = sire.ifBlank { NO_SIRE_OPTION },
-                    onSelect = { sire = if (it == NO_SIRE_OPTION) "" else it },
-                    emptyText = "No bucks on this device",
-                    enabled = !state.busy,
-                )
-                goatHerdBoundNotice(state.herd.size, state.herdCounts?.notClosed)?.let {
-                    Text(it, color = AnimalFarmTheme.colors.mutedInk, modifier = Modifier.testTag("goat-sire-bounded"))
+                // FOS-GOAT-033 — the goat sire selector, realised through the shared sire/dam atom.
+                Column(Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-033"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FarmEntitySelector(
+                        atomTag = FarmSelectionAtoms.SIRE_DAM_SELECTOR,
+                        title = "Sire (optional)",
+                        options = sireOptions,
+                        selectedId = sire.ifBlank { NO_SIRE_OPTION },
+                        onSelect = { sire = if (it == NO_SIRE_OPTION) "" else it },
+                        emptyText = "No bucks on this device",
+                        enabled = !state.busy,
+                    )
+                    goatHerdBoundNotice(state.herd.size, state.herdCounts?.notClosed)?.let {
+                        Text(it, color = AnimalFarmTheme.colors.mutedInk, modifier = Modifier.testTag("goat-sire-bounded"))
+                    }
                 }
                 FarmDateField(label = "Mating date", value = matingDay, onValueChange = { matingDay = it }, key = "mating", enabled = !state.busy)
                 Text("A mating record creates the governed +45 day pregnancy-check task.")
