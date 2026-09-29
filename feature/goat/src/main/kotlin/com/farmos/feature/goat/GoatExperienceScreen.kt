@@ -129,14 +129,24 @@ internal fun GoatExperienceScreen(
         GoatPage.STATUS_CHANGE -> GoatStatusChangeScreen(state, actions.onSetStatus) { page = GoatPage.PROFILE }
         GoatPage.PREGNANCY_DASHBOARD -> GoatPregnancyDashboardScreen(
             herd = state.herd,
+            herdTotal = state.herdCounts?.notClosed,
             onSelectDoe = {
                 actions.onSelectGoat(it)
                 page = GoatPage.DOE_REPRODUCTION
             },
             onBack = { page = GoatPage.DASHBOARD },
         )
+        GoatPage.LACTATION_DASHBOARD -> GoatLactationDashboardScreen(
+            lactation = state.lactation,
+            onSelectDoe = {
+                actions.onSelectGoat(it)
+                page = GoatPage.LACTATION_HISTORY
+            },
+            onBack = { page = GoatPage.DASHBOARD },
+        )
         GoatPage.KID_COHORT -> GoatKidCohortScreen(
             herd = state.herd,
+            herdTotal = state.herdCounts?.notClosed,
             onSelectKid = {
                 actions.onSelectGoat(it)
                 page = GoatPage.KID_PROFILE
@@ -234,6 +244,7 @@ private fun GoatDashboardScreen(
                 onOpen(if (state.selected != null) GoatPage.WEIGHT else GoatPage.HERD)
             }
             GoatDashboardAction("Pregnancy", "Breeding status of active does") { onOpen(GoatPage.PREGNANCY_DASHBOARD) }
+            GoatDashboardAction("Lactation", "Milk recorded for every goat") { onOpen(GoatPage.LACTATION_DASHBOARD) }
             GoatDashboardAction("Kids", "Registered kids by kidding") { onOpen(GoatPage.KID_COHORT) }
             GoatDashboardAction("Search", state.searchMessage) { onOpen(GoatPage.SEARCH) }
             GoatDashboardAction("Scan tag", "RFID, EID or animal tag") { onOpen(GoatPage.SCAN) }

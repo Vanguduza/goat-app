@@ -43,6 +43,7 @@ RENDERED_TRAVERSAL_TESTS = (
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHealthRuntimeNavigationTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKidRuntimeNavigationTest.kt",
+    "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatLactationRuntimeNavigationTest.kt",
 )
 RENDERED_OWNER_TESTS = (
     "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt",

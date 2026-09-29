@@ -33,6 +33,7 @@ internal enum class GoatPage {
     LAB_RESULTS,
     DOE_REPRODUCTION,
     PREGNANCY_DASHBOARD,
+    LACTATION_DASHBOARD,
     PEDIGREE,
     KIDDING_DETAIL,
     KID_COHORT,
@@ -71,6 +72,10 @@ internal fun goatStatusLabel(status: GoatStatus): String = when (status) {
 
 internal fun goatStatusLabel(raw: String): String =
     runCatching { goatStatusLabel(GoatStatus.fromWire(raw)) }.getOrDefault(raw)
+
+/** States when a herd-derived page was built from the bounded herd list rather than every goat. */
+internal fun goatHerdBoundNotice(shown: Int, total: Int?): String? =
+    total?.takeIf { it > shown }?.let { "Built from the first $shown of $it goats by tag. Goats beyond these are not shown here." }
 
 internal fun formatKg(grams: Long): String = "%.2f".format(grams / 1_000.0)
 

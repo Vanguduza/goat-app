@@ -169,6 +169,12 @@ data class PoultryGroupHouse(val groupId: String, val houseId: String)
 /** A farm-scoped record count keyed by a parent id (house, flock). */
 data class RecordKeyCount(val key: String, val count: Int)
 
+/** Exhaustive milk aggregate for one goat; not bounded by any presentation row limit. */
+data class GoatMilkTotal(val animalId: String, val totalMilli: Long, val recordCount: Int, val firstEpochDay: Long, val latestEpochDay: Long)
+
+/** Milk recorded for one goat on its latest recorded day. */
+data class GoatMilkDayTotal(val animalId: String, val litresMilli: Long)
+
 @Entity(tableName = "poultry_placements")
 data class PoultryPlacementEntity(
     @PrimaryKey val id: String,
@@ -329,6 +335,28 @@ interface LifecycleDao {
     @Upsert suspend fun upsertMilk(row: GoatMilkEntity)
     @Query("SELECT * FROM goat_milk_records WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC")
     suspend fun milkFor(farmId: String, animalId: String): List<GoatMilkEntity>
+    /** Exhaustive per-goat milk totals; litres are summed within one goat only. */
+    @Query(
+        """
+        SELECT animalId, SUM(litresMilli) AS totalMilli, COUNT(*) AS recordCount,
+            MIN(occurredEpochDay) AS firstEpochDay, MAX(occurredEpochDay) AS latestEpochDay
+        FROM goat_milk_records WHERE farmId = :farmId GROUP BY animalId ORDER BY animalId
+        """,
+    )
+    suspend fun goatMilkTotals(farmId: String): List<GoatMilkTotal>
+    /** Milk summed over each goat's latest recorded day, across every record on that day. */
+    @Query(
+        """
+        SELECT m.animalId AS animalId, SUM(m.litresMilli) AS litresMilli
+        FROM goat_milk_records m
+        JOIN (SELECT animalId, MAX(occurredEpochDay) AS latestDay FROM goat_milk_records WHERE farmId = :farmId GROUP BY animalId) l
+            ON l.animalId = m.animalId AND l.latestDay = m.occurredEpochDay
+        WHERE m.farmId = :farmId GROUP BY m.animalId ORDER BY m.animalId
+        """,
+    )
+    suspend fun goatMilkLatestDay(farmId: String): List<GoatMilkDayTotal>
+    @Query("SELECT animalId AS `key`, COUNT(*) AS count FROM goat_scc_records WHERE farmId = :farmId GROUP BY animalId ORDER BY animalId")
+    suspend fun goatSccCounts(farmId: String): List<RecordKeyCount>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPack(row: HealthPackEntity)
     @Upsert suspend fun upsertPack(row: HealthPackEntity)
     @Query("SELECT * FROM health_protocol_packs WHERE farmId = :farmId ORDER BY name")

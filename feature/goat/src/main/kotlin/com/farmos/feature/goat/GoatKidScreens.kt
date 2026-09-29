@@ -84,8 +84,11 @@ internal fun GoatKidProfileScreen(goat: GoatSnapshot?, onBack: () -> Unit) {
 
 /** FOS-GOAT-040 — registered kids grouped by the kidding they came from. */
 @Composable
-internal fun GoatKidCohortScreen(herd: List<GoatSnapshot>, onSelectKid: (String) -> Unit, onBack: () -> Unit) {
+internal fun GoatKidCohortScreen(herd: List<GoatSnapshot>, onSelectKid: (String) -> Unit, onBack: () -> Unit, herdTotal: Int? = null) {
     IllustratedGoatPage("Kids", "FOS-GOAT-040", onBack) {
+        goatHerdBoundNotice(herd.size, herdTotal)?.let {
+            Text(it, color = AnimalFarmTheme.colors.mutedInk, modifier = Modifier.testTag("goat-kid-cohort-bounded"))
+        }
         val cohorts = herd.filter { it.birthRecord != null }
             .groupBy { it.birthRecord!!.kiddingId }
             .values

@@ -18,7 +18,15 @@ data class GoatSliceUiState(
     val searchResults: List<GoatSearchResult> = emptyList(),
     val busy: Boolean = false,
     val error: String? = null,
+    /** Exhaustive per-goat milk aggregates for the lactation dashboard. */
+    val lactation: GoatLactationState = GoatLactationState.Loading,
 )
+
+sealed interface GoatLactationState {
+    data object Loading : GoatLactationState
+    data class Failed(val message: String) : GoatLactationState
+    data class Loaded(val rows: List<com.farmos.domain.goat.GoatLactationSummary>) : GoatLactationState
+}
 
 enum class LoadableSurfaceState { IDLE, LOADING, EMPTY, ERROR, DISABLED }
 
