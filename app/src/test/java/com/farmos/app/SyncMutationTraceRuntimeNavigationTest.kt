@@ -35,7 +35,7 @@ class SyncMutationTraceRuntimeNavigationTest {
     val compose = createComposeRule()
 
     private val base = 1_790_000_000_000L // 2026-09-21T14:13:20Z
-    private val traceScreen = "farm-screen:" + "FOS-" + "SYNC-" + "018"
+    private val traceScreen = "farm-screen:FOS-SYNC-018"
 
     @Test
     fun traceOpensFromTheDeadLetterQueueAndBackRestoresIt() {
