@@ -2,18 +2,19 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:af9623ae41f458cf8ef6787b8790c82ca8d22258d70a7f080c4a813fa8076ed2",
-  "runtime_evidence_tested_commit": "4650d389f2448da276b8ce0987763a1bc7453a0f",
-  "runtime_evidence_run_id": 36619848695,
+  "source_fingerprint": "sha256:c05e484781c457b822902ac39d5cfebb58dd2f7bf799aea79ff6bc3eaa4559c6",
+  "runtime_evidence_tested_commit": "98bf74634162e515efef89be8322bd54a784da29",
+  "runtime_evidence_run_id": 36622464173,
   "registry_screen_count": 545,
-  "route_screen_count": 263,
-  "unresolved_screen_count": 282,
+  "route_screen_count": 264,
+  "unresolved_screen_count": 281,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
     "FOS-ASSET-002",
     "FOS-ASSET-003",
     "FOS-ASSET-009",
+    "FOS-ATOM-001",
     "FOS-ATOM-003",
     "FOS-ATOM-005",
     "FOS-ATOM-006",
@@ -324,6 +325,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/AssetRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ATOM-001",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -3472,7 +3484,6 @@
     "FOS-ASSET-010",
     "FOS-ASSET-011",
     "FOS-ASSET-012",
-    "FOS-ATOM-001",
     "FOS-ATOM-002",
     "FOS-ATOM-004",
     "FOS-ATOM-010",

@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmTheme
+import com.farmos.core.design.FarmDateField
 import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmSelectionAtoms
@@ -209,7 +210,7 @@ internal fun GoatReproductionScreen(
         FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-017")) {
             Text("Milk", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             OutlinedTextField(milk, { milk = it }, label = { Text("Litres") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
-            OutlinedTextField(milkDay, { milkDay = it }, label = { Text("Date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+            FarmDateField(label = "Date", value = milkDay, onValueChange = { milkDay = it }, key = "milk", enabled = !state.busy)
             Button(onClick = { actions.onRecordMilk(milk, milkDay) }, enabled = !state.busy && milk.toDoubleOrNull()?.let { it > 0.0 } == true && milkDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record milk") }
         }
         FarmIllustratedSectionSurface {
@@ -218,7 +219,7 @@ internal fun GoatReproductionScreen(
                 Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-031"),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                OutlinedTextField(heatDay, { heatDay = it }, label = { Text("Heat date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                FarmDateField(label = "Heat date", value = heatDay, onValueChange = { heatDay = it }, key = "heat", enabled = !state.busy)
                 Button(onClick = { actions.onRecordHeat(heatDay) }, enabled = !state.busy && heatDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record heat") }
             }
             Column(
@@ -247,7 +248,7 @@ internal fun GoatReproductionScreen(
                 goatHerdBoundNotice(state.herd.size, state.herdCounts?.notClosed)?.let {
                     Text(it, color = AnimalFarmTheme.colors.mutedInk, modifier = Modifier.testTag("goat-sire-bounded"))
                 }
-                OutlinedTextField(matingDay, { matingDay = it }, label = { Text("Mating date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                FarmDateField(label = "Mating date", value = matingDay, onValueChange = { matingDay = it }, key = "mating", enabled = !state.busy)
                 Text("A mating record creates the governed +45 day pregnancy-check task.")
                 Button(onClick = { actions.onRecordMating(method, sire, matingDay) }, enabled = !state.busy && method in setOf("natural", "ai", "hand_mating") && matingDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record mating") }
             }
@@ -262,7 +263,7 @@ internal fun GoatReproductionScreen(
                     TextButton(onClick = { pregResult = "pregnant" }) { Text(if (pregResult == "pregnant") "Pregnant · selected" else "Pregnant") }
                     TextButton(onClick = { pregResult = "open" }) { Text(if (pregResult == "open") "Open · selected" else "Open") }
                 }
-                OutlinedTextField(pregDay, { pregDay = it }, label = { Text("Check date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                FarmDateField(label = "Check date", value = pregDay, onValueChange = { pregDay = it }, key = "pregnancy-check", enabled = !state.busy)
                 Text("The pregnancy result is a recorded check; Farm OS does not diagnose autonomously.")
                 Button(onClick = { actions.onRecordPregnancy(pregResult, pregDay) }, enabled = !state.busy && pregDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record pregnancy check") }
             }
@@ -270,7 +271,7 @@ internal fun GoatReproductionScreen(
                 Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-043"),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                OutlinedTextField(lactationDay, { lactationDay = it }, label = { Text("Kidding date for +7 day follow-up") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                FarmDateField(label = "Kidding date for +7 day follow-up", value = lactationDay, onValueChange = { lactationDay = it }, key = "lactation-follow-up", enabled = !state.busy)
                 Button(onClick = { actions.onPlanLactation(lactationDay) }, enabled = !state.busy && lactationDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Plan lactation follow-up") }
             }
         }
