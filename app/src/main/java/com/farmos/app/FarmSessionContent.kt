@@ -166,6 +166,7 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadRecords = { loadPastureRecords(app.database, membership.farmId) },
             )
             FarmModule.LABOUR -> LabourModuleHost(
                 farmId = membership.farmId,

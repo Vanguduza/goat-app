@@ -14,6 +14,8 @@ import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreatePaddock
 import com.farmos.domain.ops.EndGrazing
 import com.farmos.domain.ops.StartGrazing
+import com.farmos.feature.ops.PastureRecordNavigator
+import com.farmos.feature.ops.PastureRecords
 import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
@@ -27,16 +29,19 @@ fun PastureModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadRecords: suspend () -> PastureRecords = { PastureRecords() },
 ) {
     val scope = rememberCoroutineScope()
     var paddockRows by remember { mutableStateOf(emptyList<String>()) }
     var grazingRows by remember { mutableStateOf(emptyList<String>()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var records by remember(farmId) { mutableStateOf(PastureRecords()) }
 
     suspend fun refresh() {
         paddockRows = ops.paddocks().map { "${it.id} ${it.code} · ${it.displayName} · ${it.waterSource}" }
         grazingRows = ops.openGrazing().map { "${it.id} paddock ${it.paddockId} · group ${it.groupId}" }
+        records = loadRecords()
     }
 
     LaunchedEffect(farmId) { runCatching { refresh() } }
@@ -64,7 +69,7 @@ fun PastureModuleHost(
     val sessionId = remember { mutableStateOf("") }
     val exited = remember { mutableStateOf("") }
 
-    SimpleCaptureScreen(
+    PastureRecordNavigator(records) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-PASTURE-001",
         title = "Pasture",
         help = "One group grazes one paddock at a time. Rest starts when the session ends.",
@@ -84,6 +89,7 @@ fun PastureModuleHost(
         },
         onBack = onBack,
         extra = {
+            recordActions()
             androidx.compose.material3.OutlinedTextField(paddockId.value, { paddockId.value = it }, label = { androidx.compose.material3.Text("Paddock id") }, modifier = Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(groupId.value, { groupId.value = it }, label = { androidx.compose.material3.Text("Group id") }, modifier = Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(heads.value, { heads.value = it }, label = { androidx.compose.material3.Text("Head count") }, modifier = Modifier.fillMaxWidth())
@@ -106,5 +112,5 @@ fun PastureModuleHost(
                 enabled = !busy && sessionId.value.isNotBlank() && exited.value.isNotBlank(),
             ) { androidx.compose.material3.Text("End grazing") }
         },
-    )
+    ) }
 }
