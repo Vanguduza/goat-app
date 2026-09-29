@@ -159,6 +159,8 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadGroups = { loadGroupViews(app.database, membership.farmId) },
+                loadGroup = { loadGroupRecords(app.database, membership.farmId, it) },
             )
             FarmModule.PASTURE -> PastureModuleHost(
                 farmId = membership.farmId,
@@ -166,6 +168,7 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadRecords = { loadPastureRecords(app.database, membership.farmId) },
             )
             FarmModule.LABOUR -> LabourModuleHost(
                 farmId = membership.farmId,

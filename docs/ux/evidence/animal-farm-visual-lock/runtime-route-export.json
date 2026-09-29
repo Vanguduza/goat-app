@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:d93df6c68fefadb567947a06ff627ce42bdacc9ee74c4c3bea8f9f7a1a620e35",
-  "runtime_evidence_tested_commit": "45df71eb969c46e17ceb4cdbaf9805003be05126",
-  "runtime_evidence_run_id": 36542804502,
+  "source_fingerprint": "sha256:f252a243f2bca432b8a09ebded9d2d7e2be86d4ce6b90dbef07f408c3a7e2ff7",
+  "runtime_evidence_tested_commit": "db04bc3b4aaf147fc9962861d014202d306ac521",
+  "runtime_evidence_run_id": 36545355965,
   "registry_screen_count": 545,
-  "route_screen_count": 218,
-  "unresolved_screen_count": 327,
+  "route_screen_count": 224,
+  "unresolved_screen_count": 321,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -88,6 +88,9 @@
     "FOS-GOAT-044",
     "FOS-GOAT-051",
     "FOS-GROUP-001",
+    "FOS-GROUP-002",
+    "FOS-GROUP-006",
+    "FOS-GROUP-009",
     "FOS-HEALTH-001",
     "FOS-HEALTH-003",
     "FOS-HEALTH-004",
@@ -146,6 +149,9 @@
     "FOS-LABOUR-001",
     "FOS-LABOUR-005",
     "FOS-PASTURE-001",
+    "FOS-PASTURE-002",
+    "FOS-PASTURE-003",
+    "FOS-PASTURE-009",
     "FOS-POULTRY-001",
     "FOS-POULTRY-002",
     "FOS-POULTRY-004",
@@ -1141,6 +1147,39 @@
       }
     },
     {
+      "screen_id": "FOS-GROUP-002",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/GroupRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GROUP-006",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/GroupRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GROUP-009",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/GroupRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-HEALTH-001",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -1851,6 +1890,39 @@
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-PASTURE-002",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/PastureRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-PASTURE-003",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/PastureRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-PASTURE-009",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/PastureRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -3007,14 +3079,11 @@
     "FOS-GOAT-053",
     "FOS-GOAT-054",
     "FOS-GOAT-055",
-    "FOS-GROUP-002",
     "FOS-GROUP-003",
     "FOS-GROUP-004",
     "FOS-GROUP-005",
-    "FOS-GROUP-006",
     "FOS-GROUP-007",
     "FOS-GROUP-008",
-    "FOS-GROUP-009",
     "FOS-HEALTH-002",
     "FOS-HEALTH-005",
     "FOS-HEALTH-011",
@@ -3036,14 +3105,11 @@
     "FOS-LABOUR-007",
     "FOS-LABOUR-008",
     "FOS-LABOUR-009",
-    "FOS-PASTURE-002",
-    "FOS-PASTURE-003",
     "FOS-PASTURE-004",
     "FOS-PASTURE-005",
     "FOS-PASTURE-006",
     "FOS-PASTURE-007",
     "FOS-PASTURE-008",
-    "FOS-PASTURE-009",
     "FOS-PASTURE-010",
     "FOS-PASTURE-011",
     "FOS-POULTRY-003",

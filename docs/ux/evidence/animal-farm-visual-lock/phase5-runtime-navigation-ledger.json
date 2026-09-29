@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "45df71eb969c46e17ceb4cdbaf9805003be05126",
-  "source_fingerprint": "sha256:d93df6c68fefadb567947a06ff627ce42bdacc9ee74c4c3bea8f9f7a1a620e35",
+  "tested_commit": "db04bc3b4aaf147fc9962861d014202d306ac521",
+  "source_fingerprint": "sha256:f252a243f2bca432b8a09ebded9d2d7e2be86d4ce6b90dbef07f408c3a7e2ff7",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36542804502,
+  "foundation_run_id": 36545355965,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -229,6 +229,16 @@
       ],
       "app/src/test/java/com/farmos/app/LabourRecordRuntimeNavigationTest.kt": [
         "FOS-LABOUR-005"
+      ],
+      "app/src/test/java/com/farmos/app/PastureRecordRuntimeNavigationTest.kt": [
+        "FOS-PASTURE-002",
+        "FOS-PASTURE-003",
+        "FOS-PASTURE-009"
+      ],
+      "app/src/test/java/com/farmos/app/GroupRecordRuntimeNavigationTest.kt": [
+        "FOS-GROUP-002",
+        "FOS-GROUP-006",
+        "FOS-GROUP-009"
       ]
     },
     "rendered_surface_owner": {
@@ -345,10 +355,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 25,
-    "rendered_traversal_screen_count": 153,
+    "rendered_traversal_screen_count": 159,
     "rendered_owner_screen_count": 31,
     "route_contract_screen_count": 59,
-    "combined_screen_count": 218,
+    "combined_screen_count": 224,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -423,6 +433,9 @@
       "FOS-GOAT-040",
       "FOS-GOAT-041",
       "FOS-GOAT-044",
+      "FOS-GROUP-002",
+      "FOS-GROUP-006",
+      "FOS-GROUP-009",
       "FOS-HEALTH-003",
       "FOS-HEALTH-004",
       "FOS-HEALTH-006",
@@ -464,6 +477,9 @@
       "FOS-INV-014",
       "FOS-INV-017",
       "FOS-LABOUR-005",
+      "FOS-PASTURE-002",
+      "FOS-PASTURE-003",
+      "FOS-PASTURE-009",
       "FOS-POULTRY-002",
       "FOS-POULTRY-004",
       "FOS-POULTRY-005",
@@ -647,12 +663,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 153,
+    "runtime_reachability_executed": 159,
     "entry_action_emission_executed": 25,
     "rendered_surface_owners_executed": 31,
     "route_contracts_executed": 59,
     "parameter_scope_executed": true,
-    "return_restoration_executed": 153,
+    "return_restoration_executed": 159,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {

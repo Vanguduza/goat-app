@@ -190,6 +190,9 @@ interface PaddockDao {
 
     @Query("SELECT * FROM paddocks WHERE farmId = :farmId AND active = 1 ORDER BY code")
     suspend fun active(farmId: String): List<PaddockEntity>
+
+    @Query("SELECT * FROM paddocks WHERE farmId = :farmId ORDER BY code")
+    suspend fun forFarm(farmId: String): List<PaddockEntity>
 }
 
 @Dao
@@ -208,7 +211,42 @@ interface GrazingDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM grazing_sessions WHERE farmId = :farmId AND paddockId = :paddockId AND exitedEpochDay IS NULL)")
     suspend fun hasOpen(farmId: String, paddockId: String): Boolean
+
+    @Query("SELECT * FROM grazing_sessions WHERE farmId = :farmId ORDER BY enteredEpochDay DESC, id LIMIT :limit")
+    suspend fun recent(farmId: String, limit: Int): List<GrazingSessionEntity>
+
+    @Query("SELECT * FROM grazing_sessions WHERE farmId = :farmId AND groupId = :groupId ORDER BY enteredEpochDay DESC, id")
+    suspend fun forGroup(farmId: String, groupId: String): List<GrazingSessionEntity>
+
+    @Query("SELECT COUNT(*) FROM grazing_sessions WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    @Query(
+        """
+        SELECT paddockId, COUNT(*) AS sessionCount,
+            SUM(CASE WHEN exitedEpochDay IS NULL THEN 1 ELSE 0 END) AS openSessions,
+            SUM(CASE WHEN exitedEpochDay IS NULL THEN headCount ELSE 0 END) AS openHeadCount,
+            MIN(enteredEpochDay) AS firstEnteredEpochDay, MAX(enteredEpochDay) AS latestEnteredEpochDay,
+            MAX(exitedEpochDay) AS latestExitedEpochDay
+        FROM grazing_sessions WHERE farmId = :farmId GROUP BY paddockId ORDER BY paddockId
+        """,
+    )
+    suspend fun summaryByPaddock(farmId: String): List<PaddockGrazingSummary>
 }
+
+/**
+ * Exhaustive per-paddock grazing aggregate over every recorded session. [openHeadCount] is the head
+ * count recorded when the still-open sessions started, not a physical count.
+ */
+data class PaddockGrazingSummary(
+    val paddockId: String,
+    val sessionCount: Int,
+    val openSessions: Int,
+    val openHeadCount: Int,
+    val firstEnteredEpochDay: Long,
+    val latestEnteredEpochDay: Long,
+    val latestExitedEpochDay: Long?,
+)
 
 @Dao
 interface LabourDao {
@@ -284,6 +322,9 @@ interface FeedIssueDao {
 
     @Query("SELECT * FROM feed_issues WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<FeedIssueEntity>
+
+    @Query("SELECT * FROM feed_issues WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredEpochDay DESC, id")
+    suspend fun forGroup(farmId: String, groupId: String): List<FeedIssueEntity>
 }
 
 @Dao
