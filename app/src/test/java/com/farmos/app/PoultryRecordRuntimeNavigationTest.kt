@@ -50,12 +50,14 @@ class PoultryRecordRuntimeNavigationTest {
             compose.onNodeWithText("1850").assertExists()
             compose.onNodeWithText("22.5 kg").assertExists()
             compose.onNodeWithTag("poultry-flock-vaccination:v1").assertExists()
+            compose.onNodeWithText("Vaccinations · 1").assertExists()
             compose.onNodeWithTag("poultry-option:layers-b").performScrollTo().performClick()
             compose.onNodeWithText("No vaccinations recorded for this flock.").assertExists()
         }
         traverse("House details", "FOS-POULTRY-007") {
             compose.onNodeWithTag("poultry-house-placement:p1").assertExists()
             compose.onNodeWithTag("poultry-house-walk:bw1").assertExists()
+            compose.onNodeWithText("Placements · latest 1 of 530").assertExists()
         }
         traverse("Egg production", "FOS-POULTRY-010") {
             compose.onNodeWithText("layers-a · chicken · 1850 eggs").assertExists()
@@ -68,6 +70,8 @@ class PoultryRecordRuntimeNavigationTest {
         }
         traverse("Biosecurity records", "FOS-POULTRY-015") {
             compose.onNodeWithTag("poultry-biosecurity-mixed").assertExists()
+            compose.onNodeWithText("Mixed species recorded on 4 walk(s)").assertExists()
+            compose.onNodeWithText("Walks · latest 1 of 620").assertExists()
             compose.onNodeWithText("Wild bird droppings near feeder").assertExists()
         }
     }
@@ -110,16 +114,19 @@ class PoultryRecordRuntimeNavigationTest {
                         PoultryDayView(day(9, 20), 910, 1, 1, 10_500),
                     ),
                     vaccinations = listOf(PoultryVaccinationView("v1", day(8, 3), "Marek's vaccine")),
+                    vaccinationCount = 1,
                 ),
                 PoultryFlockView("layers-b", "duck", "H2", 200, day(9, 1), emptyList(), emptyList()),
             ),
             houses = listOf(
-                PoultryHouseView("h1", "H1", "layer_barn", "chicken", listOf(PoultryPlacementView("p1", "layers-a", "chicken", 1_000, day(8, 1))), listOf(walk)),
+                PoultryHouseView("h1", "H1", "layer_barn", "chicken", listOf(PoultryPlacementView("p1", "layers-a", "chicken", 1_000, day(8, 1))), listOf(walk), placementCount = 530, walkCount = 1),
             ),
             hatches = listOf(
                 PoultryHatchView("b1", "chicken", day(9, 1), 100, 21, "candled", "House H1", 88, 7, 3, null, null, null),
             ),
             walks = listOf(walk),
+            walkCount = 620,
+            mixedSpeciesWalkCount = 4,
         )
     }
 

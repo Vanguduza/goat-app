@@ -12,7 +12,12 @@ import com.farmos.feature.ops.PoultryWalkView
 
 private const val POULTRY_RECORD_LIMIT = 500
 
-/** Farm-scoped read model for the read-only poultry record pages. Nothing here writes. */
+/**
+ * Farm-scoped read model for the read-only poultry record pages. Nothing here writes.
+ * Flock identity, placed heads and first placement come from exhaustive per-flock aggregates; the
+ * placement, vaccination and walk lists are the latest [POULTRY_RECORD_LIMIT] rows and carry
+ * exhaustive counts so the pages can say when a list is not complete.
+ */
 internal suspend fun loadPoultryRecords(database: FarmOsDatabase, farmId: String): PoultryRecords {
     val lifecycle = database.lifecycle()
     val houses = lifecycle.houses(farmId)
@@ -20,24 +25,32 @@ internal suspend fun loadPoultryRecords(database: FarmOsDatabase, farmId: String
     fun houseLabel(id: String?) = id?.let { houseCodes[it] ?: "House not on this device" }
     val placements = lifecycle.placements(farmId, POULTRY_RECORD_LIMIT)
     val vaccinations = lifecycle.vaccinations(farmId, POULTRY_RECORD_LIMIT)
-    val products = mutableMapOf<String, String>()
-    suspend fun product(id: String) = products.getOrPut(id) { database.formulary().get(farmId, id)?.productName ?: "Product not on this device" }
+    val products = vaccinations.map { it.formularyItemId }.distinct().chunked(LOOKUP_CHUNK)
+        .flatMap { database.formulary().getMany(farmId, it) }
+        .associate { it.id to it.productName }
+    fun product(id: String) = products[id] ?: "Product not on this device"
     val rawWalks = lifecycle.biosecurityWalks(farmId, POULTRY_RECORD_LIMIT)
     val walks = rawWalks.map { walk ->
         val subject = listOfNotNull(houseLabel(walk.houseId)?.let { "House $it" }, walk.groupId?.let { "Flock $it" }).joinToString(" · ").ifBlank { "Farm" }
         PoultryWalkView(walk.id, walk.occurredEpochDay, subject, walk.findings, walk.mixedSpecies)
     }
-    val flocks = placements.groupBy { it.groupId }.map { (groupId, rows) ->
+    val groupHouses = lifecycle.poultryGroupHouses(farmId).groupBy({ it.groupId }, { it.houseId })
+    val vaccinationCounts = lifecycle.poultryVaccinationCountsByGroup(farmId).associate { it.key to it.count }
+    val placementCountsByHouse = lifecycle.poultryPlacementCountsByHouse(farmId).associate { it.key to it.count }
+    val walkCountsByHouse = lifecycle.poultryWalkCountsByHouse(farmId).associate { it.key to it.count }
+    val flocks = lifecycle.poultryPlacementTotals(farmId).map { total ->
+        val groupId = total.groupId
         PoultryFlockView(
             groupId = groupId,
-            poultryKind = rows.first().poultryKindCode,
-            houseLabel = rows.map { houseLabel(it.houseId) ?: "" }.distinct().joinToString(", "),
-            placedHeads = rows.sumOf { it.headCount },
-            firstPlacedEpochDay = rows.minOf { it.occurredEpochDay },
+            poultryKind = total.poultryKindCode,
+            houseLabel = groupHouses[groupId].orEmpty().map { houseLabel(it) ?: "" }.distinct().joinToString(", "),
+            placedHeads = total.placedHeads,
+            firstPlacedEpochDay = total.firstPlacedEpochDay,
             days = database.poultryFlockDays().forGroup(farmId, groupId).map { PoultryDayView(it.occurredEpochDay, it.eggs, it.dead, it.culls, it.feedGrams) },
             vaccinations = vaccinations.filter { it.groupId == groupId }.map { PoultryVaccinationView(it.id, it.occurredEpochDay, product(it.formularyItemId)) },
+            vaccinationCount = vaccinationCounts[groupId] ?: 0,
         )
-    }.sortedBy { it.groupId }
+    }
     return PoultryRecords(
         flocks = flocks,
         houses = houses.map { house ->
@@ -50,6 +63,8 @@ internal suspend fun loadPoultryRecords(database: FarmOsDatabase, farmId: String
                 walks = rawWalks.filter { it.houseId == house.id }.map { walk ->
                     PoultryWalkView(walk.id, walk.occurredEpochDay, "House ${house.code}", walk.findings, walk.mixedSpecies)
                 },
+                placementCount = placementCountsByHouse[house.id] ?: 0,
+                walkCount = walkCountsByHouse[house.id] ?: 0,
             )
         },
         hatches = lifecycle.hatches(farmId).map { hatch ->
@@ -70,5 +85,7 @@ internal suspend fun loadPoultryRecords(database: FarmOsDatabase, farmId: String
             )
         },
         walks = walks,
+        walkCount = lifecycle.poultryWalkCount(farmId),
+        mixedSpeciesWalkCount = lifecycle.poultryMixedSpeciesWalkCount(farmId),
     )
 }

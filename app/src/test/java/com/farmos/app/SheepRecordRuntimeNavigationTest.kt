@@ -57,7 +57,9 @@ class SheepRecordRuntimeNavigationTest {
             compose.onNodeWithText("2026-09-02 · Lambing").assertExists()
         }
         traverse("Wool dashboard", "FOS-SHEEP-018") {
-            compose.onNodeWithText("7.3 kg").assertExists()
+            compose.onNodeWithText("512.3 kg").assertExists()
+            compose.onNodeWithText("Fleece · latest 2 of 140").assertExists()
+            compose.onNodeWithText("Shearing · 1").assertExists()
             compose.onNodeWithTag("sheep-wool-shearing:sh1").assertExists()
             compose.onNodeWithText("19.5 µm").assertExists()
         }
@@ -112,7 +114,10 @@ class SheepRecordRuntimeNavigationTest {
 
     private fun wool() = SheepWoolRecords(
         clips = listOf(SheepWoolRow("c1", day(9, 5), "SH-044", "4.2 kg"), SheepWoolRow("c2", day(9, 5), "Mob m1", "3.1 kg")),
-        clipGreasyGramsTotal = 7_300,
+        // The total and count are exhaustive aggregates; only the latest clips are listed.
+        clipGreasyGramsTotal = 512_300,
+        clipCount = 140,
+        shearingCount = 1,
         shearing = listOf(SheepWoolRow("sh1", day(9, 5), "Mob m1", "shearing")),
         micron = listOf(SheepWoolRow("mi1", day(9, 6), "SH-044", "19.5 µm")),
     )
