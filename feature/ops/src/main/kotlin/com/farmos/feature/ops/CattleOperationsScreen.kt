@@ -54,6 +54,10 @@ private enum class CattleOpsPage {
     LOT_PLACE,
     DAYS_ON_FEED,
     LOT_CLOSE,
+    LACTATION_HISTORY,
+    SCC_HISTORY,
+    HEALTH_SUMMARY,
+    TIMELINE,
 }
 
 @Composable
@@ -63,6 +67,8 @@ fun CattleOperationsScreen(
     error: String?,
     actions: CattleOperationsActions,
     onBack: () -> Unit,
+    loadRecords: suspend (String) -> CattleRecords = { CattleRecords() },
+    today: LocalDate = LocalDate.now(),
 ) {
     var page by remember { mutableStateOf(CattleOpsPage.HOME) }
     val home = { page = CattleOpsPage.HOME }
@@ -140,6 +146,11 @@ fun CattleOperationsScreen(
         CattleOpsPage.LOT_CLOSE -> {
             CattleLotCloseScreen(busy, error, actions.onCloseLot, home)
         }
+
+        CattleOpsPage.LACTATION_HISTORY -> CattleRecordPageHost(CattleRecordPage.LACTATION_HISTORY, selectedAnimalId, today, loadRecords, home)
+        CattleOpsPage.SCC_HISTORY -> CattleRecordPageHost(CattleRecordPage.SCC_HISTORY, selectedAnimalId, today, loadRecords, home)
+        CattleOpsPage.HEALTH_SUMMARY -> CattleRecordPageHost(CattleRecordPage.HEALTH_SUMMARY, selectedAnimalId, today, loadRecords, home)
+        CattleOpsPage.TIMELINE -> CattleRecordPageHost(CattleRecordPage.TIMELINE, selectedAnimalId, today, loadRecords, home)
     }
 }
 
@@ -170,6 +181,12 @@ private fun CattleOpsHome(
             CattleNav("SCC") { onOpen(CattleOpsPage.SCC) }
             CattleNav("Dry-off") { onOpen(CattleOpsPage.DRY_OFF) }
             CattleNav("Locomotion") { onOpen(CattleOpsPage.LOCOMOTION) }
+        }
+        FarmOperationalSection("Animal records") {
+            CattleNav("Lactation history") { onOpen(CattleOpsPage.LACTATION_HISTORY) }
+            CattleNav("SCC history") { onOpen(CattleOpsPage.SCC_HISTORY) }
+            CattleNav("Health summary") { onOpen(CattleOpsPage.HEALTH_SUMMARY) }
+            CattleNav("Timeline") { onOpen(CattleOpsPage.TIMELINE) }
         }
         FarmOperationalSection("Traceability") {
             CattleNav("Official identifier") { onOpen(CattleOpsPage.IDENTIFIER) }

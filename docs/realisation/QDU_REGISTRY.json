@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "source_fingerprint": "sha256:662105dfdb55eadaad4ea3fee34746472e01c01a6ba00796976f842421a60092",
+  "source_fingerprint": "sha256:59f40bae2b52a72c517157c6c7a66225700fc1244daa1a7134143370ab0e8aea",
   "screen_count": 545,
   "qdu_count": 545,
   "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
@@ -5293,7 +5293,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -5310,7 +5310,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-CATTLE-021",
@@ -5351,7 +5351,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -5368,7 +5368,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-CATTLE-023",
@@ -5670,7 +5670,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -5687,7 +5687,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-CATTLE-034",
@@ -5728,7 +5728,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -5745,7 +5745,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-CATTLE-036",

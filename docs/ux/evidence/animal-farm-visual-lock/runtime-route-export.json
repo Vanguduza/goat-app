@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:662105dfdb55eadaad4ea3fee34746472e01c01a6ba00796976f842421a60092",
-  "runtime_evidence_tested_commit": "1e44f2bd7b4b8119992fdc61f5be725838350b0e",
-  "runtime_evidence_run_id": 36523547727,
+  "source_fingerprint": "sha256:59f40bae2b52a72c517157c6c7a66225700fc1244daa1a7134143370ab0e8aea",
+  "runtime_evidence_tested_commit": "729d2725efbf9c2fbca3e30d6534a892485223c4",
+  "runtime_evidence_run_id": 36525625548,
   "registry_screen_count": 545,
-  "route_screen_count": 190,
-  "unresolved_screen_count": 355,
+  "route_screen_count": 194,
+  "unresolved_screen_count": 351,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -24,7 +24,9 @@
     "FOS-CATTLE-017",
     "FOS-CATTLE-018",
     "FOS-CATTLE-019",
+    "FOS-CATTLE-020",
     "FOS-CATTLE-021",
+    "FOS-CATTLE-022",
     "FOS-CATTLE-023",
     "FOS-CATTLE-024",
     "FOS-CATTLE-026",
@@ -32,7 +34,9 @@
     "FOS-CATTLE-029",
     "FOS-CATTLE-030",
     "FOS-CATTLE-032",
+    "FOS-CATTLE-033",
     "FOS-CATTLE-034",
+    "FOS-CATTLE-035",
     "FOS-FEED-001",
     "FOS-FIN-001",
     "FOS-FIN-002",
@@ -365,6 +369,17 @@
       }
     },
     {
+      "screen_id": "FOS-CATTLE-020",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-CATTLE-021",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -372,6 +387,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-CATTLE-022",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -453,6 +479,17 @@
       }
     },
     {
+      "screen_id": "FOS-CATTLE-033",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-CATTLE-034",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -460,6 +497,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-CATTLE-035",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -2607,13 +2655,9 @@
     "FOS-CATTLE-012",
     "FOS-CATTLE-014",
     "FOS-CATTLE-016",
-    "FOS-CATTLE-020",
-    "FOS-CATTLE-022",
     "FOS-CATTLE-025",
     "FOS-CATTLE-027",
     "FOS-CATTLE-031",
-    "FOS-CATTLE-033",
-    "FOS-CATTLE-035",
     "FOS-CATTLE-036",
     "FOS-FEED-002",
     "FOS-FEED-003",

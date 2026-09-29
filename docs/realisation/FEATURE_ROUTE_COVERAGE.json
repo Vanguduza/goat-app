@@ -2,11 +2,11 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:662105dfdb55eadaad4ea3fee34746472e01c01a6ba00796976f842421a60092",
+  "source_fingerprint": "sha256:59f40bae2b52a72c517157c6c7a66225700fc1244daa1a7134143370ab0e8aea",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 65,
-  "features_fully_route_bound": 16,
+  "features_fully_route_bound": 17,
   "features_without_route_evidence": 91,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
@@ -958,16 +958,15 @@
       "route_screen_ids": [
         "FOS-CATTLE-018",
         "FOS-CATTLE-019",
+        "FOS-CATTLE-020",
         "FOS-CATTLE-021",
+        "FOS-CATTLE-022",
         "FOS-CATTLE-023",
         "FOS-CATTLE-024"
       ],
-      "unresolved_screen_ids": [
-        "FOS-CATTLE-020",
-        "FOS-CATTLE-022"
-      ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -1011,12 +1010,12 @@
       "route_screen_ids": [
         "FOS-CATTLE-030",
         "FOS-CATTLE-032",
-        "FOS-CATTLE-034"
+        "FOS-CATTLE-033",
+        "FOS-CATTLE-034",
+        "FOS-CATTLE-035"
       ],
       "unresolved_screen_ids": [
-        "FOS-CATTLE-031",
-        "FOS-CATTLE-033",
-        "FOS-CATTLE-035"
+        "FOS-CATTLE-031"
       ],
       "headless_contract": null,
       "coverage_state": "PARTIAL_ROUTE_COVERAGE",
