@@ -73,7 +73,7 @@ class RabbitCaptureOwnerTest {
                 )
             }
         }
-        compose.onNode(hasClickAction() and hasText("Palpation")).performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Open Palpation")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-RABBIT-011").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-wave-selector:wave:option:wave-sept").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("rabbit-wave-selector:wave:option:wave-other").assertDoesNotExist()
