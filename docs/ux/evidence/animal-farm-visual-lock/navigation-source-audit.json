@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "db4c4ec6bcd0e0f0863eeac18ff37c9dc787b026",
+  "tested_commit": "8c62d8092ff2a9dc7f48ff2299717b59100cddf4",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 202
+    "registered_ids_mentioned_in_kotlin": 207
   },
   "top_level": {
     "farm_modules": [
@@ -278,8 +278,8 @@
         },
         {
           "value": "KINDLING",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -308,6 +308,36 @@
         },
         {
           "value": "GI_STASIS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "CAGE_OCCUPANCY",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "CAGE_DETAIL",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "KINDLING_DUE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LITTER_PROFILE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "KIT_CENSUS",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
