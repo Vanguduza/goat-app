@@ -32,3 +32,5 @@ node_modules/
 
 # Local project-truth evidence (authoritative ledger lives on project-truth-ledger)
 .project-truth/
+__pycache__/
+*.pyc

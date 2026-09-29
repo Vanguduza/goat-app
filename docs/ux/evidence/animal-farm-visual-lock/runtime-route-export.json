@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:101c71240c0849f9627725b4e2d0e0fddf59be8026b974f6b8a91ffc06851b2e",
-  "runtime_evidence_tested_commit": "273cb6fcea13c29e6ad390d6bde2dbc1261b75d6",
-  "runtime_evidence_run_id": 36169962204,
+  "source_fingerprint": "sha256:7a8fb3f0e3f1ed7aac4bb4f5aa39a02a35b39032e05fa8549930c729907398a7",
+  "runtime_evidence_tested_commit": "3d4ddfc1e1eec70d4a893e708c906ea6427b7fd0",
+  "runtime_evidence_run_id": 36513470593,
   "registry_screen_count": 545,
-  "route_screen_count": 157,
-  "unresolved_screen_count": 388,
+  "route_screen_count": 164,
+  "unresolved_screen_count": 381,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -52,11 +52,18 @@
     "FOS-GOAT-004",
     "FOS-GOAT-006",
     "FOS-GOAT-007",
+    "FOS-GOAT-009",
     "FOS-GOAT-011",
+    "FOS-GOAT-013",
+    "FOS-GOAT-014",
+    "FOS-GOAT-015",
     "FOS-GOAT-016",
     "FOS-GOAT-017",
+    "FOS-GOAT-019",
     "FOS-GOAT-020",
+    "FOS-GOAT-021",
     "FOS-GOAT-022",
+    "FOS-GOAT-024",
     "FOS-GOAT-031",
     "FOS-GOAT-032",
     "FOS-GOAT-034",
@@ -668,6 +675,17 @@
       }
     },
     {
+      "screen_id": "FOS-GOAT-009",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-GOAT-011",
       "proof_classes": [
         "RENDERED_SURFACE_OWNER",
@@ -679,6 +697,39 @@
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-013",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-014",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-015",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -705,6 +756,17 @@
       }
     },
     {
+      "screen_id": "FOS-GOAT-019",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-GOAT-020",
       "proof_classes": [
         "RENDERED_SURFACE_OWNER"
@@ -716,6 +778,17 @@
       }
     },
     {
+      "screen_id": "FOS-GOAT-021",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-GOAT-022",
       "proof_classes": [
         "RENDERED_SURFACE_OWNER"
@@ -723,6 +796,17 @@
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
           "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-024",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -2231,17 +2315,10 @@
     "FOS-GLOBAL-019",
     "FOS-GOAT-005",
     "FOS-GOAT-008",
-    "FOS-GOAT-009",
     "FOS-GOAT-010",
     "FOS-GOAT-012",
-    "FOS-GOAT-013",
-    "FOS-GOAT-014",
-    "FOS-GOAT-015",
     "FOS-GOAT-018",
-    "FOS-GOAT-019",
-    "FOS-GOAT-021",
     "FOS-GOAT-023",
-    "FOS-GOAT-024",
     "FOS-GOAT-025",
     "FOS-GOAT-026",
     "FOS-GOAT-027",
