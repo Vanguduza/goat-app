@@ -16,9 +16,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.design.FarmVisualClass
 import java.time.LocalDate
 import java.time.ZoneId
@@ -73,6 +75,8 @@ fun HealthObservationScreen(
     readModel: HealthReadModel = HealthReadModel(),
     today: LocalDate = LocalDate.now(),
     zone: ZoneId = ZoneId.systemDefault(),
+    /** Vet-approved formulary items; a treatment references one of these, never a typed product. */
+    formularyOptions: List<FarmSelectorOption> = emptyList(),
 ) {
     var page by remember { mutableStateOf(entryPage.toHealthPage()) }
     var backStack by remember { mutableStateOf(emptyList<HealthPage>()) }
@@ -132,7 +136,7 @@ fun HealthObservationScreen(
         }
 
         HealthPage.TREATMENT -> {
-            TreatmentScreen(formulary, treatments, busy, error, onRecordTreatment, treatmentBack)
+            TreatmentScreen(formulary, formularyOptions, treatments, busy, error, onRecordTreatment, treatmentBack)
         }
 
         HealthPage.WITHDRAWALS -> {
@@ -353,6 +357,7 @@ private fun FormularyScreen(
 @Composable
 private fun TreatmentScreen(
     formulary: List<String>,
+    formularyOptions: List<FarmSelectorOption>,
     treatments: List<String>,
     busy: Boolean,
     error: String?,
@@ -374,9 +379,15 @@ private fun TreatmentScreen(
             OutlinedTextField(species, {
                 species = it
             }, label = { Text("Species") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-            OutlinedTextField(formularyId, {
-                formularyId = it
-            }, label = { Text("Formulary item id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FarmEntitySelector(
+                atomTag = HEALTH_FORMULARY_SELECTOR,
+                title = "Vet-approved formulary item",
+                options = formularyOptions,
+                selectedId = formularyId.ifBlank { null },
+                onSelect = { formularyId = it },
+                emptyText = "No approved formulary items",
+                enabled = !busy,
+            )
             OutlinedTextField(reason, { reason = it }, label = { Text("Reason") }, modifier = Modifier.fillMaxWidth(), enabled = !busy)
             Button(onClick = {
                 onRecord(species, formularyId, reason)
@@ -616,3 +627,5 @@ private fun LabResultScreen(
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }
+
+private const val HEALTH_FORMULARY_SELECTOR = "health-formulary-selector"

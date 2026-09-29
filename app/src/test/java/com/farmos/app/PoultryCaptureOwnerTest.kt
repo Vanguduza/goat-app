@@ -15,6 +15,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.AnimalGroupEntity
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.FormularyItemEntity
+import com.farmos.core.database.PoultryHouseEntity
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.core.model.LocalCommandContext
@@ -31,9 +33,10 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * The real poultry owner on an in-memory farm database: the daily flock record (FOS-POULTRY-009)
- * takes its flock from the group selector atom, which lists only this farm's poultry groups, the
- * only groups the flock-day command accepts.
+ * The real poultry owner on an in-memory farm database. Placement, the daily flock record and
+ * vaccination take their flock from the group selector atom (this farm's poultry groups only),
+ * placement takes its house from the location selector, and vaccination offers only vet-approved
+ * poultry formulary items, mirroring what each command accepts server-side.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -53,6 +56,11 @@ class PoultryCaptureOwnerTest {
             database.groups().insert(AnimalGroupEntity("grp-layers", farm, "poultry", "Layer flock A", 400))
             database.groups().insert(AnimalGroupEntity("grp-ewes", farm, "sheep", "Ewe flock", 120))
             database.groups().insert(AnimalGroupEntity("grp-other", otherFarm, "poultry", "Other farm layers", 300))
+            database.lifecycle().insertHouse(PoultryHouseEntity("house-a", farm, "LH-1", "layer", "chicken"))
+            database.lifecycle().insertHouse(PoultryHouseEntity("house-other", otherFarm, "LH-9", "layer", "chicken"))
+            database.formulary().insert(FormularyItemEntity("form-nd", farm, "ND vaccine", "poultry", "vaccine", null, null, 0, true))
+            database.formulary().insert(FormularyItemEntity("form-goat", farm, "Goat vaccine", "goat", "vaccine", 0, 0, null, true))
+            database.formulary().insert(FormularyItemEntity("form-draft", farm, "Unapproved vaccine", "poultry", "vaccine", null, null, 0, false))
         }
     }
 
@@ -82,6 +90,50 @@ class PoultryCaptureOwnerTest {
         assertEquals("grp-layers", day.groupId)
         assertEquals(312, day.eggs)
         assertEquals(2, day.dead)
+        compose.waitUntil(10_000) { syncRequests == 1 }
+    }
+
+    @Test
+    fun placementTakesItsFlockAndHouseFromThisFarmsSelectors() {
+        var syncRequests = 0
+        render { syncRequests++ }
+        compose.onNode(hasClickAction() and hasText("Open Place flock")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-POULTRY-008").assertExists()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-007:option:house-a").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-007:option:house-other").assertDoesNotExist()
+
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-007:option:house-a").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction() and hasText("Head count")).performScrollTo().performTextReplacement("400")
+        compose.onNode(hasClickAction() and hasText("Place flock")).performScrollTo().performClick()
+
+        compose.waitUntil(10_000) { runBlocking { database.lifecycle().placements(farm) }.isNotEmpty() }
+        val placement = runBlocking { database.lifecycle().placements(farm) }.single()
+        assertEquals("grp-layers", placement.groupId)
+        assertEquals("house-a", placement.houseId)
+        assertEquals(400, placement.headCount)
+        compose.waitUntil(10_000) { syncRequests == 1 }
+    }
+
+    @Test
+    fun vaccinationOffersOnlyVetApprovedPoultryFormularyItems() {
+        var syncRequests = 0
+        render { syncRequests++ }
+        compose.onNode(hasClickAction() and hasText("Open Vaccination")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-POULTRY-014").assertExists()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("poultry-formulary-selector:option:form-nd").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("poultry-formulary-selector:option:form-goat").assertDoesNotExist()
+        compose.onNodeWithTag("poultry-formulary-selector:option:form-draft").assertDoesNotExist()
+
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").performScrollTo().performClick()
+        compose.onNodeWithTag("poultry-formulary-selector:option:form-nd").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction() and hasText("Vaccination date")).performScrollTo().performTextReplacement("2026-09-20")
+        compose.onNode(hasClickAction() and hasText("Record vaccination")).performScrollTo().performClick()
+
+        compose.waitUntil(10_000) { runBlocking { database.lifecycle().vaccinations(farm) }.isNotEmpty() }
+        val vaccination = runBlocking { database.lifecycle().vaccinations(farm) }.single()
+        assertEquals("grp-layers", vaccination.groupId)
+        assertEquals("form-nd", vaccination.formularyItemId)
         compose.waitUntil(10_000) { syncRequests == 1 }
     }
 
