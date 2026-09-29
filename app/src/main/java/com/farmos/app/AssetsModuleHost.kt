@@ -9,6 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.farmos.core.design.FarmEntitySelector
+import com.farmos.core.design.FarmSelectionAtoms
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreateFarmAsset
@@ -35,9 +38,12 @@ fun AssetsModuleHost(
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var records by remember(farmId) { mutableStateOf(AssetRecords()) }
+    var assetOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
 
     suspend fun refresh() {
-        rows = ops.assets().map { "${it.id} ${it.code} · ${it.name}" }
+        val assets = ops.assets()
+        rows = assets.map { "${it.id} ${it.code} · ${it.name}" }
+        assetOptions = assets.map { FarmSelectorOption(it.id, "${it.code} · ${it.name}", it.kind) }
         records = loadRecords()
     }
 
@@ -79,7 +85,7 @@ fun AssetsModuleHost(
         onBack = onBack,
         extra = {
             recordActions()
-            androidx.compose.material3.OutlinedTextField(assetId.value, { assetId.value = it }, label = { androidx.compose.material3.Text("Asset id") }, modifier = Modifier.fillMaxWidth())
+            FarmEntitySelector(FarmSelectionAtoms.ASSET_SELECTOR, "Asset", assetOptions, assetId.value.ifBlank { null }, { assetId.value = it }, "Create an asset first.", enabled = !busy)
             androidx.compose.material3.OutlinedTextField(title.value, { title.value = it }, label = { androidx.compose.material3.Text("Maintenance title") }, modifier = Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(day.value, { day.value = it }, label = { androidx.compose.material3.Text("Date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth())
             androidx.compose.material3.Button(

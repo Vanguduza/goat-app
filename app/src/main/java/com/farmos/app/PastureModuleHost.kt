@@ -3,12 +3,15 @@ package com.farmos.app
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.farmos.core.design.FarmEntitySelector
+import com.farmos.core.design.FarmSelectionAtoms
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreatePaddock
@@ -37,9 +40,14 @@ fun PastureModuleHost(
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var records by remember(farmId) { mutableStateOf(PastureRecords()) }
+    var paddockOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
+    var groupOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
 
     suspend fun refresh() {
-        paddockRows = ops.paddocks().map { "${it.id} ${it.code} · ${it.displayName} · ${it.waterSource}" }
+        val paddocks = ops.paddocks()
+        paddockRows = paddocks.map { "${it.id} ${it.code} · ${it.displayName} · ${it.waterSource}" }
+        paddockOptions = paddocks.map { FarmSelectorOption(it.id, "${it.code} · ${it.displayName}", "Water ${it.waterSource}") }
+        groupOptions = ops.groups().map { FarmSelectorOption(it.id, it.name, "${it.speciesCode} · ${it.headCount} head recorded") }
         grazingRows = ops.openGrazing().map { "${it.id} paddock ${it.paddockId} · group ${it.groupId}" }
         records = loadRecords()
     }
@@ -90,8 +98,8 @@ fun PastureModuleHost(
         onBack = onBack,
         extra = {
             recordActions()
-            androidx.compose.material3.OutlinedTextField(paddockId.value, { paddockId.value = it }, label = { androidx.compose.material3.Text("Paddock id") }, modifier = Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(groupId.value, { groupId.value = it }, label = { androidx.compose.material3.Text("Group id") }, modifier = Modifier.fillMaxWidth())
+            FarmEntitySelector(FarmSelectionAtoms.LOCATION_SELECTOR, "Paddock", paddockOptions, paddockId.value.ifBlank { null }, { paddockId.value = it }, "Create a paddock first.", enabled = !busy)
+            FarmEntitySelector(FarmSelectionAtoms.GROUP_SELECTOR, "Group", groupOptions, groupId.value.ifBlank { null }, { groupId.value = it }, "Create a group in Groups first.", enabled = !busy)
             androidx.compose.material3.OutlinedTextField(heads.value, { heads.value = it }, label = { androidx.compose.material3.Text("Head count") }, modifier = Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(entered.value, { entered.value = it }, label = { androidx.compose.material3.Text("Enter date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth())
             androidx.compose.material3.Button(

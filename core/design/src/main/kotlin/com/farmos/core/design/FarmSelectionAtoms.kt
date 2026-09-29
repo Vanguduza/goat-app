@@ -22,6 +22,9 @@ data class FarmSelectorOption(val id: String, val label: String, val detail: Str
 object FarmSelectionAtoms {
     const val INVENTORY_ITEM_SELECTOR = "farm-atom:FOS-ATOM-009"
     const val SUPPLIER_SELECTOR = "farm-atom:FOS-ATOM-011"
+    const val GROUP_SELECTOR = "farm-atom:FOS-ATOM-005"
+    const val LOCATION_SELECTOR = "farm-atom:FOS-ATOM-007"
+    const val ASSET_SELECTOR = "farm-atom:FOS-ATOM-014"
 }
 
 /**
