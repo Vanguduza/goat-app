@@ -30,6 +30,7 @@ RENDERED_TRAVERSAL_TESTS = (
     "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt",
     "app/src/test/java/com/farmos/app/RabbitRecordRuntimeNavigationTest.kt",
     "app/src/test/java/com/farmos/app/ProcurementRecordRuntimeNavigationTest.kt",
+    "app/src/test/java/com/farmos/app/AssetRecordRuntimeNavigationTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHealthRuntimeNavigationTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt",

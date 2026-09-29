@@ -242,9 +242,23 @@ interface MaintenanceDao {
     @Upsert
     suspend fun upsertFromServer(event: MaintenanceEventEntity)
 
-    @Query("SELECT * FROM maintenance_events WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
+    @Query("SELECT * FROM maintenance_events WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<MaintenanceEventEntity>
+
+    @Query("SELECT COUNT(*) FROM maintenance_events WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    @Query(
+        """
+        SELECT assetId, COUNT(*) AS serviceCount, MAX(occurredEpochDay) AS latestEpochDay
+        FROM maintenance_events WHERE farmId = :farmId GROUP BY assetId ORDER BY assetId
+        """,
+    )
+    suspend fun summaryByAsset(farmId: String): List<AssetServiceSummary>
 }
+
+/** Exhaustive per-asset maintenance aggregate; not bounded by any presentation row limit. */
+data class AssetServiceSummary(val assetId: String, val serviceCount: Int, val latestEpochDay: Long)
 
 @Dao
 interface FeedIssueDao {

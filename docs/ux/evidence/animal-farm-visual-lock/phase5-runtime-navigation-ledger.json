@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "e4d6f32e0147a9e8f5df8f56bc2b1181c95b20dd",
-  "source_fingerprint": "sha256:9ed0df5633d376699ab54d8cf7fa5f7c25e75afd80fca605f9c19233b91a9603",
+  "tested_commit": "1d50da9906d0d811029ff98d2d7686ae1fea7cbb",
+  "source_fingerprint": "sha256:88bd5a35b670d19497156120434398286b99ac0835c5bcd5902310664bfa74d1",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36537151332,
+  "foundation_run_id": 36540394173,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -214,6 +214,11 @@
         "FOS-PROC-003",
         "FOS-PROC-005",
         "FOS-PROC-009"
+      ],
+      "app/src/test/java/com/farmos/app/AssetRecordRuntimeNavigationTest.kt": [
+        "FOS-ASSET-002",
+        "FOS-ASSET-003",
+        "FOS-ASSET-009"
       ]
     },
     "rendered_surface_owner": {
@@ -330,10 +335,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 25,
-    "rendered_traversal_screen_count": 146,
+    "rendered_traversal_screen_count": 149,
     "rendered_owner_screen_count": 31,
     "route_contract_screen_count": 59,
-    "combined_screen_count": 211,
+    "combined_screen_count": 214,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -362,6 +367,9 @@
       "FOS-WATER-001"
     ],
     "rendered_traversal_screen_ids": [
+      "FOS-ASSET-002",
+      "FOS-ASSET-003",
+      "FOS-ASSET-009",
       "FOS-CATTLE-002",
       "FOS-CATTLE-003",
       "FOS-CATTLE-004",
@@ -625,12 +633,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 146,
+    "runtime_reachability_executed": 149,
     "entry_action_emission_executed": 25,
     "rendered_surface_owners_executed": 31,
     "route_contracts_executed": 59,
     "parameter_scope_executed": true,
-    "return_restoration_executed": 146,
+    "return_restoration_executed": 149,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {

@@ -2,15 +2,18 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:9ed0df5633d376699ab54d8cf7fa5f7c25e75afd80fca605f9c19233b91a9603",
-  "runtime_evidence_tested_commit": "e4d6f32e0147a9e8f5df8f56bc2b1181c95b20dd",
-  "runtime_evidence_run_id": 36537151332,
+  "source_fingerprint": "sha256:88bd5a35b670d19497156120434398286b99ac0835c5bcd5902310664bfa74d1",
+  "runtime_evidence_tested_commit": "1d50da9906d0d811029ff98d2d7686ae1fea7cbb",
+  "runtime_evidence_run_id": 36540394173,
   "registry_screen_count": 545,
-  "route_screen_count": 211,
-  "unresolved_screen_count": 334,
+  "route_screen_count": 214,
+  "unresolved_screen_count": 331,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
+    "FOS-ASSET-002",
+    "FOS-ASSET-003",
+    "FOS-ASSET-009",
     "FOS-CATTLE-001",
     "FOS-CATTLE-002",
     "FOS-CATTLE-003",
@@ -235,6 +238,39 @@
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ASSET-002",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/AssetRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ASSET-003",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/AssetRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ASSET-009",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/AssetRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -2797,14 +2833,11 @@
     "FOS-AN-012",
     "FOS-AN-013",
     "FOS-AN-014",
-    "FOS-ASSET-002",
-    "FOS-ASSET-003",
     "FOS-ASSET-004",
     "FOS-ASSET-005",
     "FOS-ASSET-006",
     "FOS-ASSET-007",
     "FOS-ASSET-008",
-    "FOS-ASSET-009",
     "FOS-ASSET-010",
     "FOS-ASSET-011",
     "FOS-ASSET-012",

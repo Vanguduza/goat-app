@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:9ed0df5633d376699ab54d8cf7fa5f7c25e75afd80fca605f9c19233b91a9603",
+  "source_fingerprint": "sha256:88bd5a35b670d19497156120434398286b99ac0835c5bcd5902310664bfa74d1",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 67,
+  "features_with_route_evidence": 68,
   "features_fully_route_bound": 22,
-  "features_without_route_evidence": 89,
+  "features_without_route_evidence": 88,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -1975,11 +1975,11 @@
         "FOS-ASSET-004"
       ],
       "route_screen_ids": [
-        "FOS-ASSET-001"
+        "FOS-ASSET-001",
+        "FOS-ASSET-002",
+        "FOS-ASSET-003"
       ],
       "unresolved_screen_ids": [
-        "FOS-ASSET-002",
-        "FOS-ASSET-003",
         "FOS-ASSET-004"
       ],
       "headless_contract": null,
@@ -1998,16 +1998,17 @@
         "FOS-ASSET-008",
         "FOS-ASSET-009"
       ],
-      "route_screen_ids": [],
+      "route_screen_ids": [
+        "FOS-ASSET-009"
+      ],
       "unresolved_screen_ids": [
         "FOS-ASSET-005",
         "FOS-ASSET-006",
         "FOS-ASSET-007",
-        "FOS-ASSET-008",
-        "FOS-ASSET-009"
+        "FOS-ASSET-008"
       ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {

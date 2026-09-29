@@ -180,6 +180,7 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadRecords = { loadAssetRecords(app.database, membership.farmId) },
             )
             FarmModule.RABBIT -> RabbitModuleHost(
                 farmId = membership.farmId,
