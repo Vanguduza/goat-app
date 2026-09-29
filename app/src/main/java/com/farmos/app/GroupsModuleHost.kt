@@ -9,9 +9,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.farmos.core.design.FarmEntitySelector
+import com.farmos.core.design.FarmSelectionAtoms
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreateAnimalGroup
+import com.farmos.domain.ops.FarmSpeciesCodes
 import com.farmos.domain.ops.RecordGroupCensus
 import com.farmos.feature.ops.GroupRecordNavigator
 import com.farmos.feature.ops.GroupRecords
@@ -37,9 +41,12 @@ fun GroupsModuleHost(
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var groupViews by remember(farmId) { mutableStateOf(emptyList<GroupView>()) }
+    var groupOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
 
     suspend fun refresh() {
-        rows = ops.groups().map { "${it.id} ${it.name} · ${it.speciesCode} · ${it.headCount}" }
+        val groups = ops.groups()
+        rows = groups.map { "${it.id} ${it.name} · ${it.speciesCode} · ${it.headCount}" }
+        groupOptions = groups.map { FarmSelectorOption(it.id, it.name, "${it.speciesCode} · ${it.headCount} head recorded") }
         groupViews = loadGroups()
     }
 
@@ -72,7 +79,7 @@ fun GroupsModuleHost(
         rows = rows,
         busy = busy,
         error = error,
-        fields = listOf("Species" to species, "Name" to name, "Head count" to heads),
+        fields = listOf("Name" to name, "Head count" to heads),
         actionLabel = "Create group",
         onSubmit = {
             run {
@@ -84,13 +91,17 @@ fun GroupsModuleHost(
         },
         onBack = onBack,
         extra = {
-            recordActions()
-            androidx.compose.material3.OutlinedTextField(
-                groupId.value,
-                { groupId.value = it },
-                label = { androidx.compose.material3.Text("Group id") },
-                modifier = Modifier.fillMaxWidth(),
+            FarmEntitySelector(
+                FarmSelectionAtoms.SPECIES_SELECTOR,
+                "Species",
+                FarmSpeciesCodes.ALL.map { code -> FarmSelectorOption(code, code.replaceFirstChar { it.uppercase() }) },
+                species.value,
+                { species.value = it },
+                "No species available.",
+                enabled = !busy,
             )
+            recordActions()
+            FarmEntitySelector(FarmSelectionAtoms.GROUP_SELECTOR, "Census group", groupOptions, groupId.value.ifBlank { null }, { groupId.value = it }, "Create a group first.", enabled = !busy)
             androidx.compose.material3.OutlinedTextField(
                 day.value,
                 { day.value = it },

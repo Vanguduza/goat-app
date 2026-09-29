@@ -233,4 +233,12 @@ class OpsValidatorTest {
         assertNotNull(OpsValidator.census(RecordGroupCensus("c1", "g1", -1, 1)))
         assertNull(OpsValidator.census(RecordGroupCensus("c1", "g1", 8, 1)))
     }
+
+    @Test
+    fun `group species must be one the server accepts`() {
+        assertNull(OpsValidator.group(CreateAnimalGroup("g1", "sheep", "Ewe flock", 120)))
+        assertEquals("Group needs a species, name, and head count", OpsValidator.group(CreateAnimalGroup("g1", "Goats", "Herd", 12)))
+        assertEquals("Group needs a species, name, and head count", OpsValidator.group(CreateAnimalGroup("g1", "", "Herd", 12)))
+        assertEquals(listOf("goat", "sheep", "cattle", "rabbit", "poultry"), FarmSpeciesCodes.ALL)
+    }
 }

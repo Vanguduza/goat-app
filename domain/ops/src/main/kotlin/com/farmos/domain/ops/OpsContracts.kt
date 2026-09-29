@@ -650,6 +650,11 @@ data class MoveInventory(
     val occurredAtEpochMillis: Long,
 )
 
+/** The species codes the server accepts for farm groups (create_group check); no others are valid. */
+object FarmSpeciesCodes {
+    val ALL: List<String> = listOf("goat", "sheep", "cattle", "rabbit", "poultry")
+}
+
 object OpsValidator {
     fun task(command: CreateFarmTask): String? =
         if (command.title.isBlank() || command.taskCode.isBlank()) "Task title and code are required" else null
@@ -670,7 +675,11 @@ object OpsValidator {
         if (command.sku.isBlank() || command.name.isBlank()) "Inventory sku and name are required" else null
 
     fun group(command: CreateAnimalGroup): String? =
-        if (command.name.isBlank() || command.headCount <= 0) "Group needs a species, name, and head count" else null
+        if (command.name.isBlank() || command.headCount <= 0 || command.speciesCode !in FarmSpeciesCodes.ALL) {
+            "Group needs a species, name, and head count"
+        } else {
+            null
+        }
 
     fun paddock(command: CreatePaddock): String? =
         if (command.code.isBlank()) "Paddock needs a code and a water source" else null

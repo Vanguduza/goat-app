@@ -34,8 +34,9 @@ import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.AnimalFarmWarningSurface
 import com.farmos.core.design.FarmErrorRecovery
-import com.farmos.core.design.FarmLoadingSkeleton
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.FarmLoadingSkeleton
+import com.farmos.core.design.FarmPermissionExplanation
 import com.farmos.core.model.SyncState
 import java.time.Instant
 import java.time.ZoneId
@@ -238,7 +239,10 @@ internal fun SyncQueueScreen(
             if (state != SyncQueueUiState.Denied) SyncQueueSwitcher(view, onSelectView)
             when (state) {
                 SyncQueueUiState.Loading -> FarmLoadingSkeleton("Loading sync queue")
-                SyncQueueUiState.Denied -> AnimalFarmEmptyState("Sync queues are not available for your farm role.")
+                SyncQueueUiState.Denied -> FarmPermissionExplanation(
+                    "Sync queues are not available for your farm role.",
+                    "Sync queues show changes saved on this device and are limited to farm roles that record farm work.",
+                )
                 is SyncQueueUiState.Failed -> FarmErrorRecovery(state.message, onRetry)
                 is SyncQueueUiState.Loaded -> SyncQueueContent(view, state.rows, state.total, onTrace)
             }
