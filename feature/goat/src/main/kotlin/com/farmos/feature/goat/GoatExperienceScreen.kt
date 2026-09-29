@@ -126,7 +126,7 @@ internal fun GoatExperienceScreen(
             if (initialPage == GoatPage.SYNC) onBackToFarm() else page = GoatPage.DASHBOARD
         }
         GoatPage.STATUS_CHANGE -> GoatStatusChangeScreen(state, actions.onSetStatus) { page = GoatPage.PROFILE }
-        in goatHistoryPages -> GoatHistoryPage(page, state.selected) { page = GoatPage.PROFILE }
+        in goatHistoryPages -> GoatHistoryPage(page, state.selected, today, onOpen = { page = it }) { page = GoatPage.PROFILE }
         else -> error("Unhandled goat page $page")
     }
 }

@@ -50,10 +50,19 @@ internal val goatHistoryPages = setOf(
     GoatPage.LACTATION_HISTORY,
     GoatPage.SCC_HISTORY,
     GoatPage.FAMACHA_HISTORY,
+    GoatPage.HEALTH_SUMMARY,
+    GoatPage.TREATMENT_HISTORY,
+    GoatPage.WITHDRAWAL_STATUS,
 )
 
 @Composable
-internal fun GoatHistoryPage(page: GoatPage, goat: GoatSnapshot?, onBack: () -> Unit) {
+internal fun GoatHistoryPage(
+    page: GoatPage,
+    goat: GoatSnapshot?,
+    today: LocalDate,
+    onOpen: (GoatPage) -> Unit,
+    onBack: () -> Unit,
+) {
     when (page) {
         GoatPage.TIMELINE -> GoatTimelineScreen(goat, onBack)
         GoatPage.GROWTH_HISTORY -> GoatGrowthHistoryScreen(goat, onBack)
@@ -62,6 +71,9 @@ internal fun GoatHistoryPage(page: GoatPage, goat: GoatSnapshot?, onBack: () -> 
         GoatPage.LACTATION_HISTORY -> GoatLactationHistoryScreen(goat, onBack)
         GoatPage.SCC_HISTORY -> GoatSccHistoryScreen(goat, onBack)
         GoatPage.FAMACHA_HISTORY -> GoatFamachaHistoryScreen(goat, onBack)
+        GoatPage.HEALTH_SUMMARY -> GoatHealthSummaryScreen(goat, today, onOpen, onBack)
+        GoatPage.TREATMENT_HISTORY -> GoatTreatmentHistoryScreen(goat, onBack)
+        GoatPage.WITHDRAWAL_STATUS -> GoatWithdrawalStatusScreen(goat, today, onBack)
         else -> error("$page is not a goat history page")
     }
 }
@@ -77,6 +89,9 @@ internal fun GoatRecordLinks(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
             add("Growth chart" to GoatPage.GROWTH_CHART)
             add("Average daily gain" to GoatPage.ADG_DETAIL)
             add("FAMACHA history" to GoatPage.FAMACHA_HISTORY)
+            add("Health summary" to GoatPage.HEALTH_SUMMARY)
+            add("Treatment history" to GoatPage.TREATMENT_HISTORY)
+            add("Withdrawal status" to GoatPage.WITHDRAWAL_STATUS)
             if (goat.sex == GoatSex.FEMALE) add("Milk history" to GoatPage.LACTATION_HISTORY)
             if (goat.sex == GoatSex.FEMALE) add("SCC history" to GoatPage.SCC_HISTORY)
         }
@@ -90,7 +105,7 @@ internal fun GoatRecordLinks(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
 }
 
 @Composable
-private fun GoatHistoryFrame(
+internal fun GoatHistoryFrame(
     title: String,
     screenId: String,
     goat: GoatSnapshot?,
@@ -115,7 +130,7 @@ private fun GoatHistoryFrame(
 }
 
 @Composable
-private fun GoatHistoryRow(primary: String, secondary: String, modifier: Modifier = Modifier) {
+internal fun GoatHistoryRow(primary: String, secondary: String, modifier: Modifier = Modifier) {
     Row(
         modifier.fillMaxWidth().padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,

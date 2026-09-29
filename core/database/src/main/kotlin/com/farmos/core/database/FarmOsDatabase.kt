@@ -550,6 +550,9 @@ interface HealthObservationDao {
 
     @Query("SELECT * FROM health_observations WHERE farmId = :farmId ORDER BY occurredAtEpochMillis DESC LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<HealthObservationEntity>
+
+    @Query("SELECT * FROM health_observations WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredAtEpochMillis DESC, id")
+    suspend fun forAnimal(farmId: String, animalId: String): List<HealthObservationEntity>
 }
 
 @Dao
