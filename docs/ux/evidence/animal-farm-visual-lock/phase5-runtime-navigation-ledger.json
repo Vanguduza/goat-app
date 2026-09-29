@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "ac3de4786a93c18c2ffb72e7566c1a5776af497f",
-  "source_fingerprint": "sha256:214a61adcaf1f4c9cbdb89252a34e4d34d3032b1d74a41b01bf550a4a153d5bd",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36520016524,
+  "tested_commit": "c4fdf4a616bebf14d0291e4e1c9b89399247154c",
+  "source_fingerprint": "sha256:23ed083b552408ac66d7fa658249401a80efcd26cf26db928afcffbf088d06d1",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -166,6 +166,14 @@
         "FOS-GOAT-038",
         "FOS-GOAT-040",
         "FOS-GOAT-041"
+      ],
+      "app/src/test/java/com/farmos/app/InventoryRecordRuntimeNavigationTest.kt": [
+        "FOS-INV-003",
+        "FOS-INV-009",
+        "FOS-INV-010",
+        "FOS-INV-011",
+        "FOS-INV-014",
+        "FOS-INV-017"
       ]
     },
     "rendered_surface_owner": {
@@ -282,10 +290,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 25,
-    "rendered_traversal_screen_count": 112,
+    "rendered_traversal_screen_count": 118,
     "rendered_owner_screen_count": 31,
     "route_contract_screen_count": 59,
-    "combined_screen_count": 177,
+    "combined_screen_count": 183,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -373,13 +381,19 @@
       "FOS-HOME-011",
       "FOS-HOME-012-A",
       "FOS-INV-002",
+      "FOS-INV-003",
       "FOS-INV-004",
       "FOS-INV-005",
       "FOS-INV-006",
       "FOS-INV-007",
       "FOS-INV-008",
+      "FOS-INV-009",
+      "FOS-INV-010",
+      "FOS-INV-011",
       "FOS-INV-012",
       "FOS-INV-013",
+      "FOS-INV-014",
+      "FOS-INV-017",
       "FOS-POULTRY-002",
       "FOS-POULTRY-004",
       "FOS-POULTRY-006",
@@ -543,12 +557,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 112,
-    "entry_action_emission_executed": 25,
-    "rendered_surface_owners_executed": 31,
-    "route_contracts_executed": 59,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 112,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {

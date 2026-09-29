@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "ac3de4786a93c18c2ffb72e7566c1a5776af497f",
+  "tested_commit": "c4fdf4a616bebf14d0291e4e1c9b89399247154c",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 177
+    "registered_ids_mentioned_in_kotlin": 183
   },
   "top_level": {
     "farm_modules": [
@@ -374,8 +374,8 @@
       "states": [
         {
           "value": "DASHBOARD",
-          "refs": 3,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -422,6 +422,42 @@
         },
         {
           "value": "REORDER_ALERT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "ITEM_DETAIL",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LOT_DETAIL",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "EXPIRY_QUEUE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LOW_STOCK",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "MOVEMENTS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SEARCH",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
