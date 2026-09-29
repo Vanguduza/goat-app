@@ -226,6 +226,7 @@ fun FarmSessionContent(
             )
             FarmModule.SALES -> SalesModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
+                loadRecords = { loadSalesRecords(app.database, membership.farmId) },
             )
             FarmModule.PROCUREMENT -> ProcurementModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,

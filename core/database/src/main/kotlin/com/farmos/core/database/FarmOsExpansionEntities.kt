@@ -292,9 +292,23 @@ interface SaleDao {
     @Upsert
     suspend fun upsertFromServer(record: SaleRecordEntity)
 
-    @Query("SELECT * FROM sales_records WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
+    @Query("SELECT * FROM sales_records WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<SaleRecordEntity>
+
+    @Query("SELECT COUNT(*) FROM sales_records WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    @Query(
+        """
+        SELECT currency, SUM(amountMinor) AS amountMinor, COUNT(*) AS saleCount
+        FROM sales_records WHERE farmId = :farmId GROUP BY currency ORDER BY currency
+        """,
+    )
+    suspend fun totalsByCurrency(farmId: String): List<SaleCurrencyTotal>
 }
+
+/** Exhaustive per-currency sales aggregate; currencies are never summed together. */
+data class SaleCurrencyTotal(val currency: String, val amountMinor: Long, val saleCount: Int)
 
 @Dao
 interface FormularyDao {
