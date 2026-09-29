@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -40,9 +41,12 @@ data class TaskUiRow(
     val status: String,
 )
 
-private enum class TaskTab { TODAY, SCHEDULED, OVERDUE, COMPLETED }
+private enum class TaskTab { TODAY, SCHEDULED, OVERDUE, COMPLETED, ALL }
 
-/** FOS-TASK-001 / 002 / 003 / 004 — shared Farm OS task reference family. */
+/**
+ * FOS-TASK-001 / 002 / 003 / 004 — shared Farm OS task reference family. [rows] hold every open
+ * task and may hold only the latest completed ones; [completedCount] is the exhaustive count.
+ */
 @Composable
 fun TasksBoardScreen(
     rows: List<TaskUiRow>,
@@ -53,6 +57,7 @@ fun TasksBoardScreen(
     onBack: () -> Unit,
     onOpenDetail: (taskId: String) -> Unit = {},
     entryPage: TaskEntryPage = TaskEntryPage.BOARD,
+    completedCount: Int? = null,
 ) {
     if (entryPage == TaskEntryPage.CREATE) {
         CreateTaskScreen(busy = busy, error = error, onCreate = onCreate, onBack = onBack)
@@ -66,7 +71,9 @@ fun TasksBoardScreen(
         TaskTab.SCHEDULED -> rows.filter { it.status == "open" && it.dueEpochDay > today }
         TaskTab.OVERDUE -> rows.filter { it.status == "open" && it.dueEpochDay < today }
         TaskTab.COMPLETED -> rows.filter { it.status == "done" }
+        TaskTab.ALL -> rows
     }
+    val completedShown = rows.count { it.status == "done" }
 
     AnimalFarmCanvas {
         Column(
@@ -78,11 +85,14 @@ fun TasksBoardScreen(
                 subtitle = "${rows.count { it.status == "open" }} open task(s)",
             )
 
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                TaskTab.entries.forEach { option ->
-                    TextButton(onClick = { tab = option }, modifier = Modifier.weight(1f)) {
-                        Text(taskTabLabel(option, selected = tab == option))
+            TaskTab.entries.chunked(3).forEach { tabs ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    tabs.forEach { option ->
+                        TextButton(onClick = { tab = option }, modifier = Modifier.weight(1f)) {
+                            Text(taskTabLabel(option, selected = tab == option))
+                        }
                     }
+                    repeat(3 - tabs.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
 
@@ -90,6 +100,13 @@ fun TasksBoardScreen(
                 Modifier.fillMaxWidth().testTag("farm-screen:${taskTabScreenId(tab)}"),
                 verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
             ) {
+                if ((tab == TaskTab.COMPLETED || tab == TaskTab.ALL) && completedCount != null && completedShown < completedCount) {
+                    Text(
+                        "Completed tasks · latest $completedShown of $completedCount",
+                        color = AnimalFarmTheme.colors.mutedInk,
+                        modifier = Modifier.testTag("task-completed-bound"),
+                    )
+                }
                 if (visible.isEmpty()) {
                     FarmIllustratedSectionSurface {
                         Text(emptyTaskMessage(tab), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
@@ -212,6 +229,7 @@ private fun taskTabScreenId(tab: TaskTab): String = when (tab) {
     TaskTab.SCHEDULED -> "FOS-TASK-007"
     TaskTab.OVERDUE -> "FOS-TASK-008"
     TaskTab.COMPLETED -> "FOS-TASK-009"
+    TaskTab.ALL -> "FOS-TASK-002"
 }
 
 private fun taskTabLabel(tab: TaskTab, selected: Boolean): String {
@@ -220,6 +238,7 @@ private fun taskTabLabel(tab: TaskTab, selected: Boolean): String {
         TaskTab.SCHEDULED -> "Scheduled"
         TaskTab.OVERDUE -> "Overdue"
         TaskTab.COMPLETED -> "Completed"
+        TaskTab.ALL -> "All"
     }
     return if (selected) "$label · selected" else label
 }
@@ -229,6 +248,7 @@ private fun emptyTaskMessage(tab: TaskTab): String = when (tab) {
     TaskTab.SCHEDULED -> "No scheduled tasks"
     TaskTab.OVERDUE -> "No overdue tasks"
     TaskTab.COMPLETED -> "No completed tasks yet"
+    TaskTab.ALL -> "No tasks on this device"
 }
 
 private fun emptyTaskHint(tab: TaskTab): String = when (tab) {
@@ -236,6 +256,7 @@ private fun emptyTaskHint(tab: TaskTab): String = when (tab) {
     TaskTab.SCHEDULED -> "Future scheduled farm work will appear here."
     TaskTab.OVERDUE -> "Open work past its due date will appear here."
     TaskTab.COMPLETED -> "Finished work remains visible for farm history."
+    TaskTab.ALL -> "Open and completed farm work will appear here."
 }
 
 /** FOS-TASK-003 — task detail. Complete is the only authorized write here. */

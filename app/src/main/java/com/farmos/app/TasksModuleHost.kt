@@ -28,9 +28,11 @@ fun TasksModuleHost(
     onBack: () -> Unit,
     focusTaskId: String? = null,
     entryPage: TaskEntryPage = TaskEntryPage.BOARD,
+    loadCompletedCount: suspend () -> Int? = { null },
 ) {
     val scope = rememberCoroutineScope()
     var rows by remember(farmId) { mutableStateOf(emptyList<TaskUiRow>()) }
+    var completedCount by remember(farmId) { mutableStateOf<Int?>(null) }
     var selectedId by remember(farmId, focusTaskId) { mutableStateOf(focusTaskId) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -49,6 +51,7 @@ fun TasksModuleHost(
                 status = task.status,
             )
         }
+        completedCount = loadCompletedCount()
     }
 
     fun runWrite(block: suspend () -> Unit) {
@@ -107,6 +110,7 @@ fun TasksModuleHost(
             runWrite { ops.completeTask(CompleteFarmTask(taskId), newContext()) }
         },
         onOpenDetail = { selectedId = it },
+        completedCount = completedCount,
         onBack = onBack,
         entryPage = entryPage,
     )
