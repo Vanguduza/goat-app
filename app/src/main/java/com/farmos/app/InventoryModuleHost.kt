@@ -15,6 +15,7 @@ import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.ReceiveInventoryLot
 import com.farmos.domain.ops.RecordReorderAlert
 import com.farmos.domain.ops.SetInventoryReorder
+import com.farmos.feature.ops.InventoryReadModel
 import com.farmos.feature.ops.InventoryScreen
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -28,9 +29,11 @@ fun InventoryModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadReadModel: suspend () -> InventoryReadModel = { InventoryReadModel() },
 ) {
     val scope = rememberCoroutineScope()
     var rows by remember(farmId) { mutableStateOf(emptyList<String>()) }
+    var readModel by remember(farmId) { mutableStateOf(InventoryReadModel()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
@@ -38,6 +41,7 @@ fun InventoryModuleHost(
         rows = ops.items().map { item ->
             "${item.id} ${item.sku} · ${item.name} · ${item.quantityMilli} ${item.unit}"
         }
+        readModel = loadReadModel()
     }
 
     fun quantityMilli(text: String): Long = BigDecimal(text.replace(',', '.'))
@@ -138,5 +142,6 @@ fun InventoryModuleHost(
             }
         },
         onBack = onBack,
+        readModel = readModel,
     )
 }

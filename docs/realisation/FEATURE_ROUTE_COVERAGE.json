@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:214a61adcaf1f4c9cbdb89252a34e4d34d3032b1d74a41b01bf550a4a153d5bd",
+  "source_fingerprint": "sha256:23ed083b552408ac66d7fa658249401a80efcd26cf26db928afcffbf088d06d1",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 64,
-  "features_fully_route_bound": 10,
-  "features_without_route_evidence": 92,
+  "features_with_route_evidence": 65,
+  "features_fully_route_bound": 13,
+  "features_without_route_evidence": 91,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -1475,14 +1475,13 @@
       "route_screen_ids": [
         "FOS-INV-001",
         "FOS-INV-002",
-        "FOS-INV-004"
-      ],
-      "unresolved_screen_ids": [
         "FOS-INV-003",
+        "FOS-INV-004",
         "FOS-INV-017"
       ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -1497,13 +1496,12 @@
       ],
       "route_screen_ids": [
         "FOS-INV-005",
-        "FOS-INV-006"
-      ],
-      "unresolved_screen_ids": [
+        "FOS-INV-006",
         "FOS-INV-009"
       ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -1518,13 +1516,12 @@
       ],
       "route_screen_ids": [
         "FOS-INV-007",
-        "FOS-INV-008"
-      ],
-      "unresolved_screen_ids": [
+        "FOS-INV-008",
         "FOS-INV-010"
       ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -1539,11 +1536,11 @@
         "FOS-INV-018"
       ],
       "route_screen_ids": [
+        "FOS-INV-011",
         "FOS-INV-012",
         "FOS-INV-013"
       ],
       "unresolved_screen_ids": [
-        "FOS-INV-011",
         "FOS-INV-018"
       ],
       "headless_contract": null,
@@ -1560,14 +1557,15 @@
         "FOS-INV-015",
         "FOS-INV-016"
       ],
-      "route_screen_ids": [],
+      "route_screen_ids": [
+        "FOS-INV-014"
+      ],
       "unresolved_screen_ids": [
-        "FOS-INV-014",
         "FOS-INV-015",
         "FOS-INV-016"
       ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {

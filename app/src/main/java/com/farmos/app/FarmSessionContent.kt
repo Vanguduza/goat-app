@@ -193,6 +193,7 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadReadModel = { loadInventoryReadModel(app.database, membership.farmId) },
             )
             FarmModule.HOME, FarmModule.GOAT, FarmModule.HEALTH -> FarmHomeHost(
                 farmName = farmName,
