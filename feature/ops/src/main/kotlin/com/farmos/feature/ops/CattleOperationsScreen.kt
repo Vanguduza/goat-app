@@ -58,6 +58,7 @@ private enum class CattleOpsPage {
     SCC_HISTORY,
     HEALTH_SUMMARY,
     TIMELINE,
+    GROWTH_HISTORY,
 }
 
 @Composable
@@ -151,6 +152,7 @@ fun CattleOperationsScreen(
         CattleOpsPage.SCC_HISTORY -> CattleRecordPageHost(CattleRecordPage.SCC_HISTORY, selectedAnimalId, today, loadRecords, home)
         CattleOpsPage.HEALTH_SUMMARY -> CattleRecordPageHost(CattleRecordPage.HEALTH_SUMMARY, selectedAnimalId, today, loadRecords, home)
         CattleOpsPage.TIMELINE -> CattleRecordPageHost(CattleRecordPage.TIMELINE, selectedAnimalId, today, loadRecords, home)
+        CattleOpsPage.GROWTH_HISTORY -> CattleRecordPageHost(CattleRecordPage.GROWTH_HISTORY, selectedAnimalId, today, loadRecords, home)
     }
 }
 
@@ -187,6 +189,7 @@ private fun CattleOpsHome(
             CattleNav("SCC history") { onOpen(CattleOpsPage.SCC_HISTORY) }
             CattleNav("Health summary") { onOpen(CattleOpsPage.HEALTH_SUMMARY) }
             CattleNav("Timeline") { onOpen(CattleOpsPage.TIMELINE) }
+            CattleNav("Growth history") { onOpen(CattleOpsPage.GROWTH_HISTORY) }
         }
         FarmOperationalSection("Traceability") {
             CattleNav("Official identifier") { onOpen(CattleOpsPage.IDENTIFIER) }

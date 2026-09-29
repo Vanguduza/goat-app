@@ -17,6 +17,7 @@ import com.farmos.feature.ops.SheepTimelineRow
 import com.farmos.feature.ops.SheepWithdrawalRow
 import com.farmos.feature.ops.SheepWoolRecords
 import com.farmos.feature.ops.SheepWoolRow
+import com.farmos.feature.ops.WeightView
 import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.Assert.assertEquals
@@ -55,6 +56,12 @@ class SheepRecordRuntimeNavigationTest {
         traverse("Timeline", "FOS-SHEEP-031") {
             compose.onNodeWithText("Events · 2").assertExists()
             compose.onNodeWithText("2026-09-02 · Lambing").assertExists()
+        }
+        traverse("Growth history", "FOS-SHEEP-007") {
+            compose.onNodeWithText("Weights · 1").assertExists()
+            compose.onNodeWithText("62.4 kg · 2026-09-12").assertExists()
+            compose.onNodeWithTag("weight-change-total").assertDoesNotExist()
+            compose.onNodeWithTag("weight-first").assertDoesNotExist()
         }
         traverse("Wool dashboard", "FOS-SHEEP-018") {
             compose.onNodeWithText("512.3 kg").assertExists()
@@ -110,6 +117,7 @@ class SheepRecordRuntimeNavigationTest {
             SheepTimelineRow("f1", day(9, 10), "Flystrike", "Score 3 · breech"),
             SheepTimelineRow("l1", day(9, 2), "Lambing", "2 born · 2 live · 0 dead"),
         ),
+        weights = listOf(WeightView("wt1", day(9, 12), 62_400, "g")),
     )
 
     private fun wool() = SheepWoolRecords(

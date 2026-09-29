@@ -18,6 +18,7 @@ import com.farmos.feature.ops.CattleRecords
 import com.farmos.feature.ops.CattleSccRow
 import com.farmos.feature.ops.CattleTimelineRow
 import com.farmos.feature.ops.CattleWithdrawalRow
+import com.farmos.feature.ops.WeightView
 import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.Assert.assertEquals
@@ -64,6 +65,12 @@ class CattleRecordRuntimeNavigationTest {
         traverse("Timeline", "FOS-CATTLE-035") {
             compose.onNodeWithText("Events · 3").assertExists()
             compose.onNodeWithText("2026-09-20 · Calving").assertExists()
+        }
+        traverse("Growth history", "FOS-CATTLE-007") {
+            compose.onNodeWithText("Weights · 3").assertExists()
+            compose.onNodeWithText("398 kg · 2026-09-20").assertExists()
+            compose.onNodeWithText("+13 kg over 50 days").assertExists()
+            compose.onNodeWithText("398 kg · -2 kg over 18 days").assertExists()
         }
     }
 
@@ -118,6 +125,11 @@ class CattleRecordRuntimeNavigationTest {
             CattleTimelineRow("m2", day(9, 21), "Milk", "29.25 L"),
             CattleTimelineRow("c1", day(9, 20), "Calving", "1 born · 1 live · 0 dead"),
             CattleTimelineRow("o1", day(9, 19), "Observation", "Red flag · Hot quarter"),
+        ),
+        weights = listOf(
+            WeightView("wt1", day(8, 1), 385_000, "g"),
+            WeightView("wt2", day(9, 2), 400_000, "g"),
+            WeightView("wt3", day(9, 20), 398_000, "g"),
         ),
     )
 

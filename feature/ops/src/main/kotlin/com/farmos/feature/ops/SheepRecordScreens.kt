@@ -40,6 +40,8 @@ data class SheepAnimalRecords(
     /** Latest flystrike as "score (region)", or null. */
     val latestFlystrike: String? = null,
     val timeline: List<SheepTimelineRow> = emptyList(),
+    /** Recorded weights, oldest first. */
+    val weights: List<WeightView> = emptyList(),
 )
 
 /** One wool record row for the farm wool dashboard; [subject] is the sheep or mob it was recorded against. */
@@ -148,6 +150,15 @@ internal fun SheepTimelineScreen(selectedId: String?, loadRecords: suspend (Stri
                 }
             }
         }
+    }
+}
+
+/** FOS-SHEEP-007 — weights recorded for the selected sheep. No growth rate or target is derived. */
+@Composable
+internal fun SheepGrowthHistoryScreen(selectedId: String?, loadRecords: suspend (String) -> SheepAnimalRecords, onBack: () -> Unit) {
+    val state = rememberSheepLoad(selectedId, requireKey = true) { loadRecords(it!!) }
+    FarmOperationalPage("FOS-SHEEP-007", "Growth history", "Weights recorded for the selected sheep. No growth rate or target is derived.", FarmVisualClass.I3, onBack) {
+        SheepLoadContent(state) { records -> WeightHistoryContent(records.weights, "No weights recorded for this sheep on this device.") }
     }
 }
 

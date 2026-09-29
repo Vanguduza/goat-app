@@ -6,6 +6,7 @@ import com.farmos.feature.ops.SheepTimelineRow
 import com.farmos.feature.ops.SheepWithdrawalRow
 import com.farmos.feature.ops.SheepWoolRecords
 import com.farmos.feature.ops.SheepWoolRow
+import com.farmos.feature.ops.WeightView
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.ZoneOffset
@@ -60,6 +61,7 @@ internal suspend fun loadSheepRecords(database: FarmOsDatabase, farmId: String, 
         latestFootrot = footrot.firstOrNull()?.score,
         latestFlystrike = flystrike.firstOrNull()?.let { "Score ${it.score}" + (it.region?.let { r -> " ($r)" } ?: "") },
         timeline = timeline,
+        weights = database.measurements().history(farmId, animalId, "weight").map { WeightView(it.id, day(it.measuredAtEpochMillis), it.valueLong, it.unit) },
     )
 }
 
