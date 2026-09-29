@@ -126,6 +126,8 @@ internal fun GoatExperienceScreen(
             if (initialPage == GoatPage.SYNC) onBackToFarm() else page = GoatPage.DASHBOARD
         }
         GoatPage.STATUS_CHANGE -> GoatStatusChangeScreen(state, actions.onSetStatus) { page = GoatPage.PROFILE }
+        in goatHistoryPages -> GoatHistoryPage(page, state.selected) { page = GoatPage.PROFILE }
+        else -> error("Unhandled goat page $page")
     }
 }
 
@@ -357,6 +359,7 @@ private fun GoatProfileScreen(
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         GoatHistoryCard(goat)
+                        GoatRecordLinks(goat, onOpen)
                     }
                 }
             } else {
@@ -364,6 +367,7 @@ private fun GoatProfileScreen(
                     GoatIdentityCard(goat)
                     GoatProfileActions(goat, onOpen)
                     GoatHistoryCard(goat)
+                    GoatRecordLinks(goat, onOpen)
                 }
             }
         }

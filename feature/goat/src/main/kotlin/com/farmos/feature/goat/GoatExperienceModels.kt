@@ -19,6 +19,13 @@ internal enum class GoatPage {
     SCAN,
     SYNC,
     STATUS_CHANGE,
+    TIMELINE,
+    GROWTH_HISTORY,
+    GROWTH_CHART,
+    ADG_DETAIL,
+    LACTATION_HISTORY,
+    SCC_HISTORY,
+    FAMACHA_HISTORY,
 }
 
 internal data class GoatExperienceActions(
