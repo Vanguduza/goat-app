@@ -1,7 +1,9 @@
 package com.farmos.feature.goat
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -10,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
@@ -107,6 +110,33 @@ class GoatReproductionRuntimeNavigationTest {
         compose.runOnIdle { assertEquals(Triple("natural", "goat-kito", "2026-09-20"), recorded.get()) }
 
         compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:no-sire").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Record mating")).performScrollTo().performClick()
+        compose.runOnIdle { assertEquals(Triple("natural", "", "2026-09-20"), recorded.get()) }
+    }
+
+    @Test
+    fun matingDateIsChosenThroughTheDatePickerAtomWithoutSubmitting() {
+        val recorded = AtomicReference<Triple<String, String, String>?>(null)
+        render(nala(), GoatPage.REPRODUCTION) { method, sire, day -> recorded.set(Triple(method, sire, day)) }
+        val field = "farm-atom:FOS-ATOM-001:mating"
+        compose.onNodeWithTag(field).assertExists()
+
+        compose.onNodeWithTag("$field:open").performScrollTo().performClick()
+        compose.onNodeWithTag("$field:calendar").assertExists()
+        compose.onNodeWithTag("$field:cancel").performClick()
+        compose.onNodeWithTag("$field:calendar").assertDoesNotExist()
+        compose.onNode(hasClickAction() and hasText("Record mating")).assertIsNotEnabled()
+
+        compose.onNodeWithTag("$field:open").performScrollTo().performClick()
+        compose.onNodeWithTag("$field:confirm").performClick()
+        compose.onNodeWithTag("$field:calendar").assertDoesNotExist()
+        compose.onNodeWithTag(field).assertTextContains(LocalDate.now().toString())
+        compose.runOnIdle { assertEquals(null, recorded.get()) }
+
+        compose.onNodeWithTag(field).performTextClearance()
+        compose.onNodeWithTag(field).performTextInput("2026-09-20")
+        compose.onNodeWithTag("$field:open").performScrollTo().performClick()
+        compose.onNodeWithTag("$field:confirm").performClick()
         compose.onNode(hasClickAction() and hasText("Record mating")).performScrollTo().performClick()
         compose.runOnIdle { assertEquals(Triple("natural", "", "2026-09-20"), recorded.get()) }
     }
