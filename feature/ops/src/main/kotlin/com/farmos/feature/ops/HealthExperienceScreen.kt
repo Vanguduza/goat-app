@@ -20,6 +20,7 @@ import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
+import com.farmos.core.design.FarmSelectionAtoms
 import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.design.FarmVisualClass
 import java.time.LocalDate
@@ -77,6 +78,8 @@ fun HealthObservationScreen(
     zone: ZoneId = ZoneId.systemDefault(),
     /** Vet-approved formulary items; a treatment references one of these, never a typed product. */
     formularyOptions: List<FarmSelectorOption> = emptyList(),
+    /** Governed farm species codes; observation and vet visit accept only these server-side. */
+    speciesCodes: List<String> = emptyList(),
 ) {
     var page by remember { mutableStateOf(entryPage.toHealthPage()) }
     var backStack by remember { mutableStateOf(emptyList<HealthPage>()) }
@@ -128,7 +131,7 @@ fun HealthObservationScreen(
         }
 
         HealthPage.RECORD_OBSERVATION -> {
-            RecordObservationScreen(busy, error, onRecord, observationBack)
+            RecordObservationScreen(speciesCodes, busy, error, onRecord, observationBack)
         }
 
         HealthPage.FORMULARY -> {
@@ -172,7 +175,7 @@ fun HealthObservationScreen(
         }
 
         HealthPage.VET_VISIT -> {
-            VetVisitScreen(busy, error, onRecordVetVisit, vetVisitBack)
+            VetVisitScreen(speciesCodes, busy, error, onRecordVetVisit, vetVisitBack)
         }
 
         HealthPage.LAB_RESULT -> {
@@ -278,19 +281,18 @@ private fun HealthRows(
 
 @Composable
 private fun RecordObservationScreen(
+    speciesCodes: List<String>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String, Boolean) -> Unit,
     onBack: () -> Unit,
 ) {
-    var species by remember { mutableStateOf("goat") }
+    var species by remember { mutableStateOf(speciesCodes.firstOrNull().orEmpty()) }
     var signs by remember { mutableStateOf("") }
     var firstAid by remember { mutableStateOf("") }
     FarmOperationalPage("FOS-HEALTH-004", "Record observation", "Record signs first; this is not a diagnosis.", onBack = onBack) {
         FarmOperationalSection("Observation") {
-            OutlinedTextField(species, {
-                species = it
-            }, label = { Text("Species") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FarmSpeciesSelector(speciesCodes, species, busy) { species = it }
             OutlinedTextField(
                 signs,
                 { signs = it },
@@ -307,10 +309,10 @@ private fun RecordObservationScreen(
             )
             Button(onClick = {
                 onRecord(species, signs, firstAid, false)
-            }, enabled = !busy && signs.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Save observation") }
+            }, enabled = !busy && species.isNotBlank() && signs.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Save observation") }
             Button(onClick = {
                 onRecord(species, signs, firstAid, true)
-            }, enabled = !busy && signs.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Save as red flag") }
+            }, enabled = !busy && species.isNotBlank() && signs.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Save as red flag") }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
@@ -531,12 +533,13 @@ private fun ApplyProtocolScreen(
 
 @Composable
 private fun VetVisitScreen(
+    speciesCodes: List<String>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var species by remember { mutableStateOf("goat") }
+    var species by remember { mutableStateOf(speciesCodes.firstOrNull().orEmpty()) }
     var reason by remember { mutableStateOf("") }
     var vet by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
@@ -548,9 +551,7 @@ private fun VetVisitScreen(
         onBack,
     ) {
         FarmOperationalSection("Visit") {
-            OutlinedTextField(species, {
-                species = it
-            }, label = { Text("Species") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FarmSpeciesSelector(speciesCodes, species, busy) { species = it }
             OutlinedTextField(reason, { reason = it }, label = { Text("Reason") }, modifier = Modifier.fillMaxWidth(), enabled = !busy)
             OutlinedTextField(vet, {
                 vet = it
@@ -566,7 +567,7 @@ private fun VetVisitScreen(
             Button(
                 onClick = { onRecord(species, reason, vet, day) },
                 enabled =
-                    !busy && reason.isNotBlank() && vet.isNotBlank() && runCatching { LocalDate.parse(day) }.isSuccess,
+                    !busy && species.isNotBlank() && reason.isNotBlank() && vet.isNotBlank() && runCatching { LocalDate.parse(day) }.isSuccess,
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Record vet visit") }
         }
@@ -629,3 +630,17 @@ private fun LabResultScreen(
 }
 
 private const val HEALTH_FORMULARY_SELECTOR = "health-formulary-selector"
+
+/** FOS-ATOM-003 over the governed farm species, so a species-checked command never carries a typo. */
+@Composable
+private fun FarmSpeciesSelector(speciesCodes: List<String>, selected: String, busy: Boolean, onSelect: (String) -> Unit) {
+    FarmEntitySelector(
+        atomTag = FarmSelectionAtoms.SPECIES_SELECTOR,
+        title = "Species",
+        options = speciesCodes.map { code -> FarmSelectorOption(code, code.replaceFirstChar { it.uppercase() }) },
+        selectedId = selected.ifBlank { null },
+        onSelect = onSelect,
+        emptyText = "No species available.",
+        enabled = !busy,
+    )
+}

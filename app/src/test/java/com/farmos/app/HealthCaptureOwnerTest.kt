@@ -1,6 +1,7 @@
 package com.farmos.app
 
 import android.content.Context
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -33,7 +34,8 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * The real health owner on an in-memory farm database: a treatment (FOS-HEALTH-007) references a
- * vet-approved formulary item chosen from this farm's approved list, never a typed product or id.
+ * vet-approved formulary item chosen from this farm's approved list, never a typed product or id,
+ * and an observation (FOS-HEALTH-004) takes a governed species from the species selector atom.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -64,18 +66,7 @@ class HealthCaptureOwnerTest {
     @Test
     fun treatmentReferencesAnApprovedFormularyItemFromTheSelector() {
         var syncRequests = 0
-        compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                HealthModuleHost(
-                    farmId = farm,
-                    ops = RoomOpsRepository(database, farm),
-                    newContext = { LocalCommandContext(farm, "user-1", "device-1", UUID.randomUUID().toString(), 1_790_000_000_000L) },
-                    enqueueSync = { syncRequests++ },
-                    onBack = {},
-                    entryPage = HealthEntryPage.TREATMENT,
-                )
-            }
-        }
+        render(HealthEntryPage.TREATMENT) { syncRequests++ }
         compose.onNodeWithTag("farm-screen:FOS-HEALTH-007").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("health-formulary-selector:option:form-ivo").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("health-formulary-selector:option:form-draft").assertDoesNotExist()
@@ -90,5 +81,35 @@ class HealthCaptureOwnerTest {
         assertEquals("form-ivo", treatment.formularyItemId)
         assertEquals(35, treatment.meatWithdrawalDays)
         compose.waitUntil(10_000) { syncRequests == 1 }
+    }
+
+    @Test
+    fun observationTakesItsSpeciesFromTheSpeciesSelector() {
+        var syncRequests = 0
+        render(HealthEntryPage.RECORD_OBSERVATION) { syncRequests++ }
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-004").assertExists()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-003:option:goat").assertIsSelected()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-003:option:cattle").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction() and hasText("Signs observed")).performScrollTo().performTextInput("Lame on left hind")
+        compose.onNode(hasClickAction() and hasText("Save observation")).performScrollTo().performClick()
+
+        compose.waitUntil(10_000) { runBlocking { database.healthObservations().recent(farm, 10) }.isNotEmpty() }
+        assertEquals("cattle", runBlocking { database.healthObservations().recent(farm, 10) }.single().speciesCode)
+        compose.waitUntil(10_000) { syncRequests == 1 }
+    }
+
+    private fun render(entryPage: HealthEntryPage, onSync: () -> Unit) {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                HealthModuleHost(
+                    farmId = farm,
+                    ops = RoomOpsRepository(database, farm),
+                    newContext = { LocalCommandContext(farm, "user-1", "device-1", UUID.randomUUID().toString(), 1_790_000_000_000L) },
+                    enqueueSync = onSync,
+                    onBack = {},
+                    entryPage = entryPage,
+                )
+            }
+        }
     }
 }

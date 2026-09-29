@@ -14,6 +14,7 @@ import com.farmos.domain.ops.AcceptHealthPack
 import com.farmos.domain.ops.AddHealthPackSlot
 import com.farmos.domain.ops.ApplyHealthPack
 import com.farmos.domain.ops.CreateFormularyItem
+import com.farmos.domain.ops.FarmSpeciesCodes
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordLabResult
@@ -92,6 +93,7 @@ fun HealthModuleHost(
         treatments = treatments,
         formulary = formulary,
         formularyOptions = formularyOptions,
+        speciesCodes = FarmSpeciesCodes.ALL,
         packs = packs,
         withdrawals = withdrawals,
         busy = busy,
