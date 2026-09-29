@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "1ee7631f1161940c91d0ad231562e7a3824c0480",
-  "source_fingerprint": "sha256:6d3b1854e9a4e1743ec9af0fd680b6111b71f33a6cb7a8b00dfba71e2e5e3840",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36628265441,
+  "tested_commit": "8270ab7e50a8796d0b9764442ba080a6d298e260",
+  "source_fingerprint": "sha256:80c19e1f7ac4d593f05a3889ec0be126e4370205906c30e04ba43dd9792be030",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -360,6 +360,8 @@
         "FOS-POULTRY-014"
       ],
       "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt": [
+        "FOS-ATOM-003",
+        "FOS-HEALTH-004",
         "FOS-HEALTH-007"
       ]
     },
@@ -436,7 +438,7 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
     "rendered_traversal_screen_count": 192,
-    "rendered_owner_screen_count": 51,
+    "rendered_owner_screen_count": 52,
     "route_contract_screen_count": 60,
     "combined_screen_count": 265,
     "entry_action_screen_ids": [
@@ -696,6 +698,7 @@
       "FOS-GOAT-043",
       "FOS-GOAT-051",
       "FOS-GROUP-001",
+      "FOS-HEALTH-004",
       "FOS-HEALTH-007",
       "FOS-HOME-002",
       "FOS-HOME-006",
@@ -798,12 +801,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 192,
-    "entry_action_emission_executed": 26,
-    "rendered_surface_owners_executed": 51,
-    "route_contracts_executed": 60,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 192,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
