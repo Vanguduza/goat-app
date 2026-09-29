@@ -2,9 +2,9 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:63b00eed19bcdd614ff71678644586c0735812c93b7394a48837f07e17911ef0",
-  "runtime_evidence_tested_commit": "5893ff647ab207bea0ff4edfc857732071e21655",
-  "runtime_evidence_run_id": 36635749322,
+  "source_fingerprint": "sha256:a4ac3397c6a7f091866f8a32943f6819cd957767db2744caec9ca0bd1bcb4ef5",
+  "runtime_evidence_tested_commit": "a9de0f436fbd812ff9004bc85bea85ed0bc752a8",
+  "runtime_evidence_run_id": 36637788369,
   "registry_screen_count": 545,
   "route_screen_count": 265,
   "unresolved_screen_count": 280,
@@ -1718,11 +1718,15 @@
     {
       "screen_id": "FOS-HEALTH-019",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt"
         ]
       }
     },

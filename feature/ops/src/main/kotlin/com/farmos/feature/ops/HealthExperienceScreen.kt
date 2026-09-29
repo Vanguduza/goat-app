@@ -80,6 +80,8 @@ fun HealthObservationScreen(
     formularyOptions: List<FarmSelectorOption> = emptyList(),
     /** Governed farm species codes; observation and vet visit accept only these server-side. */
     speciesCodes: List<String> = emptyList(),
+    /** Vet-accepted protocol packs; adding a slot and applying a pack accept only these. */
+    acceptedPacks: List<FarmSelectorOption> = emptyList(),
 ) {
     var page by remember { mutableStateOf(entryPage.toHealthPage()) }
     var backStack by remember { mutableStateOf(emptyList<HealthPage>()) }
@@ -167,11 +169,11 @@ fun HealthObservationScreen(
         }
 
         HealthPage.EDIT_PROTOCOL -> {
-            ProtocolSlotScreen(busy, error, onAddPackSlot, home)
+            ProtocolSlotScreen(acceptedPacks, busy, error, onAddPackSlot, home)
         }
 
         HealthPage.APPLY_PROTOCOL -> {
-            ApplyProtocolScreen(busy, error, onApplyPack, home)
+            ApplyProtocolScreen(acceptedPacks, busy, error, onApplyPack, home)
         }
 
         HealthPage.VET_VISIT -> {
@@ -445,6 +447,7 @@ private fun AcceptProtocolScreen(
 
 @Composable
 private fun ProtocolSlotScreen(
+    acceptedPacks: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onAdd: (String, String, String, String, String) -> Unit,
@@ -462,9 +465,15 @@ private fun ProtocolSlotScreen(
         onBack = onBack,
     ) {
         FarmOperationalSection("Schedule slot") {
-            OutlinedTextField(packId, {
-                packId = it
-            }, label = { Text("Pack id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FarmEntitySelector(
+                atomTag = HEALTH_PACK_SELECTOR,
+                title = "Vet-accepted protocol pack",
+                options = acceptedPacks,
+                selectedId = packId.ifBlank { null },
+                onSelect = { packId = it },
+                emptyText = "No vet-accepted protocol packs. Accept one first.",
+                enabled = !busy,
+            )
             OutlinedTextField(code, {
                 code = it
             }, label = { Text("Slot code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -495,6 +504,7 @@ private fun ProtocolSlotScreen(
 
 @Composable
 private fun ApplyProtocolScreen(
+    acceptedPacks: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onApply: (String, String, String) -> Unit,
@@ -511,9 +521,15 @@ private fun ApplyProtocolScreen(
         onBack,
     ) {
         FarmOperationalSection("Apply pack") {
-            OutlinedTextField(packId, {
-                packId = it
-            }, label = { Text("Pack id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FarmEntitySelector(
+                atomTag = HEALTH_PACK_SELECTOR,
+                title = "Vet-accepted protocol pack",
+                options = acceptedPacks,
+                selectedId = packId.ifBlank { null },
+                onSelect = { packId = it },
+                emptyText = "No vet-accepted protocol packs. Accept one first.",
+                enabled = !busy,
+            )
             OutlinedTextField(animalId, {
                 animalId = it
             }, label = { Text("Animal id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -630,6 +646,7 @@ private fun LabResultScreen(
 }
 
 private const val HEALTH_FORMULARY_SELECTOR = "health-formulary-selector"
+private const val HEALTH_PACK_SELECTOR = "health-pack-selector"
 
 /** FOS-ATOM-003 over the governed farm species, so a species-checked command never carries a typo. */
 @Composable
