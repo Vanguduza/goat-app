@@ -8,9 +8,10 @@ import com.farmos.feature.rabbit.RabbitRecords
 import com.farmos.feature.rabbit.RabbitWaveEventView
 import com.farmos.feature.rabbit.RabbitWaveView
 
-private const val RABBIT_RECORD_LIMIT = 500
-
-/** Farm-scoped read model for the read-only rabbitry record pages. Nothing here writes. */
+/**
+ * Farm-scoped read model for the read-only rabbitry record pages. Nothing here writes. Wave events
+ * are read exhaustively so a wave's history is never truncated by a farm-wide row cap.
+ */
 internal suspend fun loadRabbitRecords(database: FarmOsDatabase, farmId: String): RabbitRecords {
     val programme = database.rabbitProgramme()
     val lifecycle = database.lifecycle()
@@ -18,23 +19,25 @@ internal suspend fun loadRabbitRecords(database: FarmOsDatabase, farmId: String)
     val cageCodes = cages.associate { it.id to it.code }
     val boxes = programme.boxes(farmId)
     val waves = programme.waves(farmId)
-    val kindlings = lifecycle.rabbitKindlings(farmId, RABBIT_RECORD_LIMIT)
+    val kindlings = lifecycle.rabbitKindlings(farmId)
+    val palpations = lifecycle.rabbitPalpations(farmId)
+    val outcomes = lifecycle.rabbitMatingOutcomes(farmId)
     val events = buildList {
-        lifecycle.rabbitPalpations(farmId, RABBIT_RECORD_LIMIT).forEach {
+        palpations.forEach {
             add(it.waveId to RabbitWaveEventView(it.id, it.occurredEpochDay, "Palpation", it.result))
         }
         kindlings.forEach {
             add(it.waveId to RabbitWaveEventView(it.id, it.occurredEpochDay, "Kindling", "${it.liveCount} live · ${it.deadCount} dead"))
         }
-        lifecycle.rabbitFosters(farmId, RABBIT_RECORD_LIMIT).forEach {
+        lifecycle.rabbitFosters(farmId).forEach {
             val window = if (it.withinWindow) "" else " · outside window, acknowledged"
             add(it.fromWaveId to RabbitWaveEventView("${it.id}:out", it.occurredEpochDay, "Foster out", "${it.kitCount} kits$window"))
             add(it.toWaveId to RabbitWaveEventView("${it.id}:in", it.occurredEpochDay, "Foster in", "${it.kitCount} kits$window"))
         }
-        lifecycle.rabbitWeans(farmId, RABBIT_RECORD_LIMIT).forEach {
+        lifecycle.rabbitWeans(farmId).forEach {
             add(it.waveId to RabbitWaveEventView(it.id, it.occurredEpochDay, "Weaning", "${it.weanedCount} weaned"))
         }
-        lifecycle.rabbitMatingOutcomes(farmId, RABBIT_RECORD_LIMIT).forEach {
+        outcomes.forEach {
             add(it.waveId to RabbitWaveEventView(it.id, it.occurredEpochDay, "Outcome", it.outcome))
         }
     }.groupBy({ it.first }, { it.second })
@@ -62,6 +65,8 @@ internal suspend fun loadRabbitRecords(database: FarmOsDatabase, farmId: String)
                 weanEpochDay = wave.weanEpochDay,
                 events = events[wave.id].orEmpty().sortedWith(compareByDescending<RabbitWaveEventView> { it.epochDay }.thenBy { it.id }),
                 kindlingRecorded = wave.id in kindledWaves,
+                latestPalpation = palpations.firstOrNull { it.waveId == wave.id }?.result,
+                latestOutcome = outcomes.firstOrNull { it.waveId == wave.id }?.outcome,
             )
         },
         kits = lifecycle.kits(farmId).map { RabbitKitView(it.id, it.waveId, it.tempLabel, it.sex, it.status, it.retention, it.earTag) },

@@ -11,7 +11,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Rabbit wave-event reads stay inside one farm, newest first, and honour their limit. */
+/** Rabbit wave-event reads stay inside one farm, and newest first. */
 @RunWith(AndroidJUnit4::class)
 class RabbitRecordQueryTest {
     private lateinit var database: FarmOsDatabase
@@ -45,14 +45,13 @@ class RabbitRecordQueryTest {
         lifecycle.insertMatingOutcome(RabbitMatingOutcomeEntity("o1", farmA, "w2", "false_pregnancy", 40))
         lifecycle.insertMatingOutcome(RabbitMatingOutcomeEntity("o2", farmB, "w2", "false_pregnancy", 40))
 
-        assertEquals(listOf("p2", "p1"), lifecycle.rabbitPalpations(farmA, 10).map { it.id })
-        assertEquals(listOf("p2"), lifecycle.rabbitPalpations(farmA, 1).map { it.id })
-        assertEquals(listOf("k2", "k1"), lifecycle.rabbitKindlings(farmA, 10).map { it.id })
+        assertEquals(listOf("p2", "p1"), lifecycle.rabbitPalpations(farmA).map { it.id })
+        assertEquals(listOf("k2", "k1"), lifecycle.rabbitKindlings(farmA).map { it.id })
         assertEquals(listOf("w1"), lifecycle.rabbitKindledWaveIds(farmA))
         assertEquals(listOf("w9"), lifecycle.rabbitKindledWaveIds(farmB))
-        assertEquals(listOf("f1"), lifecycle.rabbitFosters(farmA, 10).map { it.id })
-        assertEquals(listOf("n1"), lifecycle.rabbitWeans(farmA, 10).map { it.id })
-        assertEquals(listOf("o1"), lifecycle.rabbitMatingOutcomes(farmA, 10).map { it.id })
-        assertEquals(listOf("o2"), lifecycle.rabbitMatingOutcomes(farmB, 10).map { it.id })
+        assertEquals(listOf("f1"), lifecycle.rabbitFosters(farmA).map { it.id })
+        assertEquals(listOf("n1"), lifecycle.rabbitWeans(farmA).map { it.id })
+        assertEquals(listOf("o1"), lifecycle.rabbitMatingOutcomes(farmA).map { it.id })
+        assertEquals(listOf("o2"), lifecycle.rabbitMatingOutcomes(farmB).map { it.id })
     }
 }

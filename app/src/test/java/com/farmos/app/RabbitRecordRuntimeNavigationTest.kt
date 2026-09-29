@@ -56,8 +56,8 @@ class RabbitRecordRuntimeNavigationTest {
         }
         traverse("Kindling due", "FOS-RABBIT-016") {
             compose.onNodeWithTag("rabbit-kindling-past").assertExists()
-            compose.onNodeWithText("Kindling 2026-09-20 · 4 days past scheduled date").assertExists()
-            compose.onNodeWithText("Kindling 2026-10-11 · in 17 days").assertExists()
+            compose.onNodeWithText("Kindling 2026-09-20 · 4 days past scheduled date · palpation open · outcome false_pregnancy").assertExists()
+            compose.onNodeWithText("Kindling 2026-10-11 · in 17 days · no palpation recorded").assertExists()
             compose.onNodeWithTag("rabbit-kindling-due:w0").assertDoesNotExist()
         }
         traverse("Litter profiles", "FOS-RABBIT-018") {
@@ -100,8 +100,8 @@ class RabbitRecordRuntimeNavigationTest {
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
 
-    private fun wave(id: String, mating: Long, kindling: Long, events: List<RabbitWaveEventView>, kindled: Boolean) =
-        RabbitWaveView(id, "A1", if (id == "w2") 10 else 11, mating, mating + 28, kindling, kindling + 14, kindling + 11, kindling + 35, events, kindled)
+    private fun wave(id: String, mating: Long, kindling: Long, events: List<RabbitWaveEventView>, kindled: Boolean, palpation: String? = null, outcome: String? = null) =
+        RabbitWaveView(id, "A1", if (id == "w2") 10 else 11, mating, mating + 28, kindling, kindling + 14, kindling + 11, kindling + 35, events, kindled, palpation, outcome)
 
     private fun records() = RabbitRecords(
         cages = listOf(
@@ -110,7 +110,7 @@ class RabbitRecordRuntimeNavigationTest {
         ),
         waves = listOf(
             wave("w2", day(9, 10), day(10, 11), emptyList(), kindled = false),
-            wave("w1", day(8, 20), day(9, 20), emptyList(), kindled = false),
+            wave("w1", day(8, 20), day(9, 20), emptyList(), kindled = false, palpation = "open", outcome = "false_pregnancy"),
             wave(
                 "w0",
                 day(7, 1),

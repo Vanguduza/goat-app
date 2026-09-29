@@ -46,6 +46,10 @@ data class RabbitWaveView(
     val weanEpochDay: Long,
     val events: List<RabbitWaveEventView>,
     val kindlingRecorded: Boolean,
+    /** Latest recorded palpation result, or null when none is recorded. */
+    val latestPalpation: String? = null,
+    /** Latest recorded mating outcome, or null when none is recorded. */
+    val latestOutcome: String? = null,
 )
 
 data class RabbitCageView(val id: String, val code: String, val doeCapacity: Int, val nestBoxes: List<RabbitNestBoxView>, val waveIds: List<String>)
@@ -93,7 +97,7 @@ private fun RabbitSwitcher(title: String, options: List<Pair<String, String>>, s
 /** FOS-RABBIT-008 — every cage with its recorded capacity, nest boxes and waves. */
 @Composable
 internal fun RabbitCageOccupancyScreen(records: RabbitRecords, onBack: () -> Unit) {
-    FarmOperationalPage("FOS-RABBIT-008", "Cage occupancy", "Recorded capacity, nest boxes and waves per cage.", FarmVisualClass.I3, onBack) {
+    FarmOperationalPage("FOS-RABBIT-008", "Cage occupancy", "Recorded capacity, nest boxes and wave assignments per cage; not a physical head count.", FarmVisualClass.I3, onBack) {
         if (records.cages.isEmpty()) {
             AnimalFarmEmptyState("No cages on this device.")
             return@FarmOperationalPage
@@ -143,7 +147,7 @@ internal fun RabbitCageDetailScreen(records: RabbitRecords, onBack: () -> Unit) 
 /** FOS-RABBIT-016 — waves without a recorded kindling, by the kindling date stored on the wave. */
 @Composable
 internal fun RabbitKindlingDueScreen(records: RabbitRecords, today: LocalDate, onBack: () -> Unit) {
-    FarmOperationalPage("FOS-RABBIT-016", "Kindling due", "Waves with no kindling recorded, by scheduled kindling date.", FarmVisualClass.I2, onBack) {
+    FarmOperationalPage("FOS-RABBIT-016", "Kindling due", "Waves with no kindling recorded, by the kindling date stored on the wave. Palpation and outcome are shown as recorded.", FarmVisualClass.I2, onBack) {
         val due = records.waves.filterNot { it.kindlingRecorded }.sortedBy { it.kindlingEpochDay }
         if (due.isEmpty()) {
             AnimalFarmEmptyState("No waves awaiting a kindling record on this device.")
@@ -164,7 +168,11 @@ internal fun RabbitKindlingDueScreen(records: RabbitRecords, today: LocalDate, o
                     days == 0L -> "scheduled today"
                     else -> "${-days} days past scheduled date"
                 }
-                RabbitRecordRow(waveLabel(wave), "Kindling ${date(wave.kindlingEpochDay)} · $relative", "rabbit-kindling-due:${wave.id}")
+                val recorded = listOfNotNull(
+                    wave.latestPalpation?.let { "palpation $it" } ?: "no palpation recorded",
+                    wave.latestOutcome?.let { "outcome $it" },
+                ).joinToString(" · ")
+                RabbitRecordRow(waveLabel(wave), "Kindling ${date(wave.kindlingEpochDay)} · $relative · $recorded", "rabbit-kindling-due:${wave.id}")
             }
         }
     }
