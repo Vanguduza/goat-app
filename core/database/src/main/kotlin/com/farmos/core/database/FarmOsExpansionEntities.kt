@@ -215,6 +215,9 @@ interface GrazingDao {
     @Query("SELECT * FROM grazing_sessions WHERE farmId = :farmId ORDER BY enteredEpochDay DESC, id LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<GrazingSessionEntity>
 
+    @Query("SELECT * FROM grazing_sessions WHERE farmId = :farmId AND groupId = :groupId ORDER BY enteredEpochDay DESC, id")
+    suspend fun forGroup(farmId: String, groupId: String): List<GrazingSessionEntity>
+
     @Query("SELECT COUNT(*) FROM grazing_sessions WHERE farmId = :farmId")
     suspend fun count(farmId: String): Int
 
@@ -319,6 +322,9 @@ interface FeedIssueDao {
 
     @Query("SELECT * FROM feed_issues WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<FeedIssueEntity>
+
+    @Query("SELECT * FROM feed_issues WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredEpochDay DESC, id")
+    suspend fun forGroup(farmId: String, groupId: String): List<FeedIssueEntity>
 }
 
 @Dao

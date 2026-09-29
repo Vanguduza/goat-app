@@ -13,6 +13,9 @@ import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreateAnimalGroup
 import com.farmos.domain.ops.RecordGroupCensus
+import com.farmos.feature.ops.GroupRecordNavigator
+import com.farmos.feature.ops.GroupRecords
+import com.farmos.feature.ops.GroupView
 import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
@@ -26,14 +29,18 @@ fun GroupsModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadGroups: suspend () -> List<GroupView> = { emptyList() },
+    loadGroup: suspend (String) -> GroupRecords = { GroupRecords() },
 ) {
     val scope = rememberCoroutineScope()
     var rows by remember { mutableStateOf(emptyList<String>()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var groupViews by remember(farmId) { mutableStateOf(emptyList<GroupView>()) }
 
     suspend fun refresh() {
         rows = ops.groups().map { "${it.id} ${it.name} · ${it.speciesCode} · ${it.headCount}" }
+        groupViews = loadGroups()
     }
 
     LaunchedEffect(farmId) { runCatching { refresh() } }
@@ -57,7 +64,7 @@ fun GroupsModuleHost(
     val day = remember { mutableStateOf("") }
     val groupId = remember { mutableStateOf("") }
 
-    SimpleCaptureScreen(
+    GroupRecordNavigator(groupViews, loadGroup) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-GROUP-001",
         title = "Groups",
         help = "Groups hold shared animal membership and census records for farm operations.",
@@ -77,6 +84,7 @@ fun GroupsModuleHost(
         },
         onBack = onBack,
         extra = {
+            recordActions()
             androidx.compose.material3.OutlinedTextField(
                 groupId.value,
                 { groupId.value = it },
@@ -113,5 +121,5 @@ fun GroupsModuleHost(
                 enabled = !busy && groupId.value.isNotBlank() && heads.value.isNotBlank() && day.value.isNotBlank(),
             ) { androidx.compose.material3.Text("Record census") }
         },
-    )
+    ) }
 }

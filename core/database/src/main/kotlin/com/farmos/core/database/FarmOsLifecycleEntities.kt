@@ -567,6 +567,8 @@ interface LifecycleDao {
     @Upsert suspend fun upsertReorderAlert(row: ReorderAlertEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertCensus(row: GroupCensusEntity)
     @Upsert suspend fun upsertCensus(row: GroupCensusEntity)
+    @Query("SELECT * FROM group_census_records WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredEpochDay DESC, id")
+    suspend fun censusForGroup(farmId: String, groupId: String): List<GroupCensusEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertKid(row: GoatKidEntity)
     @Upsert suspend fun upsertKid(row: GoatKidEntity)
     @Query("SELECT COUNT(*) FROM goat_kid_records WHERE farmId = :farmId AND kiddingId = :kiddingId")
