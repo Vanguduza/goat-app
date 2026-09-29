@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "c76e8f0f2fb0a8170ceb54eae3edfc63a803bef8",
-  "source_fingerprint": "sha256:cbe4ab769e76a34323c348f5b2d2f7645b5b49422612dd71833806788f3f686e",
+  "tested_commit": "5893ff647ab207bea0ff4edfc857732071e21655",
+  "source_fingerprint": "sha256:63b00eed19bcdd614ff71678644586c0735812c93b7394a48837f07e17911ef0",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36633187085,
+  "foundation_run_id": 36635749322,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -357,7 +357,9 @@
         "FOS-ATOM-007",
         "FOS-POULTRY-008",
         "FOS-POULTRY-009",
-        "FOS-POULTRY-014"
+        "FOS-POULTRY-014",
+        "FOS-POULTRY-016",
+        "FOS-POULTRY-020"
       ],
       "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt": [
         "FOS-ATOM-003",
@@ -443,7 +445,7 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
     "rendered_traversal_screen_count": 192,
-    "rendered_owner_screen_count": 54,
+    "rendered_owner_screen_count": 56,
     "route_contract_screen_count": 60,
     "combined_screen_count": 265,
     "entry_action_screen_ids": [
@@ -715,6 +717,8 @@
       "FOS-POULTRY-008",
       "FOS-POULTRY-009",
       "FOS-POULTRY-014",
+      "FOS-POULTRY-016",
+      "FOS-POULTRY-020",
       "FOS-PROC-001",
       "FOS-SHEEP-010",
       "FOS-SYNC-003",
@@ -810,7 +814,7 @@
   "certification": {
     "runtime_reachability_executed": 192,
     "entry_action_emission_executed": 26,
-    "rendered_surface_owners_executed": 54,
+    "rendered_surface_owners_executed": 56,
     "route_contracts_executed": 60,
     "parameter_scope_executed": true,
     "return_restoration_executed": 192,

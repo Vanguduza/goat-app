@@ -2,9 +2,9 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:cbe4ab769e76a34323c348f5b2d2f7645b5b49422612dd71833806788f3f686e",
-  "runtime_evidence_tested_commit": "c76e8f0f2fb0a8170ceb54eae3edfc63a803bef8",
-  "runtime_evidence_run_id": 36633187085,
+  "source_fingerprint": "sha256:63b00eed19bcdd614ff71678644586c0735812c93b7394a48837f07e17911ef0",
+  "runtime_evidence_tested_commit": "5893ff647ab207bea0ff4edfc857732071e21655",
+  "runtime_evidence_run_id": 36635749322,
   "registry_screen_count": 545,
   "route_screen_count": 265,
   "unresolved_screen_count": 280,
@@ -2484,11 +2484,15 @@
     {
       "screen_id": "FOS-POULTRY-016",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt"
         ]
       }
     },
@@ -2528,11 +2532,15 @@
     {
       "screen_id": "FOS-POULTRY-020",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt"
         ]
       }
     },

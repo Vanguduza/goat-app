@@ -1,6 +1,8 @@
 package com.farmos.app
 
 import android.content.Context
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -9,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -16,6 +19,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.AnimalGroupEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.FormularyItemEntity
+import com.farmos.core.database.PoultryHatchEntity
 import com.farmos.core.database.PoultryHouseEntity
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
@@ -60,6 +64,8 @@ class PoultryCaptureOwnerTest {
             database.lifecycle().insertHouse(PoultryHouseEntity("house-other", otherFarm, "LH-9", "layer", "chicken"))
             database.formulary().insert(FormularyItemEntity("form-nd", farm, "ND vaccine", "poultry", "vaccine", null, null, 0, true))
             database.formulary().insert(FormularyItemEntity("form-goat", farm, "Goat vaccine", "goat", "vaccine", 0, 0, null, true))
+            database.lifecycle().insertHatch(PoultryHatchEntity("hatch-set", farm, "chicken", null, null, 100, 21, 20_000, "set", null, null, null, null, null, null))
+            database.lifecycle().insertHatch(PoultryHatchEntity("hatch-candled", farm, "chicken", null, null, 80, 21, 19_990, "candled", 70, 8, 2, null, null, null))
             database.formulary().insert(FormularyItemEntity("form-draft", farm, "Unapproved vaccine", "poultry", "vaccine", null, null, 0, false))
         }
     }
@@ -136,6 +142,50 @@ class PoultryCaptureOwnerTest {
         val vaccination = runBlocking { database.lifecycle().vaccinations(farm) }.single()
         assertEquals("grp-layers", vaccination.groupId)
         assertEquals("form-nd", vaccination.formularyItemId)
+        compose.waitUntil(10_000) { syncRequests == 1 }
+    }
+
+    @Test
+    fun candlingOffersOnlyHatchesStillAtTheSetStage() {
+        var syncRequests = 0
+        render { syncRequests++ }
+        compose.onNode(hasClickAction() and hasText("Open Candling")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-POULTRY-020").assertExists()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("poultry-hatch-selector:option:hatch-set").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("poultry-hatch-selector:option:hatch-candled").assertDoesNotExist()
+
+        compose.onNodeWithTag("poultry-hatch-selector:option:hatch-set").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction() and hasText("Fertile")).performScrollTo().performTextReplacement("90")
+        compose.onNode(hasSetTextAction() and hasText("Infertile")).performScrollTo().performTextReplacement("8")
+        compose.onNode(hasSetTextAction() and hasText("Mid-dead")).performScrollTo().performTextReplacement("2")
+        compose.onNode(hasSetTextAction() and hasText("Date")).performScrollTo().performTextReplacement("2026-09-20")
+        compose.onNode(hasClickAction() and hasText("Record candling")).performScrollTo().performClick()
+
+        compose.waitUntil(10_000) { runBlocking { database.lifecycle().hatch(farm, "hatch-set") }?.status == "candled" }
+        assertEquals(90, runBlocking { database.lifecycle().hatch(farm, "hatch-set") }?.fertile)
+        compose.waitUntil(10_000) { syncRequests == 1 }
+    }
+
+    @Test
+    fun biosecurityWalkCanNameAHouseWithoutAFlock() {
+        var syncRequests = 0
+        render { syncRequests++ }
+        compose.onNode(hasClickAction() and hasText("Open Biosecurity")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-POULTRY-016").assertExists()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-007:option:house-a").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:none").assertIsSelected()
+        compose.onNode(hasClickAction() and hasText("Record biosecurity check")).assertIsNotEnabled()
+
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-007:option:house-a").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction() and hasText("Findings")).performScrollTo().performTextInput("Footbath empty at entry")
+        compose.onNode(hasSetTextAction() and hasText("Date")).performScrollTo().performTextReplacement("2026-09-20")
+        compose.onNode(hasClickAction() and hasText("Record biosecurity check")).performScrollTo().performClick()
+
+        compose.waitUntil(10_000) { runBlocking { database.lifecycle().biosecurityWalks(farm, 10) }.isNotEmpty() }
+        val walk = runBlocking { database.lifecycle().biosecurityWalks(farm, 10) }.single()
+        assertEquals("house-a", walk.houseId)
+        assertEquals(null, walk.groupId)
         compose.waitUntil(10_000) { syncRequests == 1 }
     }
 
