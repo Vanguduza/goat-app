@@ -578,6 +578,12 @@ interface LifecycleDao {
     @Upsert suspend fun upsertDof(row: CattleDofEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertLotClose(row: CattleLotCloseEntity)
     @Upsert suspend fun upsertLotClose(row: CattleLotCloseEntity)
+    @Query("SELECT * FROM cattle_lot_placements WHERE farmId = :farmId ORDER BY placedEpochDay DESC, id")
+    suspend fun cattleLotPlacements(farmId: String): List<CattleLotPlacementEntity>
+    @Query("SELECT * FROM cattle_days_on_feed WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleDaysOnFeed(farmId: String): List<CattleDofEntity>
+    @Query("SELECT * FROM cattle_lot_closeouts WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleLotCloseouts(farmId: String): List<CattleLotCloseEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertLactation(row: GoatLactationPlanEntity)
     @Upsert suspend fun upsertLactation(row: GoatLactationPlanEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertReorderAlert(row: ReorderAlertEntity)

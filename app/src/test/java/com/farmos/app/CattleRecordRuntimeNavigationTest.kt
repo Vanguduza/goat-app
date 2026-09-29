@@ -10,6 +10,10 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.feature.ops.CattleLotCloseView
+import com.farmos.feature.ops.CattleLotDaysView
+import com.farmos.feature.ops.CattleLotPlacementView
+import com.farmos.feature.ops.CattleLotView
 import com.farmos.feature.ops.CattleMilkRow
 import com.farmos.feature.ops.CattleObservationRow
 import com.farmos.feature.ops.CattleOperationsActions
@@ -75,6 +79,42 @@ class CattleRecordRuntimeNavigationTest {
     }
 
     @Test
+    fun feedlotPagesShowRecordedLotsWithoutDerivedPerformance() {
+        render(null, lots = {
+            listOf(
+                CattleLotView(
+                    "g1",
+                    "Steers A",
+                    placements = listOf(CattleLotPlacementView("p2", 20, day(8, 15)), CattleLotPlacementView("p1", 40, day(8, 1))),
+                    daysOnFeed = listOf(CattleLotDaysView("d1", 45, day(9, 15))),
+                    closeouts = emptyList(),
+                ),
+                CattleLotView(
+                    "g2",
+                    "Heifers B",
+                    placements = listOf(CattleLotPlacementView("p3", 30, day(5, 1))),
+                    daysOnFeed = emptyList(),
+                    closeouts = listOf(CattleLotCloseView("c1", 29, 13_050_500, null, day(9, 1))),
+                ),
+            )
+        }) { records() }
+        traverse("Beef dashboard", "FOS-CATTLE-025") {
+            compose.onNodeWithText("1 lot · 60 head placed").assertExists()
+            compose.onNodeWithText("1 lot · 29 head out").assertExists()
+            compose.onNodeWithText("60 head placed · 45 days on feed at 2026-09-15").assertExists()
+        }
+        traverse("Feedlot lot detail", "FOS-CATTLE-027") {
+            compose.onNodeWithText("60").assertExists()
+            compose.onNodeWithTag("lot-first-placement").assertExists()
+            compose.onNodeWithTag("lot-placement:p1").assertExists()
+            compose.onNodeWithText("No close-out recorded").assertExists()
+            compose.onNodeWithTag("lot-option:g2").performScrollTo().performClick()
+            compose.onNodeWithText("2026-09-01 · 29 head out · 13050.5 kg recorded").assertExists()
+            compose.onNodeWithText("No days-on-feed records for this lot.").assertExists()
+        }
+    }
+
+    @Test
     fun withoutASelectedAnimalRecordPagesSaySoAndLoadNothing() {
         var loads = 0
         render(null) { loads++; records() }
@@ -133,7 +173,7 @@ class CattleRecordRuntimeNavigationTest {
         ),
     )
 
-    private fun render(selected: String?, load: suspend (String) -> CattleRecords) {
+    private fun render(selected: String?, lots: suspend () -> List<CattleLotView> = { emptyList() }, load: suspend (String) -> CattleRecords) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 CattleOperationsScreen(
@@ -160,6 +200,7 @@ class CattleRecordRuntimeNavigationTest {
                     onBack = {},
                     loadRecords = load,
                     today = today,
+                    loadLots = lots,
                 )
             }
         }

@@ -1,6 +1,10 @@
 package com.farmos.app
 
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.feature.ops.CattleLotCloseView
+import com.farmos.feature.ops.CattleLotDaysView
+import com.farmos.feature.ops.CattleLotPlacementView
+import com.farmos.feature.ops.CattleLotView
 import com.farmos.feature.ops.CattleMilkRow
 import com.farmos.feature.ops.CattleObservationRow
 import com.farmos.feature.ops.CattleRecords
@@ -54,4 +58,22 @@ internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String,
         timeline = timeline,
         weights = database.measurements().history(farmId, animalId, "weight").map { WeightView(it.id, day(it.measuredAtEpochMillis), it.valueLong, it.unit) },
     )
+}
+
+/** Every recorded feedlot row on the farm, grouped by lot (cattle group), newest first. */
+internal suspend fun loadCattleLots(database: FarmOsDatabase, farmId: String): List<CattleLotView> {
+    val lifecycle = database.lifecycle()
+    val groupNames = database.groups().forFarm(farmId).associate { it.id to it.name }
+    val placements = lifecycle.cattleLotPlacements(farmId).groupBy { it.groupId }
+    val days = lifecycle.cattleDaysOnFeed(farmId).groupBy { it.groupId }
+    val closeouts = lifecycle.cattleLotCloseouts(farmId).groupBy { it.groupId }
+    return (placements.keys + days.keys + closeouts.keys).sorted().map { groupId ->
+        CattleLotView(
+            groupId = groupId,
+            groupLabel = groupNames[groupId] ?: "Group not on this device",
+            placements = placements[groupId].orEmpty().map { CattleLotPlacementView(it.id, it.headCount, it.placedEpochDay) },
+            daysOnFeed = days[groupId].orEmpty().map { CattleLotDaysView(it.id, it.daysOnFeed, it.occurredEpochDay) },
+            closeouts = closeouts[groupId].orEmpty().map { CattleLotCloseView(it.id, it.headOut, it.weightGrams, it.daysOnFeed, it.occurredEpochDay) },
+        )
+    }
 }
