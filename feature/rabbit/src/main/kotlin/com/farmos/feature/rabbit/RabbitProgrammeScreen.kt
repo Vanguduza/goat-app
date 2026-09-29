@@ -24,10 +24,12 @@ import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmModuleHeader
+import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.FosDimens
 import com.farmos.domain.rabbit.KudbatSemiIntensiveExcel
@@ -79,6 +81,8 @@ fun RabbitProgrammeScreen(
     today: LocalDate = LocalDate.now(),
     /** Exhaustive count of rabbits the [does] list can show; the list itself is bounded. */
     rabbitCount: Int? = null,
+    /** This farm's breeding waves; every wave event command accepts only one of these. */
+    waveOptions: List<FarmSelectorOption> = emptyList(),
 ) {
     var page by remember { mutableStateOf(RabbitPage.DASHBOARD) }
     val home = { page = RabbitPage.DASHBOARD }
@@ -122,23 +126,23 @@ fun RabbitProgrammeScreen(
         }
 
         RabbitPage.PALPATION -> {
-            RabbitPalpationScreen(busy, error, onPalpate, home)
+            RabbitPalpationScreen(waveOptions, busy, error, onPalpate, home)
         }
 
         RabbitPage.KINDLING -> {
-            RabbitKindlingScreen(busy, error, onKindle, home)
+            RabbitKindlingScreen(waveOptions, busy, error, onKindle, home)
         }
 
         RabbitPage.FOSTER -> {
-            RabbitFosterScreen(busy, error, onFoster, home)
+            RabbitFosterScreen(waveOptions, busy, error, onFoster, home)
         }
 
         RabbitPage.WEAN -> {
-            RabbitWeanScreen(busy, error, onWean, home)
+            RabbitWeanScreen(waveOptions, busy, error, onWean, home)
         }
 
         RabbitPage.OUTCOME -> {
-            RabbitOutcomeScreen(busy, error, onRecordOutcome, home)
+            RabbitOutcomeScreen(waveOptions, busy, error, onRecordOutcome, home)
         }
 
         RabbitPage.NESTS -> {
@@ -395,6 +399,7 @@ private fun RabbitWaveScreen(
 
 @Composable
 private fun RabbitPalpationScreen(
+    waveOptions: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String) -> Unit,
@@ -411,14 +416,7 @@ private fun RabbitPalpationScreen(
         error,
         onBack,
     ) {
-        OutlinedTextField(
-            wave,
-            { wave = it },
-            label = { Text("Wave id") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !busy,
-            singleLine = true,
-        )
+        RabbitWaveSelector(waveOptions, "Breeding wave", wave, busy) { wave = it }
         OutlinedTextField(result, {
             result = it
         }, label = { Text("Result") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -438,6 +436,7 @@ private fun RabbitPalpationScreen(
 
 @Composable
 private fun RabbitKindlingScreen(
+    waveOptions: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String, String) -> Unit,
@@ -456,14 +455,7 @@ private fun RabbitKindlingScreen(
         onBack,
         FarmVisualClass.I4,
     ) {
-        OutlinedTextField(
-            wave,
-            { wave = it },
-            label = { Text("Wave id") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !busy,
-            singleLine = true,
-        )
+        RabbitWaveSelector(waveOptions, "Breeding wave", wave, busy) { wave = it }
         OutlinedTextField(live, {
             live = it
         }, label = { Text("Live kits") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -481,6 +473,7 @@ private fun RabbitKindlingScreen(
 
 @Composable
 private fun RabbitFosterScreen(
+    waveOptions: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String, String, Boolean) -> Unit,
@@ -499,17 +492,8 @@ private fun RabbitFosterScreen(
         error,
         onBack,
     ) {
-        OutlinedTextField(from, {
-            from = it
-        }, label = { Text("From wave") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(
-            to,
-            { to = it },
-            label = { Text("To wave") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !busy,
-            singleLine = true,
-        )
+        RabbitWaveSelector(waveOptions, "From wave", from, busy, key = "from") { from = it }
+        RabbitWaveSelector(waveOptions, "To wave", to, busy, key = "to") { to = it }
         OutlinedTextField(kits, {
             kits = it
         }, label = { Text("Kit count") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -530,6 +514,7 @@ private fun RabbitFosterScreen(
 
 @Composable
 private fun RabbitWeanScreen(
+    waveOptions: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String) -> Unit,
@@ -539,14 +524,7 @@ private fun RabbitWeanScreen(
     var count by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     RabbitEventPage("FOS-RABBIT-022", "Weaning", "Record kits weaned from a breeding wave.", busy, error, onBack) {
-        OutlinedTextField(
-            wave,
-            { wave = it },
-            label = { Text("Wave id") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !busy,
-            singleLine = true,
-        )
+        RabbitWaveSelector(waveOptions, "Breeding wave", wave, busy) { wave = it }
         OutlinedTextField(count, {
             count = it
         }, label = { Text("Weaned kits") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -561,6 +539,7 @@ private fun RabbitWeanScreen(
 
 @Composable
 private fun RabbitOutcomeScreen(
+    waveOptions: List<FarmSelectorOption>,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String) -> Unit,
@@ -570,14 +549,7 @@ private fun RabbitOutcomeScreen(
     var outcome by remember { mutableStateOf("false_pregnancy") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     RabbitEventPage("FOS-RABBIT-012", "Pregnancy status", "Record the breeding-wave outcome.", busy, error, onBack) {
-        OutlinedTextField(
-            wave,
-            { wave = it },
-            label = { Text("Wave id") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !busy,
-            singleLine = true,
-        )
+        RabbitWaveSelector(waveOptions, "Breeding wave", wave, busy) { wave = it }
         OutlinedTextField(outcome, {
             outcome = it
         }, label = { Text("Outcome") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -645,4 +617,25 @@ private fun RabbitEventPage(
         if (busy) Text("Saving on this device…", color = MaterialTheme.colorScheme.primary)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
+}
+
+/** Breeding-wave selector over this farm's waves, so a wave event never carries a mistyped id. */
+@Composable
+private fun RabbitWaveSelector(
+    waveOptions: List<FarmSelectorOption>,
+    title: String,
+    selected: String,
+    busy: Boolean,
+    key: String = "wave",
+    onSelect: (String) -> Unit,
+) {
+    FarmEntitySelector(
+        atomTag = "rabbit-wave-selector:$key",
+        title = title,
+        options = waveOptions,
+        selectedId = selected.ifBlank { null },
+        onSelect = onSelect,
+        emptyText = "Create a breeding wave first.",
+        enabled = !busy,
+    )
 }
