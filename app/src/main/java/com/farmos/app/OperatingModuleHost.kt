@@ -88,6 +88,7 @@ fun OperatingModuleHost(
     var moneyRows by remember { mutableStateOf(emptyList<String>()) }
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
+    var speciesCounts by remember { mutableStateOf<SpeciesHerdCounts?>(null) }
     var catalogRows by remember { mutableStateOf(emptyList<String>()) }
     var treatmentRows by remember { mutableStateOf(emptyList<String>()) }
     var packRows by remember { mutableStateOf(emptyList<String>()) }
@@ -129,6 +130,7 @@ fun OperatingModuleHost(
                 active = animal.status == "active",
             )
         }.orEmpty()
+        speciesCounts = herd?.let { SpeciesHerdCounts(total = it.listedTotal(), active = it.activeCount()) }
         catalogRows = ops.diseases().map { "${it.speciesCode} · ${it.displayName} · ${it.firstAid}" }
         treatmentRows = ops.recentTreatments().map { "${it.speciesCode} · ${it.reason} · formulary ${it.formularyItemId}" }
         packRows = ops.packs().map { "${it.speciesCode} · ${it.name} · ${it.status} · ${it.acceptedByVet.orEmpty()}" }
@@ -175,6 +177,7 @@ fun OperatingModuleHost(
                 },
                 kindRequired = false,
                 rows = speciesRows,
+                counts = speciesCounts,
                 busy = busy,
                 error = error,
                 onRegister = { tag, name, sex, kind ->

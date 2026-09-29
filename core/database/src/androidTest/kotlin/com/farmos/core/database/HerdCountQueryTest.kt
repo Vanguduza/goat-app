@@ -48,5 +48,7 @@ class HerdCountQueryTest {
         assertEquals(HerdCountRow(active = 0, females = 0, males = 0, young = 0), animals.herdCounts("33333333-3333-4333-8333-333333333333", "goat", "active", today))
         assertEquals(500, animals.listBySpecies(farmA, "goat", 500).size)
         assertEquals(562, animals.countBySpecies(farmA, "goat"))
+        assertEquals(HerdCountRow(active = 1, females = 1, males = 0, young = 1), animals.herdCounts(farmA, "sheep", "active", today))
+        assertEquals(1, animals.countBySpecies(farmA, "sheep"))
     }
 }

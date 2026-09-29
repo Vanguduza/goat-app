@@ -80,7 +80,7 @@ fun PoultryExperienceScreen(
     var page by remember { mutableStateOf(PoultryPage.DASHBOARD) }
     val home = { page = PoultryPage.DASHBOARD }
     when (page) {
-        PoultryPage.DASHBOARD -> PoultryDashboard(enabledKinds, houses, placements, flockDays, hatches, error, { page = it }, onBack)
+        PoultryPage.DASHBOARD -> PoultryDashboard(enabledKinds, houses, records.flockCount, flockDays, hatches, error, { page = it }, onBack)
         PoultryPage.KINDS -> PoultryKinds(enabledKinds, busy, error, onEnableKind, home)
         PoultryPage.HOUSES -> PoultryHouses(houses, busy, error, onCreateHouse, home)
         PoultryPage.FLOCKS -> PoultryRows("FOS-POULTRY-004", "Flocks", placements, "No flock placements yet", error, home)
@@ -107,7 +107,7 @@ fun PoultryExperienceScreen(
 private fun PoultryDashboard(
     enabledKinds: List<String>,
     houses: List<String>,
-    placements: List<String>,
+    flockCount: Int?,
     flockDays: List<String>,
     hatches: List<String>,
     error: String?,
@@ -127,7 +127,8 @@ private fun PoultryDashboard(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PoultryMetric("Kinds", enabledKinds.size, Modifier.weight(1f))
                 PoultryMetric("Houses", houses.size, Modifier.weight(1f))
-                PoultryMetric("Flocks", placements.size, Modifier.weight(1f))
+                // Distinct flocks from the exhaustive placement aggregate, not the bounded placement rows.
+                PoultryMetric("Flocks", flockCount, Modifier.weight(1f))
                 PoultryMetric("Hatches", hatches.size, Modifier.weight(1f))
             }
             PoultryAction("Enabled kinds", "Chicken, duck, turkey, quail and farm-defined kinds") { onOpen(PoultryPage.KINDS) }
@@ -158,11 +159,11 @@ private fun PoultryDashboard(
 @Composable
 private fun PoultryMetric(
     label: String,
-    value: Int,
+    value: Int?,
     modifier: Modifier,
 ) {
     FarmIllustratedSectionSurface(modifier) {
-        Text(value.toString(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(value?.toString() ?: "—", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text(label, style = MaterialTheme.typography.labelMedium)
     }
 }

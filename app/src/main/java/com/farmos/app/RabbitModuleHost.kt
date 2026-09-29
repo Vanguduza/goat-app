@@ -44,6 +44,7 @@ fun RabbitModuleHost(
     var rabbitRows by remember { mutableStateOf(emptyList<String>()) }
     var nestBoxRows by remember { mutableStateOf(emptyList<String>()) }
     var records by remember(farmId) { mutableStateOf(RabbitRecords()) }
+    var rabbitCount by remember(farmId) { mutableStateOf<Int?>(null) }
 
     suspend fun refresh() {
         val cageEntities = ops.cages()
@@ -61,6 +62,7 @@ fun RabbitModuleHost(
             }
         }
         records = loadRecords()
+        rabbitCount = rabbitHerd.listedTotal()
     }
 
     LaunchedEffect(farmId) { runCatching { refresh() } }
@@ -198,5 +200,6 @@ fun RabbitModuleHost(
         },
         onBack = onBack,
         records = records,
+        rabbitCount = rabbitCount,
     )
 }
