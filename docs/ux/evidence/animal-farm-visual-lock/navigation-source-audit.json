@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "8a28e86d7ea80ac41a43bbfd5d8af134df79cc9e",
+  "tested_commit": "882278608bd30c5f8bc7a0f0bb784d87d4d2d9b6",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 183
+    "registered_ids_mentioned_in_kotlin": 190
   },
   "top_level": {
     "farm_modules": [
@@ -473,8 +473,8 @@
       "states": [
         {
           "value": "DASHBOARD",
-          "refs": 3,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -497,8 +497,8 @@
         },
         {
           "value": "TREATMENT",
-          "refs": 3,
-          "transition_refs": 1,
+          "refs": 8,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -539,14 +539,56 @@
         },
         {
           "value": "VET_VISIT",
-          "refs": 3,
-          "transition_refs": 1,
+          "refs": 7,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
           "value": "LAB_RESULT",
-          "refs": 3,
+          "refs": 7,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "TREATMENT_RECORDS",
+          "refs": 2,
           "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "TREATMENT_DETAIL",
+          "refs": 3,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WITHDRAWAL_DETAIL",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "VET_VISITS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "VET_VISIT_DETAIL",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LAB_RESULTS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LAB_RESULT_DETAIL",
+          "refs": 2,
+          "transition_refs": 0,
           "render_only_candidate": false
         }
       ]
