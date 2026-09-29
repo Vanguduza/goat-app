@@ -43,8 +43,10 @@ class PoultryFlockQueryTest {
         lifecycle.insertHatch(PoultryHatchEntity("h-in", farmA, "chicken", null, null, 100, 21, 2, "hatched", null, null, null, 88, 2, "g1"))
         lifecycle.insertHatch(PoultryHatchEntity("h-other", farmA, "chicken", null, null, 100, 21, 2, "set", null, null, null, null, null, null))
         val days = database.poultryFlockDays()
+        // One flock-day per farm, flock and day is enforced by a unique index; order is newest day first.
+        days.insert(PoultryFlockDayEntity("d-a", farmA, "g1", 1, 0, 0, 0, occurredEpochDay = 8))
         days.insert(PoultryFlockDayEntity("d-b", farmA, "g1", 1, 0, 0, 0, occurredEpochDay = 9))
-        days.insert(PoultryFlockDayEntity("d-a", farmA, "g1", 1, 0, 0, 0, occurredEpochDay = 9))
+        days.insert(PoultryFlockDayEntity("d-farmB", farmB, "g1", 1, 0, 0, 0, occurredEpochDay = 9))
 
         assertEquals(520, lifecycle.placementsForGroup(farmA, "g1").size)
         assertEquals("a519", lifecycle.placementsForGroup(farmA, "g1").first().id)
@@ -53,6 +55,7 @@ class PoultryFlockQueryTest {
         assertEquals(listOf("w1"), lifecycle.walksForGroup(farmA, "g1").map { it.id })
         assertEquals(listOf("h-in"), lifecycle.hatchesPlacedInto(farmA, "g1").map { it.id })
         assertEquals(emptyList<String>(), lifecycle.hatchesPlacedInto(farmB, "g1").map { it.id })
-        assertEquals(listOf("d-a", "d-b"), days.forGroup(farmA, "g1").map { it.id })
+        assertEquals(listOf("d-b", "d-a"), days.forGroup(farmA, "g1").map { it.id })
+        assertEquals(listOf("d-farmB"), days.forGroup(farmB, "g1").map { it.id })
     }
 }
