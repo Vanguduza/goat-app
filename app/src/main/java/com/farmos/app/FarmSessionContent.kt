@@ -232,6 +232,7 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadRecords = { loadFeedRecords(app.database, membership.farmId) },
             )
             FarmModule.WATER -> WaterModuleHost(
                 farmId = membership.farmId,

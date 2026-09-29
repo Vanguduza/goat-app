@@ -37,6 +37,7 @@ RENDERED_TRAVERSAL_TESTS = (
     "app/src/test/java/com/farmos/app/PastureRecordRuntimeNavigationTest.kt",
     "app/src/test/java/com/farmos/app/GroupRecordRuntimeNavigationTest.kt",
     "app/src/test/java/com/farmos/app/SyncMutationTraceRuntimeNavigationTest.kt",
+    "app/src/test/java/com/farmos/app/FeedRecordRuntimeNavigationTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHealthRuntimeNavigationTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt",
