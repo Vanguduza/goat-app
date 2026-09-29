@@ -5,6 +5,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -56,5 +57,43 @@ class GlobalSearchContractTest {
             .performScrollTo()
             .performClick()
         compose.runOnIdle { assertEquals(result, opened) }
+    }
+
+    @Test
+    fun searchWithNoMatchesShowsTheSearchEmptyState() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GlobalSearchScreen(
+                    busy = false,
+                    searched = true,
+                    message = "0 local result(s)",
+                    results = emptyList(),
+                    onSearch = {},
+                    onOpenResult = {},
+                    onBack = {},
+                )
+            }
+        }
+        compose.onNodeWithTag("farm-screen:FOS-HOME-007").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-031").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("No matching animal records.").assertExists()
+    }
+
+    @Test
+    fun searchWithMatchesShowsNoEmptyState() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GlobalSearchScreen(
+                    busy = false,
+                    searched = true,
+                    message = "1 local result(s)",
+                    results = listOf(GlobalSearchResultUi("goat-nala", "goat", "GT-024", "Nala", "active", "local")),
+                    onSearch = {},
+                    onOpenResult = {},
+                    onBack = {},
+                )
+            }
+        }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-031").assertDoesNotExist()
     }
 }

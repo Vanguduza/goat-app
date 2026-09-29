@@ -33,6 +33,7 @@ object FarmFeedbackAtoms {
     const val ERROR_RECOVERY = "farm-atom:FOS-ATOM-033"
     const val OFFLINE_SAVE_RECEIPT = "farm-atom:FOS-ATOM-034"
     const val SYNC_PENDING_RECEIPT = "farm-atom:FOS-ATOM-035"
+    const val SEARCH_EMPTY_STATE = "farm-atom:FOS-ATOM-031"
 }
 
 /**
@@ -106,5 +107,17 @@ private fun FarmReceiptSurface(tag: String, modifier: Modifier, content: @Compos
         border = BorderStroke(FosDimens.Hairline, colors.divider),
     ) {
         Column(Modifier.padding(FosDimens.CardPadding), verticalArrangement = Arrangement.spacedBy(FosDimens.Grid)) { content() }
+    }
+}
+
+/**
+ * FOS-ATOM-031 — a search that matched nothing. It states the empty result for this farm only and
+ * how to search differently; it never suggests records exist elsewhere.
+ */
+@Composable
+fun FarmSearchEmptyState(title: String, hint: String, modifier: Modifier = Modifier) {
+    Column(modifier.fillMaxWidth().testTag(FarmFeedbackAtoms.SEARCH_EMPTY_STATE), verticalArrangement = Arrangement.spacedBy(FosDimens.Grid)) {
+        Text(title, fontWeight = FontWeight.SemiBold)
+        Text(hint, color = AnimalFarmTheme.colors.mutedInk)
     }
 }
