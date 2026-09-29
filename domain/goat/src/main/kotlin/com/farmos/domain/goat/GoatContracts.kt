@@ -259,7 +259,15 @@ object GoatValidator {
     }
 }
 
+/**
+ * Exhaustive herd counts, never derived from a bounded herd list. [active], [does], [bucks] and
+ * [kids] count active goats (kids: born fewer than 365 days before today); [notClosed] counts every
+ * goat the herd list can show (all statuses except closed).
+ */
+data class GoatHerdCounts(val active: Int, val does: Int, val bucks: Int, val kids: Int, val notClosed: Int)
+
 interface GoatRepository {
+    suspend fun herdCounts(todayEpochDay: Long): GoatHerdCounts
     suspend fun registerGoat(command: RegisterGoat, context: LocalCommandContext): LocalCommandResult
     suspend fun recordWeight(command: RecordGoatWeight, context: LocalCommandContext): LocalCommandResult
     suspend fun setStatus(command: SetGoatStatus, context: LocalCommandContext): LocalCommandResult
@@ -298,6 +306,8 @@ data class GoatSnapshot(
     val treatmentHistory: List<GoatTreatmentSample> = emptyList(),
     val withdrawalWindows: List<GoatWithdrawalSample> = emptyList(),
     val observationHistory: List<GoatObservationSample> = emptyList(),
+    val vetVisits: List<GoatVetVisitSample> = emptyList(),
+    val labResults: List<GoatLabResultSample> = emptyList(),
     val heatHistory: List<GoatHeatSample> = emptyList(),
     val matingHistory: List<GoatMatingSample> = emptyList(),
     val pregnancyHistory: List<GoatPregnancySample> = emptyList(),
@@ -381,6 +391,12 @@ data class GoatObservationSample(
     val redFlag: Boolean,
     val occurredAtEpochMillis: Long,
 )
+
+/** A vet visit recorded for this goat. */
+data class GoatVetVisitSample(val visitId: String, val reason: String, val attendingVet: String, val occurredEpochDay: Long)
+
+/** A lab result recorded for this goat, exactly as recorded; never interpreted. */
+data class GoatLabResultSample(val resultId: String, val testName: String, val resultText: String, val cellsPerMl: Int?, val occurredEpochDay: Long)
 
 data class SccSample(
     val recordId: String,

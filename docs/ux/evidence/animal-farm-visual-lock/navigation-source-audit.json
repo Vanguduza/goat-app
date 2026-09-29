@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "325406912cb67f4120105a3f9dea83ae1c5a8b5d",
+  "tested_commit": "c2431e1c47081d95ef1009959a26db95597eeb56",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 232
+    "registered_ids_mentioned_in_kotlin": 234
   },
   "top_level": {
     "farm_modules": [
@@ -191,6 +191,18 @@
         },
         {
           "value": "WITHDRAWAL_STATUS",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "VET_VISITS",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LAB_RESULTS",
           "refs": 0,
           "transition_refs": 0,
           "render_only_candidate": false

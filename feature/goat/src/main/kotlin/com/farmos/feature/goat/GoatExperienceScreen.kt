@@ -187,11 +187,13 @@ private fun GoatDashboardScreen(
                 family = AnimalFarmFamily.GOAT,
             )
 
+            // Exhaustive counts when loaded; the herd list is bounded and is only a fallback.
+            val counts = state.herdCounts
             val metrics = listOf(
-                "Total" to active.size.toString(),
-                "Does" to does.toString(),
-                "Bucks" to bucks.toString(),
-                "Kids" to kids.toString(),
+                "Total" to (counts?.active ?: active.size).toString(),
+                "Does" to (counts?.does ?: does).toString(),
+                "Bucks" to (counts?.bucks ?: bucks).toString(),
+                "Kids" to (counts?.kids ?: kids).toString(),
             )
             BoxWithConstraints(Modifier.fillMaxWidth()) {
                 val twoColumns = maxWidth < 420.dp && LocalDensity.current.fontScale >= 1.5f
@@ -320,6 +322,9 @@ private fun GoatHerdScreen(
                     }
                 }
             }
+        }
+        state.herdCounts?.notClosed?.takeIf { it > state.herd.size }?.let { total ->
+            Text("Showing the first ${state.herd.size} of $total goats by tag.", modifier = Modifier.testTag("goat-herd-bounded"))
         }
         when (state.herdState) {
             LoadableSurfaceState.LOADING -> Text("Loading herd")

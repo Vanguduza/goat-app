@@ -37,6 +37,9 @@ data class AnimalEntity(
     val updatedAtEpochMillis: Long,
 )
 
+/** Exhaustive counts for one species and status; [young] counts animals born fewer than 365 days ago. */
+data class HerdCountRow(val active: Int, val females: Int, val males: Int, val young: Int)
+
 @Entity(
     tableName = "measurements",
     foreignKeys = [
@@ -238,6 +241,17 @@ interface AnimalDao {
         speciesCode: String,
         limit: Int,
     ): List<AnimalEntity>
+
+    @Query(
+        """
+        SELECT COUNT(*) AS active,
+            COALESCE(SUM(CASE WHEN sex = 'FEMALE' THEN 1 ELSE 0 END), 0) AS females,
+            COALESCE(SUM(CASE WHEN sex = 'MALE' THEN 1 ELSE 0 END), 0) AS males,
+            COALESCE(SUM(CASE WHEN dateOfBirthEpochDay IS NOT NULL AND :todayEpochDay - dateOfBirthEpochDay < 365 THEN 1 ELSE 0 END), 0) AS young
+        FROM animals WHERE farmId = :farmId AND speciesCode = :speciesCode AND status = :status
+        """,
+    )
+    suspend fun herdCounts(farmId: String, speciesCode: String, status: String, todayEpochDay: Long): HerdCountRow
 
     /** Same filter as [listBySpecies] (every status except closed), counted over all rows. */
     @Query("SELECT COUNT(*) FROM animals WHERE farmId = :farmId AND speciesCode = :speciesCode AND status != 'closed'")

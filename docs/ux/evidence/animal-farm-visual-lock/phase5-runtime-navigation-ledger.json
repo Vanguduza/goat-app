@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "325406912cb67f4120105a3f9dea83ae1c5a8b5d",
-  "source_fingerprint": "sha256:9aa887b91e93eaa4e56d6a86fb3f9bc7b0c36d5e9eafa6fddafa7e0f7d2cf2bd",
+  "tested_commit": "c2431e1c47081d95ef1009959a26db95597eeb56",
+  "source_fingerprint": "sha256:062b4a40dc094483a0e4fc9f29e075284a6ba6d7fa91cd7c1f2b7670228e5d78",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36553364613,
+  "foundation_run_id": 36555911644,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -155,7 +155,9 @@
       "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHealthRuntimeNavigationTest.kt": [
         "FOS-GOAT-025",
         "FOS-GOAT-026",
-        "FOS-GOAT-027"
+        "FOS-GOAT-027",
+        "FOS-GOAT-028",
+        "FOS-GOAT-029"
       ],
       "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt": [
         "FOS-GOAT-030",
@@ -363,10 +365,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 25,
-    "rendered_traversal_screen_count": 167,
+    "rendered_traversal_screen_count": 169,
     "rendered_owner_screen_count": 31,
     "route_contract_screen_count": 59,
-    "combined_screen_count": 232,
+    "combined_screen_count": 234,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -438,6 +440,8 @@
       "FOS-GOAT-025",
       "FOS-GOAT-026",
       "FOS-GOAT-027",
+      "FOS-GOAT-028",
+      "FOS-GOAT-029",
       "FOS-GOAT-030",
       "FOS-GOAT-035",
       "FOS-GOAT-038",
@@ -679,12 +683,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 167,
+    "runtime_reachability_executed": 169,
     "entry_action_emission_executed": 25,
     "rendered_surface_owners_executed": 31,
     "route_contracts_executed": 59,
     "parameter_scope_executed": true,
-    "return_restoration_executed": 167,
+    "return_restoration_executed": 169,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {

@@ -60,6 +60,7 @@ fun GoatModuleHost(
     var error by remember { mutableStateOf<String?>(null) }
     var herdState by remember { mutableStateOf(LoadableSurfaceState.LOADING) }
     var pendingSyncCount by remember { mutableStateOf(0L) }
+    var herdCounts by remember { mutableStateOf<com.farmos.domain.goat.GoatHerdCounts?>(null) }
 
     suspend fun refreshGoatState() {
         herdState = LoadableSurfaceState.LOADING
@@ -85,6 +86,8 @@ fun GoatModuleHost(
             error = failure.message
             herdState = LoadableSurfaceState.ERROR
         }
+        // Exhaustive counts; on failure the dashboard falls back to the bounded herd list.
+        herdCounts = runCatching { repository.herdCounts(java.time.LocalDate.now().toEpochDay()) }.getOrNull()
     }
 
     suspend fun refreshMembershipAfterAuthorizationLoss(message: String) {
@@ -120,6 +123,7 @@ fun GoatModuleHost(
         state = GoatSliceUiState(
             animalId = selectedGoatId,
             herd = herd,
+            herdCounts = herdCounts,
             selected = selected,
             farmName = farmName,
             pendingSyncCount = pendingSyncCount,

@@ -6,6 +6,8 @@ import com.farmos.domain.goat.GoatSnapshot
 data class GoatSliceUiState(
     val farmName: String? = null,
     val herd: List<GoatSnapshot> = emptyList(),
+    /** Exhaustive herd counts; null until loaded, when the bounded [herd] list is the only source. */
+    val herdCounts: com.farmos.domain.goat.GoatHerdCounts? = null,
     val herdState: LoadableSurfaceState = LoadableSurfaceState.IDLE,
     val selected: GoatSnapshot? = null,
     val animalId: String? = null,
