@@ -283,6 +283,16 @@ interface LifecycleDao {
     @Upsert suspend fun upsertWithdrawal(row: WithdrawalWindowEntity)
     @Query("SELECT * FROM withdrawal_windows WHERE farmId = :farmId ORDER BY endsEpochDay DESC LIMIT :limit")
     suspend fun withdrawals(farmId: String, limit: Int): List<WithdrawalWindowEntity>
+    /** Windows reach an animal only through its treatment; both sides stay inside the farm. */
+    @Query(
+        """
+        SELECT w.* FROM withdrawal_windows AS w
+        JOIN health_treatments AS t ON t.id = w.treatmentId AND t.farmId = w.farmId
+        WHERE w.farmId = :farmId AND t.animalId = :animalId
+        ORDER BY w.endsEpochDay DESC, w.id
+        """,
+    )
+    suspend fun withdrawalsForAnimal(farmId: String, animalId: String): List<WithdrawalWindowEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMilk(row: GoatMilkEntity)
     @Upsert suspend fun upsertMilk(row: GoatMilkEntity)
     @Query("SELECT * FROM goat_milk_records WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC")

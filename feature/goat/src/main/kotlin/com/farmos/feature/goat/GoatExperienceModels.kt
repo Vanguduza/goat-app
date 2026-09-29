@@ -26,6 +26,9 @@ internal enum class GoatPage {
     LACTATION_HISTORY,
     SCC_HISTORY,
     FAMACHA_HISTORY,
+    HEALTH_SUMMARY,
+    TREATMENT_HISTORY,
+    WITHDRAWAL_STATUS,
 }
 
 internal data class GoatExperienceActions(

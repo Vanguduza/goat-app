@@ -295,7 +295,37 @@ data class GoatSnapshot(
     val milkHistory: List<MilkSample> = emptyList(),
     val bcsHistory: List<BcsSample> = emptyList(),
     val sccHistory: List<SccSample> = emptyList(),
+    val treatmentHistory: List<GoatTreatmentSample> = emptyList(),
+    val withdrawalWindows: List<GoatWithdrawalSample> = emptyList(),
+    val observationHistory: List<GoatObservationSample> = emptyList(),
     val syncPending: Boolean,
+)
+
+/** A recorded treatment for this goat, read from the shared health ledger. */
+data class GoatTreatmentSample(
+    val treatmentId: String,
+    val reason: String,
+    val productName: String?,
+    val meatWithdrawalDays: Int?,
+    val milkWithdrawalDays: Int?,
+    val occurredAtEpochMillis: Long,
+)
+
+/** A withdrawal window created by one of this goat's treatments. */
+data class GoatWithdrawalSample(
+    val windowId: String,
+    val treatmentId: String,
+    val product: String,
+    val windowKind: String,
+    val endsEpochDay: Long,
+)
+
+data class GoatObservationSample(
+    val observationId: String,
+    val signs: String,
+    val firstAidApplied: String?,
+    val redFlag: Boolean,
+    val occurredAtEpochMillis: Long,
 )
 
 data class SccSample(

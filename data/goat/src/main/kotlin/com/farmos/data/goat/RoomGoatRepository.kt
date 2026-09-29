@@ -31,6 +31,9 @@ import com.farmos.domain.goat.RecordGoatPregnancy
 import com.farmos.domain.goat.PlanGoatLactation
 import com.farmos.domain.goat.RegisterGoatKid
 import com.farmos.domain.goat.SccSample
+import com.farmos.domain.goat.GoatObservationSample
+import com.farmos.domain.goat.GoatTreatmentSample
+import com.farmos.domain.goat.GoatWithdrawalSample
 import com.farmos.domain.goat.RecordGoatFamacha
 import com.farmos.domain.goat.RecordGoatKidding
 import com.farmos.domain.goat.RecordGoatMilk
@@ -492,6 +495,22 @@ class RoomGoatRepository(
             },
             sccHistory = database.lifecycle().goatSccFor(farmId, animalId).map { row ->
                 SccSample(row.id, row.cellsPerMl, row.dimDays, row.occurredEpochDay)
+            },
+            treatmentHistory = database.treatments().forAnimal(farmId, animalId).map { row ->
+                GoatTreatmentSample(
+                    treatmentId = row.id,
+                    reason = row.reason,
+                    productName = database.formulary().get(farmId, row.formularyItemId)?.productName,
+                    meatWithdrawalDays = row.meatWithdrawalDays,
+                    milkWithdrawalDays = row.milkWithdrawalDays,
+                    occurredAtEpochMillis = row.occurredAtEpochMillis,
+                )
+            },
+            withdrawalWindows = database.lifecycle().withdrawalsForAnimal(farmId, animalId).map { row ->
+                GoatWithdrawalSample(row.id, row.treatmentId, row.product, row.windowKind, row.endsEpochDay)
+            },
+            observationHistory = database.healthObservations().forAnimal(farmId, animalId).map { row ->
+                GoatObservationSample(row.id, row.signs, row.firstAidApplied, row.redFlag, row.occurredAtEpochMillis)
             },
             syncPending = database.outbox().hasPending(farmId, animalId),
         )
