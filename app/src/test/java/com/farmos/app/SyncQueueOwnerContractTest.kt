@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -202,4 +203,27 @@ class SyncQueueOwnerContractTest {
         serverEventId = null,
         serverStreamVersion = null,
     )
+
+    @Test
+    fun failedQueueLoadRecoversOnRetry() {
+        var loads = 0
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                SyncQueueHost(
+                    view = SyncQueueView.CONFLICTS,
+                    permitted = true,
+                    loadRows = { if (++loads == 1) error("database unavailable") else listOf(row("m-conflict", "CONFLICT", attempts = 1, error = "CONFLICT")) },
+                    onSelectView = {},
+                    onBack = {},
+                    zone = ZoneOffset.UTC,
+                )
+            }
+        }
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-033").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("database unavailable").assertExists()
+        compose.onNode(hasClickAction() and hasText("Try again")).performScrollTo().performClick()
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("sync-queue-row:m-conflict").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-033").assertDoesNotExist()
+        compose.runOnIdle { assertEquals(2, loads) }
+    }
 }
