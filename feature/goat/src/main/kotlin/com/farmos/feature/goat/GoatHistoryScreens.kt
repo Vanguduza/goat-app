@@ -53,6 +53,8 @@ internal val goatHistoryPages = setOf(
     GoatPage.HEALTH_SUMMARY,
     GoatPage.TREATMENT_HISTORY,
     GoatPage.WITHDRAWAL_STATUS,
+    GoatPage.VET_VISITS,
+    GoatPage.LAB_RESULTS,
     GoatPage.DOE_REPRODUCTION,
     GoatPage.PEDIGREE,
     GoatPage.KIDDING_DETAIL,
@@ -80,6 +82,8 @@ internal fun GoatHistoryPage(
         GoatPage.HEALTH_SUMMARY -> GoatHealthSummaryScreen(goat, today, onOpen, onBack)
         GoatPage.TREATMENT_HISTORY -> GoatTreatmentHistoryScreen(goat, onBack)
         GoatPage.WITHDRAWAL_STATUS -> GoatWithdrawalStatusScreen(goat, today, onBack)
+        GoatPage.VET_VISITS -> GoatVetVisitsScreen(goat, onBack)
+        GoatPage.LAB_RESULTS -> GoatLabResultsScreen(goat, onBack)
         GoatPage.DOE_REPRODUCTION -> GoatDoeReproductionScreen(goat, onOpen, onOpenKidding, onBack)
         GoatPage.KIDDING_DETAIL -> GoatKiddingDetailScreen(goat, selectedKiddingId, onBack)
         GoatPage.KID_PROFILE -> GoatKidProfileScreen(goat, onBack)
@@ -102,6 +106,8 @@ internal fun GoatRecordLinks(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
             add("Health summary" to GoatPage.HEALTH_SUMMARY)
             add("Treatment history" to GoatPage.TREATMENT_HISTORY)
             add("Withdrawal status" to GoatPage.WITHDRAWAL_STATUS)
+            add("Vet visits" to GoatPage.VET_VISITS)
+            add("Lab results" to GoatPage.LAB_RESULTS)
             if (goat.sex == GoatSex.FEMALE) add("Breeding records" to GoatPage.DOE_REPRODUCTION)
             add("Pedigree" to GoatPage.PEDIGREE)
             if (goat.birthRecord != null) add("Birth record" to GoatPage.KID_PROFILE)

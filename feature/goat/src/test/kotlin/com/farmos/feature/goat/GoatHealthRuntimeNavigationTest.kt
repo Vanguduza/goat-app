@@ -11,10 +11,12 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.domain.goat.GoatLabResultSample
 import com.farmos.domain.goat.GoatObservationSample
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.GoatSnapshot
 import com.farmos.domain.goat.GoatTreatmentSample
+import com.farmos.domain.goat.GoatVetVisitSample
 import com.farmos.domain.goat.GoatWithdrawalSample
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
@@ -64,6 +66,16 @@ class GoatHealthRuntimeNavigationTest {
             compose.onNodeWithTag("goat-withdrawal-ended:t-old:milk").assertExists()
             compose.onNodeWithText("Ended 2026-08-20").assertExists()
         }
+        traverse("Vet visits", "FOS-GOAT-028") {
+            compose.onNodeWithTag("goat-vet-visit:v2").assertExists()
+            compose.onNodeWithText("Dr Moyo").assertExists()
+            compose.onNodeWithText("Lameness check").assertExists()
+        }
+        traverse("Lab results", "FOS-GOAT-029") {
+            compose.onNodeWithText("CAE ELISA").assertExists()
+            compose.onNodeWithText("Negative for CAE").assertExists()
+            compose.onNodeWithText("350,000 cells/mL").assertExists()
+        }
     }
 
     @Test
@@ -79,7 +91,13 @@ class GoatHealthRuntimeNavigationTest {
 
     @Test
     fun noActiveWithdrawalIsStatedWithoutClaimingClearance() {
-        render(goatWithHealth().copy(withdrawalWindows = emptyList(), treatmentHistory = emptyList(), observationHistory = emptyList()))
+        render(goatWithHealth().copy(withdrawalWindows = emptyList(), treatmentHistory = emptyList(), observationHistory = emptyList(), vetVisits = emptyList(), labResults = emptyList()))
+        traverse("Vet visits", "FOS-GOAT-028") {
+            compose.onNodeWithText("No vet visits recorded for this goat on this device.").assertExists()
+        }
+        traverse("Lab results", "FOS-GOAT-029") {
+            compose.onNodeWithText("No lab results recorded for this goat on this device.").assertExists()
+        }
         traverse("Withdrawal status", "FOS-GOAT-027") {
             compose.onNodeWithText("No active withdrawal windows recorded on this device.").assertExists()
         }
@@ -167,6 +185,11 @@ class GoatHealthRuntimeNavigationTest {
             observationHistory = listOf(
                 GoatObservationSample("o1", "Pale gums, weak", null, true, millis(LocalDate.of(2026, 9, 22))),
             ),
+            vetVisits = listOf(
+                GoatVetVisitSample("v2", "Lameness check", "Dr Moyo", LocalDate.of(2026, 9, 24).toEpochDay()),
+                GoatVetVisitSample("v1", "Pregnancy check", "Dr Banda", LocalDate.of(2026, 8, 2).toEpochDay()),
+            ),
+            labResults = listOf(GoatLabResultSample("l1", "CAE ELISA", "Negative for CAE", 350_000, LocalDate.of(2026, 9, 12).toEpochDay())),
             syncPending = false,
         )
     }

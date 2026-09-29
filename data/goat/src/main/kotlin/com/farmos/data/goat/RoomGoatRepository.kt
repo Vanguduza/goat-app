@@ -519,6 +519,12 @@ class RoomGoatRepository(
             observationHistory = database.healthObservations().forAnimal(farmId, animalId).map { row ->
                 GoatObservationSample(row.id, row.signs, row.firstAidApplied, row.redFlag, row.occurredAtEpochMillis)
             },
+            vetVisits = database.lifecycle().vetVisitsForAnimal(farmId, animalId).map { row ->
+                com.farmos.domain.goat.GoatVetVisitSample(row.id, row.reason, row.attendingVet, row.occurredEpochDay)
+            },
+            labResults = database.lifecycle().labResultsForAnimal(farmId, animalId).map { row ->
+                com.farmos.domain.goat.GoatLabResultSample(row.id, row.testName, row.resultText, row.cellsPerMl, row.occurredEpochDay)
+            },
             heatHistory = database.lifecycle().goatHeatsFor(farmId, animalId).map { row ->
                 GoatHeatSample(row.id, row.occurredEpochDay)
             },

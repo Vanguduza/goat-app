@@ -17,13 +17,15 @@ import com.farmos.core.design.AnimalFarmEmptyState
 import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.AnimalFarmWarningSurface
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.domain.goat.GoatLabResultSample
 import com.farmos.domain.goat.GoatSnapshot
 import com.farmos.domain.goat.GoatTreatmentSample
+import com.farmos.domain.goat.GoatVetVisitSample
 import com.farmos.domain.goat.GoatWithdrawalSample
 import java.time.LocalDate
 
 /**
- * Read-only goat health records (FOS-GOAT-025/026/027) projected from the shared health ledger.
+ * Read-only goat health records (FOS-GOAT-025/026/027/028/029) projected from the shared health ledger.
  * These pages never treat, prescribe or clear a withdrawal; they show what is recorded locally.
  */
 internal object GoatHealthRecords {
@@ -78,6 +80,8 @@ internal fun GoatHealthSummaryScreen(
             GoatHistoryRow("Active withdrawals", active.size.toString())
             GoatHistoryRow("Treatments recorded", subject.treatmentHistory.size.toString())
             GoatHistoryRow("Observations recorded", subject.observationHistory.size.toString())
+            GoatHistoryRow("Vet visits recorded", subject.vetVisits.size.toString())
+            GoatHistoryRow("Lab results recorded", subject.labResults.size.toString())
             subject.famachaHistory.maxByOrNull { it.occurredEpochDay }?.let {
                 GoatHistoryRow("Latest FAMACHA · ${LocalDate.ofEpochDay(it.occurredEpochDay)}", "Score ${it.score}")
             }
@@ -99,11 +103,58 @@ internal fun GoatHealthSummaryScreen(
                 "Withdrawal status" to GoatPage.WITHDRAWAL_STATUS,
                 "Treatment history" to GoatPage.TREATMENT_HISTORY,
                 "FAMACHA history" to GoatPage.FAMACHA_HISTORY,
+                "Vet visits" to GoatPage.VET_VISITS,
+                "Lab results" to GoatPage.LAB_RESULTS,
             ).forEach { (label, page) ->
                 TextButton(
                     onClick = { onOpen(page) },
                     modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
                 ) { Text(label, maxLines = 1, softWrap = false) }
+            }
+        }
+    }
+}
+
+/** FOS-GOAT-028 — vet visits recorded for this goat, newest first. */
+@Composable
+internal fun GoatVetVisitsScreen(goat: GoatSnapshot?, onBack: () -> Unit) {
+    GoatHistoryFrame("Vet visits", "FOS-GOAT-028", goat, onBack) { subject ->
+        val visits = subject.vetVisits.sortedWith(compareByDescending<GoatVetVisitSample> { it.occurredEpochDay }.thenBy { it.visitId })
+        if (visits.isEmpty()) {
+            AnimalFarmEmptyState("No vet visits recorded for this goat on this device.")
+            return@GoatHistoryFrame
+        }
+        FarmIllustratedSectionSurface {
+            visits.forEachIndexed { index, visit ->
+                if (index > 0) HorizontalDivider()
+                Column(Modifier.fillMaxWidth().padding(vertical = 6.dp).testTag("goat-vet-visit:${visit.visitId}")) {
+                    Text(LocalDate.ofEpochDay(visit.occurredEpochDay).toString(), color = AnimalFarmTheme.colors.mutedInk)
+                    Text(visit.attendingVet, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                    Text(visit.reason)
+                }
+            }
+        }
+    }
+}
+
+/** FOS-GOAT-029 — lab results recorded for this goat, exactly as recorded, without interpretation. */
+@Composable
+internal fun GoatLabResultsScreen(goat: GoatSnapshot?, onBack: () -> Unit) {
+    GoatHistoryFrame("Lab results", "FOS-GOAT-029", goat, onBack) { subject ->
+        val results = subject.labResults.sortedWith(compareByDescending<GoatLabResultSample> { it.occurredEpochDay }.thenBy { it.resultId })
+        if (results.isEmpty()) {
+            AnimalFarmEmptyState("No lab results recorded for this goat on this device.")
+            return@GoatHistoryFrame
+        }
+        FarmIllustratedSectionSurface {
+            results.forEachIndexed { index, result ->
+                if (index > 0) HorizontalDivider()
+                Column(Modifier.fillMaxWidth().padding(vertical = 6.dp).testTag("goat-lab-result:${result.resultId}")) {
+                    Text(LocalDate.ofEpochDay(result.occurredEpochDay).toString(), color = AnimalFarmTheme.colors.mutedInk)
+                    Text(result.testName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                    Text(result.resultText)
+                    result.cellsPerMl?.let { Text("%,d cells/mL".format(it)) }
+                }
             }
         }
     }

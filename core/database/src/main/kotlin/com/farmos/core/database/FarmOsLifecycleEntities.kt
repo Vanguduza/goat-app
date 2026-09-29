@@ -495,6 +495,10 @@ interface LifecycleDao {
     suspend fun vetVisits(farmId: String, limit: Int): List<VetVisitEntity>
     @Query("SELECT * FROM lab_results WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun labResults(farmId: String, limit: Int): List<LabResultEntity>
+    @Query("SELECT * FROM vet_visits WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun vetVisitsForAnimal(farmId: String, animalId: String): List<VetVisitEntity>
+    @Query("SELECT * FROM lab_results WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun labResultsForAnimal(farmId: String, animalId: String): List<LabResultEntity>
     @Query("SELECT COUNT(*) FROM vet_visits WHERE farmId = :farmId")
     suspend fun vetVisitCount(farmId: String): Int
     @Query("SELECT COUNT(*) FROM lab_results WHERE farmId = :farmId")
