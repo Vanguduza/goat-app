@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:2b3da270dcc526a763a6f1c7b43416864cd2e3e15f4f6fb5a54817aaf4eb992c",
-  "runtime_evidence_tested_commit": "348a2d62f172a21166fdcc235cbe13787d7e4f88",
-  "runtime_evidence_run_id": 36527280738,
+  "source_fingerprint": "sha256:e7bbafaa9f752fb1066a0d683899d06ae847e3691128ffb1865117bb7d165568",
+  "runtime_evidence_tested_commit": "db4c4ec6bcd0e0f0863eeac18ff37c9dc787b026",
+  "runtime_evidence_run_id": 36529254131,
   "registry_screen_count": 545,
-  "route_screen_count": 197,
-  "unresolved_screen_count": 348,
+  "route_screen_count": 202,
+  "unresolved_screen_count": 343,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -145,13 +145,18 @@
     "FOS-POULTRY-001",
     "FOS-POULTRY-002",
     "FOS-POULTRY-004",
+    "FOS-POULTRY-005",
     "FOS-POULTRY-006",
+    "FOS-POULTRY-007",
     "FOS-POULTRY-008",
     "FOS-POULTRY-009",
+    "FOS-POULTRY-010",
     "FOS-POULTRY-014",
+    "FOS-POULTRY-015",
     "FOS-POULTRY-016",
     "FOS-POULTRY-017",
     "FOS-POULTRY-018",
+    "FOS-POULTRY-019",
     "FOS-POULTRY-020",
     "FOS-POULTRY-021",
     "FOS-PROC-001",
@@ -1827,6 +1832,17 @@
       }
     },
     {
+      "screen_id": "FOS-POULTRY-005",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-POULTRY-006",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -1834,6 +1850,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-POULTRY-007",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -1860,6 +1887,17 @@
       }
     },
     {
+      "screen_id": "FOS-POULTRY-010",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-POULTRY-014",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -1867,6 +1905,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-POULTRY-015",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -1900,6 +1949,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-POULTRY-019",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -2799,14 +2859,9 @@
     "FOS-PASTURE-010",
     "FOS-PASTURE-011",
     "FOS-POULTRY-003",
-    "FOS-POULTRY-005",
-    "FOS-POULTRY-007",
-    "FOS-POULTRY-010",
     "FOS-POULTRY-011",
     "FOS-POULTRY-012",
     "FOS-POULTRY-013",
-    "FOS-POULTRY-015",
-    "FOS-POULTRY-019",
     "FOS-POULTRY-022",
     "FOS-POULTRY-023",
     "FOS-POULTRY-024",

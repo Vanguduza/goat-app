@@ -2,11 +2,11 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:2b3da270dcc526a763a6f1c7b43416864cd2e3e15f4f6fb5a54817aaf4eb992c",
+  "source_fingerprint": "sha256:e7bbafaa9f752fb1066a0d683899d06ae847e3691128ffb1865117bb7d165568",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 65,
-  "features_fully_route_bound": 19,
+  "features_fully_route_bound": 20,
   "features_without_route_evidence": 91,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
@@ -1054,13 +1054,13 @@
         "FOS-POULTRY-001",
         "FOS-POULTRY-002",
         "FOS-POULTRY-004",
+        "FOS-POULTRY-005",
         "FOS-POULTRY-006",
+        "FOS-POULTRY-007",
         "FOS-POULTRY-008"
       ],
       "unresolved_screen_ids": [
-        "FOS-POULTRY-003",
-        "FOS-POULTRY-005",
-        "FOS-POULTRY-007"
+        "FOS-POULTRY-003"
       ],
       "headless_contract": null,
       "coverage_state": "PARTIAL_ROUTE_COVERAGE",
@@ -1078,10 +1078,10 @@
         "FOS-POULTRY-012"
       ],
       "route_screen_ids": [
-        "FOS-POULTRY-009"
+        "FOS-POULTRY-009",
+        "FOS-POULTRY-010"
       ],
       "unresolved_screen_ids": [
-        "FOS-POULTRY-010",
         "FOS-POULTRY-011",
         "FOS-POULTRY-012"
       ],
@@ -1102,11 +1102,11 @@
       ],
       "route_screen_ids": [
         "FOS-POULTRY-014",
+        "FOS-POULTRY-015",
         "FOS-POULTRY-016"
       ],
       "unresolved_screen_ids": [
-        "FOS-POULTRY-013",
-        "FOS-POULTRY-015"
+        "FOS-POULTRY-013"
       ],
       "headless_contract": null,
       "coverage_state": "PARTIAL_ROUTE_COVERAGE",
@@ -1127,14 +1127,13 @@
       "route_screen_ids": [
         "FOS-POULTRY-017",
         "FOS-POULTRY-018",
+        "FOS-POULTRY-019",
         "FOS-POULTRY-020",
         "FOS-POULTRY-021"
       ],
-      "unresolved_screen_ids": [
-        "FOS-POULTRY-019"
-      ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {

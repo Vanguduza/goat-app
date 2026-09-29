@@ -19,6 +19,7 @@ import com.farmos.domain.ops.RecordPoultryHatch
 import com.farmos.domain.ops.RecordPoultryVaccination
 import com.farmos.domain.ops.SetPoultryHatch
 import com.farmos.feature.ops.PoultryExperienceScreen
+import com.farmos.feature.ops.PoultryRecords
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -31,8 +32,10 @@ fun PoultryModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadRecords: suspend () -> PoultryRecords = { PoultryRecords() },
 ) {
     val scope = rememberCoroutineScope()
+    var records by remember(farmId) { mutableStateOf(PoultryRecords()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var enabledKinds by remember { mutableStateOf(emptyList<String>()) }
@@ -49,6 +52,7 @@ fun PoultryModuleHost(
         flockDays = ops.recentFlockDays().map { "eggs ${it.eggs} · dead ${it.dead} · culls ${it.culls} · feed ${it.feedGrams} g" }
         hatches = ops.hatches().map { "${it.id} ${it.poultryKindCode} · ${it.eggsSet} eggs · ${it.status}" }
         vaccinations = ops.vaccinations().map { "${it.id} ${it.poultryKindCode} · flock ${it.groupId} · ${it.formularyItemId}" }
+        records = loadRecords()
     }
 
     LaunchedEffect(farmId) { runCatching { refresh() } }
@@ -172,5 +176,6 @@ fun PoultryModuleHost(
             }
         },
         onBack = onBack,
+        records = records,
     )
 }

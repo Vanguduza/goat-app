@@ -376,6 +376,8 @@ interface LifecycleDao {
     suspend fun placements(farmId: String, limit: Int = 50): List<PoultryPlacementEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertBiosecurity(row: PoultryBiosecurityEntity)
     @Upsert suspend fun upsertBiosecurity(row: PoultryBiosecurityEntity)
+    @Query("SELECT * FROM poultry_biosecurity_walks WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun biosecurityWalks(farmId: String, limit: Int): List<PoultryBiosecurityEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertHeat(row: GoatHeatEntity)
     @Upsert suspend fun upsertHeat(row: GoatHeatEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMating(row: GoatMatingEntity)

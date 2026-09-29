@@ -44,6 +44,11 @@ private enum class PoultryPage {
     HATCH_RESULT,
     VACCINATION,
     BIOSECURITY,
+    FLOCK_PROFILE,
+    HOUSE_DETAIL,
+    EGG_PRODUCTION,
+    INCUBATION_BATCH,
+    BIOSECURITY_RECORDS,
 }
 
 /** Flock/house-first Poultry UX. Individual-bird CRUD is intentionally not the primary navigation model. */
@@ -67,6 +72,7 @@ fun PoultryExperienceScreen(
     onVaccinate: (groupId: String, poultryKind: String, formularyId: String, day: String) -> Unit,
     onBiosecurity: (houseId: String, groupId: String, findings: String, mixedSpecies: Boolean, day: String) -> Unit,
     onBack: () -> Unit,
+    records: PoultryRecords = PoultryRecords(),
 ) {
     var page by remember { mutableStateOf(PoultryPage.DASHBOARD) }
     val home = { page = PoultryPage.DASHBOARD }
@@ -83,6 +89,11 @@ fun PoultryExperienceScreen(
         PoultryPage.HATCH_RESULT -> PoultryHatchResult(busy, error, onRecordHatch, home)
         PoultryPage.VACCINATION -> PoultryVaccination(vaccinations, busy, error, onVaccinate, home)
         PoultryPage.BIOSECURITY -> PoultryBiosecurity(busy, error, onBiosecurity, home)
+        PoultryPage.FLOCK_PROFILE -> PoultryFlockProfileScreen(records, home)
+        PoultryPage.HOUSE_DETAIL -> PoultryHouseDetailScreen(records, home)
+        PoultryPage.EGG_PRODUCTION -> PoultryEggProductionScreen(records, home)
+        PoultryPage.INCUBATION_BATCH -> PoultryIncubationBatchScreen(records, home)
+        PoultryPage.BIOSECURITY_RECORDS -> PoultryBiosecurityDashboardScreen(records, home)
     }
 }
 
@@ -125,6 +136,11 @@ private fun PoultryDashboard(
             PoultryAction("Hatch result", "Record hatched and culled chicks") { onOpen(PoultryPage.HATCH_RESULT) }
             PoultryAction("Vaccination", "Use a vet-approved formulary item") { onOpen(PoultryPage.VACCINATION) }
             PoultryAction("Biosecurity", "Record house/flock findings") { onOpen(PoultryPage.BIOSECURITY) }
+            PoultryAction("Flock profiles", "Placement, daily records and losses per flock") { onOpen(PoultryPage.FLOCK_PROFILE) }
+            PoultryAction("House details", "Placements and biosecurity per house") { onOpen(PoultryPage.HOUSE_DETAIL) }
+            PoultryAction("Egg production", "Eggs recorded per flock and day") { onOpen(PoultryPage.EGG_PRODUCTION) }
+            PoultryAction("Incubation batches", "Egg set, candling and hatch as recorded") { onOpen(PoultryPage.INCUBATION_BATCH) }
+            PoultryAction("Biosecurity records", "Recorded walks and findings") { onOpen(PoultryPage.BIOSECURITY_RECORDS) }
             if (flockDays.isEmpty()) Text("No daily flock records yet.")
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             TextButton(onClick = onBack) { Text("Farm home") }
