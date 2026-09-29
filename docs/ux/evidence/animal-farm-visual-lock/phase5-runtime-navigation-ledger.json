@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "d7ab8cc041854eb62f1eedfc5c396400b85a9792",
-  "source_fingerprint": "sha256:ed7bcb9c0e8e2a51ea1ad928a5b0bda13d0083562ccbbe4d1113ce0116aa2ff3",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36612024936,
+  "tested_commit": "05e939908036a427267d50904dfb70d5594c07b8",
+  "source_fingerprint": "sha256:a308dff3825b53a06e7d5d0a605cfce6a5dbddaf2ea12e1aa545ab2991dad7e6",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -331,6 +331,15 @@
         "FOS-ATOM-011",
         "FOS-ATOM-034",
         "FOS-PROC-001"
+      ],
+      "app/src/test/java/com/farmos/app/AssetsCaptureOwnerTest.kt": [
+        "FOS-ASSET-001",
+        "FOS-ATOM-014"
+      ],
+      "app/src/test/java/com/farmos/app/PastureCaptureOwnerTest.kt": [
+        "FOS-ATOM-005",
+        "FOS-ATOM-007",
+        "FOS-PASTURE-001"
       ]
     },
     "route_contract": {
@@ -406,9 +415,9 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
     "rendered_traversal_screen_count": 187,
-    "rendered_owner_screen_count": 39,
+    "rendered_owner_screen_count": 44,
     "route_contract_screen_count": 60,
-    "combined_screen_count": 256,
+    "combined_screen_count": 259,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -627,8 +636,12 @@
       "FOS-WATER-009"
     ],
     "rendered_owner_screen_ids": [
+      "FOS-ASSET-001",
+      "FOS-ATOM-005",
+      "FOS-ATOM-007",
       "FOS-ATOM-009",
       "FOS-ATOM-011",
+      "FOS-ATOM-014",
       "FOS-ATOM-026",
       "FOS-ATOM-031",
       "FOS-ATOM-033",
@@ -658,6 +671,7 @@
       "FOS-HOME-006",
       "FOS-HOME-007",
       "FOS-HOME-009",
+      "FOS-PASTURE-001",
       "FOS-PROC-001",
       "FOS-SHEEP-010",
       "FOS-SYNC-003",
@@ -751,12 +765,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 187,
-    "entry_action_emission_executed": 26,
-    "rendered_surface_owners_executed": 39,
-    "route_contracts_executed": 60,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 187,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
