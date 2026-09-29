@@ -2,11 +2,11 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:584f193e176c39d8edba75d3cded1ab00d01b6f5a4d46fd7f9eda86646e597fe",
+  "source_fingerprint": "sha256:965bac4335335bc334325ee9ba3dbcf2dbec0ed074df309461111d2fac223659",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 79,
-  "features_fully_route_bound": 29,
+  "features_fully_route_bound": 30,
   "features_without_route_evidence": 77,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
@@ -337,15 +337,14 @@
       ],
       "route_screen_ids": [
         "FOS-GOAT-017",
+        "FOS-GOAT-018",
         "FOS-GOAT-019",
         "FOS-GOAT-020",
         "FOS-GOAT-021"
       ],
-      "unresolved_screen_ids": [
-        "FOS-GOAT-018"
-      ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {

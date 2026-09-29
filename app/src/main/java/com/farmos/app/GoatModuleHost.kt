@@ -28,6 +28,7 @@ import com.farmos.domain.goat.RegisterGoat
 import com.farmos.domain.goat.RegisterGoatKid
 import com.farmos.domain.goat.SetGoatStatus
 import com.farmos.feature.goat.GoatEntryPage
+import com.farmos.feature.goat.GoatLactationState
 import com.farmos.feature.goat.GoatSliceUiState
 import com.farmos.feature.goat.GoatVerticalSliceScreen
 import com.farmos.feature.goat.LoadableSurfaceState
@@ -61,6 +62,7 @@ fun GoatModuleHost(
     var herdState by remember { mutableStateOf(LoadableSurfaceState.LOADING) }
     var pendingSyncCount by remember { mutableStateOf(0L) }
     var herdCounts by remember { mutableStateOf<com.farmos.domain.goat.GoatHerdCounts?>(null) }
+    var lactation by remember { mutableStateOf<GoatLactationState>(GoatLactationState.Loading) }
 
     suspend fun refreshGoatState() {
         herdState = LoadableSurfaceState.LOADING
@@ -88,6 +90,8 @@ fun GoatModuleHost(
         }
         // Exhaustive counts; on failure the dashboard falls back to the bounded herd list.
         herdCounts = runCatching { repository.herdCounts(java.time.LocalDate.now().toEpochDay()) }.getOrNull()
+        lactation = runCatching { repository.lactationSummaries() }
+            .fold({ GoatLactationState.Loaded(it) }, { GoatLactationState.Failed(it.message ?: "Lactation records could not be loaded") })
     }
 
     suspend fun refreshMembershipAfterAuthorizationLoss(message: String) {
@@ -124,6 +128,7 @@ fun GoatModuleHost(
             animalId = selectedGoatId,
             herd = herd,
             herdCounts = herdCounts,
+            lactation = lactation,
             selected = selected,
             farmName = farmName,
             pendingSyncCount = pendingSyncCount,

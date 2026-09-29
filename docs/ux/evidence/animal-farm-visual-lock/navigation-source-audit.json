@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "4d01469f2fbeddda46a424f7bd7f3ee56d38527e",
+  "tested_commit": "b6aa87d77079ea5d2b7bf65e431511ec3bdb80df",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 245
+    "registered_ids_mentioned_in_kotlin": 246
   },
   "top_level": {
     "farm_modules": [
@@ -65,8 +65,8 @@
       "states": [
         {
           "value": "DASHBOARD",
-          "refs": 10,
-          "transition_refs": 9,
+          "refs": 11,
+          "transition_refs": 10,
           "render_only_candidate": false
         },
         {
@@ -161,8 +161,8 @@
         },
         {
           "value": "LACTATION_HISTORY",
-          "refs": 0,
-          "transition_refs": 0,
+          "refs": 1,
+          "transition_refs": 1,
           "render_only_candidate": false
         },
         {
@@ -215,6 +215,12 @@
         },
         {
           "value": "PREGNANCY_DASHBOARD",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LACTATION_DASHBOARD",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false

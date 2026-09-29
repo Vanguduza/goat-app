@@ -266,8 +266,28 @@ object GoatValidator {
  */
 data class GoatHerdCounts(val active: Int, val does: Int, val bucks: Int, val kids: Int, val notClosed: Int)
 
+/**
+ * Every milk record for one goat, aggregated exhaustively. Litres are sums of recorded milli-litres
+ * for this goat only; no yield curve, peak or projection is derived. [tag] is null when the goat
+ * record is not on this device.
+ */
+data class GoatLactationSummary(
+    val animalId: String,
+    val tag: String?,
+    val name: String?,
+    val status: String?,
+    val totalMilli: Long,
+    val recordCount: Int,
+    val firstEpochDay: Long,
+    val latestEpochDay: Long,
+    val latestDayMilli: Long,
+    val sccCount: Int,
+)
+
 interface GoatRepository {
     suspend fun herdCounts(todayEpochDay: Long): GoatHerdCounts
+    /** Exhaustive per-goat milk aggregates for every goat with milk recorded on this farm. */
+    suspend fun lactationSummaries(): List<GoatLactationSummary>
     suspend fun registerGoat(command: RegisterGoat, context: LocalCommandContext): LocalCommandResult
     suspend fun recordWeight(command: RecordGoatWeight, context: LocalCommandContext): LocalCommandResult
     suspend fun setStatus(command: SetGoatStatus, context: LocalCommandContext): LocalCommandResult

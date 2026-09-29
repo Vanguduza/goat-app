@@ -90,8 +90,12 @@ internal fun GoatPregnancyDashboardScreen(
     herd: List<GoatSnapshot>,
     onSelectDoe: (String) -> Unit,
     onBack: () -> Unit,
+    herdTotal: Int? = null,
 ) {
     IllustratedGoatPage("Pregnancy", "FOS-GOAT-035", onBack) {
+        goatHerdBoundNotice(herd.size, herdTotal)?.let {
+            Text(it, color = AnimalFarmTheme.colors.mutedInk, modifier = Modifier.testTag("goat-pregnancy-bounded"))
+        }
         val board = GoatReproductionRecords.pregnancyBoard(herd)
         if (board.isEmpty()) {
             AnimalFarmEmptyState("No active does on this device.")

@@ -589,6 +589,29 @@ class RoomGoatRepository(
         return com.farmos.domain.goat.GoatHerdCounts(row.active, row.females, row.males, row.young, database.animals().countBySpecies(farmId, "goat"))
     }
 
+    override suspend fun lactationSummaries(): List<com.farmos.domain.goat.GoatLactationSummary> {
+        val lifecycle = database.lifecycle()
+        val totals = lifecycle.goatMilkTotals(farmId)
+        val latestDay = lifecycle.goatMilkLatestDay(farmId).associate { it.animalId to it.litresMilli }
+        val scc = lifecycle.goatSccCounts(farmId).associate { it.key to it.count }
+        val animals = totals.map { it.animalId }.chunked(500).flatMap { database.animals().getMany(farmId, it) }.associateBy { it.id }
+        return totals.map { total ->
+            val animal = animals[total.animalId]
+            com.farmos.domain.goat.GoatLactationSummary(
+                animalId = total.animalId,
+                tag = animal?.tag,
+                name = animal?.name,
+                status = animal?.status,
+                totalMilli = total.totalMilli,
+                recordCount = total.recordCount,
+                firstEpochDay = total.firstEpochDay,
+                latestEpochDay = total.latestEpochDay,
+                latestDayMilli = latestDay[total.animalId] ?: 0,
+                sccCount = scc[total.animalId] ?: 0,
+            )
+        }
+    }
+
     override suspend fun listGoats(limit: Int): List<GoatSnapshot> =
         database.animals().listBySpecies(
             farmId = farmId,
