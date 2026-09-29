@@ -59,6 +59,7 @@ private enum class CattleOpsPage {
     HEALTH_SUMMARY,
     TIMELINE,
     GROWTH_HISTORY,
+    MOVEMENT_RECORD,
     BEEF_DASHBOARD,
     LOT_DETAIL,
 }
@@ -156,6 +157,7 @@ fun CattleOperationsScreen(
         CattleOpsPage.HEALTH_SUMMARY -> CattleRecordPageHost(CattleRecordPage.HEALTH_SUMMARY, selectedAnimalId, today, loadRecords, home)
         CattleOpsPage.TIMELINE -> CattleRecordPageHost(CattleRecordPage.TIMELINE, selectedAnimalId, today, loadRecords, home)
         CattleOpsPage.GROWTH_HISTORY -> CattleRecordPageHost(CattleRecordPage.GROWTH_HISTORY, selectedAnimalId, today, loadRecords, home)
+        CattleOpsPage.MOVEMENT_RECORD -> CattleRecordPageHost(CattleRecordPage.MOVEMENTS, selectedAnimalId, today, loadRecords, home)
         CattleOpsPage.BEEF_DASHBOARD -> CattleBeefDashboardScreen(loadLots, home)
         CattleOpsPage.LOT_DETAIL -> CattleLotDetailScreen(loadLots, home)
     }
@@ -199,6 +201,7 @@ private fun CattleOpsHome(
         FarmOperationalSection("Traceability") {
             CattleNav("Official identifier") { onOpen(CattleOpsPage.IDENTIFIER) }
             CattleNav("Movement") { onOpen(CattleOpsPage.MOVEMENT) }
+            CattleNav("Official movement record") { onOpen(CattleOpsPage.MOVEMENT_RECORD) }
             CattleNav("Pedigree link") { onOpen(CattleOpsPage.PEDIGREE) }
         }
         FarmOperationalSection("Beef / feedlot") {

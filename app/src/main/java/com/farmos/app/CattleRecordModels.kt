@@ -1,17 +1,20 @@
 package com.farmos.app
 
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.feature.ops.CattleIdentifierRow
 import com.farmos.feature.ops.CattleLotCloseView
 import com.farmos.feature.ops.CattleLotDaysView
 import com.farmos.feature.ops.CattleLotPlacementView
 import com.farmos.feature.ops.CattleLotView
 import com.farmos.feature.ops.CattleMilkRow
+import com.farmos.feature.ops.CattleMovementRow
 import com.farmos.feature.ops.CattleObservationRow
 import com.farmos.feature.ops.CattleRecords
 import com.farmos.feature.ops.CattleSccRow
 import com.farmos.feature.ops.CattleTimelineRow
 import com.farmos.feature.ops.CattleWithdrawalRow
 import com.farmos.feature.ops.WeightView
+import com.farmos.feature.ops.cattleMovementDirection
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -32,6 +35,7 @@ internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String,
     val weanings = lifecycle.cattleWeaningsFor(farmId, animalId)
     val treatments = database.treatments().forAnimal(farmId, animalId)
     val observations = database.healthObservations().forAnimal(farmId, animalId)
+    val movements = lifecycle.movementsForAnimal(farmId, animalId)
     val timeline = buildList {
         services.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "Service", it.method)) }
         pds.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "Pregnancy diagnosis", it.result)) }
@@ -46,6 +50,9 @@ internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String,
         weanings.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "Weaning", it.weightGrams?.let { g -> "${java.math.BigDecimal.valueOf(g, 3).stripTrailingZeros().toPlainString()} kg" } ?: "Weaned")) }
         treatments.forEach { add(CattleTimelineRow(it.id, day(it.occurredAtEpochMillis), "Treatment", it.reason)) }
         observations.forEach { add(CattleTimelineRow(it.id, day(it.occurredAtEpochMillis), "Observation", (if (it.redFlag) "Red flag · " else "") + it.signs)) }
+        movements.forEach {
+            add(CattleTimelineRow(it.id, it.occurredEpochDay, "Movement", "${cattleMovementDirection(it.direction)} · from ${it.fromPlace ?: "not recorded"} · to ${it.toPlace ?: "not recorded"}"))
+        }
     }.sortedWith(compareByDescending<CattleTimelineRow> { it.epochDay }.thenBy { it.kind }.thenBy { it.id })
     return CattleRecords(
         milk = milk.map { CattleMilkRow(it.id, it.occurredEpochDay, it.litresMilli) },
@@ -57,6 +64,8 @@ internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String,
         latestLocomotion = locomotion.firstOrNull()?.score,
         timeline = timeline,
         weights = database.measurements().history(farmId, animalId, "weight").map { WeightView(it.id, day(it.measuredAtEpochMillis), it.valueLong, it.unit) },
+        movements = movements.map { CattleMovementRow(it.id, it.occurredEpochDay, it.direction, it.fromPlace, it.toPlace) },
+        identifiers = lifecycle.identifiersForAnimal(farmId, animalId).map { CattleIdentifierRow(it.id, it.type, it.value, it.isActive, it.assignedEpochDay) },
     )
 }
 

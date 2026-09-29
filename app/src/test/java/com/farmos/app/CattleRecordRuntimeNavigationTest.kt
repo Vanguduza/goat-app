@@ -10,11 +10,13 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.feature.ops.CattleIdentifierRow
 import com.farmos.feature.ops.CattleLotCloseView
 import com.farmos.feature.ops.CattleLotDaysView
 import com.farmos.feature.ops.CattleLotPlacementView
 import com.farmos.feature.ops.CattleLotView
 import com.farmos.feature.ops.CattleMilkRow
+import com.farmos.feature.ops.CattleMovementRow
 import com.farmos.feature.ops.CattleObservationRow
 import com.farmos.feature.ops.CattleOperationsActions
 import com.farmos.feature.ops.CattleOperationsScreen
@@ -75,6 +77,23 @@ class CattleRecordRuntimeNavigationTest {
             compose.onNodeWithText("398 kg · 2026-09-20").assertExists()
             compose.onNodeWithText("+13 kg over 50 days").assertExists()
             compose.onNodeWithText("398 kg · -2 kg over 18 days").assertExists()
+        }
+        traverse("Official movement record", "FOS-CATTLE-031") {
+            compose.onNodeWithText("Identifiers · 2").assertExists()
+            compose.onNodeWithText("ZA-123-456").assertExists()
+            compose.onNodeWithText("ear_tag · assigned 2026-01-05 · inactive").assertExists()
+            compose.onNodeWithText("Movements · 2").assertExists()
+            compose.onNodeWithText("2026-09-10 · Moved off").assertExists()
+            compose.onNodeWithText("From Home farm · to not recorded").assertExists()
+            compose.onNodeWithText("From not recorded · to Home farm").assertExists()
+        }
+    }
+
+    @Test
+    fun movementRecordWithNothingRecordedSaysSo() {
+        render("cow-daisy") { CattleRecords() }
+        traverse("Official movement record", "FOS-CATTLE-031") {
+            compose.onNodeWithText("No identifiers or movements recorded for this animal on this device.").assertExists()
         }
     }
 
@@ -170,6 +189,14 @@ class CattleRecordRuntimeNavigationTest {
             WeightView("wt1", day(8, 1), 385_000, "g"),
             WeightView("wt2", day(9, 2), 400_000, "g"),
             WeightView("wt3", day(9, 20), 398_000, "g"),
+        ),
+        movements = listOf(
+            CattleMovementRow("mv2", day(9, 10), "off", "Home farm", null),
+            CattleMovementRow("mv1", day(3, 2), "on", null, "Home farm"),
+        ),
+        identifiers = listOf(
+            CattleIdentifierRow("i1", "official_id", "ZA-123-456", true, day(3, 1)),
+            CattleIdentifierRow("i0", "ear_tag", "Y-17", false, day(1, 5)),
         ),
     )
 

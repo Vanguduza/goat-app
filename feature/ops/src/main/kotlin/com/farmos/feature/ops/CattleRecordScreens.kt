@@ -34,6 +34,12 @@ data class CattleWithdrawalRow(val id: String, val product: String, val windowKi
 
 data class CattleObservationRow(val id: String, val epochDay: Long, val signs: String, val redFlag: Boolean)
 
+/** One recorded official movement; places are shown exactly as recorded, or as not recorded. */
+data class CattleMovementRow(val id: String, val epochDay: Long, val direction: String, val fromPlace: String?, val toPlace: String?)
+
+/** One recorded identifier for the animal; inactive identifiers stay listed as history. */
+data class CattleIdentifierRow(val id: String, val type: String, val value: String, val active: Boolean, val assignedEpochDay: Long)
+
 /** One dated entry on the animal timeline; [kind] is the record family, [summary] its recorded facts. */
 data class CattleTimelineRow(val id: String, val epochDay: Long, val kind: String, val summary: String)
 
@@ -50,6 +56,10 @@ data class CattleRecords(
     val timeline: List<CattleTimelineRow> = emptyList(),
     /** Recorded weights, oldest first. */
     val weights: List<WeightView> = emptyList(),
+    /** Every recorded official movement, newest first. */
+    val movements: List<CattleMovementRow> = emptyList(),
+    /** Every recorded identifier, active first. */
+    val identifiers: List<CattleIdentifierRow> = emptyList(),
 )
 
 private sealed interface CattleRecordsState {
@@ -65,6 +75,15 @@ internal enum class CattleRecordPage(val screenId: String, val title: String, va
     HEALTH_SUMMARY("FOS-CATTLE-033", "Cattle health summary", "Recorded health for the selected animal. Records only; no diagnosis or dosing."),
     TIMELINE("FOS-CATTLE-035", "Cattle timeline", "Every recorded event for the selected animal, newest first."),
     GROWTH_HISTORY("FOS-CATTLE-007", "Growth history", "Weights recorded for the selected animal. No growth rate or target is derived."),
+    MOVEMENTS("FOS-CATTLE-031", "Official movement record", "Identifiers and on, off and transfer movements recorded for the selected animal."),
+}
+
+/** Recorded movement direction as captured on FOS-CATTLE-030; other stored values are shown as stored. */
+fun cattleMovementDirection(direction: String): String = when (direction) {
+    "on" -> "Moved on"
+    "off" -> "Moved off"
+    "transfer" -> "Transfer"
+    else -> direction
 }
 
 internal fun cattleLitres(milli: Long): String = BigDecimal.valueOf(milli, 3).stripTrailingZeros().toPlainString() + " L"
@@ -97,6 +116,7 @@ internal fun CattleRecordPageHost(
                 CattleRecordPage.HEALTH_SUMMARY -> CattleHealthContent(current.records, today)
                 CattleRecordPage.TIMELINE -> CattleTimelineContent(current.records)
                 CattleRecordPage.GROWTH_HISTORY -> WeightHistoryContent(current.records.weights, "No weights recorded for this animal on this device.")
+                CattleRecordPage.MOVEMENTS -> CattleMovementContent(current.records)
             }
         }
     }
@@ -186,6 +206,36 @@ private fun CattleTimelineContent(records: CattleRecords) {
         records.timeline.forEachIndexed { index, row ->
             if (index > 0) HorizontalDivider()
             CattleRow("${LocalDate.ofEpochDay(row.epochDay)} · ${row.kind}", row.summary, "cattle-timeline:${row.id}")
+        }
+    }
+}
+
+/** FOS-CATTLE-031 */
+@Composable
+private fun CattleMovementContent(records: CattleRecords) {
+    if (records.movements.isEmpty() && records.identifiers.isEmpty()) {
+        AnimalFarmEmptyState("No identifiers or movements recorded for this animal on this device.")
+        return
+    }
+    FarmOperationalSection("Identifiers · ${records.identifiers.size}") {
+        if (records.identifiers.isEmpty()) Text("No identifiers recorded for this animal.", color = AnimalFarmTheme.colors.mutedInk)
+        records.identifiers.forEach {
+            CattleRow(
+                "${it.type} · assigned ${LocalDate.ofEpochDay(it.assignedEpochDay)}" + if (it.active) "" else " · inactive",
+                it.value,
+                "cattle-identifier:${it.id}",
+            )
+        }
+    }
+    FarmOperationalSection("Movements · ${records.movements.size}") {
+        if (records.movements.isEmpty()) Text("No movements recorded for this animal.", color = AnimalFarmTheme.colors.mutedInk)
+        records.movements.forEachIndexed { index, row ->
+            if (index > 0) HorizontalDivider()
+            CattleRow(
+                "${LocalDate.ofEpochDay(row.epochDay)} · ${cattleMovementDirection(row.direction)}",
+                "From ${row.fromPlace ?: "not recorded"} · to ${row.toPlace ?: "not recorded"}",
+                "cattle-movement:${row.id}",
+            )
         }
     }
 }

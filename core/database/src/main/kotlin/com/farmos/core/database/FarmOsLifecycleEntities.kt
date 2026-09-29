@@ -476,6 +476,10 @@ interface LifecycleDao {
     suspend fun activeIdentifierByValue(farmId: String, value: String): AnimalIdentifierEntity?
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMovement(row: OfficialMovementEntity)
     @Upsert suspend fun upsertMovement(row: OfficialMovementEntity)
+    @Query("SELECT * FROM official_movements WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun movementsForAnimal(farmId: String, animalId: String): List<OfficialMovementEntity>
+    @Query("SELECT * FROM animal_identifiers WHERE farmId = :farmId AND animalId = :animalId ORDER BY isActive DESC, assignedEpochDay DESC, id")
+    suspend fun identifiersForAnimal(farmId: String, animalId: String): List<AnimalIdentifierEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertLot(row: InventoryLotEntity)
     @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertLotIfMissing(row: InventoryLotEntity): Long
     @Upsert suspend fun upsertLot(row: InventoryLotEntity)
