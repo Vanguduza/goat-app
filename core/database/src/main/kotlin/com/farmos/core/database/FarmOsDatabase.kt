@@ -572,7 +572,7 @@ interface HealthObservationDao {
     @Upsert
     suspend fun upsertFromServer(observation: HealthObservationEntity)
 
-    @Query("SELECT * FROM health_observations WHERE farmId = :farmId ORDER BY occurredAtEpochMillis DESC LIMIT :limit")
+    @Query("SELECT * FROM health_observations WHERE farmId = :farmId ORDER BY occurredAtEpochMillis DESC, id LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<HealthObservationEntity>
 
     @Query("SELECT COUNT(*) FROM health_observations WHERE farmId = :farmId")

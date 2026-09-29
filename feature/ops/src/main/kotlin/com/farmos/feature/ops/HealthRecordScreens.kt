@@ -82,6 +82,7 @@ data class HealthReadModel(
     val labResultCount: Int? = null,
     val formulary: List<FormularyItemView> = emptyList(),
     val packs: List<ProtocolPackView> = emptyList(),
+    val timeline: HealthTimeline = HealthTimeline(),
 )
 
 internal object HealthRecords {
