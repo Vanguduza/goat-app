@@ -9,6 +9,8 @@ import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.RecordWater
 import com.farmos.feature.ops.SimpleCaptureScreen
+import com.farmos.feature.ops.WaterRecordNavigator
+import com.farmos.feature.ops.WaterRecords
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -21,12 +23,17 @@ fun WaterModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadRecords: suspend () -> WaterRecords = { WaterRecords() },
 ) {
     val scope = rememberCoroutineScope()
     val busy = remember { mutableStateOf(false) }
     val error = remember { mutableStateOf<String?>(null) }
     val rows = remember { mutableStateOf(emptyList<String>()) }
-    suspend fun refresh() { rows.value = ops.recentWater().map { "${it.source} · ${it.litresMilli} ml" } }
+    val records = remember(farmId) { mutableStateOf(WaterRecords()) }
+    suspend fun refresh() {
+        rows.value = ops.recentWater().map { "${it.source} · ${it.litresMilli} ml" }
+        records.value = loadRecords()
+    }
     LaunchedEffect(farmId) { runCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
         scope.launch {
@@ -38,7 +45,7 @@ fun WaterModuleHost(
     val source = remember { mutableStateOf("trough") }
     val litres = remember { mutableStateOf("") }
     val day = remember { mutableStateOf("") }
-    SimpleCaptureScreen(
+    WaterRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-WATER-001", title = "Water",
         help = "Enter litres as a figure. The device stores milli-litres.",
         empty = "No water records on this device.", rows = rows.value,
@@ -50,5 +57,6 @@ fun WaterModuleHost(
             ops.recordWater(RecordWater(UUID.randomUUID().toString(), source.value, milliLitres, LocalDate.parse(day.value).toEpochDay()), newContext())
         } },
         onBack = onBack,
-    )
+        extra = { recordActions() },
+    ) }
 }

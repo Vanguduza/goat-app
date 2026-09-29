@@ -280,9 +280,24 @@ interface WaterDao {
     @Upsert
     suspend fun upsertFromServer(record: WaterRecordEntity)
 
-    @Query("SELECT * FROM water_records WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
+    @Query("SELECT * FROM water_records WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<WaterRecordEntity>
+
+    @Query("SELECT COUNT(*) FROM water_records WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    @Query(
+        """
+        SELECT source, SUM(litresMilli) AS litresMilli, COUNT(*) AS recordCount,
+            MIN(occurredEpochDay) AS firstEpochDay, MAX(occurredEpochDay) AS latestEpochDay
+        FROM water_records WHERE farmId = :farmId GROUP BY source ORDER BY source
+        """,
+    )
+    suspend fun totalsBySource(farmId: String): List<WaterSourceTotal>
 }
+
+/** Exhaustive per-source water aggregate over every recorded row; not bounded by any list limit. */
+data class WaterSourceTotal(val source: String, val litresMilli: Long, val recordCount: Int, val firstEpochDay: Long, val latestEpochDay: Long)
 
 @Dao
 interface SaleDao {
