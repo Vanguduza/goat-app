@@ -241,4 +241,16 @@ class OpsValidatorTest {
         assertEquals("Group needs a species, name, and head count", OpsValidator.group(CreateAnimalGroup("g1", "", "Herd", 12)))
         assertEquals(listOf("goat", "sheep", "cattle", "rabbit", "poultry"), FarmSpeciesCodes.ALL)
     }
+
+    @Test
+    fun `observation and vet visit species must be one the server accepts`() {
+        val observation = RecordHealthObservation(observationId = "o1", speciesCode = "goat", signs = "Coughing", occurredAtEpochMillis = 1L)
+        assertNull(OpsValidator.observation(observation))
+        assertEquals("Observation needs a farm species", OpsValidator.observation(observation.copy(speciesCode = "Goat")))
+        assertEquals("Observation needs a farm species", OpsValidator.observation(observation.copy(speciesCode = "")))
+
+        val visit = RecordVetVisit(visitId = "v1", speciesCode = "cattle", reason = "Lameness", attendingVet = "Dr Moyo", occurredEpochDay = 1L)
+        assertNull(OpsValidator.vetVisit(visit))
+        assertEquals("Vet visit needs a species, reason, and attending vet", OpsValidator.vetVisit(visit.copy(speciesCode = "cow")))
+    }
 }

@@ -660,6 +660,7 @@ object OpsValidator {
         if (command.title.isBlank() || command.taskCode.isBlank()) "Task title and code are required" else null
 
     fun observation(command: RecordHealthObservation): String? {
+        if (command.speciesCode !in FarmSpeciesCodes.ALL) return "Observation needs a farm species"
         if (command.signs.isBlank()) return "Signs are required"
         return null
     }
@@ -910,7 +911,7 @@ object OpsValidator {
         if (command.quantityMilli <= 0L) "Lot issue needs a quantity" else null
 
     fun vetVisit(command: RecordVetVisit): String? =
-        if (command.reason.isBlank() || command.attendingVet.isBlank()) {
+        if (command.speciesCode !in FarmSpeciesCodes.ALL || command.reason.isBlank() || command.attendingVet.isBlank()) {
             "Vet visit needs a species, reason, and attending vet"
         } else {
             null
