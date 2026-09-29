@@ -137,7 +137,7 @@ class GoatReferenceContractTest {
         compose.runOnIdle { assertNull(status.get()) }
         compose.onNodeWithText("Confirm sold").assertIsDisplayed()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-026").assertIsDisplayed()
-        compose.onNode(hasClickAction() and hasText("Cancel")).performClick()
+        compose.onNode(hasClickAction() and hasText("Cancel")).performScrollTo().performClick()
         compose.runOnIdle { assertNull(status.get()) }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-026").assertDoesNotExist()
         assertNamedClickTargets()
