@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "729d2725efbf9c2fbca3e30d6534a892485223c4",
+  "tested_commit": "0e7d47c1cd52122ed0913d2ca2230e83c7ffd9fb",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 194
+    "registered_ids_mentioned_in_kotlin": 197
   },
   "top_level": {
     "farm_modules": [
@@ -638,8 +638,8 @@
         },
         {
           "value": "WOOL",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -692,6 +692,24 @@
         },
         {
           "value": "PEDIGREE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HEALTH_SUMMARY",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "TIMELINE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WOOL_DASHBOARD",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
