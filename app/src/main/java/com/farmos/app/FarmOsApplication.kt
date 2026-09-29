@@ -21,6 +21,7 @@ import com.farmos.core.network.FarmSearchClient
 import com.farmos.core.network.MutableSessionStore
 import com.farmos.core.network.RefreshingAccessTokenProvider
 import com.farmos.core.network.SupabaseIdentityClient
+import com.farmos.core.network.SupabaseMutationTraceClient
 import com.farmos.core.network.SupabasePullClient
 import com.farmos.core.network.SupabaseRpcCommandTransport
 import com.farmos.core.network.UnsupportedServerEvent
@@ -49,6 +50,9 @@ class FarmOsApplication : Application(), SyncEngineOwner {
     var pullClient: SupabasePullClient? = null
         private set
     var farmSearchClient: FarmSearchClient? = null
+        private set
+    /** Read-only, member-gated server trace for one mutation; null when no backend is configured. */
+    var mutationTraceClient: SupabaseMutationTraceClient? = null
         private set
 
     override lateinit var syncEngine: SyncEngine
@@ -118,6 +122,11 @@ class FarmOsApplication : Application(), SyncEngineOwner {
                 },
             )
             pullClient = SupabasePullClient(
+                supabaseUrl = BuildConfig.SUPABASE_URL,
+                publishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
+                tokenProvider = refreshingTokenProvider,
+            )
+            mutationTraceClient = SupabaseMutationTraceClient(
                 supabaseUrl = BuildConfig.SUPABASE_URL,
                 publishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
                 tokenProvider = refreshingTokenProvider,

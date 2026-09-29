@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:2d0491ae66e13afc82a7a96cf0792e675db931979671b42f4754748b4cf19f66",
-  "runtime_evidence_tested_commit": "498aae01b0ba763d95ab0131f3d9c247a12af2be",
-  "runtime_evidence_run_id": 36558252582,
+  "source_fingerprint": "sha256:eeed8f2972607bb7695337b8c9c1e2de4f023eef0181869e744d4301b0bbd74d",
+  "runtime_evidence_tested_commit": "1df2f5ea48dced580e1744c2cb5c3fd7482417bd",
+  "runtime_evidence_run_id": 36562283068,
   "registry_screen_count": 545,
-  "route_screen_count": 234,
-  "unresolved_screen_count": 311,
+  "route_screen_count": 236,
+  "unresolved_screen_count": 309,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -236,6 +236,8 @@
     "FOS-SYNC-005",
     "FOS-SYNC-006",
     "FOS-SYNC-008",
+    "FOS-SYNC-009",
+    "FOS-SYNC-018",
     "FOS-TASK-001",
     "FOS-TASK-003",
     "FOS-TASK-004",
@@ -2921,6 +2923,40 @@
       }
     },
     {
+      "screen_id": "FOS-SYNC-009",
+      "proof_classes": [
+        "ENTRY_ACTION_DESTINATION",
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "ENTRY_ACTION_DESTINATION": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SyncMutationTraceRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SYNC-018",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SyncMutationTraceRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-TASK-001",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -3306,7 +3342,6 @@
     "FOS-SIM-009",
     "FOS-SYNC-001",
     "FOS-SYNC-007",
-    "FOS-SYNC-009",
     "FOS-SYNC-010",
     "FOS-SYNC-011",
     "FOS-SYNC-012",
@@ -3315,7 +3350,6 @@
     "FOS-SYNC-015",
     "FOS-SYNC-016",
     "FOS-SYNC-017",
-    "FOS-SYNC-018",
     "FOS-TASK-002",
     "FOS-TASK-005",
     "FOS-TASK-006",

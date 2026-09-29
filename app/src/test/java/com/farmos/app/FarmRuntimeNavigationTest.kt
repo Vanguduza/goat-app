@@ -203,6 +203,7 @@ class FarmRuntimeNavigationTest {
             SyncQueueView.RETRY_WAITING to 3L,
             SyncQueueView.CONFLICTS to 2L,
             SyncQueueView.REJECTED to 0L,
+            SyncQueueView.DEAD_LETTER to 4L,
         )
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
@@ -220,6 +221,7 @@ class FarmRuntimeNavigationTest {
             Triple("Retry waiting · 3", SyncQueueView.RETRY_WAITING, "FOS-SYNC-005"),
             Triple("Conflicts · 2", SyncQueueView.CONFLICTS, "FOS-SYNC-006"),
             Triple("Rejected · 0", SyncQueueView.REJECTED, "FOS-SYNC-008"),
+            Triple("Dead letter · 4", SyncQueueView.DEAD_LETTER, "FOS-SYNC-009"),
         )
         expected.forEach { (label, view, screenId) ->
             opened.set(null)

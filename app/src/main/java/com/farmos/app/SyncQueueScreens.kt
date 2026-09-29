@@ -79,6 +79,13 @@ enum class SyncQueueView(
         "The server did not accept these changes",
         "No rejected changes.",
     ),
+    DEAD_LETTER(
+        SyncState.DEAD_LETTER,
+        "FOS-SYNC-009",
+        "Dead letter",
+        "Sync stopped retrying these changes; they stay on this device",
+        "No changes have stopped retrying.",
+    ),
     ;
 
     val shortLabel: String
@@ -87,6 +94,7 @@ enum class SyncQueueView(
             RETRY_WAITING -> "Retry waiting"
             CONFLICTS -> "Conflicts"
             REJECTED -> "Rejected"
+            DEAD_LETTER -> "Dead letter"
         }
 }
 
@@ -98,13 +106,16 @@ internal data class SyncQueueRow(
     val attempts: Int,
     val reason: String?,
     val timingLabel: String?,
+    /** Every stored outbox field for this change, in display order, for the mutation trace. */
+    val localTrace: List<Pair<String, String>>,
 )
 
 internal sealed interface SyncQueueUiState {
     data object Loading : SyncQueueUiState
     data object Denied : SyncQueueUiState
     data class Failed(val message: String) : SyncQueueUiState
-    data class Loaded(val rows: List<SyncQueueRow>) : SyncQueueUiState
+    /** [rows] may be only the latest [SYNC_QUEUE_LIMIT]; [total] is the exhaustive count when known. */
+    data class Loaded(val rows: List<SyncQueueRow>, val total: Long? = null) : SyncQueueUiState
 }
 
 internal const val SYNC_QUEUE_LIMIT = 100
@@ -116,6 +127,14 @@ internal fun syncQueueCounts(counts: Map<String, Long>): Map<SyncQueueView, Long
     SyncQueueView.entries.associateWith { counts[it.state.name] ?: 0L }
 
 private val syncTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+
+/** Exact list label: the exhaustive total when known, otherwise the bounded row count. */
+internal fun syncQueueCountLabel(shown: Int, total: Long?): String = when {
+    total != null && shown < total -> "Latest $shown of $total changes"
+    total != null -> "$total change(s)"
+    shown >= SYNC_QUEUE_LIMIT -> "Latest $SYNC_QUEUE_LIMIT changes"
+    else -> "$shown change(s)"
+}
 
 internal fun syncTime(epochMillis: Long, zone: ZoneId): String = syncTimeFormat.format(Instant.ofEpochMilli(epochMillis).atZone(zone))
 
@@ -148,6 +167,22 @@ internal fun OutboxEntity.toSyncQueueRow(view: SyncQueueView, zone: ZoneId): Syn
         attempts = attemptCount,
         reason = syncReasonLabel(lastErrorCode),
         timingLabel = timing,
+        localTrace = listOf(
+            "Mutation ID" to mutationId,
+            "Command" to "$commandName · schema v$commandSchemaVersion",
+            "Record" to "$aggregateType · $aggregateId",
+            "Order on this record" to aggregateOrdinal.toString(),
+            "Expected record version" to (expectedStreamVersion?.toString() ?: "None (new record)"),
+            "Sync state" to state,
+            "Attempts" to attemptCount.toString(),
+            "Occurred" to syncTime(occurredAtEpochMillis, zone),
+            "Saved on this device" to syncTime(createdAtEpochMillis, zone),
+            "Next attempt" to (nextAttemptAtEpochMillis?.let { syncTime(it, zone) } ?: "Not scheduled"),
+            "Last result" to (lastErrorCode?.let { code -> syncReasonLabel(code)?.takeIf { it != code }?.let { "$it ($code)" } ?: code } ?: "None recorded"),
+            "Server event" to (serverEventId ?: "Not acknowledged"),
+            "Server record version" to (serverStreamVersion?.toString() ?: "Not acknowledged"),
+            "Device" to deviceId,
+        ),
     )
 }
 
@@ -159,16 +194,24 @@ internal fun SyncQueueHost(
     onSelectView: (SyncQueueView) -> Unit,
     onBack: () -> Unit,
     zone: ZoneId = ZoneId.systemDefault(),
+    loadTotal: suspend (SyncQueueView) -> Long? = { null },
+    traceOnServer: (suspend (String) -> ServerMutationTrace)? = null,
 ) {
+    var tracedId by remember(view, permitted) { mutableStateOf<String?>(null) }
     var state by remember(view, permitted) {
         mutableStateOf<SyncQueueUiState>(if (permitted) SyncQueueUiState.Loading else SyncQueueUiState.Denied)
     }
     LaunchedEffect(view, permitted) {
         if (!permitted) return@LaunchedEffect
-        state = runCatching { loadRows(view).map { it.toSyncQueueRow(view, zone) } }
-            .fold({ SyncQueueUiState.Loaded(it) }, { SyncQueueUiState.Failed(it.message ?: "Sync queue could not be loaded") })
+        state = runCatching { SyncQueueUiState.Loaded(loadRows(view).map { it.toSyncQueueRow(view, zone) }, loadTotal(view)) }
+            .fold({ it }, { SyncQueueUiState.Failed(it.message ?: "Sync queue could not be loaded") })
     }
-    SyncQueueScreen(view, state, onSelectView, onBack)
+    val traced = (state as? SyncQueueUiState.Loaded)?.rows?.firstOrNull { it.mutationId == tracedId }
+    if (traced != null) {
+        SyncMutationTraceScreen(traced, view, traceOnServer, onBack = { tracedId = null })
+    } else {
+        SyncQueueScreen(view, state, onSelectView, onBack, onTrace = { tracedId = it })
+    }
 }
 
 @Composable
@@ -177,6 +220,7 @@ internal fun SyncQueueScreen(
     state: SyncQueueUiState,
     onSelectView: (SyncQueueView) -> Unit,
     onBack: () -> Unit,
+    onTrace: (String) -> Unit = {},
 ) {
     AnimalFarmCanvas(Modifier.testTag("farm-screen:${view.screenId}")) {
         Column(
@@ -189,7 +233,7 @@ internal fun SyncQueueScreen(
                 SyncQueueUiState.Loading -> Text("Loading sync queue")
                 SyncQueueUiState.Denied -> AnimalFarmEmptyState("Sync queues are not available for your farm role.")
                 is SyncQueueUiState.Failed -> AnimalFarmWarningSurface { Text(state.message) }
-                is SyncQueueUiState.Loaded -> SyncQueueContent(view, state.rows)
+                is SyncQueueUiState.Loaded -> SyncQueueContent(view, state.rows, state.total, onTrace)
             }
             TextButton(
                 onClick = onBack,
@@ -229,18 +273,17 @@ private fun SyncQueueSwitcher(current: SyncQueueView, onSelectView: (SyncQueueVi
 }
 
 @Composable
-private fun SyncQueueContent(view: SyncQueueView, rows: List<SyncQueueRow>) {
+private fun SyncQueueContent(view: SyncQueueView, rows: List<SyncQueueRow>, total: Long?, onTrace: (String) -> Unit) {
     if (rows.isEmpty()) {
         AnimalFarmEmptyState(view.emptyMessage)
         return
     }
-    if (view == SyncQueueView.CONFLICTS || view == SyncQueueView.REJECTED) {
+    if (view == SyncQueueView.CONFLICTS || view == SyncQueueView.REJECTED || view == SyncQueueView.DEAD_LETTER) {
         AnimalFarmWarningSurface {
             Text("Kept on this device and not applied to the farm record.")
         }
     }
-    val countLabel = if (rows.size >= SYNC_QUEUE_LIMIT) "Latest $SYNC_QUEUE_LIMIT changes" else "${rows.size} change(s)"
-    Text(countLabel, color = AnimalFarmTheme.colors.mutedInk)
+    Text(syncQueueCountLabel(rows.size, total), color = AnimalFarmTheme.colors.mutedInk)
     FarmIllustratedSectionSurface {
         rows.forEachIndexed { index, row ->
             if (index > 0) HorizontalDivider()
@@ -253,6 +296,10 @@ private fun SyncQueueContent(view: SyncQueueView, rows: List<SyncQueueRow>) {
                 Text("Saved ${row.savedAt} · ${row.attempts} attempt(s)", color = AnimalFarmTheme.colors.mutedInk)
                 row.reason?.let { Text(it) }
                 row.timingLabel?.let { Text(it, color = AnimalFarmTheme.colors.mutedInk) }
+                TextButton(
+                    onClick = { onTrace(row.mutationId) },
+                    modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp).testTag("sync-queue-trace:${row.mutationId}"),
+                ) { Text("Open mutation trace") }
             }
         }
     }

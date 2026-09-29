@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:2d0491ae66e13afc82a7a96cf0792e675db931979671b42f4754748b4cf19f66",
+  "source_fingerprint": "sha256:eeed8f2972607bb7695337b8c9c1e2de4f023eef0181869e744d4301b0bbd74d",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 76,
+  "features_with_route_evidence": 77,
   "features_fully_route_bound": 28,
-  "features_without_route_evidence": 80,
+  "features_without_route_evidence": 79,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -3109,11 +3109,11 @@
       ],
       "route_screen_ids": [
         "FOS-SYNC-006",
-        "FOS-SYNC-008"
+        "FOS-SYNC-008",
+        "FOS-SYNC-009"
       ],
       "unresolved_screen_ids": [
-        "FOS-SYNC-007",
-        "FOS-SYNC-009"
+        "FOS-SYNC-007"
       ],
       "headless_contract": null,
       "coverage_state": "PARTIAL_ROUTE_COVERAGE",
@@ -3169,14 +3169,15 @@
         "FOS-SYNC-017",
         "FOS-SYNC-018"
       ],
-      "route_screen_ids": [],
-      "unresolved_screen_ids": [
-        "FOS-SYNC-016",
-        "FOS-SYNC-017",
+      "route_screen_ids": [
         "FOS-SYNC-018"
       ],
+      "unresolved_screen_ids": [
+        "FOS-SYNC-016",
+        "FOS-SYNC-017"
+      ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
