@@ -44,6 +44,8 @@ private enum class HealthPage {
     VET_VISIT_DETAIL,
     LAB_RESULTS,
     LAB_RESULT_DETAIL,
+    FORMULARY_ITEM,
+    PROTOCOL_PACK_DETAIL,
 }
 
 /** Governed Health family. Advisory/recording only; this surface does not prescribe dose or diagnose. */
@@ -112,6 +114,8 @@ fun HealthObservationScreen(
         HealthPage.VET_VISIT_DETAIL -> HealthVetVisitDetailScreen(readModel, selectedRecordId, recordBack)
         HealthPage.LAB_RESULTS -> HealthLabResultListScreen(readModel, { openRecord(HealthPage.LAB_RESULT_DETAIL, it) }, recordBack)
         HealthPage.LAB_RESULT_DETAIL -> HealthLabResultDetailScreen(readModel, selectedRecordId, recordBack)
+        HealthPage.FORMULARY_ITEM -> FormularyItemScreen(readModel.formulary, recordBack)
+        HealthPage.PROTOCOL_PACK_DETAIL -> ProtocolPackDetailScreen(readModel.packs, recordBack)
 
         HealthPage.OBSERVATIONS -> {
             HealthRows("FOS-HEALTH-003", "Observations", rows, "No observations yet", error, home)
@@ -224,9 +228,11 @@ private fun HealthDashboard(
             TextButton(onClick = { onOpen(HealthPage.TREATMENT_RECORDS) }) { Text("Treatment records") }
             TextButton(onClick = { onOpen(HealthPage.VET_VISITS) }) { Text("Vet visits") }
             TextButton(onClick = { onOpen(HealthPage.LAB_RESULTS) }) { Text("Lab results") }
+            TextButton(onClick = { onOpen(HealthPage.FORMULARY_ITEM) }) { Text("Formulary items") }
+            TextButton(onClick = { onOpen(HealthPage.PROTOCOL_PACK_DETAIL) }) { Text("Protocol pack detail") }
         }
         FarmOperationalSection("Protocol packs") {
-            Text("${packs.size} accepted pack(s)")
+            Text("${packs.size} protocol pack(s) on this device")
             TextButton(onClick = { onOpen(HealthPage.PROTOCOLS) }) { Text("View protocol packs") }
             TextButton(onClick = { onOpen(HealthPage.ACCEPT_PROTOCOL) }) { Text("Accept protocol pack") }
             TextButton(onClick = { onOpen(HealthPage.EDIT_PROTOCOL) }) { Text("Add protocol slot") }

@@ -572,6 +572,10 @@ interface LifecycleDao {
     suspend fun coreSlots(farmId: String, packId: String): List<HealthPackSlotEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPackApply(row: HealthPackApplyEntity)
     @Upsert suspend fun upsertPackApply(row: HealthPackApplyEntity)
+    @Query("SELECT * FROM health_schedule_slots WHERE farmId = :farmId ORDER BY packId, offsetDays, slotCode, id")
+    suspend fun packSlots(farmId: String): List<HealthPackSlotEntity>
+    @Query("SELECT packId AS `key`, COUNT(*) AS count FROM health_pack_applications WHERE farmId = :farmId GROUP BY packId ORDER BY packId")
+    suspend fun packApplicationCounts(farmId: String): List<RecordKeyCount>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertLotPlace(row: CattleLotPlacementEntity)
     @Upsert suspend fun upsertLotPlace(row: CattleLotPlacementEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertDof(row: CattleDofEntity)

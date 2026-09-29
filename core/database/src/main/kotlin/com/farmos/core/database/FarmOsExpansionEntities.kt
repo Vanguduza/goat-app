@@ -391,6 +391,9 @@ interface FormularyDao {
     @Query("SELECT * FROM formulary_items WHERE farmId = :farmId AND vetApproved = 1 ORDER BY productName")
     suspend fun approved(farmId: String): List<FormularyItemEntity>
 
+    @Query("SELECT * FROM formulary_items WHERE farmId = :farmId ORDER BY productName, id")
+    suspend fun forFarm(farmId: String): List<FormularyItemEntity>
+
     @Query("SELECT * FROM formulary_items WHERE farmId = :farmId AND id = :itemId LIMIT 1")
     suspend fun get(farmId: String, itemId: String): FormularyItemEntity?
 
@@ -411,6 +414,9 @@ interface TreatmentDao {
 
     @Query("SELECT COUNT(*) FROM health_treatments WHERE farmId = :farmId")
     suspend fun count(farmId: String): Int
+
+    @Query("SELECT formularyItemId AS `key`, COUNT(*) AS count FROM health_treatments WHERE farmId = :farmId GROUP BY formularyItemId ORDER BY formularyItemId")
+    suspend fun countsByFormularyItem(farmId: String): List<RecordKeyCount>
 
     @Query("SELECT * FROM health_treatments WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredAtEpochMillis DESC, id")
     suspend fun forAnimal(farmId: String, animalId: String): List<HealthTreatmentEntity>
