@@ -72,6 +72,58 @@ class TaskViewRuntimeNavigationTest {
         restoreToday()
     }
 
+    @Test
+    fun allTasksViewListsOpenAndCompletedWorkWithTheExactCompletedTotal() {
+        val today = LocalDate.now().toEpochDay()
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                TasksBoardScreen(
+                    rows = listOf(
+                        TaskUiRow("today", "Today check", "goat", "CHECK", today, "open"),
+                        TaskUiRow("past", "Past check", "sheep", "DRENCH", today - 2, "open"),
+                        TaskUiRow("done", "Done check", "goat", "CHECK", today - 1, "done"),
+                    ),
+                    busy = false,
+                    error = null,
+                    onCreate = { _, _, _, _ -> },
+                    onComplete = {},
+                    onBack = {},
+                    completedCount = 140,
+                )
+            }
+        }
+
+        openTab("All")
+        compose.onNodeWithTag("farm-screen:FOS-TASK-002").assertIsDisplayed()
+        compose.onNodeWithText("Today check").assertExists()
+        compose.onNodeWithText("Past check").assertExists()
+        compose.onNodeWithText("Done check").assertExists()
+        compose.onNodeWithText("Completed tasks · latest 1 of 140").assertExists()
+        restoreToday()
+        assertTextAbsent("Completed tasks · latest 1 of 140")
+    }
+
+    @Test
+    fun emptyAllTasksViewSaysNothingIsRecorded() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                TasksBoardScreen(
+                    rows = emptyList(),
+                    busy = false,
+                    error = null,
+                    onCreate = { _, _, _, _ -> },
+                    onComplete = {},
+                    onBack = {},
+                    completedCount = 0,
+                )
+            }
+        }
+        openTab("All")
+        compose.onNodeWithTag("farm-screen:FOS-TASK-002").assertIsDisplayed()
+        compose.onNodeWithText("No tasks on this device").assertExists()
+        assertTextAbsent("Completed tasks · latest 0 of 0")
+    }
+
     private fun openTab(label: String) {
         compose.onNode(hasClickAction() and hasText(label))
             .performScrollTo()

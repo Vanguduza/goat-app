@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:eeed8f2972607bb7695337b8c9c1e2de4f023eef0181869e744d4301b0bbd74d",
-  "runtime_evidence_tested_commit": "1df2f5ea48dced580e1744c2cb5c3fd7482417bd",
-  "runtime_evidence_run_id": 36562283068,
+  "source_fingerprint": "sha256:0882742fd7bfdd38ca287029857e8b874713a82e30b5e7939dcc552ff817303d",
+  "runtime_evidence_tested_commit": "9c168573ad5532a66956dfd4dfa814a0e8e4fa97",
+  "runtime_evidence_run_id": 36564651926,
   "registry_screen_count": 545,
-  "route_screen_count": 236,
-  "unresolved_screen_count": 309,
+  "route_screen_count": 237,
+  "unresolved_screen_count": 308,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -239,6 +239,7 @@
     "FOS-SYNC-009",
     "FOS-SYNC-018",
     "FOS-TASK-001",
+    "FOS-TASK-002",
     "FOS-TASK-003",
     "FOS-TASK-004",
     "FOS-TASK-007",
@@ -2976,6 +2977,17 @@
       }
     },
     {
+      "screen_id": "FOS-TASK-002",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/TaskViewRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-TASK-003",
       "proof_classes": [
         "TYPED_ROUTE_OWNER"
@@ -3350,7 +3362,6 @@
     "FOS-SYNC-015",
     "FOS-SYNC-016",
     "FOS-SYNC-017",
-    "FOS-TASK-002",
     "FOS-TASK-005",
     "FOS-TASK-006",
     "FOS-TASK-010",

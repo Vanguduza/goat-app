@@ -136,6 +136,7 @@ fun FarmSessionContent(
             enqueueSync = ::enqueueSync,
             onBack = backHome,
             entryPage = dest.entry,
+            loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
         )
         is FarmDestination.Module -> when (dest.module) {
             FarmModule.TASKS -> TasksModuleHost(
@@ -144,6 +145,7 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
             )
             FarmModule.MONEY -> MoneyModuleHost(
                 farmId = membership.farmId,

@@ -2,7 +2,7 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:eeed8f2972607bb7695337b8c9c1e2de4f023eef0181869e744d4301b0bbd74d",
+  "source_fingerprint": "sha256:0882742fd7bfdd38ca287029857e8b874713a82e30b5e7939dcc552ff817303d",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 77,
@@ -1380,6 +1380,7 @@
       ],
       "route_screen_ids": [
         "FOS-TASK-001",
+        "FOS-TASK-002",
         "FOS-TASK-003",
         "FOS-TASK-004",
         "FOS-TASK-007",
@@ -1387,7 +1388,6 @@
         "FOS-TASK-009"
       ],
       "unresolved_screen_ids": [
-        "FOS-TASK-002",
         "FOS-TASK-005",
         "FOS-TASK-006"
       ],
