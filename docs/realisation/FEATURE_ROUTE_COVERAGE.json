@@ -2,7 +2,7 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:a308dff3825b53a06e7d5d0a605cfce6a5dbddaf2ea12e1aa545ab2991dad7e6",
+  "source_fingerprint": "sha256:2093701dbd057504bcb62f815e034aa6315453ad4ea6907b6eaadce301e05d8f",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 83,
@@ -3203,6 +3203,7 @@
         "FOS-ATOM-014"
       ],
       "route_screen_ids": [
+        "FOS-ATOM-003",
         "FOS-ATOM-005",
         "FOS-ATOM-007",
         "FOS-ATOM-009",
@@ -3212,7 +3213,6 @@
       "unresolved_screen_ids": [
         "FOS-ATOM-001",
         "FOS-ATOM-002",
-        "FOS-ATOM-003",
         "FOS-ATOM-004",
         "FOS-ATOM-006",
         "FOS-ATOM-008",
@@ -3284,12 +3284,12 @@
         "FOS-ATOM-028"
       ],
       "route_screen_ids": [
-        "FOS-ATOM-026"
+        "FOS-ATOM-026",
+        "FOS-ATOM-028"
       ],
       "unresolved_screen_ids": [
         "FOS-ATOM-025",
-        "FOS-ATOM-027",
-        "FOS-ATOM-028"
+        "FOS-ATOM-027"
       ],
       "headless_contract": null,
       "coverage_state": "PARTIAL_ROUTE_COVERAGE",

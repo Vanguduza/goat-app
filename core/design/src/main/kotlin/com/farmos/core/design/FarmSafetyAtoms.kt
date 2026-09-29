@@ -15,6 +15,22 @@ import androidx.compose.ui.unit.dp
 /** P12 safety review atoms; the `farm-atom:` tag names the canonical atom Screen ID realised. */
 object FarmSafetyAtoms {
     const val IRREVERSIBLE_STATUS_CONFIRMATION = "farm-atom:FOS-ATOM-026"
+    const val PERMISSION_EXPLANATION = "farm-atom:FOS-ATOM-028"
+}
+
+/**
+ * FOS-ATOM-028 — why a surface is not available to the viewer's farm role. It explains the rule
+ * that applies; it never offers a way around it and never implies the viewer can grant access.
+ */
+@Composable
+fun FarmPermissionExplanation(title: String, explanation: String, modifier: Modifier = Modifier) {
+    androidx.compose.foundation.layout.Column(
+        modifier.fillMaxWidth().testTag(FarmSafetyAtoms.PERMISSION_EXPLANATION),
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(FosDimens.Grid),
+    ) {
+        Text(title, fontWeight = FontWeight.SemiBold)
+        Text(explanation, color = AnimalFarmTheme.colors.mutedInk)
+    }
 }
 
 /**

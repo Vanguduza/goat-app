@@ -131,6 +131,7 @@ class SyncQueueOwnerContractTest {
             }
         }
         compose.onNodeWithText("Sync queues are not available for your farm role.").assertExists()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-028").assertExists()
         compose.onNode(hasClickAction() and hasText("Conflicts")).assertDoesNotExist()
         compose.runOnIdle { assertEquals(0, loads) }
         assertFalse(syncQueuesPermitted("buyer"))

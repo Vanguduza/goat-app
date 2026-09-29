@@ -53,6 +53,7 @@ RENDERED_OWNER_TESTS = (
     "app/src/test/java/com/farmos/app/ProcurementCaptureOwnerTest.kt",
     "app/src/test/java/com/farmos/app/AssetsCaptureOwnerTest.kt",
     "app/src/test/java/com/farmos/app/PastureCaptureOwnerTest.kt",
+    "app/src/test/java/com/farmos/app/GroupsCaptureOwnerTest.kt",
     "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt",
 )
 ROUTE_CONTRACT_TESTS = (

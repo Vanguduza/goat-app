@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "cf4ec5155be971f0cc71e0773e5e21005abfa3db",
-  "source_fingerprint": "sha256:a308dff3825b53a06e7d5d0a605cfce6a5dbddaf2ea12e1aa545ab2991dad7e6",
+  "tested_commit": "8f470d63579814ae3c04d2826716450ca52ddd38",
+  "source_fingerprint": "sha256:2093701dbd057504bcb62f815e034aa6315453ad4ea6907b6eaadce301e05d8f",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36614830377,
+  "foundation_run_id": 36617307289,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -319,6 +319,7 @@
         "FOS-SYNC-003"
       ],
       "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt": [
+        "FOS-ATOM-028",
         "FOS-ATOM-033",
         "FOS-SYNC-004",
         "FOS-SYNC-005",
@@ -340,6 +341,11 @@
         "FOS-ATOM-005",
         "FOS-ATOM-007",
         "FOS-PASTURE-001"
+      ],
+      "app/src/test/java/com/farmos/app/GroupsCaptureOwnerTest.kt": [
+        "FOS-ATOM-003",
+        "FOS-ATOM-005",
+        "FOS-GROUP-001"
       ]
     },
     "route_contract": {
@@ -415,9 +421,9 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
     "rendered_traversal_screen_count": 187,
-    "rendered_owner_screen_count": 44,
+    "rendered_owner_screen_count": 47,
     "route_contract_screen_count": 60,
-    "combined_screen_count": 259,
+    "combined_screen_count": 261,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -637,12 +643,14 @@
     ],
     "rendered_owner_screen_ids": [
       "FOS-ASSET-001",
+      "FOS-ATOM-003",
       "FOS-ATOM-005",
       "FOS-ATOM-007",
       "FOS-ATOM-009",
       "FOS-ATOM-011",
       "FOS-ATOM-014",
       "FOS-ATOM-026",
+      "FOS-ATOM-028",
       "FOS-ATOM-031",
       "FOS-ATOM-033",
       "FOS-ATOM-034",
@@ -667,6 +675,7 @@
       "FOS-GOAT-039",
       "FOS-GOAT-043",
       "FOS-GOAT-051",
+      "FOS-GROUP-001",
       "FOS-HOME-002",
       "FOS-HOME-006",
       "FOS-HOME-007",
@@ -767,7 +776,7 @@
   "certification": {
     "runtime_reachability_executed": 187,
     "entry_action_emission_executed": 26,
-    "rendered_surface_owners_executed": 44,
+    "rendered_surface_owners_executed": 47,
     "route_contracts_executed": 60,
     "parameter_scope_executed": true,
     "return_restoration_executed": 187,
