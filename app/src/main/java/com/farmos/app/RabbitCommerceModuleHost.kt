@@ -17,6 +17,8 @@ import com.farmos.domain.rabbit.PromoteRabbitKit
 import com.farmos.domain.rabbit.RecordRabbitMarketPlan
 import com.farmos.domain.rabbit.RegisterRabbitKit
 import com.farmos.feature.ops.SimpleCaptureScreen
+import com.farmos.feature.rabbit.RabbitCommerceRecordNavigator
+import com.farmos.feature.rabbit.RabbitCommerceRecords
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -29,6 +31,7 @@ fun RabbitCommerceModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadRecords: suspend () -> RabbitCommerceRecords = { RabbitCommerceRecords() },
 ) {
     val scope = rememberCoroutineScope()
     val busyState = remember { mutableStateOf(false) }
@@ -36,10 +39,12 @@ fun RabbitCommerceModuleHost(
     val kitRowsState = remember { mutableStateOf(emptyList<String>()) }
     val waitlistRowsState = remember { mutableStateOf(emptyList<String>()) }
     val beddingLineState = remember { mutableStateOf("No bedding item bound.") }
+    val recordsState = remember(farmId) { mutableStateOf(RabbitCommerceRecords()) }
     suspend fun refresh() {
         kitRowsState.value = ops.kits().map { "${it.id} ${it.tempLabel} · ${it.sex} · ${it.retention} · ${it.status}" }
         waitlistRowsState.value = ops.waitlist().map { "${it.id} ${it.contactName} · qty ${it.qty} · ${it.status}" }
         beddingLineState.value = ops.inventoryLink()?.let { "Bedding ${it.nestBeddingItemId ?: "none"} · ${it.nestBeddingQtyMilli} milli" } ?: "No bedding item bound."
+        recordsState.value = loadRecords()
     }
     LaunchedEffect(farmId) { runCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
@@ -68,7 +73,7 @@ fun RabbitCommerceModuleHost(
             val purpose = remember { mutableStateOf("meat") }
             val grams = remember { mutableStateOf("") }
             val day = remember { mutableStateOf("") }
-            SimpleCaptureScreen(
+            RabbitCommerceRecordNavigator(recordsState.value) { recordActions -> SimpleCaptureScreen(
                 screenId = "FOS-RABBIT-027",
                 title = "Rabbit waitlist",
                 help = "Enqueue a buyer, mark a kit sale_pet, then fulfill. A contract posts income in minor units.",
@@ -88,6 +93,7 @@ fun RabbitCommerceModuleHost(
                 },
                 onBack = onBack,
                 extra = {
+                    recordActions()
                     androidx.compose.material3.OutlinedTextField(waveId.value, { waveId.value = it }, label = { androidx.compose.material3.Text("Wave id") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
                     androidx.compose.material3.OutlinedTextField(label.value, { label.value = it }, label = { androidx.compose.material3.Text("Kit label") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
                     androidx.compose.material3.OutlinedTextField(sex.value, { sex.value = it }, label = { androidx.compose.material3.Text("Kit sex") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
@@ -187,6 +193,6 @@ fun RabbitCommerceModuleHost(
                         enabled = !busy && bedQty.value.isNotBlank(),
                     ) { androidx.compose.material3.Text("Bind bedding") }
                 },
-            )
+            ) }
         
 }

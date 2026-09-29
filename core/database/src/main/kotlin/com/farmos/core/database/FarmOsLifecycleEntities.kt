@@ -371,8 +371,14 @@ interface LifecycleDao {
     @Upsert suspend fun upsertRetention(row: RabbitRetentionEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertWaitlist(row: RabbitWaitlistEntity)
     @Upsert suspend fun upsertWaitlist(row: RabbitWaitlistEntity)
-    @Query("SELECT * FROM rabbit_sales_waitlist WHERE farmId = :farmId ORDER BY contactName")
+    @Query("SELECT * FROM rabbit_sales_waitlist WHERE farmId = :farmId ORDER BY contactName, id")
     suspend fun waitlist(farmId: String): List<RabbitWaitlistEntity>
+    @Query("SELECT * FROM rabbit_retention_decisions WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun retentionDecisions(farmId: String): List<RabbitRetentionEntity>
+    @Query("SELECT * FROM rabbit_sales_contracts WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun rabbitContracts(farmId: String): List<RabbitContractEntity>
+    @Query("SELECT * FROM rabbit_market_plans WHERE farmId = :farmId ORDER BY targetEpochDay, id")
+    suspend fun rabbitMarketPlans(farmId: String): List<RabbitMarketPlanEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertContract(row: RabbitContractEntity)
     @Upsert suspend fun upsertContract(row: RabbitContractEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPlan(row: RabbitMarketPlanEntity)

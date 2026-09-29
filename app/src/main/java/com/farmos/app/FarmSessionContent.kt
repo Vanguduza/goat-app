@@ -252,6 +252,7 @@ fun FarmSessionContent(
             )
             FarmModule.WAITLIST -> RabbitCommerceModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
+                loadRecords = { loadRabbitCommerceRecords(app.database, membership.farmId) },
             )
             else -> OperatingModuleHost(
                 module = dest.module,
