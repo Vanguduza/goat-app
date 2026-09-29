@@ -104,6 +104,38 @@ class TaskViewRuntimeNavigationTest {
     }
 
     @Test
+    fun calendarGroupsOpenTasksUnderTheirDueDates() {
+        val today = LocalDate.now().toEpochDay()
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                TasksBoardScreen(
+                    rows = listOf(
+                        TaskUiRow("today", "Today check", "goat", "CHECK", today, "open"),
+                        TaskUiRow("future-b", "Fence walk", "pasture", "WALK", today + 2, "open"),
+                        TaskUiRow("future-a", "Drench ewes", "sheep", "DRENCH", today + 2, "open"),
+                        TaskUiRow("past", "Past check", "goat", "CHECK", today - 2, "open"),
+                        TaskUiRow("done", "Done check", "goat", "CHECK", today - 1, "done"),
+                    ),
+                    busy = false,
+                    error = null,
+                    onCreate = { _, _, _, _ -> },
+                    onComplete = {},
+                    onBack = {},
+                )
+            }
+        }
+
+        openTab("Calendar")
+        compose.onNodeWithTag("farm-screen:FOS-TASK-010").assertIsDisplayed()
+        compose.onNodeWithText("${LocalDate.ofEpochDay(today - 2)} · Overdue · 1 open task").assertExists()
+        compose.onNodeWithText("${LocalDate.ofEpochDay(today)} · Today · 1 open task").assertExists()
+        compose.onNodeWithText("${LocalDate.ofEpochDay(today + 2)} · 2 open tasks").assertExists()
+        compose.onNodeWithText("Drench ewes").assertExists()
+        assertTextAbsent("Done check")
+        restoreToday()
+    }
+
+    @Test
     fun emptyAllTasksViewSaysNothingIsRecorded() {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {

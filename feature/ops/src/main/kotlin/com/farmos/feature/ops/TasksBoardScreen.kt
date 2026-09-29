@@ -41,7 +41,7 @@ data class TaskUiRow(
     val status: String,
 )
 
-private enum class TaskTab { TODAY, SCHEDULED, OVERDUE, COMPLETED, ALL }
+private enum class TaskTab { TODAY, SCHEDULED, OVERDUE, COMPLETED, ALL, CALENDAR }
 
 /**
  * FOS-TASK-001 / 002 / 003 / 004 — shared Farm OS task reference family. [rows] hold every open
@@ -72,6 +72,7 @@ fun TasksBoardScreen(
         TaskTab.OVERDUE -> rows.filter { it.status == "open" && it.dueEpochDay < today }
         TaskTab.COMPLETED -> rows.filter { it.status == "done" }
         TaskTab.ALL -> rows
+        TaskTab.CALENDAR -> rows.filter { it.status == "open" }.sortedWith(compareBy<TaskUiRow> { it.dueEpochDay }.thenBy { it.title }.thenBy { it.id })
     }
     val completedShown = rows.count { it.status == "done" }
 
@@ -111,6 +112,18 @@ fun TasksBoardScreen(
                     FarmIllustratedSectionSurface {
                         Text(emptyTaskMessage(tab), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         Text(emptyTaskHint(tab), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                } else if (tab == TaskTab.CALENDAR) {
+                    visible.groupBy { it.dueEpochDay }.forEach { (day, tasks) ->
+                        Text(
+                            calendarDayLabel(day, today, tasks.size),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.testTag("task-calendar-day:$day"),
+                        )
+                        tasks.forEach { task ->
+                            TaskCard(task = task, today = today, busy = busy, onComplete = onComplete, onOpen = { onOpenDetail(task.id) })
+                        }
                     }
                 } else {
                     visible.forEach { task ->
@@ -230,6 +243,17 @@ private fun taskTabScreenId(tab: TaskTab): String = when (tab) {
     TaskTab.OVERDUE -> "FOS-TASK-008"
     TaskTab.COMPLETED -> "FOS-TASK-009"
     TaskTab.ALL -> "FOS-TASK-002"
+    TaskTab.CALENDAR -> "FOS-TASK-010"
+}
+
+/** Calendar day heading: the ISO date, whether it is today or past, and its open task count. */
+private fun calendarDayLabel(day: Long, today: Long, count: Int): String {
+    val marker = when {
+        day == today -> " · Today"
+        day < today -> " · Overdue"
+        else -> ""
+    }
+    return "${LocalDate.ofEpochDay(day)}$marker · $count open " + if (count == 1) "task" else "tasks"
 }
 
 private fun taskTabLabel(tab: TaskTab, selected: Boolean): String {
@@ -239,6 +263,7 @@ private fun taskTabLabel(tab: TaskTab, selected: Boolean): String {
         TaskTab.OVERDUE -> "Overdue"
         TaskTab.COMPLETED -> "Completed"
         TaskTab.ALL -> "All"
+        TaskTab.CALENDAR -> "Calendar"
     }
     return if (selected) "$label · selected" else label
 }
@@ -249,6 +274,7 @@ private fun emptyTaskMessage(tab: TaskTab): String = when (tab) {
     TaskTab.OVERDUE -> "No overdue tasks"
     TaskTab.COMPLETED -> "No completed tasks yet"
     TaskTab.ALL -> "No tasks on this device"
+    TaskTab.CALENDAR -> "No open tasks to schedule"
 }
 
 private fun emptyTaskHint(tab: TaskTab): String = when (tab) {
@@ -257,6 +283,7 @@ private fun emptyTaskHint(tab: TaskTab): String = when (tab) {
     TaskTab.OVERDUE -> "Open work past its due date will appear here."
     TaskTab.COMPLETED -> "Finished work remains visible for farm history."
     TaskTab.ALL -> "Open and completed farm work will appear here."
+    TaskTab.CALENDAR -> "Open farm work appears here under its due date."
 }
 
 /** FOS-TASK-003 — task detail. Complete is the only authorized write here. */
