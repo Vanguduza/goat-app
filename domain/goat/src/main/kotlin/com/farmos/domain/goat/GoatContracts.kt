@@ -259,7 +259,15 @@ object GoatValidator {
     }
 }
 
+/**
+ * Exhaustive herd counts, never derived from a bounded herd list. [active], [does], [bucks] and
+ * [kids] count active goats (kids: born fewer than 365 days before today); [notClosed] counts every
+ * goat the herd list can show (all statuses except closed).
+ */
+data class GoatHerdCounts(val active: Int, val does: Int, val bucks: Int, val kids: Int, val notClosed: Int)
+
 interface GoatRepository {
+    suspend fun herdCounts(todayEpochDay: Long): GoatHerdCounts
     suspend fun registerGoat(command: RegisterGoat, context: LocalCommandContext): LocalCommandResult
     suspend fun recordWeight(command: RecordGoatWeight, context: LocalCommandContext): LocalCommandResult
     suspend fun setStatus(command: SetGoatStatus, context: LocalCommandContext): LocalCommandResult

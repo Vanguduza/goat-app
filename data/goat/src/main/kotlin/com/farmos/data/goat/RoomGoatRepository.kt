@@ -584,6 +584,11 @@ class RoomGoatRepository(
         )
     }
 
+    override suspend fun herdCounts(todayEpochDay: Long): com.farmos.domain.goat.GoatHerdCounts {
+        val row = database.animals().herdCounts(farmId, "goat", GoatStatus.ACTIVE.wireValue(), todayEpochDay)
+        return com.farmos.domain.goat.GoatHerdCounts(row.active, row.females, row.males, row.young, database.animals().countBySpecies(farmId, "goat"))
+    }
+
     override suspend fun listGoats(limit: Int): List<GoatSnapshot> =
         database.animals().listBySpecies(
             farmId = farmId,
