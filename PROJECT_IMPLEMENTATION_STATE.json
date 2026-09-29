@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "repository": "Vanguduza/goat-app",
-  "source_fingerprint": "sha256:2093701dbd057504bcb62f815e034aa6315453ad4ea6907b6eaadce301e05d8f",
+  "source_fingerprint": "sha256:af9623ae41f458cf8ef6787b8790c82ca8d22258d70a7f080c4a813fa8076ed2",
   "canonical_branch": "main",
   "release_state": "BLOCKED",
   "green_states": {
@@ -13,11 +13,11 @@
   },
   "screen_coverage": {
     "registered": 545,
-    "kotlin_referenced": 261,
+    "kotlin_referenced": 263,
     "implementation_mapped": 128,
     "qdu_states": {
-      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 261,
-      "PLANNED_NOT_IMPLEMENTED": 284
+      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 263,
+      "PLANNED_NOT_IMPLEMENTED": 282
     },
     "feature_bound": 545
   },
@@ -56,7 +56,7 @@
     },
     "atom": {
       "registered": 35,
-      "kotlin_referenced": 13,
+      "kotlin_referenced": 15,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 6,
@@ -267,7 +267,7 @@
   "blocking_completion_gaps": [
     "156 mandatory features remain not FEATURE_GREEN",
     "545 registered screens remain not VISUAL_GREEN until native evidence and independent approval exist",
-    "284 registered screens remain PLANNED_NOT_IMPLEMENTED at this implementation fingerprint",
+    "282 registered screens remain PLANNED_NOT_IMPLEMENTED at this implementation fingerprint",
     "whole-product MODULE_GREEN and MVP_GREEN certification remains outstanding"
   ]
 }
