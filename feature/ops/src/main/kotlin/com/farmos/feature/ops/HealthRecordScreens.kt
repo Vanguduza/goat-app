@@ -66,11 +66,20 @@ data class HealthLabResultView(
 )
 
 /** Local, farm-scoped health records for the read-only record pages. Nothing here prescribes. */
+/**
+ * Farm-scoped health records. Each list may be only the latest rows; the counts are exhaustive
+ * farm-scoped aggregates (null when not loaded) so a bounded list is never presented as complete.
+ */
 data class HealthReadModel(
     val treatments: List<HealthTreatmentView> = emptyList(),
     val withdrawals: List<HealthWithdrawalView> = emptyList(),
     val vetVisits: List<HealthVetVisitView> = emptyList(),
     val labResults: List<HealthLabResultView> = emptyList(),
+    val observationCount: Int? = null,
+    val treatmentCount: Int? = null,
+    val activeWithdrawalCount: Int? = null,
+    val vetVisitCount: Int? = null,
+    val labResultCount: Int? = null,
 )
 
 internal object HealthRecords {
@@ -117,7 +126,7 @@ internal fun HealthTreatmentListScreen(model: HealthReadModel, zone: ZoneId, onO
             AnimalFarmEmptyState("No treatments recorded on this device.")
             return@FarmOperationalPage
         }
-        FarmOperationalSection("Treatments · ${model.treatments.size}") {
+        FarmOperationalSection(recordListTitle("Treatments", model.treatments.size, model.treatmentCount)) {
             model.treatments.forEachIndexed { index, t ->
                 if (index > 0) HorizontalDivider()
                 HealthRecordRow(
@@ -214,7 +223,7 @@ internal fun HealthVetVisitListScreen(model: HealthReadModel, onOpen: (String) -
             AnimalFarmEmptyState("No vet visits recorded on this device.")
             return@FarmOperationalPage
         }
-        FarmOperationalSection("Visits · ${model.vetVisits.size}") {
+        FarmOperationalSection(recordListTitle("Visits", model.vetVisits.size, model.vetVisitCount)) {
             model.vetVisits.forEachIndexed { index, v ->
                 if (index > 0) HorizontalDivider()
                 HealthRecordRow(
@@ -255,7 +264,7 @@ internal fun HealthLabResultListScreen(model: HealthReadModel, onOpen: (String) 
             AnimalFarmEmptyState("No lab results recorded on this device.")
             return@FarmOperationalPage
         }
-        FarmOperationalSection("Results · ${model.labResults.size}") {
+        FarmOperationalSection(recordListTitle("Results", model.labResults.size, model.labResultCount)) {
             model.labResults.forEachIndexed { index, r ->
                 if (index > 0) HorizontalDivider()
                 HealthRecordRow(

@@ -310,6 +310,11 @@ interface LifecycleDao {
     @Upsert suspend fun upsertWithdrawal(row: WithdrawalWindowEntity)
     @Query("SELECT * FROM withdrawal_windows WHERE farmId = :farmId ORDER BY endsEpochDay DESC LIMIT :limit")
     suspend fun withdrawals(farmId: String, limit: Int): List<WithdrawalWindowEntity>
+    @Query("SELECT COUNT(*) FROM withdrawal_windows WHERE farmId = :farmId")
+    suspend fun withdrawalCount(farmId: String): Int
+    /** Active through the end day, the same rule as HealthRecords.isActive and the farm home. */
+    @Query("SELECT COUNT(*) FROM withdrawal_windows WHERE farmId = :farmId AND endsEpochDay >= :todayEpochDay")
+    suspend fun activeWithdrawalCount(farmId: String, todayEpochDay: Long): Int
     /** Windows reach an animal only through its treatment; both sides stay inside the farm. */
     @Query(
         """
@@ -490,6 +495,10 @@ interface LifecycleDao {
     suspend fun vetVisits(farmId: String, limit: Int): List<VetVisitEntity>
     @Query("SELECT * FROM lab_results WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun labResults(farmId: String, limit: Int): List<LabResultEntity>
+    @Query("SELECT COUNT(*) FROM vet_visits WHERE farmId = :farmId")
+    suspend fun vetVisitCount(farmId: String): Int
+    @Query("SELECT COUNT(*) FROM lab_results WHERE farmId = :farmId")
+    suspend fun labResultCount(farmId: String): Int
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertCattleWeaning(row: CattleWeaningEntity)
     @Upsert suspend fun upsertCattleWeaning(row: CattleWeaningEntity)
     @Query("SELECT * FROM cattle_services WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
