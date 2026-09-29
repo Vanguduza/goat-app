@@ -441,6 +441,32 @@ interface LifecycleDao {
     suspend fun cattleDryOffsFor(farmId: String, animalId: String): List<CattleDryOffEntity>
     @Query("SELECT * FROM cattle_weanings WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
     suspend fun cattleWeaningsFor(farmId: String, animalId: String): List<CattleWeaningEntity>
+    @Query("SELECT * FROM sheep_scans WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun sheepScansFor(farmId: String, animalId: String): List<SheepScanEntity>
+    @Query("SELECT * FROM sheep_lambings WHERE farmId = :farmId AND damId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun sheepLambingsFor(farmId: String, animalId: String): List<SheepLambingEntity>
+    @Query("SELECT * FROM sheep_dag_scores WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun sheepDagFor(farmId: String, animalId: String): List<SheepDagEntity>
+    @Query("SELECT * FROM sheep_footrot_scores WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun sheepFootrotFor(farmId: String, animalId: String): List<SheepFootrotEntity>
+    @Query("SELECT * FROM sheep_flystrike_scores WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun sheepFlystrikeFor(farmId: String, animalId: String): List<SheepFlystrikeEntity>
+    @Query("SELECT * FROM sheep_wool_clips WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun sheepWoolFor(farmId: String, animalId: String): List<SheepWoolEntity>
+    @Query("SELECT * FROM sheep_shearing_events WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun sheepShearingFor(farmId: String, animalId: String): List<SheepShearingEntity>
+    @Query("SELECT * FROM sheep_micron_tests WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun sheepMicronFor(farmId: String, animalId: String): List<SheepMicronEntity>
+    @Query("SELECT * FROM sheep_markings WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun sheepMarkingsFor(farmId: String, animalId: String): List<SheepMarkingEntity>
+    @Query("SELECT * FROM sheep_weanings WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun sheepWeaningsFor(farmId: String, animalId: String): List<SheepWeaningEntity>
+    @Query("SELECT * FROM sheep_wool_clips WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun sheepWoolClips(farmId: String, limit: Int): List<SheepWoolEntity>
+    @Query("SELECT * FROM sheep_shearing_events WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun sheepShearingEvents(farmId: String, limit: Int): List<SheepShearingEntity>
+    @Query("SELECT * FROM sheep_micron_tests WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun sheepMicronTests(farmId: String, limit: Int): List<SheepMicronEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMicron(row: SheepMicronEntity)
     @Upsert suspend fun upsertMicron(row: SheepMicronEntity)
     @Upsert suspend fun upsertEnabledKind(row: EnabledPoultryKindEntity)
