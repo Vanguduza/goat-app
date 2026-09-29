@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomHerdRepository
 import com.farmos.data.herd.RoomOpsRepository
@@ -39,6 +40,7 @@ fun RabbitModuleHost(
     var error by remember { mutableStateOf<String?>(null) }
     var cages by remember { mutableStateOf(emptyList<String>()) }
     var waves by remember { mutableStateOf(emptyList<String>()) }
+    var waveOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
     var boxes by remember { mutableStateOf(0L) }
     var selectedCageId by remember { mutableStateOf<String?>(null) }
     var rabbitRows by remember { mutableStateOf(emptyList<String>()) }
@@ -50,7 +52,9 @@ fun RabbitModuleHost(
         val cageEntities = ops.cages()
         cages = cageEntities.map { it.code }
         if (selectedCageId == null) selectedCageId = cageEntities.firstOrNull()?.id
-        waves = ops.waves().map { "${it.id} · ${it.doeCount} does · mating day ${it.matingEpochDay}" }
+        val waveRows = ops.waves()
+        waves = waveRows.map { "${it.id} · ${it.doeCount} does · mating day ${it.matingEpochDay}" }
+        waveOptions = waveRows.map { FarmSelectorOption(it.id, "Mated ${LocalDate.ofEpochDay(it.matingEpochDay)}", "${it.doeCount} does") }
         boxes = selectedCageId?.let { ops.availableBoxes(it) } ?: 0
         nestBoxRows = ops.nestBoxes().map { "${it.id} ${it.code} · ${it.status}" }
         rabbitRows = rabbitHerd.list().map { animal ->
@@ -84,6 +88,7 @@ fun RabbitModuleHost(
     }
 
     RabbitProgrammeScreen(
+        waveOptions = waveOptions,
         cages = cages,
         waves = waves,
         availableBoxes = boxes,
