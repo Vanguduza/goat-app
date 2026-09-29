@@ -12,6 +12,9 @@ import java.time.ZoneOffset
 
 private const val SHEEP_WOOL_LIMIT = 100
 
+/** Bulk id lookups are chunked below SQLite's 999 bound-variable limit on older Android releases. */
+internal const val LOOKUP_CHUNK = 500
+
 private fun kg(grams: Long): String = BigDecimal.valueOf(grams, 3).stripTrailingZeros().toPlainString() + " kg"
 
 private fun micron(tenths: Int): String = BigDecimal.valueOf(tenths.toLong(), 1).stripTrailingZeros().toPlainString() + " µm"
@@ -60,24 +63,32 @@ internal suspend fun loadSheepRecords(database: FarmOsDatabase, farmId: String, 
     )
 }
 
-/** Farm-scoped wool records for the wool dashboard; subjects are sheep tags, mob ids or "Unassigned". */
+/**
+ * Farm-scoped wool records for the wool dashboard; subjects are sheep tags, mob ids or "Unassigned".
+ * Row lists are the latest [SHEEP_WOOL_LIMIT] per family; the greasy-weight total and the counts are
+ * exhaustive farm-scoped aggregates, never sums of the bounded rows.
+ */
 internal suspend fun loadSheepWool(database: FarmOsDatabase, farmId: String): SheepWoolRecords {
     val lifecycle = database.lifecycle()
-    val labels = mutableMapOf<String, String>()
-    suspend fun subject(animalId: String?, groupId: String?): String = when {
-        animalId != null -> labels.getOrPut(animalId) { database.animals().get(farmId, animalId)?.tag ?: "Sheep not on this device" }
+    val clips = lifecycle.sheepWoolClips(farmId, SHEEP_WOOL_LIMIT)
+    val shearing = lifecycle.sheepShearingEvents(farmId, SHEEP_WOOL_LIMIT)
+    val micronTests = lifecycle.sheepMicronTests(farmId, SHEEP_WOOL_LIMIT)
+    val animalIds = (clips.map { it.animalId } + shearing.map { it.animalId } + micronTests.map { it.animalId }).filterNotNull().distinct()
+    val tags = animalIds.chunked(LOOKUP_CHUNK).flatMap { database.animals().getMany(farmId, it) }.associate { it.id to it.tag }
+    fun subject(animalId: String?, groupId: String?): String = when {
+        animalId != null -> tags[animalId] ?: "Sheep not on this device"
         groupId != null -> "Mob $groupId"
         else -> "Unassigned"
     }
-    val clips = lifecycle.sheepWoolClips(farmId, SHEEP_WOOL_LIMIT)
     return SheepWoolRecords(
         clips = clips.map { SheepWoolRow(it.id, it.occurredEpochDay, subject(it.animalId, it.groupId), kg(it.greasyGrams.toLong())) },
-        clipGreasyGramsTotal = clips.sumOf { it.greasyGrams.toLong() },
-        shearing = lifecycle.sheepShearingEvents(farmId, SHEEP_WOOL_LIMIT).map {
+        clipGreasyGramsTotal = lifecycle.sheepWoolGreasyGramsTotal(farmId),
+        shearing = shearing.map {
             SheepWoolRow(it.id, it.occurredEpochDay, subject(it.animalId, it.groupId), it.kind + (it.greasyGrams?.let { g -> " · ${kg(g.toLong())}" } ?: ""))
         },
-        micron = lifecycle.sheepMicronTests(farmId, SHEEP_WOOL_LIMIT).map {
-            SheepWoolRow(it.id, it.occurredEpochDay, subject(it.animalId, it.groupId), micron(it.micronTenths))
-        },
+        micron = micronTests.map { SheepWoolRow(it.id, it.occurredEpochDay, subject(it.animalId, it.groupId), micron(it.micronTenths)) },
+        clipCount = lifecycle.sheepWoolClipCount(farmId),
+        shearingCount = lifecycle.sheepShearingEventCount(farmId),
+        micronCount = lifecycle.sheepMicronTestCount(farmId),
     )
 }

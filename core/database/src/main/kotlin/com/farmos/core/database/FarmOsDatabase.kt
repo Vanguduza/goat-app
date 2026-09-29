@@ -222,6 +222,9 @@ interface AnimalDao {
     @Query("SELECT * FROM animals WHERE farmId = :farmId AND id = :animalId LIMIT 1")
     suspend fun get(farmId: String, animalId: String): AnimalEntity?
 
+    @Query("SELECT * FROM animals WHERE farmId = :farmId AND id IN (:animalIds) ORDER BY id")
+    suspend fun getMany(farmId: String, animalIds: List<String>): List<AnimalEntity>
+
     @Query("""
         SELECT * FROM animals
         WHERE farmId = :farmId

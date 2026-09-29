@@ -38,10 +38,12 @@ data class PoultryFlockView(
     val poultryKind: String,
     val houseLabel: String,
     /** Sum of recorded placements for this flock. */
-    val placedHeads: Int,
+    val placedHeads: Long,
     val firstPlacedEpochDay: Long,
     val days: List<PoultryDayView>,
     val vaccinations: List<PoultryVaccinationView>,
+    /** Exhaustive count of this flock's vaccinations; [vaccinations] may be only the latest. */
+    val vaccinationCount: Int? = null,
 )
 
 data class PoultryPlacementView(val id: String, val groupId: String, val poultryKind: String, val headCount: Int, val epochDay: Long)
@@ -55,6 +57,9 @@ data class PoultryHouseView(
     val poultryKind: String,
     val placements: List<PoultryPlacementView>,
     val walks: List<PoultryWalkView>,
+    /** Exhaustive counts for this house; the lists above may be only the latest rows. */
+    val placementCount: Int? = null,
+    val walkCount: Int? = null,
 )
 
 data class PoultryHatchView(
@@ -79,6 +84,9 @@ data class PoultryRecords(
     val houses: List<PoultryHouseView> = emptyList(),
     val hatches: List<PoultryHatchView> = emptyList(),
     val walks: List<PoultryWalkView> = emptyList(),
+    /** Exhaustive farm-scoped walk counts; [walks] may be only the latest rows. */
+    val walkCount: Int? = null,
+    val mixedSpeciesWalkCount: Int? = null,
 )
 
 internal object PoultryRecordMath {
@@ -130,13 +138,13 @@ internal fun PoultryFlockProfileScreen(records: PoultryRecords, onBack: () -> Un
         val flock = records.flocks.firstOrNull { it.groupId == selectedId } ?: return@FarmOperationalPage
         FarmOperationalSection("Flock ${flock.groupId}") {
             PoultryRecordRow("House", flock.houseLabel, "poultry-flock-house")
-            PoultryRecordRow("Placed", "${flock.placedHeads} head · first placed ${LocalDate.ofEpochDay(flock.firstPlacedEpochDay)}", "poultry-flock-placed")
+            PoultryRecordRow("Placed, all placements", "${flock.placedHeads} head · first placed ${LocalDate.ofEpochDay(flock.firstPlacedEpochDay)}", "poultry-flock-placed")
             PoultryRecordRow("Recorded deaths and culls", PoultryRecordMath.losses(flock).toString(), "poultry-flock-losses")
             PoultryRecordRow("Placed minus recorded losses", PoultryRecordMath.placedMinusLosses(flock).toString(), "poultry-flock-remaining")
             PoultryRecordRow("Eggs recorded", PoultryRecordMath.eggs(flock).toString(), "poultry-flock-eggs")
             PoultryRecordRow("Feed recorded", PoultryRecordMath.kg(flock.days.sumOf { it.feedGrams }), "poultry-flock-feed")
         }
-        FarmOperationalSection("Vaccinations") {
+        FarmOperationalSection(recordListTitle("Vaccinations", flock.vaccinations.size, flock.vaccinationCount)) {
             if (flock.vaccinations.isEmpty()) Text("No vaccinations recorded for this flock.", color = AnimalFarmTheme.colors.mutedInk)
             flock.vaccinations.forEach { PoultryRecordRow(LocalDate.ofEpochDay(it.epochDay).toString(), it.productLabel, "poultry-flock-vaccination:${it.id}") }
         }
@@ -158,13 +166,13 @@ internal fun PoultryHouseDetailScreen(records: PoultryRecords, onBack: () -> Uni
             PoultryRecordRow("Housing", house.houseKind, "poultry-house-kind")
             PoultryRecordRow("Poultry kind", house.poultryKind, "poultry-house-poultry-kind")
         }
-        FarmOperationalSection("Placements · ${house.placements.size}") {
+        FarmOperationalSection(recordListTitle("Placements", house.placements.size, house.placementCount)) {
             if (house.placements.isEmpty()) Text("No flocks placed in this house.", color = AnimalFarmTheme.colors.mutedInk)
             house.placements.forEach {
                 PoultryRecordRow(LocalDate.ofEpochDay(it.epochDay).toString() + " · " + it.groupId, "${it.headCount} head · ${it.poultryKind}", "poultry-house-placement:${it.id}")
             }
         }
-        FarmOperationalSection("Biosecurity walks · ${house.walks.size}") {
+        FarmOperationalSection(recordListTitle("Biosecurity walks", house.walks.size, house.walkCount)) {
             if (house.walks.isEmpty()) Text("No biosecurity walks recorded for this house.", color = AnimalFarmTheme.colors.mutedInk)
             house.walks.forEach { PoultryRecordRow(LocalDate.ofEpochDay(it.epochDay).toString(), it.findings, "poultry-house-walk:${it.id}") }
         }
@@ -234,13 +242,13 @@ internal fun PoultryBiosecurityDashboardScreen(records: PoultryRecords, onBack: 
             AnimalFarmEmptyState("No biosecurity walks recorded on this device.")
             return@FarmOperationalPage
         }
-        val mixed = records.walks.count { it.mixedSpecies }
+        val mixed = records.mixedSpeciesWalkCount ?: records.walks.count { it.mixedSpecies }
         if (mixed > 0) {
             AnimalFarmWarningSurface(Modifier.testTag("poultry-biosecurity-mixed")) {
                 Text("Mixed species recorded on $mixed walk(s)", fontWeight = FontWeight.Bold)
             }
         }
-        FarmOperationalSection("Walks · ${records.walks.size}") {
+        FarmOperationalSection(recordListTitle("Walks", records.walks.size, records.walkCount)) {
             records.walks.forEachIndexed { index, walk ->
                 if (index > 0) HorizontalDivider()
                 PoultryRecordRow(

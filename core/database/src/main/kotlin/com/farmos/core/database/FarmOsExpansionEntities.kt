@@ -295,6 +295,9 @@ interface FormularyDao {
 
     @Query("SELECT * FROM formulary_items WHERE farmId = :farmId AND id = :itemId LIMIT 1")
     suspend fun get(farmId: String, itemId: String): FormularyItemEntity?
+
+    @Query("SELECT * FROM formulary_items WHERE farmId = :farmId AND id IN (:itemIds) ORDER BY id")
+    suspend fun getMany(farmId: String, itemIds: List<String>): List<FormularyItemEntity>
 }
 
 @Dao

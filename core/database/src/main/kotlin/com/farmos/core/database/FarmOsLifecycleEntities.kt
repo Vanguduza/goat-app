@@ -152,6 +152,20 @@ data class PoultryVaccinationEntity(
     val occurredEpochDay: Long,
 )
 
+/** Exhaustive per-flock placement aggregate; not bounded by any presentation row limit. */
+data class PoultryPlacementTotal(
+    val groupId: String,
+    val poultryKindCode: String,
+    val placedHeads: Long,
+    val firstPlacedEpochDay: Long,
+    val placementCount: Int,
+)
+
+data class PoultryGroupHouse(val groupId: String, val houseId: String)
+
+/** A farm-scoped record count keyed by a parent id (house, flock). */
+data class RecordKeyCount(val key: String, val count: Int)
+
 @Entity(tableName = "poultry_placements")
 data class PoultryPlacementEntity(
     @PrimaryKey val id: String,
@@ -378,14 +392,34 @@ interface LifecycleDao {
     suspend fun inventoryLink(farmId: String): RabbitInventoryLinkEntity?
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertVaccination(row: PoultryVaccinationEntity)
     @Upsert suspend fun upsertVaccination(row: PoultryVaccinationEntity)
-    @Query("SELECT * FROM poultry_vaccinations WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
+    @Query("SELECT * FROM poultry_vaccinations WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun vaccinations(farmId: String, limit: Int = 50): List<PoultryVaccinationEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertDryOff(row: CattleDryOffEntity)
     @Upsert suspend fun upsertDryOff(row: CattleDryOffEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPlacement(row: PoultryPlacementEntity)
     @Upsert suspend fun upsertPlacement(row: PoultryPlacementEntity)
-    @Query("SELECT * FROM poultry_placements WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
+    @Query("SELECT * FROM poultry_placements WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun placements(farmId: String, limit: Int = 50): List<PoultryPlacementEntity>
+    @Query(
+        """
+        SELECT groupId, MIN(poultryKindCode) AS poultryKindCode, SUM(headCount) AS placedHeads,
+            MIN(occurredEpochDay) AS firstPlacedEpochDay, COUNT(*) AS placementCount
+        FROM poultry_placements WHERE farmId = :farmId GROUP BY groupId ORDER BY groupId
+        """,
+    )
+    suspend fun poultryPlacementTotals(farmId: String): List<PoultryPlacementTotal>
+    @Query("SELECT DISTINCT groupId, houseId FROM poultry_placements WHERE farmId = :farmId ORDER BY groupId, houseId")
+    suspend fun poultryGroupHouses(farmId: String): List<PoultryGroupHouse>
+    @Query("SELECT houseId AS `key`, COUNT(*) AS count FROM poultry_placements WHERE farmId = :farmId GROUP BY houseId ORDER BY houseId")
+    suspend fun poultryPlacementCountsByHouse(farmId: String): List<RecordKeyCount>
+    @Query("SELECT groupId AS `key`, COUNT(*) AS count FROM poultry_vaccinations WHERE farmId = :farmId GROUP BY groupId ORDER BY groupId")
+    suspend fun poultryVaccinationCountsByGroup(farmId: String): List<RecordKeyCount>
+    @Query("SELECT houseId AS `key`, COUNT(*) AS count FROM poultry_biosecurity_walks WHERE farmId = :farmId AND houseId IS NOT NULL GROUP BY houseId ORDER BY houseId")
+    suspend fun poultryWalkCountsByHouse(farmId: String): List<RecordKeyCount>
+    @Query("SELECT COUNT(*) FROM poultry_biosecurity_walks WHERE farmId = :farmId")
+    suspend fun poultryWalkCount(farmId: String): Int
+    @Query("SELECT COUNT(*) FROM poultry_biosecurity_walks WHERE farmId = :farmId AND mixedSpecies = 1")
+    suspend fun poultryMixedSpeciesWalkCount(farmId: String): Int
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertBiosecurity(row: PoultryBiosecurityEntity)
     @Upsert suspend fun upsertBiosecurity(row: PoultryBiosecurityEntity)
     @Query("SELECT * FROM poultry_biosecurity_walks WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
@@ -481,6 +515,14 @@ interface LifecycleDao {
     suspend fun sheepShearingEvents(farmId: String, limit: Int): List<SheepShearingEntity>
     @Query("SELECT * FROM sheep_micron_tests WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun sheepMicronTests(farmId: String, limit: Int): List<SheepMicronEntity>
+    @Query("SELECT COALESCE(SUM(greasyGrams), 0) FROM sheep_wool_clips WHERE farmId = :farmId")
+    suspend fun sheepWoolGreasyGramsTotal(farmId: String): Long
+    @Query("SELECT COUNT(*) FROM sheep_wool_clips WHERE farmId = :farmId")
+    suspend fun sheepWoolClipCount(farmId: String): Int
+    @Query("SELECT COUNT(*) FROM sheep_shearing_events WHERE farmId = :farmId")
+    suspend fun sheepShearingEventCount(farmId: String): Int
+    @Query("SELECT COUNT(*) FROM sheep_micron_tests WHERE farmId = :farmId")
+    suspend fun sheepMicronTestCount(farmId: String): Int
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMicron(row: SheepMicronEntity)
     @Upsert suspend fun upsertMicron(row: SheepMicronEntity)
     @Upsert suspend fun upsertEnabledKind(row: EnabledPoultryKindEntity)

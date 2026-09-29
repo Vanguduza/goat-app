@@ -45,12 +45,18 @@ data class SheepAnimalRecords(
 /** One wool record row for the farm wool dashboard; [subject] is the sheep or mob it was recorded against. */
 data class SheepWoolRow(val id: String, val epochDay: Long, val subject: String, val detail: String)
 
-/** Farm-level wool records. Totals are sums of recorded greasy weights only. */
+/**
+ * Farm-level wool records. Row lists may be bounded to the latest records; [clipGreasyGramsTotal]
+ * and the counts are exhaustive farm-scoped aggregates over every recorded row.
+ */
 data class SheepWoolRecords(
     val clips: List<SheepWoolRow> = emptyList(),
     val clipGreasyGramsTotal: Long = 0,
     val shearing: List<SheepWoolRow> = emptyList(),
     val micron: List<SheepWoolRow> = emptyList(),
+    val clipCount: Int? = null,
+    val shearingCount: Int? = null,
+    val micronCount: Int? = null,
 )
 
 private sealed interface SheepLoadState<out T> {
@@ -155,15 +161,15 @@ internal fun SheepWoolDashboardScreen(loadWool: suspend () -> SheepWoolRecords, 
                 AnimalFarmEmptyState("No wool records on this device.")
                 return@SheepLoadContent
             }
-            FarmOperationalSection("Fleece · ${wool.clips.size}") {
-                SheepRow("Recorded greasy weight", sheepKg(wool.clipGreasyGramsTotal), "sheep-wool-total")
+            FarmOperationalSection(recordListTitle("Fleece", wool.clips.size, wool.clipCount)) {
+                SheepRow("Recorded greasy weight, all clips", sheepKg(wool.clipGreasyGramsTotal), "sheep-wool-total")
                 wool.clips.forEach { SheepRow("${LocalDate.ofEpochDay(it.epochDay)} · ${it.subject}", it.detail, "sheep-wool-clip:${it.id}") }
             }
-            FarmOperationalSection("Shearing · ${wool.shearing.size}") {
+            FarmOperationalSection(recordListTitle("Shearing", wool.shearing.size, wool.shearingCount)) {
                 if (wool.shearing.isEmpty()) Text("No shearing events recorded.", color = AnimalFarmTheme.colors.mutedInk)
                 wool.shearing.forEach { SheepRow("${LocalDate.ofEpochDay(it.epochDay)} · ${it.subject}", it.detail, "sheep-wool-shearing:${it.id}") }
             }
-            FarmOperationalSection("Micron · ${wool.micron.size}") {
+            FarmOperationalSection(recordListTitle("Micron", wool.micron.size, wool.micronCount)) {
                 if (wool.micron.isEmpty()) Text("No micron results recorded.", color = AnimalFarmTheme.colors.mutedInk)
                 wool.micron.forEach { SheepRow("${LocalDate.ofEpochDay(it.epochDay)} · ${it.subject}", it.detail, "sheep-wool-micron:${it.id}") }
             }
