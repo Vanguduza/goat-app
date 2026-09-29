@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:965bac4335335bc334325ee9ba3dbcf2dbec0ed074df309461111d2fac223659",
+  "source_fingerprint": "sha256:ab8c4ac6ed9aacd0bdef8dadf5db08f0b50605a4d61fb76d7292d1f0555dc2ed",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 79,
+  "features_with_route_evidence": 80,
   "features_fully_route_bound": 30,
-  "features_without_route_evidence": 77,
+  "features_without_route_evidence": 76,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -1403,13 +1403,14 @@
         "FOS-TASK-010",
         "FOS-TASK-011"
       ],
-      "route_screen_ids": [],
+      "route_screen_ids": [
+        "FOS-TASK-010"
+      ],
       "unresolved_screen_ids": [
-        "FOS-TASK-010",
         "FOS-TASK-011"
       ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {

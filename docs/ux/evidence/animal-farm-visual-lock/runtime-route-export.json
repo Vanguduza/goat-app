@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:965bac4335335bc334325ee9ba3dbcf2dbec0ed074df309461111d2fac223659",
-  "runtime_evidence_tested_commit": "b6aa87d77079ea5d2b7bf65e431511ec3bdb80df",
-  "runtime_evidence_run_id": 36581685094,
+  "source_fingerprint": "sha256:ab8c4ac6ed9aacd0bdef8dadf5db08f0b50605a4d61fb76d7292d1f0555dc2ed",
+  "runtime_evidence_tested_commit": "a83657656741c2749536a873ba978685b3dbc067",
+  "runtime_evidence_run_id": 36589512034,
   "registry_screen_count": 545,
-  "route_screen_count": 246,
-  "unresolved_screen_count": 299,
+  "route_screen_count": 247,
+  "unresolved_screen_count": 298,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -254,6 +254,7 @@
     "FOS-TASK-007",
     "FOS-TASK-008",
     "FOS-TASK-009",
+    "FOS-TASK-010",
     "FOS-WATER-001",
     "FOS-WATER-009"
   ],
@@ -3153,6 +3154,17 @@
       }
     },
     {
+      "screen_id": "FOS-TASK-010",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/TaskViewRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-WATER-001",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -3465,7 +3477,6 @@
     "FOS-SYNC-017",
     "FOS-TASK-005",
     "FOS-TASK-006",
-    "FOS-TASK-010",
     "FOS-TASK-011",
     "FOS-TASK-012",
     "FOS-TASK-013",
