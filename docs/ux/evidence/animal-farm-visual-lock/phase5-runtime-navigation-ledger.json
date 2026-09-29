@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "e41d944fdfdb71adf1102e91395206aefb3ef923",
+  "tested_commit": "4d01469f2fbeddda46a424f7bd7f3ee56d38527e",
   "source_fingerprint": "sha256:584f193e176c39d8edba75d3cded1ab00d01b6f5a4d46fd7f9eda86646e597fe",
-  "ci_status": "CI_PENDING",
-  "foundation_run_id": null,
+  "ci_status": "PASS_EXACT_HEAD_CI",
+  "foundation_run_id": 36578297184,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -717,12 +717,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 0,
-    "entry_action_emission_executed": 0,
-    "rendered_surface_owners_executed": 0,
-    "route_contracts_executed": 0,
-    "parameter_scope_executed": false,
-    "return_restoration_executed": 0,
+    "runtime_reachability_executed": 180,
+    "entry_action_emission_executed": 26,
+    "rendered_surface_owners_executed": 32,
+    "route_contracts_executed": 60,
+    "parameter_scope_executed": true,
+    "return_restoration_executed": 180,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
