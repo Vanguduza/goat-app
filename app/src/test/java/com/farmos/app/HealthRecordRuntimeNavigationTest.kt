@@ -10,12 +10,15 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.feature.ops.FormularyItemView
 import com.farmos.feature.ops.HealthLabResultView
 import com.farmos.feature.ops.HealthObservationScreen
 import com.farmos.feature.ops.HealthReadModel
 import com.farmos.feature.ops.HealthTreatmentView
 import com.farmos.feature.ops.HealthVetVisitView
 import com.farmos.feature.ops.HealthWithdrawalView
+import com.farmos.feature.ops.ProtocolPackView
+import com.farmos.feature.ops.ProtocolSlotView
 import java.time.LocalDate
 import java.time.ZoneOffset
 import org.junit.Rule
@@ -112,6 +115,42 @@ class HealthRecordRuntimeNavigationTest {
         compose.onNodeWithText("Active withdrawals").assertExists()
         open("Treatment records")
         compose.onNodeWithText("Treatments · latest 2 of 230").assertExists()
+    }
+
+    @Test
+    fun formularyItemsAndProtocolPacksShowRecordedFactsOnly() {
+        render(
+            model().copy(
+                formulary = listOf(
+                    FormularyItemView("f1", "Oxytet LA", "goat", "antibiotic", 28, 7, null, vetApproved = true, treatmentCount = 12),
+                    FormularyItemView("f2", "Old drench", "sheep", "anthelmintic", null, null, null, vetApproved = false, treatmentCount = 0),
+                ),
+                packs = listOf(
+                    ProtocolPackView(
+                        "pk1",
+                        "Kid health",
+                        "goat",
+                        "accepted",
+                        "Dr Moyo",
+                        listOf(ProtocolSlotView("s1", "CDT1", "First CDT", 28, "birth", isCore = true)),
+                        applicationCount = 3,
+                    ),
+                ),
+            ),
+        )
+        open("Formulary items")
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-014").assertExists()
+        compose.onNodeWithText("28 day(s)").assertExists()
+        compose.onNodeWithText("12").assertExists()
+        compose.onNodeWithTag("health-reference-option:f2").performScrollTo().performClick()
+        compose.onNodeWithText("Not vet approved").assertExists()
+        back()
+        open("Protocol pack detail")
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-016").assertExists()
+        compose.onNodeWithText("CDT1 · day 28 from birth · core").assertExists()
+        compose.onNodeWithText("3").assertExists()
+        back()
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-016").assertDoesNotExist()
     }
 
     @Test

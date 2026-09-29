@@ -59,6 +59,8 @@ private enum class CattleOpsPage {
     HEALTH_SUMMARY,
     TIMELINE,
     GROWTH_HISTORY,
+    BEEF_DASHBOARD,
+    LOT_DETAIL,
 }
 
 @Composable
@@ -70,6 +72,7 @@ fun CattleOperationsScreen(
     onBack: () -> Unit,
     loadRecords: suspend (String) -> CattleRecords = { CattleRecords() },
     today: LocalDate = LocalDate.now(),
+    loadLots: suspend () -> List<CattleLotView> = { emptyList() },
 ) {
     var page by remember { mutableStateOf(CattleOpsPage.HOME) }
     val home = { page = CattleOpsPage.HOME }
@@ -153,6 +156,8 @@ fun CattleOperationsScreen(
         CattleOpsPage.HEALTH_SUMMARY -> CattleRecordPageHost(CattleRecordPage.HEALTH_SUMMARY, selectedAnimalId, today, loadRecords, home)
         CattleOpsPage.TIMELINE -> CattleRecordPageHost(CattleRecordPage.TIMELINE, selectedAnimalId, today, loadRecords, home)
         CattleOpsPage.GROWTH_HISTORY -> CattleRecordPageHost(CattleRecordPage.GROWTH_HISTORY, selectedAnimalId, today, loadRecords, home)
+        CattleOpsPage.BEEF_DASHBOARD -> CattleBeefDashboardScreen(loadLots, home)
+        CattleOpsPage.LOT_DETAIL -> CattleLotDetailScreen(loadLots, home)
     }
 }
 
@@ -200,6 +205,8 @@ private fun CattleOpsHome(
             CattleNav("Place lot on feed") { onOpen(CattleOpsPage.LOT_PLACE) }
             CattleNav("Days on feed") { onOpen(CattleOpsPage.DAYS_ON_FEED) }
             CattleNav("Close-out") { onOpen(CattleOpsPage.LOT_CLOSE) }
+            CattleNav("Beef dashboard") { onOpen(CattleOpsPage.BEEF_DASHBOARD) }
+            CattleNav("Feedlot lot detail") { onOpen(CattleOpsPage.LOT_DETAIL) }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }

@@ -417,6 +417,7 @@ fun OperatingModuleHost(
                             ),
                             onBack = operationsBack,
                             loadRecords = { id -> loadCattleRecords(database, farmId, id) },
+                            loadLots = { loadCattleLots(database, farmId) },
                         )
                         else -> error("Unsupported species operations module $module")
                     }

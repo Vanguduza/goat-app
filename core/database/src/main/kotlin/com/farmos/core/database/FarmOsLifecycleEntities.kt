@@ -572,12 +572,22 @@ interface LifecycleDao {
     suspend fun coreSlots(farmId: String, packId: String): List<HealthPackSlotEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPackApply(row: HealthPackApplyEntity)
     @Upsert suspend fun upsertPackApply(row: HealthPackApplyEntity)
+    @Query("SELECT * FROM health_schedule_slots WHERE farmId = :farmId ORDER BY packId, offsetDays, slotCode, id")
+    suspend fun packSlots(farmId: String): List<HealthPackSlotEntity>
+    @Query("SELECT packId AS `key`, COUNT(*) AS count FROM health_pack_applications WHERE farmId = :farmId GROUP BY packId ORDER BY packId")
+    suspend fun packApplicationCounts(farmId: String): List<RecordKeyCount>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertLotPlace(row: CattleLotPlacementEntity)
     @Upsert suspend fun upsertLotPlace(row: CattleLotPlacementEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertDof(row: CattleDofEntity)
     @Upsert suspend fun upsertDof(row: CattleDofEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertLotClose(row: CattleLotCloseEntity)
     @Upsert suspend fun upsertLotClose(row: CattleLotCloseEntity)
+    @Query("SELECT * FROM cattle_lot_placements WHERE farmId = :farmId ORDER BY placedEpochDay DESC, id")
+    suspend fun cattleLotPlacements(farmId: String): List<CattleLotPlacementEntity>
+    @Query("SELECT * FROM cattle_days_on_feed WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleDaysOnFeed(farmId: String): List<CattleDofEntity>
+    @Query("SELECT * FROM cattle_lot_closeouts WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleLotCloseouts(farmId: String): List<CattleLotCloseEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertLactation(row: GoatLactationPlanEntity)
     @Upsert suspend fun upsertLactation(row: GoatLactationPlanEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertReorderAlert(row: ReorderAlertEntity)

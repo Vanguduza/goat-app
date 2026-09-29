@@ -2,11 +2,11 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:2da28041657c2b4dcfa1ef062e6e0bca2eec1b8858f2cb7738489cf581ce6566",
+  "source_fingerprint": "sha256:9aa887b91e93eaa4e56d6a86fb3f9bc7b0c36d5e9eafa6fddafa7e0f7d2cf2bd",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 76,
-  "features_fully_route_bound": 25,
+  "features_fully_route_bound": 28,
   "features_without_route_evidence": 80,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
@@ -978,16 +978,15 @@
         "FOS-CATTLE-029"
       ],
       "route_screen_ids": [
+        "FOS-CATTLE-025",
         "FOS-CATTLE-026",
+        "FOS-CATTLE-027",
         "FOS-CATTLE-028",
         "FOS-CATTLE-029"
       ],
-      "unresolved_screen_ids": [
-        "FOS-CATTLE-025",
-        "FOS-CATTLE-027"
-      ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -1252,13 +1251,12 @@
         "FOS-HEALTH-014"
       ],
       "route_screen_ids": [
-        "FOS-HEALTH-013"
-      ],
-      "unresolved_screen_ids": [
+        "FOS-HEALTH-013",
         "FOS-HEALTH-014"
       ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -1275,15 +1273,14 @@
       ],
       "route_screen_ids": [
         "FOS-HEALTH-015",
+        "FOS-HEALTH-016",
         "FOS-HEALTH-017",
         "FOS-HEALTH-018",
         "FOS-HEALTH-019"
       ],
-      "unresolved_screen_ids": [
-        "FOS-HEALTH-016"
-      ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {

@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "e117ccd0dad39d0a697c6fc7b76363b6c5871a87",
+  "tested_commit": "325406912cb67f4120105a3f9dea83ae1c5a8b5d",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 228
+    "registered_ids_mentioned_in_kotlin": 232
   },
   "top_level": {
     "farm_modules": [
@@ -521,8 +521,8 @@
         },
         {
           "value": "FORMULARY",
-          "refs": 3,
-          "transition_refs": 1,
+          "refs": 5,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -619,6 +619,18 @@
           "value": "LAB_RESULT_DETAIL",
           "refs": 2,
           "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FORMULARY_ITEM",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PROTOCOL_PACK_DETAIL",
+          "refs": 2,
+          "transition_refs": 1,
           "render_only_candidate": false
         }
       ]
@@ -881,6 +893,18 @@
         },
         {
           "value": "GROWTH_HISTORY",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "BEEF_DASHBOARD",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LOT_DETAIL",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false

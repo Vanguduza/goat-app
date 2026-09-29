@@ -1,11 +1,14 @@
 package com.farmos.app
 
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.feature.ops.FormularyItemView
 import com.farmos.feature.ops.HealthLabResultView
 import com.farmos.feature.ops.HealthReadModel
 import com.farmos.feature.ops.HealthTreatmentView
 import com.farmos.feature.ops.HealthVetVisitView
 import com.farmos.feature.ops.HealthWithdrawalView
+import com.farmos.feature.ops.ProtocolPackView
+import com.farmos.feature.ops.ProtocolSlotView
 import java.time.LocalDate
 
 internal const val HEALTH_RECORD_LIMIT = 200
@@ -56,5 +59,33 @@ internal suspend fun loadHealthReadModel(database: FarmOsDatabase, farmId: Strin
         activeWithdrawalCount = lifecycle.activeWithdrawalCount(farmId, today.toEpochDay()),
         vetVisitCount = lifecycle.vetVisitCount(farmId),
         labResultCount = lifecycle.labResultCount(farmId),
+        formulary = loadFormularyViews(database, farmId),
+        packs = loadProtocolPackViews(database, farmId),
     )
+}
+
+/** Every formulary item on the farm with the exhaustive count of treatments recorded against it. */
+private suspend fun loadFormularyViews(database: FarmOsDatabase, farmId: String): List<FormularyItemView> {
+    val counts = database.treatments().countsByFormularyItem(farmId).associate { it.key to it.count }
+    return database.formulary().forFarm(farmId).map {
+        FormularyItemView(it.id, it.productName, it.speciesCode, it.vetClass, it.meatWithdrawalDays, it.milkWithdrawalDays, it.eggWithdrawalDays, it.vetApproved, counts[it.id] ?: 0)
+    }
+}
+
+/** Every protocol pack on the farm with its recorded slots and exhaustive application count. */
+private suspend fun loadProtocolPackViews(database: FarmOsDatabase, farmId: String): List<ProtocolPackView> {
+    val lifecycle = database.lifecycle()
+    val slots = lifecycle.packSlots(farmId).groupBy { it.packId }
+    val applications = lifecycle.packApplicationCounts(farmId).associate { it.key to it.count }
+    return lifecycle.packs(farmId).map { pack ->
+        ProtocolPackView(
+            id = pack.id,
+            name = pack.name,
+            speciesCode = pack.speciesCode,
+            status = pack.status,
+            acceptedByVet = pack.acceptedByVet,
+            slots = slots[pack.id].orEmpty().map { ProtocolSlotView(it.id, it.slotCode, it.title, it.offsetDays, it.fromEvent, it.isCore) },
+            applicationCount = applications[pack.id] ?: 0,
+        )
+    }
 }

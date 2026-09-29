@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:2da28041657c2b4dcfa1ef062e6e0bca2eec1b8858f2cb7738489cf581ce6566",
-  "runtime_evidence_tested_commit": "e117ccd0dad39d0a697c6fc7b76363b6c5871a87",
-  "runtime_evidence_run_id": 36551061201,
+  "source_fingerprint": "sha256:9aa887b91e93eaa4e56d6a86fb3f9bc7b0c36d5e9eafa6fddafa7e0f7d2cf2bd",
+  "runtime_evidence_tested_commit": "325406912cb67f4120105a3f9dea83ae1c5a8b5d",
+  "runtime_evidence_run_id": 36553364613,
   "registry_screen_count": 545,
-  "route_screen_count": 228,
-  "unresolved_screen_count": 317,
+  "route_screen_count": 232,
+  "unresolved_screen_count": 313,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -33,7 +33,9 @@
     "FOS-CATTLE-022",
     "FOS-CATTLE-023",
     "FOS-CATTLE-024",
+    "FOS-CATTLE-025",
     "FOS-CATTLE-026",
+    "FOS-CATTLE-027",
     "FOS-CATTLE-028",
     "FOS-CATTLE-029",
     "FOS-CATTLE-030",
@@ -101,7 +103,9 @@
     "FOS-HEALTH-009",
     "FOS-HEALTH-010",
     "FOS-HEALTH-013",
+    "FOS-HEALTH-014",
     "FOS-HEALTH-015",
+    "FOS-HEALTH-016",
     "FOS-HEALTH-017",
     "FOS-HEALTH-018",
     "FOS-HEALTH-019",
@@ -502,6 +506,17 @@
       }
     },
     {
+      "screen_id": "FOS-CATTLE-025",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-CATTLE-026",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -509,6 +524,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-CATTLE-027",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -1314,6 +1340,17 @@
       }
     },
     {
+      "screen_id": "FOS-HEALTH-014",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-HEALTH-015",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -1321,6 +1358,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-HEALTH-016",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -3059,8 +3107,6 @@
     "FOS-CATTLE-012",
     "FOS-CATTLE-014",
     "FOS-CATTLE-016",
-    "FOS-CATTLE-025",
-    "FOS-CATTLE-027",
     "FOS-CATTLE-031",
     "FOS-CATTLE-036",
     "FOS-FEED-002",
@@ -3135,8 +3181,6 @@
     "FOS-HEALTH-005",
     "FOS-HEALTH-011",
     "FOS-HEALTH-012",
-    "FOS-HEALTH-014",
-    "FOS-HEALTH-016",
     "FOS-HEALTH-027",
     "FOS-HEALTH-028",
     "FOS-HEALTH-029",
