@@ -1,6 +1,8 @@
 package com.farmos.app
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -108,8 +110,14 @@ class HomeUtilityRuntimeNavigationTest {
 
         open("Switch farm")
         compose.onNodeWithTag("farm-screen:FOS-HOME-010").assertExists()
-        compose.onNodeWithText("Premier Farm").assertExists()
-        open("Switch to Irene Farm")
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-006").assertExists()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-006:option:${premier.farmId}").assertIsSelected()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-006:option:${premier.farmId}").performScrollTo().performClick()
+        compose.runOnIdle { assertEquals(null, switched) }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-006:option:${irene.farmId}")
+            .assertIsNotSelected()
+            .performScrollTo()
+            .performClick()
         compose.runOnIdle { assertEquals(irene, switched) }
         compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertExists()
     }

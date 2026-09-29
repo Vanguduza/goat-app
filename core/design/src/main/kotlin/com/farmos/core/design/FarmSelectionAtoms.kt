@@ -26,6 +26,7 @@ object FarmSelectionAtoms {
     const val LOCATION_SELECTOR = "farm-atom:FOS-ATOM-007"
     const val ASSET_SELECTOR = "farm-atom:FOS-ATOM-014"
     const val SPECIES_SELECTOR = "farm-atom:FOS-ATOM-003"
+    const val FARM_SELECTOR = "farm-atom:FOS-ATOM-006"
 }
 
 /**

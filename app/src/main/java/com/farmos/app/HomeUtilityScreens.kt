@@ -18,7 +18,10 @@ import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmHomeMetrics
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmQuickAction
+import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.FarmSelectionAtoms
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.design.FarmSyncPendingReceipt
 import com.farmos.core.network.FarmMembership
 import com.farmos.feature.goat.GoatEntryPage
@@ -192,19 +195,29 @@ private fun FarmSwitcherContent(
         return
     }
 
-    memberships.sortedBy { farmNames[it.farmId] ?: it.farmId }.forEach { membership ->
-        val farmLabel = farmNames[membership.farmId] ?: "Farm ${membership.farmId.take(8)}"
-        if (membership.farmId == currentFarmId) {
-            FarmIllustratedSectionSurface {
-                Text(farmLabel, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Text("Current farm · ${membership.role.replace('_', ' ')}")
-            }
-        } else {
-            AnimalFarmQuickAction(
-                label = "Switch to $farmLabel",
-                onClick = { onSwitchFarm(membership) },
+    val options = memberships
+        .sortedBy { farmNames[it.farmId] ?: it.farmId }
+        .map { membership ->
+            val role = membership.role.replace('_', ' ')
+            FarmSelectorOption(
+                id = membership.farmId,
+                label = farmNames[membership.farmId] ?: "Farm ${membership.farmId.take(8)}",
+                detail = if (membership.farmId == currentFarmId) "Current farm · $role" else role,
             )
         }
+    FarmIllustratedSectionSurface {
+        FarmEntitySelector(
+            atomTag = FarmSelectionAtoms.FARM_SELECTOR,
+            title = "Authorised farms",
+            options = options,
+            selectedId = currentFarmId,
+            onSelect = { farmId ->
+                if (farmId != currentFarmId) {
+                    memberships.firstOrNull { it.farmId == farmId }?.let(onSwitchFarm)
+                }
+            },
+            emptyText = "No farm memberships available",
+        )
     }
 }
 
