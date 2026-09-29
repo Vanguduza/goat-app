@@ -220,7 +220,21 @@ interface LabourDao {
 
     @Query("SELECT * FROM labour_entries WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id DESC LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<LabourEntryEntity>
+
+    @Query("SELECT COUNT(*) FROM labour_entries WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    @Query(
+        """
+        SELECT workerName, SUM(minutes) AS minutes, COUNT(*) AS entryCount, MAX(occurredEpochDay) AS latestEpochDay
+        FROM labour_entries WHERE farmId = :farmId GROUP BY workerName ORDER BY workerName
+        """,
+    )
+    suspend fun totalsByWorkerName(farmId: String): List<LabourWorkerTotal>
 }
+
+/** Exhaustive minutes per recorded worker label; the label is a farm label, not a login or roster entry. */
+data class LabourWorkerTotal(val workerName: String, val minutes: Long, val entryCount: Int, val latestEpochDay: Long)
 
 @Dao
 interface AssetDao {
