@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmEmptyState
 import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.AnimalFarmWarningSurface
+import com.farmos.core.design.FarmErrorRecovery
+import com.farmos.core.design.FarmLoadingSkeleton
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.design.FarmVisualClass
@@ -96,10 +98,11 @@ internal fun CattleRecordPageHost(
     loadRecords: suspend (String) -> CattleRecords,
     onBack: () -> Unit,
 ) {
+    var attempt by remember(selectedId) { mutableStateOf(0) }
     var state by remember(selectedId) {
         mutableStateOf<CattleRecordsState>(if (selectedId == null) CattleRecordsState.NoSelection else CattleRecordsState.Loading)
     }
-    LaunchedEffect(selectedId) {
+    LaunchedEffect(selectedId, attempt) {
         val id = selectedId ?: return@LaunchedEffect
         state = runCatching { loadRecords(id) }
             .fold({ CattleRecordsState.Loaded(it) }, { CattleRecordsState.Failed(it.message ?: "Records could not be loaded") })
@@ -108,8 +111,11 @@ internal fun CattleRecordPageHost(
     FarmOperationalPage(page.screenId, page.title, page.subtitle, visualClass, onBack) {
         when (val current = state) {
             CattleRecordsState.NoSelection -> AnimalFarmEmptyState("Select an animal from the cattle herd first.")
-            CattleRecordsState.Loading -> Text("Loading records")
-            is CattleRecordsState.Failed -> AnimalFarmWarningSurface { Text(current.message) }
+            CattleRecordsState.Loading -> FarmLoadingSkeleton("Loading records")
+            is CattleRecordsState.Failed -> FarmErrorRecovery(current.message, onRetry = {
+                state = CattleRecordsState.Loading
+                attempt++
+            })
             is CattleRecordsState.Loaded -> when (page) {
                 CattleRecordPage.LACTATION_HISTORY -> CattleLactationContent(current.records)
                 CattleRecordPage.SCC_HISTORY -> CattleSccContent(current.records)

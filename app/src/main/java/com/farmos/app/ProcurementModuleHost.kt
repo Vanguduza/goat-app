@@ -29,6 +29,7 @@ fun ProcurementModuleHost(
 ) {
     val scope = rememberCoroutineScope()
     val busy = remember { mutableStateOf(false) }
+    val saved = remember { mutableStateOf(false) }
     val error = remember { mutableStateOf<String?>(null) }
     val rows = remember { mutableStateOf(emptyList<String>()) }
     val records = remember(farmId) { mutableStateOf(ProcurementRecords()) }
@@ -40,7 +41,7 @@ fun ProcurementModuleHost(
     }
     LaunchedEffect(farmId) { runCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
-        scope.launch { busy.value = true; error.value = null; runCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error.value = it.message }; busy.value = false }
+        scope.launch { busy.value = true; error.value = null; saved.value = false; runCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }; busy.value = false }
     }
     val name = remember { mutableStateOf("") }; val lead = remember { mutableStateOf("0") }
     val supplierId = remember { mutableStateOf("") }; val itemId = remember { mutableStateOf("") }
@@ -52,6 +53,7 @@ fun ProcurementModuleHost(
         fields = listOf("Supplier name" to name, "Lead time days" to lead), actionLabel = "Create supplier",
         onSubmit = { run { ops.createSupplier(CreateSupplier(UUID.randomUUID().toString(), name.value, lead.value.toIntOrNull() ?: 0), newContext()) } },
         onBack = onBack,
+        saved = saved.value,
         extra = {
             androidx.compose.material3.OutlinedTextField(supplierId.value,{supplierId.value=it},label={androidx.compose.material3.Text("Supplier id")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(itemId.value,{itemId.value=it},label={androidx.compose.material3.Text("Inventory item id")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())

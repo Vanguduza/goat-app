@@ -19,6 +19,7 @@ import com.farmos.core.design.AnimalFarmHomeMetrics
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmQuickAction
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.FarmSyncPendingReceipt
 import com.farmos.core.network.FarmMembership
 import com.farmos.feature.goat.GoatEntryPage
 import com.farmos.feature.ops.HealthEntryPage
@@ -102,6 +103,7 @@ private fun TodaySummaryContent(
         SummaryLine("Low-stock items", summary.inventoryBelowReorder.toString())
         SummaryLine("Waiting to sync", summary.pendingSync.toString())
     }
+    if (summary.pendingSync > 0) FarmSyncPendingReceipt(summary.pendingSync)
     AnimalFarmQuickAction("Open tasks", { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) })
     AnimalFarmQuickAction("Open health", { onOpen(FarmDestination.Health()) })
     AnimalFarmQuickAction("Open sync status", { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) })

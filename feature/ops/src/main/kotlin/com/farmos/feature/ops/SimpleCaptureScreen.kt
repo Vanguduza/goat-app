@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
+import com.farmos.core.design.FarmOfflineSaveReceipt
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
@@ -29,6 +30,8 @@ fun SimpleCaptureScreen(
     onBack: () -> Unit,
     visualClass: FarmVisualClass = FarmVisualClass.I3,
     extra: @Composable () -> Unit = {},
+    /** True after the latest capture committed locally; shows the FOS-ATOM-034 receipt. */
+    saved: Boolean = false,
 ) {
     FarmOperationalPage(
         screenId = screenId,
@@ -57,6 +60,7 @@ fun SimpleCaptureScreen(
             Button(onClick = onSubmit, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
                 Text(actionLabel)
             }
+            if (saved && !busy) FarmOfflineSaveReceipt()
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }

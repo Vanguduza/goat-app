@@ -27,6 +27,7 @@ fun SalesModuleHost(
 ) {
     val scope = rememberCoroutineScope()
     val busy = remember { mutableStateOf(false) }
+    val saved = remember { mutableStateOf(false) }
     val error = remember { mutableStateOf<String?>(null) }
     val rows = remember { mutableStateOf(emptyList<String>()) }
     val records = remember(farmId) { mutableStateOf(SalesRecords()) }
@@ -36,7 +37,7 @@ fun SalesModuleHost(
     }
     LaunchedEffect(farmId) { runCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
-        scope.launch { busy.value = true; error.value = null; runCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error.value = it.message }; busy.value = false }
+        scope.launch { busy.value = true; error.value = null; saved.value = false; runCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }; busy.value = false }
     }
     val kind = remember { mutableStateOf("live_goat") }
     val qty = remember { mutableStateOf("1") }
@@ -63,6 +64,7 @@ fun SalesModuleHost(
             )
         } },
         onBack = onBack,
+        saved = saved.value,
         extra = { recordActions() },
     ) }
 }

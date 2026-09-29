@@ -3,6 +3,7 @@ package com.farmos.app
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -26,7 +27,9 @@ import com.farmos.feature.ops.CattleTimelineRow
 import com.farmos.feature.ops.CattleWithdrawalRow
 import com.farmos.feature.ops.WeightView
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+import kotlinx.coroutines.CompletableDeferred
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -232,5 +235,32 @@ class CattleRecordRuntimeNavigationTest {
             }
         }
         compose.onNodeWithTag(homeTag).assertExists()
+    }
+
+    @Test
+    fun loadingShowsTheSkeletonAndAFailedLoadRecoversOnRetry() {
+        val calls = AtomicInteger(0)
+        val gate = CompletableDeferred<Unit>()
+        render("cow-daisy") {
+            if (calls.incrementAndGet() == 1) {
+                gate.await()
+                error("records unavailable")
+            }
+            records()
+        }
+        compose.onNode(hasClickAction() and hasText("Lactation history")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-CATTLE-020").assertExists()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-032").assertExists()
+        compose.onNodeWithText("Loading records").assertExists()
+
+        gate.complete(Unit)
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-033").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("records unavailable").assertExists()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-032").assertDoesNotExist()
+
+        compose.onNode(hasClickAction() and hasText("Try again")).performScrollTo().performClick()
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("cattle-milk:m2").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-033").assertDoesNotExist()
+        compose.runOnIdle { assertEquals(2, calls.get()) }
     }
 }

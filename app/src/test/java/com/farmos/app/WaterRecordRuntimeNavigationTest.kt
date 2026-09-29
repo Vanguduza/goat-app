@@ -97,4 +97,31 @@ class WaterRecordRuntimeNavigationTest {
         }
         compose.onNodeWithTag(homeTag).assertExists()
     }
+
+    @Test
+    fun savedCaptureShowsTheOfflineSaveReceiptOnlyAfterALocalSave() {
+        val saved = mutableStateOf(false)
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                SimpleCaptureScreen(
+                    screenId = "FOS-" + "WATER-" + "001",
+                    title = "Water",
+                    help = "Water home",
+                    empty = "No water records on this device.",
+                    rows = emptyList(),
+                    busy = false,
+                    error = null,
+                    fields = listOf("Litres" to mutableStateOf("")),
+                    actionLabel = "Record water",
+                    onSubmit = { saved.value = true },
+                    onBack = {},
+                    saved = saved.value,
+                )
+            }
+        }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-034").assertDoesNotExist()
+        compose.onNode(hasClickAction() and hasText("Record water")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-034").assertExists()
+        compose.onNodeWithText("Saved on this device · waiting to sync").assertExists()
+    }
 }

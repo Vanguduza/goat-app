@@ -1,5 +1,6 @@
 package com.farmos.app
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -122,5 +123,26 @@ class HomeUtilityRuntimeNavigationTest {
     private fun restoreHome() {
         open("Farm home")
         compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertExists()
+    }
+
+    @Test
+    fun todaySummaryShowsTheSyncPendingReceiptOnlyWhileChangesWait() {
+        val pending = mutableStateOf(2L)
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                HomeUtilityScreen(
+                    surface = HomeSurface.TODAY_SUMMARY,
+                    summary = FarmHomeSummary(pendingSync = pending.value),
+                    onOpen = {},
+                    onBack = {},
+                )
+            }
+        }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-035").assertExists()
+        compose.onNodeWithText("2 changes saved on this device are waiting to sync").assertExists()
+        pending.value = 1L
+        compose.onNodeWithText("1 change saved on this device is waiting to sync").assertExists()
+        pending.value = 0L
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-035").assertDoesNotExist()
     }
 }

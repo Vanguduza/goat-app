@@ -2,18 +2,22 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:79b4db7b37f426eae153a1768b9545c92c3243cab18fec43453e8fb089ed02c6",
-  "runtime_evidence_tested_commit": "f9d9f690e834a9430ed3f956ee0bb080f3560a68",
-  "runtime_evidence_run_id": 36592891221,
+  "source_fingerprint": "sha256:43543e4f826effd177a8329b50da370db6b2588f99dad9487d5d5c485a6b0abb",
+  "runtime_evidence_tested_commit": "96ebe94c47f814bd689b4003801966f554ab2bb3",
+  "runtime_evidence_run_id": 36606271591,
   "registry_screen_count": 545,
-  "route_screen_count": 248,
-  "unresolved_screen_count": 297,
+  "route_screen_count": 252,
+  "unresolved_screen_count": 293,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
     "FOS-ASSET-002",
     "FOS-ASSET-003",
     "FOS-ASSET-009",
+    "FOS-ATOM-032",
+    "FOS-ATOM-033",
+    "FOS-ATOM-034",
+    "FOS-ATOM-035",
     "FOS-CATTLE-001",
     "FOS-CATTLE-002",
     "FOS-CATTLE-003",
@@ -305,6 +309,54 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/AssetRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ATOM-032",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ATOM-033",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ATOM-034",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/WaterRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ATOM-035",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -3294,10 +3346,6 @@
     "FOS-ATOM-029",
     "FOS-ATOM-030",
     "FOS-ATOM-031",
-    "FOS-ATOM-032",
-    "FOS-ATOM-033",
-    "FOS-ATOM-034",
-    "FOS-ATOM-035",
     "FOS-CAP-001",
     "FOS-CAP-002",
     "FOS-CAP-003",

@@ -33,6 +33,8 @@ import com.farmos.core.design.AnimalFarmHomeMetrics
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.AnimalFarmWarningSurface
+import com.farmos.core.design.FarmErrorRecovery
+import com.farmos.core.design.FarmLoadingSkeleton
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.model.SyncState
 import java.time.Instant
@@ -198,10 +200,11 @@ internal fun SyncQueueHost(
     traceOnServer: (suspend (String) -> ServerMutationTrace)? = null,
 ) {
     var tracedId by remember(view, permitted) { mutableStateOf<String?>(null) }
+    var attempt by remember(view, permitted) { mutableStateOf(0) }
     var state by remember(view, permitted) {
         mutableStateOf<SyncQueueUiState>(if (permitted) SyncQueueUiState.Loading else SyncQueueUiState.Denied)
     }
-    LaunchedEffect(view, permitted) {
+    LaunchedEffect(view, permitted, attempt) {
         if (!permitted) return@LaunchedEffect
         state = runCatching { SyncQueueUiState.Loaded(loadRows(view).map { it.toSyncQueueRow(view, zone) }, loadTotal(view)) }
             .fold({ it }, { SyncQueueUiState.Failed(it.message ?: "Sync queue could not be loaded") })
@@ -210,7 +213,10 @@ internal fun SyncQueueHost(
     if (traced != null) {
         SyncMutationTraceScreen(traced, view, traceOnServer, onBack = { tracedId = null })
     } else {
-        SyncQueueScreen(view, state, onSelectView, onBack, onTrace = { tracedId = it })
+        SyncQueueScreen(view, state, onSelectView, onBack, onTrace = { tracedId = it }, onRetry = {
+            state = SyncQueueUiState.Loading
+            attempt++
+        })
     }
 }
 
@@ -221,6 +227,7 @@ internal fun SyncQueueScreen(
     onSelectView: (SyncQueueView) -> Unit,
     onBack: () -> Unit,
     onTrace: (String) -> Unit = {},
+    onRetry: () -> Unit = {},
 ) {
     AnimalFarmCanvas(Modifier.testTag("farm-screen:${view.screenId}")) {
         Column(
@@ -230,9 +237,9 @@ internal fun SyncQueueScreen(
             AnimalFarmModuleHeader(view.title, view.subtitle)
             if (state != SyncQueueUiState.Denied) SyncQueueSwitcher(view, onSelectView)
             when (state) {
-                SyncQueueUiState.Loading -> Text("Loading sync queue")
+                SyncQueueUiState.Loading -> FarmLoadingSkeleton("Loading sync queue")
                 SyncQueueUiState.Denied -> AnimalFarmEmptyState("Sync queues are not available for your farm role.")
-                is SyncQueueUiState.Failed -> AnimalFarmWarningSurface { Text(state.message) }
+                is SyncQueueUiState.Failed -> FarmErrorRecovery(state.message, onRetry)
                 is SyncQueueUiState.Loaded -> SyncQueueContent(view, state.rows, state.total, onTrace)
             }
             TextButton(

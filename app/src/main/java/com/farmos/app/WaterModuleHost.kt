@@ -27,6 +27,7 @@ fun WaterModuleHost(
 ) {
     val scope = rememberCoroutineScope()
     val busy = remember { mutableStateOf(false) }
+    val saved = remember { mutableStateOf(false) }
     val error = remember { mutableStateOf<String?>(null) }
     val rows = remember { mutableStateOf(emptyList<String>()) }
     val records = remember(farmId) { mutableStateOf(WaterRecords()) }
@@ -37,8 +38,8 @@ fun WaterModuleHost(
     LaunchedEffect(farmId) { runCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
         scope.launch {
-            busy.value = true; error.value = null
-            runCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error.value = it.message }
+            busy.value = true; error.value = null; saved.value = false
+            runCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }
             busy.value = false
         }
     }
@@ -57,6 +58,7 @@ fun WaterModuleHost(
             ops.recordWater(RecordWater(UUID.randomUUID().toString(), source.value, milliLitres, LocalDate.parse(day.value).toEpochDay()), newContext())
         } },
         onBack = onBack,
+        saved = saved.value,
         extra = { recordActions() },
     ) }
 }
