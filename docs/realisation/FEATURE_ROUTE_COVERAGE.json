@@ -2,7 +2,7 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:ab8c4ac6ed9aacd0bdef8dadf5db08f0b50605a4d61fb76d7292d1f0555dc2ed",
+  "source_fingerprint": "sha256:79b4db7b37f426eae153a1768b9545c92c3243cab18fec43453e8fb089ed02c6",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 80,
@@ -1074,11 +1074,11 @@
       ],
       "route_screen_ids": [
         "FOS-POULTRY-009",
-        "FOS-POULTRY-010"
+        "FOS-POULTRY-010",
+        "FOS-POULTRY-012"
       ],
       "unresolved_screen_ids": [
-        "FOS-POULTRY-011",
-        "FOS-POULTRY-012"
+        "FOS-POULTRY-011"
       ],
       "headless_contract": null,
       "coverage_state": "PARTIAL_ROUTE_COVERAGE",

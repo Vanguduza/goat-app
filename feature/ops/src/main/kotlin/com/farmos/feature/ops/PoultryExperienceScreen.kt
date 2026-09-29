@@ -47,6 +47,7 @@ private enum class PoultryPage {
     FLOCK_PROFILE,
     HOUSE_DETAIL,
     EGG_PRODUCTION,
+    FEED,
     INCUBATION_BATCH,
     BIOSECURITY_RECORDS,
     FLOCK_HEALTH,
@@ -95,6 +96,7 @@ fun PoultryExperienceScreen(
         PoultryPage.FLOCK_PROFILE -> PoultryFlockProfileScreen(records, home)
         PoultryPage.HOUSE_DETAIL -> PoultryHouseDetailScreen(records, home)
         PoultryPage.EGG_PRODUCTION -> PoultryEggProductionScreen(records, home)
+        PoultryPage.FEED -> PoultryFeedScreen(records, home)
         PoultryPage.INCUBATION_BATCH -> PoultryIncubationBatchScreen(records, home)
         PoultryPage.BIOSECURITY_RECORDS -> PoultryBiosecurityDashboardScreen(records, home)
         PoultryPage.FLOCK_HEALTH -> PoultryFlockRecordScreen(timeline = false, records.flocks, loadFlock, home)
@@ -145,6 +147,7 @@ private fun PoultryDashboard(
             PoultryAction("Flock profiles", "Placement, daily records and losses per flock") { onOpen(PoultryPage.FLOCK_PROFILE) }
             PoultryAction("House details", "Placements and biosecurity per house") { onOpen(PoultryPage.HOUSE_DETAIL) }
             PoultryAction("Egg production", "Eggs recorded per flock and day") { onOpen(PoultryPage.EGG_PRODUCTION) }
+            PoultryAction("Feed", "Feed recorded per flock and day") { onOpen(PoultryPage.FEED) }
             PoultryAction("Incubation batches", "Egg set, candling and hatch as recorded") { onOpen(PoultryPage.INCUBATION_BATCH) }
             PoultryAction("Biosecurity records", "Recorded walks and findings") { onOpen(PoultryPage.BIOSECURITY_RECORDS) }
             PoultryAction("Flock health", "Recorded losses, vaccinations and walks for one flock") { onOpen(PoultryPage.FLOCK_HEALTH) }

@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "a83657656741c2749536a873ba978685b3dbc067",
-  "source_fingerprint": "sha256:ab8c4ac6ed9aacd0bdef8dadf5db08f0b50605a4d61fb76d7292d1f0555dc2ed",
+  "tested_commit": "f9d9f690e834a9430ed3f956ee0bb080f3560a68",
+  "source_fingerprint": "sha256:79b4db7b37f426eae153a1768b9545c92c3243cab18fec43453e8fb089ed02c6",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36589512034,
+  "foundation_run_id": 36592891221,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -212,6 +212,7 @@
         "FOS-POULTRY-005",
         "FOS-POULTRY-007",
         "FOS-POULTRY-010",
+        "FOS-POULTRY-012",
         "FOS-POULTRY-015",
         "FOS-POULTRY-019",
         "FOS-POULTRY-025",
@@ -391,10 +392,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
-    "rendered_traversal_screen_count": 182,
+    "rendered_traversal_screen_count": 183,
     "rendered_owner_screen_count": 32,
     "route_contract_screen_count": 60,
-    "combined_screen_count": 247,
+    "combined_screen_count": 248,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -537,6 +538,7 @@
       "FOS-POULTRY-008",
       "FOS-POULTRY-009",
       "FOS-POULTRY-010",
+      "FOS-POULTRY-012",
       "FOS-POULTRY-014",
       "FOS-POULTRY-015",
       "FOS-POULTRY-016",
@@ -725,12 +727,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 182,
+    "runtime_reachability_executed": 183,
     "entry_action_emission_executed": 26,
     "rendered_surface_owners_executed": 32,
     "route_contracts_executed": 60,
     "parameter_scope_executed": true,
-    "return_restoration_executed": 182,
+    "return_restoration_executed": 183,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {

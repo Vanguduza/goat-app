@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "a83657656741c2749536a873ba978685b3dbc067",
+  "tested_commit": "f9d9f690e834a9430ed3f956ee0bb080f3560a68",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 247
+    "registered_ids_mentioned_in_kotlin": 248
   },
   "top_level": {
     "farm_modules": [
@@ -1034,6 +1034,12 @@
         },
         {
           "value": "EGG_PRODUCTION",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FEED",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false

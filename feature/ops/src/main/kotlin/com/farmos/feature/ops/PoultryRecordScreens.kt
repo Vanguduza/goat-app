@@ -201,6 +201,34 @@ internal fun PoultryEggProductionScreen(records: PoultryRecords, onBack: () -> U
     }
 }
 
+/**
+ * FOS-POULTRY-012 — recorded feed per flock and day, totalled per flock. No feed conversion ratio
+ * is derived: bird and egg weights are not recorded, so any ratio would be invented.
+ */
+@Composable
+internal fun PoultryFeedScreen(records: PoultryRecords, onBack: () -> Unit) {
+    FarmOperationalPage("FOS-POULTRY-012", "Feed", "Feed recorded per flock and day. No conversion ratio is derived.", onBack = onBack) {
+        val fed = records.flocks.filter { flock -> flock.days.any { it.feedGrams > 0 } }
+        if (fed.isEmpty()) {
+            AnimalFarmEmptyState("No feed recorded on this device.")
+            return@FarmOperationalPage
+        }
+        Text(
+            "Bird and egg weights are not recorded, so no feed conversion ratio is shown.",
+            color = AnimalFarmTheme.colors.mutedInk,
+            modifier = Modifier.testTag("poultry-feed-no-fcr"),
+        )
+        fed.forEach { flock ->
+            FarmOperationalSection("${flock.groupId} · ${flock.poultryKind} · ${PoultryRecordMath.kg(flock.days.sumOf { it.feedGrams })}") {
+                flock.days.filter { it.feedGrams > 0 }.forEachIndexed { index, day ->
+                    if (index > 0) HorizontalDivider()
+                    PoultryRecordRow(LocalDate.ofEpochDay(day.epochDay).toString(), PoultryRecordMath.kg(day.feedGrams), "poultry-feed:${flock.groupId}:${day.epochDay}")
+                }
+            }
+        }
+    }
+}
+
 /** FOS-POULTRY-019 — one incubation batch as recorded. */
 @Composable
 internal fun PoultryIncubationBatchScreen(records: PoultryRecords, onBack: () -> Unit) {
