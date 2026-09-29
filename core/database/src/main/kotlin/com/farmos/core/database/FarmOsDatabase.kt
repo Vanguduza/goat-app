@@ -396,7 +396,26 @@ interface OutboxDao {
 
     @Query("SELECT COUNT(*) FROM sync_outbox WHERE farmId = :farmId AND state != 'ACKNOWLEDGED'")
     suspend fun countUnacknowledgedForFarm(farmId: String): Long
+
+    /** Read-only queue view: rows for one farm in one sync state, newest first. */
+    @Query(
+        """
+        SELECT * FROM sync_outbox
+        WHERE farmId = :farmId AND state = :state
+        ORDER BY createdAtEpochMillis DESC, mutationId
+        LIMIT :limit
+        """,
+    )
+    suspend fun listForFarmInState(farmId: String, state: String, limit: Int): List<OutboxEntity>
+
+    @Query("SELECT state, COUNT(*) AS count FROM sync_outbox WHERE farmId = :farmId GROUP BY state")
+    suspend fun countByStateForFarm(farmId: String): List<OutboxStateCount>
 }
+
+data class OutboxStateCount(
+    val state: String,
+    val count: Long,
+)
 
 @Dao
 interface AggregateVersionDao {

@@ -32,6 +32,7 @@ fun FarmDestination.runtimeRouteContract(): FarmRuntimeRoute =
             FarmRuntimeRoute("task.detail", "FOS-TASK-003", "taskId=$taskId")
         }
         is FarmDestination.Tasks -> entry.runtimeRouteContract()
+        is FarmDestination.SyncQueue -> FarmRuntimeRoute("sync.${view.name.lowercase()}", view.screenId)
     }
 
 private fun HomeSurface.runtimeRouteContract(): FarmRuntimeRoute =

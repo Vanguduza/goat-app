@@ -54,6 +54,12 @@ fun FarmSessionContent(
             request,
         )
     }
+    suspend fun loadSyncQueueCounts(): Map<SyncQueueView, Long>? =
+        if (!syncQueuesPermitted(membership.role)) {
+            null
+        } else {
+            syncQueueCounts(app.database.outbox().countByStateForFarm(membership.farmId).associate { it.state to it.count })
+        }
     val backHome = { destination = FarmDestination.Home }
     val runtimeRoute = destination.runtimeRouteContract()
     Box(Modifier.testTag(runtimeRoute.testTag)) {
@@ -65,6 +71,7 @@ fun FarmSessionContent(
             ops = ops,
             loadGoatCount = { repository.listGoats(500).size },
             loadPendingSync = { app.database.outbox().countUnacknowledgedForFarm(membership.farmId) },
+            loadSyncQueueCounts = ::loadSyncQueueCounts,
             onOpen = { destination = it },
             onSignOut = onSignOut,
             memberships = memberships,
@@ -77,6 +84,13 @@ fun FarmSessionContent(
             onOpen = { destination = it },
             onBack = backHome,
             onRequireReauth = onRequireReauth,
+        )
+        is FarmDestination.SyncQueue -> SyncQueueHost(
+            view = dest.view,
+            permitted = syncQueuesPermitted(membership.role),
+            loadRows = { view -> app.database.outbox().listForFarmInState(membership.farmId, view.state.name, SYNC_QUEUE_LIMIT) },
+            onSelectView = { destination = FarmDestination.SyncQueue(it) },
+            onBack = backHome,
         )
         is FarmDestination.HomePanel -> error("Home panels are nested owners and must be intercepted by RoleAwareFarmHomeScreen")
         is FarmDestination.Goat -> GoatModuleHost(
@@ -187,6 +201,7 @@ fun FarmSessionContent(
                 ops = ops,
                 loadGoatCount = { repository.listGoats(500).size },
                 loadPendingSync = { app.database.outbox().countUnacknowledgedForFarm(membership.farmId) },
+            loadSyncQueueCounts = ::loadSyncQueueCounts,
                 onOpen = { destination = it },
                 onSignOut = onSignOut,
             )
