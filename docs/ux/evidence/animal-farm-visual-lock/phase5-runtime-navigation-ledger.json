@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "96ebe94c47f814bd689b4003801966f554ab2bb3",
-  "source_fingerprint": "sha256:43543e4f826effd177a8329b50da370db6b2588f99dad9487d5d5c485a6b0abb",
+  "tested_commit": "c3b946dcd8a62ee785a34beb6f7eecfd91485bd1",
+  "source_fingerprint": "sha256:d2e16f0426789072b7b3452dd8ef312956ee9a6ea4911a3db1796f2484450ab3",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36606271591,
+  "foundation_run_id": 36609270392,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -289,6 +289,7 @@
         "FOS-HOME-009"
       ],
       "app/src/test/java/com/farmos/app/GlobalSearchContractTest.kt": [
+        "FOS-ATOM-031",
         "FOS-HOME-006",
         "FOS-HOME-007"
       ],
@@ -297,6 +298,7 @@
         "FOS-SHEEP-010"
       ],
       "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt": [
+        "FOS-ATOM-026",
         "FOS-GOAT-001",
         "FOS-GOAT-002",
         "FOS-GOAT-003",
@@ -398,9 +400,9 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
     "rendered_traversal_screen_count": 187,
-    "rendered_owner_screen_count": 33,
+    "rendered_owner_screen_count": 35,
     "route_contract_screen_count": 60,
-    "combined_screen_count": 252,
+    "combined_screen_count": 254,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -619,6 +621,8 @@
       "FOS-WATER-009"
     ],
     "rendered_owner_screen_ids": [
+      "FOS-ATOM-026",
+      "FOS-ATOM-031",
       "FOS-ATOM-033",
       "FOS-CATTLE-018",
       "FOS-GLOBAL-001",
@@ -739,7 +743,7 @@
   "certification": {
     "runtime_reachability_executed": 187,
     "entry_action_emission_executed": 26,
-    "rendered_surface_owners_executed": 33,
+    "rendered_surface_owners_executed": 35,
     "route_contracts_executed": 60,
     "parameter_scope_executed": true,
     "return_restoration_executed": 187,

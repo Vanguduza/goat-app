@@ -33,6 +33,7 @@ import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.AnimalFarmWarningSurface
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.FarmIrreversibleConfirmation
 import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FosDimens
 import com.farmos.domain.goat.GoatSex
@@ -548,22 +549,18 @@ private fun GoatStatusChangeScreen(
             }
         }
         pending?.let { next ->
-            AnimalFarmWarningSurface {
-                Text("Confirm ${goatStatusLabel(next).lowercase()}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text("This is an authoritative farm record after sync. Check the animal and status before continuing.")
-                Button(
-                    onClick = {
-                        onSetStatus(next)
-                        pending = null
-                    },
-                    enabled = !state.busy,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
-                        .testTag("goat-lifecycle-confirm"),
-                ) { Text("Confirm status change") }
-                TextButton(onClick = { pending = null }, enabled = !state.busy, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Cancel") }
-            }
+            FarmIrreversibleConfirmation(
+                title = "Confirm ${goatStatusLabel(next).lowercase()}",
+                consequence = "This is an authoritative farm record after sync. Check the animal and status before continuing.",
+                confirmLabel = "Confirm status change",
+                busy = state.busy,
+                onConfirm = {
+                    onSetStatus(next)
+                    pending = null
+                },
+                onCancel = { pending = null },
+                confirmTag = "goat-lifecycle-confirm",
+            )
         }
     }
 }

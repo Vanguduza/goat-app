@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.FarmSearchEmptyState
 import com.farmos.core.network.AuthenticationRequiredException
 import kotlinx.coroutines.launch
 
@@ -167,7 +168,10 @@ internal fun GlobalSearchScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     if (results.isEmpty()) {
-                        Text("No matching animal records.")
+                        FarmSearchEmptyState(
+                            title = "No matching animal records.",
+                            hint = "Check the spelling, or search by tag, name or species. Only this farm's records are searched.",
+                        )
                     } else {
                         results.forEach { result ->
                             val label = buildString {
