@@ -2,6 +2,7 @@ package com.farmos.app
 
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.feature.ops.PoultryDayView
+import com.farmos.feature.ops.PoultryFlockRecords
 import com.farmos.feature.ops.PoultryFlockView
 import com.farmos.feature.ops.PoultryHatchView
 import com.farmos.feature.ops.PoultryHouseView
@@ -87,5 +88,30 @@ internal suspend fun loadPoultryRecords(database: FarmOsDatabase, farmId: String
         walks = walks,
         walkCount = lifecycle.poultryWalkCount(farmId),
         mixedSpeciesWalkCount = lifecycle.poultryMixedSpeciesWalkCount(farmId),
+    )
+}
+
+/** Every record for one flock, read exhaustively inside the farm. Nothing here writes. */
+internal suspend fun loadPoultryFlockRecords(database: FarmOsDatabase, farmId: String, groupId: String): PoultryFlockRecords {
+    val lifecycle = database.lifecycle()
+    val houseCodes = lifecycle.houses(farmId).associate { it.id to it.code }
+    val vaccinations = lifecycle.vaccinationsForGroup(farmId, groupId)
+    val products = vaccinations.map { it.formularyItemId }.distinct().chunked(LOOKUP_CHUNK)
+        .flatMap { database.formulary().getMany(farmId, it) }
+        .associate { it.id to it.productName }
+    return PoultryFlockRecords(
+        placements = lifecycle.placementsForGroup(farmId, groupId).map { PoultryPlacementView(it.id, it.groupId, it.poultryKindCode, it.headCount, it.occurredEpochDay) },
+        days = database.poultryFlockDays().forGroup(farmId, groupId).map { PoultryDayView(it.occurredEpochDay, it.eggs, it.dead, it.culls, it.feedGrams) },
+        vaccinations = vaccinations.map { PoultryVaccinationView(it.id, it.occurredEpochDay, products[it.formularyItemId] ?: "Product not on this device") },
+        walks = lifecycle.walksForGroup(farmId, groupId).map { walk ->
+            val house = walk.houseId?.let { "House " + (houseCodes[it] ?: "not on this device") }
+            PoultryWalkView(walk.id, walk.occurredEpochDay, listOfNotNull(house, "Flock $groupId").joinToString(" · "), walk.findings, walk.mixedSpecies)
+        },
+        hatches = lifecycle.hatchesPlacedInto(farmId, groupId).map { hatch ->
+            PoultryHatchView(
+                hatch.id, hatch.poultryKindCode, hatch.setEpochDay, hatch.eggsSet, hatch.incubationDays, hatch.status, "Flock $groupId",
+                hatch.fertile, hatch.infertile, hatch.midDead, hatch.hatched, hatch.culls, hatch.placementGroupId,
+            )
+        },
     )
 }

@@ -12,6 +12,7 @@ import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.feature.ops.PoultryDayView
 import com.farmos.feature.ops.PoultryExperienceScreen
+import com.farmos.feature.ops.PoultryFlockRecords
 import com.farmos.feature.ops.PoultryFlockView
 import com.farmos.feature.ops.PoultryHatchView
 import com.farmos.feature.ops.PoultryHouseView
@@ -20,6 +21,7 @@ import com.farmos.feature.ops.PoultryRecords
 import com.farmos.feature.ops.PoultryVaccinationView
 import com.farmos.feature.ops.PoultryWalkView
 import java.time.LocalDate
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -77,6 +79,48 @@ class PoultryRecordRuntimeNavigationTest {
     }
 
     @Test
+    fun flockHealthAndTimelineLoadTheSelectedFlock() {
+        val loaded = mutableListOf<String>()
+        render(records()) { id ->
+            loaded += id
+            if (id != "layers-a") {
+                PoultryFlockRecords()
+            } else {
+                PoultryFlockRecords(
+                    placements = listOf(PoultryPlacementView("p1", "layers-a", "chicken", 1_000, day(8, 1))),
+                    days = listOf(PoultryDayView(day(9, 21), 940, 2, 1, 12_000), PoultryDayView(day(9, 20), 910, 1, 0, 10_500)),
+                    vaccinations = listOf(PoultryVaccinationView("v1", day(8, 3), "Marek's vaccine")),
+                    walks = listOf(PoultryWalkView("bw1", day(9, 18), "House H1 · Flock layers-a", "Wild bird droppings", mixedSpecies = true)),
+                )
+            }
+        }
+        traverse("Flock health", "FOS-POULTRY-025") {
+            compose.onNodeWithTag("flock-health-mixed").assertExists()
+            compose.onNodeWithTag("flock-health-dead").assertExists()
+            compose.onNodeWithText("2026-09-21 · 2 dead · 1 culled").assertExists()
+            compose.onNodeWithText("Marek's vaccine").assertExists()
+            compose.onNodeWithTag("flock-option:layers-b").performScrollTo().performClick()
+            compose.waitForIdle()
+            compose.onNodeWithText("No vaccinations recorded for this flock.").assertExists()
+        }
+        traverse("Flock timeline", "FOS-POULTRY-026") {
+            compose.onNodeWithText("Events · 5").assertExists()
+            compose.onNodeWithText("2026-08-01 · Placed").assertExists()
+            compose.onNodeWithText("940 eggs · 2 dead · 1 culled · 12 kg feed").assertExists()
+        }
+        compose.runOnIdle { assertEquals(listOf("layers-a", "layers-b", "layers-a"), loaded) }
+    }
+
+    @Test
+    fun failedFlockLoadIsShownNotEmpty() {
+        render(records()) { error("flock unavailable") }
+        traverse("Flock timeline", "FOS-POULTRY-026") {
+            compose.onNodeWithText("flock unavailable").assertExists()
+            compose.onNodeWithText("No records for this flock on this device.").assertDoesNotExist()
+        }
+    }
+
+    @Test
     fun emptyRecordsSayNothingIsRecorded() {
         render(PoultryRecords())
         traverse("Flock profiles", "FOS-POULTRY-005") {
@@ -93,6 +137,7 @@ class PoultryRecordRuntimeNavigationTest {
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
         compose.onNode(hasClickAction() and hasText("Open $label")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
+        compose.waitForIdle()
         assertions()
         compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
         compose.onNode(hasClickAction() and hasText("Open $label")).assertExists()
@@ -130,7 +175,7 @@ class PoultryRecordRuntimeNavigationTest {
         )
     }
 
-    private fun render(records: PoultryRecords) {
+    private fun render(records: PoultryRecords, loadFlock: suspend (String) -> PoultryFlockRecords = { PoultryFlockRecords() }) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 PoultryExperienceScreen(
@@ -153,6 +198,7 @@ class PoultryRecordRuntimeNavigationTest {
                     onBiosecurity = { _, _, _, _, _ -> },
                     onBack = {},
                     records = records,
+                    loadFlock = loadFlock,
                 )
             }
         }

@@ -152,6 +152,7 @@ fun FarmSessionContent(
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
                 loadRecords = { loadPoultryRecords(app.database, membership.farmId) },
+                loadFlock = { loadPoultryFlockRecords(app.database, membership.farmId, it) },
             )
             FarmModule.GROUPS -> GroupsModuleHost(
                 farmId = membership.farmId,
