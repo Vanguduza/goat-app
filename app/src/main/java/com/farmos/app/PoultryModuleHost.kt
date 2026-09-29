@@ -48,10 +48,16 @@ fun PoultryModuleHost(
     var hatches by remember { mutableStateOf(emptyList<String>()) }
     var vaccinations by remember { mutableStateOf(emptyList<String>()) }
     var flockGroups by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
+    var houseOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
+    var poultryFormulary by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
 
     suspend fun refresh() {
         enabledKinds = ops.enabledPoultryKinds().map { it.poultryKindCode }
-        houses = ops.houses().map { "${it.id} ${it.code} · ${it.kind} · ${it.poultryKindCode}" }
+        val houseRows = ops.houses()
+        houses = houseRows.map { "${it.id} ${it.code} · ${it.kind} · ${it.poultryKindCode}" }
+        houseOptions = houseRows.map { FarmSelectorOption(it.id, it.code, "${it.kind} · ${it.poultryKindCode}") }
+        poultryFormulary = ops.approvedFormulary().filter { it.speciesCode == "poultry" }
+            .map { FarmSelectorOption(it.id, it.productName, it.vetClass) }
         placements = ops.placements().map { "${it.groupId} · ${it.poultryKindCode} · house ${it.houseId} · ${it.headCount} head" }
         flockDays = ops.recentFlockDays().map { "eggs ${it.eggs} · dead ${it.dead} · culls ${it.culls} · feed ${it.feedGrams} g" }
         hatches = ops.hatches().map { "${it.id} ${it.poultryKindCode} · ${it.eggsSet} eggs · ${it.status}" }
@@ -78,6 +84,8 @@ fun PoultryModuleHost(
 
     PoultryExperienceScreen(
         flockGroups = flockGroups,
+        houseOptions = houseOptions,
+        poultryFormulary = poultryFormulary,
         enabledKinds = enabledKinds,
         houses = houses,
         placements = placements,

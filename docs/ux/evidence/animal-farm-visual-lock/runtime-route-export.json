@@ -2,9 +2,9 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:256bfb61952e2f4c8f5ee6a90e85e2fffe2ea3023acb7c0d1c258e9400ba9f49",
-  "runtime_evidence_tested_commit": "5f9aaf8611429f863508e92627fadcb8d30c7045",
-  "runtime_evidence_run_id": 36624968081,
+  "source_fingerprint": "sha256:6d3b1854e9a4e1743ec9af0fd680b6111b71f33a6cb7a8b00dfba71e2e5e3840",
+  "runtime_evidence_tested_commit": "1ee7631f1161940c91d0ad231562e7a3824c0480",
+  "runtime_evidence_run_id": 36628265441,
   "registry_screen_count": 545,
   "route_screen_count": 265,
   "unresolved_screen_count": 280,
@@ -382,7 +382,8 @@
       ],
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
-          "app/src/test/java/com/farmos/app/PastureCaptureOwnerTest.kt"
+          "app/src/test/java/com/farmos/app/PastureCaptureOwnerTest.kt",
+          "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt"
         ]
       }
     },
@@ -1586,11 +1587,15 @@
       "screen_id": "FOS-HEALTH-007",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER",
         "TYPED_ROUTE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt"
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
@@ -2387,11 +2392,15 @@
     {
       "screen_id": "FOS-POULTRY-008",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt"
         ]
       }
     },
@@ -2435,11 +2444,15 @@
     {
       "screen_id": "FOS-POULTRY-014",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt"
         ]
       }
     },

@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.AcceptHealthPack
@@ -40,6 +41,7 @@ fun HealthModuleHost(
     var catalog by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var treatments by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var formulary by remember(farmId) { mutableStateOf(emptyList<String>()) }
+    var formularyOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
     var packs by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var withdrawals by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var busy by remember { mutableStateOf(false) }
@@ -48,7 +50,9 @@ fun HealthModuleHost(
     suspend fun refresh() {
         observations = ops.recentObservations().map { row -> "${row.speciesCode} · ${row.signs}" }
         catalog = ops.diseases().map { row -> "${row.speciesCode} · ${row.displayName} · ${row.firstAid}" }
-        formulary = ops.approvedFormulary().map { row -> "${row.id} · ${row.productName} · ${row.speciesCode} · ${row.vetClass}" }
+        val approved = ops.approvedFormulary()
+        formulary = approved.map { row -> "${row.id} · ${row.productName} · ${row.speciesCode} · ${row.vetClass}" }
+        formularyOptions = approved.map { row -> FarmSelectorOption(row.id, row.productName, "${row.speciesCode} · ${row.vetClass}") }
         treatments = ops.recentTreatments().map { row ->
             "${row.speciesCode} · ${row.reason} · formulary ${row.formularyItemId}"
         }
@@ -87,6 +91,7 @@ fun HealthModuleHost(
         catalog = catalog,
         treatments = treatments,
         formulary = formulary,
+        formularyOptions = formularyOptions,
         packs = packs,
         withdrawals = withdrawals,
         busy = busy,
