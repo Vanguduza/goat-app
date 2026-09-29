@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:2093701dbd057504bcb62f815e034aa6315453ad4ea6907b6eaadce301e05d8f",
-  "runtime_evidence_tested_commit": "8f470d63579814ae3c04d2826716450ca52ddd38",
-  "runtime_evidence_run_id": 36617307289,
+  "source_fingerprint": "sha256:af9623ae41f458cf8ef6787b8790c82ca8d22258d70a7f080c4a813fa8076ed2",
+  "runtime_evidence_tested_commit": "4650d389f2448da276b8ce0987763a1bc7453a0f",
+  "runtime_evidence_run_id": 36619848695,
   "registry_screen_count": 545,
-  "route_screen_count": 261,
-  "unresolved_screen_count": 284,
+  "route_screen_count": 263,
+  "unresolved_screen_count": 282,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -16,7 +16,9 @@
     "FOS-ASSET-009",
     "FOS-ATOM-003",
     "FOS-ATOM-005",
+    "FOS-ATOM-006",
     "FOS-ATOM-007",
+    "FOS-ATOM-008",
     "FOS-ATOM-009",
     "FOS-ATOM-011",
     "FOS-ATOM-014",
@@ -349,6 +351,17 @@
       }
     },
     {
+      "screen_id": "FOS-ATOM-006",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-ATOM-007",
       "proof_classes": [
         "RENDERED_SURFACE_OWNER"
@@ -356,6 +369,17 @@
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
           "app/src/test/java/com/farmos/app/PastureCaptureOwnerTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ATOM-008",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -1297,10 +1321,14 @@
     {
       "screen_id": "FOS-GOAT-032",
       "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL",
         "RENDERED_SURFACE_OWNER",
         "TYPED_ROUTE_OWNER"
       ],
       "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt"
+        ],
         "RENDERED_SURFACE_OWNER": [
           "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
         ],
@@ -3447,8 +3475,6 @@
     "FOS-ATOM-001",
     "FOS-ATOM-002",
     "FOS-ATOM-004",
-    "FOS-ATOM-006",
-    "FOS-ATOM-008",
     "FOS-ATOM-010",
     "FOS-ATOM-012",
     "FOS-ATOM-013",
