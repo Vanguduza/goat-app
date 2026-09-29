@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "273cb6fcea13c29e6ad390d6bde2dbc1261b75d6",
+  "tested_commit": "f1dec314e81b74d4b9b9347b10caf2d2425c1994",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 157
+    "registered_ids_mentioned_in_kotlin": 164
   },
   "top_level": {
     "farm_modules": [
@@ -77,8 +77,8 @@
         },
         {
           "value": "PROFILE",
-          "refs": 10,
-          "transition_refs": 9,
+          "refs": 11,
+          "transition_refs": 10,
           "render_only_candidate": false
         },
         {
@@ -132,6 +132,48 @@
         {
           "value": "STATUS_CHANGE",
           "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "TIMELINE",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "GROWTH_HISTORY",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "GROWTH_CHART",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "ADG_DETAIL",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LACTATION_HISTORY",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SCC_HISTORY",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FAMACHA_HISTORY",
+          "refs": 0,
           "transition_refs": 0,
           "render_only_candidate": false
         }
