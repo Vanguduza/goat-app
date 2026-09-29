@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:d0adf2fba306f4dbc93ac5954d9c7117f6a8d9532cbb71419ddbe41a5577c52d",
+  "source_fingerprint": "sha256:9ed0df5633d376699ab54d8cf7fa5f7c25e75afd80fca605f9c19233b91a9603",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 65,
-  "features_fully_route_bound": 21,
-  "features_without_route_evidence": 91,
+  "features_with_route_evidence": 67,
+  "features_fully_route_bound": 22,
+  "features_without_route_evidence": 89,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -2219,14 +2219,13 @@
         "FOS-PROC-003"
       ],
       "route_screen_ids": [
-        "FOS-PROC-001"
-      ],
-      "unresolved_screen_ids": [
+        "FOS-PROC-001",
         "FOS-PROC-002",
         "FOS-PROC-003"
       ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -2240,15 +2239,16 @@
         "FOS-PROC-006",
         "FOS-PROC-007"
       ],
-      "route_screen_ids": [],
+      "route_screen_ids": [
+        "FOS-PROC-005"
+      ],
       "unresolved_screen_ids": [
         "FOS-PROC-004",
-        "FOS-PROC-005",
         "FOS-PROC-006",
         "FOS-PROC-007"
       ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
@@ -2260,13 +2260,14 @@
         "FOS-PROC-008",
         "FOS-PROC-009"
       ],
-      "route_screen_ids": [],
-      "unresolved_screen_ids": [
-        "FOS-PROC-008",
+      "route_screen_ids": [
         "FOS-PROC-009"
       ],
+      "unresolved_screen_ids": [
+        "FOS-PROC-008"
+      ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {

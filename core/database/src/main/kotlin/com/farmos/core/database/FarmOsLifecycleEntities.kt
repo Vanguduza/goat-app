@@ -42,6 +42,9 @@ data class SupplierEntity(@PrimaryKey val id: String, val farmId: String, val na
 @Entity(tableName = "purchases")
 data class PurchaseEntity(@PrimaryKey val id: String, val farmId: String, val supplierId: String, val itemId: String, val quantityMilli: Long, val amountMinor: Long, val currency: String, val occurredEpochDay: Long)
 
+/** Exhaustive per-supplier, per-currency purchase aggregate; currencies are never summed together. */
+data class SupplierCurrencyTotal(val supplierId: String, val currency: String, val amountMinor: Long, val purchaseCount: Int, val latestEpochDay: Long)
+
 @Entity(tableName = "withdrawal_windows")
 data class WithdrawalWindowEntity(@PrimaryKey val id: String, val farmId: String, val treatmentId: String, val product: String, val windowKind: String, val endsEpochDay: Long)
 
@@ -291,8 +294,18 @@ interface LifecycleDao {
     suspend fun suppliers(farmId: String): List<SupplierEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPurchase(row: PurchaseEntity)
     @Upsert suspend fun upsertPurchase(row: PurchaseEntity)
-    @Query("SELECT * FROM purchases WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
+    @Query("SELECT * FROM purchases WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun purchases(farmId: String, limit: Int): List<PurchaseEntity>
+    @Query("SELECT COUNT(*) FROM purchases WHERE farmId = :farmId")
+    suspend fun purchaseCount(farmId: String): Int
+    @Query(
+        """
+        SELECT supplierId, currency, SUM(amountMinor) AS amountMinor, COUNT(*) AS purchaseCount,
+            MAX(occurredEpochDay) AS latestEpochDay
+        FROM purchases WHERE farmId = :farmId GROUP BY supplierId, currency ORDER BY supplierId, currency
+        """,
+    )
+    suspend fun purchaseTotalsBySupplier(farmId: String): List<SupplierCurrencyTotal>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertWithdrawal(row: WithdrawalWindowEntity)
     @Upsert suspend fun upsertWithdrawal(row: WithdrawalWindowEntity)
     @Query("SELECT * FROM withdrawal_windows WHERE farmId = :farmId ORDER BY endsEpochDay DESC LIMIT :limit")

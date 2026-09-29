@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:d0adf2fba306f4dbc93ac5954d9c7117f6a8d9532cbb71419ddbe41a5577c52d",
-  "runtime_evidence_tested_commit": "65f36a83f873fdb27f81d33fb4dd3ac51ce12d2b",
-  "runtime_evidence_run_id": 36535020626,
+  "source_fingerprint": "sha256:9ed0df5633d376699ab54d8cf7fa5f7c25e75afd80fca605f9c19233b91a9603",
+  "runtime_evidence_tested_commit": "e4d6f32e0147a9e8f5df8f56bc2b1181c95b20dd",
+  "runtime_evidence_run_id": 36537151332,
   "registry_screen_count": 545,
-  "route_screen_count": 207,
-  "unresolved_screen_count": 338,
+  "route_screen_count": 211,
+  "unresolved_screen_count": 334,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -160,6 +160,10 @@
     "FOS-POULTRY-020",
     "FOS-POULTRY-021",
     "FOS-PROC-001",
+    "FOS-PROC-002",
+    "FOS-PROC-003",
+    "FOS-PROC-005",
+    "FOS-PROC-009",
     "FOS-RABBIT-001",
     "FOS-RABBIT-002",
     "FOS-RABBIT-005",
@@ -2006,6 +2010,50 @@
       }
     },
     {
+      "screen_id": "FOS-PROC-002",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/ProcurementRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-PROC-003",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/ProcurementRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-PROC-005",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/ProcurementRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-PROC-009",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/ProcurementRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-RABBIT-001",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -2928,14 +2976,10 @@
     "FOS-POULTRY-025",
     "FOS-POULTRY-026",
     "FOS-POULTRY-027",
-    "FOS-PROC-002",
-    "FOS-PROC-003",
     "FOS-PROC-004",
-    "FOS-PROC-005",
     "FOS-PROC-006",
     "FOS-PROC-007",
     "FOS-PROC-008",
-    "FOS-PROC-009",
     "FOS-PROC-010",
     "FOS-RABBIT-003",
     "FOS-RABBIT-004",
