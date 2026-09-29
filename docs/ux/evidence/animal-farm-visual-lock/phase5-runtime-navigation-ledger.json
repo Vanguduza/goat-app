@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "3d4ddfc1e1eec70d4a893e708c906ea6427b7fd0",
-  "source_fingerprint": "sha256:7a8fb3f0e3f1ed7aac4bb4f5aa39a02a35b39032e05fa8549930c729907398a7",
+  "tested_commit": "68e66328b72af9ecf1ca57409eb140e974add7e9",
+  "source_fingerprint": "sha256:bee6cec4e74f2b0e38d2281825460a3835aa3f8bf1fbdb7ffab74125ffac3b9d",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36513470593,
+  "foundation_run_id": 36515243451,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -28,6 +28,10 @@
         "FOS-SALES-001",
         "FOS-SHEEP-001",
         "FOS-SYNC-002",
+        "FOS-SYNC-004",
+        "FOS-SYNC-005",
+        "FOS-SYNC-006",
+        "FOS-SYNC-008",
         "FOS-TASK-001",
         "FOS-WATER-001"
       ]
@@ -184,6 +188,12 @@
         "FOS-GOAT-043",
         "FOS-GOAT-051",
         "FOS-SYNC-003"
+      ],
+      "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt": [
+        "FOS-SYNC-004",
+        "FOS-SYNC-005",
+        "FOS-SYNC-006",
+        "FOS-SYNC-008"
       ]
     },
     "route_contract": {
@@ -224,6 +234,10 @@
         "FOS-SALES-001",
         "FOS-SHEEP-001",
         "FOS-SYNC-002",
+        "FOS-SYNC-004",
+        "FOS-SYNC-005",
+        "FOS-SYNC-006",
+        "FOS-SYNC-008",
         "FOS-TASK-001",
         "FOS-TASK-003",
         "FOS-TASK-004",
@@ -252,11 +266,11 @@
   },
   "coverage": {
     "registered_screen_count": 545,
-    "entry_action_screen_count": 21,
+    "entry_action_screen_count": 25,
     "rendered_traversal_screen_count": 103,
-    "rendered_owner_screen_count": 27,
-    "route_contract_screen_count": 55,
-    "combined_screen_count": 164,
+    "rendered_owner_screen_count": 31,
+    "route_contract_screen_count": 59,
+    "combined_screen_count": 168,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -277,6 +291,10 @@
       "FOS-SALES-001",
       "FOS-SHEEP-001",
       "FOS-SYNC-002",
+      "FOS-SYNC-004",
+      "FOS-SYNC-005",
+      "FOS-SYNC-006",
+      "FOS-SYNC-008",
       "FOS-TASK-001",
       "FOS-WATER-001"
     ],
@@ -412,7 +430,11 @@
       "FOS-HOME-007",
       "FOS-HOME-009",
       "FOS-SHEEP-010",
-      "FOS-SYNC-003"
+      "FOS-SYNC-003",
+      "FOS-SYNC-004",
+      "FOS-SYNC-005",
+      "FOS-SYNC-006",
+      "FOS-SYNC-008"
     ],
     "route_contract_screen_ids": [
       "FOS-ASSET-001",
@@ -466,6 +488,10 @@
       "FOS-SALES-001",
       "FOS-SHEEP-001",
       "FOS-SYNC-002",
+      "FOS-SYNC-004",
+      "FOS-SYNC-005",
+      "FOS-SYNC-006",
+      "FOS-SYNC-008",
       "FOS-TASK-001",
       "FOS-TASK-003",
       "FOS-TASK-004",
@@ -494,9 +520,9 @@
   },
   "certification": {
     "runtime_reachability_executed": 103,
-    "entry_action_emission_executed": 21,
-    "rendered_surface_owners_executed": 27,
-    "route_contracts_executed": 55,
+    "entry_action_emission_executed": 25,
+    "rendered_surface_owners_executed": 31,
+    "route_contracts_executed": 59,
     "parameter_scope_executed": true,
     "return_restoration_executed": 103,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"

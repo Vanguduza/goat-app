@@ -121,4 +121,21 @@ class FarmRuntimeRouteTest {
             FarmDestination.Search.runtimeRouteContract(),
         )
     }
+
+    @Test
+    fun syncQueueViewsResolveToExactOwners() {
+        val expected = mapOf(
+            SyncQueueView.IN_FLIGHT to "FOS-SYNC-004",
+            SyncQueueView.RETRY_WAITING to "FOS-SYNC-005",
+            SyncQueueView.CONFLICTS to "FOS-SYNC-006",
+            SyncQueueView.REJECTED to "FOS-SYNC-008",
+        )
+        assertEquals(SyncQueueView.entries.toSet(), expected.keys)
+        expected.forEach { (view, screenId) ->
+            val route = FarmDestination.SyncQueue(view).runtimeRouteContract()
+            assertEquals(screenId, route.screenId)
+            assertEquals("sync.${view.name.lowercase()}", route.routeKey)
+            assertEquals(null, route.scopedParameter)
+        }
+    }
 }

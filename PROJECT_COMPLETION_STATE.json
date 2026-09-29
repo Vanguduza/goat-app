@@ -2,7 +2,7 @@
   "schema_version": 1,
   "repository": "Vanguduza/goat-app",
   "canonical_branch": "main",
-  "source_fingerprint": "sha256:7a8fb3f0e3f1ed7aac4bb4f5aa39a02a35b39032e05fa8549930c729907398a7",
+  "source_fingerprint": "sha256:bee6cec4e74f2b0e38d2281825460a3835aa3f8bf1fbdb7ffab74125ffac3b9d",
   "programme_status": "ACTIVE_DETERMINISTIC_COMPLETION",
   "release_blocked": true,
   "authority": {
@@ -41,8 +41,8 @@
     "modules_green": 0,
     "visual_green_screens": 0,
     "qdu_states": {
-      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 164,
-      "PLANNED_NOT_IMPLEMENTED": 381
+      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 168,
+      "PLANNED_NOT_IMPLEMENTED": 377
     }
   },
   "module_plan": {
@@ -1753,10 +1753,10 @@
     "status": "IN_PROGRESS",
     "route_export": "docs/ux/evidence/animal-farm-visual-lock/runtime-route-export.json",
     "feature_route_coverage": "docs/realisation/FEATURE_ROUTE_COVERAGE.json",
-    "route_screen_count": 164,
-    "unresolved_screen_count": 381,
-    "features_with_route_evidence": 62,
-    "features_without_route_evidence": 94,
+    "route_screen_count": 168,
+    "unresolved_screen_count": 377,
+    "features_with_route_evidence": 63,
+    "features_without_route_evidence": 93,
     "explicit_headless_contracts": 0,
     "route_gate_ready": false,
     "next_action": "PHASE_5_REALISE_UNRESOLVED_ROUTES_AND_FEATURE_ROUTE_CONTRACTS_WITHOUT_INVENTING_HEADLESS_COVERAGE"

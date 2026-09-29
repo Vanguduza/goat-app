@@ -194,4 +194,60 @@ class FarmRuntimeNavigationTest {
             }
         }
     }
+
+    @Test
+    fun todaySummarySyncQueueEntriesOpenExactQueueOwners() {
+        val opened = AtomicReference<FarmDestination?>(null)
+        val counts = mapOf(
+            SyncQueueView.IN_FLIGHT to 1L,
+            SyncQueueView.RETRY_WAITING to 3L,
+            SyncQueueView.CONFLICTS to 2L,
+            SyncQueueView.REJECTED to 0L,
+        )
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                HomeUtilityScreen(
+                    surface = HomeSurface.TODAY_SUMMARY,
+                    summary = FarmHomeSummary(pendingSync = 6, syncQueueCounts = counts),
+                    onOpen = opened::set,
+                    onBack = {},
+                )
+            }
+        }
+
+        val expected = listOf(
+            Triple("Sending · 1", SyncQueueView.IN_FLIGHT, "FOS-SYNC-004"),
+            Triple("Retry waiting · 3", SyncQueueView.RETRY_WAITING, "FOS-SYNC-005"),
+            Triple("Conflicts · 2", SyncQueueView.CONFLICTS, "FOS-SYNC-006"),
+            Triple("Rejected · 0", SyncQueueView.REJECTED, "FOS-SYNC-008"),
+        )
+        expected.forEach { (label, view, screenId) ->
+            opened.set(null)
+            compose.onNode(hasClickAction() and hasText(label))
+                .performScrollTo()
+                .assertIsDisplayed()
+                .performClick()
+            compose.runOnIdle {
+                assertEquals(FarmDestination.SyncQueue(view), opened.get())
+                assertEquals(screenId, opened.get()!!.runtimeRouteContract().screenId)
+            }
+        }
+    }
+
+    @Test
+    fun todaySummaryHidesSyncQueuesWhenTheRoleMayNotSeeThem() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                HomeUtilityScreen(
+                    surface = HomeSurface.TODAY_SUMMARY,
+                    summary = FarmHomeSummary(pendingSync = 6, syncQueueCounts = null),
+                    onOpen = {},
+                    onBack = {},
+                )
+            }
+        }
+        compose.onNodeWithText("Open sync status").assertExists()
+        compose.onNodeWithText("Sync queues").assertDoesNotExist()
+        compose.onNode(hasClickAction() and hasText("Conflicts · 0")).assertDoesNotExist()
+    }
 }

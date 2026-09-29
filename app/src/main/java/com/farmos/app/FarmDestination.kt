@@ -37,6 +37,10 @@ sealed class FarmDestination {
     data class Tasks(
         val entry: TaskEntryPage = TaskEntryPage.BOARD,
     ) : FarmDestination()
+
+    data class SyncQueue(
+        val view: SyncQueueView,
+    ) : FarmDestination()
 }
 
 fun FarmModule.toDestination(): FarmDestination =

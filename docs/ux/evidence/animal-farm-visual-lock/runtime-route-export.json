@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:7a8fb3f0e3f1ed7aac4bb4f5aa39a02a35b39032e05fa8549930c729907398a7",
-  "runtime_evidence_tested_commit": "3d4ddfc1e1eec70d4a893e708c906ea6427b7fd0",
-  "runtime_evidence_run_id": 36513470593,
+  "source_fingerprint": "sha256:bee6cec4e74f2b0e38d2281825460a3835aa3f8bf1fbdb7ffab74125ffac3b9d",
+  "runtime_evidence_tested_commit": "68e66328b72af9ecf1ca57409eb140e974add7e9",
+  "runtime_evidence_run_id": 36515243451,
   "registry_screen_count": 545,
-  "route_screen_count": 164,
-  "unresolved_screen_count": 381,
+  "route_screen_count": 168,
+  "unresolved_screen_count": 377,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -167,6 +167,10 @@
     "FOS-SHEEP-030",
     "FOS-SYNC-002",
     "FOS-SYNC-003",
+    "FOS-SYNC-004",
+    "FOS-SYNC-005",
+    "FOS-SYNC-006",
+    "FOS-SYNC-008",
     "FOS-TASK-001",
     "FOS-TASK-003",
     "FOS-TASK-004",
@@ -2060,6 +2064,82 @@
       }
     },
     {
+      "screen_id": "FOS-SYNC-004",
+      "proof_classes": [
+        "ENTRY_ACTION_DESTINATION",
+        "RENDERED_SURFACE_OWNER",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "ENTRY_ACTION_DESTINATION": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SYNC-005",
+      "proof_classes": [
+        "ENTRY_ACTION_DESTINATION",
+        "RENDERED_SURFACE_OWNER",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "ENTRY_ACTION_DESTINATION": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SYNC-006",
+      "proof_classes": [
+        "ENTRY_ACTION_DESTINATION",
+        "RENDERED_SURFACE_OWNER",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "ENTRY_ACTION_DESTINATION": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SYNC-008",
+      "proof_classes": [
+        "ENTRY_ACTION_DESTINATION",
+        "RENDERED_SURFACE_OWNER",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "ENTRY_ACTION_DESTINATION": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-TASK-001",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -2498,11 +2578,7 @@
     "FOS-SIM-008",
     "FOS-SIM-009",
     "FOS-SYNC-001",
-    "FOS-SYNC-004",
-    "FOS-SYNC-005",
-    "FOS-SYNC-006",
     "FOS-SYNC-007",
-    "FOS-SYNC-008",
     "FOS-SYNC-009",
     "FOS-SYNC-010",
     "FOS-SYNC-011",

@@ -105,7 +105,24 @@ private fun TodaySummaryContent(
     AnimalFarmQuickAction("Open tasks", { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) })
     AnimalFarmQuickAction("Open health", { onOpen(FarmDestination.Health()) })
     AnimalFarmQuickAction("Open sync status", { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) })
+    summary.syncQueueCounts?.let { counts -> SyncQueueEntries(counts, onOpen) }
 }
+
+@Composable
+private fun SyncQueueEntries(
+    counts: Map<SyncQueueView, Long>,
+    onOpen: (FarmDestination) -> Unit,
+) {
+    Text("Sync queues", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+    SyncQueueView.entries.forEach { view ->
+        AnimalFarmQuickAction(
+            syncQueueEntryLabel(view, counts[view] ?: 0L),
+            { onOpen(FarmDestination.SyncQueue(view)) },
+        )
+    }
+}
+
+internal fun syncQueueEntryLabel(view: SyncQueueView, count: Long): String = "${view.shortLabel} · $count"
 
 @Composable
 private fun FarmAlertsContent(

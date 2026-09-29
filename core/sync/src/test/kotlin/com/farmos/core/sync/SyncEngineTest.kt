@@ -4,6 +4,7 @@ import com.farmos.core.database.AggregateVersionDao
 import com.farmos.core.database.AggregateVersionEntity
 import com.farmos.core.database.OutboxDao
 import com.farmos.core.database.OutboxEntity
+import com.farmos.core.database.OutboxStateCount
 import com.farmos.core.model.CommandAcknowledgement
 import com.farmos.core.model.CommandResultCode
 import com.farmos.core.model.SyncState
@@ -474,6 +475,19 @@ private class FakeOutboxDao(
 
     override suspend fun countUnacknowledgedForFarm(farmId: String): Long =
         items.count { it.farmId == farmId && it.state != SyncState.ACKNOWLEDGED.name }.toLong()
+
+    override suspend fun listForFarmInState(farmId: String, state: String, limit: Int): List<OutboxEntity> =
+        items
+            .filter { it.farmId == farmId && it.state == state }
+            .sortedWith(compareByDescending<OutboxEntity> { it.createdAtEpochMillis }.thenBy { it.mutationId })
+            .take(limit)
+
+    override suspend fun countByStateForFarm(farmId: String): List<OutboxStateCount> =
+        items
+            .filter { it.farmId == farmId }
+            .groupingBy { it.state }
+            .eachCount()
+            .map { (state, count) -> OutboxStateCount(state, count.toLong()) }
 
     fun byId(mutationId: String): OutboxEntity = items.single { it.mutationId == mutationId }
 }
