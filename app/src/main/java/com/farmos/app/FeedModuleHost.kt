@@ -9,6 +9,8 @@ import androidx.compose.runtime.setValue
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.IssueFeed
+import com.farmos.feature.ops.FeedRecordNavigator
+import com.farmos.feature.ops.FeedRecords
 import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
@@ -22,16 +24,19 @@ fun FeedModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    loadRecords: suspend () -> FeedRecords = { FeedRecords() },
 ) {
     val scope = rememberCoroutineScope()
     var busy by androidx.compose.runtime.remember { mutableStateOf(false) }
     var error by androidx.compose.runtime.remember { mutableStateOf<String?>(null) }
     var feedRows by androidx.compose.runtime.remember { mutableStateOf(emptyList<String>()) }
     var inventoryRows by androidx.compose.runtime.remember { mutableStateOf(emptyList<String>()) }
+    var records by androidx.compose.runtime.remember(farmId) { mutableStateOf(FeedRecords()) }
 
     suspend fun refresh() {
         feedRows = ops.recentFeed().map { "${it.itemId} · ${it.quantityMilli} milli" }
         inventoryRows = ops.items().map { "${it.id} ${it.sku} · ${it.name} · ${it.quantityMilli} ${it.unit}" }
+        records = loadRecords()
     }
     LaunchedEffect(farmId) { runCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
@@ -46,7 +51,7 @@ fun FeedModuleHost(
     val itemId = androidx.compose.runtime.remember { mutableStateOf("") }
     val qty = androidx.compose.runtime.remember { mutableStateOf("") }
     val day = androidx.compose.runtime.remember { mutableStateOf("") }
-    SimpleCaptureScreen(
+    FeedRecordNavigator(records) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-FEED-001",
         title = "Feed",
         help = "Issuing feed deducts inventory in milli-units. Ration percentages stay advisory drafts.",
@@ -66,5 +71,6 @@ fun FeedModuleHost(
             }
         },
         onBack = onBack,
-    )
+        extra = { recordActions() },
+    ) }
 }

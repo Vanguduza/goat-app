@@ -320,12 +320,28 @@ interface FeedIssueDao {
     @Upsert
     suspend fun upsertFromServer(issue: FeedIssueEntity)
 
-    @Query("SELECT * FROM feed_issues WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
+    @Query("SELECT * FROM feed_issues WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<FeedIssueEntity>
 
     @Query("SELECT * FROM feed_issues WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredEpochDay DESC, id")
     suspend fun forGroup(farmId: String, groupId: String): List<FeedIssueEntity>
+
+    @Query("SELECT COUNT(*) FROM feed_issues WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    /** Exhaustive per-item issued totals; quantities are only summed within one item, so one unit. */
+    @Query(
+        """
+        SELECT itemId, SUM(quantityMilli) AS quantityMilli, COUNT(*) AS issueCount,
+            MIN(occurredEpochDay) AS firstEpochDay, MAX(occurredEpochDay) AS latestEpochDay
+        FROM feed_issues WHERE farmId = :farmId GROUP BY itemId ORDER BY itemId
+        """,
+    )
+    suspend fun totalsByItem(farmId: String): List<FeedItemTotal>
 }
+
+/** Exhaustive per-item feed issue aggregate; not bounded by any presentation row limit. */
+data class FeedItemTotal(val itemId: String, val quantityMilli: Long, val issueCount: Int, val firstEpochDay: Long, val latestEpochDay: Long)
 
 @Dao
 interface WaterDao {

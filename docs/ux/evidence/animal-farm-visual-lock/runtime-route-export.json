@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:0882742fd7bfdd38ca287029857e8b874713a82e30b5e7939dcc552ff817303d",
-  "runtime_evidence_tested_commit": "9c168573ad5532a66956dfd4dfa814a0e8e4fa97",
-  "runtime_evidence_run_id": 36564651926,
+  "source_fingerprint": "sha256:5b8532c211174fbfa303b28a4c9e17b17c5f94becad2260e47fec277c31c837c",
+  "runtime_evidence_tested_commit": "a7bb7c8c14dba29cbd981c52089f6ff14c2c4306",
+  "runtime_evidence_run_id": 36569188805,
   "registry_screen_count": 545,
-  "route_screen_count": 237,
-  "unresolved_screen_count": 308,
+  "route_screen_count": 239,
+  "unresolved_screen_count": 306,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -44,6 +44,8 @@
     "FOS-CATTLE-034",
     "FOS-CATTLE-035",
     "FOS-FEED-001",
+    "FOS-FEED-003",
+    "FOS-FEED-006",
     "FOS-FIN-001",
     "FOS-FIN-002",
     "FOS-FIN-004",
@@ -632,6 +634,28 @@
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-FEED-003",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/FeedRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-FEED-006",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/FeedRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -3182,10 +3206,8 @@
     "FOS-CATTLE-031",
     "FOS-CATTLE-036",
     "FOS-FEED-002",
-    "FOS-FEED-003",
     "FOS-FEED-004",
     "FOS-FEED-005",
-    "FOS-FEED-006",
     "FOS-FEED-007",
     "FOS-FEED-008",
     "FOS-FEED-009",

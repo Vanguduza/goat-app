@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:0882742fd7bfdd38ca287029857e8b874713a82e30b5e7939dcc552ff817303d",
+  "source_fingerprint": "sha256:5b8532c211174fbfa303b28a4c9e17b17c5f94becad2260e47fec277c31c837c",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 77,
+  "features_with_route_evidence": 78,
   "features_fully_route_bound": 28,
-  "features_without_route_evidence": 79,
+  "features_without_route_evidence": 78,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -1584,11 +1584,11 @@
         "FOS-FEED-003"
       ],
       "route_screen_ids": [
-        "FOS-FEED-001"
+        "FOS-FEED-001",
+        "FOS-FEED-003"
       ],
       "unresolved_screen_ids": [
-        "FOS-FEED-002",
-        "FOS-FEED-003"
+        "FOS-FEED-002"
       ],
       "headless_contract": null,
       "coverage_state": "PARTIAL_ROUTE_COVERAGE",
@@ -1621,13 +1621,14 @@
         "FOS-FEED-006",
         "FOS-FEED-007"
       ],
-      "route_screen_ids": [],
+      "route_screen_ids": [
+        "FOS-FEED-006"
+      ],
       "unresolved_screen_ids": [
-        "FOS-FEED-006",
         "FOS-FEED-007"
       ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {
