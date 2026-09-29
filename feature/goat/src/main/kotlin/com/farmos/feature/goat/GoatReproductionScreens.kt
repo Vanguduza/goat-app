@@ -26,7 +26,12 @@ import java.time.LocalDate
 
 /** FOS-GOAT-030 — one doe's recorded heats, services, checks and kiddings. */
 @Composable
-internal fun GoatDoeReproductionScreen(goat: GoatSnapshot?, onOpen: (GoatPage) -> Unit, onBack: () -> Unit) {
+internal fun GoatDoeReproductionScreen(
+    goat: GoatSnapshot?,
+    onOpen: (GoatPage) -> Unit,
+    onOpenKidding: (String) -> Unit,
+    onBack: () -> Unit,
+) {
     GoatHistoryFrame("Doe reproduction", "FOS-GOAT-030", goat, onBack) { subject ->
         if (subject.sex != GoatSex.FEMALE) {
             AnimalFarmEmptyState("Reproduction records apply to does.")
@@ -47,9 +52,20 @@ internal fun GoatDoeReproductionScreen(goat: GoatSnapshot?, onOpen: (GoatPage) -
         GoatReproductionSection("Heats", subject.heatHistory.sortedByDescending { it.occurredEpochDay }.map {
             LocalDate.ofEpochDay(it.occurredEpochDay).toString() to "Heat observed"
         })
-        GoatReproductionSection("Kiddings", subject.kiddingHistory.sortedByDescending { it.occurredEpochDay }.map {
-            LocalDate.ofEpochDay(it.occurredEpochDay).toString() to "${it.bornCount} born · ${it.liveCount} live"
-        })
+        FarmIllustratedSectionSurface {
+            Text("Kiddings", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            val kiddings = subject.kiddingHistory.sortedByDescending { it.occurredEpochDay }
+            if (kiddings.isEmpty()) Text("None recorded on this device.", color = AnimalFarmTheme.colors.mutedInk)
+            kiddings.forEach { kidding ->
+                GoatHistoryRow(
+                    LocalDate.ofEpochDay(kidding.occurredEpochDay).toString(),
+                    "${kidding.bornCount} born · ${kidding.liveCount} live",
+                    Modifier
+                        .heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
+                        .clickable(role = Role.Button) { onOpenKidding(kidding.kiddingId) },
+                )
+            }
+        }
         if (subject.status == GoatStatus.ACTIVE) {
             TextButton(
                 onClick = { onOpen(GoatPage.REPRODUCTION) },

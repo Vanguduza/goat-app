@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "cc0223c04ebe03c5683f1d46d6a135b7bbeb94ab",
+  "tested_commit": "ac3de4786a93c18c2ffb72e7566c1a5776af497f",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 174
+    "registered_ids_mentioned_in_kotlin": 177
   },
   "top_level": {
     "farm_modules": [
@@ -65,8 +65,8 @@
       "states": [
         {
           "value": "DASHBOARD",
-          "refs": 9,
-          "transition_refs": 8,
+          "refs": 10,
+          "transition_refs": 9,
           "render_only_candidate": false
         },
         {
@@ -107,8 +107,8 @@
         },
         {
           "value": "KIDDING",
-          "refs": 4,
-          "transition_refs": 3,
+          "refs": 6,
+          "transition_refs": 5,
           "render_only_candidate": false
         },
         {
@@ -197,8 +197,8 @@
         },
         {
           "value": "DOE_REPRODUCTION",
-          "refs": 1,
-          "transition_refs": 1,
+          "refs": 2,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -211,6 +211,24 @@
           "value": "PEDIGREE",
           "refs": 0,
           "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "KIDDING_DETAIL",
+          "refs": 2,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "KID_COHORT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "KID_PROFILE",
+          "refs": 1,
+          "transition_refs": 1,
           "render_only_candidate": false
         }
       ]

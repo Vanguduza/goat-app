@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:1a289dc346b06879cf89180e06fe3e884433c3bd6346d4dc3667753ec7adc632",
-  "runtime_evidence_tested_commit": "cc0223c04ebe03c5683f1d46d6a135b7bbeb94ab",
-  "runtime_evidence_run_id": 36518453581,
+  "source_fingerprint": "sha256:214a61adcaf1f4c9cbdb89252a34e4d34d3032b1d74a41b01bf550a4a153d5bd",
+  "runtime_evidence_tested_commit": "ac3de4786a93c18c2ffb72e7566c1a5776af497f",
+  "runtime_evidence_run_id": 36520016524,
   "registry_screen_count": 545,
-  "route_screen_count": 174,
-  "unresolved_screen_count": 371,
+  "route_screen_count": 177,
+  "unresolved_screen_count": 368,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -73,7 +73,10 @@
     "FOS-GOAT-034",
     "FOS-GOAT-035",
     "FOS-GOAT-037",
+    "FOS-GOAT-038",
     "FOS-GOAT-039",
+    "FOS-GOAT-040",
+    "FOS-GOAT-041",
     "FOS-GOAT-043",
     "FOS-GOAT-044",
     "FOS-GOAT-051",
@@ -928,6 +931,17 @@
       }
     },
     {
+      "screen_id": "FOS-GOAT-038",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKidRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-GOAT-039",
       "proof_classes": [
         "RENDERED_SURFACE_OWNER"
@@ -935,6 +949,28 @@
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
           "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-040",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKidRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-041",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKidRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -2475,9 +2511,6 @@
     "FOS-GOAT-029",
     "FOS-GOAT-033",
     "FOS-GOAT-036",
-    "FOS-GOAT-038",
-    "FOS-GOAT-040",
-    "FOS-GOAT-041",
     "FOS-GOAT-042",
     "FOS-GOAT-045",
     "FOS-GOAT-046",

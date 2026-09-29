@@ -32,6 +32,9 @@ internal enum class GoatPage {
     DOE_REPRODUCTION,
     PREGNANCY_DASHBOARD,
     PEDIGREE,
+    KIDDING_DETAIL,
+    KID_COHORT,
+    KID_PROFILE,
 }
 
 internal data class GoatExperienceActions(

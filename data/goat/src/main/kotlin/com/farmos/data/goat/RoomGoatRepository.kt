@@ -31,7 +31,9 @@ import com.farmos.domain.goat.RecordGoatPregnancy
 import com.farmos.domain.goat.PlanGoatLactation
 import com.farmos.domain.goat.RegisterGoatKid
 import com.farmos.domain.goat.SccSample
+import com.farmos.domain.goat.GoatBirthRecord
 import com.farmos.domain.goat.GoatHeatSample
+import com.farmos.domain.goat.GoatRegisteredKid
 import com.farmos.domain.goat.GoatMatingSample
 import com.farmos.domain.goat.GoatObservationSample
 import com.farmos.domain.goat.GoatPedigree
@@ -527,6 +529,8 @@ class RoomGoatRepository(
                 GoatPregnancySample(row.id, row.result, row.occurredEpochDay)
             },
             pedigree = pedigreeFor(animalId),
+            kidsByKidding = kiddingHistory.associate { it.kiddingId to registeredKids(it.kiddingId) }.filterValues { it.isNotEmpty() },
+            birthRecord = birthRecordFor(animalId),
             syncPending = database.outbox().hasPending(farmId, animalId),
         )
     }
@@ -535,6 +539,30 @@ class RoomGoatRepository(
         database.animals().get(farmId, animalId)?.let { animal ->
             animal.name?.takeIf { it.isNotBlank() }?.let { "${animal.tag} · $it" } ?: animal.tag
         }
+
+    private suspend fun registeredKids(kiddingId: String): List<GoatRegisteredKid> =
+        database.lifecycle().kidsForKidding(farmId, kiddingId).map { kid ->
+            val animal = database.animals().get(farmId, kid.animalId)
+            GoatRegisteredKid(
+                animalId = kid.animalId,
+                label = animalLabel(kid.animalId) ?: "Not on this device",
+                sex = animal?.sex?.let { sex -> runCatching { GoatSex.valueOf(sex) }.getOrNull() },
+            )
+        }
+
+    private suspend fun birthRecordFor(animalId: String): GoatBirthRecord? {
+        val record = database.lifecycle().kidRecordFor(farmId, animalId) ?: return null
+        val kidding = database.kidding().get(farmId, record.kiddingId)
+        return GoatBirthRecord(
+            kiddingId = record.kiddingId,
+            damId = record.damId,
+            damLabel = animalLabel(record.damId),
+            kiddingEpochDay = kidding?.occurredEpochDay,
+            bornCount = kidding?.bornCount,
+            liveCount = kidding?.liveCount,
+            littermates = registeredKids(record.kiddingId).filter { it.animalId != animalId },
+        )
+    }
 
     private suspend fun pedigreeFor(animalId: String): GoatPedigree {
         suspend fun parentLinks(childId: String) = database.lifecycle().pedigreeParents(farmId, childId).map { row ->
