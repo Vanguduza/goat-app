@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
@@ -94,7 +95,7 @@ fun HealthObservationScreen(
     val formularyBack = if (entryPage == HealthEntryPage.FORMULARY) onBack else home
     when (page) {
         HealthPage.DASHBOARD -> {
-            HealthDashboard(rows, treatments, withdrawals, packs, error, { openRecord(it) }, onBack)
+            HealthDashboard(readModel, packs, error, { openRecord(it) }, onBack)
         }
 
         HealthPage.TREATMENT_RECORDS -> HealthTreatmentListScreen(readModel, zone, { openRecord(HealthPage.TREATMENT_DETAIL, it) }, recordBack)
@@ -183,9 +184,7 @@ private fun HealthEntryPage.toHealthPage(): HealthPage =
 
 @Composable
 private fun HealthDashboard(
-    observations: List<String>,
-    treatments: List<String>,
-    withdrawals: List<String>,
+    counts: HealthReadModel,
     packs: List<String>,
     error: String?,
     onOpen: (HealthPage) -> Unit,
@@ -200,9 +199,10 @@ private fun HealthDashboard(
     ) {
         FarmOperationalSection("Today health picture") {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                HealthMetric("Observations", observations.size)
-                HealthMetric("Treatments", treatments.size)
-                HealthMetric("Withdrawals", withdrawals.size)
+                // Exhaustive farm-scoped counts; shown as a dash until loaded, never as a capped list size.
+                HealthMetric("Observations", counts.observationCount)
+                HealthMetric("Treatments", counts.treatmentCount)
+                HealthMetric("Active withdrawals", counts.activeWithdrawalCount)
             }
         }
         FarmOperationalSection("Observe and review") {
@@ -239,10 +239,10 @@ private fun HealthDashboard(
 @Composable
 private fun HealthMetric(
     label: String,
-    value: Int,
+    value: Int?,
 ) {
-    androidx.compose.foundation.layout.Column {
-        Text(value.toString(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+    androidx.compose.foundation.layout.Column(Modifier.testTag("health-metric:$label")) {
+        Text(value?.toString() ?: "—", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Text(label, style = MaterialTheme.typography.labelMedium)
     }
 }

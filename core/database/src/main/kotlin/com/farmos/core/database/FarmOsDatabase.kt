@@ -239,6 +239,10 @@ interface AnimalDao {
         limit: Int,
     ): List<AnimalEntity>
 
+    /** Same filter as [listBySpecies] (every status except closed), counted over all rows. */
+    @Query("SELECT COUNT(*) FROM animals WHERE farmId = :farmId AND speciesCode = :speciesCode AND status != 'closed'")
+    suspend fun countBySpecies(farmId: String, speciesCode: String): Int
+
     @Query(
         """
         UPDATE animals
@@ -490,6 +494,9 @@ interface TaskDao {
 
     @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND status = 'done' ORDER BY updatedAtEpochMillis DESC LIMIT :limit")
     suspend fun completedForFarm(farmId: String, limit: Int = 100): List<TaskEntity>
+
+    @Query("SELECT COUNT(*) FROM farm_tasks WHERE farmId = :farmId AND status = 'done'")
+    suspend fun countCompletedForFarm(farmId: String): Int
 }
 
 @Dao
@@ -553,6 +560,9 @@ interface HealthObservationDao {
 
     @Query("SELECT * FROM health_observations WHERE farmId = :farmId ORDER BY occurredAtEpochMillis DESC LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<HealthObservationEntity>
+
+    @Query("SELECT COUNT(*) FROM health_observations WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
 
     @Query("SELECT * FROM health_observations WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredAtEpochMillis DESC, id")
     suspend fun forAnimal(farmId: String, animalId: String): List<HealthObservationEntity>

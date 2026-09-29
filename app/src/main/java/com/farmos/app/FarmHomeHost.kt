@@ -52,6 +52,9 @@ fun FarmHomeHost(
     memberships: List<FarmMembership> = emptyList(),
     farmNames: Map<String, String> = emptyMap(),
     onSwitchFarm: (FarmMembership) -> Unit = {},
+    /** Exhaustive farm-scoped counts; null falls back to counting the loaded rows. */
+    loadCompletedTaskCount: suspend () -> Int? = { null },
+    loadActiveWithdrawalCount: suspend (todayEpochDay: Long) -> Int? = { null },
 ) {
     var summary by remember(farmId) { mutableStateOf(FarmHomeSummary(loading = true)) }
     LaunchedEffect(ops, farmId) {
@@ -78,8 +81,8 @@ fun FarmHomeHost(
                 openTasks = open.count { it.status == "open" },
                 overdueTasks = stages.count { it == com.farmos.domain.ops.WorkerTaskStage.DUE_NOW },
                 upcomingTasks = stages.count { it == com.farmos.domain.ops.WorkerTaskStage.UPCOMING },
-                completedTasks = stages.count { it == com.farmos.domain.ops.WorkerTaskStage.COMPLETED },
-                activeWithdrawals = withdrawals.count { it.endsEpochDay >= today },
+                completedTasks = loadCompletedTaskCount() ?: stages.count { it == com.farmos.domain.ops.WorkerTaskStage.COMPLETED },
+                activeWithdrawals = loadActiveWithdrawalCount(today) ?: withdrawals.count { it.endsEpochDay >= today },
                 pendingSync = loadPendingSync(),
                 syncQueueCounts = loadSyncQueueCounts(),
                 inventoryItemCount = items.size,

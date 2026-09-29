@@ -104,6 +104,17 @@ class HealthRecordRuntimeNavigationTest {
     }
 
     @Test
+    fun dashboardShowsExhaustiveCountsAndBoundedListsSaySo() {
+        render(model().copy(observationCount = 12, treatmentCount = 230, activeWithdrawalCount = 61, vetVisitCount = 1, labResultCount = 1))
+        compose.onNodeWithText("230").assertExists()
+        compose.onNodeWithText("61").assertExists()
+        compose.onNodeWithText("12").assertExists()
+        compose.onNodeWithText("Active withdrawals").assertExists()
+        open("Treatment records")
+        compose.onNodeWithText("Treatments · latest 2 of 230").assertExists()
+    }
+
+    @Test
     fun emptyRecordsSayNothingIsRecorded() {
         render(HealthReadModel())
         open("Treatment records")

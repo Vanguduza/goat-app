@@ -6,44 +6,55 @@ import com.farmos.feature.ops.HealthReadModel
 import com.farmos.feature.ops.HealthTreatmentView
 import com.farmos.feature.ops.HealthVetVisitView
 import com.farmos.feature.ops.HealthWithdrawalView
+import java.time.LocalDate
 
 internal const val HEALTH_RECORD_LIMIT = 200
 
-/** Farm-scoped read model for the read-only health record pages. Nothing here writes or prescribes. */
-internal suspend fun loadHealthReadModel(database: FarmOsDatabase, farmId: String): HealthReadModel {
-    val labels = mutableMapOf<String, String?>()
-    suspend fun subject(animalId: String?): String? {
-        if (animalId == null) return null
-        return labels.getOrPut(animalId) {
-            database.animals().get(farmId, animalId)?.let { animal ->
-                animal.name?.takeIf { it.isNotBlank() }?.let { "${animal.tag} · $it" } ?: animal.tag
-            } ?: "Animal not on this device"
-        }
+/**
+ * Farm-scoped read model for the read-only health record pages. Nothing here writes or prescribes.
+ * Lists are the latest [HEALTH_RECORD_LIMIT] rows; the counts are exhaustive farm-scoped
+ * aggregates, and names come from chunked farm-scoped bulk lookups.
+ */
+internal suspend fun loadHealthReadModel(database: FarmOsDatabase, farmId: String, today: LocalDate = LocalDate.now()): HealthReadModel {
+    val lifecycle = database.lifecycle()
+    val treatmentRows = database.treatments().recent(farmId, HEALTH_RECORD_LIMIT)
+    val vetVisitRows = lifecycle.vetVisits(farmId, HEALTH_RECORD_LIMIT)
+    val labRows = lifecycle.labResults(farmId, HEALTH_RECORD_LIMIT)
+    val animalIds = (treatmentRows.map { it.animalId } + vetVisitRows.map { it.animalId } + labRows.map { it.animalId }).filterNotNull().distinct()
+    val labels = animalIds.chunked(LOOKUP_CHUNK).flatMap { database.animals().getMany(farmId, it) }.associate { animal ->
+        animal.id to (animal.name?.takeIf { it.isNotBlank() }?.let { "${animal.tag} · $it" } ?: animal.tag)
     }
-    val products = mutableMapOf<String, String?>()
-    val treatments = database.treatments().recent(farmId, HEALTH_RECORD_LIMIT).map { row ->
-        HealthTreatmentView(
-            id = row.id,
-            speciesCode = row.speciesCode,
-            subjectLabel = subject(row.animalId),
-            productName = products.getOrPut(row.formularyItemId) { database.formulary().get(farmId, row.formularyItemId)?.productName },
-            reason = row.reason,
-            meatWithdrawalDays = row.meatWithdrawalDays,
-            milkWithdrawalDays = row.milkWithdrawalDays,
-            eggWithdrawalDays = row.eggWithdrawalDays,
-            occurredAtEpochMillis = row.occurredAtEpochMillis,
-        )
-    }
+    fun subject(animalId: String?): String? = animalId?.let { labels[it] ?: "Animal not on this device" }
+    val products = treatmentRows.map { it.formularyItemId }.distinct().chunked(LOOKUP_CHUNK)
+        .flatMap { database.formulary().getMany(farmId, it) }
+        .associate { it.id to it.productName }
     return HealthReadModel(
-        treatments = treatments,
-        withdrawals = database.lifecycle().withdrawals(farmId, HEALTH_RECORD_LIMIT).map {
+        treatments = treatmentRows.map { row ->
+            HealthTreatmentView(
+                id = row.id,
+                speciesCode = row.speciesCode,
+                subjectLabel = subject(row.animalId),
+                productName = products[row.formularyItemId],
+                reason = row.reason,
+                meatWithdrawalDays = row.meatWithdrawalDays,
+                milkWithdrawalDays = row.milkWithdrawalDays,
+                eggWithdrawalDays = row.eggWithdrawalDays,
+                occurredAtEpochMillis = row.occurredAtEpochMillis,
+            )
+        },
+        withdrawals = lifecycle.withdrawals(farmId, HEALTH_RECORD_LIMIT).map {
             HealthWithdrawalView(it.id, it.treatmentId, it.product, it.windowKind, it.endsEpochDay)
         },
-        vetVisits = database.lifecycle().vetVisits(farmId, HEALTH_RECORD_LIMIT).map {
+        vetVisits = vetVisitRows.map {
             HealthVetVisitView(it.id, it.speciesCode, subject(it.animalId), it.reason, it.attendingVet, it.occurredEpochDay)
         },
-        labResults = database.lifecycle().labResults(farmId, HEALTH_RECORD_LIMIT).map {
+        labResults = labRows.map {
             HealthLabResultView(it.id, subject(it.animalId), it.testName, it.resultText, it.cellsPerMl, it.occurredEpochDay)
         },
+        observationCount = database.healthObservations().count(farmId),
+        treatmentCount = database.treatments().count(farmId),
+        activeWithdrawalCount = lifecycle.activeWithdrawalCount(farmId, today.toEpochDay()),
+        vetVisitCount = lifecycle.vetVisitCount(farmId),
+        labResultCount = lifecycle.labResultCount(farmId),
     )
 }
