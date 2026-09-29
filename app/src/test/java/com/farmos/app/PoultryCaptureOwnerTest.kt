@@ -100,6 +100,7 @@ class PoultryCaptureOwnerTest {
         compose.onNode(hasClickAction() and hasText("Open Place flock")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-POULTRY-008").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-007:option:house-a").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-007:option:house-other").assertDoesNotExist()
 
         compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").performScrollTo().performClick()
@@ -122,6 +123,7 @@ class PoultryCaptureOwnerTest {
         compose.onNode(hasClickAction() and hasText("Open Vaccination")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-POULTRY-014").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("poultry-formulary-selector:option:form-nd").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("poultry-formulary-selector:option:form-goat").assertDoesNotExist()
         compose.onNodeWithTag("poultry-formulary-selector:option:form-draft").assertDoesNotExist()
 
