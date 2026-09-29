@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "68e66328b72af9ecf1ca57409eb140e974add7e9",
+  "tested_commit": "c7c53817595bc2d2b42a232539040d63e33497ee",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 168
+    "registered_ids_mentioned_in_kotlin": 171
   },
   "top_level": {
     "farm_modules": [
@@ -173,6 +173,24 @@
         },
         {
           "value": "FAMACHA_HISTORY",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HEALTH_SUMMARY",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "TREATMENT_HISTORY",
+          "refs": 0,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WITHDRAWAL_STATUS",
           "refs": 0,
           "transition_refs": 0,
           "render_only_candidate": false
