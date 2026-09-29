@@ -423,6 +423,24 @@ interface LifecycleDao {
     suspend fun labResults(farmId: String, limit: Int): List<LabResultEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertCattleWeaning(row: CattleWeaningEntity)
     @Upsert suspend fun upsertCattleWeaning(row: CattleWeaningEntity)
+    @Query("SELECT * FROM cattle_services WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleServicesFor(farmId: String, animalId: String): List<CattleServiceEntity>
+    @Query("SELECT * FROM cattle_pd WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattlePdsFor(farmId: String, animalId: String): List<CattlePdEntity>
+    @Query("SELECT * FROM cattle_calvings WHERE farmId = :farmId AND damId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleCalvingsFor(farmId: String, animalId: String): List<CattleCalvingEntity>
+    @Query("SELECT * FROM cattle_bcs_scores WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleBcsFor(farmId: String, animalId: String): List<CattleBcsEntity>
+    @Query("SELECT * FROM cattle_milk_records WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleMilkFor(farmId: String, animalId: String): List<CattleMilkEntity>
+    @Query("SELECT * FROM cattle_locomotion_scores WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleLocomotionFor(farmId: String, animalId: String): List<CattleLocomotionEntity>
+    @Query("SELECT * FROM cattle_scc_records WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleSccFor(farmId: String, animalId: String): List<CattleSccEntity>
+    @Query("SELECT * FROM cattle_dry_offs WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleDryOffsFor(farmId: String, animalId: String): List<CattleDryOffEntity>
+    @Query("SELECT * FROM cattle_weanings WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleWeaningsFor(farmId: String, animalId: String): List<CattleWeaningEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMicron(row: SheepMicronEntity)
     @Upsert suspend fun upsertMicron(row: SheepMicronEntity)
     @Upsert suspend fun upsertEnabledKind(row: EnabledPoultryKindEntity)
