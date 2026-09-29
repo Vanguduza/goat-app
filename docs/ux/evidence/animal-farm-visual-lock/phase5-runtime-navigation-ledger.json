@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "348a2d62f172a21166fdcc235cbe13787d7e4f88",
-  "source_fingerprint": "sha256:2b3da270dcc526a763a6f1c7b43416864cd2e3e15f4f6fb5a54817aaf4eb992c",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36527280738,
+  "tested_commit": "0595907a03b3293659de826b234ec79c9bf92266",
+  "source_fingerprint": "sha256:e7bbafaa9f752fb1066a0d683899d06ae847e3691128ffb1865117bb7d165568",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -194,6 +194,13 @@
         "FOS-SHEEP-018",
         "FOS-SHEEP-025",
         "FOS-SHEEP-031"
+      ],
+      "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt": [
+        "FOS-POULTRY-005",
+        "FOS-POULTRY-007",
+        "FOS-POULTRY-010",
+        "FOS-POULTRY-015",
+        "FOS-POULTRY-019"
       ]
     },
     "rendered_surface_owner": {
@@ -310,10 +317,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 25,
-    "rendered_traversal_screen_count": 132,
+    "rendered_traversal_screen_count": 137,
     "rendered_owner_screen_count": 31,
     "route_contract_screen_count": 59,
-    "combined_screen_count": 197,
+    "combined_screen_count": 202,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -427,13 +434,18 @@
       "FOS-INV-017",
       "FOS-POULTRY-002",
       "FOS-POULTRY-004",
+      "FOS-POULTRY-005",
       "FOS-POULTRY-006",
+      "FOS-POULTRY-007",
       "FOS-POULTRY-008",
       "FOS-POULTRY-009",
+      "FOS-POULTRY-010",
       "FOS-POULTRY-014",
+      "FOS-POULTRY-015",
       "FOS-POULTRY-016",
       "FOS-POULTRY-017",
       "FOS-POULTRY-018",
+      "FOS-POULTRY-019",
       "FOS-POULTRY-020",
       "FOS-POULTRY-021",
       "FOS-RABBIT-002",
@@ -591,12 +603,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 132,
-    "entry_action_emission_executed": 25,
-    "rendered_surface_owners_executed": 31,
-    "route_contracts_executed": 59,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 132,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
