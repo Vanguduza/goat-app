@@ -425,7 +425,7 @@ interface TreatmentDao {
     @Upsert
     suspend fun upsertFromServer(treatment: HealthTreatmentEntity)
 
-    @Query("SELECT * FROM health_treatments WHERE farmId = :farmId ORDER BY occurredAtEpochMillis DESC LIMIT :limit")
+    @Query("SELECT * FROM health_treatments WHERE farmId = :farmId ORDER BY occurredAtEpochMillis DESC, id LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<HealthTreatmentEntity>
 
     @Query("SELECT COUNT(*) FROM health_treatments WHERE farmId = :farmId")

@@ -46,6 +46,7 @@ private enum class HealthPage {
     LAB_RESULT_DETAIL,
     FORMULARY_ITEM,
     PROTOCOL_PACK_DETAIL,
+    TIMELINE,
 }
 
 /** Governed Health family. Advisory/recording only; this surface does not prescribe dose or diagnose. */
@@ -116,6 +117,7 @@ fun HealthObservationScreen(
         HealthPage.LAB_RESULT_DETAIL -> HealthLabResultDetailScreen(readModel, selectedRecordId, recordBack)
         HealthPage.FORMULARY_ITEM -> FormularyItemScreen(readModel.formulary, recordBack)
         HealthPage.PROTOCOL_PACK_DETAIL -> ProtocolPackDetailScreen(readModel.packs, recordBack)
+        HealthPage.TIMELINE -> HealthTimelineScreen(readModel.timeline, recordBack)
 
         HealthPage.OBSERVATIONS -> {
             HealthRows("FOS-HEALTH-003", "Observations", rows, "No observations yet", error, home)
@@ -230,6 +232,7 @@ private fun HealthDashboard(
             TextButton(onClick = { onOpen(HealthPage.LAB_RESULTS) }) { Text("Lab results") }
             TextButton(onClick = { onOpen(HealthPage.FORMULARY_ITEM) }) { Text("Formulary items") }
             TextButton(onClick = { onOpen(HealthPage.PROTOCOL_PACK_DETAIL) }) { Text("Protocol pack detail") }
+            TextButton(onClick = { onOpen(HealthPage.TIMELINE) }) { Text("Health timeline") }
         }
         FarmOperationalSection("Protocol packs") {
             Text("${packs.size} protocol pack(s) on this device")

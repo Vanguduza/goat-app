@@ -14,6 +14,9 @@ import com.farmos.feature.ops.FormularyItemView
 import com.farmos.feature.ops.HealthLabResultView
 import com.farmos.feature.ops.HealthObservationScreen
 import com.farmos.feature.ops.HealthReadModel
+import com.farmos.feature.ops.HealthTimeline
+import com.farmos.feature.ops.HealthTimelineEntry
+import com.farmos.feature.ops.HealthTimelineKind
 import com.farmos.feature.ops.HealthTreatmentView
 import com.farmos.feature.ops.HealthVetVisitView
 import com.farmos.feature.ops.HealthWithdrawalView
@@ -151,6 +154,42 @@ class HealthRecordRuntimeNavigationTest {
         compose.onNodeWithText("3").assertExists()
         back()
         compose.onNodeWithTag("farm-screen:FOS-HEALTH-016").assertDoesNotExist()
+    }
+
+    @Test
+    fun healthTimelineListsTheCompleteWindowAndRestoresTheDashboard() {
+        render(
+            model().copy(
+                timeline = HealthTimeline(
+                    entries = listOf(
+                        HealthTimelineEntry(HealthTimelineKind.TREATMENT, "t1", LocalDate.of(2026, 9, 23).toEpochDay(), "GT-024 · Nala", "goat", "Oxytet LA · Foot abscess"),
+                        HealthTimelineEntry(HealthTimelineKind.OBSERVATION, "o1", LocalDate.of(2026, 9, 18).toEpochDay(), null, "sheep", "Lame, near hind · Red flag"),
+                    ),
+                    completeFromEpochDay = LocalDate.of(2026, 9, 1).toEpochDay(),
+                    totalCount = 431,
+                ),
+            ),
+        )
+        open("Health timeline")
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-029").assertExists()
+        compose.onNodeWithText("Every record from 2026-09-01 onward is listed. Earlier records are not shown here.").assertExists()
+        compose.onNodeWithText("Records · latest 2 of 431").assertExists()
+        compose.onNodeWithTag("health-timeline:treatment:t1").assertExists()
+        compose.onNodeWithText("2026-09-23 · Treatment").assertExists()
+        compose.onNodeWithText("Oxytet LA · Foot abscess").assertExists()
+        compose.onNodeWithText("sheep (no individual animal)").assertExists()
+        compose.onNodeWithText("Lame, near hind · Red flag").assertExists()
+        back()
+        compose.onNodeWithTag(dashboardTag).assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-029").assertDoesNotExist()
+    }
+
+    @Test
+    fun emptyHealthTimelineSaysNothingIsRecorded() {
+        render(HealthReadModel())
+        open("Health timeline")
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-029").assertExists()
+        compose.onNodeWithText("No health records on this device.").assertExists()
     }
 
     @Test

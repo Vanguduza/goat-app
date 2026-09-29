@@ -4,12 +4,18 @@ import com.farmos.core.database.FarmOsDatabase
 import com.farmos.feature.ops.FormularyItemView
 import com.farmos.feature.ops.HealthLabResultView
 import com.farmos.feature.ops.HealthReadModel
+import com.farmos.feature.ops.HealthTimelineEntry
+import com.farmos.feature.ops.HealthTimelineKind
+import com.farmos.feature.ops.HealthTimelineStream
 import com.farmos.feature.ops.HealthTreatmentView
 import com.farmos.feature.ops.HealthVetVisitView
 import com.farmos.feature.ops.HealthWithdrawalView
 import com.farmos.feature.ops.ProtocolPackView
 import com.farmos.feature.ops.ProtocolSlotView
+import com.farmos.feature.ops.mergeHealthTimeline
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 
 internal const val HEALTH_RECORD_LIMIT = 200
 
@@ -18,12 +24,19 @@ internal const val HEALTH_RECORD_LIMIT = 200
  * Lists are the latest [HEALTH_RECORD_LIMIT] rows; the counts are exhaustive farm-scoped
  * aggregates, and names come from chunked farm-scoped bulk lookups.
  */
-internal suspend fun loadHealthReadModel(database: FarmOsDatabase, farmId: String, today: LocalDate = LocalDate.now()): HealthReadModel {
+internal suspend fun loadHealthReadModel(
+    database: FarmOsDatabase,
+    farmId: String,
+    today: LocalDate = LocalDate.now(),
+    zone: ZoneId = ZoneId.systemDefault(),
+): HealthReadModel {
     val lifecycle = database.lifecycle()
     val treatmentRows = database.treatments().recent(farmId, HEALTH_RECORD_LIMIT)
     val vetVisitRows = lifecycle.vetVisits(farmId, HEALTH_RECORD_LIMIT)
     val labRows = lifecycle.labResults(farmId, HEALTH_RECORD_LIMIT)
-    val animalIds = (treatmentRows.map { it.animalId } + vetVisitRows.map { it.animalId } + labRows.map { it.animalId }).filterNotNull().distinct()
+    val observationRows = database.healthObservations().recent(farmId, HEALTH_RECORD_LIMIT)
+    val animalIds = (treatmentRows.map { it.animalId } + vetVisitRows.map { it.animalId } + labRows.map { it.animalId } + observationRows.map { it.animalId })
+        .filterNotNull().distinct()
     val labels = animalIds.chunked(LOOKUP_CHUNK).flatMap { database.animals().getMany(farmId, it) }.associate { animal ->
         animal.id to (animal.name?.takeIf { it.isNotBlank() }?.let { "${animal.tag} · $it" } ?: animal.tag)
     }
@@ -31,6 +44,46 @@ internal suspend fun loadHealthReadModel(database: FarmOsDatabase, farmId: Strin
     val products = treatmentRows.map { it.formularyItemId }.distinct().chunked(LOOKUP_CHUNK)
         .flatMap { database.formulary().getMany(farmId, it) }
         .associate { it.id to it.productName }
+    fun day(epochMillis: Long): Long = Instant.ofEpochMilli(epochMillis).atZone(zone).toLocalDate().toEpochDay()
+    val observationCount = database.healthObservations().count(farmId)
+    val treatmentCount = database.treatments().count(farmId)
+    val vetVisitCount = lifecycle.vetVisitCount(farmId)
+    val labResultCount = lifecycle.labResultCount(farmId)
+    val timeline = mergeHealthTimeline(
+        listOf(
+            HealthTimelineStream(
+                observationRows.map {
+                    HealthTimelineEntry(
+                        HealthTimelineKind.OBSERVATION, it.id, day(it.occurredAtEpochMillis), subject(it.animalId), it.speciesCode,
+                        if (it.redFlag) "${it.signs} · Red flag" else it.signs,
+                    )
+                },
+                observationRows.size >= HEALTH_RECORD_LIMIT,
+            ),
+            HealthTimelineStream(
+                treatmentRows.map {
+                    HealthTimelineEntry(
+                        HealthTimelineKind.TREATMENT, it.id, day(it.occurredAtEpochMillis), subject(it.animalId), it.speciesCode,
+                        "${products[it.formularyItemId] ?: "Product not on this device"} · ${it.reason}",
+                    )
+                },
+                treatmentRows.size >= HEALTH_RECORD_LIMIT,
+            ),
+            HealthTimelineStream(
+                vetVisitRows.map {
+                    HealthTimelineEntry(HealthTimelineKind.VET_VISIT, it.id, it.occurredEpochDay, subject(it.animalId), it.speciesCode, "${it.reason} · ${it.attendingVet}")
+                },
+                vetVisitRows.size >= HEALTH_RECORD_LIMIT,
+            ),
+            HealthTimelineStream(
+                labRows.map {
+                    HealthTimelineEntry(HealthTimelineKind.LAB_RESULT, it.id, it.occurredEpochDay, subject(it.animalId), null, "${it.testName}: ${it.resultText}")
+                },
+                labRows.size >= HEALTH_RECORD_LIMIT,
+            ),
+        ),
+        totalCount = observationCount + treatmentCount + vetVisitCount + labResultCount,
+    )
     return HealthReadModel(
         treatments = treatmentRows.map { row ->
             HealthTreatmentView(
@@ -54,13 +107,14 @@ internal suspend fun loadHealthReadModel(database: FarmOsDatabase, farmId: Strin
         labResults = labRows.map {
             HealthLabResultView(it.id, subject(it.animalId), it.testName, it.resultText, it.cellsPerMl, it.occurredEpochDay)
         },
-        observationCount = database.healthObservations().count(farmId),
-        treatmentCount = database.treatments().count(farmId),
+        observationCount = observationCount,
+        treatmentCount = treatmentCount,
         activeWithdrawalCount = lifecycle.activeWithdrawalCount(farmId, today.toEpochDay()),
-        vetVisitCount = lifecycle.vetVisitCount(farmId),
-        labResultCount = lifecycle.labResultCount(farmId),
+        vetVisitCount = vetVisitCount,
+        labResultCount = labResultCount,
         formulary = loadFormularyViews(database, farmId),
         packs = loadProtocolPackViews(database, farmId),
+        timeline = timeline,
     )
 }
 
