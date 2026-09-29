@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "c3b946dcd8a62ee785a34beb6f7eecfd91485bd1",
-  "source_fingerprint": "sha256:d2e16f0426789072b7b3452dd8ef312956ee9a6ea4911a3db1796f2484450ab3",
+  "tested_commit": "d7ab8cc041854eb62f1eedfc5c396400b85a9792",
+  "source_fingerprint": "sha256:ed7bcb9c0e8e2a51ea1ad928a5b0bda13d0083562ccbbe4d1113ce0116aa2ff3",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36609270392,
+  "foundation_run_id": 36612024936,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -325,6 +325,12 @@
         "FOS-SYNC-006",
         "FOS-SYNC-008",
         "FOS-SYNC-009"
+      ],
+      "app/src/test/java/com/farmos/app/ProcurementCaptureOwnerTest.kt": [
+        "FOS-ATOM-009",
+        "FOS-ATOM-011",
+        "FOS-ATOM-034",
+        "FOS-PROC-001"
       ]
     },
     "route_contract": {
@@ -400,9 +406,9 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
     "rendered_traversal_screen_count": 187,
-    "rendered_owner_screen_count": 35,
+    "rendered_owner_screen_count": 39,
     "route_contract_screen_count": 60,
-    "combined_screen_count": 254,
+    "combined_screen_count": 256,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -621,9 +627,12 @@
       "FOS-WATER-009"
     ],
     "rendered_owner_screen_ids": [
+      "FOS-ATOM-009",
+      "FOS-ATOM-011",
       "FOS-ATOM-026",
       "FOS-ATOM-031",
       "FOS-ATOM-033",
+      "FOS-ATOM-034",
       "FOS-CATTLE-018",
       "FOS-GLOBAL-001",
       "FOS-GLOBAL-002",
@@ -649,6 +658,7 @@
       "FOS-HOME-006",
       "FOS-HOME-007",
       "FOS-HOME-009",
+      "FOS-PROC-001",
       "FOS-SHEEP-010",
       "FOS-SYNC-003",
       "FOS-SYNC-004",
@@ -743,7 +753,7 @@
   "certification": {
     "runtime_reachability_executed": 187,
     "entry_action_emission_executed": 26,
-    "rendered_surface_owners_executed": 35,
+    "rendered_surface_owners_executed": 39,
     "route_contracts_executed": 60,
     "parameter_scope_executed": true,
     "return_restoration_executed": 187,

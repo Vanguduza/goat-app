@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:d2e16f0426789072b7b3452dd8ef312956ee9a6ea4911a3db1796f2484450ab3",
+  "source_fingerprint": "sha256:ed7bcb9c0e8e2a51ea1ad928a5b0bda13d0083562ccbbe4d1113ce0116aa2ff3",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 82,
+  "features_with_route_evidence": 83,
   "features_fully_route_bound": 31,
-  "features_without_route_evidence": 74,
+  "features_without_route_evidence": 73,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -3202,7 +3202,10 @@
         "FOS-ATOM-013",
         "FOS-ATOM-014"
       ],
-      "route_screen_ids": [],
+      "route_screen_ids": [
+        "FOS-ATOM-009",
+        "FOS-ATOM-011"
+      ],
       "unresolved_screen_ids": [
         "FOS-ATOM-001",
         "FOS-ATOM-002",
@@ -3212,15 +3215,13 @@
         "FOS-ATOM-006",
         "FOS-ATOM-007",
         "FOS-ATOM-008",
-        "FOS-ATOM-009",
         "FOS-ATOM-010",
-        "FOS-ATOM-011",
         "FOS-ATOM-012",
         "FOS-ATOM-013",
         "FOS-ATOM-014"
       ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {

@@ -6,6 +6,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import com.farmos.core.design.FarmEntitySelector
+import com.farmos.core.design.FarmSelectionAtoms
+import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreateSupplier
@@ -13,6 +16,7 @@ import com.farmos.domain.ops.RecordPurchase
 import com.farmos.feature.ops.ProcurementRecordNavigator
 import com.farmos.feature.ops.ProcurementRecords
 import com.farmos.feature.ops.SimpleCaptureScreen
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -33,8 +37,13 @@ fun ProcurementModuleHost(
     val error = remember { mutableStateOf<String?>(null) }
     val rows = remember { mutableStateOf(emptyList<String>()) }
     val records = remember(farmId) { mutableStateOf(ProcurementRecords()) }
+    val supplierOptions = remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
+    val itemOptions = remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
     suspend fun refresh() {
-        val suppliers = ops.suppliers().map { "${it.id} ${it.name} · lead ${it.leadTimeDays} d" }
+        val supplierRows = ops.suppliers()
+        supplierOptions.value = supplierRows.map { FarmSelectorOption(it.id, it.name, "Lead time ${it.leadTimeDays} days") }
+        itemOptions.value = ops.items().map { FarmSelectorOption(it.id, "${it.name} · ${it.sku}", "${BigDecimal.valueOf(it.quantityMilli, 3).stripTrailingZeros().toPlainString()} ${it.unit} on hand") }
+        val suppliers = supplierRows.map { "${it.id} ${it.name} · lead ${it.leadTimeDays} d" }
         val purchases = ops.purchases().map { "${it.id} item ${it.itemId} · ${it.quantityMilli} milli · ${it.amountMinor} ${it.currency}" }
         rows.value = suppliers + purchases
         records.value = loadRecords()
@@ -55,8 +64,8 @@ fun ProcurementModuleHost(
         onBack = onBack,
         saved = saved.value,
         extra = {
-            androidx.compose.material3.OutlinedTextField(supplierId.value,{supplierId.value=it},label={androidx.compose.material3.Text("Supplier id")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(itemId.value,{itemId.value=it},label={androidx.compose.material3.Text("Inventory item id")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
+            FarmEntitySelector(FarmSelectionAtoms.SUPPLIER_SELECTOR, "Supplier", supplierOptions.value, supplierId.value.ifBlank { null }, { supplierId.value = it }, "Create a supplier first.", enabled = !busy.value)
+            FarmEntitySelector(FarmSelectionAtoms.INVENTORY_ITEM_SELECTOR, "Inventory item", itemOptions.value, itemId.value.ifBlank { null }, { itemId.value = it }, "No inventory items on this device.", enabled = !busy.value)
             androidx.compose.material3.OutlinedTextField(qty.value,{qty.value=it},label={androidx.compose.material3.Text("Quantity")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(amount.value,{amount.value=it},label={androidx.compose.material3.Text("Amount")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(day.value,{day.value=it},label={androidx.compose.material3.Text("Date")},placeholder={androidx.compose.material3.Text("YYYY-MM-DD")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
