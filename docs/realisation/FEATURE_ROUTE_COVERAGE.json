@@ -2,7 +2,7 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:4af5a054942dc0d7054d11a138f3e4809d4f5dd8635118003403ad1f07af397d",
+  "source_fingerprint": "sha256:584f193e176c39d8edba75d3cded1ab00d01b6f5a4d46fd7f9eda86646e597fe",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 79,
@@ -616,12 +616,12 @@
         "FOS-RABBIT-018",
         "FOS-RABBIT-019",
         "FOS-RABBIT-020",
-        "FOS-RABBIT-022"
+        "FOS-RABBIT-022",
+        "FOS-RABBIT-024"
       ],
       "unresolved_screen_ids": [
         "FOS-RABBIT-021",
         "FOS-RABBIT-023",
-        "FOS-RABBIT-024",
         "FOS-RABBIT-025"
       ],
       "headless_contract": null,
@@ -641,12 +641,12 @@
         "FOS-RABBIT-030"
       ],
       "route_screen_ids": [
-        "FOS-RABBIT-027"
+        "FOS-RABBIT-026",
+        "FOS-RABBIT-027",
+        "FOS-RABBIT-028",
+        "FOS-RABBIT-029"
       ],
       "unresolved_screen_ids": [
-        "FOS-RABBIT-026",
-        "FOS-RABBIT-028",
-        "FOS-RABBIT-029",
         "FOS-RABBIT-030"
       ],
       "headless_contract": null,
