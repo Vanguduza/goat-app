@@ -298,7 +298,39 @@ data class GoatSnapshot(
     val treatmentHistory: List<GoatTreatmentSample> = emptyList(),
     val withdrawalWindows: List<GoatWithdrawalSample> = emptyList(),
     val observationHistory: List<GoatObservationSample> = emptyList(),
+    val heatHistory: List<GoatHeatSample> = emptyList(),
+    val matingHistory: List<GoatMatingSample> = emptyList(),
+    val pregnancyHistory: List<GoatPregnancySample> = emptyList(),
+    val pedigree: GoatPedigree = GoatPedigree(),
     val syncPending: Boolean,
+)
+
+data class GoatHeatSample(val heatId: String, val occurredEpochDay: Long)
+
+data class GoatMatingSample(
+    val matingId: String,
+    val sireId: String?,
+    /** Tag or name of the sire when that animal is on this device. */
+    val sireLabel: String?,
+    val method: String,
+    val occurredEpochDay: Long,
+)
+
+data class GoatPregnancySample(val checkId: String, val result: String, val occurredEpochDay: Long)
+
+/** One recorded pedigree link; [label] is null when the relative is not on this device. */
+data class GoatPedigreeLink(
+    val linkId: String,
+    val relativeId: String,
+    val label: String?,
+    val relationType: String,
+)
+
+data class GoatPedigree(
+    val parents: List<GoatPedigreeLink> = emptyList(),
+    /** Grandparents keyed by the id of the parent they were recorded against. */
+    val grandparents: Map<String, List<GoatPedigreeLink>> = emptyMap(),
+    val offspring: List<GoatPedigreeLink> = emptyList(),
 )
 
 /** A recorded treatment for this goat, read from the shared health ledger. */

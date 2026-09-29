@@ -31,7 +31,12 @@ import com.farmos.domain.goat.RecordGoatPregnancy
 import com.farmos.domain.goat.PlanGoatLactation
 import com.farmos.domain.goat.RegisterGoatKid
 import com.farmos.domain.goat.SccSample
+import com.farmos.domain.goat.GoatHeatSample
+import com.farmos.domain.goat.GoatMatingSample
 import com.farmos.domain.goat.GoatObservationSample
+import com.farmos.domain.goat.GoatPedigree
+import com.farmos.domain.goat.GoatPedigreeLink
+import com.farmos.domain.goat.GoatPregnancySample
 import com.farmos.domain.goat.GoatTreatmentSample
 import com.farmos.domain.goat.GoatWithdrawalSample
 import com.farmos.domain.goat.RecordGoatFamacha
@@ -512,7 +517,36 @@ class RoomGoatRepository(
             observationHistory = database.healthObservations().forAnimal(farmId, animalId).map { row ->
                 GoatObservationSample(row.id, row.signs, row.firstAidApplied, row.redFlag, row.occurredAtEpochMillis)
             },
+            heatHistory = database.lifecycle().goatHeatsFor(farmId, animalId).map { row ->
+                GoatHeatSample(row.id, row.occurredEpochDay)
+            },
+            matingHistory = database.lifecycle().goatMatingsForDam(farmId, animalId).map { row ->
+                GoatMatingSample(row.id, row.sireId, row.sireId?.let { animalLabel(it) }, row.method, row.occurredEpochDay)
+            },
+            pregnancyHistory = database.lifecycle().goatPregnanciesFor(farmId, animalId).map { row ->
+                GoatPregnancySample(row.id, row.result, row.occurredEpochDay)
+            },
+            pedigree = pedigreeFor(animalId),
             syncPending = database.outbox().hasPending(farmId, animalId),
+        )
+    }
+
+    private suspend fun animalLabel(animalId: String): String? =
+        database.animals().get(farmId, animalId)?.let { animal ->
+            animal.name?.takeIf { it.isNotBlank() }?.let { "${animal.tag} · $it" } ?: animal.tag
+        }
+
+    private suspend fun pedigreeFor(animalId: String): GoatPedigree {
+        suspend fun parentLinks(childId: String) = database.lifecycle().pedigreeParents(farmId, childId).map { row ->
+            GoatPedigreeLink(row.id, row.parentId, animalLabel(row.parentId), row.relationType)
+        }
+        val parents = parentLinks(animalId)
+        return GoatPedigree(
+            parents = parents,
+            grandparents = parents.associate { it.relativeId to parentLinks(it.relativeId) }.filterValues { it.isNotEmpty() },
+            offspring = database.lifecycle().pedigreeChildren(farmId, animalId).map { row ->
+                GoatPedigreeLink(row.id, row.animalId, animalLabel(row.animalId), row.relationType)
+            },
         )
     }
 

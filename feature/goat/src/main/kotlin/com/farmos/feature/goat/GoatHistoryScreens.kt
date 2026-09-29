@@ -53,6 +53,8 @@ internal val goatHistoryPages = setOf(
     GoatPage.HEALTH_SUMMARY,
     GoatPage.TREATMENT_HISTORY,
     GoatPage.WITHDRAWAL_STATUS,
+    GoatPage.DOE_REPRODUCTION,
+    GoatPage.PEDIGREE,
 )
 
 @Composable
@@ -74,6 +76,8 @@ internal fun GoatHistoryPage(
         GoatPage.HEALTH_SUMMARY -> GoatHealthSummaryScreen(goat, today, onOpen, onBack)
         GoatPage.TREATMENT_HISTORY -> GoatTreatmentHistoryScreen(goat, onBack)
         GoatPage.WITHDRAWAL_STATUS -> GoatWithdrawalStatusScreen(goat, today, onBack)
+        GoatPage.DOE_REPRODUCTION -> GoatDoeReproductionScreen(goat, onOpen, onBack)
+        GoatPage.PEDIGREE -> GoatPedigreeScreen(goat, onBack)
         else -> error("$page is not a goat history page")
     }
 }
@@ -92,6 +96,8 @@ internal fun GoatRecordLinks(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
             add("Health summary" to GoatPage.HEALTH_SUMMARY)
             add("Treatment history" to GoatPage.TREATMENT_HISTORY)
             add("Withdrawal status" to GoatPage.WITHDRAWAL_STATUS)
+            if (goat.sex == GoatSex.FEMALE) add("Breeding records" to GoatPage.DOE_REPRODUCTION)
+            add("Pedigree" to GoatPage.PEDIGREE)
             if (goat.sex == GoatSex.FEMALE) add("Milk history" to GoatPage.LACTATION_HISTORY)
             if (goat.sex == GoatSex.FEMALE) add("SCC history" to GoatPage.SCC_HISTORY)
         }

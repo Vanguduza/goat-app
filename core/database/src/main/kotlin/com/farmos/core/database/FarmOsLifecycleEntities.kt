@@ -382,6 +382,12 @@ interface LifecycleDao {
     @Upsert suspend fun upsertMating(row: GoatMatingEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPregnancy(row: GoatPregnancyEntity)
     @Upsert suspend fun upsertPregnancy(row: GoatPregnancyEntity)
+    @Query("SELECT * FROM goat_heats WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun goatHeatsFor(farmId: String, animalId: String): List<GoatHeatEntity>
+    @Query("SELECT * FROM goat_matings WHERE farmId = :farmId AND damId = :damId ORDER BY occurredEpochDay DESC, id")
+    suspend fun goatMatingsForDam(farmId: String, damId: String): List<GoatMatingEntity>
+    @Query("SELECT * FROM goat_pregnancy_checks WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun goatPregnanciesFor(farmId: String, animalId: String): List<GoatPregnancyEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertIdentifier(row: AnimalIdentifierEntity)
     @Upsert suspend fun upsertIdentifier(row: AnimalIdentifierEntity)
     @Query("""
@@ -420,6 +426,10 @@ interface LifecycleDao {
     @Upsert suspend fun upsertGiStasis(row: RabbitGiStasisEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPedigree(row: PedigreeRelationEntity)
     @Upsert suspend fun upsertPedigree(row: PedigreeRelationEntity)
+    @Query("SELECT * FROM pedigree_relations WHERE farmId = :farmId AND animalId = :animalId ORDER BY relationType, id")
+    suspend fun pedigreeParents(farmId: String, animalId: String): List<PedigreeRelationEntity>
+    @Query("SELECT * FROM pedigree_relations WHERE farmId = :farmId AND parentId = :parentId ORDER BY animalId, id")
+    suspend fun pedigreeChildren(farmId: String, parentId: String): List<PedigreeRelationEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPackSlot(row: HealthPackSlotEntity)
     @Upsert suspend fun upsertPackSlot(row: HealthPackSlotEntity)
     @Query("SELECT * FROM health_schedule_slots WHERE farmId = :farmId AND packId = :packId AND isCore = 1")

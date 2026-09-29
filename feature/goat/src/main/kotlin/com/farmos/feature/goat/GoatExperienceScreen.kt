@@ -126,6 +126,14 @@ internal fun GoatExperienceScreen(
             if (initialPage == GoatPage.SYNC) onBackToFarm() else page = GoatPage.DASHBOARD
         }
         GoatPage.STATUS_CHANGE -> GoatStatusChangeScreen(state, actions.onSetStatus) { page = GoatPage.PROFILE }
+        GoatPage.PREGNANCY_DASHBOARD -> GoatPregnancyDashboardScreen(
+            herd = state.herd,
+            onSelectDoe = {
+                actions.onSelectGoat(it)
+                page = GoatPage.DOE_REPRODUCTION
+            },
+            onBack = { page = GoatPage.DASHBOARD },
+        )
         in goatHistoryPages -> GoatHistoryPage(page, state.selected, today, onOpen = { page = it }) { page = GoatPage.PROFILE }
         else -> error("Unhandled goat page $page")
     }
@@ -203,6 +211,7 @@ private fun GoatDashboardScreen(
             GoatDashboardAction("Growth", "Weights and growth rates") {
                 onOpen(if (state.selected != null) GoatPage.WEIGHT else GoatPage.HERD)
             }
+            GoatDashboardAction("Pregnancy", "Breeding status of active does") { onOpen(GoatPage.PREGNANCY_DASHBOARD) }
             GoatDashboardAction("Search", state.searchMessage) { onOpen(GoatPage.SEARCH) }
             GoatDashboardAction("Scan tag", "RFID, EID or animal tag") { onOpen(GoatPage.SCAN) }
 

@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:b9cab0ee03e2fd89f198f715818897147e6bf56729b202f431b36daf98ea9a76",
+  "source_fingerprint": "sha256:1a289dc346b06879cf89180e06fe3e884433c3bd6346d4dc3667753ec7adc632",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 63,
+  "features_with_route_evidence": 64,
   "features_fully_route_bound": 10,
-  "features_without_route_evidence": 93,
+  "features_without_route_evidence": 92,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -394,14 +394,14 @@
         "FOS-GOAT-036"
       ],
       "route_screen_ids": [
+        "FOS-GOAT-030",
         "FOS-GOAT-031",
         "FOS-GOAT-032",
-        "FOS-GOAT-034"
+        "FOS-GOAT-034",
+        "FOS-GOAT-035"
       ],
       "unresolved_screen_ids": [
-        "FOS-GOAT-030",
         "FOS-GOAT-033",
-        "FOS-GOAT-035",
         "FOS-GOAT-036"
       ],
       "headless_contract": null,
@@ -447,14 +447,15 @@
         "FOS-GOAT-045",
         "FOS-GOAT-046"
       ],
-      "route_screen_ids": [],
+      "route_screen_ids": [
+        "FOS-GOAT-044"
+      ],
       "unresolved_screen_ids": [
-        "FOS-GOAT-044",
         "FOS-GOAT-045",
         "FOS-GOAT-046"
       ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {

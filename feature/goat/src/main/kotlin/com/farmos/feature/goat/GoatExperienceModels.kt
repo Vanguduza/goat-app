@@ -29,6 +29,9 @@ internal enum class GoatPage {
     HEALTH_SUMMARY,
     TREATMENT_HISTORY,
     WITHDRAWAL_STATUS,
+    DOE_REPRODUCTION,
+    PREGNANCY_DASHBOARD,
+    PEDIGREE,
 }
 
 internal data class GoatExperienceActions(
