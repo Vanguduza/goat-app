@@ -49,6 +49,8 @@ private enum class PoultryPage {
     EGG_PRODUCTION,
     INCUBATION_BATCH,
     BIOSECURITY_RECORDS,
+    FLOCK_HEALTH,
+    FLOCK_TIMELINE,
 }
 
 /** Flock/house-first Poultry UX. Individual-bird CRUD is intentionally not the primary navigation model. */
@@ -73,6 +75,7 @@ fun PoultryExperienceScreen(
     onBiosecurity: (houseId: String, groupId: String, findings: String, mixedSpecies: Boolean, day: String) -> Unit,
     onBack: () -> Unit,
     records: PoultryRecords = PoultryRecords(),
+    loadFlock: suspend (String) -> PoultryFlockRecords = { PoultryFlockRecords() },
 ) {
     var page by remember { mutableStateOf(PoultryPage.DASHBOARD) }
     val home = { page = PoultryPage.DASHBOARD }
@@ -94,6 +97,8 @@ fun PoultryExperienceScreen(
         PoultryPage.EGG_PRODUCTION -> PoultryEggProductionScreen(records, home)
         PoultryPage.INCUBATION_BATCH -> PoultryIncubationBatchScreen(records, home)
         PoultryPage.BIOSECURITY_RECORDS -> PoultryBiosecurityDashboardScreen(records, home)
+        PoultryPage.FLOCK_HEALTH -> PoultryFlockRecordScreen(timeline = false, records.flocks, loadFlock, home)
+        PoultryPage.FLOCK_TIMELINE -> PoultryFlockRecordScreen(timeline = true, records.flocks, loadFlock, home)
     }
 }
 
@@ -141,6 +146,8 @@ private fun PoultryDashboard(
             PoultryAction("Egg production", "Eggs recorded per flock and day") { onOpen(PoultryPage.EGG_PRODUCTION) }
             PoultryAction("Incubation batches", "Egg set, candling and hatch as recorded") { onOpen(PoultryPage.INCUBATION_BATCH) }
             PoultryAction("Biosecurity records", "Recorded walks and findings") { onOpen(PoultryPage.BIOSECURITY_RECORDS) }
+            PoultryAction("Flock health", "Recorded losses, vaccinations and walks for one flock") { onOpen(PoultryPage.FLOCK_HEALTH) }
+            PoultryAction("Flock timeline", "Every recorded event for one flock") { onOpen(PoultryPage.FLOCK_TIMELINE) }
             if (flockDays.isEmpty()) Text("No daily flock records yet.")
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             TextButton(onClick = onBack) { Text("Farm home") }

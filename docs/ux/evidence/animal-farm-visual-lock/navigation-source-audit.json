@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "db04bc3b4aaf147fc9962861d014202d306ac521",
+  "tested_commit": "862fef616e332567a6f1e35979c4a4a5971195a2",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 224
+    "registered_ids_mentioned_in_kotlin": 228
   },
   "top_level": {
     "farm_modules": [
@@ -743,6 +743,12 @@
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
+        },
+        {
+          "value": "GROWTH_HISTORY",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
         }
       ]
     },
@@ -872,6 +878,12 @@
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
+        },
+        {
+          "value": "GROWTH_HISTORY",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
         }
       ]
     },
@@ -980,6 +992,18 @@
         },
         {
           "value": "BIOSECURITY_RECORDS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FLOCK_HEALTH",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FLOCK_TIMELINE",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false

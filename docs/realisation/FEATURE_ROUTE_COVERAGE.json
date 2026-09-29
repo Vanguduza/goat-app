@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:f252a243f2bca432b8a09ebded9d2d7e2be86d4ce6b90dbef07f408c3a7e2ff7",
+  "source_fingerprint": "sha256:1f9ff2ae50f3bf251b1ee3125129b7e72498e8192b12d941446119285d82b034",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 75,
-  "features_fully_route_bound": 24,
-  "features_without_route_evidence": 81,
+  "features_with_route_evidence": 76,
+  "features_fully_route_bound": 25,
+  "features_without_route_evidence": 80,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -732,10 +732,10 @@
       ],
       "route_screen_ids": [
         "FOS-SHEEP-006",
+        "FOS-SHEEP-007",
         "FOS-SHEEP-009"
       ],
       "unresolved_screen_ids": [
-        "FOS-SHEEP-007",
         "FOS-SHEEP-008"
       ],
       "headless_contract": null,
@@ -896,13 +896,12 @@
       ],
       "route_screen_ids": [
         "FOS-CATTLE-006",
+        "FOS-CATTLE-007",
         "FOS-CATTLE-008"
       ],
-      "unresolved_screen_ids": [
-        "FOS-CATTLE-007"
-      ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -1147,16 +1146,17 @@
         "FOS-POULTRY-025",
         "FOS-POULTRY-026"
       ],
-      "route_screen_ids": [],
-      "unresolved_screen_ids": [
-        "FOS-POULTRY-022",
-        "FOS-POULTRY-023",
-        "FOS-POULTRY-024",
+      "route_screen_ids": [
         "FOS-POULTRY-025",
         "FOS-POULTRY-026"
       ],
+      "unresolved_screen_ids": [
+        "FOS-POULTRY-022",
+        "FOS-POULTRY-023",
+        "FOS-POULTRY-024"
+      ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {

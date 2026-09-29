@@ -48,6 +48,8 @@ data class CattleRecords(
     val latestBcs: String? = null,
     val latestLocomotion: Int? = null,
     val timeline: List<CattleTimelineRow> = emptyList(),
+    /** Recorded weights, oldest first. */
+    val weights: List<WeightView> = emptyList(),
 )
 
 private sealed interface CattleRecordsState {
@@ -62,6 +64,7 @@ internal enum class CattleRecordPage(val screenId: String, val title: String, va
     SCC_HISTORY("FOS-CATTLE-022", "SCC history", "Somatic cell counts recorded for the selected animal."),
     HEALTH_SUMMARY("FOS-CATTLE-033", "Cattle health summary", "Recorded health for the selected animal. Records only; no diagnosis or dosing."),
     TIMELINE("FOS-CATTLE-035", "Cattle timeline", "Every recorded event for the selected animal, newest first."),
+    GROWTH_HISTORY("FOS-CATTLE-007", "Growth history", "Weights recorded for the selected animal. No growth rate or target is derived."),
 }
 
 internal fun cattleLitres(milli: Long): String = BigDecimal.valueOf(milli, 3).stripTrailingZeros().toPlainString() + " L"
@@ -93,6 +96,7 @@ internal fun CattleRecordPageHost(
                 CattleRecordPage.SCC_HISTORY -> CattleSccContent(current.records)
                 CattleRecordPage.HEALTH_SUMMARY -> CattleHealthContent(current.records, today)
                 CattleRecordPage.TIMELINE -> CattleTimelineContent(current.records)
+                CattleRecordPage.GROWTH_HISTORY -> WeightHistoryContent(current.records.weights, "No weights recorded for this animal on this device.")
             }
         }
     }

@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:f252a243f2bca432b8a09ebded9d2d7e2be86d4ce6b90dbef07f408c3a7e2ff7",
-  "runtime_evidence_tested_commit": "db04bc3b4aaf147fc9962861d014202d306ac521",
-  "runtime_evidence_run_id": 36545355965,
+  "source_fingerprint": "sha256:1f9ff2ae50f3bf251b1ee3125129b7e72498e8192b12d941446119285d82b034",
+  "runtime_evidence_tested_commit": "862fef616e332567a6f1e35979c4a4a5971195a2",
+  "runtime_evidence_run_id": 36548886227,
   "registry_screen_count": 545,
-  "route_screen_count": 224,
-  "unresolved_screen_count": 321,
+  "route_screen_count": 228,
+  "unresolved_screen_count": 317,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -20,6 +20,7 @@
     "FOS-CATTLE-004",
     "FOS-CATTLE-005",
     "FOS-CATTLE-006",
+    "FOS-CATTLE-007",
     "FOS-CATTLE-008",
     "FOS-CATTLE-010",
     "FOS-CATTLE-013",
@@ -169,6 +170,8 @@
     "FOS-POULTRY-019",
     "FOS-POULTRY-020",
     "FOS-POULTRY-021",
+    "FOS-POULTRY-025",
+    "FOS-POULTRY-026",
     "FOS-PROC-001",
     "FOS-PROC-002",
     "FOS-PROC-003",
@@ -200,6 +203,7 @@
     "FOS-SHEEP-003",
     "FOS-SHEEP-004",
     "FOS-SHEEP-006",
+    "FOS-SHEEP-007",
     "FOS-SHEEP-009",
     "FOS-SHEEP-010",
     "FOS-SHEEP-011",
@@ -351,6 +355,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-CATTLE-007",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -2118,6 +2133,28 @@
       }
     },
     {
+      "screen_id": "FOS-POULTRY-025",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-POULTRY-026",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-PROC-001",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -2475,6 +2512,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SHEEP-007",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SheepRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -3006,7 +3054,6 @@
     "FOS-CAP-008",
     "FOS-CAP-009",
     "FOS-CAP-010",
-    "FOS-CATTLE-007",
     "FOS-CATTLE-009",
     "FOS-CATTLE-011",
     "FOS-CATTLE-012",
@@ -3119,8 +3166,6 @@
     "FOS-POULTRY-022",
     "FOS-POULTRY-023",
     "FOS-POULTRY-024",
-    "FOS-POULTRY-025",
-    "FOS-POULTRY-026",
     "FOS-POULTRY-027",
     "FOS-PROC-004",
     "FOS-PROC-006",
@@ -3179,7 +3224,6 @@
     "FOS-SEARCH-008",
     "FOS-SEARCH-009",
     "FOS-SHEEP-005",
-    "FOS-SHEEP-007",
     "FOS-SHEEP-008",
     "FOS-SHEEP-013",
     "FOS-SHEEP-015",

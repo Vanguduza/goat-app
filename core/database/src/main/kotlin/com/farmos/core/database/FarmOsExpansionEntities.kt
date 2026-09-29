@@ -436,7 +436,7 @@ interface PoultryFlockDayDao {
     @Query("SELECT * FROM poultry_flock_days WHERE farmId = :farmId ORDER BY occurredEpochDay DESC LIMIT :limit")
     suspend fun recent(farmId: String, limit: Int): List<PoultryFlockDayEntity>
 
-    @Query("SELECT * FROM poultry_flock_days WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredEpochDay DESC")
+    @Query("SELECT * FROM poultry_flock_days WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredEpochDay DESC, id")
     suspend fun forGroup(farmId: String, groupId: String): List<PoultryFlockDayEntity>
 }
 

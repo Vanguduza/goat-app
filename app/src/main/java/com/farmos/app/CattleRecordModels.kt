@@ -7,6 +7,7 @@ import com.farmos.feature.ops.CattleRecords
 import com.farmos.feature.ops.CattleSccRow
 import com.farmos.feature.ops.CattleTimelineRow
 import com.farmos.feature.ops.CattleWithdrawalRow
+import com.farmos.feature.ops.WeightView
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -51,5 +52,6 @@ internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String,
         latestBcs = bcs.firstOrNull()?.let { "${it.scoreTenths / 10}.${it.scoreTenths % 10} (${it.scale})" },
         latestLocomotion = locomotion.firstOrNull()?.score,
         timeline = timeline,
+        weights = database.measurements().history(farmId, animalId, "weight").map { WeightView(it.id, day(it.measuredAtEpochMillis), it.valueLong, it.unit) },
     )
 }

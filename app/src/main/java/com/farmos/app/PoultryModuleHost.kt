@@ -19,6 +19,7 @@ import com.farmos.domain.ops.RecordPoultryHatch
 import com.farmos.domain.ops.RecordPoultryVaccination
 import com.farmos.domain.ops.SetPoultryHatch
 import com.farmos.feature.ops.PoultryExperienceScreen
+import com.farmos.feature.ops.PoultryFlockRecords
 import com.farmos.feature.ops.PoultryRecords
 import java.time.LocalDate
 import java.util.UUID
@@ -33,6 +34,7 @@ fun PoultryModuleHost(
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
     loadRecords: suspend () -> PoultryRecords = { PoultryRecords() },
+    loadFlock: suspend (String) -> PoultryFlockRecords = { PoultryFlockRecords() },
 ) {
     val scope = rememberCoroutineScope()
     var records by remember(farmId) { mutableStateOf(PoultryRecords()) }
@@ -177,5 +179,6 @@ fun PoultryModuleHost(
         },
         onBack = onBack,
         records = records,
+        loadFlock = loadFlock,
     )
 }

@@ -57,6 +57,7 @@ private enum class SheepOpsPage {
     HEALTH_SUMMARY,
     TIMELINE,
     WOOL_DASHBOARD,
+    GROWTH_HISTORY,
 }
 
 @Composable
@@ -196,6 +197,7 @@ fun SheepOperationsScreen(
 
         SheepOpsPage.HEALTH_SUMMARY -> SheepHealthSummaryScreen(selectedAnimalId, today, loadRecords, home)
         SheepOpsPage.TIMELINE -> SheepTimelineScreen(selectedAnimalId, loadRecords, home)
+        SheepOpsPage.GROWTH_HISTORY -> SheepGrowthHistoryScreen(selectedAnimalId, loadRecords, home)
         SheepOpsPage.WOOL_DASHBOARD -> SheepWoolDashboardScreen(loadWool, home)
     }
 }
@@ -231,6 +233,7 @@ private fun SheepOpsHome(
         FarmOperationalSection("Sheep records") {
             SheepNav("Health summary") { onOpen(SheepOpsPage.HEALTH_SUMMARY) }
             SheepNav("Timeline") { onOpen(SheepOpsPage.TIMELINE) }
+            SheepNav("Growth history") { onOpen(SheepOpsPage.GROWTH_HISTORY) }
         }
         FarmOperationalSection("Field health") {
             SheepNav("FAMACHA") { onOpen(SheepOpsPage.FAMACHA) }

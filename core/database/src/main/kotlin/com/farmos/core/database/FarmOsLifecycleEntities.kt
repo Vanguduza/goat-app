@@ -437,6 +437,14 @@ interface LifecycleDao {
     @Upsert suspend fun upsertBiosecurity(row: PoultryBiosecurityEntity)
     @Query("SELECT * FROM poultry_biosecurity_walks WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
     suspend fun biosecurityWalks(farmId: String, limit: Int): List<PoultryBiosecurityEntity>
+    @Query("SELECT * FROM poultry_placements WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredEpochDay DESC, id")
+    suspend fun placementsForGroup(farmId: String, groupId: String): List<PoultryPlacementEntity>
+    @Query("SELECT * FROM poultry_vaccinations WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredEpochDay DESC, id")
+    suspend fun vaccinationsForGroup(farmId: String, groupId: String): List<PoultryVaccinationEntity>
+    @Query("SELECT * FROM poultry_biosecurity_walks WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredEpochDay DESC, id")
+    suspend fun walksForGroup(farmId: String, groupId: String): List<PoultryBiosecurityEntity>
+    @Query("SELECT * FROM poultry_hatches WHERE farmId = :farmId AND placementGroupId = :groupId ORDER BY setEpochDay DESC, id")
+    suspend fun hatchesPlacedInto(farmId: String, groupId: String): List<PoultryHatchEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertHeat(row: GoatHeatEntity)
     @Upsert suspend fun upsertHeat(row: GoatHeatEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMating(row: GoatMatingEntity)
