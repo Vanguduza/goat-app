@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
@@ -76,16 +77,26 @@ fun RabbitProgrammeScreen(
     onBack: () -> Unit,
     records: RabbitRecords = RabbitRecords(),
     today: LocalDate = LocalDate.now(),
+    /** Exhaustive count of rabbits the [does] list can show; the list itself is bounded. */
+    rabbitCount: Int? = null,
 ) {
     var page by remember { mutableStateOf(RabbitPage.DASHBOARD) }
     val home = { page = RabbitPage.DASHBOARD }
     when (page) {
         RabbitPage.DASHBOARD -> {
-            RabbitDashboard(does, cages, waves, availableBoxes, error, { page = it }, onBack)
+            RabbitDashboard(does, rabbitCount, cages, waves, availableBoxes, error, { page = it }, onBack)
         }
 
         RabbitPage.ANIMALS -> {
-            RabbitRows("FOS-RABBIT-002", "Breeding animals", does, "No rabbits registered", error, home)
+            RabbitRows(
+                "FOS-RABBIT-002",
+                "Breeding animals",
+                does,
+                "No rabbits registered",
+                error,
+                home,
+                note = rabbitCount?.takeIf { it > does.size }?.let { "Showing the first ${does.size} of $it rabbits by tag." },
+            )
         }
 
         RabbitPage.REGISTER -> {
@@ -150,6 +161,7 @@ fun RabbitProgrammeScreen(
 @Composable
 private fun RabbitDashboard(
     animals: List<String>,
+    rabbitCount: Int?,
     cages: List<String>,
     waves: List<String>,
     availableBoxes: Long,
@@ -168,7 +180,7 @@ private fun RabbitDashboard(
                 family = AnimalFarmFamily.RABBIT,
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                RabbitMetric("Rabbits", animals.size, Modifier.weight(1f))
+                RabbitMetric("Rabbits", rabbitCount ?: animals.size, Modifier.weight(1f))
                 RabbitMetric("Cages", cages.size, Modifier.weight(1f))
                 RabbitMetric("Waves", waves.size, Modifier.weight(1f))
                 RabbitMetric("Boxes", availableBoxes.toInt(), Modifier.weight(1f))
@@ -228,8 +240,10 @@ private fun RabbitRows(
     empty: String,
     error: String?,
     onBack: () -> Unit,
+    note: String? = null,
 ) {
     FarmOperationalPage(screenId, title, "Rabbitry records on this device.", onBack = onBack) {
+        note?.let { Text(it, modifier = Modifier.testTag("rabbit-list-bounded")) }
         FarmOperationalRows(rows, empty, "Add a record from the rabbitry dashboard.")
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }

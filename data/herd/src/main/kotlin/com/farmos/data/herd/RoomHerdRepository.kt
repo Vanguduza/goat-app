@@ -153,6 +153,12 @@ class RoomHerdRepository(
 
     suspend fun list(): List<AnimalEntity> = database.animals().listBySpecies(farmId, species, 200)
 
+    /** Exhaustive count of the animals [list] can show (every status except closed), past its 200-row bound. */
+    suspend fun listedTotal(): Int = database.animals().countBySpecies(farmId, species)
+
+    /** Exhaustive count of active animals of this species. */
+    suspend fun activeCount(): Int = database.animals().herdCounts(farmId, species, "active", todayEpochDay = 0).active
+
     private suspend fun nextExpectedStreamVersion(animalId: String): Long {
         val authoritative = database.aggregateVersions().getVersion(farmId, "animal", animalId) ?: 0L
         val queued = database.outbox().countUnacknowledgedForAggregate(farmId, "animal", animalId)

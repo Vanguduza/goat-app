@@ -4,6 +4,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -74,7 +75,17 @@ class SpeciesHerdRuntimeNavigationTest {
         home()
     }
 
-    private fun renderSpecies(module: FarmModule, label: String) {
+    @Test
+    fun herdMetricsUseExhaustiveCountsAndTheListSaysWhenBounded() {
+        renderSpecies(FarmModule.CATTLE, "Cow One", SpeciesHerdCounts(total = 640, active = 612))
+        compose.onNodeWithText("640").assertExists()
+        compose.onNodeWithText("612").assertExists()
+        open("Open Cattle records")
+        assertScreen("FOS-CATTLE-002")
+        compose.onNodeWithText("Showing the first 1 of 640 cattle by tag.").assertExists()
+    }
+
+    private fun renderSpecies(module: FarmModule, label: String, counts: SpeciesHerdCounts? = null) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 SpeciesHerdScreen(
@@ -90,6 +101,7 @@ class SpeciesHerdRuntimeNavigationTest {
                     onRecordWeight = { _, _ -> },
                     onSetStatus = { _, _ -> },
                     onBack = {},
+                    counts = counts,
                 )
             }
         }

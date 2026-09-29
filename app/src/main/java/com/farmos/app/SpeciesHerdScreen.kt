@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
@@ -30,6 +31,9 @@ import com.farmos.core.design.FarmSpeciesVisual
 import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.FosDimens
 import com.farmos.core.design.toAnimalFarmFamily
+
+/** Exhaustive herd counts: [total] is every animal the herd list can show, [active] the active ones. */
+data class SpeciesHerdCounts(val total: Int, val active: Int)
 
 data class SpeciesAnimalRow(
     val animalId: String,
@@ -73,6 +77,7 @@ fun SpeciesHerdScreen(
     onSetStatus: (animalId: String, status: String) -> Unit,
     onBack: () -> Unit,
     extra: @Composable (SpeciesAnimalRow?, onBack: () -> Unit) -> Unit = { _, _ -> },
+    counts: SpeciesHerdCounts? = null,
 ) {
     require(module == FarmModule.SHEEP || module == FarmModule.CATTLE) {
         "SpeciesHerdScreen is reserved for individual-animal sheep/cattle UX"
@@ -119,11 +124,11 @@ fun SpeciesHerdScreen(
     val home = { page = SpeciesPage.DASHBOARD }
     when (page) {
         SpeciesPage.DASHBOARD -> {
-            SpeciesDashboard(config, rows, selected, error, { page = it }, onBack)
+            SpeciesDashboard(config, rows, counts, selected, error, { page = it }, onBack)
         }
 
         SpeciesPage.HERD -> {
-            SpeciesHerdList(config, rows, busy, error, {
+            SpeciesHerdList(config, rows, counts?.total, busy, error, {
                 selectedId = it
                 page = SpeciesPage.PROFILE
             }, home)
@@ -155,6 +160,7 @@ fun SpeciesHerdScreen(
 private fun SpeciesDashboard(
     config: SpeciesUiConfig,
     rows: List<SpeciesAnimalRow>,
+    counts: SpeciesHerdCounts?,
     selected: SpeciesAnimalRow?,
     error: String?,
     onOpen: (SpeciesPage) -> Unit,
@@ -171,8 +177,9 @@ private fun SpeciesDashboard(
                 family = config.visual.toAnimalFarmFamily(),
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                SpeciesMetric("Total", rows.size, Modifier.weight(1f))
-                SpeciesMetric("Active", rows.count { it.active }, Modifier.weight(1f))
+                // Exhaustive counts when loaded; the row list is bounded and is only a fallback.
+                SpeciesMetric("Total", counts?.total ?: rows.size, Modifier.weight(1f))
+                SpeciesMetric("Active", counts?.active ?: rows.count { it.active }, Modifier.weight(1f))
             }
             SpeciesAction("${config.name} records", "Browse the current ${config.plural} list") { onOpen(SpeciesPage.HERD) }
             SpeciesAction("Register ${config.name.lowercase()}", "Create an individual animal identity") { onOpen(SpeciesPage.REGISTER) }
@@ -217,6 +224,7 @@ private fun SpeciesAction(
 private fun SpeciesHerdList(
     config: SpeciesUiConfig,
     rows: List<SpeciesAnimalRow>,
+    listedTotal: Int?,
     busy: Boolean,
     error: String?,
     onSelect: (String) -> Unit,
@@ -229,6 +237,9 @@ private fun SpeciesHerdList(
         "Individual ${config.plural} records on this device.",
         onBack = onBack,
     ) {
+        listedTotal?.takeIf { it > rows.size }?.let { total ->
+            Text("Showing the first ${rows.size} of $total ${config.plural} by tag.", Modifier.testTag("species-herd-bounded"))
+        }
         if (rows.isEmpty()) {
             FarmOperationalRows(emptyList(), "No ${config.plural} registered", "Register the first animal from the dashboard.")
         } else {

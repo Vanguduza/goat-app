@@ -112,6 +112,14 @@ class RabbitRecordRuntimeNavigationTest {
     }
 
     @Test
+    fun rabbitCountIsExhaustiveAndTheListSaysWhenBounded() {
+        render(RabbitRecords(), does = listOf("R-1 · doe · active"), rabbitCount = 240)
+        compose.onNodeWithText("240").assertExists()
+        compose.onNode(hasClickAction() and hasText("Open Breeding animals")).performScrollTo().performClick()
+        compose.onNodeWithText("Showing the first 1 of 240 rabbits by tag.").assertExists()
+    }
+
+    @Test
     fun emptyRecordsSayNothingIsRecorded() {
         render(RabbitRecords())
         traverse("Cage occupancy", "FOS-RABBIT-008") {
@@ -166,7 +174,7 @@ class RabbitRecordRuntimeNavigationTest {
         ),
     )
 
-    private fun render(records: RabbitRecords) {
+    private fun render(records: RabbitRecords, does: List<String> = emptyList(), rabbitCount: Int? = null) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 RabbitProgrammeScreen(
@@ -175,7 +183,7 @@ class RabbitRecordRuntimeNavigationTest {
                     availableBoxes = 0,
                     busy = false,
                     error = null,
-                    does = emptyList(),
+                    does = does,
                     onRegisterDoe = { _, _, _ -> },
                     onCreateCage = {},
                     onCreateNestBox = { _, _ -> },
@@ -186,6 +194,7 @@ class RabbitRecordRuntimeNavigationTest {
                     onBack = {},
                     records = records,
                     today = today,
+                    rabbitCount = rabbitCount,
                 )
             }
         }
