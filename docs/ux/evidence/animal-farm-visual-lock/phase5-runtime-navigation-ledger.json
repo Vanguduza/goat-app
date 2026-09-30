@@ -2,8 +2,8 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "1a1f0290802dca06c66b4637b8abda601475634b",
-  "source_fingerprint": "sha256:6ef7227bb6f7a9878e01befff6fc9827af51fbfe72c5227c90c9d5bb19d7f60b",
+  "tested_commit": "effb21b4962af3141e3a51245aa40b3d7c43479e",
+  "source_fingerprint": "sha256:a9e0d2538fc60516d292de96ba07e664fdf7d762925c8d356c2490a4e989d674",
   "ci_status": "CI_PENDING",
   "foundation_run_id": null,
   "test_sources": {
