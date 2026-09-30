@@ -55,6 +55,8 @@ data class ReplicationDeviceEntity(
     val lastReportedOwnSequence: Long,
     val revokedAfterSequence: Long?,
     val isLocal: Boolean,
+    /** Base64 X.509 key-agreement public key, used to wrap farm keys to this device after a rotation. */
+    val publicKey: String? = null,
 )
 
 /** Contiguous-watermark input: highest sequence and row count per originating device. */
@@ -279,6 +281,7 @@ private fun localOperation(
         lastReportedOwnSequence = sequence,
         revokedAfterSequence = previous?.revokedAfterSequence,
         isLocal = true,
+        publicKey = previous?.publicKey,
     )
 }
 

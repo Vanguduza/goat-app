@@ -42,6 +42,8 @@ class PairingServer(
     private val keys: () -> FarmKeyRing,
     private val driveFolderId: () -> String? = { null },
     private val lock: Any = authority,
+    /** Persists an approved enrolment before the grant is sent, so the new device is known when it first syncs. */
+    private val onGranted: (EnrolmentRequest, DeviceGrant) -> Unit = { _, _ -> },
     /** Asks a person on this device; blocks until they decide. */
     private val decide: (PendingEnrolment) -> EnrolmentDecision,
 ) : Closeable {
@@ -77,7 +79,10 @@ class PairingServer(
             }
         }
         when (decision) {
-            is PairingDecision.Approved -> PairingCodec.writeGrant(output, decision.grant)
+            is PairingDecision.Approved -> {
+                onGranted(request, decision.grant)
+                PairingCodec.writeGrant(output, decision.grant)
+            }
             is PairingDecision.Rejected -> PairingCodec.writeRefusal(output, decision.reason.name)
             null -> PairingCodec.writeRefusal(output, "DECLINED")
         }
@@ -157,6 +162,15 @@ internal object PairingCodec {
         }
         out.writeBoolean(grant.driveFolderId != null)
         grant.driveFolderId?.let(out::writeUTF)
+        out.writeInt(grant.devices.size)
+        grant.devices.forEach { device ->
+            out.writeUTF(device.deviceId)
+            out.writeUTF(device.name.take(MAX_NAME))
+            out.writeUTF(device.status.name)
+            out.writeLong(device.lastReportedOwnSequence)
+            out.writeBoolean(device.revokedAfterSequence != null)
+            device.revokedAfterSequence?.let(out::writeLong)
+        }
     }
 
     fun writeRefusal(out: DataOutputStream, reason: String) {
@@ -176,7 +190,12 @@ internal object PairingCodec {
         if (count !in 0..MAX_KEYS) throw IOException("Key count $count is outside the protocol limit")
         val wrapped = List(count) { WrappedFarmKey(input.readUTF(), input.bytes(), input.bytes(), input.bytes()) }
         val drive = if (input.readBoolean()) input.readUTF() else null
-        return EnrolmentOutcome.Granted(DeviceGrant(farmId, deviceId, deviceName, approvedBy, approvedAt, currentKeyId, wrapped, drive))
+        val deviceCount = input.readInt()
+        if (deviceCount !in 0..MAX_KEYS) throw IOException("Device count $deviceCount is outside the protocol limit")
+        val devices = List(deviceCount) {
+            FarmDevice(input.readUTF(), input.readUTF(), DeviceStatus.valueOf(input.readUTF()), input.readLong(), if (input.readBoolean()) input.readLong() else null)
+        }
+        return EnrolmentOutcome.Granted(DeviceGrant(farmId, deviceId, deviceName, approvedBy, approvedAt, currentKeyId, wrapped, drive, devices))
     }
 
     private fun DataOutputStream.bytes(value: ByteArray) {

@@ -116,6 +116,8 @@ class DeviceGrant(
     val currentKeyId: String,
     val wrappedKeys: List<WrappedFarmKey>,
     val driveFolderId: String?,
+    /** The farm's devices as the approving device knows them, including the new one, so it can sync at once. */
+    val devices: List<FarmDevice> = emptyList(),
 )
 
 sealed interface PairingDecision {
@@ -206,6 +208,7 @@ class PairingAuthority(
                 currentKeyId = keys.currentKeyId,
                 wrappedKeys = keys.all().map { FarmKeyWrap.wrap(it, devicePublic, farmId, request.deviceId, random) },
                 driveFolderId = driveFolderId,
+                devices = registry.all(),
             ),
         )
     }
