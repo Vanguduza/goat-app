@@ -42,4 +42,30 @@ interface AnimalExitDao {
 
     @Query("SELECT * FROM animal_exits WHERE farmId = :farmId AND id = :exitId LIMIT 1")
     suspend fun get(farmId: String, exitId: String): AnimalExitEntity?
+
+    /** Standing sale exits with no sale recorded against them yet, newest first, with the animal. */
+    @Query(
+        """
+        SELECT e.id AS exitId, e.animalId, a.tag, a.name, a.speciesCode, e.buyer, e.priceMinor, e.currency, e.occurredEpochDay
+        FROM animal_exits e JOIN animals a ON a.farmId = e.farmId AND a.id = e.animalId
+        WHERE e.farmId = :farmId AND e.kind = 'SALE'
+            AND NOT EXISTS (SELECT 1 FROM animal_exits r WHERE r.farmId = e.farmId AND r.reversesExitId = e.id)
+            AND NOT EXISTS (SELECT 1 FROM sales_records s WHERE s.farmId = e.farmId AND s.exitId = e.id)
+        ORDER BY e.occurredEpochDay DESC, e.id
+        """,
+    )
+    suspend fun unsettledSaleExits(farmId: String): List<UnsettledSaleExit>
 }
+
+/** A sale exit whose sale money has not been recorded yet. */
+data class UnsettledSaleExit(
+    val exitId: String,
+    val animalId: String,
+    val tag: String,
+    val name: String?,
+    val speciesCode: String,
+    val buyer: String?,
+    val priceMinor: Long?,
+    val currency: String?,
+    val occurredEpochDay: Long,
+)

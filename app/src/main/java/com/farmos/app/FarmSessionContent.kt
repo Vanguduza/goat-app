@@ -289,6 +289,7 @@ fun FarmSessionContent(
                 customers = { back -> CustomerRegisterHost(app.database, membership.farmId, membership.role, ::context, ::enqueueSync, back) },
                 customerSearch = remember(membership.farmId) { customerSelectorSearch(app.database, membership.farmId) },
                 customerCommands = remember(membership.farmId) { com.farmos.data.herd.CustomerCommands(app.database, membership.farmId) },
+                animalSale = { back -> AnimalSaleHost(app.database, membership.farmId, ::context, ::enqueueSync, back) },
             )
             FarmModule.PROCUREMENT -> ProcurementModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,

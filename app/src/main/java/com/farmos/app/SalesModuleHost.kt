@@ -38,6 +38,8 @@ fun SalesModuleHost(
     /** Whole-farm customer search for the sale's customer (D-004); null hides the selector. */
     customerSearch: FarmSelectorSearch? = null,
     customerCommands: CustomerCommands? = null,
+    /** Animal sale (FOS-SALES-007), opened from the sales home. */
+    animalSale: (@Composable (onBack: () -> Unit) -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
     val currency by rememberFarmCurrency(farmId, loadCurrency)
@@ -59,7 +61,7 @@ fun SalesModuleHost(
     val amount = remember { mutableStateOf("") }
     val day = remember { mutableStateOf("") }
     val customer = remember { mutableStateOf(NO_CUSTOMER) }
-    SalesRecordNavigator(records.value, customers) { recordActions -> SimpleCaptureScreen(
+    SalesRecordNavigator(records.value, customers, animalSale) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-SALES-001", title = "Sales",
         help = "A sale posts income in integer minor units of ${currency ?: "the farm currency"}. This is farm unit economics, not a statutory ledger.",
         empty = "No sales on this device.", rows = rows.value, busy = busy.value, error = error.value,

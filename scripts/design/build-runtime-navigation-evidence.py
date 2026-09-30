@@ -73,6 +73,7 @@ RENDERED_OWNER_TESTS = (
     "app/src/test/java/com/farmos/app/OpsAnimalPickerTest.kt",
     "app/src/test/java/com/farmos/app/OpsCoiAnalysisTest.kt",
     "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt",
+    "app/src/test/java/com/farmos/app/AnimalSaleScreensTest.kt",
 )
 ROUTE_CONTRACT_TESTS = (
     "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt",
