@@ -38,4 +38,11 @@ interface AttachmentDao {
     /** Every attachment on one record, newest first; no row cap. */
     @Query("SELECT * FROM attachments WHERE farmId = :farmId AND ownerType = :ownerType AND ownerId = :ownerId ORDER BY attachedAtEpochMillis DESC, id")
     suspend fun forOwner(farmId: String, ownerType: String, ownerId: String): List<AttachmentEntity>
+
+    /** Each attachment content the farm knows of, once, whatever records carry it. */
+    @Query("SELECT contentSha256, MAX(byteSize) AS byteSize FROM attachments WHERE farmId = :farmId GROUP BY contentSha256 ORDER BY MIN(attachedAtEpochMillis) DESC, contentSha256")
+    suspend fun contents(farmId: String): List<AttachmentContentRow>
 }
+
+/** One attachment content known to the farm and its recorded size. */
+data class AttachmentContentRow(val contentSha256: String, val byteSize: Long)

@@ -37,7 +37,9 @@ import com.farmos.core.model.LocalCommandResult
 import com.farmos.data.herd.AttachmentCommands
 import com.farmos.domain.ops.AttachFile
 import com.farmos.domain.ops.AttachmentRules
+import com.farmos.domain.replication.AttachmentBlobSource
 import java.io.File
+import java.io.RandomAccessFile
 import java.security.MessageDigest
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
@@ -68,6 +70,19 @@ internal class FileAttachmentStore(private val root: File) {
     /** The verified bytes, or null when they are not on this device or no longer match their hash. */
     fun read(farmId: String, contentSha256: String): ByteArray? =
         file(farmId, contentSha256).takeIf { it.isFile }?.readBytes()?.takeIf { sha256Hex(it) == contentSha256 }
+
+    /** This device's bytes for one farm as the LAN serves them to the farm's paired devices. */
+    fun source(farmId: String): AttachmentBlobSource = object : AttachmentBlobSource {
+        override fun size(contentSha256: String): Long? = file(farmId, contentSha256).takeIf { it.isFile }?.length()
+
+        override fun read(contentSha256: String, offset: Long, length: Int): ByteArray? {
+            val target = file(farmId, contentSha256).takeIf { it.isFile } ?: return null
+            return RandomAccessFile(target, "r").use { raf ->
+                if (offset < 0 || offset + length > raf.length()) return null
+                ByteArray(length).also { raf.seek(offset); raf.readFully(it) }
+            }
+        }
+    }
 
     private fun file(farmId: String, contentSha256: String): File {
         require(farmId.matches(SAFE_ID)) { "Invalid farm id" }
@@ -103,6 +118,31 @@ internal suspend fun attachToAnimal(
     withContext(Dispatchers.IO) { store.put(farmId, bytes) }
     return AttachmentCommands(database, farmId).attach(command, context)
 }
+
+/**
+ * Fetches, from a paired device, the bytes of every attachment the farm knows of that this device does not
+ * hold, up to [limit] per session. Bytes are kept only when their size and SHA-256 match the recorded
+ * metadata; anything else is dropped and stays "Available when connected". Returns how many were kept.
+ */
+internal suspend fun pullMissingAttachments(
+    database: FarmOsDatabase,
+    farmId: String,
+    store: FileAttachmentStore,
+    limit: Int = ATTACHMENTS_PER_SESSION,
+    fetch: (contentSha256: String, maxBytes: Long) -> ByteArray?,
+): Int {
+    var kept = 0
+    database.attachments().contents(farmId).filterNot { store.has(farmId, it.contentSha256) }.take(limit).forEach { wanted ->
+        val bytes = runCatching { fetch(wanted.contentSha256, wanted.byteSize) }.getOrNull() ?: return@forEach
+        if (bytes.size.toLong() == wanted.byteSize && sha256Hex(bytes) == wanted.contentSha256) {
+            store.put(farmId, bytes)
+            kept++
+        }
+    }
+    return kept
+}
+
+private const val ATTACHMENTS_PER_SESSION = 25
 
 /** One attachment as shown: whether its bytes are here, and a small preview of a photo that is. */
 internal data class AttachmentView(val row: AttachmentEntity, val local: Boolean, val preview: Bitmap?)

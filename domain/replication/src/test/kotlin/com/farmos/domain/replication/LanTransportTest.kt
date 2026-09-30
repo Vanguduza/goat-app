@@ -218,4 +218,37 @@ class LanTransportTest {
         ).also { transports += it }
         assertFalse(client.isAvailable())
     }
+
+    private class MapBlobs(private val held: Map<String, ByteArray>) : AttachmentBlobSource {
+        override fun size(contentSha256: String): Long? = held[contentSha256]?.size?.toLong()
+
+        override fun read(contentSha256: String, offset: Long, length: Int): ByteArray? =
+            held[contentSha256]?.copyOfRange(offset.toInt(), offset.toInt() + length)
+    }
+
+    @Test
+    fun attachmentBytesLargerThanOneChunkArriveWholeAndMissingOnesAreReportedAbsent() {
+        val a = replica("A")
+        val b = replica("B")
+        // Two and a half chunks, so the transfer takes three requests.
+        val photo = ByteArray(BLOB_CHUNK_BYTES * 5 / 2) { (it % 253).toByte() }
+        val sha = Sha256.hex(photo)
+        val server = LanSyncServer(b, { keys }, blobs = MapBlobs(mapOf(sha to photo))).start(InetSocketAddress(loopback, 0)).also { servers += it }
+        val transport = transport(a, server)
+
+        assertTrue(photo.contentEquals(transport.fetchAttachment(sha, photo.size.toLong())))
+        assertEquals(null, transport.fetchAttachment("0".repeat(64), Long.MAX_VALUE))
+        // A peer never sends more than the recorded size, and a malformed hash reads as absent.
+        assertEquals(null, transport.fetchAttachment(sha, photo.size - 1L))
+        assertEquals(null, transport.fetchAttachment("../secret", Long.MAX_VALUE))
+        // The same connection still synchronises after attachment requests.
+        assertEquals(SyncSessionStatus.COMPLETED, SyncSession.run(a, transport, remoteDeviceId = "B").status)
+    }
+
+    @Test
+    fun aDeviceServingNoAttachmentsReportsEveryOneAbsent() {
+        val a = replica("A")
+        val server = serve(replica("B"))
+        assertEquals(null, transport(a, server).fetchAttachment("a".repeat(64), Long.MAX_VALUE))
+    }
 }

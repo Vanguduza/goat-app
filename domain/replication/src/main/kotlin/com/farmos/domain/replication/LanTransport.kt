@@ -293,6 +293,21 @@ internal object LanWire {
         }
     }
 
+    fun blobRequest(contentSha256: String, offset: Long): ByteArray = write {
+        writeLongString(contentSha256)
+        writeLong(offset)
+    }
+
+    fun blobRequest(bytes: ByteArray): Pair<String, Long> = read(bytes) { readLongString() to readLong() }
+
+    /** A chunk of attachment bytes with the content's total size; a negative size means the bytes are not held. */
+    fun blobChunk(totalBytes: Long, chunk: ByteArray): ByteArray = write {
+        writeLong(totalBytes)
+        writeBytesField(chunk)
+    }
+
+    fun blobChunk(bytes: ByteArray): Pair<Long, ByteArray> = read(bytes) { readLong() to readBytesField() }
+
     private fun DataOutputStream.writeOperation(op: OperationEnvelope) {
         listOf(op.operationId, op.farmId, op.entityType, op.entityId, op.actorId, op.deviceId).forEach { writeLongString(it) }
         writeLong(op.deviceSequence)
@@ -360,7 +375,21 @@ private object LanRequest {
     const val VECTOR: Byte = 1
     const val FETCH: Byte = 2
     const val PUBLISH: Byte = 3
+    const val BLOB: Byte = 4
 }
+
+/** Attachment bytes this device can serve to its farm's peers (D-015), addressed by content hash. */
+interface AttachmentBlobSource {
+    /** The size of the held content, or null when its bytes are not on this device. */
+    fun size(contentSha256: String): Long?
+
+    /** [length] bytes of the held content from [offset], or null when they are not on this device. */
+    fun read(contentSha256: String, offset: Long, length: Int): ByteArray?
+}
+
+/** Attachment bytes travel in chunks well inside the frame limit. */
+internal const val BLOB_CHUNK_BYTES = 1024 * 1024
+private val CONTENT_SHA256 = Regex("^[0-9a-f]{64}$")
 
 /**
  * Serves this device's replica to authenticated farm peers on the LAN. Incoming bundles go through the
@@ -374,6 +403,8 @@ class LanSyncServer(
     private val random: SecureRandom = SecureRandom(),
     /** When set, peers whose identity key is known must prove it, and may then use a previous farm key. */
     private val identity: LanIdentity? = null,
+    /** This device's attachment bytes for the farm; none are served when null. */
+    private val blobs: AttachmentBlobSource? = null,
 ) : Closeable {
     private var server: ServerSocket? = null
 
@@ -415,7 +446,8 @@ class LanSyncServer(
             }
             if (!authorised(channel.peerDeviceId)) return
             val body = request.copyOfRange(1, request.size)
-            val response = synchronized(lock) {
+            // Attachment bytes are read outside the replica lock; they never change the replica.
+            val response = if (request.first() == LanRequest.BLOB) blobResponse(body) else synchronized(lock) {
                 when (request.first()) {
                     LanRequest.VECTOR -> LanWire.vector(replica.vector())
                     LanRequest.FETCH -> LanWire.bundles(replica.bundlesFor(LanWire.ranges(body)))
@@ -428,6 +460,15 @@ class LanSyncServer(
     }
 
     private fun authorised(deviceId: String): Boolean = synchronized(lock) { replica.maySynchronise(deviceId) }
+
+    private fun blobResponse(body: ByteArray): ByteArray {
+        val (sha, offset) = LanWire.blobRequest(body)
+        val source = blobs
+        val total = if (source != null && CONTENT_SHA256.matches(sha)) source.size(sha) else null
+        if (source == null || total == null || offset !in 0..total) return LanWire.blobChunk(-1, ByteArray(0))
+        val chunk = source.read(sha, offset, minOf(BLOB_CHUNK_BYTES.toLong(), total - offset).toInt()) ?: return LanWire.blobChunk(-1, ByteArray(0))
+        return LanWire.blobChunk(total, chunk)
+    }
 
     override fun close() {
         server?.close()
@@ -482,6 +523,26 @@ class LanPeerTransport(
     override fun publish(farmId: String, bundles: List<OperationBundle>) {
         check(farmId == this.farmId) { "Peer serves another farm" }
         lastRejections = LanWire.rejections(call(LanRequest.PUBLISH, LanWire.bundles(bundles)))
+    }
+
+    /**
+     * The attachment bytes with [contentSha256] from the peer, fetched in chunks (D-015). Null when the peer
+     * does not hold them, their size changes mid-transfer or exceeds [maxBytes]. The caller verifies the hash
+     * before keeping them.
+     */
+    fun fetchAttachment(contentSha256: String, maxBytes: Long): ByteArray? {
+        val received = java.io.ByteArrayOutputStream()
+        var offset = 0L
+        var expected = -1L
+        do {
+            val (total, chunk) = LanWire.blobChunk(call(LanRequest.BLOB, LanWire.blobRequest(contentSha256, offset)))
+            if (total < 0 || total > maxBytes || (expected >= 0 && total != expected)) return null
+            expected = total
+            if (chunk.isEmpty() && offset < total) return null
+            received.write(chunk)
+            offset += chunk.size
+        } while (offset < total)
+        return received.toByteArray().takeIf { it.size.toLong() == expected }
     }
 
     /** Reasons the peer gave for refusing bundles in the last publish; empty when it accepted all. */

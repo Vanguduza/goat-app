@@ -1,5 +1,6 @@
 package com.farmos.app
 
+import java.io.File
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -376,7 +377,7 @@ internal fun LocalFarmSession(app: FarmOsApplication) {
     val (account, farmName) = current
     val membership = account.membership()
     DisposableEffect(account.farmId) {
-        val runtime = FarmLanRuntime(app.database, app.keyVault, app.peerDiscovery, account.farmId, farmName, app.deviceId).start()
+        val runtime = FarmLanRuntime(app.database, app.keyVault, app.peerDiscovery, account.farmId, farmName, app.deviceId, attachments = FileAttachmentStore(File(app.filesDir, "attachments"))).start()
         app.farmLan = runtime
         onDispose {
             app.farmLan = null

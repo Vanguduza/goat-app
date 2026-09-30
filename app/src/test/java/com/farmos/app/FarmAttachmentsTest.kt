@@ -124,4 +124,46 @@ class FarmAttachmentsTest {
         assertThrows(IllegalArgumentException::class.java) { store.read("../escape", sha) }
         assertThrows(IllegalArgumentException::class.java) { store.read(farm, "../../etc") }
     }
+
+    @Test
+    fun bytesFetchedFromAPairedDeviceAreKeptOnlyWhenTheyMatchTheRecord(): Unit = runBlocking {
+        val aDb = database()
+        val bDb = database()
+        listOf(aDb, bDb).forEach { it.sheep("s1") }
+        val a = RoomReplicaEndpoint(aDb, farm, "A", replicationAppliers).apply { registerPairedDevice("B", "B") }
+        val b = RoomReplicaEndpoint(bDb, farm, "B", replicationAppliers).apply { registerPairedDevice("A", "A") }
+        val aStore = store()
+        val bStore = store()
+        val scan = ByteArray(4_096) { (it % 7).toByte() }
+        attachToAnimal(aDb, farm, aStore, "s1", photo, "image/png", "Lamb.png", context("A"))
+        attachToAnimal(aDb, farm, aStore, "s1", scan, "application/pdf", "Scan.pdf", context("A"))
+        SyncSession.run(b, LocalPeerTransport(a), remoteDeviceId = "A")
+
+        // A peer that sends altered bytes, or none, leaves B without them.
+        val served = aStore.source(farm)
+        val tampered = pullMissingAttachments(bDb, farm, bStore) { sha, _ -> served.read(sha, 0, served.size(sha)!!.toInt())!!.also { it[0] = (it[0] + 1).toByte() } }
+        assertEquals(0, tampered)
+        assertEquals(0, pullMissingAttachments(bDb, farm, bStore) { _, _ -> null })
+        assertFalse(bStore.has(farm, sha256Hex(photo)))
+
+        // The genuine bytes are kept, once, and a second pull fetches nothing.
+        var requests = 0
+        val genuine: (String, Long) -> ByteArray? = { sha, max -> requests++; served.size(sha)?.takeIf { it <= max }?.let { served.read(sha, 0, it.toInt()) } }
+        assertEquals(2, pullMissingAttachments(bDb, farm, bStore, fetch = genuine))
+        assertArrayEquals(photo, bStore.read(farm, sha256Hex(photo)))
+        assertArrayEquals(scan, bStore.read(farm, sha256Hex(scan)))
+        assertEquals(0, pullMissingAttachments(bDb, farm, bStore, fetch = genuine))
+        assertEquals(2, requests)
+    }
+
+    @Test
+    fun theServedSourceReadsExactRangesAndNothingPastTheEnd() {
+        val store = store()
+        val sha = store.put(farm, photo)
+        val source = store.source(farm)
+        assertEquals(2_048L, source.size(sha))
+        assertArrayEquals(photo.copyOfRange(1_000, 1_100), source.read(sha, 1_000, 100))
+        assertNull(source.read(sha, 2_000, 100))
+        assertNull(source.size("b".repeat(64)))
+    }
 }
