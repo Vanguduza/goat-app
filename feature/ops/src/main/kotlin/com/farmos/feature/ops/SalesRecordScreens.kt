@@ -66,14 +66,27 @@ private fun SalesRow(primary: String, secondary: String, tag: String) {
  * record actions; each action opens a read-only record page whose back returns home.
  */
 @Composable
-fun SalesRecordNavigator(records: SalesRecords, home: @Composable (recordActions: @Composable () -> Unit) -> Unit) {
+fun SalesRecordNavigator(
+    records: SalesRecords,
+    /** The customer register (FOS-SALES-002/003); null hides the entry. */
+    customers: (@Composable (onBack: () -> Unit) -> Unit)? = null,
+    home: @Composable (recordActions: @Composable () -> Unit) -> Unit,
+) {
     var page by rememberSaveable { mutableStateOf<SalesRecordPage?>(null) }
+    var register by rememberSaveable { mutableStateOf(false) }
     val back = { page = null }
+    if (register && customers != null) {
+        customers { register = false }
+        return
+    }
     when (page) {
         null -> home {
             FarmOperationalSection("Records") {
                 SalesRecordPage.entries.forEach { target ->
                     TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text("Open ${target.label}") }
+                }
+                if (customers != null) {
+                    TextButton(onClick = { register = true }, modifier = Modifier.fillMaxWidth()) { Text("Customers") }
                 }
             }
         }

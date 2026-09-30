@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:ac98211fcdbc70dd4cafbebe570c80d990fa51f361b77dd56ba3778693bfca92",
-  "runtime_evidence_tested_commit": "15b4dc5b5bda2b2ae6bf51c756d3d1561f67196d",
-  "runtime_evidence_run_id": 36734131078,
+  "source_fingerprint": "sha256:e9ef95c0d4b911ce31ee8927c2795a9b523b5ff5625ebf2e15657aaf2dea29d0",
+  "runtime_evidence_tested_commit": "fcd2890ba3da84875ad5ad1f9ae3c7b3278f8491",
+  "runtime_evidence_run_id": 36737556301,
   "registry_screen_count": 545,
-  "route_screen_count": 294,
-  "unresolved_screen_count": 251,
+  "route_screen_count": 296,
+  "unresolved_screen_count": 249,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -254,6 +254,8 @@
     "FOS-REPORT-001",
     "FOS-REPORT-011",
     "FOS-SALES-001",
+    "FOS-SALES-002",
+    "FOS-SALES-003",
     "FOS-SALES-005",
     "FOS-SALES-011",
     "FOS-SHEEP-001",
@@ -3249,6 +3251,28 @@
       }
     },
     {
+      "screen_id": "FOS-SALES-002",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/CustomerScreensTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SALES-003",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/CustomerScreensTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-SALES-005",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -4069,8 +4093,6 @@
     "FOS-REPORT-013",
     "FOS-REPORT-014",
     "FOS-REPORT-015",
-    "FOS-SALES-002",
-    "FOS-SALES-003",
     "FOS-SALES-004",
     "FOS-SALES-006",
     "FOS-SALES-007",

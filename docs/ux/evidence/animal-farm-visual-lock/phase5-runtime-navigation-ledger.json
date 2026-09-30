@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "15b4dc5b5bda2b2ae6bf51c756d3d1561f67196d",
-  "source_fingerprint": "sha256:ac98211fcdbc70dd4cafbebe570c80d990fa51f361b77dd56ba3778693bfca92",
+  "tested_commit": "fcd2890ba3da84875ad5ad1f9ae3c7b3278f8491",
+  "source_fingerprint": "sha256:e9ef95c0d4b911ce31ee8927c2795a9b523b5ff5625ebf2e15657aaf2dea29d0",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36734131078,
+  "foundation_run_id": 36737556301,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -429,6 +429,10 @@
       "app/src/test/java/com/farmos/app/ReportsScreensTest.kt": [
         "FOS-REPORT-001",
         "FOS-REPORT-011"
+      ],
+      "app/src/test/java/com/farmos/app/CustomerScreensTest.kt": [
+        "FOS-SALES-002",
+        "FOS-SALES-003"
       ]
     },
     "route_contract": {
@@ -506,9 +510,9 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 27,
     "rendered_traversal_screen_count": 199,
-    "rendered_owner_screen_count": 86,
+    "rendered_owner_screen_count": 88,
     "route_contract_screen_count": 62,
-    "combined_screen_count": 294,
+    "combined_screen_count": 296,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -818,6 +822,8 @@
       "FOS-RABBIT-011",
       "FOS-REPORT-001",
       "FOS-REPORT-011",
+      "FOS-SALES-002",
+      "FOS-SALES-003",
       "FOS-SHEEP-010",
       "FOS-SHEEP-030",
       "FOS-SYNC-003",
@@ -913,7 +919,7 @@
   "certification": {
     "runtime_reachability_executed": 199,
     "entry_action_emission_executed": 27,
-    "rendered_surface_owners_executed": 86,
+    "rendered_surface_owners_executed": 88,
     "route_contracts_executed": 62,
     "parameter_scope_executed": true,
     "return_restoration_executed": 199,

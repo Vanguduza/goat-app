@@ -103,6 +103,8 @@ data class SaleRecordEntity(
     val amountMinor: Long,
     val currency: String,
     val occurredEpochDay: Long,
+    /** The customer in the register (FOS-SALES-003); null when the sale named none. */
+    @ColumnInfo(defaultValue = "NULL") val customerId: String? = null,
 )
 
 @Entity(tableName = "formulary_items", indices = [Index(value = ["farmId", "productName"])])

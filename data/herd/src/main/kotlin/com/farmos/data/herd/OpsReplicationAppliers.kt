@@ -5,7 +5,10 @@ import com.farmos.core.database.OperationApplier
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.domain.ops.AcceptHealthPack
 import com.farmos.domain.ops.AddHealthPackSlot
+import com.farmos.domain.ops.CreateFarmCustomer
+import com.farmos.domain.ops.RecordCustomerSale
 import com.farmos.domain.ops.RecordWorkerLabour
+import com.farmos.domain.ops.UpdateFarmCustomer
 import com.farmos.domain.ops.ApplyHealthPack
 import com.farmos.domain.ops.AssignAnimalIdentifier
 import com.farmos.domain.ops.CandlePoultryHatch
@@ -210,6 +213,9 @@ object OpsReplicationAppliers {
         AnimalExitCommands.RECORD to OperationApplier { database, op -> AnimalExitCommands(database, op.farmId, replaying = true).record(decode<RecordAnimalExit>(op), context(op)) },
         AnimalExitCommands.REVERSE to OperationApplier { database, op -> AnimalExitCommands(database, op.farmId, replaying = true).reverse(decode<ReverseAnimalExit>(op), context(op)) },
         WorkerRegisterCommands.CREATE to OperationApplier { database, op -> WorkerRegisterCommands(database, op.farmId, replaying = true).create(decode<CreateFarmWorker>(op), context(op)) },
+        CustomerCommands.CREATE to OperationApplier { database, op -> CustomerCommands(database, op.farmId, replaying = true).create(decode<CreateFarmCustomer>(op), context(op)) },
+        CustomerCommands.UPDATE to OperationApplier { database, op -> CustomerCommands(database, op.farmId, replaying = true).update(decode<UpdateFarmCustomer>(op), context(op)) },
+        CustomerCommands.SALE to OperationApplier { database, op -> CustomerCommands(database, op.farmId, replaying = true).recordSale(decode<RecordCustomerSale>(op), context(op)) },
         LabourCommands.RECORD to OperationApplier { database, op -> LabourCommands(database, op.farmId, replaying = true).record(decode<RecordWorkerLabour>(op), context(op)) },
         WorkerRegisterCommands.UPDATE to OperationApplier { database, op -> WorkerRegisterCommands(database, op.farmId, replaying = true).update(decode<UpdateFarmWorker>(op), context(op)) },
         StockCountCommands.START to stock { commands, op -> commands.start(decode<StartStockCount>(op), context(op)) },
