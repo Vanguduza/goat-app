@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.recordPeerHolds
 import com.farmos.domain.access.LocalAccount
 import com.farmos.domain.access.Permission
 import com.farmos.domain.access.RolePermissions
@@ -215,8 +216,14 @@ internal class FarmLanRuntime(
     private fun syncNow() {
         val outcomes = mutableState.value.peers.map { peer ->
             LanPeerTransport(peer.host, peer.port, farmId, deviceId, keys, endpoint::maySynchronise).use { transport ->
-                runCatching { SyncSession.run(endpoint, transport) }
+                val outcome = runCatching { SyncSession.run(endpoint, transport) }
                     .getOrElse { SyncOutcome(transport.kind, SyncSessionStatus.TRANSPORT_UNAVAILABLE, rejectedReasons = listOf(it.message ?: "Sync failed")) }
+                val peerId = transport.peerDeviceId
+                val held = outcome.peerHoldsOwnThrough
+                if (outcome.status == SyncSessionStatus.COMPLETED && peerId != null && held != null) {
+                    runBlocking { database.recordPeerHolds(farmId, peerId, held, clock()) }
+                }
+                outcome
             }
         }
         mutableState.value = mutableState.value.copy(lastSyncEpochMillis = clock(), lastOutcomes = outcomes)

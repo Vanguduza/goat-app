@@ -13,6 +13,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.farmos.core.database.unsharedLocalOperations
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.network.FarmMembership
 import com.farmos.core.sync.SyncWorker
@@ -46,6 +47,11 @@ fun FarmSessionContent(
         )
     }
     fun enqueueSync() {
+        // Without a server there is nothing to upload: share the change with the farm's devices instead.
+        if (!app.backendConfigured) {
+            app.farmLan?.requestSync()
+            return
+        }
         val request = OneTimeWorkRequestBuilder<SyncWorker>()
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
             .addTag(FarmOsApplication.SYNC_WORK_TAG)
@@ -62,6 +68,13 @@ fun FarmSessionContent(
         } else {
             syncQueueCounts(app.database.outbox().countByStateForFarm(membership.farmId).associate { it.state to it.count })
         }
+    /** Server-era outbox rows, or, without a server, local changes no other farm device holds yet. */
+    suspend fun pendingSync(): Long =
+        if (app.backendConfigured) {
+            app.database.outbox().countUnacknowledgedForFarm(membership.farmId)
+        } else {
+            app.database.unsharedLocalOperations(membership.farmId, app.deviceId)
+        }
     val backHome = { destination = FarmDestination.Home }
     val runtimeRoute = destination.runtimeRouteContract()
     Box(Modifier.testTag(runtimeRoute.testTag)) {
@@ -74,7 +87,7 @@ fun FarmSessionContent(
             loadGoatCount = { app.database.animals().countBySpecies(membership.farmId, "goat") },
             loadCompletedTaskCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
             loadActiveWithdrawalCount = { app.database.lifecycle().activeWithdrawalCount(membership.farmId, it) },
-            loadPendingSync = { app.database.outbox().countUnacknowledgedForFarm(membership.farmId) },
+            loadPendingSync = { pendingSync() },
             loadSyncQueueCounts = ::loadSyncQueueCounts,
             onOpen = { destination = it },
             onSignOut = onSignOut,
@@ -235,7 +248,7 @@ fun FarmSessionContent(
                 loadGoatCount = { app.database.animals().countBySpecies(membership.farmId, "goat") },
                 loadCompletedTaskCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
                 loadActiveWithdrawalCount = { app.database.lifecycle().activeWithdrawalCount(membership.farmId, it) },
-                loadPendingSync = { app.database.outbox().countUnacknowledgedForFarm(membership.farmId) },
+                loadPendingSync = { pendingSync() },
             loadSyncQueueCounts = ::loadSyncQueueCounts,
                 onOpen = { destination = it },
                 onSignOut = onSignOut,

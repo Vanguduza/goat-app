@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.farmos.core.database.unsharedLocalOperations
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.model.SearchSource
 import com.farmos.core.network.AuthenticationRequiredException
@@ -82,7 +83,11 @@ fun GoatModuleHost(
             herd = loaded
             selectedGoatId = effectiveId
             selected = chosen
-            pendingSyncCount = app.database.outbox().countUnacknowledgedForFarm(membership.farmId)
+            pendingSyncCount = if (app.backendConfigured) {
+                app.database.outbox().countUnacknowledgedForFarm(membership.farmId)
+            } else {
+                app.database.unsharedLocalOperations(membership.farmId, app.deviceId)
+            }
             herdState = if (loaded.isEmpty()) LoadableSurfaceState.EMPTY else LoadableSurfaceState.IDLE
         }.onFailure { failure ->
             error = failure.message
