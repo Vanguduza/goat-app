@@ -177,4 +177,45 @@ class LanTransportTest {
 
     private fun LanSecureChannel.field(name: String): ByteArray =
         LanSecureChannel::class.java.getDeclaredField(name).apply { isAccessible = true }.get(this) as ByteArray
+
+    @Test
+    fun aDeviceWithAProvenIdentityCanConnectWithThePreviousKeyAfterRotationButAnImpostorCannot() {
+        val serverIdentity = DeviceKeys.generate()
+        val clientIdentity = DeviceKeys.generate()
+        val impostorIdentity = DeviceKeys.generate()
+        val identities = mapOf("A" to clientIdentity.public, "B" to serverIdentity.public)
+        val rotated = keys.rotate("k2")
+        val b = replica("B")
+        val server = LanSyncServer(b, { rotated }, identity = LanIdentity(serverIdentity) { identities[it] })
+            .start(InetSocketAddress(loopback, 0)).also { servers += it }
+
+        // A still holds only k1 but proves it is A: accepted, so it can receive the rotated key.
+        val a = replica("A")
+        a.weigh("goat-1", "31.5")
+        val proven = LanPeerTransport(loopback.hostAddress, server.port, farm, "A", { keys }, a.registry::maySynchronise, identity = LanIdentity(clientIdentity) { identities[it] })
+            .also { transports += it }
+        assertEquals(SyncSessionStatus.COMPLETED, SyncSession.run(a, proven, remoteDeviceId = "B").status)
+
+        // Someone holding k1 who claims to be A without A's identity key is refused.
+        val impostor = LanPeerTransport(loopback.hostAddress, server.port, farm, "A", { keys }, a.registry::maySynchronise, identity = LanIdentity(impostorIdentity) { identities[it] })
+            .also { transports += it }
+        assertFalse(impostor.isAvailable())
+        // And without any identity, the previous key is refused as before.
+        assertFalse(transport(a, server, keys).isAvailable())
+    }
+
+    @Test
+    fun aClientRefusesAServerThatCannotProveItsDeviceIdentity() {
+        val serverIdentity = DeviceKeys.generate()
+        val clientIdentity = DeviceKeys.generate()
+        val fake = DeviceKeys.generate()
+        val server = LanSyncServer(replica("B"), { keys }, identity = LanIdentity(fake) { null })
+            .start(InetSocketAddress(loopback, 0)).also { servers += it }
+        val a = replica("A")
+        val client = LanPeerTransport(
+            loopback.hostAddress, server.port, farm, "A", { keys }, a.registry::maySynchronise,
+            identity = LanIdentity(clientIdentity) { if (it == "B") serverIdentity.public else null },
+        ).also { transports += it }
+        assertFalse(client.isAvailable())
+    }
 }

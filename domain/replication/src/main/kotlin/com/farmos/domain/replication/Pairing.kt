@@ -202,7 +202,7 @@ class PairingAuthority(
 
     private fun grant(request: EnrolmentRequest, approverAccountId: String, keys: FarmKeyRing, driveFolderId: String?): PairingDecision {
         val devicePublic = DeviceKeys.decode(request.devicePublicKey)
-        registry.register(FarmDevice(request.deviceId, request.deviceName, DeviceStatus.ACTIVE))
+        registry.register(FarmDevice(request.deviceId, request.deviceName, DeviceStatus.ACTIVE, publicKey = Base64.getEncoder().encodeToString(request.devicePublicKey)))
         return PairingDecision.Approved(
             DeviceGrant(
                 farmId = farmId,

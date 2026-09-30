@@ -2,7 +2,7 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:7bf016dec930ae3ef3947c17c86130b0d8dc6f43ddd7aeaef435a7de574ab2c0",
+  "source_fingerprint": "sha256:d8ddc874e4b68c1fffaf1a951a2f1f4edfd4b8b2e4db75dae6b0578d0305ce13",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 89,

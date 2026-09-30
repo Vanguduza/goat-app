@@ -178,6 +178,8 @@ internal object PairingCodec {
             out.writeLong(device.lastReportedOwnSequence)
             out.writeBoolean(device.revokedAfterSequence != null)
             device.revokedAfterSequence?.let(out::writeLong)
+            out.writeBoolean(device.publicKey != null)
+            device.publicKey?.let(out::writeUTF)
         }
     }
 
@@ -201,7 +203,14 @@ internal object PairingCodec {
         val deviceCount = input.readInt()
         if (deviceCount !in 0..MAX_KEYS) throw IOException("Device count $deviceCount is outside the protocol limit")
         val devices = List(deviceCount) {
-            FarmDevice(input.readUTF(), input.readUTF(), DeviceStatus.valueOf(input.readUTF()), input.readLong(), if (input.readBoolean()) input.readLong() else null)
+            FarmDevice(
+                deviceId = input.readUTF(),
+                name = input.readUTF(),
+                status = DeviceStatus.valueOf(input.readUTF()),
+                lastReportedOwnSequence = input.readLong(),
+                revokedAfterSequence = if (input.readBoolean()) input.readLong() else null,
+                publicKey = if (input.readBoolean()) input.readUTF() else null,
+            )
         }
         return EnrolmentOutcome.Granted(DeviceGrant(farmId, deviceId, deviceName, approvedBy, approvedAt, currentKeyId, wrapped, drive, devices))
     }
