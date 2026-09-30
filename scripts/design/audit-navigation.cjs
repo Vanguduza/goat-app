@@ -182,7 +182,7 @@ if (args.includes('--self-test')) {
   const assert = (ok, msg) => { if (!ok) throw new Error(msg); };
   assert(report.registry.exact_entries === 545, `expected 545 registry entries, got ${report.registry.exact_entries}`);
   assert(report.registry.unique_entries === 545, 'registry IDs must be unique');
-  assert(farmModules.length === 19, `expected 19 FarmModule values, got ${farmModules.length}`);
+  assert(farmModules.length === 20, `expected 20 FarmModule values, got ${farmModules.length}`);
   assert(personas.length === 9, `expected 9 role personas, got ${personas.length}`);
   assert(!renderOnly.includes('RabbitPage.NESTS'), 'RabbitPage.NESTS must have a dashboard transition');
   assert(preemptedModules.length === 0, 'dedicated module hosts must not remain duplicated in OperatingModuleHost');
