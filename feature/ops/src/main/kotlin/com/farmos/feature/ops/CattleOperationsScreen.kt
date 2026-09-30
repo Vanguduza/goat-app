@@ -62,6 +62,7 @@ private enum class CattleOpsPage {
     MOVEMENT_RECORD,
     BEEF_DASHBOARD,
     LOT_DETAIL,
+    CALVING_DUE,
 }
 
 @Composable
@@ -74,6 +75,7 @@ fun CattleOperationsScreen(
     loadRecords: suspend (String) -> CattleRecords = { CattleRecords() },
     today: LocalDate = LocalDate.now(),
     loadLots: suspend () -> List<CattleLotView> = { emptyList() },
+    loadCalvingDue: suspend () -> CattleCalvingDue = { CattleCalvingDue(emptyList(), 283) },
 ) {
     var page by remember { mutableStateOf(CattleOpsPage.HOME) }
     val home = { page = CattleOpsPage.HOME }
@@ -160,6 +162,7 @@ fun CattleOperationsScreen(
         CattleOpsPage.MOVEMENT_RECORD -> CattleRecordPageHost(CattleRecordPage.MOVEMENTS, selectedAnimalId, today, loadRecords, home)
         CattleOpsPage.BEEF_DASHBOARD -> CattleBeefDashboardScreen(loadLots, home)
         CattleOpsPage.LOT_DETAIL -> CattleLotDetailScreen(loadLots, home)
+        CattleOpsPage.CALVING_DUE -> CattleCalvingDueScreen(loadCalvingDue, today, home)
     }
 }
 
@@ -181,6 +184,7 @@ private fun CattleOpsHome(
         FarmOperationalSection("Reproduction") {
             CattleNav("Service") { onOpen(CattleOpsPage.SERVICE) }
             CattleNav("Pregnancy diagnosis") { onOpen(CattleOpsPage.PD) }
+            CattleNav("Calving due") { onOpen(CattleOpsPage.CALVING_DUE) }
             CattleNav("Calving") { onOpen(CattleOpsPage.CALVING) }
             CattleNav("Weaning") { onOpen(CattleOpsPage.WEANING) }
         }

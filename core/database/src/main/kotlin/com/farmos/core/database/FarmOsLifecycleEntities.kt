@@ -365,6 +365,32 @@ interface LifecycleDao {
         """,
     )
     suspend fun goatKiddingDue(farmId: String): List<GoatDueRow>
+
+    /**
+     * Every active cow whose latest service has no calving on or after it, with the latest pregnancy
+     * diagnosis since that service and the latest expected calving date recorded at a dry-off since then.
+     * Exhaustive over the farm: due lists never come from a capped herd page.
+     */
+    @Query(
+        """
+        SELECT a.id AS animalId, a.tag AS tag, a.name AS name, s.occurredEpochDay AS serviceEpochDay, s.method AS method,
+            (SELECT p.result FROM cattle_pd p
+             WHERE p.farmId = a.farmId AND p.animalId = a.id AND p.occurredEpochDay >= s.occurredEpochDay
+             ORDER BY p.occurredEpochDay DESC, p.id DESC LIMIT 1) AS latestPdResult,
+            (SELECT d.expectedCalvingEpochDay FROM cattle_dry_offs d
+             WHERE d.farmId = a.farmId AND d.animalId = a.id AND d.occurredEpochDay >= s.occurredEpochDay
+               AND d.expectedCalvingEpochDay IS NOT NULL
+             ORDER BY d.occurredEpochDay DESC, d.id DESC LIMIT 1) AS storedDueEpochDay
+        FROM animals a JOIN cattle_services s ON s.farmId = a.farmId AND s.animalId = a.id
+        WHERE a.farmId = :farmId AND a.speciesCode = 'cattle' AND a.status = 'active'
+          AND s.id = (SELECT s2.id FROM cattle_services s2 WHERE s2.farmId = a.farmId AND s2.animalId = a.id
+                      ORDER BY s2.occurredEpochDay DESC, s2.id DESC LIMIT 1)
+          AND NOT EXISTS (SELECT 1 FROM cattle_calvings c
+                          WHERE c.farmId = a.farmId AND c.damId = a.id AND c.occurredEpochDay >= s.occurredEpochDay)
+        ORDER BY s.occurredEpochDay, a.tag, a.id
+        """,
+    )
+    suspend fun cattleCalvingDue(farmId: String): List<CattleDueRow>
     /** Milk summed over each goat's latest recorded day, across every record on that day. */
     @Query(
         """
@@ -671,3 +697,13 @@ interface LifecycleDao {
 
 /** One doe awaiting kidding: her latest service and the latest pregnancy check since it, if any. */
 data class GoatDueRow(val animalId: String, val tag: String, val name: String?, val serviceEpochDay: Long, val latestCheckResult: String?)
+
+data class CattleDueRow(
+    val animalId: String,
+    val tag: String,
+    val name: String?,
+    val serviceEpochDay: Long,
+    val method: String,
+    val latestPdResult: String?,
+    val storedDueEpochDay: Long?,
+)

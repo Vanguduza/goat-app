@@ -1,6 +1,12 @@
 package com.farmos.app
 
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.domain.ops.DueDates
+import com.farmos.domain.ops.DueSource
+import com.farmos.domain.ops.GestationSpecies
+import com.farmos.feature.ops.CattleCalvingDue
+import com.farmos.feature.ops.CattleCalvingDueView
+import com.farmos.feature.ops.CattleDueSource
 import com.farmos.feature.ops.CattleIdentifierRow
 import com.farmos.feature.ops.CattleLotCloseView
 import com.farmos.feature.ops.CattleLotDaysView
@@ -67,6 +73,35 @@ internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String,
         movements = movements.map { CattleMovementRow(it.id, it.occurredEpochDay, it.direction, it.fromPlace, it.toPlace) },
         identifiers = lifecycle.identifiersForAnimal(farmId, animalId).map { CattleIdentifierRow(it.id, it.type, it.value, it.isActive, it.assignedEpochDay) },
     )
+}
+
+/**
+ * Every active cow expected to calve (owner decision D-019): her latest service without a later calving,
+ * minus cows diagnosed open since. A dry-off expected calving date wins; otherwise the service day plus
+ * the farm's own cattle gestation period.
+ */
+internal suspend fun loadCattleCalvingDue(database: FarmOsDatabase, farmId: String): CattleCalvingDue {
+    val period = database.gestationPeriod(farmId, GestationSpecies.CATTLE)
+    val rows = database.lifecycle().cattleCalvingDue(farmId)
+        // A cow diagnosed open since her service is not expected to calve from it.
+        .filter { it.latestPdResult != "open" }
+        .map { row ->
+            val due = DueDates.estimate(row.serviceEpochDay, period, storedDueEpochDay = row.storedDueEpochDay)
+            CattleCalvingDueView(
+                animalId = row.animalId,
+                tag = row.tag,
+                name = row.name,
+                serviceEpochDay = row.serviceEpochDay,
+                method = row.method,
+                pdResult = row.latestPdResult,
+                source = if (due.source == DueSource.STORED) CattleDueSource.STORED else CattleDueSource.PREDICTED,
+                earliestEpochDay = due.earliestEpochDay,
+                typicalEpochDay = due.typicalEpochDay,
+                latestEpochDay = due.latestEpochDay,
+            )
+        }
+        .sortedWith(compareBy({ it.typicalEpochDay }, { it.tag }, { it.animalId }))
+    return CattleCalvingDue(rows, period.typicalDays)
 }
 
 /** Every recorded feedlot row on the farm, grouped by lot (cattle group), newest first. */
