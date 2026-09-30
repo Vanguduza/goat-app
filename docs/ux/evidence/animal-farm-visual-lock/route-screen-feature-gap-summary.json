@@ -1,36 +1,36 @@
 {
   "schema_version": 2,
-  "tested_commit": "bd5ed3d5d413526f3eaf5c19814c68542593c658",
+  "tested_commit": "4a5bc6caa8a1e27dd665224fd847e8c260e63454",
   "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_WITH_SEPARATE_RUNTIME_EVIDENCE",
   "registry_rows": 545,
   "route_evidence_counts": {
-    "NO_ROUTE_EVIDENCE": 279,
+    "NO_ROUTE_EVIDENCE": 269,
     "STATIC_AUTH_STATE_BRANCH": 4,
-    "STATIC_CODE_ID_REFERENCE_ONLY": 130,
+    "STATIC_CODE_ID_REFERENCE_ONLY": 140,
     "STATIC_GENERAL_HOME_FALLBACK": 1,
     "STATIC_HOME_NESTED_DESTINATION": 1,
     "STATIC_MAIN_ACTIVITY_SPLASH_BRANCH": 1,
     "STATIC_ROLE_DISPATCH_PRESENT": 8,
     "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 121
   },
-  "no_route_evidence": 279,
-  "some_static_route_evidence": 266,
+  "no_route_evidence": 269,
+  "some_static_route_evidence": 276,
   "runtime_reachability_executed": 192,
-  "rendered_surface_owners_executed": 61,
+  "rendered_surface_owners_executed": 72,
   "entry_action_emission_executed": 26,
-  "route_contracts_executed": 60,
+  "route_contracts_executed": 61,
   "runtime_evidence": {
     "ledger": "docs/ux/evidence/animal-farm-visual-lock/phase5-runtime-navigation-ledger.json",
-    "tested_commit": "bd5ed3d5d413526f3eaf5c19814c68542593c658",
-    "source_fingerprint": "sha256:31e0ec0a2e3f6829ddd678107523ec158039610a125321ddf4a454949c4983db",
-    "foundation_run_id": 36671231376,
+    "tested_commit": "4a5bc6caa8a1e27dd665224fd847e8c260e63454",
+    "source_fingerprint": "sha256:047784653bb01ce5a7f51ffbc5f3dc874210254963c18a10a93e77d6e470d0ad",
+    "foundation_run_id": 36673020878,
     "ci_status": "PASS_EXACT_HEAD_CI"
   },
   "feature_id_catalog_status": "CANONICAL_OWNER_AUTHORIZED",
   "module_gap_counts": {
     "admin": {
       "total": 25,
-      "no_route_evidence": 25
+      "no_route_evidence": 16
     },
     "ai": {
       "total": 12,
@@ -70,7 +70,7 @@
     },
     "global": {
       "total": 20,
-      "no_route_evidence": 12
+      "no_route_evidence": 11
     },
     "goat": {
       "total": 55,

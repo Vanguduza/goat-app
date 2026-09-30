@@ -3,11 +3,13 @@ package com.farmos.app
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
+import com.farmos.domain.ops.FarmCurrency
 import com.farmos.domain.rabbit.AgreeRabbitContract
 import com.farmos.domain.rabbit.BindRabbitBedding
 import com.farmos.domain.rabbit.DecideRabbitRetention
@@ -32,7 +34,9 @@ fun RabbitCommerceModuleHost(
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
     loadRecords: suspend () -> RabbitCommerceRecords = { RabbitCommerceRecords() },
+    loadCurrency: suspend () -> String = { FarmCurrency.DEFAULT_CODE },
 ) {
+    val currency by rememberFarmCurrency(farmId, loadCurrency)
     val scope = rememberCoroutineScope()
     val busyState = remember { mutableStateOf(false) }
     val errorState = remember { mutableStateOf<String?>(null) }
@@ -140,13 +144,15 @@ fun RabbitCommerceModuleHost(
                     androidx.compose.material3.Button(
                         onClick = {
                             run {
-                                val amountMinor = amount.value.toScaledLongExact(2, "Amount")
+                                val code = checkNotNull(currency) { "The farm currency is still loading" }
+                                val amountMinor = amount.value.toScaledLongExact(FarmCurrency.minorDigits(code), "Amount")
                                 ops.agreeContract(
                                     AgreeRabbitContract(
                                         contractId = UUID.randomUUID().toString(),
                                         waitlistId = waitlistId.value.trim().ifBlank { null },
                                         buyerName = buyer.value,
                                         amountMinor = amountMinor,
+                                        currency = code,
                                         occurredEpochDay = LocalDate.parse(day.value).toEpochDay(),
                                     ),
                                     newContext(),

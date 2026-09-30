@@ -748,8 +748,13 @@ interface SyncCursorDao {
         GoatKidEntity::class,
         ReplicationOperationEntity::class,
         ReplicationDeviceEntity::class,
+        LocalFarmEntity::class,
+        LocalAccountEntity::class,
+        FarmRecoveryEntity::class,
+        AccessAuditEntity::class,
+        FarmSettingsEntity::class,
     ],
-    version = 14,
+    version = 16,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -757,6 +762,8 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun measurements(): MeasurementDao
     abstract fun outbox(): OutboxDao
     abstract fun replication(): ReplicationDao
+    abstract fun localAccess(): LocalAccessDao
+    abstract fun farmSettings(): FarmSettingsDao
     abstract fun aggregateVersions(): AggregateVersionDao
     abstract fun syncCursors(): SyncCursorDao
     abstract fun tasks(): TaskDao
@@ -1121,6 +1128,25 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14)
+        /** Adds local farms, local accounts, the owner recovery hash and access history. */
+        val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `local_farms` (`farmId` TEXT NOT NULL, `name` TEXT NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`farmId`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `local_accounts` (`accountId` TEXT NOT NULL, `farmId` TEXT NOT NULL, `username` TEXT NOT NULL, `displayName` TEXT NOT NULL, `role` TEXT NOT NULL, `status` TEXT NOT NULL, `credentialKind` TEXT NOT NULL, `credentialHash` TEXT NOT NULL, `failedAttempts` INTEGER NOT NULL, `lockedUntilEpochMillis` INTEGER, `workerId` TEXT, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`accountId`))")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_local_accounts_farmId_username` ON `local_accounts` (`farmId`, `username`)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `farm_recovery` (`farmId` TEXT NOT NULL, `recoveryHash` TEXT NOT NULL, PRIMARY KEY(`farmId`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `access_audit` (`eventId` TEXT NOT NULL, `farmId` TEXT NOT NULL, `actorAccountId` TEXT, `subjectAccountId` TEXT, `action` TEXT NOT NULL, `detail` TEXT NOT NULL, `atEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`eventId`))")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_access_audit_farmId_atEpochMillis` ON `access_audit` (`farmId`, `atEpochMillis`)")
+            }
+        }
+
+        /** Adds farm-scoped settings; farms without a row keep the documented defaults (currency USD). */
+        val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `farm_settings` (`farmId` TEXT NOT NULL, `currencyCode` TEXT NOT NULL, `updatedAtEpochMillis` INTEGER NOT NULL, `updatedByActorId` TEXT NOT NULL, PRIMARY KEY(`farmId`))")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16)
     }
 }

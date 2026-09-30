@@ -29,12 +29,14 @@ fun FarmSessionContent(
     onRequireReauth: (String?) -> Unit,
     onRequireFarmReselection: (String, List<FarmMembership>) -> Unit,
     onSignOut: () -> Unit,
+    /** The local GOAT account signed in on this device; server-era sessions leave it null. */
+    actorId: String? = null,
 ) {
     var destination by remember(membership.farmId) { mutableStateOf<FarmDestination>(FarmDestination.Home) }
     val repository = remember(membership.farmId) { app.goatRepository(membership.farmId) }
     val ops = remember(membership.farmId) { app.opsRepository(membership.farmId) }
     fun context(): LocalCommandContext {
-        val userId = requireNotNull(app.sessionStore.current()?.user?.id) { "Sign in is required" }
+        val userId = actorId ?: requireNotNull(app.sessionStore.current()?.user?.id) { "Sign in is required" }
         return LocalCommandContext(
             mutationId = UUID.randomUUID().toString(),
             farmId = membership.farmId,
@@ -86,6 +88,14 @@ fun FarmSessionContent(
             onOpen = { destination = it },
             onBack = backHome,
             onRequireReauth = onRequireReauth,
+        )
+        FarmDestination.Settings -> SettingsHost(
+            directory = remember(app) { LocalFarmDirectory(app.database) },
+            database = app.database,
+            farmId = membership.farmId,
+            actorId = actorId,
+            deviceId = app.deviceId,
+            onBack = backHome,
         )
         is FarmDestination.SyncQueue -> SyncQueueHost(
             view = dest.view,
@@ -154,6 +164,7 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
             FarmModule.POULTRY -> PoultryModuleHost(
                 farmId = membership.farmId,
@@ -247,14 +258,17 @@ fun FarmSessionContent(
             FarmModule.SALES -> SalesModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
                 loadRecords = { loadSalesRecords(app.database, membership.farmId) },
+                loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
             FarmModule.PROCUREMENT -> ProcurementModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
                 loadRecords = { loadProcurementRecords(app.database, membership.farmId) },
+                loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
             FarmModule.WAITLIST -> RabbitCommerceModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
                 loadRecords = { loadRabbitCommerceRecords(app.database, membership.farmId) },
+                loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
             else -> OperatingModuleHost(
                 module = dest.module,

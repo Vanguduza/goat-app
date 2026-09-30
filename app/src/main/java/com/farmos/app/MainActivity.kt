@@ -49,6 +49,8 @@ class MainActivity : ComponentActivity() {
                     return@FarmOsTheme
                 }
 
+                // No application server: farms, accounts and sign-in live on this device (owner lock, 30 Sep 2026).
+                if (!app.backendConfigured) { LocalFarmSession(app); return@FarmOsTheme }
                 val scope = rememberCoroutineScope()
                 val restoredMembership = remember { app.lastMembershipForCurrentSession() }
                 var memberships by remember {

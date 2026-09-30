@@ -123,6 +123,11 @@ class FarmRuntimeRouteTest {
     }
 
     @Test
+    fun farmSettingsHasAStableRuntimeOwner() {
+        assertEquals(FarmRuntimeRoute("settings", "FOS-ADMIN-001"), FarmDestination.Settings.runtimeRouteContract())
+    }
+
+    @Test
     fun syncQueueViewsResolveToExactOwners() {
         val expected = mapOf(
             SyncQueueView.IN_FLIGHT to "FOS-SYNC-004",

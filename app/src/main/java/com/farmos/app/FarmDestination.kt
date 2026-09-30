@@ -16,6 +16,7 @@ enum class HomeSurface {
 sealed class FarmDestination {
     data object Home : FarmDestination()
     data object Search : FarmDestination()
+    data object Settings : FarmDestination()
     data class HomePanel(val surface: HomeSurface) : FarmDestination()
 
     data class Module(

@@ -2,14 +2,23 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:31e0ec0a2e3f6829ddd678107523ec158039610a125321ddf4a454949c4983db",
-  "runtime_evidence_tested_commit": "bd5ed3d5d413526f3eaf5c19814c68542593c658",
-  "runtime_evidence_run_id": 36671231376,
+  "source_fingerprint": "sha256:047784653bb01ce5a7f51ffbc5f3dc874210254963c18a10a93e77d6e470d0ad",
+  "runtime_evidence_tested_commit": "4a5bc6caa8a1e27dd665224fd847e8c260e63454",
+  "runtime_evidence_run_id": 36673020878,
   "registry_screen_count": 545,
-  "route_screen_count": 266,
-  "unresolved_screen_count": 279,
+  "route_screen_count": 276,
+  "unresolved_screen_count": 269,
   "coverage_complete": false,
   "screen_ids": [
+    "FOS-ADMIN-001",
+    "FOS-ADMIN-003",
+    "FOS-ADMIN-004",
+    "FOS-ADMIN-005",
+    "FOS-ADMIN-006",
+    "FOS-ADMIN-011",
+    "FOS-ADMIN-021",
+    "FOS-ADMIN-023",
+    "FOS-ADMIN-024",
     "FOS-ASSET-001",
     "FOS-ASSET-002",
     "FOS-ASSET-003",
@@ -70,6 +79,7 @@
     "FOS-FIN-005",
     "FOS-GLOBAL-001",
     "FOS-GLOBAL-002",
+    "FOS-GLOBAL-004",
     "FOS-GLOBAL-005",
     "FOS-GLOBAL-006",
     "FOS-GLOBAL-016",
@@ -278,6 +288,109 @@
     "FOS-WATER-009"
   ],
   "routes": [
+    {
+      "screen_id": "FOS-ADMIN-001",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ADMIN-003",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ADMIN-004",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ADMIN-005",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ADMIN-006",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ADMIN-011",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ADMIN-021",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ADMIN-023",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ADMIN-024",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
+        ]
+      }
+    },
     {
       "screen_id": "FOS-ASSET-001",
       "proof_classes": [
@@ -968,10 +1081,22 @@
       ],
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
-          "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt"
+          "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt",
+          "app/src/test/java/com/farmos/app/LocalFarmEntryTest.kt"
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FoundationAuthStateTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GLOBAL-004",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/LocalFarmEntryTest.kt"
         ]
       }
     },
@@ -989,9 +1114,13 @@
     {
       "screen_id": "FOS-GLOBAL-006",
       "proof_classes": [
+        "RENDERED_SURFACE_OWNER",
         "TYPED_ROUTE_OWNER"
       ],
       "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/LocalFarmEntryTest.kt"
+        ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FoundationAuthStateTest.kt"
         ]
@@ -3505,17 +3634,11 @@
     }
   ],
   "unresolved_registry_screen_ids": [
-    "FOS-ADMIN-001",
     "FOS-ADMIN-002",
-    "FOS-ADMIN-003",
-    "FOS-ADMIN-004",
-    "FOS-ADMIN-005",
-    "FOS-ADMIN-006",
     "FOS-ADMIN-007",
     "FOS-ADMIN-008",
     "FOS-ADMIN-009",
     "FOS-ADMIN-010",
-    "FOS-ADMIN-011",
     "FOS-ADMIN-012",
     "FOS-ADMIN-013",
     "FOS-ADMIN-014",
@@ -3525,10 +3648,7 @@
     "FOS-ADMIN-018",
     "FOS-ADMIN-019",
     "FOS-ADMIN-020",
-    "FOS-ADMIN-021",
     "FOS-ADMIN-022",
-    "FOS-ADMIN-023",
-    "FOS-ADMIN-024",
     "FOS-ADMIN-025",
     "FOS-AI-001",
     "FOS-AI-002",
@@ -3627,7 +3747,6 @@
     "FOS-GEN-009",
     "FOS-GEN-010",
     "FOS-GLOBAL-003",
-    "FOS-GLOBAL-004",
     "FOS-GLOBAL-007",
     "FOS-GLOBAL-008",
     "FOS-GLOBAL-009",

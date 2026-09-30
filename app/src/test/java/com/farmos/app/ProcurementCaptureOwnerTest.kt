@@ -99,4 +99,34 @@ class ProcurementCaptureOwnerTest {
         assertEquals(LocalDate.of(2026, 9, 20).toEpochDay(), purchase.occurredEpochDay)
         compose.runOnIdle { assertEquals(1, syncRequests) }
     }
+
+    @Test
+    fun purchaseIsRecordedInTheFarmCurrencyWithThatCurrencysMinorUnit() {
+        runBlocking { database.setFarmCurrency(farm, "JPY", actorId = "owner-1", deviceId = "device-1") }
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                ProcurementModuleHost(
+                    farmId = farm,
+                    ops = RoomOpsRepository(database, farm),
+                    newContext = { LocalCommandContext(farm, "user-1", "device-1", UUID.randomUUID().toString(), 1_790_000_000_000L) },
+                    enqueueSync = {},
+                    onBack = {},
+                    loadCurrency = { database.farmCurrency(farm) },
+                )
+            }
+        }
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-011:option:sup-agri").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(10_000) { compose.onAllNodes(hasText("integer minor units of JPY", substring = true)).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-011:option:sup-agri").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-009:option:item-mash").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction() and hasText("Quantity")).performScrollTo().performTextInput("1")
+        compose.onNode(hasSetTextAction() and hasText("Amount")).performScrollTo().performTextInput("1500")
+        compose.onNode(hasSetTextAction() and hasText("Date")).performScrollTo().performTextInput("2026-09-21")
+        compose.onNode(hasClickAction() and hasText("Record purchase")).performScrollTo().performClick()
+
+        compose.waitUntil(10_000) { runBlocking { database.lifecycle().purchases(farm, 10) }.isNotEmpty() }
+        val purchase = runBlocking { database.lifecycle().purchases(farm, 10) }.single()
+        assertEquals("JPY", purchase.currency)
+        assertEquals(1_500L, purchase.amountMinor)
+    }
 }

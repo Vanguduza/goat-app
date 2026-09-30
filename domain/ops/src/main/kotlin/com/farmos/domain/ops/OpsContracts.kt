@@ -668,7 +668,7 @@ object OpsValidator {
     fun money(command: RecordMoney): String? {
         if (command.kind !in setOf("expense", "income")) return "Money kind must be expense or income"
         if (command.amountMinor <= 0L) return "Amount must be greater than zero"
-        if (command.currency.length != 3) return "Currency must be a 3-letter code"
+        if (!FarmCurrency.isRecordable(command.currency)) return "Currency must be an ISO 4217 code"
         return null
     }
 
@@ -708,6 +708,7 @@ object OpsValidator {
         if (command.itemKind.isBlank() || command.quantityMilli <= 0L || command.amountMinor <= 0L) {
             return "Sale needs an item, quantity, and amount"
         }
+        if (!FarmCurrency.isRecordable(command.currency)) return "Currency must be an ISO 4217 code"
         return null
     }
 
@@ -782,8 +783,11 @@ object OpsValidator {
     fun supplier(command: CreateSupplier): String? =
         if (command.name.isBlank()) "Supplier name is required" else null
 
-    fun purchase(command: RecordPurchase): String? =
-        if (command.quantityMilli <= 0L || command.amountMinor <= 0L) "Purchase needs a quantity and amount" else null
+    fun purchase(command: RecordPurchase): String? = when {
+        command.quantityMilli <= 0L || command.amountMinor <= 0L -> "Purchase needs a quantity and amount"
+        !FarmCurrency.isRecordable(command.currency) -> "Currency must be an ISO 4217 code"
+        else -> null
+    }
 
     fun marking(command: RecordSheepMarking): String? =
         if (command.markedCount <= 0 || (command.groupId.isNullOrBlank() && command.animalId.isNullOrBlank())) {

@@ -105,6 +105,7 @@ dependencies {
     implementation(project(":domain:goat"))
     implementation(project(":domain:rabbit"))
     implementation(project(":domain:ops"))
+    implementation(project(":domain:access"))
     implementation(project(":data:goat"))
     implementation(project(":data:herd"))
     implementation(project(":feature:goat"))
@@ -117,6 +118,7 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.room:room-runtime:2.8.4")
+    implementation("androidx.room:room-ktx:2.8.4")
     implementation("androidx.work:work-runtime-ktx:2.11.2")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:2.2.10")
