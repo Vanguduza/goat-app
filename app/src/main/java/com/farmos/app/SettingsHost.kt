@@ -23,8 +23,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.farmos.core.database.AccessAuditEntity
+import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.ReplicationDeviceEntity
+import com.farmos.core.database.UnappliedOperation
 import com.farmos.core.design.AnimalFarmQuickAction
 import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.FarmEntitySelector
@@ -66,6 +68,8 @@ private data class SettingsSnapshot(
     val devices: List<ReplicationDeviceEntity>,
     val journalCount: Long,
     val currencyCode: String,
+    val unapplied: List<UnappliedOperation> = emptyList(),
+    val unappliedTotal: Long = 0,
 )
 
 /**
@@ -104,6 +108,9 @@ internal fun SettingsHost(
                 devices = database.replication().devices(farmId),
                 journalCount = database.replication().count(farmId),
                 currencyCode = database.farmCurrency(farmId),
+                unapplied = database.replicationApplications().unappliedForReview(farmId, REVIEW_PAGE),
+                unappliedTotal = database.replicationApplications().count(farmId, ApplicationState.FAILED.name) +
+                    database.replicationApplications().count(farmId, ApplicationState.AWAITING_APPLIER.name),
             )
         }
     }
@@ -225,6 +232,11 @@ internal fun SettingsHost(
                     LanStatus(lan, current.devices.count { it.deviceId != deviceId })
                 }
             }
+            FarmOperationalSection("Received changes needing review") {
+                ReceivedChangesReview(current.unapplied, current.unappliedTotal, busy || !RolePermissions.allows(actor.role, Permission.RESOLVE_SYNC_CONFLICTS)) {
+                    act { withContext(io) { RoomReplicaEndpoint(database, farmId, deviceId, replicationAppliers).applyPending() } }
+                }
+            }
             FarmOperationalSection("Google Drive") {
                 Text("Not connected.")
                 Text("Farm work continues on this device. Disconnecting Google Drive never deletes farm records on this device.", color = AnimalFarmTheme.colors.mutedInk)
@@ -271,6 +283,33 @@ internal fun SettingsHost(
             }
         }
     }
+}
+
+/**
+ * Changes received from other farm devices that have not taken effect here, with the reason. They stay in
+ * the journal; one waiting on an earlier change is retried automatically, and Try again retries now.
+ */
+@Composable
+private fun ReceivedChangesReview(rows: List<UnappliedOperation>, total: Long, busy: Boolean, onRetry: () -> Unit) {
+    if (total == 0L) {
+        Text("Every change received from other farm devices has taken effect here.", modifier = Modifier.testTag("settings-review-count"))
+        return
+    }
+    Text(
+        if (total > rows.size) "Latest ${rows.size} of $total received change(s) not yet in effect" else "$total received change(s) not yet in effect",
+        modifier = Modifier.testTag("settings-review-count"),
+    )
+    rows.forEach { row ->
+        val why = when (row.state) {
+            ApplicationState.AWAITING_APPLIER.name -> "needs a newer version of this app"
+            else -> row.reason ?: "not applied yet"
+        }
+        Text(
+            listOf(timestamp(row.businessTimeEpochMillis), auditLabel(row.operationType.substringBeforeLast(".v").replace('.', '_')), "from ${row.deviceId}", why).joinToString(" · "),
+            modifier = Modifier.testTag("settings-review:${row.operationId}"),
+        )
+    }
+    SettingsButton("Try again", !busy, onRetry)
 }
 
 @Composable
@@ -514,3 +553,4 @@ private fun timestamp(epochMillis: Long): String =
     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(epochMillis))
 
 private const val AUDIT_PAGE = 100
+private const val REVIEW_PAGE = 50

@@ -15,7 +15,10 @@ import androidx.compose.ui.test.performTextInput
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.ReplicationApplicationEntity
+import com.farmos.core.database.journalLocalOperation
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.core.design.FarmSafetyAtoms
@@ -265,6 +268,30 @@ class SettingsHostTest {
         compose.onNodeWithTag(FarmSafetyAtoms.PERMISSION_EXPLANATION).assertExists()
         assertTrue(compose.onAllNodesWithTag("settings-currency").fetchSemanticsNodes().isEmpty())
         assertEquals("USD", runBlocking { database.farmCurrency(farmId) })
+    }
+
+    @Test
+    fun storageListsReceivedChangesThatHaveNotTakenEffectWithTheReason() {
+        runBlocking {
+            database.journalLocalOperation(
+                "op-remote-1", farmId, "inventory_item", "item-x", "worker-9", "device-b", 1_790_000_000_000, 1_790_000_000_000,
+                null, "inventory.move.v1", "{}", 1,
+            )
+            database.replicationApplications().upsert(
+                ReplicationApplicationEntity("op-remote-1", farmId, ApplicationState.FAILED.name, "Inventory item not found", 1, 1_790_000_000_000),
+            )
+        }
+        render(owner.accountId)
+        waitForText("Signed in as Tendai Moyo")
+        click("Storage and backup")
+        waitForTag("settings-review:op-remote-1")
+        waitForText("1 received change(s) not yet in effect")
+        waitForText("Inventory item not found")
+        click("Try again")
+        compose.waitUntil(10_000) {
+            runBlocking { database.replicationApplications().get(farmId, "op-remote-1") }!!.attempts > 1
+        }
+        waitForText("1 received change(s) not yet in effect")
     }
 
     @Test

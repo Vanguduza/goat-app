@@ -63,7 +63,31 @@ interface ReplicationApplicationDao {
 
     @Query("SELECT COUNT(*) FROM replication_applications WHERE farmId = :farmId AND state = :state")
     suspend fun count(farmId: String, state: String): Long
+
+    /** Received operations that have not taken effect, newest business time first, for review. */
+    @Query(
+        """
+        SELECT o.operationId, o.operationType, o.deviceId, o.actorId, o.businessTimeEpochMillis, a.state, a.reason, a.attempts
+        FROM replication_applications a JOIN replication_operations o ON o.operationId = a.operationId
+        WHERE a.farmId = :farmId AND a.state != 'APPLIED'
+        ORDER BY o.businessTimeEpochMillis DESC, o.operationId
+        LIMIT :limit
+        """,
+    )
+    suspend fun unappliedForReview(farmId: String, limit: Int): List<UnappliedOperation>
 }
+
+/** One received operation awaiting application, with why. */
+data class UnappliedOperation(
+    val operationId: String,
+    val operationType: String,
+    val deviceId: String,
+    val actorId: String,
+    val businessTimeEpochMillis: Long,
+    val state: String,
+    val reason: String?,
+    val attempts: Int,
+)
 
 /**
  * How far a farm peer has confirmed holding this device's own operations, from the peer's own vector at
