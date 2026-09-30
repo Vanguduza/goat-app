@@ -15,13 +15,18 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.net.SocketException
 import java.security.GeneralSecurityException
+import java.security.KeyPair
 import java.security.MessageDigest
+import java.security.PublicKey
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.KeyAgreement
 import javax.crypto.Mac
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
+
+/** This device's identity key pair and the known identity keys of farm devices, for device-authenticated sessions. */
+class LanIdentity(val own: KeyPair, val peerKey: (deviceId: String) -> PublicKey?)
 
 /** The peer could not prove it belongs to this farm, or is not an authorised farm device. */
 class LanPeerRefused(message: String) : IOException(message)
@@ -75,6 +80,7 @@ class LanSecureChannel internal constructor(
             keys: FarmKeyRing,
             authorised: (deviceId: String) -> Boolean,
             random: SecureRandom = SecureRandom(),
+            identity: LanIdentity? = null,
         ): LanSecureChannel {
             val din = DataInputStream(input)
             val dout = DataOutputStream(output)
@@ -94,17 +100,30 @@ class LanSecureChannel internal constructor(
             val serverEphemeral = din.readBytesField()
             val serverNonce = din.readBytesField()
             val serverProof = din.readBytesField()
+            val serverIdentityProof = din.readBytesField()
             val transcript = transcript(farmId, deviceId, key.keyId, DeviceKeys.encode(ephemeral.public), clientNonce, serverDeviceId, serverEphemeral, serverNonce)
             if (!MessageDigest.isEqual(serverProof, proof(key, SERVER_ROLE, transcript))) throw LanPeerRefused("The peer could not prove it belongs to this farm")
             if (!authorised(serverDeviceId)) throw LanPeerRefused("The peer is not an active device of this farm")
+            // When this device knows the server's identity key, the server must prove it holds the private half.
+            identity?.peerKey?.invoke(serverDeviceId)?.let { serverStatic ->
+                val expected = identityProof(ephemeral.private, serverStatic, SERVER_ROLE, transcript)
+                if (!MessageDigest.isEqual(serverIdentityProof, expected)) throw LanPeerRefused("The peer could not prove it is $serverDeviceId")
+            }
             dout.writeBytesField(proof(key, CLIENT_ROLE, transcript))
+            dout.writeBytesField(identity?.let { identityProof(it.own.private, DeviceKeys.decode(serverEphemeral), CLIENT_ROLE, transcript) } ?: ByteArray(0))
             dout.flush()
+            // The server confirms only after checking this device's proofs, so a refused client knows at once.
+            if (!din.readBoolean()) throw LanPeerRefused(din.readUTF())
 
             val session = sessionKeys(ephemeral.private, serverEphemeral, key, transcript)
             return LanSecureChannel(input, output, session.first, session.second, serverDeviceId)
         }
 
-        /** Server side of the handshake; refuses other farms, unknown or revoked devices and stale keys. */
+        /**
+         * Server side of the handshake; refuses other farms, unknown or revoked devices and stale keys. A client
+         * whose device identity key is known here and proven in the handshake may use a previous farm key this
+         * device still holds, so a device that has not yet received a rotated key can connect to receive it.
+         */
         fun accept(
             input: InputStream,
             output: OutputStream,
@@ -113,6 +132,7 @@ class LanSecureChannel internal constructor(
             keys: FarmKeyRing,
             authorised: (deviceId: String) -> Boolean,
             random: SecureRandom = SecureRandom(),
+            identity: LanIdentity? = null,
         ): LanSecureChannel {
             val din = DataInputStream(input)
             val dout = DataOutputStream(output)
@@ -122,19 +142,17 @@ class LanSecureChannel internal constructor(
             val keyId = din.readUTF()
             val clientEphemeral = din.readBytesField()
             val clientNonce = din.readBytesField()
+            val clientStatic = identity?.peerKey?.invoke(peerDevice)
+            val key = keys.key(keyId)
             val refusal = when {
                 peerFarm != farmId -> "This device serves another farm"
                 !authorised(peerDevice) -> "This device is not an active device of the farm"
-                keyId != keys.currentKeyId -> "The farm key has changed; pair this device again"
+                key == null -> "The farm key has changed; pair this device again"
+                keyId != keys.currentKeyId && clientStatic == null -> "The farm key has changed; pair this device again"
                 else -> null
             }
-            if (refusal != null) {
-                dout.writeBoolean(false)
-                dout.writeUTF(refusal)
-                dout.flush()
-                throw LanPeerRefused(refusal)
-            }
-            val key = keys.current
+            if (refusal != null) refuse(dout, refusal)
+            val agreed = requireNotNull(key)
             val ephemeral = DeviceKeys.generate(random)
             val serverNonce = ByteArray(NONCE_BYTES).also(random::nextBytes)
             val serverEphemeral = DeviceKeys.encode(ephemeral.public)
@@ -143,13 +161,41 @@ class LanSecureChannel internal constructor(
             dout.writeUTF(deviceId)
             dout.writeBytesField(serverEphemeral)
             dout.writeBytesField(serverNonce)
-            dout.writeBytesField(proof(key, SERVER_ROLE, transcript))
+            dout.writeBytesField(proof(agreed, SERVER_ROLE, transcript))
+            dout.writeBytesField(identity?.let { identityProof(it.own.private, DeviceKeys.decode(clientEphemeral), SERVER_ROLE, transcript) } ?: ByteArray(0))
             dout.flush()
             val clientProof = din.readBytesField()
-            if (!MessageDigest.isEqual(clientProof, proof(key, CLIENT_ROLE, transcript))) throw LanPeerRefused("The peer could not prove it belongs to this farm")
+            val clientIdentityProof = din.readBytesField()
+            if (!MessageDigest.isEqual(clientProof, proof(agreed, CLIENT_ROLE, transcript))) refuse(dout, "The peer could not prove it belongs to this farm")
+            if (clientStatic != null) {
+                val expected = identityProof(ephemeral.private, clientStatic, CLIENT_ROLE, transcript)
+                if (!MessageDigest.isEqual(clientIdentityProof, expected)) refuse(dout, "The peer could not prove it is $peerDevice")
+            }
+            dout.writeBoolean(true)
+            dout.flush()
 
-            val session = sessionKeys(ephemeral.private, clientEphemeral, key, transcript)
+            val session = sessionKeys(ephemeral.private, clientEphemeral, agreed, transcript)
             return LanSecureChannel(input, output, session.second, session.first, peerDevice)
+        }
+
+        private fun refuse(out: DataOutputStream, reason: String): Nothing {
+            out.writeBoolean(false)
+            out.writeUTF(reason)
+            out.flush()
+            throw LanPeerRefused(reason)
+        }
+
+        /**
+         * Proves possession of a static device key: ECDH between one side's static key and the other side's
+         * ephemeral key, which only the holder of the static private key (or of that ephemeral) can compute.
+         */
+        private fun identityProof(own: java.security.PrivateKey, peer: java.security.PublicKey, role: String, transcript: ByteArray): ByteArray {
+            val shared = KeyAgreement.getInstance("ECDH").apply {
+                init(own)
+                doPhase(peer, true)
+            }.generateSecret()
+            val macKey = Hkdf.sha256(shared, salt = transcript, info = "goat-lan-identity-v1|$role".toByteArray(), length = 32)
+            return Mac.getInstance("HmacSHA256").apply { init(SecretKeySpec(macKey, "HmacSHA256")) }.doFinal(transcript)
         }
 
         private fun transcript(
@@ -326,6 +372,8 @@ class LanSyncServer(
     private val keys: () -> FarmKeyRing,
     private val lock: Any = replica,
     private val random: SecureRandom = SecureRandom(),
+    /** When set, peers whose identity key is known must prove it, and may then use a previous farm key. */
+    private val identity: LanIdentity? = null,
 ) : Closeable {
     private var server: ServerSocket? = null
 
@@ -352,7 +400,7 @@ class LanSyncServer(
         val output = BufferedOutputStream(socket.getOutputStream())
         val ring = synchronized(lock) { keys() }
         val channel = try {
-            LanSecureChannel.accept(input, output, replica.farmId, replica.deviceId, ring, ::authorised, random)
+            LanSecureChannel.accept(input, output, replica.farmId, replica.deviceId, ring, ::authorised, random, identity)
         } catch (_: IOException) {
             return
         }
@@ -403,6 +451,7 @@ class LanPeerTransport(
     private val authorised: (deviceId: String) -> Boolean,
     private val connectTimeoutMillis: Int = 5_000,
     private val random: SecureRandom = SecureRandom(),
+    private val identity: LanIdentity? = null,
 ) : ReplicationTransport, Closeable {
     override val kind = TransportKind.FARM_LAN_PEER
     private var socket: Socket? = null
@@ -456,7 +505,7 @@ class LanPeerTransport(
         return LanSecureChannel.connect(
             BufferedInputStream(connected.getInputStream()),
             BufferedOutputStream(connected.getOutputStream()),
-            farmId, deviceId, keys(), authorised, random,
+            farmId, deviceId, keys(), authorised, random, identity,
         ).also { channel = it }
     }
 
