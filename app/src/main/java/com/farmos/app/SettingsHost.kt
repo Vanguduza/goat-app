@@ -76,6 +76,8 @@ private data class SettingsSnapshot(
     val unappliedTotal: Long = 0,
     /** The farm's own gestation periods; species absent here use the defaults. */
     val gestationOverrides: Map<GestationSpecies, GestationPeriod> = emptyMap(),
+    /** Per device: operations it reported that this device does not hold yet. */
+    val unpublished: Map<String, Long> = emptyMap(),
 )
 
 /**
@@ -290,10 +292,10 @@ internal fun SettingsHost(
                 val others = current.devices.filter { it.deviceId != deviceId }
                 if (others.isEmpty()) Text("No other devices yet.", color = AnimalFarmTheme.colors.mutedInk)
                 others.forEach { device ->
-                    KnownDevice(device, busy) {
+                    KnownDevice(device, current.unpublished[device.deviceId] ?: 0, busy) { status ->
                         act { actor ->
-                            database.setDeviceStatus(farmId, device.deviceId, DeviceStatus.LOST_REVOKED, actor.accountId, deviceId)
-                            // The lost device keeps what it had, but can read nothing sealed from now on.
+                            database.setDeviceStatus(farmId, device.deviceId, status, actor.accountId, deviceId)
+                            // A retired or lost device keeps what it had, but can read nothing sealed from now on.
                             lan?.rotateKeyAfterRevocation(actor.accountId)
                         }
                     }
@@ -381,21 +383,43 @@ private fun LanStatus(lan: FarmLanRuntime, pairedDevices: Int) {
 }
 
 @Composable
-private fun KnownDevice(device: ReplicationDeviceEntity, busy: Boolean, onReportLost: () -> Unit) {
-    var confirming by remember(device.deviceId) { mutableStateOf(false) }
+private fun KnownDevice(device: ReplicationDeviceEntity, unpublished: Long, busy: Boolean, onSetStatus: (DeviceStatus) -> Unit) {
+    var confirming by remember(device.deviceId) { mutableStateOf<DeviceStatus?>(null) }
     val active = device.status == DeviceStatus.ACTIVE.name || device.status == DeviceStatus.TEMPORARILY_OFFLINE.name
     Text(
         "${device.name} · ${device.status.lowercase().replace('_', ' ')} · ${device.lastReportedOwnSequence} operation(s)",
         modifier = Modifier.testTag("settings-device:${device.deviceId}"),
     )
     if (!active) return
-    if (!confirming) {
-        SettingsButton("Report ${device.name} lost", !busy) { confirming = true }
-    } else {
-        Text("${device.name} will never synchronise with this farm again, and anything it recorded but had not shared is lost.", color = MaterialTheme.colorScheme.error)
-        SettingsButton("Confirm ${device.name} is lost", !busy) {
-            confirming = false
-            onReportLost()
+    when (confirming) {
+        null -> {
+            SettingsButton("Retire ${device.name}", !busy) { confirming = DeviceStatus.RETIRED }
+            SettingsButton("Report ${device.name} lost", !busy) { confirming = DeviceStatus.LOST_REVOKED }
+        }
+        DeviceStatus.RETIRED -> {
+            // Owner decision D-014: warn before retiring a device whose work has not reached this device.
+            Text(
+                if (unpublished > 0) {
+                    "${device.name} recorded $unpublished operation(s) this device has not received. Synchronise it first: once retired, they are refused for good."
+                } else {
+                    "Everything ${device.name} recorded has reached this device. Once retired it cannot synchronise with this farm again."
+                },
+                color = if (unpublished > 0) MaterialTheme.colorScheme.error else AnimalFarmTheme.colors.mutedInk,
+                modifier = Modifier.testTag("settings-retire-warning:${device.deviceId}"),
+            )
+            SettingsButton(if (unpublished > 0) "Retire ${device.name} anyway" else "Confirm retiring ${device.name}", !busy) {
+                confirming = null
+                onSetStatus(DeviceStatus.RETIRED)
+            }
+            SettingsButton("Cancel", !busy) { confirming = null }
+        }
+        else -> {
+            Text("${device.name} will never synchronise with this farm again, and anything it recorded but had not shared is lost.", color = MaterialTheme.colorScheme.error)
+            SettingsButton("Confirm ${device.name} is lost", !busy) {
+                confirming = null
+                onSetStatus(DeviceStatus.LOST_REVOKED)
+            }
+            SettingsButton("Cancel", !busy) { confirming = null }
         }
     }
 }
@@ -632,5 +656,6 @@ private suspend fun loadSnapshot(
         unappliedTotal = database.replicationApplications().count(farmId, ApplicationState.FAILED.name) +
             database.replicationApplications().count(farmId, ApplicationState.AWAITING_APPLIER.name),
         gestationOverrides = database.farmGestationOverrides(farmId),
+        unpublished = database.replication().devices(farmId).associate { it.deviceId to database.unpublishedOperations(farmId, it.deviceId) },
     )
 }

@@ -95,6 +95,15 @@ internal suspend fun FarmOsDatabase.setDeviceStatus(
 }
 
 /**
+ * Operations [deviceId] reported issuing that have not reached this device (D-014). Retiring the device
+ * now would refuse them for good, so they are shown before retirement is confirmed.
+ */
+internal suspend fun FarmOsDatabase.unpublishedOperations(farmId: String, deviceId: String): Long {
+    val device = replication().device(farmId, deviceId) ?: return 0
+    return (device.lastReportedOwnSequence - replicationVector(farmId).watermark(deviceId)).coerceAtLeast(0)
+}
+
+/**
  * On the new device: installs a pairing grant. The farm keys are unwrapped with this device's own key
  * and sealed into the vault; the farm's devices are recorded so their operations are accepted at once.
  */
