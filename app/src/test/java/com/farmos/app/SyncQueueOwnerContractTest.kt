@@ -141,6 +141,15 @@ class SyncQueueOwnerContractTest {
     }
 
     @Test
+    fun serverQueuesAreShownOnlyWithAServer() {
+        // Without a server there is no outbox to send; Home offers no server queues for any role.
+        assertFalse(serverSyncQueuesVisible(backendConfigured = false, role = "owner"))
+        assertFalse(serverSyncQueuesVisible(backendConfigured = false, role = "worker"))
+        assertTrue(serverSyncQueuesVisible(backendConfigured = true, role = "owner"))
+        assertFalse(serverSyncQueuesVisible(backendConfigured = true, role = "buyer"))
+    }
+
+    @Test
     fun queueCountsDefaultMissingStatesToZeroAndIgnoreOtherStates() {
         val counts = syncQueueCounts(mapOf("CONFLICT" to 2L, "ACKNOWLEDGED" to 40L, "PENDING" to 5L))
         assertEquals(2L, counts[SyncQueueView.CONFLICTS])

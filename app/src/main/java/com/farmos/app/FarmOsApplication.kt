@@ -77,6 +77,10 @@ class FarmOsApplication : Application(), SyncEngineOwner {
     val backendConfigured: Boolean
         get() = BuildConfig.SUPABASE_URL.isNotBlank() && BuildConfig.SUPABASE_PUBLISHABLE_KEY.isNotBlank()
 
+    /** A background sync job left from a server-configured install does nothing without a server. */
+    override val serverSyncConfigured: Boolean
+        get() = backendConfigured
+
     override fun onCreate() {
         super.onCreate()
 

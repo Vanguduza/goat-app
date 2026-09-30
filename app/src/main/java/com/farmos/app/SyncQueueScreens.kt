@@ -126,6 +126,12 @@ internal const val SYNC_QUEUE_LIMIT = 100
 /** Only farm roles that operate records see sync internals; buyer/read-only fail closed. */
 internal fun syncQueuesPermitted(role: String): Boolean = resolveFarmHomePersona(role) != FarmHomePersona.BUYER
 
+/**
+ * The server outbox queues (sending, retry, conflicts, rejected, dead letter) exist only with a server.
+ * Without one, changes are shared with farm devices and received changes are reviewed on Storage and backup.
+ */
+internal fun serverSyncQueuesVisible(backendConfigured: Boolean, role: String): Boolean = backendConfigured && syncQueuesPermitted(role)
+
 internal fun syncQueueCounts(counts: Map<String, Long>): Map<SyncQueueView, Long> =
     SyncQueueView.entries.associateWith { counts[it.state.name] ?: 0L }
 

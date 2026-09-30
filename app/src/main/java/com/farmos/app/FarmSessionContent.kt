@@ -63,7 +63,7 @@ fun FarmSessionContent(
         )
     }
     suspend fun loadSyncQueueCounts(): Map<SyncQueueView, Long>? =
-        if (!syncQueuesPermitted(membership.role)) {
+        if (!serverSyncQueuesVisible(app.backendConfigured, membership.role)) {
             null
         } else {
             syncQueueCounts(app.database.outbox().countByStateForFarm(membership.farmId).associate { it.state to it.count })
