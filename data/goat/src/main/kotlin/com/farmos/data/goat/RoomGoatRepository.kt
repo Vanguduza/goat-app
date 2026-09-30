@@ -592,6 +592,24 @@ class RoomGoatRepository(
         return com.farmos.domain.goat.GoatHerdCounts(row.active, row.females, row.males, row.young, database.animals().countBySpecies(farmId, "goat"))
     }
 
+    override suspend fun kiddingDue(earliestDays: Int, typicalDays: Int, latestDays: Int): List<com.farmos.domain.goat.GoatKiddingDue> =
+        database.lifecycle().goatKiddingDue(farmId)
+            // A doe checked open since her service is not expected to kid from it.
+            .filter { it.latestCheckResult != "open" }
+            .map { row ->
+                com.farmos.domain.goat.GoatKiddingDue(
+                    animalId = row.animalId,
+                    tag = row.tag,
+                    name = row.name,
+                    serviceEpochDay = row.serviceEpochDay,
+                    confirmedPregnant = row.latestCheckResult == "pregnant",
+                    earliestDueEpochDay = row.serviceEpochDay + earliestDays,
+                    typicalDueEpochDay = row.serviceEpochDay + typicalDays,
+                    latestDueEpochDay = row.serviceEpochDay + latestDays,
+                )
+            }
+            .sortedWith(compareBy({ it.typicalDueEpochDay }, { it.tag }, { it.animalId }))
+
     override suspend fun lactationSummaries(): List<com.farmos.domain.goat.GoatLactationSummary> {
         val lifecycle = database.lifecycle()
         val totals = lifecycle.goatMilkTotals(farmId)

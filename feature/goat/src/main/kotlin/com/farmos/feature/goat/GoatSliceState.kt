@@ -20,7 +20,16 @@ data class GoatSliceUiState(
     val error: String? = null,
     /** Exhaustive per-goat milk aggregates for the lactation dashboard. */
     val lactation: GoatLactationState = GoatLactationState.Loading,
+    /** Does expected to kid, for Kidding due (FOS-GOAT-036). */
+    val kiddingDue: GoatKiddingDueState = GoatKiddingDueState.Loading,
 )
+
+/** Every doe expected to kid, from an exhaustive query. */
+sealed interface GoatKiddingDueState {
+    data object Loading : GoatKiddingDueState
+    data class Failed(val message: String) : GoatKiddingDueState
+    data class Loaded(val rows: List<com.farmos.domain.goat.GoatKiddingDue>, val typicalDays: Int) : GoatKiddingDueState
+}
 
 sealed interface GoatLactationState {
     data object Loading : GoatLactationState

@@ -344,6 +344,27 @@ interface LifecycleDao {
         """,
     )
     suspend fun goatMilkTotals(farmId: String): List<GoatMilkTotal>
+
+    /**
+     * Every active doe whose latest service has no kidding on or after it, with the latest pregnancy check
+     * since that service. Exhaustive over the farm: due lists never come from a capped herd page.
+     */
+    @Query(
+        """
+        SELECT a.id AS animalId, a.tag AS tag, a.name AS name, m.occurredEpochDay AS serviceEpochDay,
+            (SELECT p.result FROM goat_pregnancy_checks p
+             WHERE p.farmId = a.farmId AND p.animalId = a.id AND p.occurredEpochDay >= m.occurredEpochDay
+             ORDER BY p.occurredEpochDay DESC, p.id DESC LIMIT 1) AS latestCheckResult
+        FROM animals a JOIN goat_matings m ON m.farmId = a.farmId AND m.damId = a.id
+        WHERE a.farmId = :farmId AND a.speciesCode = 'goat' AND a.status = 'active'
+          AND m.id = (SELECT m2.id FROM goat_matings m2 WHERE m2.farmId = a.farmId AND m2.damId = a.id
+                      ORDER BY m2.occurredEpochDay DESC, m2.id DESC LIMIT 1)
+          AND NOT EXISTS (SELECT 1 FROM kidding_events k
+                          WHERE k.farmId = a.farmId AND k.damId = a.id AND k.occurredEpochDay >= m.occurredEpochDay)
+        ORDER BY m.occurredEpochDay, a.tag, a.id
+        """,
+    )
+    suspend fun goatKiddingDue(farmId: String): List<GoatDueRow>
     /** Milk summed over each goat's latest recorded day, across every record on that day. */
     @Query(
         """
@@ -647,3 +668,6 @@ interface LifecycleDao {
     @Query("SELECT * FROM goat_kid_records WHERE farmId = :farmId AND animalId = :animalId LIMIT 1")
     suspend fun kidRecordFor(farmId: String, animalId: String): GoatKidEntity?
 }
+
+/** One doe awaiting kidding: her latest service and the latest pregnancy check since it, if any. */
+data class GoatDueRow(val animalId: String, val tag: String, val name: String?, val serviceEpochDay: Long, val latestCheckResult: String?)

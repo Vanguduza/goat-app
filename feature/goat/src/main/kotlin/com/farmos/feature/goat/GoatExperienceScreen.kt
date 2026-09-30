@@ -137,6 +137,15 @@ internal fun GoatExperienceScreen(
             },
             onBack = { page = GoatPage.DASHBOARD },
         )
+        GoatPage.KIDDING_DUE -> GoatKiddingDueScreen(
+            due = state.kiddingDue,
+            todayEpochDay = java.time.LocalDate.now().toEpochDay(),
+            onSelectDoe = {
+                actions.onSelectGoat(it)
+                page = GoatPage.DOE_REPRODUCTION
+            },
+            onBack = { page = GoatPage.DASHBOARD },
+        )
         GoatPage.LACTATION_DASHBOARD -> GoatLactationDashboardScreen(
             lactation = state.lactation,
             onSelectDoe = {
@@ -245,6 +254,7 @@ private fun GoatDashboardScreen(
                 onOpen(if (state.selected != null) GoatPage.WEIGHT else GoatPage.HERD)
             }
             GoatDashboardAction("Pregnancy", "Breeding status of active does") { onOpen(GoatPage.PREGNANCY_DASHBOARD) }
+            GoatDashboardAction("Kidding due", "Does expected to kid, by window") { onOpen(GoatPage.KIDDING_DUE) }
             GoatDashboardAction("Lactation", "Milk recorded for every goat") { onOpen(GoatPage.LACTATION_DASHBOARD) }
             GoatDashboardAction("Kids", "Registered kids by kidding") { onOpen(GoatPage.KID_COHORT) }
             GoatDashboardAction("Search", state.searchMessage) { onOpen(GoatPage.SEARCH) }
