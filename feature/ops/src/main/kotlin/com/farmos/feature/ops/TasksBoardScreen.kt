@@ -355,8 +355,8 @@ private fun emptyTaskHint(tab: TaskTab): String = when (tab) {
 }
 
 /**
- * FOS-TASK-003 — task detail. Anyone may complete an open task; a planner may also edit an open occurrence
- * of a repeating task (FOS-TASK-005). A completed task is never edited.
+ * FOS-TASK-003 — task detail. Anyone may complete an open task; a planner may also edit it (FOS-TASK-005):
+ * a repeating task by occurrence scope, a one-off task directly. A completed task is never edited.
  */
 @Composable
 fun TaskDetailScreen(
@@ -396,7 +396,7 @@ fun TaskDetailScreen(
                     enabled = !busy,
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text("Mark done") }
-                if (task.seriesId != null && canPlanWork) {
+                if (canPlanWork) {
                     TextButton(onClick = onEdit, enabled = !busy, modifier = Modifier.fillMaxWidth().testTag("task-detail-edit")) { Text("Edit") }
                 }
             }

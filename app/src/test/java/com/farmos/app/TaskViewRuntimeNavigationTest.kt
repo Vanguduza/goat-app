@@ -25,6 +25,7 @@ import com.farmos.feature.ops.TaskRepeat
 import com.farmos.feature.ops.TaskSeriesDraft
 import com.farmos.feature.ops.TaskSeriesUiRow
 import com.farmos.feature.ops.TaskUiRow
+import com.farmos.feature.ops.TaskUpdateDraft
 import com.farmos.feature.ops.TasksBoardScreen
 import java.time.LocalDate
 import org.junit.Assert.assertTrue
@@ -284,6 +285,33 @@ class TaskViewRuntimeNavigationTest {
         compose.runOnIdle {
             val draft = saved.last()
             assertTrue(draft.scope == TaskEditScope.THIS_AND_FUTURE && draft.repeat == TaskRepeat.WEEKLY && draft.movedTo == null)
+        }
+    }
+
+    @Test
+    fun editingAOneOffTaskOffersNoScopeAndSavesOnlyWhatChanged() {
+        val today = LocalDate.now().toEpochDay()
+        val saved = mutableListOf<TaskUpdateDraft>()
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                EditTaskScreen(
+                    task = TaskUiRow("gate", "Fix gate", "ops", "FIX", today, "open"),
+                    assignees = listOf(TaskAssigneeOption("farai", "Farai")),
+                    busy = false,
+                    error = null,
+                    onSave = {},
+                    onBack = {},
+                    onSaveOneOff = { saved += it },
+                )
+            }
+        }
+        compose.onNodeWithTag("farm-screen:FOS-TASK-005").assertExists()
+        assertTextAbsent("This occurrence")
+        compose.onNodeWithTag("task-edit-assignee:farai").performScrollTo().performClick()
+        compose.onNodeWithTag("task-edit-save").performScrollTo().performClick()
+        compose.runOnIdle {
+            val draft = saved.single()
+            assertTrue(draft.taskId == "gate" && draft.title == null && draft.due == null && draft.assignee?.accountId == "farai")
         }
     }
 

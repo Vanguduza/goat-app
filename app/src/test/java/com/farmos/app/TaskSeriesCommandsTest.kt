@@ -15,6 +15,7 @@ import com.farmos.domain.ops.EditTaskSeries
 import com.farmos.domain.ops.EndTaskSeries
 import com.farmos.domain.ops.TaskAssignee
 import com.farmos.domain.ops.TaskRecurrenceSchedule
+import com.farmos.domain.ops.UpdateFarmTask
 import com.farmos.domain.replication.LocalPeerTransport
 import com.farmos.domain.replication.SyncSession
 import java.time.LocalDate
@@ -100,6 +101,35 @@ class TaskSeriesCommandsTest {
         // Ending the series after 10-07 leaves no later occurrence.
         tasks.end(EndTaskSeries("water-2", day("2026-10-07")), context())
         assertEquals(listOf("2026-10-05 Troughs", "2026-10-07 Troughs"), db.titles("2026-10-05", "2026-10-20"))
+    }
+
+    @Test
+    fun anOpenOneOffTaskCanChangeButNotOnceDoneOrWhenRepeating(): Unit = runBlocking {
+        val db = database()
+        db.localAccess().upsertAccount(account("farai"))
+        val ops = com.farmos.data.herd.RoomOpsRepository(db, farm)
+        ops.createTask(com.farmos.domain.ops.CreateFarmTask("fix-gate", "ops", "FIX", "Fix gate", day("2026-10-02")), context())
+        val tasks = TaskSeriesCommands(db, farm)
+
+        tasks.update(UpdateFarmTask("fix-gate", title = "Fix the north gate", dueEpochDay = day("2026-10-04"), assignee = TaskAssignee(accountId = "farai")), context())
+        val changed = db.tasks().get(farm, "fix-gate")!!
+        assertEquals("Fix the north gate", changed.title)
+        assertEquals(day("2026-10-04"), changed.dueOnEpochDay)
+        assertEquals("farai", changed.assigneeAccountId)
+        assertThrows(IllegalStateException::class.java) { runBlocking { tasks.update(UpdateFarmTask("fix-gate"), context()) } }
+
+        ops.completeTask(com.farmos.domain.ops.CompleteFarmTask("fix-gate"), context())
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking { tasks.update(UpdateFarmTask("fix-gate", title = "Rewritten"), context()) }
+        }
+        assertEquals("Fix the north gate", db.tasks().get(farm, "fix-gate")!!.title)
+
+        tasks.create(CreateTaskSeries("water", "ops", "WATER", "Check troughs", "DAILY", startEpochDay = day("2026-10-01")), context())
+        tasks.edit(EditTaskSeries("water", day("2026-10-02"), "THIS", title = "Troughs"), context())
+        val occurrence = TaskRecurrenceSchedule.occurrenceId("water", day("2026-10-02"))
+        assertThrows(IllegalArgumentException::class.java) {
+            runBlocking { tasks.update(UpdateFarmTask(occurrence, title = "Other"), context()) }
+        }
     }
 
     @Test

@@ -15,12 +15,14 @@ import com.farmos.domain.ops.TaskOccurrence
 import com.farmos.domain.ops.TaskRecurrenceSchedule
 import com.farmos.domain.ops.TaskSeriesRules
 import com.farmos.domain.ops.TaskSeriesSchedule
+import com.farmos.domain.ops.UpdateFarmTask
 import com.farmos.feature.ops.TaskAssigneeOption
 import com.farmos.feature.ops.TaskEditScope
 import com.farmos.feature.ops.TaskEditDraft
 import com.farmos.feature.ops.TaskRepeat
 import com.farmos.feature.ops.TaskSeriesDraft
 import com.farmos.feature.ops.TaskSeriesUiRow
+import com.farmos.feature.ops.TaskUpdateDraft
 import com.farmos.feature.ops.taskRepeatLabel
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
@@ -121,6 +123,15 @@ class TaskPlanning(
                 recurrenceKind = draft.repeat?.name,
                 recurrenceInterval = draft.interval,
             ),
+            context,
+        )
+    }
+
+    /** Changes an open one-off task (D-020 resolution R2). */
+    suspend fun update(draft: TaskUpdateDraft, context: LocalCommandContext) {
+        check(canPlanWork) { "Only supervisors and farm management change planned work" }
+        commands.update(
+            UpdateFarmTask(draft.taskId, draft.title, draft.due?.toEpochDay(), draft.assignee?.let { TaskAssignee(accountId = it.accountId) }),
             context,
         )
     }

@@ -68,7 +68,7 @@ fun TasksModuleHost(
 
     fun complete(taskId: String) = runWrite { completeTaskRow(rows.firstOrNull { it.id == taskId }, taskId, ops, planning, newContext()) }
 
-    val editing = editingId?.let { id -> rows.firstOrNull { it.id == id && it.seriesId != null && it.status == "open" } }
+    val editing = editingId?.let { id -> rows.firstOrNull { it.id == id && it.status == "open" } }
     if (editing != null && planning != null && planning.canPlanWork) {
         EditTaskScreen(
             task = editing,
@@ -76,6 +76,7 @@ fun TasksModuleHost(
             busy = busy,
             error = error,
             onSave = { draft -> runWrite { planning.edit(draft, newContext()).also { editingId = null } } },
+            onSaveOneOff = { draft -> runWrite { planning.update(draft, newContext()).also { editingId = null } } },
             onBack = { editingId = null },
         )
         return

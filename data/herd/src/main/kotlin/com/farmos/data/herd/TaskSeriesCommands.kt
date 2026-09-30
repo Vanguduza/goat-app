@@ -17,6 +17,7 @@ import com.farmos.domain.ops.TaskOccurrence
 import com.farmos.domain.ops.TaskRecurrenceSchedule
 import com.farmos.domain.ops.TaskSeriesRules
 import com.farmos.domain.ops.TaskSeriesSchedule
+import com.farmos.domain.ops.UpdateFarmTask
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -116,6 +117,32 @@ class TaskSeriesCommands(
         return LocalCommandResult(context.mutationId, command.newSeriesId ?: series.id, true)
     }
 
+    /** Changes an open one-off task (R2); a task in a series is edited through its series, a completed task never. */
+    suspend fun update(command: UpdateFarmTask, context: LocalCommandContext): LocalCommandResult {
+        TaskSeriesRules.update(command)?.let { error(it) }
+        command.assignee?.let { requireAssignee(it) }
+        val task = requireNotNull(database.tasks().get(farmId, command.taskId)) { "Task not found" }
+        require(task.seriesId == null) { "A repeating task is changed through its series" }
+        require(task.status != DONE) { "A completed task is kept as it was done and cannot be changed" }
+        journal(context, TASK_UPDATE, command.taskId, json.encodeToString(command), entityType = "task") {
+            val current = requireNotNull(database.tasks().get(farmId, command.taskId)) { "Task not found" }
+            // A task completed on another device first stays as it was done.
+            if (current.status != DONE) {
+                val assignee = command.assignee
+                database.tasks().upsertFromServer(
+                    current.copy(
+                        title = command.title?.trim() ?: current.title,
+                        dueOnEpochDay = command.dueEpochDay ?: current.dueOnEpochDay,
+                        assigneeAccountId = if (assignee != null) assignee.accountId else current.assigneeAccountId,
+                        assigneeWorkerId = if (assignee != null) assignee.workerId else current.assigneeWorkerId,
+                        updatedAtEpochMillis = context.occurredAtEpochMillis,
+                    ),
+                )
+            }
+        }
+        return LocalCommandResult(context.mutationId, command.taskId, true)
+    }
+
     /** Ends a series after [EndTaskSeries.lastEpochDay]; a day before its start stops it before any occurrence. */
     suspend fun end(command: EndTaskSeries, context: LocalCommandContext): LocalCommandResult {
         val series = series(command.seriesId)
@@ -178,7 +205,14 @@ class TaskSeriesCommands(
         )
     }
 
-    private suspend fun journal(context: LocalCommandContext, commandName: String, seriesId: String, payloadJson: String, localWrite: suspend () -> Unit) {
+    private suspend fun journal(
+        context: LocalCommandContext,
+        commandName: String,
+        entityId: String,
+        payloadJson: String,
+        entityType: String = "task_series",
+        localWrite: suspend () -> Unit,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         if (replaying) return database.withTransaction { localWrite() }
         database.withTransaction {
@@ -186,8 +220,8 @@ class TaskSeriesCommands(
             database.journalLocalOperation(
                 operationId = context.mutationId,
                 farmId = farmId,
-                entityType = "task_series",
-                entityId = seriesId,
+                entityType = entityType,
+                entityId = entityId,
                 actorId = context.actorId,
                 deviceId = context.deviceId,
                 businessTimeEpochMillis = context.occurredAtEpochMillis,
@@ -205,6 +239,7 @@ class TaskSeriesCommands(
         const val OCCURRENCE_COMPLETE = "task.occurrence_complete.v1"
         const val SERIES_EDIT = "task.series_edit.v1"
         const val SERIES_END = "task.series_end.v1"
+        const val TASK_UPDATE = "task.update.v1"
         private const val ACTIVE = "active"
         private const val ENDED = "ended"
         private const val OPEN = "open"

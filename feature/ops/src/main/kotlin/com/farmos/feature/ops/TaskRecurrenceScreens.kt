@@ -76,6 +76,9 @@ data class TaskEditDraft(
 
 data class TaskAssigneeChange(val accountId: String?)
 
+/** An edit of an open one-off task (D-020 resolution R2). Null fields keep their value. */
+data class TaskUpdateDraft(val taskId: String, val title: String?, val due: LocalDate?, val assignee: TaskAssigneeChange?)
+
 /** One active repeating task, for the Recurrence list. */
 data class TaskSeriesUiRow(
     val seriesId: String,
@@ -167,8 +170,13 @@ fun EditTaskScreen(
     error: String?,
     onSave: (TaskEditDraft) -> Unit,
     onBack: () -> Unit,
+    onSaveOneOff: (TaskUpdateDraft) -> Unit = {},
 ) {
-    val seriesId = requireNotNull(task.seriesId) { "Only repeating tasks are edited here" }
+    val seriesId = task.seriesId
+    if (seriesId == null) {
+        EditOneOffTask(task, assignees, busy, error, onSaveOneOff, onBack)
+        return
+    }
     val occurrenceDay = task.occurrenceEpochDay ?: task.dueEpochDay
     var scope by remember { mutableStateOf(TaskEditScope.THIS) }
     var title by remember { mutableStateOf(task.title) }
@@ -215,6 +223,46 @@ fun EditTaskScreen(
                 )
             },
             enabled = !busy && valid,
+            modifier = Modifier.fillMaxWidth().testTag("task-edit-save"),
+        ) { Text("Save changes") }
+        error?.let { Text(it, color = AnimalFarmTheme.colors.critical) }
+    }
+}
+
+/** FOS-TASK-005, one-off variant: an open task outside a series changes its title, due day or assignee. */
+@Composable
+private fun EditOneOffTask(
+    task: TaskUiRow,
+    assignees: List<TaskAssigneeOption>,
+    busy: Boolean,
+    error: String?,
+    onSave: (TaskUpdateDraft) -> Unit,
+    onBack: () -> Unit,
+) {
+    var title by remember { mutableStateOf(task.title) }
+    var due by remember { mutableStateOf(LocalDate.ofEpochDay(task.dueEpochDay).toString()) }
+    var assigneeId by remember { mutableStateOf(task.assigneeAccountId) }
+    FarmOperationalPage("FOS-TASK-005", "Edit task", task.title, onBack = onBack, backLabel = "Task") {
+        FarmOperationalSection("Task") {
+            OutlinedTextField(title, { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth().testTag("task-edit-title"), enabled = !busy, singleLine = true)
+            OutlinedTextField(due, { due = it }, label = { Text("Due date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth().testTag("task-edit-due"), enabled = !busy, singleLine = true)
+            Text("Assign to", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.accountId to it.label }, assigneeId, busy, "task-edit-assignee") { assigneeId = it }
+        }
+        val dueDate = runCatching { LocalDate.parse(due) }.getOrNull()
+        val changed = title.trim() != task.title || dueDate?.toEpochDay() != task.dueEpochDay || assigneeId != task.assigneeAccountId
+        Button(
+            onClick = {
+                onSave(
+                    TaskUpdateDraft(
+                        taskId = task.id,
+                        title = title.trim().takeIf { it != task.title },
+                        due = dueDate?.takeIf { it.toEpochDay() != task.dueEpochDay },
+                        assignee = TaskAssigneeChange(assigneeId).takeIf { assigneeId != task.assigneeAccountId },
+                    ),
+                )
+            },
+            enabled = !busy && title.isNotBlank() && dueDate != null && changed,
             modifier = Modifier.fillMaxWidth().testTag("task-edit-save"),
         ) { Text("Save changes") }
         error?.let { Text(it, color = AnimalFarmTheme.colors.critical) }
