@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "c20a769c35ec4bc12222a9643fd63b09b9d0e5af",
-  "source_fingerprint": "sha256:17fc3b798dd2f16934bf389fd3254e18b057b3b090d573498443568073806948",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36754049214,
+  "tested_commit": "75b3039e5e716db3c545cd3873e3c31da8036e7b",
+  "source_fingerprint": "sha256:2c3bc8b63ebc39dff97407b527261fa34a7b2a4df33f9e9cdb4a87945658ff99",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -72,6 +72,7 @@
         "FOS-FIN-004",
         "FOS-FIN-005",
         "FOS-GEN-006",
+        "FOS-GEN-007",
         "FOS-HEALTH-003",
         "FOS-HEALTH-004",
         "FOS-HEALTH-007",
@@ -452,12 +453,14 @@
       "app/src/test/java/com/farmos/app/OpsCoiAnalysisTest.kt": [
         "FOS-ATOM-004",
         "FOS-ATOM-008",
-        "FOS-GEN-006"
+        "FOS-GEN-006",
+        "FOS-GEN-007"
       ],
       "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt": [
         "FOS-ATOM-004",
         "FOS-ATOM-008",
         "FOS-GEN-006",
+        "FOS-GEN-007",
         "FOS-RABBIT-031"
       ],
       "app/src/test/java/com/farmos/app/AnimalSaleScreensTest.kt": [
@@ -538,10 +541,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 27,
-    "rendered_traversal_screen_count": 200,
-    "rendered_owner_screen_count": 98,
+    "rendered_traversal_screen_count": 201,
+    "rendered_owner_screen_count": 99,
     "route_contract_screen_count": 62,
-    "combined_screen_count": 303,
+    "combined_screen_count": 304,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -617,6 +620,7 @@
       "FOS-FIN-004",
       "FOS-FIN-005",
       "FOS-GEN-006",
+      "FOS-GEN-007",
       "FOS-GOAT-009",
       "FOS-GOAT-013",
       "FOS-GOAT-014",
@@ -803,6 +807,7 @@
       "FOS-CATTLE-018",
       "FOS-CATTLE-034",
       "FOS-GEN-006",
+      "FOS-GEN-007",
       "FOS-GLOBAL-001",
       "FOS-GLOBAL-002",
       "FOS-GLOBAL-004",
@@ -957,12 +962,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 200,
-    "entry_action_emission_executed": 27,
-    "rendered_surface_owners_executed": 98,
-    "route_contracts_executed": 62,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 200,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
