@@ -31,7 +31,7 @@ class FarmOsDatabaseMigrationTest {
     }
 
     @Test
-    fun version1DatabaseMigratesThroughVersion26WithoutLosingFoundationData() = runBlocking {
+    fun version1DatabaseMigratesThroughVersion27WithoutLosingFoundationData() = runBlocking {
         val farmId = "11111111-1111-4111-8111-111111111111"
         val animalId = "33333333-3333-4333-8333-333333333333"
         val mutationId = "55555555-5555-4555-8555-555555555555"
@@ -41,7 +41,7 @@ class FarmOsDatabaseMigrationTest {
             .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
             .build()
 
-        // Force Room to execute the complete 1 -> 26 chain and validate the final schema.
+        // Force Room to execute the complete 1 -> 27 chain and validate the final schema.
         migrated.openHelper.writableDatabase
 
         val animal = migrated.animals().get(farmId, animalId)
@@ -85,6 +85,8 @@ class FarmOsDatabaseMigrationTest {
         assertEquals(0, migrated.animalExits().forAnimal(farmId, animalId).size)
         // Version 26 links labour entries to registered workers; the totals query joins the register.
         assertEquals(0, migrated.labour().totalsByWorkerName(farmId).size)
+        // Version 27 adds the customer register and the customer on a sale.
+        assertEquals(0, migrated.customers().all(farmId).size)
 
         migrated.close()
     }

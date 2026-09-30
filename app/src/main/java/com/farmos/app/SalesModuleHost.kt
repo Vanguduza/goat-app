@@ -7,8 +7,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.core.design.FarmSearchSelector
+import com.farmos.core.design.FarmSelectionAtoms
+import com.farmos.core.design.FarmSelectorOption
+import com.farmos.core.design.FarmSelectorSearch
+import com.farmos.data.herd.CustomerCommands
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.FarmCurrency
+import com.farmos.domain.ops.RecordCustomerSale
 import com.farmos.domain.ops.RecordSale
 import com.farmos.feature.ops.SalesRecordNavigator
 import com.farmos.feature.ops.SalesRecords
@@ -27,6 +33,11 @@ fun SalesModuleHost(
     onBack: () -> Unit,
     loadRecords: suspend () -> SalesRecords = { SalesRecords() },
     loadCurrency: suspend () -> String = { FarmCurrency.DEFAULT_CODE },
+    /** The customer register (FOS-SALES-002/003), opened from the sales home. */
+    customers: (@Composable (onBack: () -> Unit) -> Unit)? = null,
+    /** Whole-farm customer search for the sale's customer (D-004); null hides the selector. */
+    customerSearch: FarmSelectorSearch? = null,
+    customerCommands: CustomerCommands? = null,
 ) {
     val scope = rememberCoroutineScope()
     val currency by rememberFarmCurrency(farmId, loadCurrency)
@@ -47,7 +58,8 @@ fun SalesModuleHost(
     val qty = remember { mutableStateOf("1") }
     val amount = remember { mutableStateOf("") }
     val day = remember { mutableStateOf("") }
-    SalesRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
+    val customer = remember { mutableStateOf(NO_CUSTOMER) }
+    SalesRecordNavigator(records.value, customers) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-SALES-001", title = "Sales",
         help = "A sale posts income in integer minor units of ${currency ?: "the farm currency"}. This is farm unit economics, not a statutory ledger.",
         empty = "No sales on this device.", rows = rows.value, busy = busy.value, error = error.value,
@@ -57,6 +69,14 @@ fun SalesModuleHost(
             val code = checkNotNull(currency) { "The farm currency is still loading" }
             val amountMinor = amount.value.toScaledLongExact(FarmCurrency.minorDigits(code), "Amount")
             val quantityMilli = qty.value.toScaledLongExact(3, "Quantity")
+            val chosen = customer.value.takeUnless { it.id == NO_CUSTOMER.id }
+            if (chosen != null && customerCommands != null) {
+                customerCommands.recordSale(
+                    RecordCustomerSale(UUID.randomUUID().toString(), chosen.id, chosen.label, kind.value, quantityMilli, amountMinor, code, LocalDate.parse(day.value).toEpochDay()),
+                    newContext(),
+                )
+                return@run
+            }
             ops.recordSale(
                 RecordSale(
                     saleId = UUID.randomUUID().toString(),
@@ -71,6 +91,13 @@ fun SalesModuleHost(
         } },
         onBack = onBack,
         saved = saved.value,
-        extra = { recordActions() },
+        extra = {
+            recordActions()
+            if (customerSearch != null) {
+                FarmSearchSelector(FarmSelectionAtoms.CUSTOMER_SELECTOR, "Customer (optional)", customerSearch, customer.value, { customer.value = it }, "No customers match on this device", enabled = !busy.value, pinned = listOf(NO_CUSTOMER))
+            }
+        },
     ) }
 }
+
+private val NO_CUSTOMER = FarmSelectorOption("no-customer", "No customer recorded")

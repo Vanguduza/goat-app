@@ -775,8 +775,9 @@ interface SyncCursorDao {
         StockCountLineEntity::class,
         FarmWorkerEntity::class,
         AnimalExitEntity::class,
+        FarmCustomerEntity::class,
     ],
-    version = 26,
+    version = 27,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -818,6 +819,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun diseaseCatalog(): DiseaseCatalogDao
     abstract fun lifecycle(): LifecycleDao
     abstract fun reports(): FarmReportDao
+    abstract fun customers(): FarmCustomerDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -1279,6 +1281,18 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26)
+        /** Version 27 adds the customer register and links sales to a customer; earlier sales name none. */
+        val MIGRATION_26_27 = object : Migration(26, 27) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `farm_customers` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `name` TEXT NOT NULL, `phone` TEXT, " +
+                        "`active` INTEGER NOT NULL, `updatedAtEpochMillis` INTEGER NOT NULL, `updatedByActorId` TEXT NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_farm_customers_farmId_active` ON `farm_customers` (`farmId`, `active`)")
+                db.execSQL("ALTER TABLE `sales_records` ADD COLUMN `customerId` TEXT DEFAULT NULL")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27)
     }
 }

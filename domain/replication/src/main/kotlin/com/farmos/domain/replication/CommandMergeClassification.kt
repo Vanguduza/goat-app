@@ -18,6 +18,7 @@ object CommandMergeClassification {
         "money.record.v1",
         "purchase.record.v1",
         "sale.record.v1",
+        "sale.record.v2",
     )
 
     /** Mutable configuration of an existing record. */
