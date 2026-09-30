@@ -37,7 +37,9 @@ import com.farmos.feature.goat.GoatVerticalSliceScreen
 import com.farmos.feature.goat.LoadableSurfaceState
 import java.time.LocalDate
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun GoatModuleHost(
@@ -329,6 +331,14 @@ fun GoatModuleHost(
                 busy = true
                 error = null
                 syncMessage = "Syncing"
+                if (!app.backendConfigured) {
+                    // No server: synchronise with the farm's devices on this network; never drain the server outbox.
+                    val outcomes = withContext(Dispatchers.IO) { app.farmLan?.syncOnce() }
+                    refreshGoatState()
+                    syncMessage = goatLocalSyncReceipt(outcomes, pendingSyncCount)
+                    busy = false
+                    return@launch
+                }
                 runCatching {
                     val push = app.syncEngine.drain()
                     push to if (push.authorizationLoss == null) app.farmPullReconciler()?.reconcile(membership.farmId) else null

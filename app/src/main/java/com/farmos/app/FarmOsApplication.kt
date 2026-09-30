@@ -236,7 +236,8 @@ class FarmOsApplication : Application(), SyncEngineOwner {
             .apply()
     }
 
-    fun goatRepository(farmId: String): GoatRepository = RoomGoatRepository(database, farmId)
+    fun goatRepository(farmId: String): GoatRepository =
+        RoomGoatRepository(database, farmId, localDeviceId = deviceId.takeUnless { backendConfigured })
 
     fun opsRepository(farmId: String): RoomOpsRepository = RoomOpsRepository(database, farmId)
 

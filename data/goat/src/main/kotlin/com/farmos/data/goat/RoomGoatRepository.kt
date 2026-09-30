@@ -58,6 +58,11 @@ class RoomGoatRepository(
     private val json: Json = Json { encodeDefaults = true },
     /** Replays an operation received from another device: domain writes only, it is already journalled. */
     private val replaying: Boolean = false,
+    /**
+     * Without a server, this device's id: a goat is waiting to sync while it has a change no other farm
+     * device has confirmed holding. Null keeps the server-era outbox rule.
+     */
+    private val localDeviceId: String? = null,
 ) : GoatRepository {
     override suspend fun registerGoat(command: RegisterGoat, context: LocalCommandContext): LocalCommandResult {
         require(context.farmId == farmId) { "Farm context mismatch" }
@@ -540,7 +545,8 @@ class RoomGoatRepository(
             pedigree = pedigreeFor(animalId),
             kidsByKidding = kiddingHistory.associate { it.kiddingId to registeredKids(it.kiddingId) }.filterValues { it.isNotEmpty() },
             birthRecord = birthRecordFor(animalId),
-            syncPending = database.outbox().hasPending(farmId, animalId),
+            syncPending = localDeviceId?.let { database.replication().hasUnsharedOwnChange(farmId, it, animalId) }
+                ?: database.outbox().hasPending(farmId, animalId),
         )
     }
 

@@ -118,6 +118,21 @@ interface ReplicationDao {
     /** Every journalled operation on one record, for folding field updates in canonical order. */
     @Query("SELECT * FROM replication_operations WHERE farmId = :farmId AND entityType = :entityType AND entityId = :entityId")
     suspend fun operationsForEntity(farmId: String, entityType: String, entityId: String): List<ReplicationOperationEntity>
+
+    /**
+     * Whether this device made a change to [entityId] that no other farm device has confirmed holding yet,
+     * judged against the furthest any peer has confirmed of this device's own sequence.
+     */
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM replication_operations
+            WHERE farmId = :farmId AND deviceId = :deviceId AND entityId = :entityId
+              AND deviceSequence > COALESCE((SELECT MAX(holdsOwnThrough) FROM replication_peer_marks WHERE farmId = :farmId), 0)
+        )
+        """,
+    )
+    suspend fun hasUnsharedOwnChange(farmId: String, deviceId: String, entityId: String): Boolean
 }
 
 fun ReplicationOperationEntity.toEnvelope(): OperationEnvelope = OperationEnvelope(
