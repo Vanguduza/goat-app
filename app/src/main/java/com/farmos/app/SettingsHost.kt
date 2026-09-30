@@ -138,7 +138,7 @@ internal fun SettingsHost(
             AnimalFarmQuickAction("Storage and backup", { page = SettingsPage.STORAGE })
             AnimalFarmQuickAction("Devices", { page = SettingsPage.DEVICES })
         }
-        SettingsPage.MEMBERS -> FarmOperationalPage("FOS-ADMIN-003", "Accounts and access", "People who can sign in to this farm.", onBack = home) {
+        SettingsPage.MEMBERS -> FarmOperationalPage("FOS-ADMIN-003", "Accounts and access", "People who can sign in to this farm.", onBack = home, backLabel = "Farm settings") {
             val actor = current.actor
             if (actor == null || !RolePermissions.allows(actor.role, Permission.MANAGE_ACCOUNTS)) {
                 FarmPermissionExplanation("Accounts are managed by farm management", "Only Owner and Manager accounts can add or change accounts. Ask a manager if you need access.")
@@ -157,14 +157,14 @@ internal fun SettingsHost(
             }
             SettingsButton("Add account", !busy) { page = SettingsPage.CREATE_MEMBER }
         }
-        SettingsPage.CREATE_MEMBER -> FarmOperationalPage("FOS-ADMIN-004", "Add account", "Create a local account for someone who works on this farm.", onBack = { page = SettingsPage.MEMBERS }) {
+        SettingsPage.CREATE_MEMBER -> FarmOperationalPage("FOS-ADMIN-004", "Add account", "Create a local account for someone who works on this farm.", onBack = { page = SettingsPage.MEMBERS }, backLabel = "Accounts and access") {
             val actor = current.actor ?: return@FarmOperationalPage
             SettingsError(error)
             CreateAccountForm(assignableRoles(actor), busy) { displayName, username, role, pin ->
                 act(onDone = { page = SettingsPage.MEMBERS }) { directory.access.createAccount(it, username, displayName, role, Credential(CredentialKind.PIN, pin)) }
             }
         }
-        SettingsPage.MEMBER_DETAIL -> FarmOperationalPage("FOS-ADMIN-005", "Account and role", "Role, status and PIN for one account.", onBack = { page = SettingsPage.MEMBERS }) {
+        SettingsPage.MEMBER_DETAIL -> FarmOperationalPage("FOS-ADMIN-005", "Account and role", "Role, status and PIN for one account.", onBack = { page = SettingsPage.MEMBERS }, backLabel = "Accounts and access") {
             val actor = current.actor ?: return@FarmOperationalPage
             val subject = current.accounts.firstOrNull { it.accountId == selectedAccountId } ?: return@FarmOperationalPage
             SettingsError(error)
@@ -177,14 +177,14 @@ internal fun SettingsHost(
                 onResetPin = { pin -> act { directory.access.resetCredential(it, subject.accountId, Credential(CredentialKind.PIN, pin)) } },
             )
         }
-        SettingsPage.PERMISSIONS -> FarmOperationalPage("FOS-ADMIN-006", "Roles and permissions", "What each role may do on this farm.", onBack = home) {
+        SettingsPage.PERMISSIONS -> FarmOperationalPage("FOS-ADMIN-006", "Roles and permissions", "What each role may do on this farm.", onBack = home, backLabel = "Farm settings") {
             LocalRole.entries.forEach { role ->
                 FarmOperationalSection(roleLabel(role)) {
                     RolePermissions.of(role).sortedBy { it.ordinal }.forEach { Text(permissionLabel(it)) }
                 }
             }
         }
-        SettingsPage.AUDIT -> FarmOperationalPage("FOS-ADMIN-024", "Access history", "Sign-ins and account changes on this farm.", onBack = home) {
+        SettingsPage.AUDIT -> FarmOperationalPage("FOS-ADMIN-024", "Access history", "Sign-ins and account changes on this farm.", onBack = home, backLabel = "Farm settings") {
             val actor = current.actor
             if (actor == null || !RolePermissions.allows(actor.role, Permission.MANAGE_ACCOUNTS)) {
                 FarmPermissionExplanation("Access history is for farm management", "Only Owner and Manager accounts can review access history.")
@@ -203,7 +203,7 @@ internal fun SettingsHost(
                 }
             }
         }
-        SettingsPage.STORAGE -> FarmOperationalPage("FOS-ADMIN-023", "Storage and backup", "Where this farm's records are kept and copied.", onBack = home) {
+        SettingsPage.STORAGE -> FarmOperationalPage("FOS-ADMIN-023", "Storage and backup", "Where this farm's records are kept and copied.", onBack = home, backLabel = "Farm settings") {
             val actor = current.actor
             if (actor == null || !RolePermissions.allows(actor.role, Permission.MANAGE_STORAGE_AND_BACKUP)) {
                 FarmPermissionExplanation("Storage is managed by farm management", "Only Owner and Manager accounts can change storage and backup.")
@@ -220,7 +220,7 @@ internal fun SettingsHost(
             }
             FarmOperationalSection("Backup") { Text("No backup has been made.") }
         }
-        SettingsPage.CURRENCY -> FarmOperationalPage("FOS-ADMIN-011", "Currency", "The currency new money records use on this farm.", onBack = home) {
+        SettingsPage.CURRENCY -> FarmOperationalPage("FOS-ADMIN-011", "Currency", "The currency new money records use on this farm.", onBack = home, backLabel = "Farm settings") {
             val actor = current.actor
             // Owner decision D-018: the farm currency is owner-changeable.
             if (actor == null || actor.role != LocalRole.OWNER) {
@@ -235,7 +235,7 @@ internal fun SettingsHost(
                 }
             }
         }
-        SettingsPage.DEVICES -> FarmOperationalPage("FOS-ADMIN-021", "Devices", "This device and the farm devices it knows.", onBack = home) {
+        SettingsPage.DEVICES -> FarmOperationalPage("FOS-ADMIN-021", "Devices", "This device and the farm devices it knows.", onBack = home, backLabel = "Farm settings") {
             val actor = current.actor
             if (actor == null || !RolePermissions.allows(actor.role, Permission.MANAGE_DEVICES)) {
                 FarmPermissionExplanation("Devices are managed by farm management", "Only Owner and Manager accounts can review farm devices.")

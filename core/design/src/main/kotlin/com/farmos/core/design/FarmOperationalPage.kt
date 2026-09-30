@@ -34,6 +34,7 @@ fun FarmOperationalPage(
     visualClass: FarmVisualClass = FarmVisualClass.I3,
     onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    backLabel: String = "Farm home",
     content: @Composable ColumnScope.() -> Unit,
 ) {
     key(screenId) {
@@ -61,7 +62,7 @@ fun FarmOperationalPage(
                 }
                 content()
                 onBack?.let { back ->
-                    TextButton(onClick = back) { Text("Farm home") }
+                    TextButton(onClick = back) { Text(backLabel) }
                 }
             }
         }

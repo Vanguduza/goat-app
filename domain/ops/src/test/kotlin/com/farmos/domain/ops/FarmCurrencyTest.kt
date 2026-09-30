@@ -18,6 +18,8 @@ class FarmCurrencyTest {
     fun onlyUpperCaseIso4217CodesWithAMinorUnitAreRecordable() {
         listOf("USD", "ZAR", "KES", "JPY", "BHD", "EUR").forEach { assertTrue(FarmCurrency.isRecordable(it), it) }
         listOf("usd", "US", "USDX", "ABC", "", "XAU").forEach { assertFalse(FarmCurrency.isRecordable(it), it) }
+        listOf("ZAL", "DEM", "ZWD", "USN", "CLF").forEach { assertFalse(FarmCurrency.isRecordable(it), "$it is withdrawn or a fund unit") }
+        assertEquals(listOf("ZAR"), FarmCurrency.search("rand").map { it.currencyCode })
     }
 
     @Test

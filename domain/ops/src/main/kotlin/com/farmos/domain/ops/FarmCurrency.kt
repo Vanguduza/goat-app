@@ -11,12 +11,26 @@ import java.util.Locale
 object FarmCurrency {
     const val DEFAULT_CODE = "USD"
 
-    /** Currencies a farm can record in: ISO 4217 codes with a defined minor unit, ordered by code. */
+    /**
+     * Currencies a farm can record in: active ISO 4217 codes with a defined minor unit, ordered by code.
+     * The platform list also carries withdrawn currencies and fund or accounting units, which are excluded.
+     */
     val recordable: List<Currency> by lazy {
         Currency.getAvailableCurrencies()
-            .filter { it.defaultFractionDigits >= 0 }
+            .filter { it.defaultFractionDigits >= 0 && it.currencyCode !in NOT_FOR_RECORDING }
             .sortedBy { it.currencyCode }
     }
+
+    /** Withdrawn ISO 4217 currencies and fund/accounting codes that platform lists still include. */
+    private val NOT_FOR_RECORDING = setOf(
+        // Withdrawn national currencies.
+        "ADP", "AFA", "ATS", "AYM", "AZM", "BEF", "BGL", "BYB", "BYR", "CSD", "CUC", "CYP", "DEM", "EEK", "ESP",
+        "FIM", "FRF", "GHC", "GRD", "GWP", "HRK", "IEP", "ITL", "LTL", "LUF", "LVL", "MGF", "MRO", "MTL", "MZM",
+        "NLG", "PTE", "ROL", "RUR", "SDD", "SIT", "SKK", "SRG", "STD", "TMM", "TPE", "TRL", "VEB", "VEF",
+        "XFO", "XFU", "YUM", "ZAL", "ZMK", "ZWD", "ZWN", "ZWR",
+        // Fund, index and settlement units that are not a farm's trading currency.
+        "BOV", "CHE", "CHW", "CLF", "COU", "MXV", "USN", "USS", "UYI", "UYW", "XSU", "XUA",
+    )
 
     /** True for an upper-case ISO 4217 code a farm can record in. */
     fun isRecordable(code: String): Boolean =
