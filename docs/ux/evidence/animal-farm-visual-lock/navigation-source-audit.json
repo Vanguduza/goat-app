@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "62bbbec02a32fd80f18f0584319e8cb9c30c9768",
+  "tested_commit": "b6176a2da80c54dea9701e79020b970ca772c68f",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 277
+    "registered_ids_mentioned_in_kotlin": 279
   },
   "top_level": {
     "farm_modules": [
@@ -65,8 +65,8 @@
       "states": [
         {
           "value": "DASHBOARD",
-          "refs": 11,
-          "transition_refs": 10,
+          "refs": 12,
+          "transition_refs": 11,
           "render_only_candidate": false
         },
         {
@@ -107,8 +107,8 @@
         },
         {
           "value": "KIDDING",
-          "refs": 6,
-          "transition_refs": 5,
+          "refs": 8,
+          "transition_refs": 6,
           "render_only_candidate": false
         },
         {
@@ -209,12 +209,18 @@
         },
         {
           "value": "DOE_REPRODUCTION",
-          "refs": 2,
-          "transition_refs": 2,
+          "refs": 3,
+          "transition_refs": 3,
           "render_only_candidate": false
         },
         {
           "value": "PREGNANCY_DASHBOARD",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "KIDDING_DUE",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
