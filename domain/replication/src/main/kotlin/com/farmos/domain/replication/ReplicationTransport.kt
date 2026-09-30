@@ -39,16 +39,16 @@ enum class SyncSessionStatus { COMPLETED, TRANSPORT_UNAVAILABLE, PEER_NOT_AUTHOR
  */
 object SyncSession {
     fun run(
-        replica: FarmReplica,
+        replica: ReplicaEndpoint,
         transport: ReplicationTransport,
         remoteDeviceId: String? = null,
         maxOperationsPerBundle: Int = 100,
     ): SyncOutcome {
         if (!transport.isAvailable()) return SyncOutcome(transport.kind, SyncSessionStatus.TRANSPORT_UNAVAILABLE)
-        if (remoteDeviceId != null && !replica.registry.maySynchronise(remoteDeviceId)) {
+        if (remoteDeviceId != null && !replica.maySynchronise(remoteDeviceId)) {
             return SyncOutcome(transport.kind, SyncSessionStatus.PEER_NOT_AUTHORISED)
         }
-        if (!replica.registry.maySynchronise(replica.deviceId)) {
+        if (!replica.maySynchronise(replica.deviceId)) {
             return SyncOutcome(transport.kind, SyncSessionStatus.PEER_NOT_AUTHORISED)
         }
         val local = replica.vector()
@@ -88,7 +88,7 @@ object SyncSession {
  * same calls over an authenticated socket; this implementation is the executable contract used by tests.
  */
 class LocalPeerTransport(
-    private val peer: FarmReplica,
+    private val peer: ReplicaEndpoint,
     private val reachable: () -> Boolean = { true },
 ) : ReplicationTransport {
     override val kind = TransportKind.FARM_LAN_PEER

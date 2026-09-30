@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "4a5bc6caa8a1e27dd665224fd847e8c260e63454",
-  "source_fingerprint": "sha256:047784653bb01ce5a7f51ffbc5f3dc874210254963c18a10a93e77d6e470d0ad",
+  "tested_commit": "8be48cc8566dad5f6ba00b95544a48559dc7b591",
+  "source_fingerprint": "sha256:4c101890918fc9bb6ba975fc5a3dc686119d10fef78c7a8e2cf0e4690b187205",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36673020878,
+  "foundation_run_id": 36674986262,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [

@@ -753,8 +753,9 @@ interface SyncCursorDao {
         FarmRecoveryEntity::class,
         AccessAuditEntity::class,
         FarmSettingsEntity::class,
+        ReplicationApplicationEntity::class,
     ],
-    version = 16,
+    version = 17,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -764,6 +765,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun replication(): ReplicationDao
     abstract fun localAccess(): LocalAccessDao
     abstract fun farmSettings(): FarmSettingsDao
+    abstract fun replicationApplications(): ReplicationApplicationDao
     abstract fun aggregateVersions(): AggregateVersionDao
     abstract fun syncCursors(): SyncCursorDao
     abstract fun tasks(): TaskDao
@@ -1147,6 +1149,14 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16)
+        /** Tracks whether each received operation has taken effect in the domain tables. */
+        val MIGRATION_16_17 = object : Migration(16, 17) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `replication_applications` (`operationId` TEXT NOT NULL, `farmId` TEXT NOT NULL, `state` TEXT NOT NULL, `reason` TEXT, `attempts` INTEGER NOT NULL, `updatedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`operationId`))")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_replication_applications_farmId_state` ON `replication_applications` (`farmId`, `state`)")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17)
     }
 }

@@ -18,6 +18,8 @@ class RoomHerdRepository(
     private val farmId: String,
     private val species: String,
     private val json: Json = Json { encodeDefaults = true },
+    /** Replays an operation received from another device: domain writes only, it is already journalled. */
+    private val replaying: Boolean = false,
 ) {
     suspend fun register(
         animalId: String,
@@ -57,7 +59,7 @@ class RoomHerdRepository(
                     updatedAtEpochMillis = context.occurredAtEpochMillis,
                 ),
             )
-            database.insertOutboxAndJournal(
+            journal(
                 OutboxEntity(
                     mutationId = context.mutationId,
                     farmId = farmId,
@@ -166,6 +168,10 @@ class RoomHerdRepository(
         return authoritative + queued
     }
 
+    private suspend fun journal(outbox: OutboxEntity) {
+        if (!replaying) database.insertOutboxAndJournal(outbox)
+    }
+
     private suspend fun enqueue(
         context: LocalCommandContext,
         commandName: String,
@@ -176,7 +182,7 @@ class RoomHerdRepository(
     ) {
         database.withTransaction {
             localWrite()
-            database.insertOutboxAndJournal(
+            journal(
                 OutboxEntity(
                     mutationId = context.mutationId,
                     farmId = farmId,

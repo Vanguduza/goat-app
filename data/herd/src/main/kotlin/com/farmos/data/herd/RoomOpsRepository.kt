@@ -208,6 +208,8 @@ class RoomOpsRepository(
     private val database: FarmOsDatabase,
     private val farmId: String,
     private val json: Json = Json { encodeDefaults = true },
+    /** Replays an operation received from another device: domain writes only, it is already journalled. */
+    private val replaying: Boolean = false,
 ) {
     suspend fun createTask(command: CreateFarmTask, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.task(command)?.let { error(it) }
@@ -1329,6 +1331,7 @@ class RoomOpsRepository(
         localWrite: suspend () -> Unit,
     ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
+        if (replaying) return database.withTransaction { localWrite() }
         database.withTransaction {
             val ordinal = database.outbox().nextAggregateOrdinal(farmId, aggregateType, aggregateId)
             localWrite()

@@ -32,6 +32,25 @@ data class ReplicationConflict(
 
 enum class ConflictResolution { RETAIN_EXISTING, ACCEPT_INCOMING }
 
+/**
+ * What a transport needs from a device's copy of the farm journal: its vector, the bundles it holds, and
+ * verified ingestion. [FarmReplica] is the in-memory implementation; the app implements it over Room.
+ */
+interface ReplicaEndpoint {
+    val farmId: String
+    val deviceId: String
+
+    fun vector(): SyncVector
+
+    fun bundlesFor(ranges: List<SequenceRange>, maxOperationsPerBundle: Int = 100): List<OperationBundle>
+
+    /** Verifies then applies a bundle atomically; a rejected bundle changes nothing. */
+    fun ingest(bundle: OperationBundle): IngestResult
+
+    /** Whether [deviceId] is an active device of this farm that may take part in synchronisation. */
+    fun maySynchronise(deviceId: String): Boolean
+}
+
 data class IngestResult(
     val applied: Int = 0,
     val duplicates: Int = 0,
@@ -46,12 +65,12 @@ data class IngestResult(
  * idempotently whatever transport delivered them and in whatever order they arrive.
  */
 class FarmReplica(
-    val farmId: String,
-    val deviceId: String,
+    override val farmId: String,
+    override val deviceId: String,
     val registry: DeviceRegistry,
     private val newOperationId: () -> String,
     private val clock: () -> Long,
-) {
+) : ReplicaEndpoint {
     private val journal = LinkedHashMap<String, OperationEnvelope>()
     private val positions = HashMap<DevicePosition, String>()
     private val byEntity = HashMap<EntityKey, MutableList<String>>()
@@ -98,7 +117,7 @@ class FarmReplica(
     }
 
     /** Contiguous high-water marks of every device this replica has incorporated. */
-    fun vector(): SyncVector {
+    override fun vector(): SyncVector {
         val devices = checkpointMarks.keys + positions.keys.map { it.deviceId }
         return SyncVector(
             devices.associateWith { device ->
@@ -109,12 +128,14 @@ class FarmReplica(
         )
     }
 
+    override fun maySynchronise(deviceId: String): Boolean = registry.maySynchronise(deviceId)
+
     fun contains(operationId: String): Boolean = journal.containsKey(operationId)
 
     fun operation(operationId: String): OperationEnvelope? = journal[operationId]
 
     /** Contiguous bundles covering as much of each requested range as this replica holds. */
-    fun bundlesFor(ranges: List<SequenceRange>, maxOperationsPerBundle: Int = 100): List<OperationBundle> =
+    override fun bundlesFor(ranges: List<SequenceRange>, maxOperationsPerBundle: Int): List<OperationBundle> =
         ranges.flatMap { range ->
             val present = generateSequence(range.from) { it + 1 }
                 .takeWhile { it <= range.to }
@@ -129,7 +150,7 @@ class FarmReplica(
      * Verifies then applies a bundle atomically: if any rule fails nothing is applied. Operations
      * already incorporated are counted as duplicates and change nothing.
      */
-    fun ingest(bundle: OperationBundle): IngestResult {
+    override fun ingest(bundle: OperationBundle): IngestResult {
         when (val verdict = bundle.verify(farmId)) {
             is BundleVerdict.Rejected -> return IngestResult(rejectedReason = verdict.reason)
             BundleVerdict.Valid -> Unit
