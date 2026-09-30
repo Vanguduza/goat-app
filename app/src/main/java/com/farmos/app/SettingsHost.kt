@@ -29,7 +29,11 @@ import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.design.FarmPermissionExplanation
+import com.farmos.core.design.FarmSearchPage
+import com.farmos.core.design.FarmSearchSelector
+import com.farmos.core.design.FarmSelectorSearch
 import com.farmos.core.design.FarmSelectorOption
+import com.farmos.domain.access.AccessDenied
 import com.farmos.domain.access.AccountStatus
 import com.farmos.domain.access.Credential
 import com.farmos.domain.access.CredentialKind
@@ -37,15 +41,18 @@ import com.farmos.domain.access.LocalAccount
 import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.Permission
 import com.farmos.domain.access.RolePermissions
+import com.farmos.domain.ops.FarmCurrency
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Currency
+import java.util.Locale
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private enum class SettingsPage { HOME, MEMBERS, CREATE_MEMBER, MEMBER_DETAIL, PERMISSIONS, AUDIT, STORAGE, DEVICES }
+private enum class SettingsPage { HOME, MEMBERS, CREATE_MEMBER, MEMBER_DETAIL, PERMISSIONS, AUDIT, STORAGE, DEVICES, CURRENCY }
 
 /** Everything the settings pages show, read from this device's database in one pass. */
 private data class SettingsSnapshot(
@@ -55,6 +62,7 @@ private data class SettingsSnapshot(
     val auditTotal: Long,
     val devices: List<ReplicationDeviceEntity>,
     val journalCount: Long,
+    val currencyCode: String,
 )
 
 /**
@@ -90,11 +98,12 @@ internal fun SettingsHost(
                 auditTotal = access.auditCount(farmId),
                 devices = database.replication().devices(farmId),
                 journalCount = database.replication().count(farmId),
+                currencyCode = database.farmCurrency(farmId),
             )
         }
     }
 
-    fun act(onDone: () -> Unit = {}, block: (LocalAccount) -> Unit) {
+    fun act(onDone: () -> Unit = {}, block: suspend (LocalAccount) -> Unit) {
         val actor = snapshot?.actor ?: return
         scope.launch {
             busy = true
@@ -108,7 +117,7 @@ internal fun SettingsHost(
     }
 
     val loaded = snapshot != null
-    val current = snapshot ?: SettingsSnapshot(null, emptyList(), emptyList(), 0, emptyList(), 0)
+    val current = snapshot ?: SettingsSnapshot(null, emptyList(), emptyList(), 0, emptyList(), 0, FarmCurrency.DEFAULT_CODE)
     val home = { page = SettingsPage.HOME; error = null }
     when (page) {
         SettingsPage.HOME -> FarmOperationalPage("FOS-ADMIN-001", "Farm settings", "Accounts, storage and devices on this farm.", onBack = onBack) {
@@ -125,6 +134,7 @@ internal fun SettingsHost(
             AnimalFarmQuickAction("Accounts and access", { page = SettingsPage.MEMBERS })
             AnimalFarmQuickAction("Roles and permissions", { page = SettingsPage.PERMISSIONS })
             AnimalFarmQuickAction("Access history", { page = SettingsPage.AUDIT })
+            AnimalFarmQuickAction("Currency", { page = SettingsPage.CURRENCY })
             AnimalFarmQuickAction("Storage and backup", { page = SettingsPage.STORAGE })
             AnimalFarmQuickAction("Devices", { page = SettingsPage.DEVICES })
         }
@@ -210,6 +220,21 @@ internal fun SettingsHost(
             }
             FarmOperationalSection("Backup") { Text("No backup has been made.") }
         }
+        SettingsPage.CURRENCY -> FarmOperationalPage("FOS-ADMIN-011", "Currency", "The currency new money records use on this farm.", onBack = home) {
+            val actor = current.actor
+            // Owner decision D-018: the farm currency is owner-changeable.
+            if (actor == null || actor.role != LocalRole.OWNER) {
+                FarmPermissionExplanation("Currency is set by the farm owner", "Only Owner accounts can change the farm currency.")
+                return@FarmOperationalPage
+            }
+            SettingsError(error)
+            CurrencyChoice(current.currencyCode, busy) { code ->
+                act {
+                    if (it.role != LocalRole.OWNER) throw AccessDenied("Only the farm owner can change the farm currency")
+                    database.setFarmCurrency(farmId, code, it.accountId, deviceId)
+                }
+            }
+        }
         SettingsPage.DEVICES -> FarmOperationalPage("FOS-ADMIN-021", "Devices", "This device and the farm devices it knows.", onBack = home) {
             val actor = current.actor
             if (actor == null || !RolePermissions.allows(actor.role, Permission.MANAGE_DEVICES)) {
@@ -234,6 +259,34 @@ internal fun SettingsHost(
 private fun SettingsError(error: String?) {
     error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("settings-error")) }
 }
+
+@Composable
+private fun CurrencyChoice(currentCode: String, busy: Boolean, onSave: (String) -> Unit) {
+    var chosen by remember(currentCode) { mutableStateOf(currencyOption(Currency.getInstance(currentCode))) }
+    FarmOperationalSection("Farm currency", "New sales, purchases and money records use this currency. Amounts already recorded keep their own currency and are never converted.") {
+        Text("Records are kept in ${currencyOption(Currency.getInstance(currentCode)).label}", modifier = Modifier.testTag("settings-currency-current"))
+        FarmSearchSelector(
+            atomTag = "settings-currency",
+            title = "Currency",
+            search = CurrencySearch,
+            selected = chosen,
+            onSelect = { chosen = it },
+            emptyText = "No currency matches",
+            enabled = !busy,
+            searchLabel = "Search by code or name",
+        )
+        SettingsButton("Save currency", !busy && chosen.id != currentCode) { onSave(chosen.id) }
+    }
+}
+
+/** Every recordable ISO 4217 currency, searched by code or name; a stable instance so the selector does not restart. */
+private val CurrencySearch = FarmSelectorSearch { query, offset, limit ->
+    val matches = FarmCurrency.search(query)
+    FarmSearchPage(matches.drop(offset).take(limit).map(::currencyOption), hasMore = matches.size > offset + limit)
+}
+
+private fun currencyOption(currency: Currency) =
+    FarmSelectorOption(currency.currencyCode, "${currency.currencyCode} · ${currency.getDisplayName(Locale.ENGLISH)}")
 
 @Composable
 private fun CreateAccountForm(roles: List<LocalRole>, busy: Boolean, onCreate: (String, String, LocalRole, String) -> Unit) {

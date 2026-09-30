@@ -752,8 +752,9 @@ interface SyncCursorDao {
         LocalAccountEntity::class,
         FarmRecoveryEntity::class,
         AccessAuditEntity::class,
+        FarmSettingsEntity::class,
     ],
-    version = 15,
+    version = 16,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -762,6 +763,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun outbox(): OutboxDao
     abstract fun replication(): ReplicationDao
     abstract fun localAccess(): LocalAccessDao
+    abstract fun farmSettings(): FarmSettingsDao
     abstract fun aggregateVersions(): AggregateVersionDao
     abstract fun syncCursors(): SyncCursorDao
     abstract fun tasks(): TaskDao
@@ -1138,6 +1140,13 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15)
+        /** Adds farm-scoped settings; farms without a row keep the documented defaults (currency USD). */
+        val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `farm_settings` (`farmId` TEXT NOT NULL, `currencyCode` TEXT NOT NULL, `updatedAtEpochMillis` INTEGER NOT NULL, `updatedByActorId` TEXT NOT NULL, PRIMARY KEY(`farmId`))")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16)
     }
 }

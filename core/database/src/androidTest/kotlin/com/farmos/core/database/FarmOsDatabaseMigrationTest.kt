@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,7 +31,7 @@ class FarmOsDatabaseMigrationTest {
     }
 
     @Test
-    fun version1DatabaseMigratesThroughVersion15WithoutLosingFoundationData() = runBlocking {
+    fun version1DatabaseMigratesThroughVersion16WithoutLosingFoundationData() = runBlocking {
         val farmId = "11111111-1111-4111-8111-111111111111"
         val animalId = "33333333-3333-4333-8333-333333333333"
         val mutationId = "55555555-5555-4555-8555-555555555555"
@@ -40,7 +41,7 @@ class FarmOsDatabaseMigrationTest {
             .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
             .build()
 
-        // Force Room to execute the complete 1 -> 15 chain and validate the final schema.
+        // Force Room to execute the complete 1 -> 16 chain and validate the final schema.
         migrated.openHelper.writableDatabase
 
         val animal = migrated.animals().get(farmId, animalId)
@@ -62,6 +63,8 @@ class FarmOsDatabaseMigrationTest {
         // Version 15 adds local farms, accounts, owner recovery and access history.
         assertEquals(0, migrated.localAccess().farms().size)
         assertEquals(0, migrated.localAccess().accounts(farmId).size)
+        // Version 16 adds farm settings; a migrated farm has no row and keeps the default currency.
+        assertNull(migrated.farmSettings().get(farmId))
 
         migrated.close()
     }

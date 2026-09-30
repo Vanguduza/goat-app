@@ -21,6 +21,7 @@ object CommandMergeClassification {
 
     /** Mutable configuration of an existing record. */
     val FIELD_UPDATES: Set<String> = setOf(
+        "farm.set_currency.v1",
         "health.pack_accept.v1",
         "inventory.set_reorder.v1",
         "rabbit.nest_box_set_status.v1",

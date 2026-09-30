@@ -3,6 +3,7 @@ package com.farmos.app
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -12,6 +13,7 @@ import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreateSupplier
+import com.farmos.domain.ops.FarmCurrency
 import com.farmos.domain.ops.RecordPurchase
 import com.farmos.feature.ops.ProcurementRecordNavigator
 import com.farmos.feature.ops.ProcurementRecords
@@ -30,8 +32,10 @@ fun ProcurementModuleHost(
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
     loadRecords: suspend () -> ProcurementRecords = { ProcurementRecords() },
+    loadCurrency: suspend () -> String = { FarmCurrency.DEFAULT_CODE },
 ) {
     val scope = rememberCoroutineScope()
+    val currency by rememberFarmCurrency(farmId, loadCurrency)
     val busy = remember { mutableStateOf(false) }
     val saved = remember { mutableStateOf(false) }
     val error = remember { mutableStateOf<String?>(null) }
@@ -57,7 +61,7 @@ fun ProcurementModuleHost(
     val qty = remember { mutableStateOf("") }; val amount = remember { mutableStateOf("") }; val day = remember { mutableStateOf("") }
     ProcurementRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-PROC-001", title = "Procurement",
-        help = "A purchase receives inventory and posts an expense in integer minor units.",
+        help = "A purchase receives inventory and posts an expense in integer minor units of ${currency ?: "the farm currency"}.",
         empty = "No suppliers on this device.", rows = rows.value, busy = busy.value, error = error.value,
         fields = listOf("Supplier name" to name, "Lead time days" to lead), actionLabel = "Create supplier",
         onSubmit = { run { ops.createSupplier(CreateSupplier(UUID.randomUUID().toString(), name.value, lead.value.toIntOrNull() ?: 0), newContext()) } },
@@ -70,7 +74,7 @@ fun ProcurementModuleHost(
             androidx.compose.material3.OutlinedTextField(amount.value,{amount.value=it},label={androidx.compose.material3.Text("Amount")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
             androidx.compose.material3.OutlinedTextField(day.value,{day.value=it},label={androidx.compose.material3.Text("Date")},placeholder={androidx.compose.material3.Text("YYYY-MM-DD")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
             recordActions()
-            androidx.compose.material3.Button(onClick={run { val quantityMilli=qty.value.toScaledLongExact(3,"Quantity"); val amountMinor=amount.value.toScaledLongExact(2,"Amount"); ops.recordPurchase(RecordPurchase(purchaseId = UUID.randomUUID().toString(), supplierId = supplierId.value, itemId = itemId.value, quantityMilli = quantityMilli, amountMinor = amountMinor, occurredEpochDay = LocalDate.parse(day.value).toEpochDay()), newContext()) }},enabled=!busy.value&&supplierId.value.isNotBlank()&&itemId.value.isNotBlank()&&qty.value.isNotBlank()&&amount.value.isNotBlank()&&day.value.isNotBlank()){androidx.compose.material3.Text("Record purchase")}
+            androidx.compose.material3.Button(onClick={run { val quantityMilli=qty.value.toScaledLongExact(3,"Quantity"); val code=checkNotNull(currency) { "The farm currency is still loading" }; val amountMinor=amount.value.toScaledLongExact(FarmCurrency.minorDigits(code),"Amount"); ops.recordPurchase(RecordPurchase(purchaseId = UUID.randomUUID().toString(), supplierId = supplierId.value, itemId = itemId.value, quantityMilli = quantityMilli, amountMinor = amountMinor, currency = code, occurredEpochDay = LocalDate.parse(day.value).toEpochDay()), newContext()) }},enabled=!busy.value&&supplierId.value.isNotBlank()&&itemId.value.isNotBlank()&&qty.value.isNotBlank()&&amount.value.isNotBlank()&&day.value.isNotBlank()){androidx.compose.material3.Text("Record purchase")}
         },
     ) }
 }

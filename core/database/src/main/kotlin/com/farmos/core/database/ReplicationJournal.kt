@@ -149,31 +149,66 @@ const val COMMAND_PAYLOAD_KEY = "command"
  */
 suspend fun FarmOsDatabase.insertOutboxAndJournal(outbox: OutboxEntity) {
     outbox().insert(outbox)
-    val journal = replication()
-    val device = journal.device(outbox.farmId, outbox.deviceId)
-    val sequence = (device?.lastReportedOwnSequence ?: 0) + 1
-    val operation = OperationEnvelope.seal(
+    journalLocalOperation(
         operationId = outbox.mutationId,
         farmId = outbox.farmId,
         entityType = outbox.aggregateType,
         entityId = outbox.aggregateId,
         actorId = outbox.actorId,
         deviceId = outbox.deviceId,
-        deviceSequence = sequence,
         businessTimeEpochMillis = outbox.occurredAtEpochMillis,
         createdAtEpochMillis = outbox.createdAtEpochMillis,
         baseVersion = outbox.expectedStreamVersion,
         operationType = outbox.commandName,
-        mergeClass = CommandMergeClassification.forCommand(outbox.commandName),
-        payload = mapOf(COMMAND_PAYLOAD_KEY to outbox.payloadJson),
+        payloadJson = outbox.payloadJson,
         schemaVersion = outbox.commandSchemaVersion,
+    )
+}
+
+/**
+ * Journals a device-local change that has no server-era outbox command, such as a farm setting. Like
+ * [insertOutboxAndJournal], callers run it inside the Room transaction that makes the change, and it
+ * takes the next sequence of the local device.
+ */
+suspend fun FarmOsDatabase.journalLocalOperation(
+    operationId: String,
+    farmId: String,
+    entityType: String,
+    entityId: String,
+    actorId: String,
+    deviceId: String,
+    businessTimeEpochMillis: Long,
+    createdAtEpochMillis: Long,
+    baseVersion: Long?,
+    operationType: String,
+    payloadJson: String,
+    schemaVersion: Int,
+) {
+    val journal = replication()
+    val device = journal.device(farmId, deviceId)
+    val sequence = (device?.lastReportedOwnSequence ?: 0) + 1
+    val operation = OperationEnvelope.seal(
+        operationId = operationId,
+        farmId = farmId,
+        entityType = entityType,
+        entityId = entityId,
+        actorId = actorId,
+        deviceId = deviceId,
+        deviceSequence = sequence,
+        businessTimeEpochMillis = businessTimeEpochMillis,
+        createdAtEpochMillis = createdAtEpochMillis,
+        baseVersion = baseVersion,
+        operationType = operationType,
+        mergeClass = CommandMergeClassification.forCommand(operationType),
+        payload = mapOf(COMMAND_PAYLOAD_KEY to payloadJson),
+        schemaVersion = schemaVersion,
         provenance = LOCAL_PROVENANCE,
     )
     journal.insertOperation(operation.toEntity())
     journal.upsertDevice(
         ReplicationDeviceEntity(
-            farmId = outbox.farmId,
-            deviceId = outbox.deviceId,
+            farmId = farmId,
+            deviceId = deviceId,
             name = device?.name ?: THIS_DEVICE_NAME,
             status = device?.status ?: DeviceStatus.ACTIVE.name,
             lastReportedOwnSequence = sequence,

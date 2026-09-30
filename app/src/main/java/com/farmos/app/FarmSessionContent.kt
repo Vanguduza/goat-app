@@ -164,6 +164,7 @@ fun FarmSessionContent(
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
+                loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
             FarmModule.POULTRY -> PoultryModuleHost(
                 farmId = membership.farmId,
@@ -257,14 +258,17 @@ fun FarmSessionContent(
             FarmModule.SALES -> SalesModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
                 loadRecords = { loadSalesRecords(app.database, membership.farmId) },
+                loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
             FarmModule.PROCUREMENT -> ProcurementModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
                 loadRecords = { loadProcurementRecords(app.database, membership.farmId) },
+                loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
             FarmModule.WAITLIST -> RabbitCommerceModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
                 loadRecords = { loadRabbitCommerceRecords(app.database, membership.farmId) },
+                loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
             else -> OperatingModuleHost(
                 module = dest.module,

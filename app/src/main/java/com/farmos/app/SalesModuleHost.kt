@@ -2,11 +2,13 @@ package com.farmos.app
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
+import com.farmos.domain.ops.FarmCurrency
 import com.farmos.domain.ops.RecordSale
 import com.farmos.feature.ops.SalesRecordNavigator
 import com.farmos.feature.ops.SalesRecords
@@ -24,8 +26,10 @@ fun SalesModuleHost(
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
     loadRecords: suspend () -> SalesRecords = { SalesRecords() },
+    loadCurrency: suspend () -> String = { FarmCurrency.DEFAULT_CODE },
 ) {
     val scope = rememberCoroutineScope()
+    val currency by rememberFarmCurrency(farmId, loadCurrency)
     val busy = remember { mutableStateOf(false) }
     val saved = remember { mutableStateOf(false) }
     val error = remember { mutableStateOf<String?>(null) }
@@ -45,12 +49,13 @@ fun SalesModuleHost(
     val day = remember { mutableStateOf("") }
     SalesRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-SALES-001", title = "Sales",
-        help = "A sale posts income in integer minor units. This is farm unit economics, not a statutory ledger.",
+        help = "A sale posts income in integer minor units of ${currency ?: "the farm currency"}. This is farm unit economics, not a statutory ledger.",
         empty = "No sales on this device.", rows = rows.value, busy = busy.value, error = error.value,
         fields = listOf("Item kind" to kind, "Quantity" to qty, "Amount" to amount, "Date" to day),
         actionLabel = "Record sale",
         onSubmit = { run {
-            val amountMinor = amount.value.toScaledLongExact(2, "Amount")
+            val code = checkNotNull(currency) { "The farm currency is still loading" }
+            val amountMinor = amount.value.toScaledLongExact(FarmCurrency.minorDigits(code), "Amount")
             val quantityMilli = qty.value.toScaledLongExact(3, "Quantity")
             ops.recordSale(
                 RecordSale(
@@ -58,6 +63,7 @@ fun SalesModuleHost(
                     itemKind = kind.value,
                     quantityMilli = quantityMilli,
                     amountMinor = amountMinor,
+                    currency = code,
                     occurredEpochDay = LocalDate.parse(day.value).toEpochDay(),
                 ),
                 newContext(),

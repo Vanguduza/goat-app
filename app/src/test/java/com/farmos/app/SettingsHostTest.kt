@@ -27,6 +27,7 @@ import com.farmos.domain.access.CredentialKind
 import com.farmos.domain.access.LocalAccount
 import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.SignInResult
+import com.farmos.domain.replication.MergeClass
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -42,7 +43,7 @@ import org.robolectric.annotation.GraphicsMode
 /**
  * Local farm settings on an in-memory farm database: Settings Home (FOS-ADMIN-001), Accounts and access
  * (FOS-ADMIN-003), Add account (FOS-ADMIN-004), Account and role (FOS-ADMIN-005), Roles and permissions
- * (FOS-ADMIN-006), Devices (FOS-ADMIN-021), Storage and backup (FOS-ADMIN-023) and Access history
+ * (FOS-ADMIN-006), Currency (FOS-ADMIN-011), Devices (FOS-ADMIN-021), Storage and backup (FOS-ADMIN-023) and Access history
  * (FOS-ADMIN-024). Every change goes through the local access service and is authorised and audited.
  */
 @RunWith(AndroidJUnit4::class)
@@ -230,6 +231,38 @@ class SettingsHostTest {
         assertTrue(total >= 2)
         waitForText("$total entries")
         waitForText("Account created")
+    }
+
+    @Test
+    fun ownerChangesTheFarmCurrencyThroughSearchAndTheChangeIsJournalled() {
+        render(owner.accountId)
+        waitForText("Signed in as Tendai Moyo")
+        click("Currency")
+        waitForTag("farm-screen:FOS-ADMIN-011")
+        waitForText("Records are kept in USD")
+        compose.onNodeWithTag("settings-currency:query").performScrollTo().performTextInput("rand")
+        waitForTag("settings-currency:option:ZAR")
+        compose.onNodeWithTag("settings-currency:option:ZAR").performScrollTo().performClick()
+        click("Save currency")
+
+        waitForText("Records are kept in ZAR")
+        assertEquals("ZAR", runBlocking { database.farmCurrency(farmId) })
+        val change = runBlocking { database.replication().operationsInRange(farmId, "device-a", 1, 10) }.single()
+        assertEquals(SET_FARM_CURRENCY_COMMAND, change.operationType)
+        assertEquals(MergeClass.FIELD_UPDATE.name, change.mergeClass)
+        assertEquals(owner.accountId, change.actorId)
+    }
+
+    @Test
+    fun aWorkerCannotChangeTheFarmCurrency() {
+        val rudo = worker()
+        render(rudo.accountId)
+        waitForText("Signed in as Rudo Chari · Worker")
+        click("Currency")
+        waitForTag("farm-screen:FOS-ADMIN-011")
+        compose.onNodeWithTag(FarmSafetyAtoms.PERMISSION_EXPLANATION).assertExists()
+        assertTrue(compose.onAllNodesWithTag("settings-currency").fetchSemanticsNodes().isEmpty())
+        assertEquals("USD", runBlocking { database.farmCurrency(farmId) })
     }
 
     @Test
