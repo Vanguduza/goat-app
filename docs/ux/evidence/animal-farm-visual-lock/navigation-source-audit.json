@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "4b2ad266d7ef7a75981e092065a328f0e64103ed",
+  "tested_commit": "afcd9b24fea5da8ec5380ffef9b3ff457099eb31",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 291
+    "registered_ids_mentioned_in_kotlin": 294
   },
   "top_level": {
     "farm_modules": [
@@ -29,7 +29,8 @@
       "WATER",
       "SALES",
       "PROCUREMENT",
-      "WAITLIST"
+      "WAITLIST",
+      "REPORTS"
     ],
     "role_personas": [
       "OWNER",
@@ -101,8 +102,8 @@
         },
         {
           "value": "REPRODUCTION",
-          "refs": 5,
-          "transition_refs": 4,
+          "refs": 6,
+          "transition_refs": 5,
           "render_only_candidate": false
         },
         {
@@ -270,6 +271,12 @@
         {
           "value": "KID_PROFILE",
           "refs": 1,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "MATE_COMPARE",
+          "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
         }
