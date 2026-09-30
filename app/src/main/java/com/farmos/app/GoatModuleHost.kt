@@ -29,6 +29,9 @@ import com.farmos.domain.goat.RecordGoatWeight
 import com.farmos.domain.goat.RegisterGoat
 import com.farmos.domain.goat.RegisterGoatKid
 import com.farmos.domain.goat.SetGoatStatus
+import com.farmos.data.herd.AnimalExitCommands
+import com.farmos.domain.ops.ReverseAnimalExit
+import com.farmos.feature.goat.GoatExitView
 import com.farmos.feature.goat.GoatEntryPage
 import com.farmos.feature.goat.GoatKiddingDueState
 import com.farmos.feature.goat.GoatLactationState
@@ -59,6 +62,13 @@ fun GoatModuleHost(
     var herd by remember { mutableStateOf<List<GoatSnapshot>>(emptyList()) }
     var selectedGoatId by remember { mutableStateOf<String?>(null) }
     var selected by remember { mutableStateOf<GoatSnapshot?>(null) }
+    var standingExit by remember { mutableStateOf<GoatExitView?>(null) }
+    val exits = remember(membership.farmId) { AnimalExitCommands(app.database, membership.farmId) }
+    val currency by rememberFarmCurrency(membership.farmId) { app.database.farmCurrency(membership.farmId) }
+    // The selected goat's standing exit (D-022), reloaded whenever the goat or its status changes.
+    LaunchedEffect(selected?.animalId, selected?.status) {
+        standingExit = selected?.animalId?.let { runCatching { loadStandingGoatExit(app.database, membership.farmId, it) }.getOrNull() }
+    }
     var searchResults by remember { mutableStateOf<List<GoatSearchResult>>(emptyList()) }
     var syncMessage by remember { mutableStateOf("No local changes yet") }
     var searchMessage by remember { mutableStateOf("Local search is always available") }
@@ -154,6 +164,8 @@ fun GoatModuleHost(
             syncMessage = syncMessage,
             searchMessage = searchMessage,
             searchResults = searchResults,
+            standingExit = standingExit,
+            currency = currency,
         ),
         entryPage = entryPage,
         searchSires = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "goat", "MALE") },
@@ -318,6 +330,18 @@ fun GoatModuleHost(
             val animalId = selectedGoatId
             if (animalId == null) error = "Select a goat first" else runGoatWrite {
                 repository.setStatus(SetGoatStatus(animalId, status), newContext())
+            }
+        },
+        onRecordExit = { draft ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                exits.record(goatExitCommand(animalId, draft, currency), newContext())
+            }
+        },
+        onReverseExit = { exitId, reason ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                exits.reverse(ReverseAnimalExit(UUID.randomUUID().toString(), animalId, exitId, reason, LocalDate.now().toEpochDay()), newContext())
             }
         },
         onSelectGoat = { animalId ->

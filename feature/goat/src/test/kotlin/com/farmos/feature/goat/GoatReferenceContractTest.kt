@@ -3,6 +3,7 @@ package com.farmos.feature.goat
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -118,12 +119,12 @@ class GoatReferenceContractTest {
 
     @Test
     fun lifecycleChangeCancelIsNonDestructive() {
-        val status = AtomicReference<GoatStatus?>(null)
+        val exit = AtomicReference<GoatExitDraft?>(null)
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 GoatExperienceScreen(
                     state = state,
-                    actions = noOpActions(onStatus = status::set),
+                    actions = noOpActions(onExit = exit::set),
                     onBackToFarm = {},
                     onSignOut = {},
                     initialPage = GoatPage.STATUS_CHANGE,
@@ -133,12 +134,12 @@ class GoatReferenceContractTest {
         }
 
         compose.onNodeWithTag("farm-screen:FOS-GOAT-051").assertIsDisplayed()
-        compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
-        compose.runOnIdle { assertNull(status.get()) }
-        compose.onNodeWithText("Confirm sold").assertIsDisplayed()
+        openSaleAndContinue()
+        compose.runOnIdle { assertNull(exit.get()) }
+        compose.onNodeWithText("Confirm sale exit").assertIsDisplayed()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-026").assertIsDisplayed()
         compose.onNode(hasClickAction() and hasText("Cancel")).performScrollTo().performClick()
-        compose.runOnIdle { assertNull(status.get()) }
+        compose.runOnIdle { assertNull(exit.get()) }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-026").assertDoesNotExist()
         assertNamedClickTargets()
     }
@@ -280,11 +281,12 @@ class GoatReferenceContractTest {
 
     @Test
     fun lifecycleChangeRequiresExplicitConfirmation() {
+        val exit = AtomicReference<GoatExitDraft?>(null)
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 GoatExperienceScreen(
                     state = state,
-                    actions = noOpActions(),
+                    actions = noOpActions(onExit = exit::set),
                     onBackToFarm = {},
                     onSignOut = {},
                     initialPage = GoatPage.STATUS_CHANGE,
@@ -293,16 +295,90 @@ class GoatReferenceContractTest {
             }
         }
 
-        compose.onNode(hasClickAction() and hasText("Mark sold")).performClick()
-        compose.onNodeWithText("Confirm sold").assertIsDisplayed()
-        compose.onNodeWithTag("goat-lifecycle-confirm")
+        openSaleAndContinue()
+        compose.onNodeWithText("Confirm sale exit").assertIsDisplayed()
+        compose.onNodeWithTag("goat-exit-confirm")
             .performScrollTo()
             .assertIsDisplayed()
             .assertIsEnabled()
             .performClick()
         compose.waitForIdle()
-        compose.onNodeWithTag("goat-lifecycle-confirm").assertDoesNotExist()
+        compose.onNodeWithTag("goat-exit-confirm").assertDoesNotExist()
+        compose.runOnIdle {
+            assertEquals(GoatExitKind.SALE, exit.get()?.kind)
+            assertEquals("Moyo Butchery", exit.get()?.buyer)
+        }
         assertNamedClickTargets()
+    }
+
+    @Test
+    fun mortalityNeedsACauseAndIsRecordedAfterConfirmation() {
+        val exit = AtomicReference<GoatExitDraft?>(null)
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(state = state, actions = noOpActions(onExit = exit::set), onBackToFarm = {}, onSignOut = {}, initialPage = GoatPage.STATUS_CHANGE, today = fixedDate)
+            }
+        }
+        compose.onNodeWithTag("goat-exit-open:MORTALITY").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-053").assertIsDisplayed()
+        compose.onNodeWithTag("goat-exit-continue").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag("goat-exit-cause:PREDATION").performScrollTo().performClick()
+        compose.onNodeWithTag("goat-exit-continue").performScrollTo().performClick()
+        compose.onNodeWithTag("goat-exit-confirm").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(GoatExitKind.DEATH, exit.get()?.kind)
+            assertEquals("PREDATION", exit.get()?.deathCause)
+        }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun cullNeedsAReason() {
+        val exit = AtomicReference<GoatExitDraft?>(null)
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(state = state, actions = noOpActions(onExit = exit::set), onBackToFarm = {}, onSignOut = {}, initialPage = GoatPage.STATUS_CHANGE, today = fixedDate)
+            }
+        }
+        compose.onNodeWithTag("goat-exit-open:CULL").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-054").assertIsDisplayed()
+        compose.onNodeWithTag("goat-exit-continue").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag("goat-exit-reason").performScrollTo().performTextInput("Chronic lameness")
+        compose.onNodeWithTag("goat-exit-continue").performScrollTo().performClick()
+        compose.onNodeWithTag("goat-exit-confirm").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(GoatExitKind.CULL, exit.get()?.kind)
+            assertEquals("Chronic lameness", exit.get()?.reason)
+        }
+    }
+
+    @Test
+    fun aGoatThatHasLeftShowsItsExitWhichCanBeReversedWithAReason() {
+        val reversed = AtomicReference<Pair<String, String>?>(null)
+        val sold = state.copy(
+            selected = state.selected!!.copy(status = GoatStatus.SOLD),
+            standingExit = GoatExitView("exit-1", "Sold to Moyo Butchery on 2026-09-20"),
+        )
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(state = sold, actions = noOpActions(onReverse = { id, reason -> reversed.set(id to reason) }), onBackToFarm = {}, onSignOut = {}, initialPage = GoatPage.STATUS_CHANGE, today = fixedDate)
+            }
+        }
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-051").assertIsDisplayed()
+        compose.onNodeWithText("Sold to Moyo Butchery on 2026-09-20").assertIsDisplayed()
+        compose.onNodeWithTag("goat-exit-open:SALE_EXIT").assertDoesNotExist()
+        compose.onNodeWithTag("goat-exit-reverse").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag("goat-exit-reverse-reason").performScrollTo().performTextInput("Wrong goat recorded")
+        compose.onNodeWithTag("goat-exit-reverse").performScrollTo().performClick()
+        compose.runOnIdle { assertEquals("exit-1" to "Wrong goat recorded", reversed.get()) }
+    }
+
+    /** From Lifecycle change, opens the sale exit (FOS-GOAT-052), names a buyer and continues to confirmation. */
+    private fun openSaleAndContinue() {
+        compose.onNodeWithTag("goat-exit-open:SALE_EXIT").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-052").assertIsDisplayed()
+        compose.onNodeWithTag("goat-exit-buyer").performScrollTo().performTextInput("Moyo Butchery")
+        compose.onNodeWithTag("goat-exit-continue").performScrollTo().performClick()
     }
 
     private fun assertNamedClickTargets() {
@@ -365,6 +441,8 @@ class GoatReferenceContractTest {
         onStatus: (GoatStatus) -> Unit = {},
         onSelect: (String) -> Unit = {},
         onScan: (String) -> Unit = {},
+        onExit: (GoatExitDraft) -> Unit = {},
+        onReverse: (String, String) -> Unit = { _, _ -> },
     ) = GoatExperienceActions(
         onRegister = { _, _, _, _ -> },
         onRecordWeight = onWeight,
@@ -383,5 +461,7 @@ class GoatReferenceContractTest {
         onSyncNow = {},
         onSearch = {},
         onScanIdentifier = onScan,
+        onRecordExit = onExit,
+        onReverseExit = onReverse,
     )
 }

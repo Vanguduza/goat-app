@@ -13,6 +13,8 @@ import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateAnimalGroup
 import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.CreateFarmTask
+import com.farmos.domain.ops.ReverseAnimalExit
+import com.farmos.domain.ops.RecordAnimalExit
 import com.farmos.domain.ops.UpdateFarmWorker
 import com.farmos.domain.ops.CreateFarmWorker
 import com.farmos.domain.ops.UpdateFarmTask
@@ -204,6 +206,8 @@ object OpsReplicationAppliers {
         "supplier.create.v1" to replay { ops, op -> ops.createSupplier(decode<CreateSupplier>(op), context(op)) },
         "task.complete.v1" to replay { ops, op -> ops.completeTask(decode<CompleteFarmTask>(op), context(op)) },
         "task.create.v1" to replay { ops, op -> ops.createTask(decode<CreateFarmTask>(op), context(op)) },
+        AnimalExitCommands.RECORD to OperationApplier { database, op -> AnimalExitCommands(database, op.farmId, replaying = true).record(decode<RecordAnimalExit>(op), context(op)) },
+        AnimalExitCommands.REVERSE to OperationApplier { database, op -> AnimalExitCommands(database, op.farmId, replaying = true).reverse(decode<ReverseAnimalExit>(op), context(op)) },
         WorkerRegisterCommands.CREATE to OperationApplier { database, op -> WorkerRegisterCommands(database, op.farmId, replaying = true).create(decode<CreateFarmWorker>(op), context(op)) },
         WorkerRegisterCommands.UPDATE to OperationApplier { database, op -> WorkerRegisterCommands(database, op.farmId, replaying = true).update(decode<UpdateFarmWorker>(op), context(op)) },
         StockCountCommands.START to stock { commands, op -> commands.start(decode<StartStockCount>(op), context(op)) },

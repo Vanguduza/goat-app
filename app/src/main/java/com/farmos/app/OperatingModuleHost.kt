@@ -202,6 +202,9 @@ fun OperatingModuleHost(
                 onSetStatus = { animalId, status ->
                     run { herd?.setStatus(animalId, status, newContext()) }
                 },
+                exitContent = { animal, screenId, statusBack ->
+                    SpeciesExitHost(database, farmId, animal, screenId, newContext, onRecorded = { run { } }, onBack = statusBack)
+                },
                 onBack = onBack,
                 extra = { selected, operationsBack ->
                     when (module) {
