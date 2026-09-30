@@ -90,6 +90,8 @@ internal fun managementHomeActions(): List<Pair<String, FarmDestination>> =
         "Open groups" to FarmDestination.Module(FarmModule.GROUPS),
         // FOS-RABBIT-027 — More has sales, not the rabbit waitlist. Owner/manager keep the existing module reachable.
         "Open waitlist" to FarmDestination.Module(FarmModule.WAITLIST),
+        // FOS-REPORT-001 — metrics and device exports are management work (D-026).
+        "Open reports" to FarmDestination.Module(FarmModule.REPORTS),
     )
 
 /** Exact-owner actions for specialist homes. Buyer/read-only does not gain Sync. */

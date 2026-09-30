@@ -817,6 +817,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun poultryFlockDays(): PoultryFlockDayDao
     abstract fun diseaseCatalog(): DiseaseCatalogDao
     abstract fun lifecycle(): LifecycleDao
+    abstract fun reports(): FarmReportDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {

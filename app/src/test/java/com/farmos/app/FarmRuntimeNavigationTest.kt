@@ -180,6 +180,7 @@ class FarmRuntimeNavigationTest {
         val remaining = listOf(
             Triple("Open groups", FarmDestination.Module(FarmModule.GROUPS), "FOS-GROUP-001"),
             Triple("Open waitlist", FarmDestination.Module(FarmModule.WAITLIST), "FOS-RABBIT-027"),
+            Triple("Open reports", FarmDestination.Module(FarmModule.REPORTS), "FOS-REPORT-001"),
             Triple("Open sync status", FarmDestination.Goat(GoatEntryPage.SYNC), "FOS-SYNC-002"),
         )
         remaining.forEach { (label, expected, screenId) ->

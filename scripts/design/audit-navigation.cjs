@@ -125,6 +125,7 @@ const directActionViolations = [
   ['Open assets', 'FarmModule.ASSETS', 'FOS-ASSET-001'],
   ['Open groups', 'FarmModule.GROUPS', 'FOS-GROUP-001'],
   ['Open waitlist', 'FarmModule.WAITLIST', 'FOS-RABBIT-027'],
+  ['Open reports', 'FarmModule.REPORTS', 'FOS-REPORT-001'],
 ].filter(([label, token]) => appKt.includes(`"${label}"`) && !appKt.includes(token))
   .map(([label, , expected]) => ({
     label,
