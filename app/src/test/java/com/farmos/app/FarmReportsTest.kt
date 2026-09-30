@@ -107,7 +107,8 @@ class FarmReportsTest {
 
         val lines = moneyRecordsCsv(database.reports().moneyRecords(farm)).split("\r\n")
         assertEquals("Date,Kind,Category,Amount,Currency,Note", lines[0])
-        assertEquals(123, lines.size - 2)
+        // 120 sales, one expense and one ZAR sale on this farm; the other farm's record is not exported.
+        assertEquals(122, lines.size - 2)
         assertTrue(lines.contains("2024-10-05,expense,purchase,25.50,USD,'=feed"))
     }
 
