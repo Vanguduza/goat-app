@@ -24,6 +24,7 @@ object CommandMergeClassification {
         "access.account_set.v1",
         "access.recovery_set.v1",
         "farm.set_currency.v1",
+        "farm.set_gestation.v1",
         "health.pack_accept.v1",
         "inventory.set_reorder.v1",
         "rabbit.nest_box_set_status.v1",

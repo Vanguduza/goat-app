@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.farmos.core.database.unsharedLocalOperations
+import com.farmos.domain.ops.GestationSpecies
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.model.SearchSource
 import com.farmos.core.network.AuthenticationRequiredException
@@ -29,6 +30,7 @@ import com.farmos.domain.goat.RegisterGoat
 import com.farmos.domain.goat.RegisterGoatKid
 import com.farmos.domain.goat.SetGoatStatus
 import com.farmos.feature.goat.GoatEntryPage
+import com.farmos.feature.goat.GoatKiddingDueState
 import com.farmos.feature.goat.GoatLactationState
 import com.farmos.feature.goat.GoatSliceUiState
 import com.farmos.feature.goat.GoatVerticalSliceScreen
@@ -64,6 +66,7 @@ fun GoatModuleHost(
     var pendingSyncCount by remember { mutableStateOf(0L) }
     var herdCounts by remember { mutableStateOf<com.farmos.domain.goat.GoatHerdCounts?>(null) }
     var lactation by remember { mutableStateOf<GoatLactationState>(GoatLactationState.Loading) }
+    var kiddingDue by remember { mutableStateOf<GoatKiddingDueState>(GoatKiddingDueState.Loading) }
 
     suspend fun refreshGoatState() {
         herdState = LoadableSurfaceState.LOADING
@@ -97,6 +100,11 @@ fun GoatModuleHost(
         herdCounts = runCatching { repository.herdCounts(java.time.LocalDate.now().toEpochDay()) }.getOrNull()
         lactation = runCatching { repository.lactationSummaries() }
             .fold({ GoatLactationState.Loaded(it) }, { GoatLactationState.Failed(it.message ?: "Lactation records could not be loaded") })
+        kiddingDue = runCatching {
+            // The farm's own goat gestation period (owner decision D-019), or the default.
+            val period = app.database.gestationPeriod(membership.farmId, GestationSpecies.GOAT)
+            GoatKiddingDueState.Loaded(repository.kiddingDue(period.earliestDays, period.typicalDays, period.latestDays), period.typicalDays)
+        }.getOrElse { GoatKiddingDueState.Failed(it.message ?: "Does expected to kid could not be loaded") }
     }
 
     suspend fun refreshMembershipAfterAuthorizationLoss(message: String) {
@@ -134,6 +142,7 @@ fun GoatModuleHost(
             herd = herd,
             herdCounts = herdCounts,
             lactation = lactation,
+            kiddingDue = kiddingDue,
             selected = selected,
             farmName = farmName,
             pendingSyncCount = pendingSyncCount,

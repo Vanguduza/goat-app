@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:d8ddc874e4b68c1fffaf1a951a2f1f4edfd4b8b2e4db75dae6b0578d0305ce13",
-  "runtime_evidence_tested_commit": "62bbbec02a32fd80f18f0584319e8cb9c30c9768",
-  "runtime_evidence_run_id": 36684685592,
+  "source_fingerprint": "sha256:b9d87df45810298a75edf6fc651e66e20ad51d3d868f62f04fcb4eeafaff2eb7",
+  "runtime_evidence_tested_commit": "0c37ec2f93fe0f72675dff7fc266980378f24334",
+  "runtime_evidence_run_id": 36687361344,
   "registry_screen_count": 545,
-  "route_screen_count": 277,
-  "unresolved_screen_count": 268,
+  "route_screen_count": 279,
+  "unresolved_screen_count": 266,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -15,6 +15,7 @@
     "FOS-ADMIN-004",
     "FOS-ADMIN-005",
     "FOS-ADMIN-006",
+    "FOS-ADMIN-007",
     "FOS-ADMIN-011",
     "FOS-ADMIN-021",
     "FOS-ADMIN-023",
@@ -117,6 +118,7 @@
     "FOS-GOAT-033",
     "FOS-GOAT-034",
     "FOS-GOAT-035",
+    "FOS-GOAT-036",
     "FOS-GOAT-037",
     "FOS-GOAT-038",
     "FOS-GOAT-039",
@@ -339,6 +341,17 @@
     },
     {
       "screen_id": "FOS-ADMIN-006",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ADMIN-007",
       "proof_classes": [
         "RENDERED_SURFACE_OWNER"
       ],
@@ -1540,6 +1553,17 @@
         "RENDERED_DESTINATION_TRAVERSAL": [
           "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatLactationRuntimeNavigationTest.kt",
           "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-036",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKiddingDueTest.kt"
         ]
       }
     },
@@ -3649,7 +3673,6 @@
   ],
   "unresolved_registry_screen_ids": [
     "FOS-ADMIN-002",
-    "FOS-ADMIN-007",
     "FOS-ADMIN-008",
     "FOS-ADMIN-009",
     "FOS-ADMIN-010",
@@ -3775,7 +3798,6 @@
     "FOS-GOAT-010",
     "FOS-GOAT-012",
     "FOS-GOAT-023",
-    "FOS-GOAT-036",
     "FOS-GOAT-042",
     "FOS-GOAT-045",
     "FOS-GOAT-046",

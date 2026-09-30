@@ -2,11 +2,11 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:d8ddc874e4b68c1fffaf1a951a2f1f4edfd4b8b2e4db75dae6b0578d0305ce13",
+  "source_fingerprint": "sha256:b9d87df45810298a75edf6fc651e66e20ad51d3d868f62f04fcb4eeafaff2eb7",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 89,
-  "features_fully_route_bound": 33,
+  "features_fully_route_bound": 34,
   "features_without_route_evidence": 67,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
@@ -398,13 +398,12 @@
         "FOS-GOAT-032",
         "FOS-GOAT-033",
         "FOS-GOAT-034",
-        "FOS-GOAT-035"
-      ],
-      "unresolved_screen_ids": [
+        "FOS-GOAT-035",
         "FOS-GOAT-036"
       ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {
@@ -2936,10 +2935,10 @@
         "FOS-ADMIN-011"
       ],
       "route_screen_ids": [
+        "FOS-ADMIN-007",
         "FOS-ADMIN-011"
       ],
       "unresolved_screen_ids": [
-        "FOS-ADMIN-007",
         "FOS-ADMIN-008",
         "FOS-ADMIN-009",
         "FOS-ADMIN-010"

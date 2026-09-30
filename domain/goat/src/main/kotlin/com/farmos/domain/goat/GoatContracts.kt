@@ -266,6 +266,19 @@ object GoatValidator {
  */
 data class GoatHerdCounts(val active: Int, val does: Int, val bucks: Int, val kids: Int, val notClosed: Int)
 
+/** One doe expected to kid, with the window predicted from her latest service. */
+data class GoatKiddingDue(
+    val animalId: String,
+    val tag: String,
+    val name: String?,
+    val serviceEpochDay: Long,
+    /** True when a pregnancy check since the service found her pregnant; false when not yet checked. */
+    val confirmedPregnant: Boolean,
+    val earliestDueEpochDay: Long,
+    val typicalDueEpochDay: Long,
+    val latestDueEpochDay: Long,
+)
+
 /**
  * Every milk record for one goat, aggregated exhaustively. Litres are sums of recorded milli-litres
  * for this goat only; no yield curve, peak or projection is derived. [tag] is null when the goat
@@ -288,6 +301,12 @@ interface GoatRepository {
     suspend fun herdCounts(todayEpochDay: Long): GoatHerdCounts
     /** Exhaustive per-goat milk aggregates for every goat with milk recorded on this farm. */
     suspend fun lactationSummaries(): List<GoatLactationSummary>
+
+    /**
+     * Every active doe expected to kid: her latest service without a later kidding, excluding does checked
+     * open since. Dates use the farm's gestation days (earliest, typical, latest) passed by the caller.
+     */
+    suspend fun kiddingDue(earliestDays: Int, typicalDays: Int, latestDays: Int): List<GoatKiddingDue>
     suspend fun registerGoat(command: RegisterGoat, context: LocalCommandContext): LocalCommandResult
     suspend fun recordWeight(command: RecordGoatWeight, context: LocalCommandContext): LocalCommandResult
     suspend fun setStatus(command: SetGoatStatus, context: LocalCommandContext): LocalCommandResult
