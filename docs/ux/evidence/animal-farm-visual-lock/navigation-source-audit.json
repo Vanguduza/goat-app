@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "bf8e9780b3e6eaf354da194e052edb09e91d15a3",
+  "tested_commit": "1a1f0290802dca06c66b4637b8abda601475634b",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 286
+    "registered_ids_mentioned_in_kotlin": 291
   },
   "top_level": {
     "farm_modules": [
@@ -131,6 +131,24 @@
         },
         {
           "value": "STATUS_CHANGE",
+          "refs": 5,
+          "transition_refs": 3,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SALE_EXIT",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "MORTALITY",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "CULL",
           "refs": 2,
           "transition_refs": 0,
           "render_only_candidate": false
