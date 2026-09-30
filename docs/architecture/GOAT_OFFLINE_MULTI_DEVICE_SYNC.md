@@ -65,7 +65,8 @@ One protocol, interchangeable transports (`ReplicationTransport`): vectors, fetc
 
 | Transport | Status |
 |---|---|
-| `LocalPeerTransport` (farm LAN, works with no Internet) | IMPLEMENTED as executable in-process contract; PLANNED: socket carrier over authenticated TLS |
+| `LocalPeerTransport` (farm LAN, works with no Internet) | IMPLEMENTED as executable in-process contract |
+| `LanPeerTransport` + `LanSyncServer` (farm LAN sockets) | IMPLEMENTED on the JVM: mutually authenticated handshake (ephemeral ECDH P-256, HMAC-SHA256 transcript proofs under the current farm key, registry check on both sides), per-direction AES-256-GCM session keys with counter nonces; unpaired, revoked, other-farm and impostor peers and altered or replayed frames are refused (`LanTransportTest`, loopback sockets). PLANNED: Android service lifecycle, NSD advertisement and Wi-Fi lock |
 | `GoogleDriveTransport` (Drive Gateway) | IMPLEMENTED against a write-once store; PLANNED: Google Drive REST carrier |
 
 Drive layout (deterministic, farm-isolated, immutable): `GOAT/farms/<farm-id>/sync/<device-id>/<from>-<to>.bundle` (12-digit zero-padded). **IMPLEMENTED** (`DriveJournalLayout`). Further folders — `descriptor/`, `devices/`, `manifests/`, `checkpoints/`, `attachments/`, `backups/`, `exports/`, `audit/` — are **PLANNED**.
