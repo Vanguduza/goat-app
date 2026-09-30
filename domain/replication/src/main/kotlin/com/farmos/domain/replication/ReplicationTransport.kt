@@ -29,6 +29,11 @@ data class SyncOutcome(
     val duplicateOperations: Int = 0,
     val pushedOperations: Int = 0,
     val rejectedReasons: List<String> = emptyList(),
+    /**
+     * After a completed session: the highest of this device's own sequences the peer now holds, so this
+     * device knows which of its changes have reached another farm device.
+     */
+    val peerHoldsOwnThrough: Long? = null,
 )
 
 enum class SyncSessionStatus { COMPLETED, TRANSPORT_UNAVAILABLE, PEER_NOT_AUTHORISED }
@@ -71,6 +76,8 @@ object SyncSession {
         val offer = remote.missingFrom(replica.vector())
         val outgoing = replica.bundlesFor(offer, maxOperationsPerBundle)
         if (outgoing.isNotEmpty()) transport.publish(replica.farmId, outgoing)
+        // The peer's own answer, not an assumption that everything pushed was accepted.
+        val peerHoldsOwn = if (outgoing.isEmpty()) remote.watermark(replica.deviceId) else transport.remoteVector(replica.farmId).watermark(replica.deviceId)
 
         return SyncOutcome(
             transport = transport.kind,
@@ -79,6 +86,7 @@ object SyncSession {
             duplicateOperations = duplicates,
             pushedOperations = outgoing.sumOf { it.operations.size },
             rejectedReasons = rejected,
+            peerHoldsOwnThrough = peerHoldsOwn,
         )
     }
 }

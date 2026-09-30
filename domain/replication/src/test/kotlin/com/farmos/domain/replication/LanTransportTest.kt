@@ -70,6 +70,7 @@ class LanTransportTest {
         assertEquals(SyncSessionStatus.COMPLETED, outcome.status)
         assertEquals(2, outcome.pulledOperations)
         assertEquals(3, outcome.pushedOperations)
+        assertEquals(3L, outcome.peerHoldsOwnThrough)
         synchronized(b) {
             assertEquals(a.vector().entries, b.vector().entries)
             assertEquals(a.stateDigest(), b.stateDigest())
