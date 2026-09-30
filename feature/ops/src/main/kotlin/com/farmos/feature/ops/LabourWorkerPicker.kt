@@ -1,5 +1,6 @@
 package com.farmos.feature.ops
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.Text
@@ -26,13 +27,15 @@ fun LabourWorkerPicker(workers: List<LabourWorkerOption>, selectedWorkerId: Stri
         Text("No workers are registered yet. Type who did the work, or add workers under Workers.", color = AnimalFarmTheme.colors.mutedInk)
         return
     }
-    Text("Worker", fontWeight = FontWeight.SemiBold)
-    workers.forEach { worker ->
-        val chosen = worker.workerId == selectedWorkerId
-        TextButton(
-            onClick = { onSelect(worker.workerId) },
-            enabled = enabled,
-            modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp).semantics { selected = chosen }.testTag("labour-worker:${worker.workerId}"),
-        ) { Text(if (chosen) "${worker.name} · selected" else worker.name) }
+    Column(Modifier.fillMaxWidth()) {
+        Text("Worker", fontWeight = FontWeight.SemiBold)
+        workers.forEach { worker ->
+            val chosen = worker.workerId == selectedWorkerId
+            TextButton(
+                onClick = { onSelect(worker.workerId) },
+                enabled = enabled,
+                modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp).semantics { selected = chosen }.testTag("labour-worker:${worker.workerId}"),
+            ) { Text(if (chosen) "${worker.name} · selected" else worker.name) }
+        }
     }
 }
