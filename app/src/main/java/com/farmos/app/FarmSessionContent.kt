@@ -220,6 +220,7 @@ fun FarmSessionContent(
                 onBack = backHome,
                 loadRecords = { loadLabourRecords(app.database, membership.farmId) },
                 workers = { back -> WorkerRegisterHost(app.database, membership.farmId, membership.role, ::context, ::enqueueSync, back) },
+                capture = remember(membership.farmId, ops) { LabourCapture(app.database, membership.farmId, ops) },
             )
             FarmModule.ASSETS -> AssetsModuleHost(
                 farmId = membership.farmId,

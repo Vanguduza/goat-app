@@ -12,6 +12,8 @@ import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.feature.ops.LabourRecordNavigator
 import com.farmos.feature.ops.LabourRecords
+import com.farmos.feature.ops.LabourWorkerOption
+import com.farmos.feature.ops.LabourWorkerPicker
 import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
@@ -28,16 +30,21 @@ fun LabourModuleHost(
     loadRecords: suspend () -> LabourRecords = { LabourRecords() },
     /** The worker register (resolution R1), opened from the labour home. */
     workers: (@Composable (onBack: () -> Unit) -> Unit)? = null,
+    /** Records labour against a registered worker (R1). */
+    capture: LabourCapture? = null,
 ) {
     val scope = rememberCoroutineScope()
     var rows by remember { mutableStateOf(emptyList<String>()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var records by remember(farmId) { mutableStateOf(LabourRecords()) }
+    var workerOptions by remember(farmId) { mutableStateOf(emptyList<LabourWorkerOption>()) }
+    var workerId by remember(farmId) { mutableStateOf<String?>(null) }
 
     suspend fun refresh() {
         rows = ops.recentLabour().map { "${it.workerName} · ${it.taskCode} · ${it.minutes} min" }
         records = loadRecords()
+        workerOptions = capture?.activeWorkers().orEmpty()
     }
 
     LaunchedEffect(farmId) { runCatching { refresh() } }
@@ -60,31 +67,31 @@ fun LabourModuleHost(
     val minutes = remember { mutableStateOf("") }
     val day = remember { mutableStateOf("") }
 
-    LabourRecordNavigator(records, workers) { recordActions -> SimpleCaptureScreen(
+    // Returning from the register refreshes the worker choice, so a worker just added can be chosen.
+    val register: (@Composable (onBack: () -> Unit) -> Unit)? = if (workers == null) null else { back -> workers { back(); scope.launch { runCatching { refresh() } } } }
+    LabourRecordNavigator(records, register) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-LABOUR-001",
         title = "Labour",
-        help = "Minutes are whole figures. Worker name is a farm label, not a login.",
+        help = "Minutes are whole figures.",
         empty = "No labour entries on this device.",
         rows = rows,
         busy = busy,
         error = error,
-        fields = listOf("Worker" to worker, "Task code" to code, "Minutes" to minutes, "Date" to day),
+        fields = (if (workerOptions.isEmpty()) listOf("Worker" to worker) else emptyList()) + listOf("Task code" to code, "Minutes" to minutes, "Date" to day),
         actionLabel = "Record labour",
         onSubmit = {
             run {
-                ops.recordLabour(
-                    RecordLabour(
-                        UUID.randomUUID().toString(),
-                        worker.value,
-                        code.value,
-                        minutes.value.toIntOrNull() ?: 0,
-                        LocalDate.parse(day.value).toEpochDay(),
-                    ),
-                    newContext(),
-                )
+                if (capture != null) {
+                    capture.record(workerOptions, workerId, worker.value, code.value, minutes.value, day.value, newContext())
+                } else {
+                    ops.recordLabour(RecordLabour(UUID.randomUUID().toString(), worker.value, code.value, minutes.value.toIntOrNull() ?: 0, LocalDate.parse(day.value).toEpochDay()), newContext())
+                }
             }
         },
         onBack = onBack,
-        extra = { recordActions() },
+        extra = {
+            recordActions()
+            LabourWorkerPicker(workerOptions, workerId, !busy) { workerId = it }
+        },
     ) }
 }
