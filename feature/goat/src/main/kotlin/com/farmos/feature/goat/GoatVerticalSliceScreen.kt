@@ -44,6 +44,8 @@ fun GoatVerticalSliceScreen(
     onRecordExit: (GoatExitDraft) -> Unit = {},
     /** Reverses the selected goat's standing exit with a reason. */
     onReverseExit: (exitId: String, reason: String) -> Unit = { _, _ -> },
+    /** Reads a prospective mating from the local pedigree (D-023). */
+    mateAnalysis: GoatMateAnalysis = NoGoatMateAnalysis,
 ) {
     GoatExperienceScreen(
         state = state,
@@ -69,6 +71,7 @@ fun GoatVerticalSliceScreen(
             searchSires = searchSires,
             onRecordExit = onRecordExit,
             onReverseExit = onReverseExit,
+            mateAnalysis = mateAnalysis,
         ),
         onBackToFarm = onBack,
         onSignOut = onSignOut,

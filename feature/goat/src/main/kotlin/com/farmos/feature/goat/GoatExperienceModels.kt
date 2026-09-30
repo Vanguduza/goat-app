@@ -44,6 +44,7 @@ internal enum class GoatPage {
     KIDDING_DETAIL,
     KID_COHORT,
     KID_PROFILE,
+    MATE_COMPARE,
 }
 
 internal data class GoatExperienceActions(
@@ -70,6 +71,8 @@ internal data class GoatExperienceActions(
     val onReverseExit: (exitId: String, reason: String) -> Unit = { _, _ -> },
     /** Whole-farm buck search for the sire selector; never the capped herd list. */
     val searchSires: FarmSelectorSearch = NoFarmSelectorSearch,
+    /** Reads a prospective mating from the local pedigree (D-023). */
+    val mateAnalysis: GoatMateAnalysis = NoGoatMateAnalysis,
 )
 
 internal fun goatDisplayName(goat: GoatSnapshot): String = goat.name?.takeIf { it.isNotBlank() } ?: goat.tag

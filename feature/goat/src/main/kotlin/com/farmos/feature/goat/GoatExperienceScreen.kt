@@ -90,6 +90,7 @@ internal fun GoatExperienceScreen(
             state,
             actions,
             onSelectGoat = actions.onSelectGoat,
+            onCompareMates = { page = GoatPage.MATE_COMPARE },
         ) {
             if (initialPage == GoatPage.REPRODUCTION) onBackToFarm() else page = GoatPage.PROFILE
         }
@@ -125,6 +126,7 @@ internal fun GoatExperienceScreen(
         GoatPage.SYNC -> GoatSyncScreen(state, actions.onSyncNow) {
             if (initialPage == GoatPage.SYNC) onBackToFarm() else page = GoatPage.DASHBOARD
         }
+        GoatPage.MATE_COMPARE -> GoatMateCompareScreen(state, actions) { page = GoatPage.REPRODUCTION }
         GoatPage.STATUS_CHANGE -> GoatStatusChangeScreen(state, { page = it }, actions.onReverseExit) { page = GoatPage.PROFILE }
         GoatPage.SALE_EXIT -> GoatExitCaptureScreen(GoatExitKind.SALE, state, state.currency, actions.onRecordExit) { page = GoatPage.STATUS_CHANGE }
         GoatPage.MORTALITY -> GoatExitCaptureScreen(GoatExitKind.DEATH, state, state.currency, actions.onRecordExit) { page = GoatPage.STATUS_CHANGE }

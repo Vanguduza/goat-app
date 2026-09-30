@@ -169,6 +169,7 @@ fun GoatModuleHost(
         ),
         entryPage = entryPage,
         searchSires = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "goat", "MALE") },
+        mateAnalysis = remember(membership.farmId) { goatMateAnalysis(app.database, membership.farmId) },
         onRegister = { tag, name, sex, dateText ->
             runGoatWrite {
                 val day = dateText.takeIf { it.isNotBlank() }?.let { LocalDate.parse(it).toEpochDay() }
