@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "f18bccd2d33379f7b24721470ad386fd30ad66f8",
-  "source_fingerprint": "sha256:9aafe662a49529d298b74d0bbe2cb99ebdae02aede575d7020aa6e272b6aa3f1",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36666425916,
+  "tested_commit": "4440f6592ae4f6cb8c250ef6f62fd559b179e8ee",
+  "source_fingerprint": "sha256:ff078ebeef5493c61713f1f1116260ed6475893d3c0b08991497b7a891c22ed9",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -363,9 +363,11 @@
       ],
       "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt": [
         "FOS-ATOM-003",
+        "FOS-ATOM-004",
         "FOS-HEALTH-004",
         "FOS-HEALTH-007",
-        "FOS-HEALTH-019"
+        "FOS-HEALTH-019",
+        "FOS-HEALTH-024"
       ],
       "app/src/test/java/com/farmos/app/InventoryCaptureOwnerTest.kt": [
         "FOS-ATOM-009",
@@ -450,9 +452,9 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
     "rendered_traversal_screen_count": 192,
-    "rendered_owner_screen_count": 59,
+    "rendered_owner_screen_count": 61,
     "route_contract_screen_count": 60,
-    "combined_screen_count": 265,
+    "combined_screen_count": 266,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -678,6 +680,7 @@
     "rendered_owner_screen_ids": [
       "FOS-ASSET-001",
       "FOS-ATOM-003",
+      "FOS-ATOM-004",
       "FOS-ATOM-005",
       "FOS-ATOM-007",
       "FOS-ATOM-009",
@@ -713,6 +716,7 @@
       "FOS-HEALTH-004",
       "FOS-HEALTH-007",
       "FOS-HEALTH-019",
+      "FOS-HEALTH-024",
       "FOS-HOME-002",
       "FOS-HOME-006",
       "FOS-HOME-007",
@@ -820,12 +824,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 192,
-    "entry_action_emission_executed": 26,
-    "rendered_surface_owners_executed": 59,
-    "route_contracts_executed": 60,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 192,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
