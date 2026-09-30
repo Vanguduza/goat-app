@@ -14,6 +14,8 @@ data class FarmDevice(
     val status: DeviceStatus,
     val lastReportedOwnSequence: Long = 0,
     val revokedAfterSequence: Long? = null,
+    /** Base64 X.509 identity key, when known; used to authenticate the device and wrap farm keys to it. */
+    val publicKey: String? = null,
 )
 
 /** Whether the farm's known state can be claimed complete. Unknown is never reported as complete. */

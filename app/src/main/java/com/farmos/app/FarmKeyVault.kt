@@ -67,7 +67,12 @@ internal class KeystoreSealer(private val alias: String = "goat_farm_vault_v1") 
 }
 
 /** What this device holds for one farm: the farm key ring and its own key-agreement identity. */
-internal class FarmSecrets(val keys: FarmKeyRing, val device: KeyPair)
+internal class FarmSecrets(
+    val keys: FarmKeyRing,
+    val device: KeyPair,
+    /** Business time of the rotation that made the current key current; a later rotation always wins. */
+    val currentSinceEpochMillis: Long = 0,
+)
 
 /**
  * This device's farm keys and device identity, sealed with [sealer] in the no-backup files directory, so
@@ -75,6 +80,7 @@ internal class FarmSecrets(val keys: FarmKeyRing, val device: KeyPair)
  * written unsealed and never leave the device except wrapped to another paired device.
  */
 internal class FarmKeyVault(private val directory: File, private val sealer: DeviceSealer) {
+    @Synchronized
     fun secrets(farmId: String): FarmSecrets? {
         val file = file(farmId).takeIf { it.exists() } ?: return null
         val json = JSONObject(String(sealer.open(file.readBytes()), Charsets.UTF_8))
@@ -83,15 +89,28 @@ internal class FarmKeyVault(private val directory: File, private val sealer: Dev
             List(keys.length()) { index -> keys.getJSONObject(index).let { FarmDataKey(it.getString("id"), decode(it.getString("material"))) } },
             json.getString("current"),
         )
-        return FarmSecrets(ring, DeviceKeys.keyPair(decode(json.getString("devicePublic")), decode(json.getString("devicePrivate"))))
+        return FarmSecrets(
+            ring,
+            DeviceKeys.keyPair(decode(json.getString("devicePublic")), decode(json.getString("devicePrivate"))),
+            json.optLong("currentSince", 0),
+        )
     }
 
+    /** Reads, changes and saves one farm's secrets atomically with respect to other vault calls. */
+    @Synchronized
+    fun update(farmId: String, change: (FarmSecrets) -> FarmSecrets?) {
+        val current = secrets(farmId) ?: return
+        change(current)?.let { save(farmId, it) }
+    }
+
+    @Synchronized
     fun save(farmId: String, secrets: FarmSecrets) {
         val json = JSONObject()
             .put("current", secrets.keys.currentKeyId)
             .put("keys", JSONArray(secrets.keys.all().map { JSONObject().put("id", it.keyId).put("material", encode(it.materialForVault())) }))
             .put("devicePublic", encode(DeviceKeys.encode(secrets.device.public)))
             .put("devicePrivate", encode(DeviceKeys.encodePrivate(secrets.device.private)))
+            .put("currentSince", secrets.currentSinceEpochMillis)
         directory.mkdirs()
         val target = file(farmId)
         val temporary = File(directory, "${target.name}.tmp")
@@ -100,6 +119,7 @@ internal class FarmKeyVault(private val directory: File, private val sealer: Dev
     }
 
     /** First keys for a farm created on this device: a fresh farm key and this device's identity. */
+    @Synchronized
     fun provisionNewFarm(farmId: String): FarmSecrets {
         check(secrets(farmId) == null) { "This farm already has keys on this device" }
         return FarmSecrets(FarmKeyRing(listOf(FarmDataKey.generate(FIRST_KEY_ID)), FIRST_KEY_ID), DeviceKeys.generate()).also { save(farmId, it) }
@@ -109,9 +129,11 @@ internal class FarmKeyVault(private val directory: File, private val sealer: Dev
      * Secrets for a farm on this device. A device that created the farm has no pairing grant, so it
      * provisions the farm's first key when first needed; a device that joined saved its grant at pairing.
      */
+    @Synchronized
     fun secretsForLocalFarm(farmId: String): FarmSecrets = secrets(farmId) ?: provisionNewFarm(farmId)
 
     /** This device's identity for a farm it is about to join, created before pairing so its key can be wrapped to. */
+    @Synchronized
     fun joiningIdentity(farmId: String): KeyPair = pendingIdentities.getOrPut(farmId) { DeviceKeys.generate() }
 
     private val pendingIdentities = mutableMapOf<String, KeyPair>()

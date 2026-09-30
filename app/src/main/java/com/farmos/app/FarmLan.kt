@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.OperationApplier
 import com.farmos.core.database.recordPeerHolds
 import com.farmos.domain.access.LocalAccount
 import com.farmos.domain.access.Permission
@@ -14,6 +15,7 @@ import com.farmos.domain.replication.EnrolmentDecision
 import com.farmos.domain.replication.EnrolmentOutcome
 import com.farmos.domain.replication.EnrolmentRequest
 import com.farmos.domain.replication.FarmDiscoveryDescriptor
+import com.farmos.domain.replication.LanIdentity
 import com.farmos.domain.replication.LanPeerTransport
 import com.farmos.domain.replication.LanSyncServer
 import com.farmos.domain.replication.PairingAuthority
@@ -144,8 +146,9 @@ internal class FarmLanRuntime(
     private val deviceId: String,
     private val clock: () -> Long = System::currentTimeMillis,
 ) : Closeable {
-    private val endpoint = RoomReplicaEndpoint(database, farmId, deviceId, replicationAppliers)
+    private val endpoint = RoomReplicaEndpoint(database, farmId, deviceId, farmAppliers(vault, deviceId))
     private val keys = { vault.secretsForLocalFarm(farmId).keys }
+    private val identity = { farmIdentity(database, vault, farmId) }
     private val worker = Executors.newSingleThreadScheduledExecutor { runnable -> Thread(runnable, "goat-farm-lan").apply { isDaemon = true } }
     private val resources = mutableListOf<Closeable>()
     @Volatile private var syncPort: Int? = null
@@ -157,7 +160,8 @@ internal class FarmLanRuntime(
     fun start(intervalSeconds: Long = SYNC_INTERVAL_SECONDS): FarmLanRuntime {
         worker.execute {
             runCatching {
-                val server = LanSyncServer(endpoint, keys).start(InetSocketAddress(0))
+                runBlocking { database.announceIdentity(farmId, deviceId, vault.secretsForLocalFarm(farmId).device, clock()) }
+                val server = LanSyncServer(endpoint, keys, identity = identity()).start(InetSocketAddress(0))
                 resources += server
                 syncPort = server.port
                 advertise(pairingPort = null)
@@ -207,6 +211,15 @@ internal class FarmLanRuntime(
         advertisement = discovery.advertise(serviceName(), descriptor().copy(pairingPort = pairingPort), port)
     }
 
+    /**
+     * After a device is revoked: rotates the farm key and journals it wrapped to the remaining devices, then
+     * shares it at once. Blocks; call it off the main thread.
+     */
+    fun rotateKeyAfterRevocation(actorId: String) {
+        runBlocking { database.rotateFarmKey(farmId, deviceId, actorId, vault, clock()) }
+        requestSync()
+    }
+
     /** Synchronises with every farm device currently found on the network. */
     fun requestSync() {
         // A screen may still hold a runtime its session has already closed.
@@ -215,7 +228,7 @@ internal class FarmLanRuntime(
 
     private fun syncNow() {
         val outcomes = mutableState.value.peers.map { peer ->
-            LanPeerTransport(peer.host, peer.port, farmId, deviceId, keys, endpoint::maySynchronise).use { transport ->
+            LanPeerTransport(peer.host, peer.port, farmId, deviceId, keys, endpoint::maySynchronise, identity = identity()).use { transport ->
                 val outcome = runCatching { SyncSession.run(endpoint, transport) }
                     .getOrElse { SyncOutcome(transport.kind, SyncSessionStatus.TRANSPORT_UNAVAILABLE, rejectedReasons = listOf(it.message ?: "Sync failed")) }
                 val peerId = transport.peerDeviceId
@@ -352,9 +365,9 @@ internal class FarmJoiner(
             is EnrolmentOutcome.Refused -> JoinResult.Refused(refusalMessage(outcome.reason))
             is EnrolmentOutcome.Granted -> {
                 runBlocking { database.installGrant(outcome.grant, identity, deviceId, vault) }
-                val endpoint = RoomReplicaEndpoint(database, descriptor.farmId, deviceId, replicationAppliers)
+                val endpoint = RoomReplicaEndpoint(database, descriptor.farmId, deviceId, farmAppliers(vault, deviceId))
                 val keys = { vault.secretsForLocalFarm(descriptor.farmId).keys }
-                LanPeerTransport(farm.host, farm.port, descriptor.farmId, deviceId, keys, endpoint::maySynchronise).use { transport ->
+                LanPeerTransport(farm.host, farm.port, descriptor.farmId, deviceId, keys, endpoint::maySynchronise, identity = farmIdentity(database, vault, descriptor.farmId)).use { transport ->
                     SyncSession.run(endpoint, transport)
                 }
                 JoinResult.Joined(descriptor.farmId, descriptor.farmName)
@@ -373,4 +386,13 @@ internal class FarmJoiner(
     private companion object {
         const val NONCE_BYTES = 16
     }
+}
+
+/** Every applier this device runs, including installing rotated farm keys wrapped to it. */
+internal fun farmAppliers(vault: FarmKeyVault, deviceId: String): Map<String, OperationApplier> =
+    replicationAppliers + (KEY_ROTATED_COMMAND to keyRotationApplier(vault, deviceId))
+
+/** This device's identity and the identity keys the farm journal records for its devices. */
+internal fun farmIdentity(database: FarmOsDatabase, vault: FarmKeyVault, farmId: String) = LanIdentity(vault.secretsForLocalFarm(farmId).device) { peer ->
+    runBlocking { database.replication().device(farmId, peer) }?.publicKey?.let { DeviceKeys.decode(java.util.Base64.getDecoder().decode(it)) }
 }

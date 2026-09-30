@@ -53,6 +53,7 @@ class PairingWireTest {
         assertEquals("drive-folder", grant.driveFolderId)
         assertEquals(DeviceStatus.ACTIVE, registry.device("tablet")?.status)
         assertEquals(setOf("owner-phone", "tablet"), grant.devices.map { it.deviceId }.toSet())
+        assertEquals(java.util.Base64.getEncoder().encodeToString(req.devicePublicKey), grant.devices.single { it.deviceId == "tablet" }.publicKey)
         val key = FarmKeyWrap.unwrap(grant.wrappedKeys.single(), device, farmId, "tablet")
         assertContentEquals(keys.current.material(), key.material())
     }

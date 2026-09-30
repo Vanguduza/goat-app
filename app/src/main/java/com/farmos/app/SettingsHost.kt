@@ -270,7 +270,11 @@ internal fun SettingsHost(
                 if (others.isEmpty()) Text("No other devices yet.", color = AnimalFarmTheme.colors.mutedInk)
                 others.forEach { device ->
                     KnownDevice(device, busy) {
-                        act { actor -> database.setDeviceStatus(farmId, device.deviceId, DeviceStatus.LOST_REVOKED, actor.accountId, deviceId) }
+                        act { actor ->
+                            database.setDeviceStatus(farmId, device.deviceId, DeviceStatus.LOST_REVOKED, actor.accountId, deviceId)
+                            // The lost device keeps what it had, but can read nothing sealed from now on.
+                            lan?.rotateKeyAfterRevocation(actor.accountId)
+                        }
                     }
                 }
             }
