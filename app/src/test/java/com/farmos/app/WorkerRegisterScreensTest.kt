@@ -95,7 +95,8 @@ class WorkerRegisterScreensTest {
         }
         compose.onNode(hasClickAction() and hasText("Workers")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-LABOUR-002").assertExists()
-        compose.onNode(hasClickAction() and hasText("Labour")).performScrollTo().performClick()
+        // The back control sits in the page header, outside the scrolling content.
+        compose.onNode(hasClickAction() and hasText("Labour")).performClick()
         compose.onNode(hasClickAction() and hasText("Open Work log")).assertExists()
     }
 }
