@@ -120,6 +120,7 @@ fun FarmSessionContent(
             onBack = backHome,
             entryPage = dest.entry,
             loadReadModel = { loadHealthReadModel(app.database, membership.farmId) },
+            searchAnimals = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, speciesCode = null) },
         )
         is FarmDestination.Task -> TasksModuleHost(
             farmId = membership.farmId,
@@ -204,6 +205,7 @@ fun FarmSessionContent(
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
                 loadRecords = { loadRabbitRecords(app.database, membership.farmId) },
+                searchRabbits = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "rabbit") },
             )
             FarmModule.INVENTORY -> InventoryModuleHost(
                 farmId = membership.farmId,

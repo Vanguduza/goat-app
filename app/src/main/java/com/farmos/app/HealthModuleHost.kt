@@ -8,6 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.farmos.core.design.FarmSelectorOption
+import com.farmos.core.design.FarmSelectorSearch
+import com.farmos.core.design.NoFarmSelectorSearch
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.AcceptHealthPack
@@ -35,6 +37,7 @@ fun HealthModuleHost(
     onBack: () -> Unit,
     entryPage: HealthEntryPage = HealthEntryPage.DASHBOARD,
     loadReadModel: suspend () -> HealthReadModel = { HealthReadModel() },
+    searchAnimals: FarmSelectorSearch = NoFarmSelectorSearch,
 ) {
     val scope = rememberCoroutineScope()
     var readModel by remember(farmId) { mutableStateOf(HealthReadModel()) }
@@ -99,6 +102,7 @@ fun HealthModuleHost(
         formularyOptions = formularyOptions,
         speciesCodes = FarmSpeciesCodes.ALL,
         acceptedPacks = acceptedPacks,
+        searchAnimals = searchAnimals,
         packs = packs,
         withdrawals = withdrawals,
         busy = busy,

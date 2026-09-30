@@ -28,6 +28,7 @@ object FarmSelectionAtoms {
     const val SPECIES_SELECTOR = "farm-atom:FOS-ATOM-003"
     const val FARM_SELECTOR = "farm-atom:FOS-ATOM-006"
     const val SIRE_DAM_SELECTOR = "farm-atom:FOS-ATOM-008"
+    const val ANIMAL_SELECTOR = "farm-atom:FOS-ATOM-004"
 }
 
 /**
@@ -53,21 +54,26 @@ fun FarmEntitySelector(
             return@Column
         }
         options.forEach { option ->
-            val selected = option.id == selectedId
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
-                    .selectable(selected = selected, enabled = enabled, role = Role.RadioButton) { onSelect(option.id) }
-                    .padding(vertical = FosDimens.Grid)
-                    .testTag("$atomTag:option:${option.id}"),
-            ) {
-                Text(
-                    option.label + if (selected) " · selected" else "",
-                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                )
-                option.detail?.let { Text(it, color = AnimalFarmTheme.colors.mutedInk, style = MaterialTheme.typography.bodySmall) }
-            }
+            FarmSelectorOptionRow(atomTag, option, option.id == selectedId, enabled) { onSelect(option.id) }
         }
+    }
+}
+
+/** One single-choice option row, tagged `<atomTag>:option:<id>`. Shared by every selector atom. */
+@Composable
+internal fun FarmSelectorOptionRow(atomTag: String, option: FarmSelectorOption, selected: Boolean, enabled: Boolean, onSelect: () -> Unit) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
+            .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onSelect)
+            .padding(vertical = FosDimens.Grid)
+            .testTag("$atomTag:option:${option.id}"),
+    ) {
+        Text(
+            option.label + if (selected) " · selected" else "",
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+        )
+        option.detail?.let { Text(it, color = AnimalFarmTheme.colors.mutedInk, style = MaterialTheme.typography.bodySmall) }
     }
 }

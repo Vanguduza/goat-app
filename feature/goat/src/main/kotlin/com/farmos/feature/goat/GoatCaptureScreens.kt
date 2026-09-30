@@ -23,7 +23,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.FarmDateField
-import com.farmos.core.design.FarmEntitySelector
+import com.farmos.core.design.FarmSearchSelector
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmSelectionAtoms
 import com.farmos.core.design.FarmSelectorOption
@@ -192,7 +192,7 @@ internal fun GoatReproductionScreen(
     var milkDay by remember { mutableStateOf("") }
     var heatDay by remember { mutableStateOf("") }
     var method by remember { mutableStateOf("natural") }
-    var sire by remember { mutableStateOf("") }
+    var sire by remember { mutableStateOf(NO_SIRE) }
     var matingDay by remember { mutableStateOf("") }
     var pregResult by remember { mutableStateOf("pregnant") }
     var pregDay by remember { mutableStateOf("") }
@@ -228,32 +228,23 @@ internal fun GoatReproductionScreen(
             ) {
                 OutlinedTextField(method, { method = it }, label = { Text("Method: natural, ai, hand_mating") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 // The server accepts only a goat on this farm as sire, so the sire is chosen from the herd.
-                val sireOptions = listOf(FarmSelectorOption(NO_SIRE_OPTION, "No sire recorded")) +
-                    state.herd.filter { it.sex == GoatSex.MALE }.map { buck ->
-                        FarmSelectorOption(
-                            id = buck.animalId,
-                            label = listOfNotNull(buck.tag, buck.name).joinToString(" · "),
-                            detail = goatStatusLabel(buck.status),
-                        )
-                    }
-                // FOS-GOAT-033 — the goat sire selector, realised through the shared sire/dam atom.
+                // FOS-GOAT-033 — the goat sire selector: a search over every buck in the local database, never
+                // the capped herd list. The server accepts only a goat on this farm as sire.
                 Column(Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-033"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FarmEntitySelector(
+                    FarmSearchSelector(
                         atomTag = FarmSelectionAtoms.SIRE_DAM_SELECTOR,
                         title = "Sire (optional)",
-                        options = sireOptions,
-                        selectedId = sire.ifBlank { NO_SIRE_OPTION },
-                        onSelect = { sire = if (it == NO_SIRE_OPTION) "" else it },
-                        emptyText = "No bucks on this device",
+                        search = actions.searchSires,
+                        selected = sire,
+                        onSelect = { sire = it },
+                        emptyText = "No bucks match on this device",
                         enabled = !state.busy,
+                        pinned = listOf(NO_SIRE),
                     )
-                    goatHerdBoundNotice(state.herd.size, state.herdCounts?.notClosed)?.let {
-                        Text(it, color = AnimalFarmTheme.colors.mutedInk, modifier = Modifier.testTag("goat-sire-bounded"))
-                    }
                 }
                 FarmDateField(label = "Mating date", value = matingDay, onValueChange = { matingDay = it }, key = "mating", enabled = !state.busy)
                 Text("A mating record creates the governed +45 day pregnancy-check task.")
-                Button(onClick = { actions.onRecordMating(method, sire, matingDay) }, enabled = !state.busy && method in setOf("natural", "ai", "hand_mating") && matingDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record mating") }
+                Button(onClick = { actions.onRecordMating(method, sire.id.takeUnless { it == NO_SIRE.id }.orEmpty(), matingDay) }, enabled = !state.busy && method in setOf("natural", "ai", "hand_mating") && matingDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record mating") }
             }
         }
         FarmIllustratedSectionSurface {
@@ -437,4 +428,4 @@ internal fun GoatSyncScreen(
     }
 }
 
-private const val NO_SIRE_OPTION = "no-sire"
+private val NO_SIRE = FarmSelectorOption("no-sire", "No sire recorded")

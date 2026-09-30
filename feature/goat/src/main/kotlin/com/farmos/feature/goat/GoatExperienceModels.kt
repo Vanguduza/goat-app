@@ -1,5 +1,7 @@
 package com.farmos.feature.goat
 
+import com.farmos.core.design.FarmSelectorSearch
+import com.farmos.core.design.NoFarmSelectorSearch
 import com.farmos.domain.goat.GoatSearchResult
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.GoatSnapshot
@@ -58,6 +60,8 @@ internal data class GoatExperienceActions(
     val onSyncNow: () -> Unit,
     val onSearch: (String) -> Unit,
     val onScanIdentifier: (String) -> Unit = {},
+    /** Whole-farm buck search for the sire selector; never the capped herd list. */
+    val searchSires: FarmSelectorSearch = NoFarmSelectorSearch,
 )
 
 internal fun goatDisplayName(goat: GoatSnapshot): String = goat.name?.takeIf { it.isNotBlank() } ?: goat.tag

@@ -15,6 +15,7 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.FormularyItemEntity
 import com.farmos.core.database.HealthPackEntity
@@ -124,6 +125,41 @@ class HealthCaptureOwnerTest {
         compose.waitUntil(10_000) { syncRequests == 1 }
     }
 
+    @Test
+    fun labResultSearchesEveryAnimalOnTheFarmNotACappedList() {
+        seedAnimals()
+        var syncRequests = 0
+        render(HealthEntryPage.LAB_RESULT) { syncRequests++ }
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-024").assertExists()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-004").assertExists()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-004:option:cow-1").fetchSemanticsNodes().isNotEmpty() }
+        // One page of 25 in tag order: cattle C-0001 then G-0001..G-0024; the rest is one "Show more" away.
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:goat-0025").assertDoesNotExist()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-004:more").performScrollTo().performClick()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-004:option:goat-0025").fetchSemanticsNodes().isNotEmpty() }
+
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-004:query").performScrollTo().performTextInput("G-0055")
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-004:option:goat-0055").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-004:option:goat-0001").fetchSemanticsNodes().isEmpty() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:goat-other").assertDoesNotExist()
+
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:goat-0055").performScrollTo().performClick()
+        compose.onNode(hasSetTextAction() and hasText("Lab test")).performScrollTo().performTextInput("Faecal egg count")
+        compose.onNode(hasSetTextAction() and hasText("Result")).performScrollTo().performTextInput("1200 epg")
+        compose.onNode(hasClickAction() and hasText("Record lab result")).performScrollTo().performClick()
+
+        compose.waitUntil(10_000) { runBlocking { database.lifecycle().labResults(farm, 10) }.isNotEmpty() }
+        assertEquals("goat-0055", runBlocking { database.lifecycle().labResults(farm, 10) }.single().animalId)
+        compose.waitUntil(10_000) { syncRequests == 1 }
+    }
+
+    @Test
+    fun likeWildcardsTypedIntoSearchMatchLiterally() {
+        assertEquals("50\\%", escapeLike("50%"))
+        assertEquals("G\\_1", escapeLike("G_1"))
+        assertEquals("a\\\\b", escapeLike("a\\b"))
+    }
+
     private fun render(entryPage: HealthEntryPage, onSync: () -> Unit) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
@@ -134,8 +170,18 @@ class HealthCaptureOwnerTest {
                     enqueueSync = onSync,
                     onBack = {},
                     entryPage = entryPage,
+                    searchAnimals = animalSelectorSearch(database, farm, speciesCode = null),
                 )
             }
         }
+    }
+
+    private fun seedAnimals() = runBlocking {
+        (1..60).forEach { n ->
+            val tag = "G-%04d".format(n)
+            database.animals().insert(AnimalEntity(id = "goat-%04d".format(n), farmId = farm, tag = tag, name = null, speciesCode = "goat", sex = "FEMALE", status = "active", dateOfBirthEpochDay = null, updatedAtEpochMillis = 1L))
+        }
+        database.animals().insert(AnimalEntity(id = "cow-1", farmId = farm, tag = "C-0001", name = "Daisy", speciesCode = "cattle", sex = "FEMALE", status = "active", dateOfBirthEpochDay = null, updatedAtEpochMillis = 1L))
+        database.animals().insert(AnimalEntity(id = "goat-other", farmId = otherFarm, tag = "G-0055X", name = null, speciesCode = "goat", sex = "FEMALE", status = "active", dateOfBirthEpochDay = null, updatedAtEpochMillis = 1L))
     }
 }
