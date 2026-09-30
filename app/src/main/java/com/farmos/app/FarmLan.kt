@@ -174,6 +174,7 @@ internal class FarmLanRuntime(
      * Opens pairing for [approver]: the farm is announced with a pairing port, and each device that asks to
      * join waits in [PairingSession.pending] until the approver types the code it shows, or declines.
      */
+    /** Blocks until the pairing server is listening; call it off the main thread. */
     fun openPairing(approver: LocalAccount): PairingSession = worker.submit<PairingSession> {
         checkNotNull(syncPort) { "The farm network is still starting on this device" }
         val registry = DeviceRegistry(runBlocking { database.farmDevices(farmId) })
@@ -207,7 +208,8 @@ internal class FarmLanRuntime(
 
     /** Synchronises with every farm device currently found on the network. */
     fun requestSync() {
-        worker.execute { syncNow() }
+        // A screen may still hold a runtime its session has already closed.
+        if (!worker.isShutdown) runCatching { worker.execute { syncNow() } }
     }
 
     private fun syncNow() {
@@ -233,6 +235,7 @@ internal class FarmLanRuntime(
     private fun serviceName() = "goat-${deviceId.take(SERVICE_NAME_ID_CHARS)}"
 
     override fun close() {
+        if (worker.isShutdown) return
         worker.execute {
             advertisement?.let { runCatching { it.close() } }
             advertisement = null

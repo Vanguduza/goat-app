@@ -310,12 +310,26 @@ private fun KnownDevice(device: ReplicationDeviceEntity, busy: Boolean, onReport
 @Composable
 private fun AddDevice(lan: FarmLanRuntime, approver: LocalAccount, onJoined: () -> Unit) {
     var session by remember { mutableStateOf<PairingSession?>(null) }
+    var opening by remember { mutableStateOf(false) }
+    var failure by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
     DisposableEffect(Unit) { onDispose { session?.close() } }
     FarmOperationalSection("Add a device") {
         val open = session
         if (open == null) {
             Text("A phone or tablet on this network can ask to join. You approve it by typing the code it shows.", color = AnimalFarmTheme.colors.mutedInk)
-            SettingsButton("Add a device", true) { session = lan.openPairing(approver) }
+            failure?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            SettingsButton(if (opening) "Opening" else "Add a device", !opening) {
+                opening = true
+                failure = null
+                scope.launch {
+                    // Opening waits for the network worker, which may be mid-sync; never on the main thread.
+                    withContext(Dispatchers.IO) { runCatching { lan.openPairing(approver) } }
+                        .onSuccess { session = it }
+                        .onFailure { failure = it.message ?: "Adding a device could not start on this device" }
+                    opening = false
+                }
+            }
             return@FarmOperationalSection
         }
         val pending by open.pending.collectAsState()
