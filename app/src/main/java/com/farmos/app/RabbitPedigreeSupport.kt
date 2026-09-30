@@ -30,7 +30,7 @@ internal fun rabbitPedigreePorts(database: FarmOsDatabase, farmId: String, ops: 
         },
         coi = { buckId, doeId ->
             val view = coi.analyse(buckId, doeId)
-            RabbitCoiView(view.coefficient, view.generationsKnown, view.commonAncestors, view.conflictingParentage)
+            RabbitCoiView(view.coefficient, view.generationsKnown, view.commonAncestors, view.conflictingParentage, view.sireDateOfBirthEpochDay, view.sireLatestWeightGrams)
         },
     )
 }

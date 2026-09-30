@@ -1,5 +1,6 @@
 package com.farmos.app
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -40,14 +41,15 @@ class RabbitPedigreeScreensTest {
 
     private val luna = FarmSelectorOption("r1", "RB-1 · Luna")
     private val max = FarmSelectorOption("r2", "RB-2 · Max")
+    private val bruno = FarmSelectorOption("r3", "RB-3 · Bruno")
     private val links = mutableListOf<Triple<String, String, String>>()
     private val ports = RabbitPedigreePorts(
         searchRabbits = searchOf(luna, max),
         searchDoes = searchOf(luna),
-        searchBucks = searchOf(max),
+        searchBucks = searchOf(max, bruno),
         parents = { id -> if (links.any { it.first == id }) listOf(RabbitParentView("sire", "RB-2 · Max")) else emptyList() },
         link = { child, parent, relation -> links += Triple(child, parent, relation) },
-        coi = { _, _ -> RabbitCoiView(0.25, 1, listOf("RB-9 · Old Buck"), 0) },
+        coi = { buck, _ -> if (buck == "r3") RabbitCoiView(0.0, 0, emptyList(), 0) else RabbitCoiView(0.25, 1, listOf("RB-9 · Old Buck"), 0, 19_500, 3_250) },
     )
 
     private fun render() {
@@ -93,5 +95,28 @@ class RabbitPedigreeScreensTest {
         compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:r2").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-coi").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("Inbreeding of the kits (COI) 25.00% · 1 complete generation recorded").assertExists()
+    }
+
+    @Test
+    fun bucksAreComparedSideBySideForADoeWithoutRanking() {
+        render()
+        compose.onNode(hasClickAction() and hasText("Open Compare bucks")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GEN-007").assertExists()
+        compose.onNodeWithText("Choose a doe to compare bucks for.").assertExists()
+        waitForOption("farm-atom:FOS-ATOM-004:option:r1")
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:r1").performScrollTo().performClick()
+        listOf("r2", "r3").forEach { buck ->
+            waitForOption("farm-atom:FOS-ATOM-008:option:$buck")
+            compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:$buck").performScrollTo().performClick()
+            compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-candidate-coi:$buck").fetchSemanticsNodes().isNotEmpty() }
+        }
+        compose.onNodeWithText("Inbreeding of the kits (COI) 25.00% · 1 complete generation recorded").assertExists()
+        compose.onNodeWithText("Latest weight: 3.25 kg").assertExists()
+        compose.onNodeWithText("Born: 2023-05-23").assertExists()
+        compose.onNodeWithText("Born: Not recorded").assertExists()
+        compose.onNodeWithText("Inbreeding of the kits (COI) 0.00% · no complete generation recorded").assertExists()
+        compose.onNodeWithTag("rabbit-candidate-remove:r2").performScrollTo().performClick()
+        compose.onAllNodesWithTag("rabbit-candidate-coi:r2").assertCountEquals(0)
+        compose.onNodeWithTag("rabbit-candidate-coi:r3").assertExists()
     }
 }
