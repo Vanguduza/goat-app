@@ -45,12 +45,14 @@ class CustomerCommands(
         requireNotNull(database.customers().get(farmId, command.customerId)) { "Customer not found" }
         journal(context, UPDATE, "farm_customer", command.customerId, json.encodeToString(command)) {
             val current = requireNotNull(database.customers().get(farmId, command.customerId)) { "Customer not found" }
+            // A null phone keeps the number; an empty one clears it.
+            val phone = command.phone
             // The later change by business time wins, whatever order changes arrive in.
             if (current.updatedAtEpochMillis <= context.occurredAtEpochMillis) {
                 database.customers().upsert(
                     current.copy(
                         name = command.name?.trim() ?: current.name,
-                        phone = command.phone?.let { it.trim().ifBlank { null } } ?: current.phone,
+                        phone = if (phone == null) current.phone else phone.trim().ifBlank { null },
                         active = command.active ?: current.active,
                         updatedAtEpochMillis = context.occurredAtEpochMillis,
                         updatedByActorId = context.actorId,
