@@ -47,6 +47,10 @@ internal class LocalFarmDirectory(
 
     fun farms(): List<LocalFarmEntity> = database.localAccess().farms()
 
+    fun accounts(farmId: String): List<LocalAccount> = store.accounts(farmId)
+
+    fun account(farmId: String, accountId: String): LocalAccount? = store.account(farmId, accountId)
+
     /** The farm's Owner with [username], used by recovery; null never reveals which part did not match. */
     fun ownerByUsername(farmId: String, username: String): LocalAccount? {
         val normalised = username.trim().lowercase()

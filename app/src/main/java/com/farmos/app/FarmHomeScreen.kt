@@ -50,7 +50,12 @@ internal fun FarmHomeScreen(
         return
     }
     if (destination == "more") {
-        FarmMoreScreen(onOpen = { onOpen(it.toDestination()) }, onBack = { destination = "home" }, onSignOut = onSignOut)
+        FarmMoreScreen(
+            onOpen = { onOpen(it.toDestination()) },
+            onBack = { destination = "home" },
+            onSignOut = onSignOut,
+            onSettings = { onOpen(FarmDestination.Settings) },
+        )
         return
     }
 
@@ -124,6 +129,7 @@ internal fun FarmMoreScreen(
     onOpen: (FarmModule) -> Unit,
     onBack: () -> Unit,
     onSignOut: () -> Unit,
+    onSettings: (() -> Unit)? = null,
 ) {
     var showSignOutConfirmation by remember { mutableStateOf(false) }
     val cards = listOf(
@@ -144,6 +150,7 @@ internal fun FarmMoreScreen(
             cards.forEach { card ->
                 AnimalFarmQuickAction(card.title, { onOpen(card.module) })
             }
+            onSettings?.let { AnimalFarmQuickAction("Farm settings", it) }
             TextButton(onClick = onBack) { Text("Farm home") }
             TextButton(onClick = { showSignOutConfirmation = true }) { Text("Sign out") }
         }

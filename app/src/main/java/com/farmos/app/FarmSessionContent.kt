@@ -89,6 +89,14 @@ fun FarmSessionContent(
             onBack = backHome,
             onRequireReauth = onRequireReauth,
         )
+        FarmDestination.Settings -> SettingsHost(
+            directory = remember(app) { LocalFarmDirectory(app.database) },
+            database = app.database,
+            farmId = membership.farmId,
+            actorId = actorId,
+            deviceId = app.deviceId,
+            onBack = backHome,
+        )
         is FarmDestination.SyncQueue -> SyncQueueHost(
             view = dest.view,
             permitted = syncQueuesPermitted(membership.role),

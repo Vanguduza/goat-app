@@ -245,7 +245,12 @@ internal fun RoleAwareFarmHomeScreen(
         return
     }
     if (destination == "more") {
-        FarmMoreScreen(onOpen = { onOpen(it.toDestination()) }, onBack = { destination = "home" }, onSignOut = onSignOut)
+        FarmMoreScreen(
+            onOpen = { onOpen(it.toDestination()) },
+            onBack = { destination = "home" },
+            onSignOut = onSignOut,
+            onSettings = { onOpen(FarmDestination.Settings) },
+        )
         return
     }
     val onAnimals = { destination = "animals" }

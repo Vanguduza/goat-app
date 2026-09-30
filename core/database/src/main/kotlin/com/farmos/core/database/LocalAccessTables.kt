@@ -88,4 +88,7 @@ interface LocalAccessDao {
 
     @Query("SELECT * FROM access_audit WHERE farmId = :farmId ORDER BY atEpochMillis DESC, eventId LIMIT :limit")
     fun audit(farmId: String, limit: Int): List<AccessAuditEntity>
+
+    @Query("SELECT COUNT(*) FROM access_audit WHERE farmId = :farmId")
+    fun auditCount(farmId: String): Long
 }

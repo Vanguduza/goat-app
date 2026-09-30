@@ -23,6 +23,7 @@ fun FarmDestination.runtimeRouteContract(): FarmRuntimeRoute =
     when (this) {
         FarmDestination.Home -> FarmRuntimeRoute("home", "FOS-HOME-001")
         FarmDestination.Search -> FarmRuntimeRoute("home.search", "FOS-HOME-006")
+        FarmDestination.Settings -> FarmRuntimeRoute("settings", "FOS-ADMIN-001")
         is FarmDestination.HomePanel -> surface.runtimeRouteContract()
         is FarmDestination.Module -> module.runtimeRouteContract()
         is FarmDestination.Goat -> entry.runtimeRouteContract()
