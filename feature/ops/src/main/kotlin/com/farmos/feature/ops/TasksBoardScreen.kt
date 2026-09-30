@@ -39,9 +39,17 @@ data class TaskUiRow(
     val taskCode: String,
     val dueEpochDay: Long,
     val status: String,
+    /** The repeating task this occurrence belongs to (D-020), or null for a one-off task. */
+    val seriesId: String? = null,
+    /** The series day this occurrence stands for; its due day may have been moved. */
+    val occurrenceEpochDay: Long? = null,
+    val assigneeAccountId: String? = null,
+    val assigneeLabel: String? = null,
+    /** How the task repeats, in words; null for a task that does not repeat. */
+    val repeatLabel: String? = null,
 )
 
-private enum class TaskTab { TODAY, SCHEDULED, OVERDUE, COMPLETED, ALL, CALENDAR }
+private enum class TaskTab { TODAY, SCHEDULED, OVERDUE, COMPLETED, ALL, CALENDAR, MINE, REPEATING }
 
 /**
  * FOS-TASK-001 / 002 / 003 / 004 — shared Farm OS task reference family. [rows] hold every open
@@ -58,9 +66,18 @@ fun TasksBoardScreen(
     onOpenDetail: (taskId: String) -> Unit = {},
     entryPage: TaskEntryPage = TaskEntryPage.BOARD,
     completedCount: Int? = null,
+    /** Supervisors and management plan repeating and assigned work (D-020); everyone completes it. */
+    canPlanWork: Boolean = false,
+    currentAccountId: String? = null,
+    assignees: List<TaskAssigneeOption> = emptyList(),
+    series: List<TaskSeriesUiRow> = emptyList(),
+    onCreateSeries: (TaskSeriesDraft) -> Unit = {},
+    onEndSeries: (seriesId: String) -> Unit = {},
+    /** How far ahead repeating occurrences are listed; null when the board has no repeating tasks. */
+    repeatHorizonDays: Long? = null,
 ) {
     if (entryPage == TaskEntryPage.CREATE) {
-        CreateTaskScreen(busy = busy, error = error, onCreate = onCreate, onBack = onBack)
+        CreateTaskScreen(busy = busy, error = error, onCreate = onCreate, onBack = onBack, canPlanWork = canPlanWork, assignees = assignees, onCreateSeries = onCreateSeries)
         return
     }
     var tab by remember { mutableStateOf(TaskTab.TODAY) }
@@ -73,6 +90,8 @@ fun TasksBoardScreen(
         TaskTab.COMPLETED -> rows.filter { it.status == "done" }
         TaskTab.ALL -> rows
         TaskTab.CALENDAR -> rows.filter { it.status == "open" }.sortedWith(compareBy<TaskUiRow> { it.dueEpochDay }.thenBy { it.title }.thenBy { it.id })
+        TaskTab.MINE -> rows.filter { it.status == "open" && currentAccountId != null && it.assigneeAccountId == currentAccountId }
+        TaskTab.REPEATING -> emptyList()
     }
     val completedShown = rows.count { it.status == "done" }
 
@@ -101,6 +120,13 @@ fun TasksBoardScreen(
                 Modifier.fillMaxWidth().testTag("farm-screen:${taskTabScreenId(tab)}"),
                 verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
             ) {
+                if (repeatHorizonDays != null && series.isNotEmpty() && tab in setOf(TaskTab.SCHEDULED, TaskTab.ALL, TaskTab.CALENDAR)) {
+                    Text(
+                        "Repeating tasks are listed $repeatHorizonDays days ahead; see Repeating for each rule.",
+                        color = AnimalFarmTheme.colors.mutedInk,
+                        modifier = Modifier.testTag("task-repeat-horizon"),
+                    )
+                }
                 if ((tab == TaskTab.COMPLETED || tab == TaskTab.ALL) && completedCount != null && completedShown < completedCount) {
                     Text(
                         "Completed tasks · latest $completedShown of $completedCount",
@@ -108,7 +134,9 @@ fun TasksBoardScreen(
                         modifier = Modifier.testTag("task-completed-bound"),
                     )
                 }
-                if (visible.isEmpty()) {
+                if (tab == TaskTab.REPEATING) {
+                    TaskRecurrenceList(series, canPlanWork, busy, onEndSeries)
+                } else if (visible.isEmpty()) {
                     FarmIllustratedSectionSurface {
                         Text(emptyTaskMessage(tab), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         Text(emptyTaskHint(tab), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -147,7 +175,7 @@ fun TasksBoardScreen(
             }
 
             if (showCreate) {
-                CreateTaskCard(busy = busy, onCreate = onCreate) { showCreate = false }
+                CreateTaskCard(busy = busy, onCreate = onCreate, canPlanWork = canPlanWork, assignees = assignees, onCreateSeries = onCreateSeries) { showCreate = false }
             }
 
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
@@ -170,7 +198,11 @@ private fun TaskCard(
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(task.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Text(
-                    "${task.moduleCode} · ${task.taskCode}",
+                    listOfNotNull(
+                        "${task.moduleCode} · ${task.taskCode}",
+                        task.repeatLabel,
+                        task.assigneeLabel?.let { "Assigned to $it" },
+                    ).joinToString(" · "),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -198,6 +230,9 @@ fun CreateTaskScreen(
     error: String?,
     onCreate: (title: String, module: String, code: String, due: String) -> Unit,
     onBack: () -> Unit,
+    canPlanWork: Boolean = false,
+    assignees: List<TaskAssigneeOption> = emptyList(),
+    onCreateSeries: (TaskSeriesDraft) -> Unit = {},
 ) {
     FarmOperationalPage(
         screenId = "FOS-TASK-004",
@@ -205,7 +240,7 @@ fun CreateTaskScreen(
         subtitle = "Create a farm task. Species-specific capture stays inside its native module.",
         onBack = onBack,
     ) {
-        CreateTaskCard(busy = busy, onCreate = onCreate) {}
+        CreateTaskCard(busy = busy, onCreate = onCreate, canPlanWork = canPlanWork, assignees = assignees, onCreateSeries = onCreateSeries) {}
         error?.let { Text(it, color = AnimalFarmTheme.colors.critical) }
     }
 }
@@ -214,24 +249,49 @@ fun CreateTaskScreen(
 private fun CreateTaskCard(
     busy: Boolean,
     onCreate: (title: String, module: String, code: String, due: String) -> Unit,
+    canPlanWork: Boolean,
+    assignees: List<TaskAssigneeOption>,
+    onCreateSeries: (TaskSeriesDraft) -> Unit,
     onCreated: () -> Unit,
 ) {
     var title by remember { mutableStateOf("") }
     var module by remember { mutableStateOf("goat") }
     var code by remember { mutableStateOf("CHECK") }
     var due by remember { mutableStateOf(LocalDate.now().toString()) }
+    var repeat by remember { mutableStateOf(TaskRepeat.NONE) }
+    var interval by remember { mutableStateOf("2") }
+    var endDate by remember { mutableStateOf("") }
+    var assigneeId by remember { mutableStateOf<String?>(null) }
     FarmIllustratedSectionSurface {
         Text("Add task", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         OutlinedTextField(title, { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
         OutlinedTextField(module, { module = it }, label = { Text("Module") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
         OutlinedTextField(code, { code = it }, label = { Text("Task code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(due, { due = it }, label = { Text("Due date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        OutlinedTextField(due, { due = it }, label = { Text(if (repeat == TaskRepeat.NONE) "Due date" else "First day") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        if (canPlanWork) {
+            TaskPlanningFields(busy, assignees, repeat, { repeat = it }, interval, { interval = it }, endDate, { endDate = it }, assigneeId, { assigneeId = it })
+        }
         Button(
             onClick = {
-                onCreate(title, module, code, due)
+                if (repeat == TaskRepeat.NONE && assigneeId == null) {
+                    onCreate(title, module, code, due)
+                } else {
+                    onCreateSeries(
+                        TaskSeriesDraft(
+                            title = title.trim(),
+                            moduleCode = module.trim(),
+                            taskCode = code.trim(),
+                            startDate = LocalDate.parse(due),
+                            repeat = repeat,
+                            interval = if (repeat.takesInterval) interval.toInt() else 1,
+                            endDate = endDate.takeIf { repeat != TaskRepeat.NONE && it.isNotBlank() }?.let { LocalDate.parse(it) },
+                            assigneeAccountId = assigneeId,
+                        ),
+                    )
+                }
                 onCreated()
             },
-            enabled = !busy && title.isNotBlank() && module.isNotBlank() && code.isNotBlank() && runCatching { LocalDate.parse(due) }.isSuccess,
+            enabled = !busy && title.isNotBlank() && module.isNotBlank() && code.isNotBlank() && planningValid(repeat, interval, due, endDate),
             modifier = Modifier.fillMaxWidth(),
         ) { Text("Create task") }
     }
@@ -244,6 +304,8 @@ private fun taskTabScreenId(tab: TaskTab): String = when (tab) {
     TaskTab.COMPLETED -> "FOS-TASK-009"
     TaskTab.ALL -> "FOS-TASK-002"
     TaskTab.CALENDAR -> "FOS-TASK-010"
+    TaskTab.MINE -> "FOS-TASK-006"
+    TaskTab.REPEATING -> "FOS-TASK-011"
 }
 
 /** Calendar day heading: the ISO date, whether it is today or past, and its open task count. */
@@ -264,6 +326,8 @@ private fun taskTabLabel(tab: TaskTab, selected: Boolean): String {
         TaskTab.COMPLETED -> "Completed"
         TaskTab.ALL -> "All"
         TaskTab.CALENDAR -> "Calendar"
+        TaskTab.MINE -> "Assigned to me"
+        TaskTab.REPEATING -> "Repeating"
     }
     return if (selected) "$label · selected" else label
 }
@@ -275,6 +339,8 @@ private fun emptyTaskMessage(tab: TaskTab): String = when (tab) {
     TaskTab.COMPLETED -> "No completed tasks yet"
     TaskTab.ALL -> "No tasks on this device"
     TaskTab.CALENDAR -> "No open tasks to schedule"
+    TaskTab.MINE -> "Nothing assigned to you"
+    TaskTab.REPEATING -> "No repeating tasks"
 }
 
 private fun emptyTaskHint(tab: TaskTab): String = when (tab) {
@@ -284,9 +350,14 @@ private fun emptyTaskHint(tab: TaskTab): String = when (tab) {
     TaskTab.COMPLETED -> "Finished work remains visible for farm history."
     TaskTab.ALL -> "Open and completed farm work will appear here."
     TaskTab.CALENDAR -> "Open farm work appears here under its due date."
+    TaskTab.MINE -> "Open work assigned to your account will appear here."
+    TaskTab.REPEATING -> "Repeating farm work will appear here."
 }
 
-/** FOS-TASK-003 — task detail. Complete is the only authorized write here. */
+/**
+ * FOS-TASK-003 — task detail. Anyone may complete an open task; a planner may also edit an open occurrence
+ * of a repeating task (FOS-TASK-005). A completed task is never edited.
+ */
 @Composable
 fun TaskDetailScreen(
     task: TaskUiRow?,
@@ -294,6 +365,8 @@ fun TaskDetailScreen(
     error: String?,
     onComplete: (String) -> Unit,
     onBack: () -> Unit,
+    canPlanWork: Boolean = false,
+    onEdit: () -> Unit = {},
 ) {
     val today = LocalDate.now().toEpochDay()
     FarmOperationalPage(
@@ -315,12 +388,17 @@ fun TaskDetailScreen(
                 },
                 color = if (overdue) AnimalFarmTheme.colors.critical else AnimalFarmTheme.colors.mutedInk,
             )
+            task.repeatLabel?.let { Text("Repeats: $it", modifier = Modifier.testTag("task-detail-repeating")) }
+            task.assigneeLabel?.let { Text("Assigned to $it") }
             if (task.status == "open") {
                 Button(
                     onClick = { onComplete(task.id) },
                     enabled = !busy,
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text("Mark done") }
+                if (task.seriesId != null && canPlanWork) {
+                    TextButton(onClick = onEdit, enabled = !busy, modifier = Modifier.fillMaxWidth().testTag("task-detail-edit")) { Text("Edit") }
+                }
             }
         }
         error?.let { Text(it, color = AnimalFarmTheme.colors.critical) }

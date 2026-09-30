@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "95291c241b204dbd871562eb67c36a7d543879af",
+  "tested_commit": "412d8bd24461a71a2dc12189a161ea5ea6529d14",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 281
+    "registered_ids_mentioned_in_kotlin": 284
   },
   "top_level": {
     "farm_modules": [
@@ -1136,8 +1136,8 @@
         },
         {
           "value": "SCHEDULED",
-          "refs": 5,
-          "transition_refs": 0,
+          "refs": 6,
+          "transition_refs": 1,
           "render_only_candidate": false
         },
         {
@@ -1154,12 +1154,24 @@
         },
         {
           "value": "ALL",
-          "refs": 6,
-          "transition_refs": 1,
+          "refs": 7,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
           "value": "CALENDAR",
+          "refs": 7,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "MINE",
+          "refs": 5,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "REPEATING",
           "refs": 6,
           "transition_refs": 1,
           "render_only_candidate": false

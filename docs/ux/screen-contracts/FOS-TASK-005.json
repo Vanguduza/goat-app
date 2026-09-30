@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-TASK-005",
+  "registry_name": "Edit Task",
+  "feature_ids": [],
+  "status": "DRAFT",
+  "user_job": "Change one repeating task: just this occurrence (retitle, reassign, move a day), this and future occurrences (including how it repeats), or every occurrence, without changing work already done.",
+  "personas_and_grants": [
+    "OWNER, MANAGER, SUPERVISOR: MANAGE_WORKERS (edit)",
+    "WORKER, VIEWER: no edit entry; completion only"
+  ],
+  "scope": {
+    "farm_source": "Signed-in farm session (membership.farmId)",
+    "species_kind": "N/A: shared operations task",
+    "subject": "One open occurrence of a task series",
+    "sensitive_fields": []
+  },
+  "navigation": {
+    "route": "Tasks > task detail (FOS-TASK-003) > Edit",
+    "entry_points": [
+      "TaskDetailScreen Edit (open repeating occurrence, planner only)"
+    ],
+    "arguments": [
+      "seriesId",
+      "occurrenceEpochDay"
+    ],
+    "deep_link_authorization": "No deep link; entry hidden without MANAGE_WORKERS and TaskPlanning.edit refuses without it",
+    "back_and_draft_behavior": "Back returns to the task; unsaved edits are discarded",
+    "aliases": []
+  },
+  "design": {
+    "recipe": "P07",
+    "reference_ids": [],
+    "native_golden_family": "UNREVIEWED",
+    "token_version": "UNREVIEWED",
+    "ordered_sections": [
+      "Change (scope)",
+      "Task (title, due date for this occurrence or repeat for later scopes, assignee)",
+      "Save changes"
+    ],
+    "shared_components": [
+      "FarmOperationalPage",
+      "FarmOperationalSection"
+    ],
+    "illustration_use": "None",
+    "copy": {},
+    "adaptive_layout": {
+      "phone": "Single column",
+      "tablet": "UNREVIEWED",
+      "large_text": "UNREVIEWED",
+      "outdoor": "UNREVIEWED"
+    }
+  },
+  "fields": [
+    {
+      "key": "scope",
+      "label": "Change",
+      "type": "choice THIS/THIS_AND_FUTURE/SERIES",
+      "unit": "N/A",
+      "required": true,
+      "bounds_source": "D-020",
+      "default_source": "THIS",
+      "editable_by": [
+        "MANAGE_WORKERS"
+      ],
+      "validation": [
+        "THIS_AND_FUTURE at the first occurrence is sent as SERIES"
+      ]
+    },
+    {
+      "key": "title",
+      "label": "Title",
+      "type": "text",
+      "unit": "N/A",
+      "required": true,
+      "bounds_source": "TaskSeriesRules.edit",
+      "default_source": "Occurrence title",
+      "editable_by": [
+        "MANAGE_WORKERS"
+      ],
+      "validation": [
+        "not blank"
+      ]
+    },
+    {
+      "key": "dueDate",
+      "label": "Due date",
+      "type": "ISO date",
+      "unit": "day",
+      "required": true,
+      "bounds_source": "TaskSeriesRules.edit (moving only for THIS)",
+      "default_source": "Occurrence due day",
+      "editable_by": [
+        "MANAGE_WORKERS"
+      ],
+      "validation": [
+        "valid date",
+        "only with scope THIS"
+      ]
+    },
+    {
+      "key": "repeat",
+      "label": "Repeat",
+      "type": "choice of RecurrenceKind (not NONE) or keep",
+      "unit": "N/A",
+      "required": false,
+      "bounds_source": "TaskRecurrence (interval 2-365)",
+      "default_source": "Keep how it repeats",
+      "editable_by": [
+        "MANAGE_WORKERS"
+      ],
+      "validation": [
+        "not with scope THIS",
+        "interval 2-365 for every N"
+      ]
+    },
+    {
+      "key": "assignee",
+      "label": "Assign to",
+      "type": "local account or nobody",
+      "unit": "N/A",
+      "required": false,
+      "bounds_source": "D-020",
+      "default_source": "Current assignee",
+      "editable_by": [
+        "MANAGE_WORKERS"
+      ],
+      "validation": [
+        "account must be on this farm"
+      ]
+    }
+  ],
+  "queries": [
+    {
+      "name": "open occurrence row",
+      "read_model": "TaskSeriesQueries.openOccurrences via TaskPlanning",
+      "loading_empty_error": "Opened from a loaded row; errors shown on save",
+      "freshness": "Local Room",
+      "offline_source": "Local Room"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Save changes",
+      "intent": "Edit the series at this occurrence",
+      "permission": "MANAGE_WORKERS",
+      "command_or_destination": "task.series_edit.v1 (TaskSeriesCommands.edit)",
+      "validation": [
+        "TaskSeriesRules.edit",
+        "completed occurrence refused"
+      ],
+      "effects": [
+        "THIS: stored occurrence row",
+        "THIS_AND_FUTURE: series ends the day before, new series continues",
+        "SERIES: series updated; completed rows unchanged"
+      ],
+      "idempotency": "Journalled once per save; replay applies the same edit",
+      "success_receipt": "Returns to the task board with the change listed",
+      "failure_and_recovery": "Error shown; nothing written"
+    }
+  ],
+  "state_matrix": [
+    {
+      "state": "content",
+      "fixture": "Open daily occurrence",
+      "expected_ui": "Scope choice, title, due date, assignee",
+      "test_id": "TaskViewRuntimeNavigationTest.editingARepeatingTaskOffersEachScopeAndMovesOnlyThisOccurrence"
+    }
+  ],
+  "not_applicable_states": [
+    "Completed occurrence: no edit entry (history kept)"
+  ],
+  "accessibility_tests": [],
+  "functional_tests": [
+    "TaskSeriesCommandsTest",
+    "TaskPlanningTest"
+  ],
+  "linked_routes": [
+    "FOS-TASK-003"
+  ],
+  "guide_and_resource_links": [],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": null,
+  "notes": "feature_ids left empty: no canonical feature-ID catalogue maps D-020 screens yet (ANIMAL_FARM_PROGRESS_LEDGER). UNREVIEWED design items await visual-lock review; not design-ready."
+}

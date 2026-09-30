@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "95291c241b204dbd871562eb67c36a7d543879af",
-  "source_fingerprint": "sha256:1265e78c5050883de4fe2d4bb8316610352ef1606f99d51c88e9a448cbe36be4",
+  "tested_commit": "412d8bd24461a71a2dc12189a161ea5ea6529d14",
+  "source_fingerprint": "sha256:9e39c90dedc94a43e5449f4abf43ea41054566ee8a147563f8c929801c1bc010",
   "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36698526454,
+  "foundation_run_id": 36703274582,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -132,10 +132,14 @@
       "app/src/test/java/com/farmos/app/TaskViewRuntimeNavigationTest.kt": [
         "FOS-TASK-001",
         "FOS-TASK-002",
+        "FOS-TASK-004",
+        "FOS-TASK-005",
+        "FOS-TASK-006",
         "FOS-TASK-007",
         "FOS-TASK-008",
         "FOS-TASK-009",
-        "FOS-TASK-010"
+        "FOS-TASK-010",
+        "FOS-TASK-011"
       ],
       "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt": [
         "FOS-ATOM-006",
@@ -479,10 +483,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 26,
-    "rendered_traversal_screen_count": 194,
+    "rendered_traversal_screen_count": 198,
     "rendered_owner_screen_count": 75,
     "route_contract_screen_count": 61,
-    "combined_screen_count": 281,
+    "combined_screen_count": 284,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -701,10 +705,14 @@
       "FOS-SYNC-018",
       "FOS-TASK-001",
       "FOS-TASK-002",
+      "FOS-TASK-004",
+      "FOS-TASK-005",
+      "FOS-TASK-006",
       "FOS-TASK-007",
       "FOS-TASK-008",
       "FOS-TASK-009",
       "FOS-TASK-010",
+      "FOS-TASK-011",
       "FOS-WATER-009"
     ],
     "rendered_owner_screen_ids": [
@@ -862,18 +870,17 @@
       "FOS-HOME-012-F",
       "FOS-HOME-012-G",
       "FOS-HOME-012-H",
-      "FOS-TASK-003",
-      "FOS-TASK-004"
+      "FOS-TASK-003"
     ],
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 194,
+    "runtime_reachability_executed": 198,
     "entry_action_emission_executed": 26,
     "rendered_surface_owners_executed": 75,
     "route_contracts_executed": 61,
     "parameter_scope_executed": true,
-    "return_restoration_executed": 194,
+    "return_restoration_executed": 198,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
