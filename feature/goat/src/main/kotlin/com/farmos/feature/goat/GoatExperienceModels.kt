@@ -1,5 +1,6 @@
 package com.farmos.feature.goat
 
+import androidx.compose.runtime.Composable
 import com.farmos.core.design.FarmSelectorSearch
 import com.farmos.core.design.NoFarmSelectorSearch
 import com.farmos.domain.goat.GoatSearchResult
@@ -73,6 +74,8 @@ internal data class GoatExperienceActions(
     val searchSires: FarmSelectorSearch = NoFarmSelectorSearch,
     /** Reads a prospective mating from the local pedigree (D-023). */
     val mateAnalysis: GoatMateAnalysis = NoGoatMateAnalysis,
+    /** Photos and documents of a goat on its profile (D-015); the host renders them. */
+    val profileAttachments: @Composable (animalId: String, active: Boolean) -> Unit = { _, _ -> },
 )
 
 internal fun goatDisplayName(goat: GoatSnapshot): String = goat.name?.takeIf { it.isNotBlank() } ?: goat.tag

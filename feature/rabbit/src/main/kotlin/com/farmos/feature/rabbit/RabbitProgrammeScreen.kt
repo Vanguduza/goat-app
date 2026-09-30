@@ -101,6 +101,8 @@ fun RabbitProgrammeScreen(
     rabbits: List<RabbitAnimalView> = emptyList(),
     /** A rabbit's exit record and reversal (D-022), shown on its profile. */
     rabbitExit: @Composable (RabbitAnimalView) -> Unit = {},
+    /** Photos and documents on a rabbit's profile (D-015). */
+    rabbitAttachments: @Composable (RabbitAnimalView) -> Unit = {},
     /** Rabbit pedigree and the kits' inbreeding (D-023); null hides both. */
     pedigree: RabbitPedigreePorts? = null,
 ) {
@@ -131,7 +133,7 @@ fun RabbitProgrammeScreen(
             if (rabbit == null) {
                 LaunchedEffect(profileId) { page = RabbitPage.ANIMALS }
             } else {
-                RabbitProfileScreen(rabbit, rabbitExit) { page = RabbitPage.ANIMALS }
+                RabbitProfileScreen(rabbit, rabbitExit, { page = RabbitPage.ANIMALS }, rabbitAttachments)
             }
         }
 

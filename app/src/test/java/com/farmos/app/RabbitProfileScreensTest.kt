@@ -44,6 +44,7 @@ class RabbitProfileScreensTest {
                         val standing = if (rabbit.active) null else SpeciesStandingExit("exit-9", "Culled on 2026-09-20 · Poor growth")
                         SpeciesExitContent(SpeciesAnimalRow(rabbit.animalId, rabbit.label, rabbit.active), standing, "USD", false, null, onRecord, onReverse)
                     },
+                    rabbitAttachments = { rabbit -> AttachmentsSection(emptyList(), canAttach = rabbit.active, busy = false, message = null, onAddPhoto = {}, onAddDocument = {}) },
                 )
             }
         }
@@ -58,6 +59,8 @@ class RabbitProfileScreensTest {
         compose.onNodeWithTag("rabbit:r1").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-RABBIT-003").assertExists()
         compose.onNodeWithText("In the rabbitry").assertExists()
+        // Photos and documents of the doe (D-015) sit on her profile.
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-016:photo").performScrollTo().assertExists()
         compose.onNodeWithTag("species-exit-kind:CULL").performScrollTo().performClick()
         compose.onNodeWithTag("species-exit-reason").performScrollTo().performTextInput("Poor mothering")
         compose.onNodeWithTag("species-exit-continue").performScrollTo().performClick()

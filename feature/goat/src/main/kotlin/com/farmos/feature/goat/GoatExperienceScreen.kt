@@ -75,6 +75,7 @@ internal fun GoatExperienceScreen(
             state = state,
             onOpen = { page = it },
             onBack = { page = GoatPage.DASHBOARD },
+            attachments = actions.profileAttachments,
         )
         GoatPage.REGISTER -> GoatRegisterScreen(actions.onRegister) { page = GoatPage.DASHBOARD }
         GoatPage.WEIGHT -> GoatWeightScreen(
@@ -402,6 +403,7 @@ private fun GoatProfileScreen(
     state: GoatSliceUiState,
     onOpen: (GoatPage) -> Unit,
     onBack: () -> Unit,
+    attachments: @Composable (animalId: String, active: Boolean) -> Unit = { _, _ -> },
 ) {
     val goat = state.selected
     IllustratedGoatPage("Goat profile", "FOS-GOAT-003", onBack) {
@@ -420,6 +422,7 @@ private fun GoatProfileScreen(
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         GoatHistoryCard(goat)
                         GoatRecordLinks(goat, onOpen)
+                        attachments(goat.animalId, goat.status == GoatStatus.ACTIVE)
                     }
                 }
             } else {
@@ -428,6 +431,7 @@ private fun GoatProfileScreen(
                     GoatProfileActions(goat, onOpen)
                     GoatHistoryCard(goat)
                     GoatRecordLinks(goat, onOpen)
+                    attachments(goat.animalId, goat.status == GoatStatus.ACTIVE)
                 }
             }
         }

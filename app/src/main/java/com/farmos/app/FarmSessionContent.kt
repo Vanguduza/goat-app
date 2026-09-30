@@ -243,6 +243,7 @@ fun FarmSessionContent(
                 exitFor = { rabbit, onRecorded ->
                     SpeciesExitHost(app.database, membership.farmId, SpeciesAnimalRow(rabbit.animalId, rabbit.label, rabbit.active), null, ::context, onRecorded, onBack = {})
                 },
+                attachmentsFor = { rabbit -> AnimalAttachmentsHost(app.database, membership.farmId, rabbit.animalId, canAttach = rabbit.active, ::context) },
             )
             FarmModule.INVENTORY -> InventoryModuleHost(
                 farmId = membership.farmId,
