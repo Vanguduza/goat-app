@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.MeasurementEntity
+import com.farmos.core.database.MoneyRecordEntity
 import com.farmos.domain.access.Permission
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -81,5 +82,26 @@ class FarmReportsTest {
         assertEquals("goat,T-a,'=cmd,female,active,2024-10-04,,", lines[1])
         assertEquals("sheep,T-b,\"Dora, the ewe\",female,active,2024-10-04,51.250,", lines[2])
         assertEquals("", lines[3])
+    }
+
+    @Test
+    fun moneyIsTotalledPerCurrencyOverEveryRecordAndExported(): Unit = runBlocking {
+        // More records than any capped list shows, in two currencies that are never added together.
+        (1..120).forEach { database.money().insert(MoneyRecordEntity("i$it", farm, "income", "sales", 1_000, "USD", 20_000L + it, "Sale")) }
+        database.money().insert(MoneyRecordEntity("e1", farm, "expense", "purchase", 2_550, "USD", 20_001, "=feed"))
+        database.money().insert(MoneyRecordEntity("z1", farm, "income", "sales", 5_000, "ZAR", 20_002, null))
+        database.money().insert(MoneyRecordEntity("x1", otherFarm, "income", "sales", 9_999, "USD", 20_002, null))
+
+        val metrics = moneyMetrics(database.reports().moneyTotals(farm)).associateBy { it.definition.id }
+        assertEquals(setOf("money-expense-USD", "money-income-USD", "money-income-ZAR"), metrics.keys)
+        assertEquals("1200.00 USD", metricValueText(metrics.getValue("money-income-USD")))
+        assertEquals(120, metrics.getValue("money-income-USD").included)
+        assertEquals("25.50 USD", metricValueText(metrics.getValue("money-expense-USD")))
+        assertEquals("50.00 ZAR", metricValueText(metrics.getValue("money-income-ZAR")))
+
+        val lines = moneyRecordsCsv(database.reports().moneyRecords(farm)).split("\r\n")
+        assertEquals("Date,Kind,Category,Amount,Currency,Note", lines[0])
+        assertEquals(123, lines.size - 2)
+        assertTrue(lines.contains("2024-10-05,expense,purchase,25.50,USD,'=feed"))
     }
 }

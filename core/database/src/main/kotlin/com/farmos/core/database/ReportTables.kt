@@ -34,4 +34,21 @@ interface FarmReportDao {
         """,
     )
     suspend fun herdRegister(farmId: String): List<HerdRegisterRow>
+
+    /** Income and expense totals per currency over every money record; amounts are never converted. */
+    @Query(
+        """
+        SELECT kind, currency, SUM(amountMinor) AS amountMinor, COUNT(*) AS records
+        FROM money_records WHERE farmId = :farmId
+        GROUP BY kind, currency ORDER BY currency, kind
+        """,
+    )
+    suspend fun moneyTotals(farmId: String): List<MoneyTotalRow>
+
+    /** Every money record on the farm, oldest first, for export. */
+    @Query("SELECT * FROM money_records WHERE farmId = :farmId ORDER BY occurredEpochDay, id")
+    suspend fun moneyRecords(farmId: String): List<MoneyRecordEntity>
 }
+
+/** Money of one kind (income or expense) in one currency, over every record. */
+data class MoneyTotalRow(val kind: String, val currency: String, val amountMinor: Long, val records: Int)
