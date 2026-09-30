@@ -7,7 +7,6 @@ import com.farmos.core.database.FarmAssetEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.CattleCalvingEntity
 import com.farmos.core.database.CattlePdEntity
-import com.farmos.core.database.CattleServiceEntity
 import com.farmos.core.database.FamachaScoreEntity
 import com.farmos.core.database.FeedIssueEntity
 import com.farmos.core.database.FormularyItemEntity
@@ -75,7 +74,6 @@ import com.farmos.core.database.SheepMarkingEntity
 import com.farmos.core.database.SheepWeaningEntity
 import com.farmos.core.database.SheepWoolEntity
 import com.farmos.core.database.SaleRecordEntity
-import com.farmos.core.database.SheepJoiningEntity
 import com.farmos.core.database.SheepLambingEntity
 import com.farmos.core.database.SheepScanEntity
 import com.farmos.core.database.SupplierEntity
@@ -108,6 +106,7 @@ import com.farmos.domain.goat.RecordGoatPregnancy
 import com.farmos.domain.ops.AcceptHealthPack
 import com.farmos.domain.ops.AddHealthPackSlot
 import com.farmos.domain.ops.ApplyHealthPack
+import com.farmos.domain.ops.BreedingDueSchedule
 import com.farmos.domain.ops.AssignAnimalIdentifier
 import com.farmos.domain.ops.CloseCattleLot
 import com.farmos.domain.ops.PlaceCattleLot
@@ -1064,11 +1063,11 @@ class RoomOpsRepository(
         val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Joining needs a sheep mob" }
         require(group.speciesCode == "sheep") { "Joining needs a sheep mob" }
         enqueue(context, "sheep.record_joining.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
-            database.lifecycle().insertJoining(SheepJoiningEntity(command.joiningId, farmId, command.groupId, command.startedEpochDay))
-            database.tasks().insert(TaskEntity(command.scanTaskId, farmId, "sheep", "SCAN", "Pregnancy scanning", command.startedEpochDay + 70, "open", null, null, null, context.occurredAtEpochMillis))
-            database.tasks().insert(TaskEntity(command.preLambTaskId, farmId, "sheep", "PRE_LAMB", "Pre-lambing vaccination / nutrition", command.startedEpochDay + 140, "open", null, null, null, context.occurredAtEpochMillis))
-            database.tasks().insert(TaskEntity(command.paddockTaskId, farmId, "sheep", "LAMBING_PADDOCK", "Lambing paddock set-up", command.startedEpochDay + 140, "open", null, null, null, context.occurredAtEpochMillis))
-            database.tasks().insert(TaskEntity(command.lambingTaskId, farmId, "sheep", "EXPECTED_LAMBING", "Expected lambing start", command.startedEpochDay + 147, "open", null, null, null, context.occurredAtEpochMillis))
+            // v1 kept its fixed lambing day; new joinings use sheep.record_joining.v2 (BreedingDueCommands).
+            database.writeSheepJoining(
+                farmId, command.joiningId, command.groupId, command.startedEpochDay, command.startedEpochDay + BreedingDueSchedule.V1_SHEEP_LAMBING_DAYS,
+                command.scanTaskId, command.preLambTaskId, command.paddockTaskId, command.lambingTaskId, context.occurredAtEpochMillis,
+            )
         }
         return LocalCommandResult(context.mutationId, command.joiningId, true)
     }
@@ -1098,10 +1097,11 @@ class RoomOpsRepository(
         val cow = requireNotNull(database.animals().get(farmId, command.animalId)) { "Active cow not found" }
         require(cow.speciesCode == "cattle" && cow.status == "active") { "Active cow not found" }
         enqueue(context, "cattle.record_service.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
-            database.lifecycle().insertService(CattleServiceEntity(command.serviceId, farmId, command.animalId, command.method, command.occurredEpochDay))
-            database.tasks().insert(TaskEntity(command.pdTaskId, farmId, "cattle", "PD", "Pregnancy diagnosis (PD)", command.occurredEpochDay + 32, "open", command.animalId, null, null, context.occurredAtEpochMillis))
-            database.tasks().insert(TaskEntity(command.paddockTaskId, farmId, "cattle", "CALVING_PADDOCK", "Calving paddock / close-up pen", command.occurredEpochDay + 259, "open", command.animalId, null, null, context.occurredAtEpochMillis))
-            database.tasks().insert(TaskEntity(command.calvingTaskId, farmId, "cattle", "EXPECTED_CALVING", "Expected calving", command.occurredEpochDay + 280, "open", command.animalId, null, null, context.occurredAtEpochMillis))
+            // v1 kept its fixed calving day; new services use cattle.record_service.v2 (BreedingDueCommands).
+            database.writeCattleService(
+                farmId, command.serviceId, command.animalId, command.method, command.occurredEpochDay, command.occurredEpochDay + BreedingDueSchedule.V1_CATTLE_CALVING_DAYS,
+                command.pdTaskId, command.paddockTaskId, command.calvingTaskId, context.occurredAtEpochMillis,
+            )
         }
         return LocalCommandResult(context.mutationId, command.serviceId, true)
     }

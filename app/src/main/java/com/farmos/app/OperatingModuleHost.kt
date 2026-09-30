@@ -10,6 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.data.herd.BreedingDueCommands
 import com.farmos.data.herd.RoomHerdRepository
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.AcceptHealthPack
@@ -22,7 +23,7 @@ import com.farmos.domain.ops.RecordCattleBcs
 import com.farmos.domain.ops.RecordCattleCalving
 import com.farmos.domain.ops.RecordCattleMilk
 import com.farmos.domain.ops.RecordCattlePd
-import com.farmos.domain.ops.RecordCattleService
+import com.farmos.domain.ops.RecordCattleServiceV2
 import com.farmos.domain.ops.RecordCattleDryOff
 import com.farmos.domain.ops.RecordCattleLocomotion
 import com.farmos.domain.ops.RecordCattleScc
@@ -33,7 +34,7 @@ import com.farmos.domain.ops.RecordSheepFootrot
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordMoney
-import com.farmos.domain.ops.RecordSheepJoining
+import com.farmos.domain.ops.RecordSheepJoiningV2
 import com.farmos.domain.ops.RecordSheepLambing
 import com.farmos.domain.ops.RecordSheepMarking
 import com.farmos.domain.ops.RecordSheepScan
@@ -42,6 +43,7 @@ import com.farmos.domain.ops.RecordSheepWool
 import com.farmos.domain.ops.AddHealthPackSlot
 import com.farmos.domain.ops.ApplyHealthPack
 import com.farmos.domain.ops.AssignAnimalIdentifier
+import com.farmos.domain.ops.GestationSpecies
 import com.farmos.domain.ops.CloseCattleLot
 import com.farmos.domain.ops.IssueInventoryLot
 import com.farmos.domain.ops.LinkPedigree
@@ -210,10 +212,12 @@ fun OperatingModuleHost(
                             actions = SheepOperationsActions(
                                 onJoining = { groupId, day ->
                                     run {
-                                        ops.recordJoining(
-                                            RecordSheepJoining(
-                                                joiningId = UUID.randomUUID().toString(), groupId = groupId,
-                                                startedEpochDay = LocalDate.parse(day).toEpochDay(),
+                                        // The expected lambing day is set here from the farm's sheep gestation (D-019) and carried.
+                                        val started = LocalDate.parse(day).toEpochDay()
+                                        BreedingDueCommands(database, farmId).recordJoining(
+                                            RecordSheepJoiningV2(
+                                                joiningId = UUID.randomUUID().toString(), groupId = groupId, startedEpochDay = started,
+                                                expectedLambingEpochDay = started + database.gestationPeriod(farmId, GestationSpecies.SHEEP).typicalDays,
                                                 scanTaskId = UUID.randomUUID().toString(), preLambTaskId = UUID.randomUUID().toString(),
                                                 paddockTaskId = UUID.randomUUID().toString(), lambingTaskId = UUID.randomUUID().toString(),
                                             ),
@@ -332,9 +336,12 @@ fun OperatingModuleHost(
                             actions = CattleOperationsActions(
                                 onService = { animalId, method, day ->
                                     run {
-                                        ops.recordCattleService(
-                                            RecordCattleService(
-                                                UUID.randomUUID().toString(), animalId, method, LocalDate.parse(day).toEpochDay(),
+                                        // The expected calving day is set here from the farm's cattle gestation (D-019) and carried.
+                                        val served = LocalDate.parse(day).toEpochDay()
+                                        BreedingDueCommands(database, farmId).recordCattleService(
+                                            RecordCattleServiceV2(
+                                                UUID.randomUUID().toString(), animalId, method, served,
+                                                served + database.gestationPeriod(farmId, GestationSpecies.CATTLE).typicalDays,
                                                 UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                                             ),
                                             newContext(),
