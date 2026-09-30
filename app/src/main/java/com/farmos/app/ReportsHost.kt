@@ -29,6 +29,8 @@ import com.farmos.core.design.FarmVisualClass
 import com.farmos.domain.ops.FarmCsv
 import com.farmos.domain.ops.MetricDefinition
 import com.farmos.domain.ops.MetricResult
+import com.farmos.core.database.BirthTotalRow
+import com.farmos.core.database.HealthTotalRow
 import com.farmos.core.database.MoneyRecordEntity
 import com.farmos.core.database.MoneyTotalRow
 import com.farmos.domain.ops.FarmCurrency
@@ -82,6 +84,28 @@ internal fun moneyMetrics(totals: List<MoneyTotalRow>): List<MetricResult> = tot
     )
 }
 
+private val youngNames = mapOf("goat" to "Kids", "sheep" to "Lambs", "cattle" to "Calves", "rabbit" to "Kits")
+private val birthEvents = mapOf("goat" to "kiddings", "sheep" to "lambings", "cattle" to "calvings", "rabbit" to "kindlings")
+
+/** Births per species over every recorded birth event (D-026); species with none recorded are left out. */
+internal fun birthMetrics(totals: List<BirthTotalRow>): List<MetricResult> = totals.filter { it.events > 0 }.flatMap { row ->
+    val young = youngNames[row.speciesCode] ?: row.speciesCode
+    val event = birthEvents[row.speciesCode] ?: "births"
+    val scope = "This farm · every recorded ${event.dropLast(1)}"
+    listOf(
+        MetricResult.count(MetricDefinition("births-${row.speciesCode}", "${event.replaceFirstChar { it.uppercase() }} recorded", "Count of ${event.dropLast(1)} records", "records", "All time", scope), row.events),
+        MetricResult(MetricDefinition("born-alive-${row.speciesCode}", "$young born alive", "Sum of live young on each ${event.dropLast(1)} record", "animals", "All time", scope), row.live, row.events, 0),
+        MetricResult(MetricDefinition("born-dead-${row.speciesCode}", "$young born dead", "Sum of dead young on each ${event.dropLast(1)} record", "animals", "All time", scope), row.dead, row.events, 0),
+    )
+}
+
+/** Health activity over every record, and the withdrawal windows running today (D-026). */
+internal fun healthMetrics(totals: HealthTotalRow): List<MetricResult> = listOf(
+    MetricResult.count(MetricDefinition("health-observations", "Health observations", "Count of health observation records", "records", "All time", "This farm · all species"), totals.observations),
+    MetricResult.count(MetricDefinition("health-treatments", "Treatments", "Count of treatment records", "records", "All time", "This farm · all species"), totals.treatments),
+    MetricResult.count(MetricDefinition("health-withdrawals", "Withdrawals running", "Count of withdrawal windows whose last day is today or later", "windows", "Today", "This farm · all species"), totals.activeWithdrawals),
+)
+
 /** The metric value in its declared unit; weights are stored in grams and money in minor units. */
 internal fun metricValueText(result: MetricResult): String {
     val unit = result.definition.unit
@@ -123,12 +147,17 @@ internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExpo
     val context = LocalContext.current
     var rows by remember(farmId) { mutableStateOf<List<HerdRegisterRow>?>(null) }
     var money by remember(farmId) { mutableStateOf(emptyList<MoneyTotalRow>()) }
+    var more by remember(farmId) { mutableStateOf(emptyList<MetricResult>()) }
     var pending by remember { mutableStateOf(REPORT_HERD) }
     var failure by remember { mutableStateOf<String?>(null) }
     var exportMessage by remember { mutableStateOf<String?>(null) }
     var exporting by remember { mutableStateOf(false) }
     LaunchedEffect(farmId) {
-        runCatching { money = database.reports().moneyTotals(farmId); database.reports().herdRegister(farmId) }.onSuccess { rows = it }.onFailure { failure = it.message ?: "Records could not be read" }
+        runCatching {
+            money = database.reports().moneyTotals(farmId)
+            more = birthMetrics(database.reports().birthTotals(farmId)) + healthMetrics(database.reports().healthTotals(farmId, LocalDate.now().toEpochDay()))
+            database.reports().herdRegister(farmId)
+        }.onSuccess { rows = it }.onFailure { failure = it.message ?: "Records could not be read" }
     }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri: Uri? ->
         if (uri == null) {
@@ -154,7 +183,7 @@ internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExpo
         }
     }
     ReportsScreen(
-        metrics = rows?.let { herdMetrics(it) + moneyMetrics(money) },
+        metrics = rows?.let { herdMetrics(it) + more + moneyMetrics(money) },
         failure = failure,
         canExport = canExport,
         exporting = exporting,

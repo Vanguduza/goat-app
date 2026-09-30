@@ -7,7 +7,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.MeasurementEntity
+import com.farmos.core.database.KiddingEntity
 import com.farmos.core.database.MoneyRecordEntity
+import com.farmos.core.database.SheepLambingEntity
+import com.farmos.core.database.WithdrawalWindowEntity
 import com.farmos.domain.access.Permission
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -103,5 +106,27 @@ class FarmReportsTest {
         assertEquals("Date,Kind,Category,Amount,Currency,Note", lines[0])
         assertEquals(123, lines.size - 2)
         assertTrue(lines.contains("2024-10-05,expense,purchase,25.50,USD,'=feed"))
+    }
+
+    @Test
+    fun birthsAndHealthAreCountedOverEveryRecord(): Unit = runBlocking {
+        database.kidding().insert(KiddingEntity("k1", farm, "doe-1", 3, 2, 1, 20_100))
+        database.kidding().insert(KiddingEntity("k2", farm, "doe-2", 2, 2, 0, 20_110))
+        database.kidding().insert(KiddingEntity("k3", otherFarm, "doe-9", 4, 4, 0, 20_110))
+        database.lifecycle().insertLambing(SheepLambingEntity("l1", farm, "ewe-1", 1, 1, 0, 20_120))
+        database.lifecycle().insertWithdrawal(WithdrawalWindowEntity("w1", farm, "t1", "Oxytetracycline", "meat", 20_500))
+        database.lifecycle().insertWithdrawal(WithdrawalWindowEntity("w2", farm, "t2", "Ivermectin", "meat", 20_000))
+
+        val births = birthMetrics(database.reports().birthTotals(farm)).associateBy { it.definition.id }
+        // Cattle and rabbits recorded no births and are left out rather than shown as zero.
+        assertEquals(setOf("births-goat", "born-alive-goat", "born-dead-goat", "births-sheep", "born-alive-sheep", "born-dead-sheep"), births.keys)
+        assertEquals(2L, births.getValue("births-goat").value)
+        assertEquals(4L, births.getValue("born-alive-goat").value)
+        assertEquals(1L, births.getValue("born-dead-goat").value)
+        assertEquals("Kiddings recorded", births.getValue("births-goat").definition.name)
+
+        val health = healthMetrics(database.reports().healthTotals(farm, 20_300)).associateBy { it.definition.id }
+        assertEquals(1L, health.getValue("health-withdrawals").value)
+        assertEquals(0L, health.getValue("health-treatments").value)
     }
 }
