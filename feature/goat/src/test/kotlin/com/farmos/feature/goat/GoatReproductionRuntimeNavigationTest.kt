@@ -184,8 +184,8 @@ class GoatReproductionRuntimeNavigationTest {
         page: GoatPage,
         others: List<GoatSnapshot> = emptyList(),
         onSelect: (String) -> Unit = {},
-        onMating: (String, String, String) -> Unit = { _, _, _ -> },
         sires: FarmSelectorSearch = NoFarmSelectorSearch,
+        onMating: (String, String, String) -> Unit = { _, _, _ -> },
     ) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
