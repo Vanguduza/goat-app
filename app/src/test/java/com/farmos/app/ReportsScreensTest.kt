@@ -54,14 +54,15 @@ class ReportsScreensTest {
         var exports = 0
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                ReportsScreen(herdMetrics(rows), failure = null, canExport = true, exporting = false, exportMessage = "Herd register exported: 3 animal(s).", onExportHerdRegister = { exports++ }, onExportMoney = { exports++ }, onBack = {})
+                ReportsScreen(herdMetrics(rows), failure = null, canExport = true, exporting = false, exportMessage = "Herd register exported: 3 animal(s).", onExportHerdRegister = { exports++ }, onExportMoney = { exports++ }, onExportSummary = { exports++ }, onBack = {})
             }
         }
         compose.onNodeWithTag("report-open-export").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-REPORT-011").assertExists()
         compose.onNodeWithTag("report-export-herd-register").performScrollTo().performClick()
         compose.onNodeWithTag("report-export-money").performScrollTo().performClick()
-        compose.runOnIdle { assertEquals(2, exports) }
+        compose.onNodeWithTag("report-export-summary").performScrollTo().performClick()
+        compose.runOnIdle { assertEquals(3, exports) }
         compose.onNodeWithText("Herd register exported: 3 animal(s).").assertExists()
     }
 

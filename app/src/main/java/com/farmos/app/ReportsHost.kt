@@ -35,6 +35,7 @@ import com.farmos.core.database.ProductionTotalRow
 import com.farmos.core.database.InventoryTotalRow
 import com.farmos.core.database.MoneyRecordEntity
 import com.farmos.core.database.MoneyTotalRow
+import java.io.OutputStream
 import com.farmos.domain.ops.FarmCurrency
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -162,42 +163,55 @@ internal fun herdRegisterCsv(rows: List<HerdRegisterRow>): String = FarmCsv.writ
     },
 )
 
+/** Every metric on Reports, read from every record on this device (D-026). */
+internal suspend fun farmMetrics(database: FarmOsDatabase, farmId: String, today: LocalDate): List<MetricResult> {
+    val reports = database.reports()
+    return herdMetrics(reports.herdRegister(farmId)) + birthMetrics(reports.birthTotals(farmId)) + healthMetrics(reports.healthTotals(farmId, today.toEpochDay())) +
+        productionMetrics(reports.productionTotals(farmId)) + inventoryMetrics(reports.inventoryTotals(farmId)) + moneyMetrics(reports.moneyTotals(farmId))
+}
+
 /** Reports (FOS-REPORT-001) and the export sheet (FOS-REPORT-011) for one farm. */
 @Composable
 internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExport: Boolean, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    var rows by remember(farmId) { mutableStateOf<List<HerdRegisterRow>?>(null) }
-    var money by remember(farmId) { mutableStateOf(emptyList<MoneyTotalRow>()) }
-    var more by remember(farmId) { mutableStateOf(emptyList<MetricResult>()) }
+    var metrics by remember(farmId) { mutableStateOf<List<MetricResult>?>(null) }
     var pending by remember { mutableStateOf(REPORT_HERD) }
     var failure by remember { mutableStateOf<String?>(null) }
     var exportMessage by remember { mutableStateOf<String?>(null) }
     var exporting by remember { mutableStateOf(false) }
     LaunchedEffect(farmId) {
-        runCatching {
-            money = database.reports().moneyTotals(farmId)
-            more = birthMetrics(database.reports().birthTotals(farmId)) + healthMetrics(database.reports().healthTotals(farmId, LocalDate.now().toEpochDay())) +
-                productionMetrics(database.reports().productionTotals(farmId)) + inventoryMetrics(database.reports().inventoryTotals(farmId))
-            database.reports().herdRegister(farmId)
-        }.onSuccess { rows = it }.onFailure { failure = it.message ?: "Records could not be read" }
+        runCatching { farmMetrics(database, farmId, LocalDate.now()) }.onSuccess { metrics = it }.onFailure { failure = it.message ?: "Records could not be read" }
     }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri: Uri? ->
+    val onChosen: (Uri?) -> Unit = { uri ->
         if (uri == null) {
             exportMessage = "Export cancelled; nothing was written."
         } else {
             scope.launch {
                 exporting = true
                 exportMessage = runCatching {
-                    val (csv, done) = if (pending == REPORT_MONEY) {
-                        val records = database.reports().moneyRecords(farmId)
-                        moneyRecordsCsv(records) to "Money records exported: ${records.size} record(s)."
-                    } else {
-                        val register = database.reports().herdRegister(farmId)
-                        herdRegisterCsv(register) to "Herd register exported: ${register.size} animal(s)."
+                    val (write, done) = when (pending) {
+                        REPORT_MONEY -> {
+                            val records = database.reports().moneyRecords(farmId)
+                            val csv = moneyRecordsCsv(records).toByteArray(Charsets.UTF_8)
+                            val writer: (OutputStream) -> Unit = { it.write(csv) }
+                            writer to "Money records exported: ${records.size} record(s)."
+                        }
+                        REPORT_SUMMARY -> {
+                            val today = LocalDate.now()
+                            val summary = farmMetrics(database, farmId, today)
+                            val writer: (OutputStream) -> Unit = { writeFarmSummaryPdf(context, summary, today, it) }
+                            writer to "Farm summary exported: ${summary.size} figure(s)."
+                        }
+                        else -> {
+                            val register = database.reports().herdRegister(farmId)
+                            val csv = herdRegisterCsv(register).toByteArray(Charsets.UTF_8)
+                            val writer: (OutputStream) -> Unit = { it.write(csv) }
+                            writer to "Herd register exported: ${register.size} animal(s)."
+                        }
                     }
                     withContext(Dispatchers.IO) {
-                        requireNotNull(context.contentResolver.openOutputStream(uri)) { "The chosen location cannot be written" }.use { it.write(csv.toByteArray(Charsets.UTF_8)) }
+                        requireNotNull(context.contentResolver.openOutputStream(uri)) { "The chosen location cannot be written" }.use(write)
                     }
                     done
                 }.getOrElse { "Export failed: ${it.message ?: "the file could not be written"}" }
@@ -205,14 +219,17 @@ internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExpo
             }
         }
     }
+    val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv"), onChosen)
+    val pdfLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf"), onChosen)
     ReportsScreen(
-        metrics = rows?.let { herdMetrics(it) + more + moneyMetrics(money) },
+        metrics = metrics,
         failure = failure,
         canExport = canExport,
         exporting = exporting,
         exportMessage = exportMessage,
-        onExportHerdRegister = { pending = REPORT_HERD; launcher.launch("herd-register-${LocalDate.now()}.csv") },
-        onExportMoney = { pending = REPORT_MONEY; launcher.launch("money-records-${LocalDate.now()}.csv") },
+        onExportHerdRegister = { pending = REPORT_HERD; csvLauncher.launch("herd-register-${LocalDate.now()}.csv") },
+        onExportMoney = { pending = REPORT_MONEY; csvLauncher.launch("money-records-${LocalDate.now()}.csv") },
+        onExportSummary = { pending = REPORT_SUMMARY; pdfLauncher.launch("farm-summary-${LocalDate.now()}.pdf") },
         onBack = onBack,
     )
 }
@@ -226,6 +243,7 @@ internal fun ReportsScreen(
     exportMessage: String?,
     onExportHerdRegister: () -> Unit,
     onExportMoney: () -> Unit = {},
+    onExportSummary: () -> Unit = {},
     onBack: () -> Unit,
 ) {
     var exportSheet by remember { mutableStateOf(false) }
@@ -241,6 +259,12 @@ internal fun ReportsScreen(
                 Text("Every income and expense record, oldest first: date, kind, category, amount, currency and note.")
                 Button(onClick = onExportMoney, enabled = !exporting, modifier = Modifier.fillMaxWidth().testTag("report-export-money")) {
                     Text(if (exporting) "Exporting" else "Export money records")
+                }
+            }
+            FarmOperationalSection("Farm summary (PDF)") {
+                Text("Every figure on Reports with how it is worked out, its period and scope, and whether it is complete, for printing or sharing.")
+                Button(onClick = onExportSummary, enabled = !exporting, modifier = Modifier.fillMaxWidth().testTag("report-export-summary")) {
+                    Text(if (exporting) "Exporting" else "Export farm summary")
                 }
             }
             exportMessage?.let { Text(it, modifier = Modifier.testTag("report-export-message")) }
@@ -271,3 +295,4 @@ internal fun ReportsScreen(
 
 private const val REPORT_HERD = "herd"
 private const val REPORT_MONEY = "money"
+private const val REPORT_SUMMARY = "summary"
