@@ -62,6 +62,7 @@ private enum class RabbitPage {
     PROFILE,
     PEDIGREE,
     COI,
+    MATE_COMPARE,
 }
 
 /** Rabbit biology is wave/cage/litter-first; this is not a Goat layout with rabbit labels. */
@@ -137,6 +138,8 @@ fun RabbitProgrammeScreen(
         RabbitPage.PEDIGREE -> pedigree?.let { RabbitPedigreeScreen(it, busy, home) }
 
         RabbitPage.COI -> pedigree?.let { RabbitCoiScreen(it, busy, home) }
+
+        RabbitPage.MATE_COMPARE -> pedigree?.let { RabbitMateCompareScreen(it, busy, home) }
 
         RabbitPage.REGISTER -> {
             RabbitRegisterScreen(busy, error, onRegisterDoe, home)
@@ -245,6 +248,7 @@ private fun RabbitDashboard(
             if (showPedigree) {
                 RabbitDashboardAction("Rabbit pedigree", "Sire and dam of each rabbit", { onOpen(RabbitPage.PEDIGREE) })
                 RabbitDashboardAction("Inbreeding check", "Kits' inbreeding for a doe and buck", { onOpen(RabbitPage.COI) })
+                RabbitDashboardAction("Compare bucks", "Up to four bucks side by side for a doe", { onOpen(RabbitPage.MATE_COMPARE) })
             }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             TextButton(onClick = onBack) { Text("Farm home") }

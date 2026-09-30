@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:17fc3b798dd2f16934bf389fd3254e18b057b3b090d573498443568073806948",
-  "runtime_evidence_tested_commit": "c20a769c35ec4bc12222a9643fd63b09b9d0e5af",
-  "runtime_evidence_run_id": 36754049214,
+  "source_fingerprint": "sha256:7a7f93a00b295776193da7d6584983824fccc9cd5c05bc667c37d63b850b0623",
+  "runtime_evidence_tested_commit": "a8d91c87130ad4ad6f74eacab1a9929b5f3b3b1c",
+  "runtime_evidence_run_id": 36758084272,
   "registry_screen_count": 545,
-  "route_screen_count": 303,
-  "unresolved_screen_count": 242,
+  "route_screen_count": 304,
+  "unresolved_screen_count": 241,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -81,6 +81,7 @@
     "FOS-FIN-004",
     "FOS-FIN-005",
     "FOS-GEN-006",
+    "FOS-GEN-007",
     "FOS-GLOBAL-001",
     "FOS-GLOBAL-002",
     "FOS-GLOBAL-004",
@@ -1141,6 +1142,22 @@
     },
     {
       "screen_id": "FOS-GEN-006",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/OpsCoiAnalysisTest.kt",
+          "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GEN-007",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL",
         "RENDERED_SURFACE_OWNER"
@@ -4106,7 +4123,6 @@
     "FOS-GEN-003",
     "FOS-GEN-004",
     "FOS-GEN-005",
-    "FOS-GEN-007",
     "FOS-GEN-008",
     "FOS-GEN-009",
     "FOS-GEN-010",

@@ -218,6 +218,7 @@ class OperationalRuntimeNavigationTest {
                 "Movement" to "FOS-SHEEP-027",
                 "Pedigree link" to "FOS-SHEEP-026",
                 "Inbreeding check" to "FOS-GEN-006",
+                "Compare rams" to "FOS-GEN-007",
             ),
         )
     }
@@ -267,6 +268,7 @@ class OperationalRuntimeNavigationTest {
                 "Movement" to "FOS-CATTLE-030",
                 "Pedigree link" to "FOS-CATTLE-032",
                 "Inbreeding check" to "FOS-GEN-006",
+                "Compare bulls" to "FOS-GEN-007",
                 "Place lot on feed" to "FOS-CATTLE-026",
                 "Days on feed" to "FOS-CATTLE-028",
                 "Close-out" to "FOS-CATTLE-029",

@@ -29,6 +29,15 @@ import com.farmos.core.design.FarmVisualClass
 import com.farmos.domain.ops.FarmCsv
 import com.farmos.domain.ops.MetricDefinition
 import com.farmos.domain.ops.MetricResult
+import com.farmos.core.database.BirthTotalRow
+import com.farmos.core.database.HealthTotalRow
+import com.farmos.core.database.ProductionTotalRow
+import com.farmos.core.database.InventoryTotalRow
+import com.farmos.core.database.MoneyRecordEntity
+import com.farmos.core.database.MoneyTotalRow
+import java.io.OutputStream
+import com.farmos.domain.ops.FarmCurrency
+import java.math.BigDecimal
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,9 +72,83 @@ internal fun herdMetrics(rows: List<HerdRegisterRow>): List<MetricResult> {
     )
 }
 
-/** The metric value in its declared unit; weights are stored in grams. */
-internal fun metricValueText(result: MetricResult): String =
-    if (result.definition.unit == "kg") "%.1f kg".format(result.value / 1000.0) else "${result.value} ${result.definition.unit}"
+/**
+ * Money metrics (D-026): income and expenses per currency over every money record. Currencies are never
+ * added together or converted.
+ */
+internal fun moneyMetrics(totals: List<MoneyTotalRow>): List<MetricResult> = totals.map { row ->
+    val income = row.kind == "income"
+    MetricResult(
+        MetricDefinition(
+            "money-${row.kind}-${row.currency}", if (income) "Income in ${row.currency}" else "Expenses in ${row.currency}",
+            "Sum of every ${row.kind} record in ${row.currency}", row.currency, "All time", "This farm · money records in ${row.currency}",
+        ),
+        row.amountMinor, row.records, 0,
+    )
+}
+
+private val youngNames = mapOf("goat" to "Kids", "sheep" to "Lambs", "cattle" to "Calves", "rabbit" to "Kits")
+private val birthEvents = mapOf("goat" to "kiddings", "sheep" to "lambings", "cattle" to "calvings", "rabbit" to "kindlings")
+
+/** Births per species over every recorded birth event (D-026); species with none recorded are left out. */
+internal fun birthMetrics(totals: List<BirthTotalRow>): List<MetricResult> = totals.filter { it.events > 0 }.flatMap { row ->
+    val young = youngNames[row.speciesCode] ?: row.speciesCode
+    val event = birthEvents[row.speciesCode] ?: "births"
+    val scope = "This farm · every recorded ${event.dropLast(1)}"
+    listOf(
+        MetricResult.count(MetricDefinition("births-${row.speciesCode}", "${event.replaceFirstChar { it.uppercase() }} recorded", "Count of ${event.dropLast(1)} records", "records", "All time", scope), row.events),
+        MetricResult(MetricDefinition("born-alive-${row.speciesCode}", "$young born alive", "Sum of live young on each ${event.dropLast(1)} record", "animals", "All time", scope), row.live, row.events, 0),
+        MetricResult(MetricDefinition("born-dead-${row.speciesCode}", "$young born dead", "Sum of dead young on each ${event.dropLast(1)} record", "animals", "All time", scope), row.dead, row.events, 0),
+    )
+}
+
+/** Health activity over every record, and the withdrawal windows running today (D-026). */
+internal fun healthMetrics(totals: HealthTotalRow): List<MetricResult> = listOf(
+    MetricResult.count(MetricDefinition("health-observations", "Health observations", "Count of health observation records", "records", "All time", "This farm · all species"), totals.observations),
+    MetricResult.count(MetricDefinition("health-treatments", "Treatments", "Count of treatment records", "records", "All time", "This farm · all species"), totals.treatments),
+    MetricResult.count(MetricDefinition("health-withdrawals", "Withdrawals running", "Count of withdrawal windows whose last day is today or later", "windows", "Today", "This farm · all species"), totals.activeWithdrawals),
+)
+
+private val products = mapOf(
+    "goat-milk" to Triple("Goat milk", "L", "goat milk record"),
+    "cattle-milk" to Triple("Cattle milk", "L", "cattle milk record"),
+    "sheep-wool" to Triple("Sheep wool (greasy)", "kg", "wool clip record"),
+    "poultry-eggs" to Triple("Eggs", "eggs", "flock day record"),
+)
+
+/** Production over every record (D-026); a product with nothing recorded is left out rather than shown as zero. */
+internal fun productionMetrics(totals: List<ProductionTotalRow>): List<MetricResult> = totals.filter { it.records > 0 }.map { row ->
+    val (name, unit, record) = products[row.product] ?: Triple(row.product, "units", "record")
+    MetricResult(MetricDefinition("production-${row.product}", name, "Sum over every $record", unit, "All time", "This farm"), row.amount, row.records, 0)
+}
+
+/** Stock items and those needing reorder, over every item (D-026). */
+internal fun inventoryMetrics(totals: InventoryTotalRow): List<MetricResult> = if (totals.items == 0) emptyList() else listOf(
+    MetricResult.count(MetricDefinition("inventory-items", "Stock items", "Count of inventory items", "items", "Now", "This farm"), totals.items),
+    MetricResult.count(MetricDefinition("inventory-reorder", "Stock at or below reorder level", "Count of items whose quantity is at or below the reorder level set for them", "items", "Now", "This farm · items with a reorder level"), totals.atOrBelowReorder),
+)
+
+/** The metric value in its declared unit; weights are stored in grams and money in minor units. */
+internal fun metricValueText(result: MetricResult): String {
+    val unit = result.definition.unit
+    return when {
+        unit == "kg" -> "%.1f kg".format(result.value / 1000.0)
+        unit == "L" -> "%.1f L".format(result.value / 1000.0)
+        FarmCurrency.isRecordable(unit) -> "${BigDecimal.valueOf(result.value, FarmCurrency.minorDigits(unit)).toPlainString()} $unit"
+        else -> "${result.value} $unit"
+    }
+}
+
+/** Every money record as CSV, oldest first, amounts in each record's own currency. */
+internal fun moneyRecordsCsv(rows: List<MoneyRecordEntity>): String = FarmCsv.write(
+    listOf("Date", "Kind", "Category", "Amount", "Currency", "Note"),
+    rows.map { row ->
+        listOf(
+            LocalDate.ofEpochDay(row.occurredEpochDay).toString(), row.kind, row.categoryCode,
+            BigDecimal.valueOf(row.amountMinor, FarmCurrency.minorDigits(row.currency)).toPlainString(), row.currency, row.note,
+        )
+    },
+)
 
 /** The herd register as CSV: every animal on the farm, one row each. */
 internal fun herdRegisterCsv(rows: List<HerdRegisterRow>): String = FarmCsv.write(
@@ -80,43 +163,73 @@ internal fun herdRegisterCsv(rows: List<HerdRegisterRow>): String = FarmCsv.writ
     },
 )
 
+/** Every metric on Reports, read from every record on this device (D-026). */
+internal suspend fun farmMetrics(database: FarmOsDatabase, farmId: String, today: LocalDate): List<MetricResult> {
+    val reports = database.reports()
+    return herdMetrics(reports.herdRegister(farmId)) + birthMetrics(reports.birthTotals(farmId)) + healthMetrics(reports.healthTotals(farmId, today.toEpochDay())) +
+        productionMetrics(reports.productionTotals(farmId)) + inventoryMetrics(reports.inventoryTotals(farmId)) + moneyMetrics(reports.moneyTotals(farmId))
+}
+
 /** Reports (FOS-REPORT-001) and the export sheet (FOS-REPORT-011) for one farm. */
 @Composable
 internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExport: Boolean, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    var rows by remember(farmId) { mutableStateOf<List<HerdRegisterRow>?>(null) }
+    var metrics by remember(farmId) { mutableStateOf<List<MetricResult>?>(null) }
+    var pending by remember { mutableStateOf(REPORT_HERD) }
     var failure by remember { mutableStateOf<String?>(null) }
     var exportMessage by remember { mutableStateOf<String?>(null) }
     var exporting by remember { mutableStateOf(false) }
     LaunchedEffect(farmId) {
-        runCatching { database.reports().herdRegister(farmId) }.onSuccess { rows = it }.onFailure { failure = it.message ?: "Records could not be read" }
+        runCatching { farmMetrics(database, farmId, LocalDate.now()) }.onSuccess { metrics = it }.onFailure { failure = it.message ?: "Records could not be read" }
     }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri: Uri? ->
+    val onChosen: (Uri?) -> Unit = { uri ->
         if (uri == null) {
             exportMessage = "Export cancelled; nothing was written."
         } else {
             scope.launch {
                 exporting = true
                 exportMessage = runCatching {
-                    val register = database.reports().herdRegister(farmId)
-                    val csv = herdRegisterCsv(register)
-                    withContext(Dispatchers.IO) {
-                        requireNotNull(context.contentResolver.openOutputStream(uri)) { "The chosen location cannot be written" }.use { it.write(csv.toByteArray(Charsets.UTF_8)) }
+                    val (write, done) = when (pending) {
+                        REPORT_MONEY -> {
+                            val records = database.reports().moneyRecords(farmId)
+                            val csv = moneyRecordsCsv(records).toByteArray(Charsets.UTF_8)
+                            val writer: (OutputStream) -> Unit = { it.write(csv) }
+                            writer to "Money records exported: ${records.size} record(s)."
+                        }
+                        REPORT_SUMMARY -> {
+                            val today = LocalDate.now()
+                            val summary = farmMetrics(database, farmId, today)
+                            val writer: (OutputStream) -> Unit = { writeFarmSummaryPdf(context, summary, today, it) }
+                            writer to "Farm summary exported: ${summary.size} figure(s)."
+                        }
+                        else -> {
+                            val register = database.reports().herdRegister(farmId)
+                            val csv = herdRegisterCsv(register).toByteArray(Charsets.UTF_8)
+                            val writer: (OutputStream) -> Unit = { it.write(csv) }
+                            writer to "Herd register exported: ${register.size} animal(s)."
+                        }
                     }
-                    "Herd register exported: ${register.size} animal(s)."
+                    withContext(Dispatchers.IO) {
+                        requireNotNull(context.contentResolver.openOutputStream(uri)) { "The chosen location cannot be written" }.use(write)
+                    }
+                    done
                 }.getOrElse { "Export failed: ${it.message ?: "the file could not be written"}" }
                 exporting = false
             }
         }
     }
+    val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv"), onChosen)
+    val pdfLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf"), onChosen)
     ReportsScreen(
-        metrics = rows?.let(::herdMetrics),
+        metrics = metrics,
         failure = failure,
         canExport = canExport,
         exporting = exporting,
         exportMessage = exportMessage,
-        onExportHerdRegister = { launcher.launch("herd-register-${LocalDate.now()}.csv") },
+        onExportHerdRegister = { pending = REPORT_HERD; csvLauncher.launch("herd-register-${LocalDate.now()}.csv") },
+        onExportMoney = { pending = REPORT_MONEY; csvLauncher.launch("money-records-${LocalDate.now()}.csv") },
+        onExportSummary = { pending = REPORT_SUMMARY; pdfLauncher.launch("farm-summary-${LocalDate.now()}.pdf") },
         onBack = onBack,
     )
 }
@@ -129,6 +242,8 @@ internal fun ReportsScreen(
     exporting: Boolean,
     exportMessage: String?,
     onExportHerdRegister: () -> Unit,
+    onExportMoney: () -> Unit = {},
+    onExportSummary: () -> Unit = {},
     onBack: () -> Unit,
 ) {
     var exportSheet by remember { mutableStateOf(false) }
@@ -139,8 +254,20 @@ internal fun ReportsScreen(
                 Button(onClick = onExportHerdRegister, enabled = !exporting, modifier = Modifier.fillMaxWidth().testTag("report-export-herd-register")) {
                     Text(if (exporting) "Exporting" else "Export herd register")
                 }
-                exportMessage?.let { Text(it, modifier = Modifier.testTag("report-export-message")) }
             }
+            FarmOperationalSection("Money records (CSV)") {
+                Text("Every income and expense record, oldest first: date, kind, category, amount, currency and note.")
+                Button(onClick = onExportMoney, enabled = !exporting, modifier = Modifier.fillMaxWidth().testTag("report-export-money")) {
+                    Text(if (exporting) "Exporting" else "Export money records")
+                }
+            }
+            FarmOperationalSection("Farm summary (PDF)") {
+                Text("Every figure on Reports with how it is worked out, its period and scope, and whether it is complete, for printing or sharing.")
+                Button(onClick = onExportSummary, enabled = !exporting, modifier = Modifier.fillMaxWidth().testTag("report-export-summary")) {
+                    Text(if (exporting) "Exporting" else "Export farm summary")
+                }
+            }
+            exportMessage?.let { Text(it, modifier = Modifier.testTag("report-export-message")) }
         }
         return
     }
@@ -165,3 +292,7 @@ internal fun ReportsScreen(
         }
     }
 }
+
+private const val REPORT_HERD = "herd"
+private const val REPORT_MONEY = "money"
+private const val REPORT_SUMMARY = "summary"

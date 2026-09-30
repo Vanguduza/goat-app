@@ -55,6 +55,7 @@ private enum class SheepOpsPage {
     MOVEMENT,
     PEDIGREE,
     COI,
+    MATE_COMPARE,
     HEALTH_SUMMARY,
     TIMELINE,
     WOOL_DASHBOARD,
@@ -199,6 +200,7 @@ fun SheepOperationsScreen(
         }
 
         SheepOpsPage.COI -> OpsCoiAnalysisPage("Ewe", "Ram", "lambs", busy, home)
+        SheepOpsPage.MATE_COMPARE -> OpsMateComparePage("Ewe", "Ram", "lambs", busy, home)
 
         SheepOpsPage.HEALTH_SUMMARY -> SheepHealthSummaryScreen(selectedAnimalId, today, loadRecords, home)
         SheepOpsPage.TIMELINE -> SheepTimelineScreen(selectedAnimalId, loadRecords, home)
@@ -253,6 +255,7 @@ private fun SheepOpsHome(
             SheepNav("Movement") { onOpen(SheepOpsPage.MOVEMENT) }
             SheepNav("Pedigree link") { onOpen(SheepOpsPage.PEDIGREE) }
             SheepNav("Inbreeding check") { onOpen(SheepOpsPage.COI) }
+            SheepNav("Compare rams") { onOpen(SheepOpsPage.MATE_COMPARE) }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
