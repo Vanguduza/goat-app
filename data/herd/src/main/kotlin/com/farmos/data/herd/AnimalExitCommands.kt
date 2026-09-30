@@ -35,7 +35,8 @@ class AnimalExitCommands(
         // "Today" from the business time in UTC plus one day, so a device whose local date is ahead of UTC is not refused.
         val today = Instant.ofEpochMilli(context.occurredAtEpochMillis).atZone(ZoneOffset.UTC).toLocalDate().toEpochDay() + 1
         AnimalExitRules.exitError(kind, command.occurredEpochDay, today, command.deathCause, command.reason, command.buyer, command.priceMinor)?.let { error(it) }
-        if (command.priceMinor != null) require(command.currency != null && FarmCurrency.isRecordable(command.currency)) { "A price needs the farm currency" }
+        val currency = command.currency
+        if (command.priceMinor != null) require(currency != null && FarmCurrency.isRecordable(currency)) { "A price needs the farm currency" }
         val animal = requireNotNull(database.animals().get(farmId, command.animalId)) { "Animal not found" }
         require(animal.status == "active") { "Only an animal still on the farm can leave it" }
         journal(context, RECORD, command.animalId, json.encodeToString(command)) {
