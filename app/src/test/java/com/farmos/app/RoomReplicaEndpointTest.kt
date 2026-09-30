@@ -57,7 +57,7 @@ class RoomReplicaEndpointTest {
         tabletDb = database()
         phoneDb = database()
         tablet = RoomReplicaEndpoint(tabletDb, farm, tabletId).apply { registerPairedDevice(phoneId, "Phone") }
-        phone = RoomReplicaEndpoint(phoneDb, farm, phoneId).apply { registerPairedDevice(tabletId, "Tablet") }
+        phone = RoomReplicaEndpoint(phoneDb, farm, phoneId, replicationAppliers).apply { registerPairedDevice(tabletId, "Tablet") }
     }
 
     @After
@@ -127,5 +127,21 @@ class RoomReplicaEndpointTest {
         assertNotNull(phone.ingest(bundle).rejectedReason)
         assertEquals(0L, phoneDb.replication().count(farm))
         assertEquals(false, phone.maySynchronise(tabletId))
+    }
+
+    @Test
+    fun aCurrencyChangeTakesEffectOnTheReceivingDeviceAndAnOlderChangeNeverOverridesANewerOne() = runBlocking {
+        tabletDb.setFarmCurrency(farm, "ZAR", actorId = "owner-1", deviceId = tabletId, nowEpochMillis = 1_790_000_500_000)
+        phoneDb.setFarmCurrency(farm, "KES", actorId = "owner-1", deviceId = phoneId, nowEpochMillis = 1_790_000_900_000)
+
+        SyncSession.run(phone, LocalPeerTransport(tablet), remoteDeviceId = tabletId)
+
+        // The phone's own change is newer, so the tablet's older one is journalled but does not win.
+        assertEquals("KES", phoneDb.farmCurrency(farm))
+        assertEquals(1L, phoneDb.replication().operationsInRange(farm, tabletId, 1, 1).size.toLong())
+
+        tabletDb.setFarmCurrency(farm, "USD", actorId = "owner-1", deviceId = tabletId, nowEpochMillis = 1_790_001_000_000)
+        SyncSession.run(phone, LocalPeerTransport(tablet), remoteDeviceId = tabletId)
+        assertEquals("USD", phoneDb.farmCurrency(farm))
     }
 }

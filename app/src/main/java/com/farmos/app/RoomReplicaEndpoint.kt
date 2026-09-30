@@ -7,6 +7,7 @@ import com.farmos.core.database.replicationVector
 import com.farmos.core.database.toEntity
 import com.farmos.core.database.toEnvelope
 import com.farmos.domain.replication.BundleVerdict
+import com.farmos.domain.replication.CanonicalOperationOrder
 import com.farmos.domain.replication.DeviceStatus
 import com.farmos.domain.replication.IngestResult
 import com.farmos.domain.replication.OperationBundle
@@ -15,6 +16,14 @@ import com.farmos.domain.replication.ReplicaEndpoint
 import com.farmos.domain.replication.SequenceRange
 import com.farmos.domain.replication.SyncVector
 import kotlinx.coroutines.runBlocking
+
+/**
+ * Makes a received operation take effect in this device's domain tables. Runs inside the ingest
+ * transaction, so a failing applier rejects the bundle and leaves nothing behind.
+ */
+fun interface OperationApplier {
+    suspend fun apply(database: FarmOsDatabase, operation: OperationEnvelope)
+}
 
 /**
  * This device's Room replication journal as a replication endpoint, so the LAN server, the Drive gateway
@@ -31,6 +40,7 @@ class RoomReplicaEndpoint(
     private val database: FarmOsDatabase,
     override val farmId: String,
     override val deviceId: String,
+    private val appliers: Map<String, OperationApplier> = emptyMap(),
 ) : ReplicaEndpoint {
     private val journal get() = database.replication()
 
@@ -72,6 +82,8 @@ class RoomReplicaEndpoint(
                 }
             }
             fresh.forEach { journal.insertOperation(it.toEntity()) }
+            // Received operations take effect in the same transaction, in business order.
+            fresh.sortedWith(CanonicalOperationOrder).forEach { op -> appliers[op.operationType]?.apply(database, op) }
             if (fresh.isNotEmpty()) {
                 journal.upsertDevice(origin.copy(lastReportedOwnSequence = maxOf(origin.lastReportedOwnSequence, bundle.toSequence)))
             }
