@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "48e9a912f53a44546fea0ad05b719e2550f313da",
-  "source_fingerprint": "sha256:3996ceea48ae3cefab6b9a32593ae490beb03750107fb59613bb827637aa5b84",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36747990679,
+  "tested_commit": "71e2094da2a3d6eaadda30090ffdd6f3b4e5565f",
+  "source_fingerprint": "sha256:cd2c2b0c67edd1f3f316ea27381c41baece9a9af1613388ee08e04718ebe8616",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -438,6 +438,15 @@
         "FOS-ATOM-027",
         "FOS-SYNC-006",
         "FOS-SYNC-007"
+      ],
+      "app/src/test/java/com/farmos/app/RabbitProfileScreensTest.kt": [
+        "FOS-RABBIT-002",
+        "FOS-RABBIT-003",
+        "FOS-RABBIT-004"
+      ],
+      "app/src/test/java/com/farmos/app/OpsAnimalPickerTest.kt": [
+        "FOS-ATOM-004",
+        "FOS-CATTLE-010"
       ]
     },
     "route_contract": {
@@ -515,9 +524,9 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 27,
     "rendered_traversal_screen_count": 199,
-    "rendered_owner_screen_count": 90,
+    "rendered_owner_screen_count": 94,
     "route_contract_screen_count": 62,
-    "combined_screen_count": 298,
+    "combined_screen_count": 300,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -773,6 +782,7 @@
       "FOS-ATOM-031",
       "FOS-ATOM-033",
       "FOS-ATOM-034",
+      "FOS-CATTLE-010",
       "FOS-CATTLE-018",
       "FOS-CATTLE-034",
       "FOS-GLOBAL-001",
@@ -824,6 +834,9 @@
       "FOS-POULTRY-016",
       "FOS-POULTRY-020",
       "FOS-PROC-001",
+      "FOS-RABBIT-002",
+      "FOS-RABBIT-003",
+      "FOS-RABBIT-004",
       "FOS-RABBIT-006",
       "FOS-RABBIT-011",
       "FOS-REPORT-001",
@@ -924,12 +937,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 199,
-    "entry_action_emission_executed": 27,
-    "rendered_surface_owners_executed": 90,
-    "route_contracts_executed": 62,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 199,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {

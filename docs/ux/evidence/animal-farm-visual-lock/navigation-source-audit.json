@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "48e9a912f53a44546fea0ad05b719e2550f313da",
+  "tested_commit": "71e2094da2a3d6eaadda30090ffdd6f3b4e5565f",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 299
+    "registered_ids_mentioned_in_kotlin": 301
   },
   "top_level": {
     "farm_modules": [
@@ -297,8 +297,8 @@
         },
         {
           "value": "ANIMALS",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 3,
           "render_only_candidate": false
         },
         {
@@ -387,6 +387,12 @@
         },
         {
           "value": "KIT_CENSUS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PROFILE",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
