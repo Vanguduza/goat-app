@@ -38,6 +38,8 @@ import com.farmos.domain.replication.MergeClass
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import com.farmos.core.database.ReplicationDeviceEntity
+import com.farmos.domain.replication.DeviceStatus
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -219,6 +221,26 @@ class SettingsHostTest {
         click("Devices")
         waitForTag("farm-screen:FOS-ADMIN-021")
         waitForText("Device ID device-a")
+    }
+
+    @Test
+    fun retiringADeviceWarnsAboutWorkThisDeviceHasNotReceivedAndIsJournalled() {
+        runBlocking {
+            // The phone reported three operations; none has reached this device yet.
+            database.replication().upsertDevice(ReplicationDeviceEntity(farmId, "phone", "Phone", DeviceStatus.ACTIVE.name, 3, null, isLocal = false, publicKey = null))
+        }
+        val before = runBlocking { database.replication().count(farmId) }
+        render(owner.accountId)
+        waitForText("Signed in as Tendai Moyo")
+        click("Devices")
+        waitForTag("farm-screen:FOS-ADMIN-021")
+        click("Retire Phone")
+        waitForTag("settings-retire-warning:phone")
+        waitForText("Phone recorded 3 operation(s) this device has not received.")
+        click("Retire Phone anyway")
+        compose.waitUntil(10_000) { runBlocking { database.replication().device(farmId, "phone")?.status } == DeviceStatus.RETIRED.name }
+        assertEquals(before + 1, runBlocking { database.replication().count(farmId) })
+        waitForText("Phone · retired")
     }
 
     @Test
