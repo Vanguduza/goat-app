@@ -51,6 +51,7 @@ private enum class CattleOpsPage {
     IDENTIFIER,
     MOVEMENT,
     PEDIGREE,
+    COI,
     LOT_PLACE,
     DAYS_ON_FEED,
     LOT_CLOSE,
@@ -142,6 +143,8 @@ fun CattleOperationsScreen(
             CattlePedigreeScreen(selectedAnimalId, busy, error, actions.onPedigree, home)
         }
 
+        CattleOpsPage.COI -> OpsCoiAnalysisPage("Cow", "Bull", "calves", busy, home)
+
         CattleOpsPage.LOT_PLACE -> {
             CattleLotPlaceScreen(busy, error, actions.onPlaceLot, home)
         }
@@ -207,6 +210,7 @@ private fun CattleOpsHome(
             CattleNav("Movement") { onOpen(CattleOpsPage.MOVEMENT) }
             CattleNav("Official movement record") { onOpen(CattleOpsPage.MOVEMENT_RECORD) }
             CattleNav("Pedigree link") { onOpen(CattleOpsPage.PEDIGREE) }
+            CattleNav("Inbreeding check") { onOpen(CattleOpsPage.COI) }
         }
         FarmOperationalSection("Beef / feedlot") {
             CattleNav("Place lot on feed") { onOpen(CattleOpsPage.LOT_PLACE) }
@@ -576,7 +580,7 @@ private fun CattlePedigreeScreen(
     CattleFormPage(
         "FOS-CATTLE-032",
         "Pedigree",
-        "Record parentage only. This does not calculate COI or genetic merit.",
+        "Record parentage. Inbreeding check uses it; genetic merit is not calculated.",
         busy,
         error,
         onBack,

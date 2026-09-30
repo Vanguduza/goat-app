@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:57cc6a931c7221c71fc1de61f186f899cd6a1e52e6b799f4f1776f984e4e8f3c",
-  "runtime_evidence_tested_commit": "f4a38f796c354ed2930fbeda0d3ebde86370d4c0",
-  "runtime_evidence_run_id": 36751082718,
+  "source_fingerprint": "sha256:17fc3b798dd2f16934bf389fd3254e18b057b3b090d573498443568073806948",
+  "runtime_evidence_tested_commit": "c20a769c35ec4bc12222a9643fd63b09b9d0e5af",
+  "runtime_evidence_run_id": 36754049214,
   "registry_screen_count": 545,
-  "route_screen_count": 300,
-  "unresolved_screen_count": 245,
+  "route_screen_count": 303,
+  "unresolved_screen_count": 242,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -80,6 +80,7 @@
     "FOS-FIN-002",
     "FOS-FIN-004",
     "FOS-FIN-005",
+    "FOS-GEN-006",
     "FOS-GLOBAL-001",
     "FOS-GLOBAL-002",
     "FOS-GLOBAL-004",
@@ -253,6 +254,7 @@
     "FOS-RABBIT-027",
     "FOS-RABBIT-028",
     "FOS-RABBIT-029",
+    "FOS-RABBIT-031",
     "FOS-RABBIT-034",
     "FOS-REPORT-001",
     "FOS-REPORT-011",
@@ -260,6 +262,7 @@
     "FOS-SALES-002",
     "FOS-SALES-003",
     "FOS-SALES-005",
+    "FOS-SALES-007",
     "FOS-SALES-011",
     "FOS-SHEEP-001",
     "FOS-SHEEP-002",
@@ -510,7 +513,9 @@
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
           "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt",
-          "app/src/test/java/com/farmos/app/OpsAnimalPickerTest.kt"
+          "app/src/test/java/com/farmos/app/OpsAnimalPickerTest.kt",
+          "app/src/test/java/com/farmos/app/OpsCoiAnalysisTest.kt",
+          "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt"
         ]
       }
     },
@@ -553,11 +558,16 @@
     {
       "screen_id": "FOS-ATOM-008",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/OpsCoiAnalysisTest.kt",
+          "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt"
         ]
       }
     },
@@ -1126,6 +1136,22 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GEN-006",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/OpsCoiAnalysisTest.kt",
+          "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt"
         ]
       }
     },
@@ -3241,6 +3267,17 @@
       }
     },
     {
+      "screen_id": "FOS-RABBIT-031",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-RABBIT-034",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -3326,6 +3363,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/SalesRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SALES-007",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/AnimalSaleScreensTest.kt"
         ]
       }
     },
@@ -4058,7 +4106,6 @@
     "FOS-GEN-003",
     "FOS-GEN-004",
     "FOS-GEN-005",
-    "FOS-GEN-006",
     "FOS-GEN-007",
     "FOS-GEN-008",
     "FOS-GEN-009",
@@ -4130,7 +4177,6 @@
     "FOS-RABBIT-023",
     "FOS-RABBIT-025",
     "FOS-RABBIT-030",
-    "FOS-RABBIT-031",
     "FOS-RABBIT-032",
     "FOS-RABBIT-033",
     "FOS-RABBIT-035",
@@ -4150,7 +4196,6 @@
     "FOS-REPORT-015",
     "FOS-SALES-004",
     "FOS-SALES-006",
-    "FOS-SALES-007",
     "FOS-SALES-008",
     "FOS-SALES-009",
     "FOS-SALES-010",

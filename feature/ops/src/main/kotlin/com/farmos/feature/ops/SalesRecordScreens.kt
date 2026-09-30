@@ -70,13 +70,20 @@ fun SalesRecordNavigator(
     records: SalesRecords,
     /** The customer register (FOS-SALES-002/003); null hides the entry. */
     customers: (@Composable (onBack: () -> Unit) -> Unit)? = null,
+    /** Animal sale (FOS-SALES-007): the money for animals sold through a sale exit; null hides the entry. */
+    animalSale: (@Composable (onBack: () -> Unit) -> Unit)? = null,
     home: @Composable (recordActions: @Composable () -> Unit) -> Unit,
 ) {
     var page by rememberSaveable { mutableStateOf<SalesRecordPage?>(null) }
     var register by rememberSaveable { mutableStateOf(false) }
+    var animalSaleOpen by rememberSaveable { mutableStateOf(false) }
     val back = { page = null }
     if (register && customers != null) {
         customers { register = false }
+        return
+    }
+    if (animalSaleOpen && animalSale != null) {
+        animalSale { animalSaleOpen = false }
         return
     }
     when (page) {
@@ -87,6 +94,9 @@ fun SalesRecordNavigator(
                 }
                 if (customers != null) {
                     TextButton(onClick = { register = true }, modifier = Modifier.fillMaxWidth()) { Text("Customers") }
+                }
+                if (animalSale != null) {
+                    TextButton(onClick = { animalSaleOpen = true }, modifier = Modifier.fillMaxWidth()) { Text("Animal sale") }
                 }
             }
         }

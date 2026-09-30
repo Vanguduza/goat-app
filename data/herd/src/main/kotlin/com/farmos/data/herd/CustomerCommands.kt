@@ -12,6 +12,7 @@ import com.farmos.domain.ops.CreateFarmCustomer
 import com.farmos.domain.ops.CustomerRules
 import com.farmos.domain.ops.OpsValidator
 import com.farmos.domain.ops.RecordCustomerSale
+import com.farmos.domain.ops.RecordExitSale
 import com.farmos.domain.ops.RecordSale
 import com.farmos.domain.ops.UpdateFarmCustomer
 import kotlinx.serialization.encodeToString
@@ -78,6 +79,27 @@ class CustomerCommands(
         return LocalCommandResult(context.mutationId, command.saleId, true)
     }
 
+    /** The money for an animal sold through a sale exit; one sale per exit, and never for a reversed exit. */
+    suspend fun recordExitSale(command: RecordExitSale, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.sale(RecordSale(command.saleId, "animal", 1_000, command.amountMinor, command.currency, command.occurredEpochDay))?.let { error(it) }
+        val exit = requireNotNull(database.animalExits().get(farmId, command.exitId)) { "Sale exit not found on this farm" }
+        require(exit.kind == "SALE" && exit.animalId == command.animalId) { "Only a sale exit can be settled by a sale" }
+        require(database.sales().forExit(farmId, command.exitId) == null) { "The money for this sale is already recorded" }
+        val customerId = command.customerId
+        if (!replaying) {
+            require(database.animalExits().forAnimal(farmId, command.animalId).none { it.reversesExitId == command.exitId }) { "This sale exit was reversed" }
+            if (customerId != null) {
+                val customer = database.customers().get(farmId, customerId)
+                require(customer != null && customer.active) { "Choose an active customer on this farm" }
+            }
+        }
+        journal(context, EXIT_SALE, "sale_record", command.saleId, json.encodeToString(command)) {
+            database.sales().insert(SaleRecordEntity(command.saleId, farmId, "animal", 1_000, command.amountMinor, command.currency, command.occurredEpochDay, customerId, command.exitId))
+            database.money().insert(MoneyRecordEntity(command.saleId, farmId, "income", "sales", command.amountMinor, command.currency, command.occurredEpochDay, "Sale of ${command.animalLabel.trim()}"))
+        }
+        return LocalCommandResult(context.mutationId, command.saleId, true)
+    }
+
     private suspend fun journal(context: LocalCommandContext, commandName: String, entityType: String, entityId: String, payloadJson: String, localWrite: suspend () -> Unit) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         if (replaying) return database.withTransaction { localWrite() }
@@ -104,5 +126,6 @@ class CustomerCommands(
         const val CREATE = "customer.create.v1"
         const val UPDATE = "customer.update.v1"
         const val SALE = "sale.record.v2"
+        const val EXIT_SALE = "sale.record_exit.v1"
     }
 }

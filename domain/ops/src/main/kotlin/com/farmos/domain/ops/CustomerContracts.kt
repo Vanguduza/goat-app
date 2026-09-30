@@ -54,3 +54,20 @@ object CustomerRules {
         else -> phone(command.phone)
     }
 }
+
+/**
+ * The sale money for an animal that left through a sale exit (D-022, resolution R6): posts the income and
+ * links the sale to the exit, once per exit. [animalLabel] is the animal as sold, kept with the sale; the
+ * customer is optional. Replicated as `sale.record_exit.v1`.
+ */
+@Serializable
+data class RecordExitSale(
+    val saleId: String,
+    val exitId: String,
+    val animalId: String,
+    val animalLabel: String,
+    val amountMinor: Long,
+    val currency: String,
+    val occurredEpochDay: Long,
+    val customerId: String? = null,
+)

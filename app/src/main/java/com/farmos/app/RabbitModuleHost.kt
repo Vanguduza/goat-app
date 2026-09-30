@@ -22,6 +22,7 @@ import com.farmos.domain.rabbit.CreateRabbitWave
 import com.farmos.domain.rabbit.RecordRabbitGiStasis
 import com.farmos.feature.rabbit.RabbitAnimalView
 import com.farmos.feature.rabbit.RabbitNestBoxChoice
+import com.farmos.feature.rabbit.RabbitPedigreePorts
 import com.farmos.feature.rabbit.RabbitProgrammeScreen
 import com.farmos.feature.rabbit.RabbitRecords
 import java.time.LocalDate
@@ -41,6 +42,7 @@ fun RabbitModuleHost(
     searchRabbits: FarmSelectorSearch = NoFarmSelectorSearch,
     /** A rabbit's exit record and reversal (D-022); onRecorded refreshes the rabbitry. */
     exitFor: @Composable (rabbit: RabbitAnimalView, onRecorded: () -> Unit) -> Unit = { _, _ -> },
+    pedigree: RabbitPedigreePorts? = null,
 ) {
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
@@ -103,6 +105,7 @@ fun RabbitModuleHost(
     RabbitProgrammeScreen(
         rabbits = rabbits,
         rabbitExit = { rabbit -> exitFor(rabbit) { run { } } },
+        pedigree = pedigree,
         waveOptions = waveOptions,
         nestBoxChoices = nestBoxChoices,
         searchRabbits = searchRabbits,

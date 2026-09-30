@@ -239,6 +239,7 @@ fun FarmSessionContent(
                 onBack = backHome,
                 loadRecords = { loadRabbitRecords(app.database, membership.farmId) },
                 searchRabbits = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "rabbit") },
+                pedigree = remember(membership.farmId) { rabbitPedigreePorts(app.database, membership.farmId, ops, ::context, ::enqueueSync) },
                 exitFor = { rabbit, onRecorded ->
                     SpeciesExitHost(app.database, membership.farmId, SpeciesAnimalRow(rabbit.animalId, rabbit.label, rabbit.active), null, ::context, onRecorded, onBack = {})
                 },
@@ -288,6 +289,7 @@ fun FarmSessionContent(
                 customers = { back -> CustomerRegisterHost(app.database, membership.farmId, membership.role, ::context, ::enqueueSync, back) },
                 customerSearch = remember(membership.farmId) { customerSelectorSearch(app.database, membership.farmId) },
                 customerCommands = remember(membership.farmId) { com.farmos.data.herd.CustomerCommands(app.database, membership.farmId) },
+                animalSale = { back -> AnimalSaleHost(app.database, membership.farmId, ::context, ::enqueueSync, back) },
             )
             FarmModule.PROCUREMENT -> ProcurementModuleHost(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,

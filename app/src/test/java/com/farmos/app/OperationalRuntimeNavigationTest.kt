@@ -217,6 +217,7 @@ class OperationalRuntimeNavigationTest {
                 "Official identifier" to "FOS-SHEEP-029",
                 "Movement" to "FOS-SHEEP-027",
                 "Pedigree link" to "FOS-SHEEP-026",
+                "Inbreeding check" to "FOS-GEN-006",
             ),
         )
     }
@@ -265,6 +266,7 @@ class OperationalRuntimeNavigationTest {
                 "Official identifier" to "FOS-CATTLE-005",
                 "Movement" to "FOS-CATTLE-030",
                 "Pedigree link" to "FOS-CATTLE-032",
+                "Inbreeding check" to "FOS-GEN-006",
                 "Place lot on feed" to "FOS-CATTLE-026",
                 "Days on feed" to "FOS-CATTLE-028",
                 "Close-out" to "FOS-CATTLE-029",

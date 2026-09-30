@@ -2,12 +2,12 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:57cc6a931c7221c71fc1de61f186f899cd6a1e52e6b799f4f1776f984e4e8f3c",
+  "source_fingerprint": "sha256:17fc3b798dd2f16934bf389fd3254e18b057b3b090d573498443568073806948",
   "feature_count": 156,
   "mandatory_feature_count": 156,
-  "features_with_route_evidence": 91,
+  "features_with_route_evidence": 92,
   "features_fully_route_bound": 43,
-  "features_without_route_evidence": 65,
+  "features_without_route_evidence": 64,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
   "features": [
@@ -662,10 +662,10 @@
         "FOS-RABBIT-035"
       ],
       "route_screen_ids": [
+        "FOS-RABBIT-031",
         "FOS-RABBIT-034"
       ],
       "unresolved_screen_ids": [
-        "FOS-RABBIT-031",
         "FOS-RABBIT-032",
         "FOS-RABBIT-033",
         "FOS-RABBIT-035"
@@ -2156,12 +2156,12 @@
         "FOS-SALES-009"
       ],
       "route_screen_ids": [
-        "FOS-SALES-005"
+        "FOS-SALES-005",
+        "FOS-SALES-007"
       ],
       "unresolved_screen_ids": [
         "FOS-SALES-004",
         "FOS-SALES-006",
-        "FOS-SALES-007",
         "FOS-SALES-008",
         "FOS-SALES-009"
       ],
@@ -2375,13 +2375,14 @@
         "FOS-GEN-005",
         "FOS-GEN-006"
       ],
-      "route_screen_ids": [],
-      "unresolved_screen_ids": [
-        "FOS-GEN-005",
+      "route_screen_ids": [
         "FOS-GEN-006"
       ],
+      "unresolved_screen_ids": [
+        "FOS-GEN-005"
+      ],
       "headless_contract": null,
-      "coverage_state": "NO_ROUTE_COVERAGE",
+      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
       "feature_green": false
     },
     {

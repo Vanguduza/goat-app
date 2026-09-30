@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "source_fingerprint": "sha256:57cc6a931c7221c71fc1de61f186f899cd6a1e52e6b799f4f1776f984e4e8f3c",
+  "source_fingerprint": "sha256:17fc3b798dd2f16934bf389fd3254e18b057b3b090d573498443568073806948",
   "screen_count": 545,
   "qdu_count": 545,
   "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
@@ -3640,7 +3640,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -3657,7 +3657,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-RABBIT-032",
@@ -10803,7 +10803,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -10820,7 +10820,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-SALES-008",
@@ -11702,7 +11702,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -11719,7 +11719,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-GEN-007",

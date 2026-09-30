@@ -105,6 +105,8 @@ data class SaleRecordEntity(
     val occurredEpochDay: Long,
     /** The customer in the register (FOS-SALES-003); null when the sale named none. */
     @ColumnInfo(defaultValue = "NULL") val customerId: String? = null,
+    /** The animal sale exit this sale settles (D-022); null for any other sale. */
+    @ColumnInfo(defaultValue = "NULL") val exitId: String? = null,
 )
 
 @Entity(tableName = "formulary_items", indices = [Index(value = ["farmId", "productName"])])
@@ -391,6 +393,9 @@ interface SaleDao {
 
     @Query("SELECT COUNT(*) FROM sales_records WHERE farmId = :farmId")
     suspend fun count(farmId: String): Int
+
+    @Query("SELECT * FROM sales_records WHERE farmId = :farmId AND exitId = :exitId LIMIT 1")
+    suspend fun forExit(farmId: String, exitId: String): SaleRecordEntity?
 
     @Query(
         """

@@ -60,6 +60,8 @@ private enum class RabbitPage {
     LITTER_PROFILE,
     KIT_CENSUS,
     PROFILE,
+    PEDIGREE,
+    COI,
 }
 
 /** Rabbit biology is wave/cage/litter-first; this is not a Goat layout with rabbit labels. */
@@ -98,13 +100,15 @@ fun RabbitProgrammeScreen(
     rabbits: List<RabbitAnimalView> = emptyList(),
     /** A rabbit's exit record and reversal (D-022), shown on its profile. */
     rabbitExit: @Composable (RabbitAnimalView) -> Unit = {},
+    /** Rabbit pedigree and the kits' inbreeding (D-023); null hides both. */
+    pedigree: RabbitPedigreePorts? = null,
 ) {
     var page by remember { mutableStateOf(RabbitPage.DASHBOARD) }
     var profileId by remember { mutableStateOf<String?>(null) }
     val home = { page = RabbitPage.DASHBOARD }
     when (page) {
         RabbitPage.DASHBOARD -> {
-            RabbitDashboard(does, rabbitCount, cages, waves, availableBoxes, error, { page = it }, onBack)
+            RabbitDashboard(does, rabbitCount, cages, waves, availableBoxes, error, { page = it }, onBack, showPedigree = pedigree != null)
         }
 
         RabbitPage.ANIMALS -> if (rabbits.isNotEmpty()) {
@@ -129,6 +133,10 @@ fun RabbitProgrammeScreen(
                 RabbitProfileScreen(rabbit, rabbitExit) { page = RabbitPage.ANIMALS }
             }
         }
+
+        RabbitPage.PEDIGREE -> pedigree?.let { RabbitPedigreeScreen(it, busy, home) }
+
+        RabbitPage.COI -> pedigree?.let { RabbitCoiScreen(it, busy, home) }
 
         RabbitPage.REGISTER -> {
             RabbitRegisterScreen(busy, error, onRegisterDoe, home)
@@ -200,6 +208,7 @@ private fun RabbitDashboard(
     error: String?,
     onOpen: (RabbitPage) -> Unit,
     onBack: () -> Unit,
+    showPedigree: Boolean = false,
 ) {
     AnimalFarmCanvas {
         Column(
@@ -233,6 +242,10 @@ private fun RabbitDashboard(
             RabbitDashboardAction("Kindling due", "Waves with no kindling recorded yet", { onOpen(RabbitPage.KINDLING_DUE) })
             RabbitDashboardAction("Litter profiles", "Schedule, events and kits per wave", { onOpen(RabbitPage.LITTER_PROFILE) })
             RabbitDashboardAction("Kit census", "Individual kits by wave", { onOpen(RabbitPage.KIT_CENSUS) })
+            if (showPedigree) {
+                RabbitDashboardAction("Rabbit pedigree", "Sire and dam of each rabbit", { onOpen(RabbitPage.PEDIGREE) })
+                RabbitDashboardAction("Inbreeding check", "Kits' inbreeding for a doe and buck", { onOpen(RabbitPage.COI) })
+            }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             TextButton(onClick = onBack) { Text("Farm home") }
         }
