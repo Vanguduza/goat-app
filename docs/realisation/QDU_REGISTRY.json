@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "source_fingerprint": "sha256:31e0ec0a2e3f6829ddd678107523ec158039610a125321ddf4a454949c4983db",
+  "source_fingerprint": "sha256:d3ced488a6ff4b42d86f475cb22b7173717ed0dc559d24a5fc694cae0116989a",
   "screen_count": 545,
   "qdu_count": 545,
   "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
@@ -102,7 +102,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -119,7 +119,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-GLOBAL-005",
@@ -13558,7 +13558,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -13575,7 +13575,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-ADMIN-002",
@@ -13616,7 +13616,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -13633,7 +13633,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-ADMIN-004",
@@ -13645,7 +13645,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -13662,7 +13662,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-ADMIN-005",
@@ -13674,7 +13674,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -13691,7 +13691,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-ADMIN-006",
@@ -13703,7 +13703,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -13720,7 +13720,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-ADMIN-007",
@@ -13848,7 +13848,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -13865,7 +13865,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-ADMIN-012",
@@ -14138,7 +14138,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -14155,7 +14155,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-ADMIN-022",
@@ -14196,7 +14196,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -14213,7 +14213,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-ADMIN-024",
@@ -14225,7 +14225,7 @@
       ],
       "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
       "implementation_evidence": {
-        "kotlin_reference": false,
+        "kotlin_reference": true,
         "implementation_map": false
       },
       "required_contracts": [
@@ -14242,7 +14242,7 @@
       ],
       "feature_green": false,
       "visual_green": false,
-      "state": "PLANNED_NOT_IMPLEMENTED"
+      "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     },
     {
       "qdu_id": "QDU-SCREEN-FOS-ADMIN-025",
