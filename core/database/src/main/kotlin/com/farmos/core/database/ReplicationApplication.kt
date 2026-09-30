@@ -26,6 +26,12 @@ enum class ApplicationState {
 
     /** This app version has no applier for the operation type yet; it stays journalled until one exists. */
     AWAITING_APPLIER,
+
+    /**
+     * Farm management reviewed it in the Conflict Centre and kept it out of this farm's records (D-013). It
+     * stays in the journal as history and is never retried.
+     */
+    SET_ASIDE,
 }
 
 /** Application state of one received operation. Local operations are applied when they are written. */
@@ -55,7 +61,7 @@ interface ReplicationApplicationDao {
         """
         SELECT o.* FROM replication_operations o
         JOIN replication_applications a ON a.operationId = o.operationId
-        WHERE a.farmId = :farmId AND a.state != 'APPLIED'
+        WHERE a.farmId = :farmId AND a.state IN ('FAILED', 'AWAITING_APPLIER')
         ORDER BY o.businessTimeEpochMillis, o.deviceId, o.deviceSequence
         """,
     )
@@ -69,12 +75,24 @@ interface ReplicationApplicationDao {
         """
         SELECT o.operationId, o.operationType, o.deviceId, o.actorId, o.businessTimeEpochMillis, a.state, a.reason, a.attempts
         FROM replication_applications a JOIN replication_operations o ON o.operationId = a.operationId
-        WHERE a.farmId = :farmId AND a.state != 'APPLIED'
+        WHERE a.farmId = :farmId AND a.state IN ('FAILED', 'AWAITING_APPLIER')
         ORDER BY o.businessTimeEpochMillis DESC, o.operationId
         LIMIT :limit
         """,
     )
     suspend fun unappliedForReview(farmId: String, limit: Int): List<UnappliedOperation>
+
+    /** Received operations set aside in conflict review, newest business time first. */
+    @Query(
+        """
+        SELECT o.operationId, o.operationType, o.deviceId, o.actorId, o.businessTimeEpochMillis, a.state, a.reason, a.attempts
+        FROM replication_applications a JOIN replication_operations o ON o.operationId = a.operationId
+        WHERE a.farmId = :farmId AND a.state = 'SET_ASIDE'
+        ORDER BY o.businessTimeEpochMillis DESC, o.operationId
+        LIMIT :limit
+        """,
+    )
+    suspend fun setAsideForReview(farmId: String, limit: Int): List<UnappliedOperation>
 }
 
 /** One received operation awaiting application, with why. */

@@ -51,10 +51,17 @@ class AnimalExitCommands(
         return LocalCommandResult(context.mutationId, command.exitId, true)
     }
 
-    suspend fun reverse(command: ReverseAnimalExit, context: LocalCommandContext): LocalCommandResult {
+    /**
+     * Reverses the animal's standing exit. [ofUnappliedExit] reverses an exit received from another device
+     * that never took effect here, as the correction recorded when it is set aside in conflict review; here it
+     * is history only, and on the devices where the exit stands it returns the animal to the herd.
+     */
+    suspend fun reverse(command: ReverseAnimalExit, context: LocalCommandContext, ofUnappliedExit: Boolean = false): LocalCommandResult {
         AnimalExitRules.reversalError(command.reason)?.let { error(it) }
-        val standing = AnimalExitRules.standing(events(command.animalId))
-        require(standing?.exitId == command.exitId) { "Only the animal's current exit can be reversed" }
+        val events = events(command.animalId)
+        if (events.any { it.exitId == command.exitId } || !(replaying || ofUnappliedExit)) {
+            require(AnimalExitRules.standing(events)?.exitId == command.exitId) { "Only the animal's current exit can be reversed" }
+        }
         journal(context, REVERSE, command.animalId, json.encodeToString(command)) {
             database.animalExits().insert(
                 AnimalExitEntity(
