@@ -211,6 +211,7 @@ fun OperatingModuleHost(
                 exitContent = { animal, screenId, statusBack ->
                     SpeciesExitHost(database, farmId, animal, screenId, newContext, onRecorded = { run { } }, onBack = statusBack)
                 },
+                attachmentContent = { animal -> AnimalAttachmentsHost(database, farmId, animal.animalId, canAttach = animal.active, newContext) },
                 onBack = onBack,
                 extra = { selected, operationsBack ->
                     // Owner decision D-004: operations choose animals and groups from every record, never by typed id.

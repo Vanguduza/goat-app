@@ -79,6 +79,7 @@ fun SpeciesHerdScreen(
     extra: @Composable (SpeciesAnimalRow?, onBack: () -> Unit) -> Unit = { _, _ -> },
     counts: SpeciesHerdCounts? = null,
     exitContent: (@Composable (animal: SpeciesAnimalRow, screenId: String, onBack: () -> Unit) -> Unit)? = null,
+    attachmentContent: (@Composable (animal: SpeciesAnimalRow) -> Unit)? = null,
 ) {
     require(module == FarmModule.SHEEP || module == FarmModule.CATTLE) {
         "SpeciesHerdScreen is reserved for individual-animal sheep/cattle UX"
@@ -136,7 +137,7 @@ fun SpeciesHerdScreen(
         }
 
         SpeciesPage.PROFILE -> {
-            SpeciesProfile(config, selected, { page = it }, home, exitsReversible = exitContent != null)
+            SpeciesProfile(config, selected, { page = it }, home, exitsReversible = exitContent != null, attachmentContent = attachmentContent)
         }
 
         SpeciesPage.REGISTER -> {
@@ -271,6 +272,7 @@ private fun SpeciesProfile(
     onOpen: (SpeciesPage) -> Unit,
     onBack: () -> Unit,
     exitsReversible: Boolean = false,
+    attachmentContent: (@Composable (animal: SpeciesAnimalRow) -> Unit)? = null,
 ) {
     FarmOperationalPage(
         config.screenIds.profile,
@@ -295,6 +297,8 @@ private fun SpeciesProfile(
                 TextButton(onClick = { onOpen(SpeciesPage.OPERATIONS) }, enabled = selected.active) { Text(config.operationsTitle) }
                 TextButton(onClick = { onOpen(SpeciesPage.STATUS) }, enabled = selected.active || exitsReversible) { Text("Lifecycle status") }
             }
+            // Owner decision D-015: photos and documents of this animal, when the host provides them.
+            attachmentContent?.invoke(selected)
         }
     }
 }

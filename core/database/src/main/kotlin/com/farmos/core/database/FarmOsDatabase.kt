@@ -776,8 +776,9 @@ interface SyncCursorDao {
         FarmWorkerEntity::class,
         AnimalExitEntity::class,
         FarmCustomerEntity::class,
+        AttachmentEntity::class,
     ],
-    version = 28,
+    version = 29,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -820,6 +821,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun lifecycle(): LifecycleDao
     abstract fun reports(): FarmReportDao
     abstract fun customers(): FarmCustomerDao
+    abstract fun attachments(): AttachmentDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -1300,6 +1302,18 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28)
+        /** Version 29 adds attachment metadata (D-015); the bytes are kept outside the database. */
+        val MIGRATION_28_29 = object : Migration(28, 29) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `attachments` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `ownerType` TEXT NOT NULL, `ownerId` TEXT NOT NULL, " +
+                        "`contentSha256` TEXT NOT NULL, `byteSize` INTEGER NOT NULL, `mediaType` TEXT NOT NULL, `displayName` TEXT NOT NULL, " +
+                        "`attachedAtEpochMillis` INTEGER NOT NULL, `attachedByActorId` TEXT NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_attachments_farmId_ownerType_ownerId` ON `attachments` (`farmId`, `ownerType`, `ownerId`)")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29)
     }
 }
