@@ -1,6 +1,6 @@
 # Farm OS — Agent Operating Rules
 
-Farm OS is a multi-species livestock operating system (Android/Kotlin/Compose + Supabase + Meilisearch).
+Farm OS (GOAT) is a multi-species livestock operating system: a local-first Android/Kotlin/Compose app with Room on every device, farm-LAN peer replication and owner Google Drive replication/backup. There is no application server (owner lock of 30 September 2026, `docs/00_PROJECT_TRUTH.md` §0).
 Before changing code, read `docs/00_PROJECT_TRUTH.md`, then the relevant product/spec section. Do not implement from chat memory.
 
 ## Authority — non-negotiable
@@ -15,35 +15,36 @@ Before changing code, read `docs/00_PROJECT_TRUTH.md`, then the relevant product
 Current locked owner decisions:
 
 - MVP contains all documented features and all specified animal modules: goat, rabbit, poultry, sheep and cattle plus all shared modules.
-- Supabase is the canonical backend/database authority.
-- Meilisearch is mandatory MVP server search and remains a rebuildable projection.
+- No application server. Room/SQLite on each device is the operational datastore; devices replicate immutable operations over the farm LAN and through approved Google Drive Gateways (`docs/architecture/GOAT_OFFLINE_MULTI_DEVICE_SYNC.md`, `domain/replication`). Supabase and Meilisearch are superseded authorities being migrated out in audited tranches; do not extend them.
+- Local full-database search is the search authority.
 - A green vertical slice proves architecture only. It does not make a feature green.
 - `FEATURE_GREEN` requires the complete Feature Implementation Contract and all applicable tests/gates.
 
 ## Schema and write authority
 
-- `supabase/migrations/` is the server schema source of truth. Schema changes require matching Android model/mirror changes and tests.
-- Material business writes use versioned command boundaries/RPCs. Do not create a second direct-table business writer.
+- Room schema plus the replication operation contract are the data authority. Every Room schema version increase needs executable migration-chain evidence. `supabase/migrations/` is server-era provenance pending migration.
+- Material business writes use versioned local command boundaries that commit the Room change and its replication operation together. Do not create a second direct-table business writer.
 - `domain_events` is append-only for event-ledger domains; corrections are compensating/superseding events.
 - Master/configuration records use governed relational versioning/audit rather than fake event sourcing.
-- Every farm-owned durable table carries `farm_id`; cross-farm relationships are prevented structurally where applicable and protected by fail-closed RLS.
-- No service-role, Meilisearch admin, or other privileged server key may appear in the APK.
+- Every farm-owned durable table and every replicated operation carries `farm_id`; operations for another farm are rejected; cross-farm relationships are prevented structurally.
+- No privileged credential in the APK. Drive tokens and farm keys live in Keystore-backed storage and are never broadcast over LAN discovery.
 
 ## Offline and sync
 
 - User-visible success means the local Room transaction has committed.
-- Every remotely retried mutation has `mutation_id` and explicit state.
-- Outbox states: `PENDING`, `IN_FLIGHT`, `ACKNOWLEDGED`, `CONFLICT`, `REJECTED`, `RETRY_WAIT`, `DEAD_LETTER`.
-- Pull ordering uses a server-issued monotonic cursor, never phone wall clock.
-- Search/provider failure cannot roll back accepted authoritative state.
+- Every replicated mutation is an immutable operation with a global ID, per-device sequence, original business time and checksum; replay is idempotent.
+- Devices exchange sync vectors and transfer only missing operations. Sync order is never business order; late devices are reconciled, never discarded.
+- Never synchronise whole SQLite files; no last-file, last-device or timestamp wins.
+- "Saved locally", "Synchronised" and "Backed up" are distinct, truthful states.
+- Sync, Drive or provider failure cannot roll back accepted local state.
 
 ## Module boundaries
 
-- Only domain/application command handlers create authoritative business events; Compose screens never write Supabase tables directly.
+- Only domain/application command handlers create authoritative business events; Compose screens never write Room business tables directly.
 - Features never import another species feature to reuse biology or copy.
 - Species UX stays species-native: no generic Animals home, no mammalized poultry, no sheep-as-goat or cattle-as-sheep implementation.
 - Vendor AI SDKs live behind Farm OS-owned ports.
-- Meilisearch lives behind Farm OS-owned search interfaces and is never a system of record.
+- Search lives behind Farm OS-owned search interfaces over the complete local database; capped presentation lists never feed selectors, metrics or reports.
 
 ## Fan-out discipline
 
@@ -88,7 +89,7 @@ A feature is **not** complete because code exists or because an architecture sli
 - [ ] Full Feature Implementation Contract realized: states, commands, queries, events, permissions and UI surfaces.
 - [ ] Failing-first domain/property tests.
 - [ ] Schema migration + Room mirror/model + tests.
-- [ ] `farm_id`, relational tenant integrity, RLS and negative authorization tests.
+- [ ] `farm_id`, relational tenant integrity, local role/permission and negative authorization tests.
 - [ ] Offline save/restart/retry/conflict/rejection behavior.
 - [ ] Idempotency and optimistic-concurrency tests.
 - [ ] Search projection/local fallback/rebuild tests where searchable.
@@ -113,9 +114,10 @@ The designated slice is:
 ## Forbidden
 
 - A second source of truth for mutable state; shadow authoritative tables; spreadsheet imports bypassing governed commands.
-- Direct feature writes to authoritative Supabase business tables.
+- Direct feature writes to Room business tables that bypass command handlers and the replication journal.
+- Synchronising whole SQLite database files between devices.
 - Retrying side effects without idempotency and reconciliation.
-- Widening RLS, tool scope or autonomy to make a test pass.
+- Widening permissions, tool scope or autonomy to make a test pass.
 - Hard-coded model vendors, privileged search credentials, storage providers or currency/locale assumptions.
 - Free-typed medication products in treatment records.
 - Placeholder UI content or emoji.
