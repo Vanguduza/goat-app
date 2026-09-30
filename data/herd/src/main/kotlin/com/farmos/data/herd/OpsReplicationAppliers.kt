@@ -36,6 +36,7 @@ import com.farmos.domain.ops.RecordCattleMilk
 import com.farmos.domain.ops.RecordCattlePd
 import com.farmos.domain.ops.RecordCattleScc
 import com.farmos.domain.ops.RecordCattleService
+import com.farmos.domain.ops.RecordCattleServiceV2
 import com.farmos.domain.ops.RecordCattleWeaning
 import com.farmos.domain.ops.RecordFamacha
 import com.farmos.domain.ops.RecordGroupCensus
@@ -60,6 +61,7 @@ import com.farmos.domain.ops.RecordSheepDag
 import com.farmos.domain.ops.RecordSheepFlystrike
 import com.farmos.domain.ops.RecordSheepFootrot
 import com.farmos.domain.ops.RecordSheepJoining
+import com.farmos.domain.ops.RecordSheepJoiningV2
 import com.farmos.domain.ops.RecordSheepLambing
 import com.farmos.domain.ops.RecordSheepMarking
 import com.farmos.domain.ops.RecordSheepMicron
@@ -114,6 +116,9 @@ object OpsReplicationAppliers {
         "cattle.record_pd.v1" to replay { ops, op -> ops.recordCattlePd(decode<RecordCattlePd>(op), context(op)) },
         "cattle.record_scc.v1" to replay { ops, op -> ops.recordScc(decode<RecordCattleScc>(op), context(op)) },
         "cattle.record_service.v1" to replay { ops, op -> ops.recordCattleService(decode<RecordCattleService>(op), context(op)) },
+        BreedingDueCommands.CATTLE_SERVICE_V2 to OperationApplier { database, op ->
+            BreedingDueCommands(database, op.farmId, replaying = true).recordCattleService(decode<RecordCattleServiceV2>(op), context(op))
+        },
         "cattle.record_weaning.v1" to replay { ops, op -> ops.recordCattleWeaning(decode<RecordCattleWeaning>(op), context(op)) },
         "feed.issue.v1" to replay { ops, op -> ops.issueFeed(decode<IssueFeed>(op), context(op)) },
         "formulary.item_create.v1" to replay { ops, op -> ops.createFormulary(decode<CreateFormularyItem>(op), context(op)) },
@@ -174,6 +179,9 @@ object OpsReplicationAppliers {
         "sheep.record_flystrike.v1" to replay { ops, op -> ops.recordFlystrike(decode<RecordSheepFlystrike>(op), context(op)) },
         "sheep.record_footrot.v1" to replay { ops, op -> ops.recordFootrot(decode<RecordSheepFootrot>(op), context(op)) },
         "sheep.record_joining.v1" to replay { ops, op -> ops.recordJoining(decode<RecordSheepJoining>(op), context(op)) },
+        BreedingDueCommands.SHEEP_JOINING_V2 to OperationApplier { database, op ->
+            BreedingDueCommands(database, op.farmId, replaying = true).recordJoining(decode<RecordSheepJoiningV2>(op), context(op))
+        },
         "sheep.record_lambing.v1" to replay { ops, op -> ops.recordLambing(decode<RecordSheepLambing>(op), context(op)) },
         "sheep.record_marking.v1" to replay { ops, op -> ops.recordMarking(decode<RecordSheepMarking>(op), context(op)) },
         "sheep.record_micron.v1" to replay { ops, op -> ops.recordMicron(decode<RecordSheepMicron>(op), context(op)) },

@@ -116,9 +116,10 @@ class OpsReplicationApplierTest {
 
     @Test
     fun everyCommandTheOpsRepositoryJournalsHasAnApplier() {
-        val source = java.io.File("../data/herd/src/main/kotlin/com/farmos/data/herd/RoomOpsRepository.kt").takeIf { it.exists() }
-            ?: java.io.File("data/herd/src/main/kotlin/com/farmos/data/herd/RoomOpsRepository.kt")
-        val journalled = Regex("\"([a-z_]+\\.[a-z_]+\\.v\\d)\"").findAll(source.readText()).map { it.groupValues[1] }.toSet()
+        fun source(name: String) = java.io.File("../data/herd/src/main/kotlin/com/farmos/data/herd/$name").takeIf { it.exists() }
+            ?: java.io.File("data/herd/src/main/kotlin/com/farmos/data/herd/$name")
+        val text = source("RoomOpsRepository.kt").readText() + source("BreedingDueCommands.kt").readText()
+        val journalled = Regex("\"([a-z_]+\\.[a-z_]+\\.v\\d)\"").findAll(text).map { it.groupValues[1] }.toSet()
         assertTrue(journalled.size > 80)
         assertEquals(journalled, journalled.intersect(OpsReplicationAppliers.all.keys))
     }
