@@ -63,7 +63,7 @@ class SettingsHostTest {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        directory = LocalFarmDirectory(database, CredentialHasher(iterations = 1_000))
+        directory = LocalFarmDirectory(database, "device-a", CredentialHasher(iterations = 1_000))
         runBlocking {
             farmId = directory.createFarm("Premier Farm") { id ->
                 owner = directory.access.setUpFarm(id, "tendai", "Tendai Moyo", Credential(CredentialKind.PIN, "482913")).owner
@@ -195,7 +195,9 @@ class SettingsHostTest {
         waitForText("Signed in as Tendai Moyo")
         click("Storage and backup")
         waitForTag("farm-screen:FOS-ADMIN-023")
-        waitForText("0 operation(s) recorded")
+        val journalled = runBlocking { database.replication().count(farmId) }
+        assertTrue("Farm setup is journalled for replication", journalled > 0)
+        waitForText("$journalled operation(s) recorded")
         waitForText("No backup has been made.")
         waitForText("Disconnecting Google Drive never deletes farm records on this device.")
     }
@@ -247,7 +249,7 @@ class SettingsHostTest {
 
         waitForText("Records are kept in ZAR")
         assertEquals("ZAR", runBlocking { database.farmCurrency(farmId) })
-        val change = runBlocking { database.replication().operationsInRange(farmId, "device-a", 1, 10) }.single()
+        val change = runBlocking { database.replication().operationsInRange(farmId, "device-a", 1, 100) }.single { it.operationType == SET_FARM_CURRENCY_COMMAND }
         assertEquals(SET_FARM_CURRENCY_COMMAND, change.operationType)
         assertEquals(MergeClass.FIELD_UPDATE.name, change.mergeClass)
         assertEquals(owner.accountId, change.actorId)

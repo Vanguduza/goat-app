@@ -114,7 +114,7 @@ internal fun LocalFarmEntry(
             }
             is EntryStep.SignIn -> SignInForm(current.farms, busy, onRecover = { step = EntryStep.Recover(current.farms) }) { farm, username, pin ->
                 launchEntry {
-                    when (val result = withContext(io) { directory.access.signIn(farm.farmId, username, pin) }) {
+                    when (val result = withContext(io) { directory.transact { it.signIn(farm.farmId, username, pin) } }) {
                         is SignInResult.SignedIn -> onSignedIn(result.account, farm.name)
                         SignInResult.InvalidCredentials -> error = "The username or PIN is not correct."
                         SignInResult.Disabled -> error = "This account is disabled. Ask a manager to enable it."
@@ -125,8 +125,10 @@ internal fun LocalFarmEntry(
             is EntryStep.Recover -> RecoverForm(current.farms, busy, onBack = { step = EntryStep.SignIn(current.farms) }) { farm, username, code, pin ->
                 launchEntry {
                     val result = withContext(io) {
-                        val owner = directory.ownerByUsername(farm.farmId, username)
-                        if (owner == null) RecoveryResult.InvalidCode else directory.access.recoverOwner(farm.farmId, owner.accountId, code, Credential(CredentialKind.PIN, pin))
+                        directory.transact { access ->
+                            val owner = directory.ownerByUsername(farm.farmId, username)
+                            if (owner == null) RecoveryResult.InvalidCode else access.recoverOwner(farm.farmId, owner.accountId, code, Credential(CredentialKind.PIN, pin))
+                        }
                     }
                     when (result) {
                         is RecoveryResult.Recovered -> step = EntryStep.ShowRecoveryCode("FOS-GLOBAL-004", result.newRecoveryCode, result.owner, farm.name)
@@ -293,7 +295,7 @@ private fun clockTime(epochMillis: Long): String =
  */
 @Composable
 internal fun LocalFarmSession(app: FarmOsApplication) {
-    val directory = remember { LocalFarmDirectory(app.database) }
+    val directory = remember { LocalFarmDirectory(app.database, app.deviceId) }
     var signedIn by remember { mutableStateOf<Pair<LocalAccount, String>?>(null) }
     val current = signedIn
     if (current == null) {

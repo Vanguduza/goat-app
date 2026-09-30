@@ -31,7 +31,7 @@ class FarmOsDatabaseMigrationTest {
     }
 
     @Test
-    fun version1DatabaseMigratesThroughVersion17WithoutLosingFoundationData() = runBlocking {
+    fun version1DatabaseMigratesThroughVersion18WithoutLosingFoundationData() = runBlocking {
         val farmId = "11111111-1111-4111-8111-111111111111"
         val animalId = "33333333-3333-4333-8333-333333333333"
         val mutationId = "55555555-5555-4555-8555-555555555555"
@@ -41,7 +41,7 @@ class FarmOsDatabaseMigrationTest {
             .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
             .build()
 
-        // Force Room to execute the complete 1 -> 17 chain and validate the final schema.
+        // Force Room to execute the complete 1 -> 18 chain and validate the final schema.
         migrated.openHelper.writableDatabase
 
         val animal = migrated.animals().get(farmId, animalId)
@@ -67,6 +67,8 @@ class FarmOsDatabaseMigrationTest {
         assertNull(migrated.farmSettings().get(farmId))
         // Version 17 tracks application of received operations; nothing has been received yet.
         assertEquals(0, migrated.replicationApplications().unapplied(farmId).size)
+        // Version 18 adds change times to local accounts and the recovery hash.
+        assertNull(migrated.localAccess().recovery(farmId))
 
         migrated.close()
     }

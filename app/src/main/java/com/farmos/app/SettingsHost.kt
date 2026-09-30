@@ -161,7 +161,7 @@ internal fun SettingsHost(
             val actor = current.actor ?: return@FarmOperationalPage
             SettingsError(error)
             CreateAccountForm(assignableRoles(actor), busy) { displayName, username, role, pin ->
-                act(onDone = { page = SettingsPage.MEMBERS }) { directory.access.createAccount(it, username, displayName, role, Credential(CredentialKind.PIN, pin)) }
+                act(onDone = { page = SettingsPage.MEMBERS }) { actor -> directory.transact { it.createAccount(actor, username, displayName, role, Credential(CredentialKind.PIN, pin)) } }
             }
         }
         SettingsPage.MEMBER_DETAIL -> FarmOperationalPage("FOS-ADMIN-005", "Account and role", "Role, status and PIN for one account.", onBack = { page = SettingsPage.MEMBERS }, backLabel = "Accounts and access") {
@@ -172,9 +172,9 @@ internal fun SettingsHost(
                 subject = subject,
                 roles = assignableRoles(actor),
                 busy = busy,
-                onRole = { role -> act { directory.access.changeRole(it, subject.accountId, role) } },
-                onStatus = { status -> act { directory.access.setStatus(it, subject.accountId, status) } },
-                onResetPin = { pin -> act { directory.access.resetCredential(it, subject.accountId, Credential(CredentialKind.PIN, pin)) } },
+                onRole = { role -> act { actor -> directory.transact { it.changeRole(actor, subject.accountId, role) } } },
+                onStatus = { status -> act { actor -> directory.transact { it.setStatus(actor, subject.accountId, status) } } },
+                onResetPin = { pin -> act { actor -> directory.transact { it.resetCredential(actor, subject.accountId, Credential(CredentialKind.PIN, pin)) } } },
             )
         }
         SettingsPage.PERMISSIONS -> FarmOperationalPage("FOS-ADMIN-006", "Roles and permissions", "What each role may do on this farm.", onBack = home, backLabel = "Farm settings") {

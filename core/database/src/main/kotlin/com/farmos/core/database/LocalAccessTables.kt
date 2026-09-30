@@ -1,5 +1,6 @@
 package com.farmos.core.database
 
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Entity
 import androidx.room.Index
@@ -35,6 +36,8 @@ data class LocalAccountEntity(
     val lockedUntilEpochMillis: Long?,
     val workerId: String?,
     val createdAtEpochMillis: Long,
+    /** Business time of the last replicated identity change; later changes from any device win. */
+    @ColumnInfo(defaultValue = "0") val updatedAtEpochMillis: Long = 0,
 )
 
 /** The hash of the farm's current one-time owner recovery code. */
@@ -42,6 +45,7 @@ data class LocalAccountEntity(
 data class FarmRecoveryEntity(
     @PrimaryKey val farmId: String,
     val recoveryHash: String,
+    @ColumnInfo(defaultValue = "0") val updatedAtEpochMillis: Long = 0,
 )
 
 /** Access history: sign-ins, failures and every administrative action. Never contains secrets. */
@@ -85,6 +89,16 @@ interface LocalAccessDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertAudit(event: AccessAuditEntity)
+
+    /** Replicated farms and audit events arrive at most once per id; a repeat changes nothing. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertFarmIfAbsent(farm: LocalFarmEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertAuditIfAbsent(event: AccessAuditEntity)
+
+    @Query("SELECT * FROM farm_recovery WHERE farmId = :farmId LIMIT 1")
+    fun recovery(farmId: String): FarmRecoveryEntity?
 
     @Query("SELECT * FROM access_audit WHERE farmId = :farmId ORDER BY atEpochMillis DESC, eventId LIMIT :limit")
     fun audit(farmId: String, limit: Int): List<AccessAuditEntity>

@@ -90,7 +90,7 @@ fun FarmSessionContent(
             onRequireReauth = onRequireReauth,
         )
         FarmDestination.Settings -> SettingsHost(
-            directory = remember(app) { LocalFarmDirectory(app.database) },
+            directory = remember(app) { LocalFarmDirectory(app.database, app.deviceId) },
             database = app.database,
             farmId = membership.farmId,
             actorId = actorId,
