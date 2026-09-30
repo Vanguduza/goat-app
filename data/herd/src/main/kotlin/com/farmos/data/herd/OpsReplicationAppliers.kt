@@ -13,6 +13,7 @@ import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateAnimalGroup
 import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.CreateFarmTask
+import com.farmos.domain.ops.UpdateFarmTask
 import com.farmos.domain.ops.SubmitStockCount
 import com.farmos.domain.ops.StartStockCount
 import com.farmos.domain.ops.RejectStockCount
@@ -210,6 +211,7 @@ object OpsReplicationAppliers {
         TaskSeriesCommands.OCCURRENCE_COMPLETE to series { commands, op -> commands.complete(decode<CompleteTaskOccurrence>(op), context(op)) },
         TaskSeriesCommands.SERIES_EDIT to series { commands, op -> commands.edit(decode<EditTaskSeries>(op), context(op)) },
         TaskSeriesCommands.SERIES_END to series { commands, op -> commands.end(decode<EndTaskSeries>(op), context(op)) },
+        TaskSeriesCommands.TASK_UPDATE to series { commands, op -> commands.update(decode<UpdateFarmTask>(op), context(op)) },
         "water.record.v1" to replay { ops, op -> ops.recordWater(decode<RecordWater>(op), context(op)) },
     )
 

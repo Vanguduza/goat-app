@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "tested_commit": "09611efd188a3c9a6639cf42e27afd5973b91825",
+  "tested_commit": "bf8e9780b3e6eaf354da194e052edb09e91d15a3",
   "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_WITH_SEPARATE_RUNTIME_EVIDENCE",
   "registry_rows": 545,
   "route_evidence_counts": {
@@ -21,9 +21,9 @@
   "route_contracts_executed": 61,
   "runtime_evidence": {
     "ledger": "docs/ux/evidence/animal-farm-visual-lock/phase5-runtime-navigation-ledger.json",
-    "tested_commit": "09611efd188a3c9a6639cf42e27afd5973b91825",
-    "source_fingerprint": "sha256:0aa252a0ce9ba9a524f92267b1f3f7e30aa4570d4d6e241c3e57bb060f40bc9f",
-    "foundation_run_id": 36706893680,
+    "tested_commit": "bf8e9780b3e6eaf354da194e052edb09e91d15a3",
+    "source_fingerprint": "sha256:2b89de530eb0050ce7d7d7f5b99a526fd5d2710ebeeb40edf6ad1c1a3f9751e5",
+    "foundation_run_id": 36710343358,
     "ci_status": "PASS_EXACT_HEAD_CI"
   },
   "feature_id_catalog_status": "CANONICAL_OWNER_AUTHORIZED",

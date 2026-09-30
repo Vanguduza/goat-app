@@ -47,6 +47,18 @@ data class EditTaskSeries(
     val recurrenceInterval: Int? = null,
 )
 
+/**
+ * Changes an open one-off task: its title, due day or assignee (resolution R2 of D-020). A null field keeps
+ * its value. A completed task never changes. Replicated as `task.update.v1`.
+ */
+@Serializable
+data class UpdateFarmTask(
+    val taskId: String,
+    val title: String? = null,
+    val dueEpochDay: Long? = null,
+    val assignee: TaskAssignee? = null,
+)
+
 /** Ends a series after [lastEpochDay]; earlier occurrences, completed or not, are kept. Replicated as `task.series_end.v1`. */
 @Serializable
 data class EndTaskSeries(val seriesId: String, val lastEpochDay: Long)
@@ -68,6 +80,12 @@ object TaskSeriesRules {
         runCatching { TaskSeriesSchedule(recurrence(command.recurrenceKind, command.recurrenceInterval), command.startEpochDay, command.endEpochDay) }
             .onFailure { return it.message ?: "Repeat is not valid" }
         return assignee(command.assignee)
+    }
+
+    fun update(command: UpdateFarmTask): String? {
+        if (command.title?.isBlank() == true) return "Task title is required"
+        if (command.title == null && command.dueEpochDay == null && command.assignee == null) return "Nothing to change"
+        return command.assignee?.let { assignee(it) }
     }
 
     fun edit(command: EditTaskSeries): String? {
