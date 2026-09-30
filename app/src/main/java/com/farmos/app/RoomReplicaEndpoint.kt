@@ -99,6 +99,9 @@ class RoomReplicaEndpoint(
      */
     fun applyPending() = runBlocking { applyPendingOperations() }
 
+    /** Suspending form of [applyPending] for callers already in a coroutine; never nest runBlocking there. */
+    suspend fun applyPendingNow() = applyPendingOperations()
+
     private suspend fun applyPendingOperations() {
         var progressed = true
         while (progressed) {

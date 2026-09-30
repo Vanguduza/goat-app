@@ -234,7 +234,7 @@ internal fun SettingsHost(
             }
             FarmOperationalSection("Received changes needing review") {
                 ReceivedChangesReview(current.unapplied, current.unappliedTotal, busy || !RolePermissions.allows(actor.role, Permission.RESOLVE_SYNC_CONFLICTS)) {
-                    act { withContext(io) { RoomReplicaEndpoint(database, farmId, deviceId, replicationAppliers).applyPending() } }
+                    act { RoomReplicaEndpoint(database, farmId, deviceId, replicationAppliers).applyPendingNow() }
                 }
             }
             FarmOperationalSection("Google Drive") {
