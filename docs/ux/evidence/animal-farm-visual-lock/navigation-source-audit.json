@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "0c37ec2f93fe0f72675dff7fc266980378f24334",
+  "tested_commit": "36fffa98db53d669a40acb673a8caf1ab29dac07",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 279
+    "registered_ids_mentioned_in_kotlin": 281
   },
   "top_level": {
     "farm_modules": [
@@ -692,8 +692,8 @@
         },
         {
           "value": "LAMBING",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -791,6 +791,12 @@
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
+        },
+        {
+          "value": "LAMBING_DUE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
         }
       ]
     },
@@ -821,8 +827,8 @@
         },
         {
           "value": "CALVING",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -941,6 +947,12 @@
         },
         {
           "value": "LOT_DETAIL",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "CALVING_DUE",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
