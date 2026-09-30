@@ -239,6 +239,7 @@ fun FarmSessionContent(
                 onBack = backHome,
                 loadRecords = { loadRabbitRecords(app.database, membership.farmId) },
                 searchRabbits = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "rabbit") },
+                pedigree = remember(membership.farmId) { rabbitPedigreePorts(app.database, membership.farmId, ops, ::context, ::enqueueSync) },
                 exitFor = { rabbit, onRecorded ->
                     SpeciesExitHost(app.database, membership.farmId, SpeciesAnimalRow(rabbit.animalId, rabbit.label, rabbit.active), null, ::context, onRecorded, onBack = {})
                 },
