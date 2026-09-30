@@ -322,7 +322,7 @@ private object LanRequest {
  * Calls into the replica are serialised on [lock].
  */
 class LanSyncServer(
-    private val replica: FarmReplica,
+    private val replica: ReplicaEndpoint,
     private val keys: () -> FarmKeyRing,
     private val lock: Any = replica,
     private val random: SecureRandom = SecureRandom(),
@@ -379,7 +379,7 @@ class LanSyncServer(
         }
     }
 
-    private fun authorised(deviceId: String): Boolean = synchronized(lock) { replica.registry.maySynchronise(deviceId) }
+    private fun authorised(deviceId: String): Boolean = synchronized(lock) { replica.maySynchronise(deviceId) }
 
     override fun close() {
         server?.close()
