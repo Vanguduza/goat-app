@@ -279,7 +279,7 @@ private fun SheepJoiningScreen(
         error,
         onBack,
     ) {
-        Field(groupId, { groupId = it }, "Sheep mob id", busy)
+        OpsGroupPicker("Sheep mob", groupId, busy) { groupId = it }
         Field(day, { day = it }, "Joining start", busy)
         Button(onClick = {
             onRecord(groupId, day)
@@ -299,7 +299,7 @@ private fun SheepScanScreen(
     var result by remember { mutableStateOf("single") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-012", "Pregnancy scan", "Result must be dry, single, twin or triplet.", busy, error, onBack) {
-        Field(animalId, { animalId = it }, "Ewe id", busy)
+        OpsAnimalPicker("Ewe", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
         Field(result, { result = it }, "Scan result", busy)
         Field(day, { day = it }, "Scan date", busy)
         Button(onClick = {
@@ -322,7 +322,7 @@ private fun SheepLambingScreen(
     var dead by remember { mutableStateOf("0") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-014", "Record lambing", "Live plus dead must equal born.", busy, error, onBack, FarmVisualClass.I4) {
-        Field(animalId, { animalId = it }, "Ewe id", busy)
+        OpsAnimalPicker("Ewe", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             CompactField(born, { born = it }, "Born", busy, Modifier.weight(1f))
             CompactField(live, { live = it }, "Live", busy, Modifier.weight(1f))
@@ -355,7 +355,7 @@ private fun SheepGroupAnimalCountScreen(
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage(screenId, title, "Use a mob or an individual sheep plus the recorded count.", busy, error, onBack) {
         Field(groupId, { groupId = it }, "Mob id (optional)", busy)
-        Field(animalId, { animalId = it }, "Animal id (optional)", busy)
+        OpsAnimalPicker("Animal (optional)", animalId, OpsAnimalFilter.ANY, busy, optional = true) { animalId = it }
         Field(count, { count = it }, countLabel, busy)
         Field(day, { day = it }, "Date", busy)
         Button(
@@ -463,7 +463,7 @@ private fun SheepScoreScreen(
     var score by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage(screenId, title, subtitle, busy, error, onBack, visualClass) {
-        Field(animalId, { animalId = it }, "Sheep id", busy)
+        OpsAnimalPicker("Sheep", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
         Field(score, { score = it }, "Score", busy)
         Field(day, { day = it }, "Date", busy)
         Button(
@@ -488,7 +488,7 @@ private fun SheepIdentifierScreen(
     var value by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-029", "Official identifier", "Bind an approved identifier type to this sheep.", busy, error, onBack) {
-        Field(animalId, { animalId = it }, "Sheep id", busy)
+        OpsAnimalPicker("Sheep", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
         Field(type, { type = it }, "Identifier type", busy)
         Field(value, { value = it }, "Identifier value", busy)
         Field(day, {
@@ -518,7 +518,7 @@ private fun SheepMovementScreen(
     var to by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-027", "Movement", "Record on, off or transfer movement and places.", busy, error, onBack) {
-        Field(animalId, { animalId = it }, "Sheep id", busy)
+        OpsAnimalPicker("Sheep", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
         Field(direction, { direction = it }, "Direction", busy)
         Field(from, { from = it }, "From place", busy)
         Field(to, { to = it }, "To place", busy)
@@ -548,8 +548,8 @@ private fun SheepPedigreeScreen(
         error,
         onBack,
     ) {
-        Field(animalId, { animalId = it }, "Sheep id", busy)
-        Field(parentId, { parentId = it }, "Parent id", busy)
+        OpsAnimalPicker("Sheep", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
+        OpsAnimalPicker("Parent", parentId, OpsAnimalFilter.ANY, busy, parent = true) { parentId = it }
         Field(relation, {
             relation =
                 it
