@@ -116,6 +116,14 @@ data class TaskEntity(
     val cageId: String?,
     val waveId: String?,
     val updatedAtEpochMillis: Long,
+    /** The task series this occurrence belongs to (D-020), or null for a one-off task. */
+    val seriesId: String? = null,
+    /** The series day this stored occurrence stands for; its due day may have been moved. Null without a series. */
+    val occurrenceEpochDay: Long? = null,
+    /** Assigned to a local account on this farm, or null. */
+    val assigneeAccountId: String? = null,
+    /** Assigned to a worker record on this farm, or null. */
+    val assigneeWorkerId: String? = null,
 )
 
 @Entity(tableName = "kidding_events", indices = [Index(value = ["farmId", "damId"])])
@@ -529,6 +537,12 @@ interface TaskDao {
     @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND status = 'open' ORDER BY dueOnEpochDay, title")
     suspend fun openForFarm(farmId: String): List<TaskEntity>
 
+    @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND id = :taskId LIMIT 1")
+    suspend fun get(farmId: String, taskId: String): TaskEntity?
+
+    @Query("DELETE FROM farm_tasks WHERE farmId = :farmId AND id = :taskId AND status = 'open'")
+    suspend fun deleteOpen(farmId: String, taskId: String)
+
     @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND status = 'done' ORDER BY updatedAtEpochMillis DESC LIMIT :limit")
     suspend fun completedForFarm(farmId: String, limit: Int = 100): List<TaskEntity>
 
@@ -756,8 +770,9 @@ interface SyncCursorDao {
         ReplicationApplicationEntity::class,
         ReplicationPeerMarkEntity::class,
         FarmGestationEntity::class,
+        TaskSeriesEntity::class,
     ],
-    version = 21,
+    version = 22,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -769,6 +784,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun localAccess(): LocalAccessDao
     abstract fun farmSettings(): FarmSettingsDao
     abstract fun farmGestation(): FarmGestationDao
+    abstract fun taskSeries(): TaskSeriesDao
     abstract fun replicationApplications(): ReplicationApplicationDao
     abstract fun replicationPeerMarks(): ReplicationPeerMarkDao
     abstract fun aggregateVersions(): AggregateVersionDao
@@ -1191,6 +1207,23 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21)
+        /** Repeating tasks and task assignment (owner decision D-020). Existing tasks stay one-off and unassigned. */
+        val MIGRATION_21_22 = object : Migration(21, 22) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `farm_tasks` ADD COLUMN `seriesId` TEXT")
+                db.execSQL("ALTER TABLE `farm_tasks` ADD COLUMN `occurrenceEpochDay` INTEGER")
+                db.execSQL("ALTER TABLE `farm_tasks` ADD COLUMN `assigneeAccountId` TEXT")
+                db.execSQL("ALTER TABLE `farm_tasks` ADD COLUMN `assigneeWorkerId` TEXT")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `task_series` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `moduleCode` TEXT NOT NULL, " +
+                        "`taskCode` TEXT NOT NULL, `title` TEXT NOT NULL, `recurrenceKind` TEXT NOT NULL, `recurrenceInterval` INTEGER NOT NULL, " +
+                        "`startEpochDay` INTEGER NOT NULL, `endEpochDay` INTEGER, `animalId` TEXT, `assigneeAccountId` TEXT, `assigneeWorkerId` TEXT, " +
+                        "`status` TEXT NOT NULL, `updatedAtEpochMillis` INTEGER NOT NULL, `updatedByActorId` TEXT NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_task_series_farmId_status` ON `task_series` (`farmId`, `status`)")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22)
     }
 }

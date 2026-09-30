@@ -13,6 +13,10 @@ import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateAnimalGroup
 import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.CreateFarmTask
+import com.farmos.domain.ops.EndTaskSeries
+import com.farmos.domain.ops.EditTaskSeries
+import com.farmos.domain.ops.CreateTaskSeries
+import com.farmos.domain.ops.CompleteTaskOccurrence
 import com.farmos.domain.ops.CreateFormularyItem
 import com.farmos.domain.ops.CreateInventoryItem
 import com.farmos.domain.ops.CreatePaddock
@@ -192,6 +196,10 @@ object OpsReplicationAppliers {
         "supplier.create.v1" to replay { ops, op -> ops.createSupplier(decode<CreateSupplier>(op), context(op)) },
         "task.complete.v1" to replay { ops, op -> ops.completeTask(decode<CompleteFarmTask>(op), context(op)) },
         "task.create.v1" to replay { ops, op -> ops.createTask(decode<CreateFarmTask>(op), context(op)) },
+        TaskSeriesCommands.SERIES_CREATE to series { commands, op -> commands.create(decode<CreateTaskSeries>(op), context(op)) },
+        TaskSeriesCommands.OCCURRENCE_COMPLETE to series { commands, op -> commands.complete(decode<CompleteTaskOccurrence>(op), context(op)) },
+        TaskSeriesCommands.SERIES_EDIT to series { commands, op -> commands.edit(decode<EditTaskSeries>(op), context(op)) },
+        TaskSeriesCommands.SERIES_END to series { commands, op -> commands.end(decode<EndTaskSeries>(op), context(op)) },
         "water.record.v1" to replay { ops, op -> ops.recordWater(decode<RecordWater>(op), context(op)) },
     )
 
@@ -199,6 +207,9 @@ object OpsReplicationAppliers {
 
     private fun context(op: OperationEnvelope) =
         LocalCommandContext(op.farmId, op.actorId, op.deviceId, op.operationId, op.businessTimeEpochMillis)
+
+    private fun series(block: suspend (TaskSeriesCommands, OperationEnvelope) -> Unit) =
+        OperationApplier { database, op -> block(TaskSeriesCommands(database, op.farmId, replaying = true), op) }
 
     private fun replay(block: suspend (RoomOpsRepository, OperationEnvelope) -> Unit) =
         OperationApplier { database, op -> block(RoomOpsRepository(database, op.farmId, replaying = true), op) }
