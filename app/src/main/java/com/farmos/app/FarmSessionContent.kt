@@ -29,12 +29,14 @@ fun FarmSessionContent(
     onRequireReauth: (String?) -> Unit,
     onRequireFarmReselection: (String, List<FarmMembership>) -> Unit,
     onSignOut: () -> Unit,
+    /** The local GOAT account signed in on this device; server-era sessions leave it null. */
+    actorId: String? = null,
 ) {
     var destination by remember(membership.farmId) { mutableStateOf<FarmDestination>(FarmDestination.Home) }
     val repository = remember(membership.farmId) { app.goatRepository(membership.farmId) }
     val ops = remember(membership.farmId) { app.opsRepository(membership.farmId) }
     fun context(): LocalCommandContext {
-        val userId = requireNotNull(app.sessionStore.current()?.user?.id) { "Sign in is required" }
+        val userId = actorId ?: requireNotNull(app.sessionStore.current()?.user?.id) { "Sign in is required" }
         return LocalCommandContext(
             mutationId = UUID.randomUUID().toString(),
             farmId = membership.farmId,

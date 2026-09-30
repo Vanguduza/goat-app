@@ -105,6 +105,7 @@ dependencies {
     implementation(project(":domain:goat"))
     implementation(project(":domain:rabbit"))
     implementation(project(":domain:ops"))
+    implementation(project(":domain:access"))
     implementation(project(":data:goat"))
     implementation(project(":data:herd"))
     implementation(project(":feature:goat"))
