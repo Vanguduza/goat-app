@@ -44,6 +44,8 @@ data class TaskUiRow(
     /** The series day this occurrence stands for; its due day may have been moved. */
     val occurrenceEpochDay: Long? = null,
     val assigneeAccountId: String? = null,
+    /** A worker record assignee (resolution R1). */
+    val assigneeWorkerId: String? = null,
     val assigneeLabel: String? = null,
     /** How the task repeats, in words; null for a task that does not repeat. */
     val repeatLabel: String? = null,
@@ -285,7 +287,8 @@ private fun CreateTaskCard(
                             repeat = repeat,
                             interval = if (repeat.takesInterval) interval.toInt() else 1,
                             endDate = endDate.takeIf { repeat != TaskRepeat.NONE && it.isNotBlank() }?.let { LocalDate.parse(it) },
-                            assigneeAccountId = assigneeId,
+                            assigneeAccountId = assigneeChange(assigneeId).accountId,
+                            assigneeWorkerId = assigneeChange(assigneeId).workerId,
                         ),
                     )
                 }

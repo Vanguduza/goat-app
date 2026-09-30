@@ -23,6 +23,7 @@ import com.farmos.feature.ops.TaskRepeat
 import com.farmos.feature.ops.TaskSeriesDraft
 import com.farmos.feature.ops.TaskSeriesUiRow
 import com.farmos.feature.ops.TaskUpdateDraft
+import com.farmos.feature.ops.assigneeKey
 import com.farmos.feature.ops.taskRepeatLabel
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
@@ -55,12 +56,17 @@ class TaskPlanning(
     val commands = TaskSeriesCommands(database, farmId)
     private val queries = TaskSeriesQueries(database, farmId)
 
-    /** Local accounts on this farm a task can be assigned to. */
+    /** Active local accounts, then active workers without a login (R1), a task can be assigned to. */
     val loadAssignees: suspend () -> List<TaskAssigneeOption> = {
-        withContext(Dispatchers.IO) { database.localAccess().accounts(farmId) }
+        val accounts = withContext(Dispatchers.IO) { database.localAccess().accounts(farmId) }
             .filter { it.status == "ACTIVE" }
             .map { TaskAssigneeOption(it.accountId, it.displayName.ifBlank { it.username }) }
+        accounts + database.workers().active(farmId).map { TaskAssigneeOption(null, "${it.name} · worker", workerId = it.id) }
     }
+
+    /** Labels for every worker, active or not, so work assigned to an inactive worker stays named. */
+    suspend fun workerLabels(): Map<String, String> =
+        database.workers().all(farmId).associate { "worker:${it.id}" to "${it.name} · worker" }
 
     /** Every open occurrence from the earliest active series start to [HORIZON_DAYS] ahead. */
     suspend fun openOccurrences(today: Long): List<TaskOccurrence> {
@@ -84,7 +90,7 @@ class TaskPlanning(
                 startEpochDay = series.startEpochDay,
                 endEpochDay = series.endEpochDay,
                 nextEpochDay = TaskRecurrenceSchedule.next(schedule, today - 1),
-                assigneeLabel = series.assigneeAccountId?.let { names[it] ?: it },
+                assigneeLabel = assigneeKey(series.assigneeAccountId, series.assigneeWorkerId)?.let { names[it] ?: it },
             )
         }
 
@@ -100,7 +106,7 @@ class TaskPlanning(
                 recurrenceInterval = draft.interval,
                 startEpochDay = draft.startDate.toEpochDay(),
                 endEpochDay = draft.endDate?.toEpochDay(),
-                assignee = TaskAssignee(accountId = draft.assigneeAccountId),
+                assignee = TaskAssignee(accountId = draft.assigneeAccountId, workerId = draft.assigneeWorkerId),
             ),
             context,
         )
@@ -118,7 +124,7 @@ class TaskPlanning(
                 scope = SeriesEditScope.valueOf(scope.name).name,
                 newSeriesId = UUID.randomUUID().toString().takeIf { scope == TaskEditScope.THIS_AND_FUTURE },
                 title = draft.title,
-                assignee = draft.assignee?.let { TaskAssignee(accountId = it.accountId) },
+                assignee = draft.assignee?.let { TaskAssignee(accountId = it.accountId, workerId = it.workerId) },
                 movedToEpochDay = draft.movedTo?.toEpochDay(),
                 recurrenceKind = draft.repeat?.name,
                 recurrenceInterval = draft.interval,
@@ -131,7 +137,7 @@ class TaskPlanning(
     suspend fun update(draft: TaskUpdateDraft, context: LocalCommandContext) {
         check(canPlanWork) { "Only supervisors and farm management change planned work" }
         commands.update(
-            UpdateFarmTask(draft.taskId, draft.title, draft.due?.toEpochDay(), draft.assignee?.let { TaskAssignee(accountId = it.accountId) }),
+            UpdateFarmTask(draft.taskId, draft.title, draft.due?.toEpochDay(), draft.assignee?.let { TaskAssignee(accountId = it.accountId, workerId = it.workerId) }),
             context,
         )
     }

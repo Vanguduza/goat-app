@@ -54,14 +54,23 @@ private fun LabourRow(primary: String, secondary: String, tag: String) {
  * record action; the action opens the read-only work log whose back returns home.
  */
 @Composable
-fun LabourRecordNavigator(records: LabourRecords, home: @Composable (recordActions: @Composable () -> Unit) -> Unit) {
+fun LabourRecordNavigator(
+    records: LabourRecords,
+    /** The worker register (FOS-LABOUR-002/003, resolution R1); null hides the entry. */
+    workers: (@Composable (onBack: () -> Unit) -> Unit)? = null,
+    home: @Composable (recordActions: @Composable () -> Unit) -> Unit,
+) {
     var open by rememberSaveable { mutableStateOf(false) }
-    if (open) {
-        LabourWorkLogScreen(records) { open = false }
-    } else {
-        home {
+    var register by rememberSaveable { mutableStateOf(false) }
+    when {
+        register && workers != null -> workers { register = false }
+        open -> LabourWorkLogScreen(records) { open = false }
+        else -> home {
             FarmOperationalSection("Records") {
                 TextButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth()) { Text("Open Work log") }
+                if (workers != null) {
+                    TextButton(onClick = { register = true }, modifier = Modifier.fillMaxWidth()) { Text("Workers") }
+                }
             }
         }
     }

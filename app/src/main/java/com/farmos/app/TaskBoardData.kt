@@ -10,6 +10,7 @@ import com.farmos.domain.ops.TaskOccurrence
 import com.farmos.feature.ops.TaskAssigneeOption
 import com.farmos.feature.ops.TaskSeriesUiRow
 import com.farmos.feature.ops.TaskUiRow
+import com.farmos.feature.ops.assigneeKey
 import java.time.LocalDate
 import java.util.UUID
 
@@ -26,11 +27,11 @@ internal data class TaskBoardData(
  */
 internal suspend fun loadTaskBoard(ops: RoomOpsRepository, planning: TaskPlanning?, today: Long): TaskBoardData {
     val assignees = planning?.loadAssignees?.invoke().orEmpty()
-    val names = assignees.associate { it.accountId to it.label }
+    val names = assignees.associate { it.key to it.label } + planning?.workerLabels().orEmpty()
     val repeats = planning?.repeatLabels().orEmpty()
-    fun label(accountId: String?) = accountId?.let { names[it] ?: it }
-    val stored = (ops.openTasks().filter { it.seriesId == null } + ops.completedTasks(100)).map { task -> task.toRow(label(task.assigneeAccountId), task.seriesId?.let { repeats[it] }) }
-    val occurrences = planning?.openOccurrences(today).orEmpty().map { it.toRow(label(it.assignee.accountId), repeats[it.seriesId]) }
+    fun label(accountId: String?, workerId: String? = null) = assigneeKey(accountId, workerId)?.let { names[it] ?: workerId ?: it }
+    val stored = (ops.openTasks().filter { it.seriesId == null } + ops.completedTasks(100)).map { task -> task.toRow(label(task.assigneeAccountId, task.assigneeWorkerId), task.seriesId?.let { repeats[it] }) }
+    val occurrences = planning?.openOccurrences(today).orEmpty().map { it.toRow(label(it.assignee.accountId, it.assignee.workerId), repeats[it.seriesId]) }
     return TaskBoardData(stored + occurrences, planning?.seriesRows(today, names).orEmpty(), assignees)
 }
 
@@ -59,6 +60,7 @@ private fun TaskEntity.toRow(assigneeLabel: String?, repeatLabel: String?) = Tas
     seriesId = seriesId,
     occurrenceEpochDay = occurrenceEpochDay,
     assigneeAccountId = assigneeAccountId,
+    assigneeWorkerId = assigneeWorkerId,
     assigneeLabel = assigneeLabel,
     repeatLabel = repeatLabel,
 )
@@ -73,6 +75,7 @@ private fun TaskOccurrence.toRow(assigneeLabel: String?, repeatLabel: String?) =
     seriesId = seriesId,
     occurrenceEpochDay = occurrenceEpochDay,
     assigneeAccountId = assignee.accountId,
+    assigneeWorkerId = assignee.workerId,
     assigneeLabel = assigneeLabel,
     repeatLabel = repeatLabel,
 )

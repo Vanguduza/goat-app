@@ -29,7 +29,17 @@ import com.farmos.core.design.FarmOperationalSection
 import java.time.LocalDate
 
 /** A local account a task can be assigned to. */
-data class TaskAssigneeOption(val accountId: String, val label: String)
+data class TaskAssigneeOption(val accountId: String?, val label: String, val workerId: String? = null) {
+    /** Selection key: an account id, or `worker:` and a worker id. */
+    val key: String get() = assigneeKey(accountId, workerId) ?: ""
+}
+
+/** The selection key of an assignee: an account id, or `worker:` and a worker id; null for nobody. */
+fun assigneeKey(accountId: String?, workerId: String?): String? = workerId?.let { "worker:$it" } ?: accountId
+
+/** The assignee change a selection key stands for; null key removes the assignee. */
+fun assigneeChange(key: String?): TaskAssigneeChange =
+    if (key?.startsWith("worker:") == true) TaskAssigneeChange(null, key.removePrefix("worker:")) else TaskAssigneeChange(key)
 
 /** How a new or edited task repeats (D-020). Mirrors the recurrence kinds of the task contracts. */
 enum class TaskRepeat(val label: String, val takesInterval: Boolean = false) {
@@ -52,6 +62,8 @@ data class TaskSeriesDraft(
     val interval: Int,
     val endDate: LocalDate?,
     val assigneeAccountId: String?,
+    /** A worker record assignee (resolution R1); never together with [assigneeAccountId]. */
+    val assigneeWorkerId: String? = null,
 )
 
 /** Which occurrences an edit changes. */
@@ -74,7 +86,7 @@ data class TaskEditDraft(
     val interval: Int?,
 )
 
-data class TaskAssigneeChange(val accountId: String?)
+data class TaskAssigneeChange(val accountId: String?, val workerId: String? = null)
 
 /** An edit of an open one-off task (D-020 resolution R2). Null fields keep their value. */
 data class TaskUpdateDraft(val taskId: String, val title: String?, val due: LocalDate?, val assignee: TaskAssigneeChange?)
@@ -132,7 +144,7 @@ internal fun TaskPlanningFields(
         )
     }
     Text("Assign to", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-    ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.accountId to it.label }, assigneeId, busy, "task-assignee", onAssignee)
+    ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.key to it.label }, assigneeId, busy, "task-assignee", onAssignee)
 }
 
 /** Whether the planning fields describe a valid series; [endDate] may be blank. */
@@ -180,7 +192,7 @@ fun EditTaskScreen(
     val occurrenceDay = task.occurrenceEpochDay ?: task.dueEpochDay
     var scope by remember { mutableStateOf(TaskEditScope.THIS) }
     var title by remember { mutableStateOf(task.title) }
-    var assigneeId by remember { mutableStateOf(task.assigneeAccountId) }
+    var assigneeId by remember { mutableStateOf(assigneeKey(task.assigneeAccountId, task.assigneeWorkerId)) }
     var moveTo by remember { mutableStateOf(LocalDate.ofEpochDay(task.dueEpochDay).toString()) }
     var repeat by remember { mutableStateOf<TaskRepeat?>(null) }
     var interval by remember { mutableStateOf("2") }
@@ -200,7 +212,7 @@ fun EditTaskScreen(
                 }
             }
             Text("Assign to", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.accountId to it.label }, assigneeId, busy, "task-edit-assignee") { assigneeId = it }
+            ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.key to it.label }, assigneeId, busy, "task-edit-assignee") { assigneeId = it }
         }
         val movedTo = runCatching { LocalDate.parse(moveTo) }.getOrNull()
         val chosenRepeat = repeat
@@ -215,7 +227,7 @@ fun EditTaskScreen(
                         occurrenceEpochDay = occurrenceDay,
                         scope = scope,
                         title = title.trim().takeIf { it != task.title },
-                        assignee = TaskAssigneeChange(assigneeId).takeIf { assigneeId != task.assigneeAccountId },
+                        assignee = assigneeChange(assigneeId).takeIf { assigneeId != assigneeKey(task.assigneeAccountId, task.assigneeWorkerId) },
                         movedTo = movedTo?.takeIf { scope == TaskEditScope.THIS && it.toEpochDay() != task.dueEpochDay },
                         repeat = chosenRepeat.takeIf { scope != TaskEditScope.THIS },
                         interval = chosenRepeat?.takeIf { it.takesInterval && scope != TaskEditScope.THIS }?.let { interval.toInt() },
@@ -241,16 +253,16 @@ private fun EditOneOffTask(
 ) {
     var title by remember { mutableStateOf(task.title) }
     var due by remember { mutableStateOf(LocalDate.ofEpochDay(task.dueEpochDay).toString()) }
-    var assigneeId by remember { mutableStateOf(task.assigneeAccountId) }
+    var assigneeId by remember { mutableStateOf(assigneeKey(task.assigneeAccountId, task.assigneeWorkerId)) }
     FarmOperationalPage("FOS-TASK-005", "Edit task", task.title, onBack = onBack, backLabel = "Task") {
         FarmOperationalSection("Task") {
             OutlinedTextField(title, { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth().testTag("task-edit-title"), enabled = !busy, singleLine = true)
             OutlinedTextField(due, { due = it }, label = { Text("Due date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth().testTag("task-edit-due"), enabled = !busy, singleLine = true)
             Text("Assign to", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.accountId to it.label }, assigneeId, busy, "task-edit-assignee") { assigneeId = it }
+            ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.key to it.label }, assigneeId, busy, "task-edit-assignee") { assigneeId = it }
         }
         val dueDate = runCatching { LocalDate.parse(due) }.getOrNull()
-        val changed = title.trim() != task.title || dueDate?.toEpochDay() != task.dueEpochDay || assigneeId != task.assigneeAccountId
+        val changed = title.trim() != task.title || dueDate?.toEpochDay() != task.dueEpochDay || assigneeId != assigneeKey(task.assigneeAccountId, task.assigneeWorkerId)
         Button(
             onClick = {
                 onSave(
@@ -258,7 +270,7 @@ private fun EditOneOffTask(
                         taskId = task.id,
                         title = title.trim().takeIf { it != task.title },
                         due = dueDate?.takeIf { it.toEpochDay() != task.dueEpochDay },
-                        assignee = TaskAssigneeChange(assigneeId).takeIf { assigneeId != task.assigneeAccountId },
+                        assignee = assigneeChange(assigneeId).takeIf { assigneeId != assigneeKey(task.assigneeAccountId, task.assigneeWorkerId) },
                     ),
                 )
             },

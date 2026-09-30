@@ -69,7 +69,8 @@ class TaskPlanningTest {
         planning.create(draft(TaskRepeat.DAILY, LocalDate.of(2026, 10, 1), assignee = "farai"), context())
         planning.create(draft(TaskRepeat.NONE, LocalDate.of(2026, 10, 3), assignee = "farai").copy(title = "Fix gate"), context())
 
-        assertEquals(listOf("farai" to "Farai"), planning.loadAssignees().map { it.accountId to it.label })
+        com.farmos.data.herd.WorkerRegisterCommands(database, farm).create(com.farmos.domain.ops.CreateFarmWorker("w1", "Tendai"), context())
+        assertEquals(listOf("farai" to "Farai", "worker:w1" to "Tendai · worker"), planning.loadAssignees().map { it.key to it.label })
         val occurrences = planning.openOccurrences(today)
         // Daily from today through the 30-day horizon, plus the one-off assigned task.
         assertEquals(31 + 1, occurrences.size)
