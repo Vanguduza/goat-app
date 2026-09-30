@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:2b89de530eb0050ce7d7d7f5b99a526fd5d2710ebeeb40edf6ad1c1a3f9751e5",
-  "runtime_evidence_tested_commit": "bf8e9780b3e6eaf354da194e052edb09e91d15a3",
-  "runtime_evidence_run_id": 36710343358,
+  "source_fingerprint": "sha256:cd5fb45252a537977ce18dee81f7bf75e94775c909ea5d17a8f4ffd4a8be5c03",
+  "runtime_evidence_tested_commit": "4b2ad266d7ef7a75981e092065a328f0e64103ed",
+  "runtime_evidence_run_id": 36714748852,
   "registry_screen_count": 545,
-  "route_screen_count": 286,
-  "unresolved_screen_count": 259,
+  "route_screen_count": 291,
+  "unresolved_screen_count": 254,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -128,6 +128,9 @@
     "FOS-GOAT-043",
     "FOS-GOAT-044",
     "FOS-GOAT-051",
+    "FOS-GOAT-052",
+    "FOS-GOAT-053",
+    "FOS-GOAT-054",
     "FOS-GROUP-001",
     "FOS-GROUP-002",
     "FOS-GROUP-006",
@@ -193,6 +196,8 @@
     "FOS-INV-016",
     "FOS-INV-017",
     "FOS-LABOUR-001",
+    "FOS-LABOUR-002",
+    "FOS-LABOUR-003",
     "FOS-LABOUR-005",
     "FOS-PASTURE-001",
     "FOS-PASTURE-002",
@@ -991,11 +996,15 @@
     {
       "screen_id": "FOS-CATTLE-034",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SpeciesExitScreensTest.kt"
         ]
       }
     },
@@ -1669,6 +1678,39 @@
     },
     {
       "screen_id": "FOS-GOAT-051",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-052",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-053",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-054",
       "proof_classes": [
         "RENDERED_SURFACE_OWNER"
       ],
@@ -2494,6 +2536,28 @@
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-LABOUR-002",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/WorkerRegisterScreensTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-LABOUR-003",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/WorkerRegisterScreensTest.kt"
         ]
       }
     },
@@ -3444,11 +3508,15 @@
     {
       "screen_id": "FOS-SHEEP-030",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/SpeciesExitScreensTest.kt"
         ]
       }
     },
@@ -3892,9 +3960,6 @@
     "FOS-GOAT-048",
     "FOS-GOAT-049",
     "FOS-GOAT-050",
-    "FOS-GOAT-052",
-    "FOS-GOAT-053",
-    "FOS-GOAT-054",
     "FOS-GOAT-055",
     "FOS-GROUP-003",
     "FOS-GROUP-004",
@@ -3910,8 +3975,6 @@
     "FOS-HEALTH-030",
     "FOS-INV-018",
     "FOS-INV-019",
-    "FOS-LABOUR-002",
-    "FOS-LABOUR-003",
     "FOS-LABOUR-004",
     "FOS-LABOUR-006",
     "FOS-LABOUR-007",

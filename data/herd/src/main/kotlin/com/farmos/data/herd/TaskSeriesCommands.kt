@@ -163,8 +163,8 @@ class TaskSeriesCommands(
     private suspend fun requireAssignee(assignee: TaskAssignee) {
         // Replay trusts the origin device: the account may not have reached this device yet.
         if (replaying) return
-        val accountId = assignee.accountId ?: return
-        require(database.taskSeries().accountOnFarm(farmId, accountId)) { "That account is not on this farm" }
+        assignee.accountId?.let { require(database.taskSeries().accountOnFarm(farmId, it)) { "That account is not on this farm" } }
+        assignee.workerId?.let { require(database.taskSeries().activeWorkerOnFarm(farmId, it)) { "That worker is not active on this farm" } }
     }
 
     private fun TaskSeriesEntity.schedule() =

@@ -26,6 +26,8 @@ fun LabourModuleHost(
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
     loadRecords: suspend () -> LabourRecords = { LabourRecords() },
+    /** The worker register (resolution R1), opened from the labour home. */
+    workers: (@Composable (onBack: () -> Unit) -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
     var rows by remember { mutableStateOf(emptyList<String>()) }
@@ -58,7 +60,7 @@ fun LabourModuleHost(
     val minutes = remember { mutableStateOf("") }
     val day = remember { mutableStateOf("") }
 
-    LabourRecordNavigator(records) { recordActions -> SimpleCaptureScreen(
+    LabourRecordNavigator(records, workers) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-LABOUR-001",
         title = "Labour",
         help = "Minutes are whole figures. Worker name is a farm label, not a login.",

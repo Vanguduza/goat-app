@@ -51,6 +51,10 @@ interface TaskSeriesDao {
     @Query("SELECT EXISTS(SELECT 1 FROM local_accounts WHERE farmId = :farmId AND accountId = :accountId)")
     suspend fun accountOnFarm(farmId: String, accountId: String): Boolean
 
+    /** Whether [workerId] is an active worker on this farm, for assigning a task to them. */
+    @Query("SELECT EXISTS(SELECT 1 FROM farm_workers WHERE farmId = :farmId AND id = :workerId AND active = 1)")
+    suspend fun activeWorkerOnFarm(farmId: String, workerId: String): Boolean
+
     /** Stored occurrences of one series (completed or individually edited), by day. */
     @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND seriesId = :seriesId ORDER BY dueOnEpochDay, id")
     suspend fun storedOccurrences(farmId: String, seriesId: String): List<TaskEntity>

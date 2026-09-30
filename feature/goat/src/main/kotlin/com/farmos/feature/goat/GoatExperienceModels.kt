@@ -21,6 +21,9 @@ internal enum class GoatPage {
     SCAN,
     SYNC,
     STATUS_CHANGE,
+    SALE_EXIT,
+    MORTALITY,
+    CULL,
     TIMELINE,
     GROWTH_HISTORY,
     GROWTH_CHART,
@@ -61,6 +64,10 @@ internal data class GoatExperienceActions(
     val onSyncNow: () -> Unit,
     val onSearch: (String) -> Unit,
     val onScanIdentifier: (String) -> Unit = {},
+    /** Records how the selected goat left the herd (D-022). */
+    val onRecordExit: (GoatExitDraft) -> Unit = {},
+    /** Reverses the selected goat's standing exit with a reason. */
+    val onReverseExit: (exitId: String, reason: String) -> Unit = { _, _ -> },
     /** Whole-farm buck search for the sire selector; never the capped herd list. */
     val searchSires: FarmSelectorSearch = NoFarmSelectorSearch,
 )

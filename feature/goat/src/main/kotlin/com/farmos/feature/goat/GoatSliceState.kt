@@ -22,6 +22,10 @@ data class GoatSliceUiState(
     val lactation: GoatLactationState = GoatLactationState.Loading,
     /** Does expected to kid, for Kidding due (FOS-GOAT-036). */
     val kiddingDue: GoatKiddingDueState = GoatKiddingDueState.Loading,
+    /** The selected goat's standing exit, when it has left the herd (D-022). */
+    val standingExit: GoatExitView? = null,
+    /** The farm currency, for a sale price. */
+    val currency: String? = null,
 )
 
 /** Every doe expected to kid, from an exhaustive query. */

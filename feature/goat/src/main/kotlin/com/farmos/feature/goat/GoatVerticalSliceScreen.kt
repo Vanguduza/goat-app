@@ -40,6 +40,10 @@ fun GoatVerticalSliceScreen(
     modifier: Modifier = Modifier,
     entryPage: GoatEntryPage = GoatEntryPage.DASHBOARD,
     searchSires: FarmSelectorSearch = NoFarmSelectorSearch,
+    /** Records how the selected goat left the herd (D-022). */
+    onRecordExit: (GoatExitDraft) -> Unit = {},
+    /** Reverses the selected goat's standing exit with a reason. */
+    onReverseExit: (exitId: String, reason: String) -> Unit = { _, _ -> },
 ) {
     GoatExperienceScreen(
         state = state,
@@ -63,6 +67,8 @@ fun GoatVerticalSliceScreen(
             onSearch = onSearch,
             onScanIdentifier = onScanIdentifier,
             searchSires = searchSires,
+            onRecordExit = onRecordExit,
+            onReverseExit = onReverseExit,
         ),
         onBackToFarm = onBack,
         onSignOut = onSignOut,

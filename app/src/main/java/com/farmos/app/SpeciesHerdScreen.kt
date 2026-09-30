@@ -78,6 +78,7 @@ fun SpeciesHerdScreen(
     onBack: () -> Unit,
     extra: @Composable (SpeciesAnimalRow?, onBack: () -> Unit) -> Unit = { _, _ -> },
     counts: SpeciesHerdCounts? = null,
+    exitContent: (@Composable (animal: SpeciesAnimalRow, screenId: String, onBack: () -> Unit) -> Unit)? = null,
 ) {
     require(module == FarmModule.SHEEP || module == FarmModule.CATTLE) {
         "SpeciesHerdScreen is reserved for individual-animal sheep/cattle UX"
@@ -135,7 +136,7 @@ fun SpeciesHerdScreen(
         }
 
         SpeciesPage.PROFILE -> {
-            SpeciesProfile(config, selected, { page = it }, home)
+            SpeciesProfile(config, selected, { page = it }, home, exitsReversible = exitContent != null)
         }
 
         SpeciesPage.REGISTER -> {
@@ -151,7 +152,13 @@ fun SpeciesHerdScreen(
         }
 
         SpeciesPage.STATUS -> {
-            SpeciesStatus(config, selected, busy, error, onSetStatus, home)
+            // Owner decision D-022: exits are recorded as reversible exit events when the host provides them.
+            val animal = selected
+            if (exitContent != null && animal != null) {
+                exitContent(animal, config.screenIds.status, home)
+            } else {
+                SpeciesStatus(config, selected, busy, error, onSetStatus, home)
+            }
         }
     }
 }
@@ -263,6 +270,7 @@ private fun SpeciesProfile(
     selected: SpeciesAnimalRow?,
     onOpen: (SpeciesPage) -> Unit,
     onBack: () -> Unit,
+    exitsReversible: Boolean = false,
 ) {
     FarmOperationalPage(
         config.screenIds.profile,
@@ -285,7 +293,7 @@ private fun SpeciesProfile(
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text("Record weight") }
                 TextButton(onClick = { onOpen(SpeciesPage.OPERATIONS) }, enabled = selected.active) { Text(config.operationsTitle) }
-                TextButton(onClick = { onOpen(SpeciesPage.STATUS) }, enabled = selected.active) { Text("Lifecycle status") }
+                TextButton(onClick = { onOpen(SpeciesPage.STATUS) }, enabled = selected.active || exitsReversible) { Text("Lifecycle status") }
             }
         }
     }

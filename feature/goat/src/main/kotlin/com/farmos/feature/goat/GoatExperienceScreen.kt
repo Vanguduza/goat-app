@@ -31,9 +31,7 @@ import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmTheme
-import com.farmos.core.design.AnimalFarmWarningSurface
 import com.farmos.core.design.FarmIllustratedSectionSurface
-import com.farmos.core.design.FarmIrreversibleConfirmation
 import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FosDimens
 import com.farmos.domain.goat.GoatSex
@@ -127,7 +125,10 @@ internal fun GoatExperienceScreen(
         GoatPage.SYNC -> GoatSyncScreen(state, actions.onSyncNow) {
             if (initialPage == GoatPage.SYNC) onBackToFarm() else page = GoatPage.DASHBOARD
         }
-        GoatPage.STATUS_CHANGE -> GoatStatusChangeScreen(state, actions.onSetStatus) { page = GoatPage.PROFILE }
+        GoatPage.STATUS_CHANGE -> GoatStatusChangeScreen(state, { page = it }, actions.onReverseExit) { page = GoatPage.PROFILE }
+        GoatPage.SALE_EXIT -> GoatExitCaptureScreen(GoatExitKind.SALE, state, state.currency, actions.onRecordExit) { page = GoatPage.STATUS_CHANGE }
+        GoatPage.MORTALITY -> GoatExitCaptureScreen(GoatExitKind.DEATH, state, state.currency, actions.onRecordExit) { page = GoatPage.STATUS_CHANGE }
+        GoatPage.CULL -> GoatExitCaptureScreen(GoatExitKind.CULL, state, state.currency, actions.onRecordExit) { page = GoatPage.STATUS_CHANGE }
         GoatPage.PREGNANCY_DASHBOARD -> GoatPregnancyDashboardScreen(
             herd = state.herd,
             herdTotal = state.herdCounts?.notClosed,
@@ -509,69 +510,40 @@ private fun GoatHistoryCard(goat: GoatSnapshot) {
     }
 }
 
+/**
+ * FOS-GOAT-051 — lifecycle: an active goat leaves the herd through a sale (FOS-GOAT-052), mortality
+ * (FOS-GOAT-053) or cull (FOS-GOAT-054) record; a goat that has left shows its exit, which can be reversed.
+ */
 @Composable
 private fun GoatStatusChangeScreen(
     state: GoatSliceUiState,
-    onSetStatus: (GoatStatus) -> Unit,
+    onOpen: (GoatPage) -> Unit,
+    onReverseExit: (String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var pending by remember { mutableStateOf<GoatStatus?>(null) }
     IllustratedGoatPage("Lifecycle change", "FOS-GOAT-051 · I4", onBack, safety = true) {
         val goat = state.selected
         if (goat == null) {
             Text("No goat selected.")
             return@IllustratedGoatPage
         }
-        AnimalFarmWarningSurface {
-            Text(goatDisplayName(goat), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text("A lifecycle change removes this goat from the active herd. Existing history remains on the record.")
-        }
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val stacked = maxWidth < 480.dp
-            val changes = listOf(
-                "Mark sold" to GoatStatus.SOLD,
-                "Mark deceased" to GoatStatus.DEAD,
-                "Mark culled" to GoatStatus.CULLED,
-            )
-            if (stacked) {
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    changes.forEach { (label, status) ->
-                        TextButton(
-                            onClick = { pending = status },
-                            modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
-                        ) {
-                            Text(label, maxLines = 1, softWrap = false)
-                        }
-                    }
-                }
-            } else {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    changes.forEach { (label, status) ->
-                        TextButton(
-                            onClick = { pending = status },
-                            modifier = Modifier.weight(1f).heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
-                        ) {
-                            Text(label, maxLines = 1, softWrap = false)
-                        }
-                    }
-                }
+        Text(goatDisplayName(goat), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        val exit = state.standingExit
+        if (goat.status != GoatStatus.ACTIVE && exit != null) {
+            GoatExitReversal(exit, state.busy, onReverseExit)
+        } else if (goat.status != GoatStatus.ACTIVE) {
+            Text("${goatStatusLabel(goat.status)} before exits were recorded; no exit to reverse.")
+        } else {
+            Text("How is this goat leaving the herd?")
+            listOf("Sale" to GoatPage.SALE_EXIT, "Death" to GoatPage.MORTALITY, "Cull" to GoatPage.CULL).forEach { (label, target) ->
+                TextButton(
+                    onClick = { onOpen(target) },
+                    enabled = !state.busy,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp).testTag("goat-exit-open:${target.name}"),
+                ) { Text(label) }
             }
         }
-        pending?.let { next ->
-            FarmIrreversibleConfirmation(
-                title = "Confirm ${goatStatusLabel(next).lowercase()}",
-                consequence = "This is an authoritative farm record after sync. Check the animal and status before continuing.",
-                confirmLabel = "Confirm status change",
-                busy = state.busy,
-                onConfirm = {
-                    onSetStatus(next)
-                    pending = null
-                },
-                onCancel = { pending = null },
-                confirmTag = "goat-lifecycle-confirm",
-            )
-        }
+        state.error?.let { Text(it, color = AnimalFarmTheme.colors.critical) }
     }
 }
 
