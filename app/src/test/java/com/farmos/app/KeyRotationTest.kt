@@ -65,7 +65,7 @@ class KeyRotationTest {
         replication().upsertDevice(ReplicationDeviceEntity(farm, deviceId, deviceId, DeviceStatus.ACTIVE.name, 0, null, isLocal = false, publicKey = b64(publicKey)))
 
     @Test
-    fun aLostDeviceIsCutOffWhileTheRemainingDevicesReceiveTheRotatedKey() = runBlocking {
+    fun aLostDeviceIsCutOffWhileTheRemainingDevicesReceiveTheRotatedKey(): Unit = runBlocking {
         // Three paired devices sharing the first farm key, each with its own identity.
         val tabletDb = database()
         val laptopDb = database()
