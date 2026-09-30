@@ -58,6 +58,7 @@ private enum class SheepOpsPage {
     TIMELINE,
     WOOL_DASHBOARD,
     GROWTH_HISTORY,
+    LAMBING_DUE,
 }
 
 @Composable
@@ -70,6 +71,7 @@ fun SheepOperationsScreen(
     loadRecords: suspend (String) -> SheepAnimalRecords = { SheepAnimalRecords() },
     loadWool: suspend () -> SheepWoolRecords = { SheepWoolRecords() },
     today: LocalDate = LocalDate.now(),
+    loadLambingDue: suspend () -> SheepLambingDue = { SheepLambingDue(emptyList(), emptyList(), 147) },
 ) {
     var page by remember { mutableStateOf(SheepOpsPage.HOME) }
     val home = { page = SheepOpsPage.HOME }
@@ -199,6 +201,7 @@ fun SheepOperationsScreen(
         SheepOpsPage.TIMELINE -> SheepTimelineScreen(selectedAnimalId, loadRecords, home)
         SheepOpsPage.GROWTH_HISTORY -> SheepGrowthHistoryScreen(selectedAnimalId, loadRecords, home)
         SheepOpsPage.WOOL_DASHBOARD -> SheepWoolDashboardScreen(loadWool, home)
+        SheepOpsPage.LAMBING_DUE -> SheepLambingDueScreen(loadLambingDue, today, home)
     }
 }
 
@@ -220,6 +223,7 @@ private fun SheepOpsHome(
         FarmOperationalSection("Reproduction") {
             SheepNav("Record joining") { onOpen(SheepOpsPage.JOINING) }
             SheepNav("Pregnancy scan") { onOpen(SheepOpsPage.SCAN) }
+            SheepNav("Lambing due") { onOpen(SheepOpsPage.LAMBING_DUE) }
             SheepNav("Record lambing") { onOpen(SheepOpsPage.LAMBING) }
             SheepNav("Lamb marking") { onOpen(SheepOpsPage.MARKING) }
             SheepNav("Weaning") { onOpen(SheepOpsPage.WEANING) }

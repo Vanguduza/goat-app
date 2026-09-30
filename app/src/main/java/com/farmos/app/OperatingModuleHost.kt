@@ -323,6 +323,7 @@ fun OperatingModuleHost(
                             onBack = operationsBack,
                             loadRecords = { id -> loadSheepRecords(database, farmId, id) },
                             loadWool = { loadSheepWool(database, farmId) },
+                            loadLambingDue = { loadSheepLambingDue(database, farmId) },
                         )
                         FarmModule.CATTLE -> CattleOperationsScreen(
                             selectedAnimalId = selected?.animalId,
