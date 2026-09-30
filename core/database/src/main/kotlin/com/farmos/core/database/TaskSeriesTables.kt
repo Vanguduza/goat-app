@@ -47,6 +47,10 @@ interface TaskSeriesDao {
     @Upsert
     suspend fun upsert(series: TaskSeriesEntity)
 
+    /** Whether [accountId] is a local account on this farm, for assigning a task to it. */
+    @Query("SELECT EXISTS(SELECT 1 FROM local_accounts WHERE farmId = :farmId AND accountId = :accountId)")
+    suspend fun accountOnFarm(farmId: String, accountId: String): Boolean
+
     /** Stored occurrences of one series (completed or individually edited), by day. */
     @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND seriesId = :seriesId ORDER BY dueOnEpochDay, id")
     suspend fun storedOccurrences(farmId: String, seriesId: String): List<TaskEntity>

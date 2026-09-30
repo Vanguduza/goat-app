@@ -118,6 +118,8 @@ data class TaskEntity(
     val updatedAtEpochMillis: Long,
     /** The task series this occurrence belongs to (D-020), or null for a one-off task. */
     val seriesId: String? = null,
+    /** The series day this stored occurrence stands for; its due day may have been moved. Null without a series. */
+    val occurrenceEpochDay: Long? = null,
     /** Assigned to a local account on this farm, or null. */
     val assigneeAccountId: String? = null,
     /** Assigned to a worker record on this farm, or null. */
@@ -534,6 +536,12 @@ interface TaskDao {
 
     @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND status = 'open' ORDER BY dueOnEpochDay, title")
     suspend fun openForFarm(farmId: String): List<TaskEntity>
+
+    @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND id = :taskId LIMIT 1")
+    suspend fun get(farmId: String, taskId: String): TaskEntity?
+
+    @Query("DELETE FROM farm_tasks WHERE farmId = :farmId AND id = :taskId AND status = 'open'")
+    suspend fun deleteOpen(farmId: String, taskId: String)
 
     @Query("SELECT * FROM farm_tasks WHERE farmId = :farmId AND status = 'done' ORDER BY updatedAtEpochMillis DESC LIMIT :limit")
     suspend fun completedForFarm(farmId: String, limit: Int = 100): List<TaskEntity>
@@ -1203,6 +1211,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
         val MIGRATION_21_22 = object : Migration(21, 22) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE `farm_tasks` ADD COLUMN `seriesId` TEXT")
+                db.execSQL("ALTER TABLE `farm_tasks` ADD COLUMN `occurrenceEpochDay` INTEGER")
                 db.execSQL("ALTER TABLE `farm_tasks` ADD COLUMN `assigneeAccountId` TEXT")
                 db.execSQL("ALTER TABLE `farm_tasks` ADD COLUMN `assigneeWorkerId` TEXT")
                 db.execSQL(
