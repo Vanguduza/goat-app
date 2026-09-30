@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-TASK-011",
+  "registry_name": "Recurrence",
+  "feature_ids": [],
+  "status": "DRAFT",
+  "user_job": "See every active repeating task, how it repeats, when it next falls due and who it is assigned to, and stop one after today.",
+  "personas_and_grants": [
+    "All: VIEW_FARM (list)",
+    "OWNER, MANAGER, SUPERVISOR: MANAGE_WORKERS (end a series)"
+  ],
+  "scope": {
+    "farm_source": "Signed-in farm session",
+    "species_kind": "N/A",
+    "subject": "Active task series that repeat",
+    "sensitive_fields": []
+  },
+  "navigation": {
+    "route": "Tasks > Repeating tab",
+    "entry_points": [
+      "TasksBoardScreen tab"
+    ],
+    "arguments": [],
+    "deep_link_authorization": "No deep link",
+    "back_and_draft_behavior": "Tab switch",
+    "aliases": []
+  },
+  "design": {
+    "recipe": "P08",
+    "reference_ids": [],
+    "native_golden_family": "UNREVIEWED",
+    "token_version": "UNREVIEWED",
+    "ordered_sections": [
+      "Series rows (rule, from/until, next, assignee, end action)"
+    ],
+    "shared_components": [
+      "FarmIllustratedSectionSurface",
+      "AnimalFarmEmptyState"
+    ],
+    "illustration_use": "None",
+    "copy": {},
+    "adaptive_layout": {
+      "phone": "Single column",
+      "tablet": "UNREVIEWED",
+      "large_text": "UNREVIEWED",
+      "outdoor": "UNREVIEWED"
+    }
+  },
+  "fields": [],
+  "queries": [
+    {
+      "name": "active repeating series",
+      "read_model": "TaskPlanning.seriesRows (task_series, non-repeating excluded)",
+      "loading_empty_error": "Empty: 'No repeating tasks on this farm.'",
+      "freshness": "Local Room at board load",
+      "offline_source": "Local Room"
+    }
+  ],
+  "actions": [
+    {
+      "label": "End after today",
+      "intent": "Stop a series after today",
+      "permission": "MANAGE_WORKERS",
+      "command_or_destination": "task.series_end.v1",
+      "validation": [],
+      "effects": [
+        "Series last day set to today; earlier occurrences kept"
+      ],
+      "idempotency": "Ending again keeps the earlier last day",
+      "success_receipt": "Row shows no further occurrence after today",
+      "failure_and_recovery": "Error shown"
+    }
+  ],
+  "state_matrix": [
+    {
+      "state": "content",
+      "fixture": "Two series",
+      "expected_ui": "Rule, dates, next, assignee, end action",
+      "test_id": "TaskViewRuntimeNavigationTest.assignedToMeAndRepeatingViewsShowOnlyTheirOwnWork"
+    }
+  ],
+  "not_applicable_states": [],
+  "accessibility_tests": [],
+  "functional_tests": [
+    "TaskPlanningTest",
+    "TaskSeriesCommandsTest"
+  ],
+  "linked_routes": [
+    "FOS-TASK-005"
+  ],
+  "guide_and_resource_links": [],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": null,
+  "notes": "feature_ids left empty: no canonical feature-ID catalogue maps D-020 screens yet (ANIMAL_FARM_PROGRESS_LEDGER). UNREVIEWED design items await visual-lock review; not design-ready."
+}

@@ -76,6 +76,8 @@ fun FarmSessionContent(
             app.database.unsharedLocalOperations(membership.farmId, app.deviceId)
         }
     val backHome = { destination = FarmDestination.Home }
+    // Repeating and assigned tasks (D-020); Assigned to me needs a signed-in local account.
+    val taskPlanning = remember(membership.farmId, actorId) { TaskPlanning(app.database, membership.farmId, canPlanFarmWork(membership.role), actorId) }
     val runtimeRoute = destination.runtimeRouteContract()
     Box(Modifier.testTag(runtimeRoute.testTag)) {
         when (val dest = destination) {
@@ -153,6 +155,7 @@ fun FarmSessionContent(
             enqueueSync = ::enqueueSync,
             onBack = backHome,
             focusTaskId = dest.taskId,
+            planning = taskPlanning,
         )
         is FarmDestination.Tasks -> TasksModuleHost(
             farmId = membership.farmId,
@@ -162,6 +165,7 @@ fun FarmSessionContent(
             onBack = backHome,
             entryPage = dest.entry,
             loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
+            planning = taskPlanning,
         )
         is FarmDestination.Module -> when (dest.module) {
             FarmModule.TASKS -> TasksModuleHost(
@@ -171,6 +175,7 @@ fun FarmSessionContent(
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
                 loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
+                planning = taskPlanning,
             )
             FarmModule.MONEY -> MoneyModuleHost(
                 farmId = membership.farmId,
