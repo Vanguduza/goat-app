@@ -44,6 +44,8 @@ class PairingServer(
     private val lock: Any = authority,
     /** Persists an approved enrolment before the grant is sent, so the new device is known when it first syncs. */
     private val onGranted: (EnrolmentRequest, DeviceGrant) -> Unit = { _, _ -> },
+    /** Told why a request was refused, so the approver sees the real outcome. */
+    private val onRefused: (EnrolmentRequest, String) -> Unit = { _, _ -> },
     /** Asks a person on this device; blocks until they decide. */
     private val decide: (PendingEnrolment) -> EnrolmentDecision,
 ) : Closeable {
@@ -83,8 +85,14 @@ class PairingServer(
                 onGranted(request, decision.grant)
                 PairingCodec.writeGrant(output, decision.grant)
             }
-            is PairingDecision.Rejected -> PairingCodec.writeRefusal(output, decision.reason.name)
-            null -> PairingCodec.writeRefusal(output, "DECLINED")
+            is PairingDecision.Rejected -> {
+                onRefused(request, decision.reason.name)
+                PairingCodec.writeRefusal(output, decision.reason.name)
+            }
+            null -> {
+                onRefused(request, "DECLINED")
+                PairingCodec.writeRefusal(output, "DECLINED")
+            }
         }
         output.flush()
     }

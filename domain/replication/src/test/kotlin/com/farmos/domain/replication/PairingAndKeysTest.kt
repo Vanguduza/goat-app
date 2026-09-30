@@ -34,6 +34,8 @@ class PairingAndKeysTest {
         assertNull(FarmDiscoveryDescriptor.fromTxtRecord(record + ("token" to "secret")))
         assertNull(FarmDiscoveryDescriptor.fromTxtRecord(record - "fid"))
         assertEquals("_goatfarm._tcp", FarmDiscoveryDescriptor.SERVICE_TYPE)
+        val pairing = descriptor.copy(pairingPort = 41_234)
+        assertEquals(pairing, FarmDiscoveryDescriptor.fromTxtRecord(pairing.toTxtRecord()))
     }
 
     @Test

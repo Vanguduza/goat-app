@@ -96,6 +96,7 @@ fun FarmSessionContent(
             actorId = actorId,
             deviceId = app.deviceId,
             onBack = backHome,
+            lan = app.farmLan,
         )
         is FarmDestination.SyncQueue -> SyncQueueHost(
             view = dest.view,

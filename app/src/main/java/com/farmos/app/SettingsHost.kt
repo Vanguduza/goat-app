@@ -8,7 +8,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +44,7 @@ import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.Permission
 import com.farmos.domain.access.RolePermissions
 import com.farmos.domain.ops.FarmCurrency
+import com.farmos.domain.replication.DeviceStatus
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -79,6 +82,8 @@ internal fun SettingsHost(
     deviceId: String,
     onBack: () -> Unit,
     io: CoroutineDispatcher = Dispatchers.IO,
+    /** Farm-LAN replication for this farm, present while a local session runs it. */
+    lan: FarmLanRuntime? = null,
 ) {
     val scope = rememberCoroutineScope()
     var page by remember { mutableStateOf(SettingsPage.HOME) }
@@ -213,7 +218,13 @@ internal fun SettingsHost(
                 Text("${current.journalCount} operation(s) recorded in this device's replication journal.", modifier = Modifier.testTag("settings-journal-count"))
                 Text("Farm work is always saved here first and never waits for a network.", color = AnimalFarmTheme.colors.mutedInk)
             }
-            FarmOperationalSection("Farm network sync") { Text("Not set up. No other farm devices are paired with this one.") }
+            FarmOperationalSection("Farm network sync") {
+                if (lan == null) {
+                    Text("Not running on this device.")
+                } else {
+                    LanStatus(lan, current.devices.count { it.deviceId != deviceId })
+                }
+            }
             FarmOperationalSection("Google Drive") {
                 Text("Not connected.")
                 Text("Farm work continues on this device. Disconnecting Google Drive never deletes farm records on this device.", color = AnimalFarmTheme.colors.mutedInk)
@@ -249,8 +260,88 @@ internal fun SettingsHost(
             FarmOperationalSection("Known farm devices") {
                 val others = current.devices.filter { it.deviceId != deviceId }
                 if (others.isEmpty()) Text("No other devices yet.", color = AnimalFarmTheme.colors.mutedInk)
-                others.forEach { Text("${it.name} · ${it.status.lowercase().replace('_', ' ')} · ${it.lastReportedOwnSequence} operation(s)") }
+                others.forEach { device ->
+                    KnownDevice(device, busy) {
+                        act { actor -> database.setDeviceStatus(farmId, device.deviceId, DeviceStatus.LOST_REVOKED, actor.accountId, deviceId) }
+                    }
+                }
             }
+            if (lan != null && RolePermissions.allows(actor.role, Permission.APPROVE_DEVICE_PAIRING)) {
+                AddDevice(lan, actor, onJoined = { refreshKey++ })
+            }
+        }
+    }
+}
+
+@Composable
+private fun LanStatus(lan: FarmLanRuntime, pairedDevices: Int) {
+    val state by lan.state.collectAsState()
+    Text(if (state.serving) "Sharing this farm on the local network." else "Starting the farm network on this device.")
+    Text("${state.peers.size} of $pairedDevices paired device(s) found on this network.", modifier = Modifier.testTag("settings-lan-peers"))
+    Text(
+        state.lastSyncEpochMillis?.let { "Last synchronised ${timestamp(it)}" } ?: "Not synchronised on this network yet.",
+        color = AnimalFarmTheme.colors.mutedInk,
+    )
+    state.lastError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    SettingsButton("Synchronise now", state.serving) { lan.requestSync() }
+}
+
+@Composable
+private fun KnownDevice(device: ReplicationDeviceEntity, busy: Boolean, onReportLost: () -> Unit) {
+    var confirming by remember(device.deviceId) { mutableStateOf(false) }
+    val active = device.status == DeviceStatus.ACTIVE.name || device.status == DeviceStatus.TEMPORARILY_OFFLINE.name
+    Text(
+        "${device.name} · ${device.status.lowercase().replace('_', ' ')} · ${device.lastReportedOwnSequence} operation(s)",
+        modifier = Modifier.testTag("settings-device:${device.deviceId}"),
+    )
+    if (!active) return
+    if (!confirming) {
+        SettingsButton("Report ${device.name} lost", !busy) { confirming = true }
+    } else {
+        Text("${device.name} will never synchronise with this farm again, and anything it recorded but had not shared is lost.", color = MaterialTheme.colorScheme.error)
+        SettingsButton("Confirm ${device.name} is lost", !busy) {
+            confirming = false
+            onReportLost()
+        }
+    }
+}
+
+/** Opens pairing on this device; each device asking to join is added only when its code is typed here. */
+@Composable
+private fun AddDevice(lan: FarmLanRuntime, approver: LocalAccount, onJoined: () -> Unit) {
+    var session by remember { mutableStateOf<PairingSession?>(null) }
+    DisposableEffect(Unit) { onDispose { session?.close() } }
+    FarmOperationalSection("Add a device") {
+        val open = session
+        if (open == null) {
+            Text("A phone or tablet on this network can ask to join. You approve it by typing the code it shows.", color = AnimalFarmTheme.colors.mutedInk)
+            SettingsButton("Add a device", true) { session = lan.openPairing(approver) }
+            return@FarmOperationalSection
+        }
+        val pending by open.pending.collectAsState()
+        val result by open.lastResult.collectAsState()
+        LaunchedEffect(result) { if (result != null) onJoined() }
+        result?.let { Text(it, modifier = Modifier.testTag("settings-pairing-result")) }
+        val request = pending
+        if (request == null) {
+            Text("Waiting for a device. On the new device choose Join a farm on this network.", modifier = Modifier.testTag("settings-pairing-waiting"))
+        } else {
+            var code by remember(request) { mutableStateOf("") }
+            Text("${request.deviceName} wants to join this farm.", modifier = Modifier.testTag("settings-pairing-request"))
+            OutlinedTextField(
+                value = code,
+                onValueChange = { typed -> code = typed.filter(Char::isDigit).take(6) },
+                label = { Text("Code shown on ${request.deviceName}") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            SettingsButton("Approve", code.length == 6) { open.approve(code) }
+            SettingsButton("Decline", true) { open.decline() }
+        }
+        SettingsButton("Stop adding devices", true) {
+            open.close()
+            session = null
         }
     }
 }

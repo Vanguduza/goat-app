@@ -64,6 +64,13 @@ class FarmOsApplication : Application(), SyncEngineOwner {
     /** This device's farm keys and device identity, sealed by the Android Keystore; excluded from backups. */
     internal val keyVault: FarmKeyVault by lazy { FarmKeyVault(java.io.File(noBackupFilesDir, "goat-vault"), KeystoreSealer()) }
 
+    /** Finds and announces farm devices on the local network. */
+    internal val peerDiscovery: FarmPeerDiscovery by lazy { NsdFarmPeerDiscovery(this) }
+
+    /** Farm-LAN replication for the farm open on this device, while a local session is signed in. */
+    @Volatile
+    internal var farmLan: FarmLanRuntime? = null
+
     @Volatile
     var authorizationListener: ((AuthorizationLoss) -> Unit)? = null
 
