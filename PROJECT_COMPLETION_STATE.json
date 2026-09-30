@@ -2,7 +2,7 @@
   "schema_version": 1,
   "repository": "Vanguduza/goat-app",
   "canonical_branch": "main",
-  "source_fingerprint": "sha256:9aafe662a49529d298b74d0bbe2cb99ebdae02aede575d7020aa6e272b6aa3f1",
+  "source_fingerprint": "sha256:f6346559e4df0b7255b61ccef67b0394e4da024cdbea5128b55e1524ca5dfd11",
   "programme_status": "ACTIVE_DETERMINISTIC_COMPLETION",
   "release_blocked": true,
   "authority": {
@@ -41,8 +41,8 @@
     "modules_green": 0,
     "visual_green_screens": 0,
     "qdu_states": {
-      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 265,
-      "PLANNED_NOT_IMPLEMENTED": 280
+      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 266,
+      "PLANNED_NOT_IMPLEMENTED": 279
     }
   },
   "module_plan": {
@@ -1753,8 +1753,8 @@
     "status": "IN_PROGRESS",
     "route_export": "docs/ux/evidence/animal-farm-visual-lock/runtime-route-export.json",
     "feature_route_coverage": "docs/realisation/FEATURE_ROUTE_COVERAGE.json",
-    "route_screen_count": 265,
-    "unresolved_screen_count": 280,
+    "route_screen_count": 266,
+    "unresolved_screen_count": 279,
     "features_with_route_evidence": 83,
     "features_without_route_evidence": 73,
     "explicit_headless_contracts": 0,

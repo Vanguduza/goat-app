@@ -140,6 +140,7 @@ fun GoatModuleHost(
             searchResults = searchResults,
         ),
         entryPage = entryPage,
+        searchSires = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "goat", "MALE") },
         onRegister = { tag, name, sex, dateText ->
             runGoatWrite {
                 val day = dateText.takeIf { it.isNotBlank() }?.let { LocalDate.parse(it).toEpochDay() }

@@ -8,6 +8,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.farmos.core.design.FarmSelectorOption
+import com.farmos.core.design.FarmSelectorSearch
+import com.farmos.core.design.NoFarmSelectorSearch
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomHerdRepository
 import com.farmos.data.herd.RoomOpsRepository
@@ -35,6 +37,7 @@ fun RabbitModuleHost(
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
     loadRecords: suspend () -> RabbitRecords = { RabbitRecords() },
+    searchRabbits: FarmSelectorSearch = NoFarmSelectorSearch,
 ) {
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
@@ -94,6 +97,7 @@ fun RabbitModuleHost(
     RabbitProgrammeScreen(
         waveOptions = waveOptions,
         nestBoxChoices = nestBoxChoices,
+        searchRabbits = searchRabbits,
         cages = cages,
         waves = waves,
         availableBoxes = boxes,

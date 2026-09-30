@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:9aafe662a49529d298b74d0bbe2cb99ebdae02aede575d7020aa6e272b6aa3f1",
-  "runtime_evidence_tested_commit": "f18bccd2d33379f7b24721470ad386fd30ad66f8",
-  "runtime_evidence_run_id": 36666425916,
+  "source_fingerprint": "sha256:f6346559e4df0b7255b61ccef67b0394e4da024cdbea5128b55e1524ca5dfd11",
+  "runtime_evidence_tested_commit": "d24f63d210495c32cf032edca5b2c51dde35559d",
+  "runtime_evidence_run_id": 36667807063,
   "registry_screen_count": 545,
-  "route_screen_count": 265,
-  "unresolved_screen_count": 280,
+  "route_screen_count": 266,
+  "unresolved_screen_count": 279,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ASSET-001",
@@ -16,6 +16,7 @@
     "FOS-ASSET-009",
     "FOS-ATOM-001",
     "FOS-ATOM-003",
+    "FOS-ATOM-004",
     "FOS-ATOM-005",
     "FOS-ATOM-006",
     "FOS-ATOM-007",
@@ -348,6 +349,17 @@
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
           "app/src/test/java/com/farmos/app/GroupsCaptureOwnerTest.kt",
+          "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ATOM-004",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
           "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt"
         ]
       }
@@ -1782,11 +1794,15 @@
       "screen_id": "FOS-HEALTH-024",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER",
         "TYPED_ROUTE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt"
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
@@ -3549,7 +3565,6 @@
     "FOS-ASSET-011",
     "FOS-ASSET-012",
     "FOS-ATOM-002",
-    "FOS-ATOM-004",
     "FOS-ATOM-010",
     "FOS-ATOM-012",
     "FOS-ATOM-013",

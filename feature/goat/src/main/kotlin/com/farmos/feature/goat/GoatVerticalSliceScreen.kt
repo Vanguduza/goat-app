@@ -2,6 +2,8 @@ package com.farmos.feature.goat
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.farmos.core.design.FarmSelectorSearch
+import com.farmos.core.design.NoFarmSelectorSearch
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.GoatStatus
 
@@ -37,6 +39,7 @@ fun GoatVerticalSliceScreen(
     onBack: () -> Unit = onSignOut,
     modifier: Modifier = Modifier,
     entryPage: GoatEntryPage = GoatEntryPage.DASHBOARD,
+    searchSires: FarmSelectorSearch = NoFarmSelectorSearch,
 ) {
     GoatExperienceScreen(
         state = state,
@@ -59,6 +62,7 @@ fun GoatVerticalSliceScreen(
             onSyncNow = onSyncNow,
             onSearch = onSearch,
             onScanIdentifier = onScanIdentifier,
+            searchSires = searchSires,
         ),
         onBackToFarm = onBack,
         onSignOut = onSignOut,

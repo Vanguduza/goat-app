@@ -20,9 +20,12 @@ import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
+import com.farmos.core.design.FarmSearchSelector
 import com.farmos.core.design.FarmSelectionAtoms
 import com.farmos.core.design.FarmSelectorOption
+import com.farmos.core.design.FarmSelectorSearch
 import com.farmos.core.design.FarmVisualClass
+import com.farmos.core.design.NoFarmSelectorSearch
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -82,6 +85,8 @@ fun HealthObservationScreen(
     speciesCodes: List<String> = emptyList(),
     /** Vet-accepted protocol packs; adding a slot and applying a pack accept only these. */
     acceptedPacks: List<FarmSelectorOption> = emptyList(),
+    /** Whole-farm animal search across species for health subjects; never a capped presentation list. */
+    searchAnimals: FarmSelectorSearch = NoFarmSelectorSearch,
 ) {
     var page by remember { mutableStateOf(entryPage.toHealthPage()) }
     var backStack by remember { mutableStateOf(emptyList<HealthPage>()) }
@@ -173,7 +178,7 @@ fun HealthObservationScreen(
         }
 
         HealthPage.APPLY_PROTOCOL -> {
-            ApplyProtocolScreen(acceptedPacks, busy, error, onApplyPack, home)
+            ApplyProtocolScreen(acceptedPacks, searchAnimals, busy, error, onApplyPack, home)
         }
 
         HealthPage.VET_VISIT -> {
@@ -181,7 +186,7 @@ fun HealthObservationScreen(
         }
 
         HealthPage.LAB_RESULT -> {
-            LabResultScreen(busy, error, onRecordLab, labResultBack)
+            LabResultScreen(searchAnimals, busy, error, onRecordLab, labResultBack)
         }
     }
 }
@@ -505,13 +510,15 @@ private fun ProtocolSlotScreen(
 @Composable
 private fun ApplyProtocolScreen(
     acceptedPacks: List<FarmSelectorOption>,
+    searchAnimals: FarmSelectorSearch,
     busy: Boolean,
     error: String?,
     onApply: (String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
     var packId by remember { mutableStateOf("") }
-    var animalId by remember { mutableStateOf("") }
+    var animal by remember { mutableStateOf<FarmSelectorOption?>(null) }
+    val animalId = animal?.id.orEmpty()
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage(
         "FOS-HEALTH-018",
@@ -530,9 +537,15 @@ private fun ApplyProtocolScreen(
                 emptyText = "No vet-accepted protocol packs. Accept one first.",
                 enabled = !busy,
             )
-            OutlinedTextField(animalId, {
-                animalId = it
-            }, label = { Text("Animal id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FarmSearchSelector(
+                atomTag = FarmSelectionAtoms.ANIMAL_SELECTOR,
+                title = "Animal",
+                search = searchAnimals,
+                selected = animal,
+                onSelect = { animal = it },
+                emptyText = "No animals match on this device",
+                enabled = !busy,
+            )
             OutlinedTextField(day, {
                 day = it
             }, label = { Text("Anchor date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -593,12 +606,14 @@ private fun VetVisitScreen(
 
 @Composable
 private fun LabResultScreen(
+    searchAnimals: FarmSelectorSearch,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var animalId by remember { mutableStateOf("") }
+    var animal by remember { mutableStateOf<FarmSelectorOption?>(null) }
+    val animalId = animal?.id.orEmpty()
     var test by remember { mutableStateOf("") }
     var result by remember { mutableStateOf("") }
     var cells by remember { mutableStateOf("") }
@@ -611,9 +626,15 @@ private fun LabResultScreen(
         onBack,
     ) {
         FarmOperationalSection("Laboratory result") {
-            OutlinedTextField(animalId, {
-                animalId = it
-            }, label = { Text("Animal id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            FarmSearchSelector(
+                atomTag = FarmSelectionAtoms.ANIMAL_SELECTOR,
+                title = "Animal",
+                search = searchAnimals,
+                selected = animal,
+                onSelect = { animal = it },
+                emptyText = "No animals match on this device",
+                enabled = !busy,
+            )
             OutlinedTextField(
                 test,
                 { test = it },

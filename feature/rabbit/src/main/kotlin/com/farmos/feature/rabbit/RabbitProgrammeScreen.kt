@@ -29,9 +29,13 @@ import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
+import com.farmos.core.design.FarmSearchSelector
+import com.farmos.core.design.FarmSelectionAtoms
 import com.farmos.core.design.FarmSelectorOption
+import com.farmos.core.design.FarmSelectorSearch
 import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.FosDimens
+import com.farmos.core.design.NoFarmSelectorSearch
 import com.farmos.domain.rabbit.KudbatSemiIntensiveExcel
 import com.farmos.domain.rabbit.RabbitNestBoxCycle
 import java.time.LocalDate
@@ -86,6 +90,8 @@ fun RabbitProgrammeScreen(
     waveOptions: List<FarmSelectorOption> = emptyList(),
     /** This farm's nest boxes with their current status; the next status is limited to the governed cycle. */
     nestBoxChoices: List<RabbitNestBoxChoice> = emptyList(),
+    /** Whole-farm rabbit search for health subjects; never the capped presentation list. */
+    searchRabbits: FarmSelectorSearch = NoFarmSelectorSearch,
 ) {
     var page by remember { mutableStateOf(RabbitPage.DASHBOARD) }
     val home = { page = RabbitPage.DASHBOARD }
@@ -154,7 +160,7 @@ fun RabbitProgrammeScreen(
         }
 
         RabbitPage.GI_STASIS -> {
-            RabbitGiStasisScreen(busy, error, onRecordGiStasis, home)
+            RabbitGiStasisScreen(searchRabbits, busy, error, onRecordGiStasis, home)
         }
 
         RabbitPage.CAGE_OCCUPANCY -> RabbitCageOccupancyScreen(records, home)
@@ -587,12 +593,13 @@ private fun RabbitOutcomeScreen(
 
 @Composable
 private fun RabbitGiStasisScreen(
+    searchRabbits: FarmSelectorSearch,
     busy: Boolean,
     error: String?,
     onRecord: (String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var animal by remember { mutableStateOf("") }
+    var animal by remember { mutableStateOf<FarmSelectorOption?>(null) }
     var signs by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     RabbitEventPage(
@@ -604,9 +611,15 @@ private fun RabbitGiStasisScreen(
         onBack,
         FarmVisualClass.I4,
     ) {
-        OutlinedTextField(animal, {
-            animal = it
-        }, label = { Text("Rabbit id") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+        FarmSearchSelector(
+            atomTag = FarmSelectionAtoms.ANIMAL_SELECTOR,
+            title = "Rabbit",
+            search = searchRabbits,
+            selected = animal,
+            onSelect = { animal = it },
+            emptyText = "No rabbits match on this device",
+            enabled = !busy,
+        )
         OutlinedTextField(signs, { signs = it }, label = { Text("Signs observed") }, modifier = Modifier.fillMaxWidth(), enabled = !busy)
         OutlinedTextField(
             day,
@@ -617,8 +630,8 @@ private fun RabbitGiStasisScreen(
             singleLine = true,
         )
         Button(onClick = {
-            onRecord(animal, signs, day)
-        }, enabled = !busy && animal.isNotBlank() && signs.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
+            onRecord(animal?.id.orEmpty(), signs, day)
+        }, enabled = !busy && animal != null && signs.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
             Text("Flag and create vet-call task")
         }
     }

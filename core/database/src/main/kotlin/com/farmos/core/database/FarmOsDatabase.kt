@@ -228,6 +228,29 @@ interface AnimalDao {
     @Query("SELECT * FROM animals WHERE farmId = :farmId AND id IN (:animalIds) ORDER BY id")
     suspend fun getMany(farmId: String, animalIds: List<String>): List<AnimalEntity>
 
+    /**
+     * Whole-farm selector search. Covers every animal of the farm (optionally one species and sex), never a
+     * capped presentation list; ordered deterministically by tag then id and paged by [limit]/[offset].
+     * [pattern] is an escaped LIKE pattern matched against tag or name, or null for all animals.
+     */
+    @Query("""
+        SELECT * FROM animals
+        WHERE farmId = :farmId
+          AND (:speciesCode IS NULL OR speciesCode = :speciesCode)
+          AND (:sex IS NULL OR sex = :sex)
+          AND (:pattern IS NULL OR tag LIKE :pattern ESCAPE '\' OR name LIKE :pattern ESCAPE '\')
+        ORDER BY tag, id
+        LIMIT :limit OFFSET :offset
+    """)
+    suspend fun search(
+        farmId: String,
+        speciesCode: String?,
+        sex: String?,
+        pattern: String?,
+        limit: Int,
+        offset: Int,
+    ): List<AnimalEntity>
+
     @Query("""
         SELECT * FROM animals
         WHERE farmId = :farmId
