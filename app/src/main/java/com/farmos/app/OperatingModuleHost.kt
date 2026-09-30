@@ -218,7 +218,7 @@ fun OperatingModuleHost(
                         val code = speciesCode.orEmpty()
                         OpsAnimalSearch(
                             animalSelectorSearch(database, farmId, code), animalSelectorSearch(database, farmId, code, "FEMALE"), animalSelectorSearch(database, farmId, code, "MALE"),
-                            selected?.animalId, selected?.label, speciesGroups,
+                            selected?.animalId, selected?.label, speciesGroups, speciesMateCoi(database, farmId, code),
                         )
                     }
                     CompositionLocalProvider(LocalOpsAnimalSearch provides opsSearch) { when (module) {

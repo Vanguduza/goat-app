@@ -26,6 +26,8 @@ data class OpsAnimalSearch(
     val selectedLabel: String? = null,
     /** Every group of this species on the farm, for lot and mob captures. */
     val groups: List<FarmSelectorOption> = emptyList(),
+    /** Offspring inbreeding from recorded pedigree (D-023); null where the host provides none. */
+    val mateCoi: MateCoiAnalysis? = null,
 ) {
     companion object {
         val None = OpsAnimalSearch(NoFarmSelectorSearch, NoFarmSelectorSearch, NoFarmSelectorSearch)

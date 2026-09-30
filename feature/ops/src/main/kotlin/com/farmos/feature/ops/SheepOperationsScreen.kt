@@ -54,6 +54,7 @@ private enum class SheepOpsPage {
     IDENTIFIER,
     MOVEMENT,
     PEDIGREE,
+    COI,
     HEALTH_SUMMARY,
     TIMELINE,
     WOOL_DASHBOARD,
@@ -197,6 +198,8 @@ fun SheepOperationsScreen(
             SheepPedigreeScreen(selectedAnimalId, busy, error, actions.onPedigree, home)
         }
 
+        SheepOpsPage.COI -> OpsCoiAnalysisPage("Ewe", "Ram", "lambs", busy, home)
+
         SheepOpsPage.HEALTH_SUMMARY -> SheepHealthSummaryScreen(selectedAnimalId, today, loadRecords, home)
         SheepOpsPage.TIMELINE -> SheepTimelineScreen(selectedAnimalId, loadRecords, home)
         SheepOpsPage.GROWTH_HISTORY -> SheepGrowthHistoryScreen(selectedAnimalId, loadRecords, home)
@@ -249,6 +252,7 @@ private fun SheepOpsHome(
             SheepNav("Official identifier") { onOpen(SheepOpsPage.IDENTIFIER) }
             SheepNav("Movement") { onOpen(SheepOpsPage.MOVEMENT) }
             SheepNav("Pedigree link") { onOpen(SheepOpsPage.PEDIGREE) }
+            SheepNav("Inbreeding check") { onOpen(SheepOpsPage.COI) }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
@@ -543,7 +547,7 @@ private fun SheepPedigreeScreen(
     SheepFormPage(
         "FOS-SHEEP-026",
         "Pedigree",
-        "Record parentage only. This does not calculate COI or genetic merit.",
+        "Record parentage. Inbreeding check uses it; genetic merit is not calculated.",
         busy,
         error,
         onBack,
