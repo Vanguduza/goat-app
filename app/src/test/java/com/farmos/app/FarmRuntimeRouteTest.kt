@@ -31,6 +31,7 @@ class FarmRuntimeRouteTest {
             FarmModule.SALES to "FOS-SALES-001",
             FarmModule.PROCUREMENT to "FOS-PROC-001",
             FarmModule.WAITLIST to "FOS-RABBIT-027",
+            FarmModule.REPORTS to "FOS-REPORT-001",
         )
 
         assertEquals(FarmModule.entries.toSet(), expected.keys)

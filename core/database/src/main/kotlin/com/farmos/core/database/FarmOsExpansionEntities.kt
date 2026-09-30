@@ -1,5 +1,6 @@
 package com.farmos.core.database
 
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Entity
 import androidx.room.Index
@@ -51,6 +52,8 @@ data class LabourEntryEntity(
     val minutes: Int,
     val occurredEpochDay: Long,
     val note: String?,
+    /** The registered worker (R1); null for an entry recorded with a typed label. */
+    @ColumnInfo(defaultValue = "NULL") val workerId: String? = null,
 )
 
 @Entity(tableName = "farm_assets", indices = [Index(value = ["farmId", "code"], unique = true)])
@@ -264,14 +267,17 @@ interface LabourDao {
 
     @Query(
         """
-        SELECT workerName, SUM(minutes) AS minutes, COUNT(*) AS entryCount, MAX(occurredEpochDay) AS latestEpochDay
-        FROM labour_entries WHERE farmId = :farmId GROUP BY workerName ORDER BY workerName
+        SELECT COALESCE(w.name, l.workerName) AS workerName, SUM(l.minutes) AS minutes, COUNT(*) AS entryCount, MAX(l.occurredEpochDay) AS latestEpochDay
+        FROM labour_entries l LEFT JOIN farm_workers w ON w.farmId = l.farmId AND w.id = l.workerId
+        WHERE l.farmId = :farmId
+        GROUP BY COALESCE('worker:' || l.workerId, 'label:' || l.workerName)
+        ORDER BY workerName
         """,
     )
     suspend fun totalsByWorkerName(farmId: String): List<LabourWorkerTotal>
 }
 
-/** Exhaustive minutes per recorded worker label; the label is a farm label, not a login or roster entry. */
+/** Exhaustive minutes per registered worker (named as now), or per typed label for entries without one. */
 data class LabourWorkerTotal(val workerName: String, val minutes: Long, val entryCount: Int, val latestEpochDay: Long)
 
 @Dao

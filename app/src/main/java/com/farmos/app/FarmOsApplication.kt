@@ -17,7 +17,6 @@ import com.farmos.core.network.AuthorizationLoss
 import com.farmos.core.network.CommandTransport
 import com.farmos.core.network.FarmAccessGuard
 import com.farmos.core.network.FarmMembership
-import com.farmos.core.network.FarmSearchClient
 import com.farmos.core.network.MutableSessionStore
 import com.farmos.core.network.RefreshingAccessTokenProvider
 import com.farmos.core.network.SupabaseIdentityClient
@@ -48,8 +47,6 @@ class FarmOsApplication : Application(), SyncEngineOwner {
     var identityClient: SupabaseIdentityClient? = null
         private set
     var pullClient: SupabasePullClient? = null
-        private set
-    var farmSearchClient: FarmSearchClient? = null
         private set
     /** Read-only, member-gated server trace for one mutation; null when no backend is configured. */
     var mutationTraceClient: SupabaseMutationTraceClient? = null
@@ -145,14 +142,6 @@ class FarmOsApplication : Application(), SyncEngineOwner {
                 publishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
                 tokenProvider = refreshingTokenProvider,
             )
-            if (BuildConfig.MEILI_HOST.isNotBlank()) {
-                farmSearchClient = FarmSearchClient(
-                    supabaseUrl = BuildConfig.SUPABASE_URL,
-                    supabasePublishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
-                    meiliHost = BuildConfig.MEILI_HOST,
-                    tokenProvider = refreshingTokenProvider,
-                )
-            }
             transport = SupabaseRpcCommandTransport(
                 supabaseUrl = BuildConfig.SUPABASE_URL,
                 publishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,

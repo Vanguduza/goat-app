@@ -14,6 +14,7 @@ object CommandMergeClassification {
         "inventory.lot_receive.v1",
         "inventory.move.v1",
         "labour.record.v1",
+        "labour.record.v2",
         "money.record.v1",
         "purchase.record.v1",
         "sale.record.v1",

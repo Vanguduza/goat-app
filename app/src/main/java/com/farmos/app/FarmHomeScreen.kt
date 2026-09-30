@@ -31,7 +31,7 @@ import java.util.Locale
 
 enum class FarmModule {
     HOME, GOAT, RABBIT, SHEEP, CATTLE, POULTRY, TASKS, HEALTH, MONEY, INVENTORY,
-    GROUPS, PASTURE, LABOUR, ASSETS, FEED, WATER, SALES, PROCUREMENT, WAITLIST,
+    GROUPS, PASTURE, LABOUR, ASSETS, FEED, WATER, SALES, PROCUREMENT, WAITLIST, REPORTS,
 }
 
 private data class HomeModuleCard(val module: FarmModule, val title: String, val description: String)

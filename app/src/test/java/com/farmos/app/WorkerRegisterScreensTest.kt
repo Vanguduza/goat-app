@@ -100,4 +100,21 @@ class WorkerRegisterScreensTest {
         compose.onNode(hasClickAction() and hasText("Labour")).performScrollTo().performClick()
         compose.onNode(hasClickAction() and hasText("Open Work log")).assertExists()
     }
+
+    @Test
+    fun labourCaptureChoosesARegisteredWorker() {
+        var chosen: String? = null
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                com.farmos.feature.ops.LabourWorkerPicker(
+                    listOf(com.farmos.feature.ops.LabourWorkerOption("w1", "Tendai"), com.farmos.feature.ops.LabourWorkerOption("w2", "Rudo")),
+                    selectedWorkerId = "w2",
+                    enabled = true,
+                ) { chosen = it }
+            }
+        }
+        compose.onNodeWithText("Rudo · selected").assertExists()
+        compose.onNodeWithTag("labour-worker:w1").performClick()
+        compose.runOnIdle { assertEquals("w1", chosen) }
+    }
 }

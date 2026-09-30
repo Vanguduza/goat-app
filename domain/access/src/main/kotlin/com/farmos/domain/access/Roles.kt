@@ -18,14 +18,17 @@ enum class Permission {
     RESOLVE_SYNC_CONFLICTS,
     MANAGE_FARM_SETTINGS,
 
+    /** Exporting farm records from the device (D-026); farm data leaves the farm's control. */
+    EXPORT_FARM_DATA,
+
     /** Creating, disabling, re-roling or resetting Owner accounts. Only Owners hold it. */
     MANAGE_OWNERS,
 }
 
 /**
  * Default role permissions. Workers record and count; supervisors also review and manage workers;
- * management (Manager and Owner) administers accounts, devices, storage, conflicts, settings and posts
- * stock adjustments; only Owners manage Owners.
+ * management (Manager and Owner) administers accounts, devices, storage, conflicts, settings, posts
+ * stock adjustments and exports farm records; only Owners manage Owners.
  */
 object RolePermissions {
     private val viewer = setOf(Permission.VIEW_FARM)
@@ -40,6 +43,7 @@ object RolePermissions {
         Permission.MANAGE_STORAGE_AND_BACKUP,
         Permission.RESOLVE_SYNC_CONFLICTS,
         Permission.MANAGE_FARM_SETTINGS,
+        Permission.EXPORT_FARM_DATA,
     )
     private val owner = Permission.entries.toSet()
 

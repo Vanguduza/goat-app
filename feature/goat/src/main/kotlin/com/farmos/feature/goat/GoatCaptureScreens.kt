@@ -186,6 +186,7 @@ internal fun GoatReproductionScreen(
     state: GoatSliceUiState,
     actions: GoatExperienceActions,
     onSelectGoat: (String) -> Unit,
+    onCompareMates: () -> Unit = {},
     onBack: () -> Unit,
 ) {
     var milk by remember { mutableStateOf("") }
@@ -241,6 +242,10 @@ internal fun GoatReproductionScreen(
                         enabled = !state.busy,
                         pinned = listOf(NO_SIRE),
                     )
+                    if (sire.id != NO_SIRE.id) GoatMatingCoi(actions.mateAnalysis, goat.animalId, sire.id)
+                    TextButton(onClick = onCompareMates, enabled = !state.busy, modifier = Modifier.fillMaxWidth().testTag("goat-compare-bucks")) {
+                        Text("Compare bucks for this doe")
+                    }
                 }
                 FarmDateField(label = "Mating date", value = matingDay, onValueChange = { matingDay = it }, key = "mating", enabled = !state.busy)
                 Text("A mating record creates the governed +45 day pregnancy-check task.")

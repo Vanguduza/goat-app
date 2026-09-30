@@ -81,7 +81,8 @@ data class LocalCommandResult(
     val locallyDurable: Boolean,
 )
 
-enum class SearchSource { LOCAL, MEILISEARCH }
+/** Where a search result came from; local full-database search is the only search authority (D-027). */
+enum class SearchSource { LOCAL }
 
 enum class AnimalSex { FEMALE, MALE }
 

@@ -72,6 +72,7 @@ private fun FarmModule.runtimeRouteContract(): FarmRuntimeRoute =
             FarmModule.SALES -> "FOS-SALES-001"
             FarmModule.PROCUREMENT -> "FOS-PROC-001"
             FarmModule.WAITLIST -> "FOS-RABBIT-027"
+            FarmModule.REPORTS -> "FOS-REPORT-001"
         },
     )
 

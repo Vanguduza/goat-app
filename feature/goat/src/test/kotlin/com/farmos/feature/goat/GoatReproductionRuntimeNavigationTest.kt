@@ -133,6 +133,46 @@ class GoatReproductionRuntimeNavigationTest {
     }
 
     @Test
+    fun aChosenSireShowsTheKidsInbreedingAndBucksCompareWithoutARanking() {
+        val bucks = listOf(FarmSelectorOption("goat-bako", "GT-044 · Bako", "Active"), FarmSelectorOption("goat-kito", "GT-011 · Kito", "Active"))
+        val wholeFarm = FarmSelectorSearch { query, offset, limit ->
+            val matches = bucks.filter { query.isBlank() || it.label.contains(query, ignoreCase = true) }
+            FarmSearchPage(matches.drop(offset).take(limit), hasMore = matches.size > offset + limit)
+        }
+        // Kito is Nala's half-brother through a shared sire; Bako is unrelated, with no weight recorded.
+        val analysis = GoatMateAnalysis { _, buckId ->
+            if (buckId == "goat-kito") {
+                GoatMateCandidate(buckId, "GT-011 · Kito", day(3, 2), 61_500, 0.125, 2, listOf("GT-001 · Zeus"), 0)
+            } else {
+                GoatMateCandidate(buckId, "GT-044 · Bako", null, null, 0.0, 1, emptyList(), 1)
+            }
+        }
+        render(nala(), GoatPage.REPRODUCTION, sires = wholeFarm, mateAnalysis = analysis)
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-008:option:goat-kito").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("goat-mating-coi").assertDoesNotExist()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:goat-kito").performScrollTo().performClick()
+        compose.waitUntil(10_000) { compose.onAllNodes(hasText("Kids' inbreeding (COI) 12.50% · 2 complete generations recorded")).fetchSemanticsNodes().isNotEmpty() }
+
+        compose.onNodeWithTag("goat-compare-bucks").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-046").assertExists()
+        compose.onNodeWithText("For Nala").assertExists()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-008:option:goat-bako").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:goat-kito").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:goat-bako").performScrollTo().performClick()
+        compose.waitUntil(10_000) { compose.onAllNodes(hasText("Latest weight: Not recorded")).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("Latest weight: 61.5 kg").assertExists()
+        compose.onNodeWithText("Common ancestors: GT-001 · Zeus").assertExists()
+        compose.onNodeWithText("Common ancestors: none recorded").assertExists()
+        compose.onNodeWithText("Kids' inbreeding (COI) 0.00% · 1 complete generation recorded").assertExists()
+        compose.onNode(hasText("conflicting parentage", substring = true)).assertExists()
+        compose.onNodeWithText("No ranking is shown", substring = true).assertExists()
+
+        compose.onNodeWithTag("goat-mate-remove:goat-bako").performScrollTo().performClick()
+        compose.onNodeWithTag("goat-mate-candidate:goat-bako").assertDoesNotExist()
+        compose.onNodeWithTag("goat-mate-candidate:goat-kito").assertExists()
+    }
+
+    @Test
     fun matingDateIsChosenThroughTheDatePickerAtomWithoutSubmitting() {
         val recorded = AtomicReference<Triple<String, String, String>?>(null)
         render(nala(), GoatPage.REPRODUCTION) { method, sire, day -> recorded.set(Triple(method, sire, day)) }
@@ -185,6 +225,7 @@ class GoatReproductionRuntimeNavigationTest {
         others: List<GoatSnapshot> = emptyList(),
         onSelect: (String) -> Unit = {},
         sires: FarmSelectorSearch = NoFarmSelectorSearch,
+        mateAnalysis: GoatMateAnalysis = NoGoatMateAnalysis,
         onMating: (String, String, String) -> Unit = { _, _, _ -> },
     ) {
         compose.setContent {
@@ -209,6 +250,7 @@ class GoatReproductionRuntimeNavigationTest {
                         onSyncNow = {},
                         onSearch = {},
                         searchSires = sires,
+                        mateAnalysis = mateAnalysis,
                     ),
                     onBackToFarm = {},
                     onSignOut = {},

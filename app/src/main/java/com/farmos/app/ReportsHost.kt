@@ -1,0 +1,167 @@
+package com.farmos.app
+
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.HerdRegisterRow
+import com.farmos.core.design.AnimalFarmEmptyState
+import com.farmos.core.design.AnimalFarmTheme
+import com.farmos.core.design.AnimalFarmWarningSurface
+import com.farmos.core.design.FarmOperationalPage
+import com.farmos.core.design.FarmOperationalSection
+import com.farmos.core.design.FarmVisualClass
+import com.farmos.domain.ops.FarmCsv
+import com.farmos.domain.ops.MetricDefinition
+import com.farmos.domain.ops.MetricResult
+import java.time.LocalDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+private val speciesNames = linkedMapOf("goat" to "Goats", "sheep" to "Sheep", "cattle" to "Cattle", "rabbit" to "Rabbits", "poultry" to "Poultry")
+private val exitedStatuses = setOf("sold", "dead", "culled")
+
+/**
+ * Herd metrics from the exhaustive herd register (owner decision D-026, resolution R10). Each declares its
+ * formula, unit, period and scope; a weight total counts animals without a weight as missing, never as zero.
+ */
+internal fun herdMetrics(rows: List<HerdRegisterRow>): List<MetricResult> {
+    val bySpecies = rows.groupBy { it.speciesCode }
+    val ordered = speciesNames.keys.filter { it in bySpecies } + bySpecies.keys.filterNot { it in speciesNames }.sorted()
+    return ordered.flatMap { code ->
+        val name = speciesNames[code] ?: code
+        val active = bySpecies.getValue(code).filter { it.status == "active" }
+        listOf(
+            MetricResult.count(
+                MetricDefinition("active-$code", "$name on the farm", "Count of $code records whose status is active", "animals", "Now", "This farm · $name"),
+                active.size,
+            ),
+            MetricResult.sumOfKnown(
+                MetricDefinition("live-weight-$code", "$name live weight", "Sum of each active animal's latest recorded weight", "kg", "Latest weight on record", "This farm · active $name"),
+                active.map { it.latestWeightGrams },
+            ),
+        )
+    } + MetricResult.count(
+        MetricDefinition("exited", "Animals that have left", "Count of records whose status is sold, dead or culled", "animals", "All time", "This farm · all species"),
+        rows.count { it.status in exitedStatuses },
+    )
+}
+
+/** The metric value in its declared unit; weights are stored in grams. */
+internal fun metricValueText(result: MetricResult): String =
+    if (result.definition.unit == "kg") "%.1f kg".format(result.value / 1000.0) else "${result.value} ${result.definition.unit}"
+
+/** The herd register as CSV: every animal on the farm, one row each. */
+internal fun herdRegisterCsv(rows: List<HerdRegisterRow>): String = FarmCsv.write(
+    listOf("Species", "Tag", "Name", "Sex", "Status", "Born", "Latest weight (kg)", "Poultry kind"),
+    rows.map { row ->
+        listOf(
+            row.speciesCode, row.tag, row.name, row.sex.lowercase(), row.status,
+            row.dateOfBirthEpochDay?.let { LocalDate.ofEpochDay(it).toString() },
+            row.latestWeightGrams?.let { "%.3f".format(it / 1000.0) },
+            row.poultryKindCode,
+        )
+    },
+)
+
+/** Reports (FOS-REPORT-001) and the export sheet (FOS-REPORT-011) for one farm. */
+@Composable
+internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExport: Boolean, onBack: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var rows by remember(farmId) { mutableStateOf<List<HerdRegisterRow>?>(null) }
+    var failure by remember { mutableStateOf<String?>(null) }
+    var exportMessage by remember { mutableStateOf<String?>(null) }
+    var exporting by remember { mutableStateOf(false) }
+    LaunchedEffect(farmId) {
+        runCatching { database.reports().herdRegister(farmId) }.onSuccess { rows = it }.onFailure { failure = it.message ?: "Records could not be read" }
+    }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri: Uri? ->
+        if (uri == null) {
+            exportMessage = "Export cancelled; nothing was written."
+        } else {
+            scope.launch {
+                exporting = true
+                exportMessage = runCatching {
+                    val register = database.reports().herdRegister(farmId)
+                    val csv = herdRegisterCsv(register)
+                    withContext(Dispatchers.IO) {
+                        requireNotNull(context.contentResolver.openOutputStream(uri)) { "The chosen location cannot be written" }.use { it.write(csv.toByteArray(Charsets.UTF_8)) }
+                    }
+                    "Herd register exported: ${register.size} animal(s)."
+                }.getOrElse { "Export failed: ${it.message ?: "the file could not be written"}" }
+                exporting = false
+            }
+        }
+    }
+    ReportsScreen(
+        metrics = rows?.let(::herdMetrics),
+        failure = failure,
+        canExport = canExport,
+        exporting = exporting,
+        exportMessage = exportMessage,
+        onExportHerdRegister = { launcher.launch("herd-register-${LocalDate.now()}.csv") },
+        onBack = onBack,
+    )
+}
+
+@Composable
+internal fun ReportsScreen(
+    metrics: List<MetricResult>?,
+    failure: String?,
+    canExport: Boolean,
+    exporting: Boolean,
+    exportMessage: String?,
+    onExportHerdRegister: () -> Unit,
+    onBack: () -> Unit,
+) {
+    var exportSheet by remember { mutableStateOf(false) }
+    if (exportSheet) {
+        FarmOperationalPage("FOS-REPORT-011", "Export", "Files are written to a location you choose on this device.", FarmVisualClass.I3, { exportSheet = false }, backLabel = "Reports") {
+            FarmOperationalSection("Herd register (CSV)") {
+                Text("Every animal on this farm, one row each: species, tag, name, sex, status, date of birth, latest weight and poultry kind.")
+                Button(onClick = onExportHerdRegister, enabled = !exporting, modifier = Modifier.fillMaxWidth().testTag("report-export-herd-register")) {
+                    Text(if (exporting) "Exporting" else "Export herd register")
+                }
+                exportMessage?.let { Text(it, modifier = Modifier.testTag("report-export-message")) }
+            }
+        }
+        return
+    }
+    FarmOperationalPage("FOS-REPORT-001", "Reports", "Figures from every record on this device. Each says how it is worked out.", FarmVisualClass.I3, onBack) {
+        when {
+            failure != null -> AnimalFarmWarningSurface { Text(failure) }
+            metrics == null -> Text("Reading farm records")
+            metrics.isEmpty() -> AnimalFarmEmptyState("No animals are recorded on this device yet.")
+            else -> metrics.forEach { result ->
+                FarmOperationalSection(result.definition.name) {
+                    Text(metricValueText(result), fontWeight = FontWeight.SemiBold, modifier = Modifier.testTag("report-metric:${result.definition.id}"))
+                    Text("How: ${result.definition.formula}", color = AnimalFarmTheme.colors.mutedInk)
+                    Text("Period: ${result.definition.period} · Scope: ${result.definition.scope}", color = AnimalFarmTheme.colors.mutedInk)
+                    Text(result.completeness, color = if (result.complete) AnimalFarmTheme.colors.mutedInk else AnimalFarmTheme.colors.critical)
+                }
+            }
+        }
+        if (canExport) {
+            TextButton(onClick = { exportSheet = true }, modifier = Modifier.fillMaxWidth().testTag("report-open-export")) { Text("Export records") }
+        } else {
+            Text("Exports are made by farm management.", color = AnimalFarmTheme.colors.mutedInk)
+        }
+    }
+}

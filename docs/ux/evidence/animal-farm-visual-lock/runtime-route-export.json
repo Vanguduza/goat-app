@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:cd5fb45252a537977ce18dee81f7bf75e94775c909ea5d17a8f4ffd4a8be5c03",
-  "runtime_evidence_tested_commit": "4b2ad266d7ef7a75981e092065a328f0e64103ed",
-  "runtime_evidence_run_id": 36714748852,
+  "source_fingerprint": "sha256:25d05707b90ea7169b0cdff9656fda8f32045f48d14ac92cf33c7df65a243013",
+  "runtime_evidence_tested_commit": "cab89954acee6943d354148ec27b04f8f706f7cc",
+  "runtime_evidence_run_id": 36719211229,
   "registry_screen_count": 545,
-  "route_screen_count": 291,
-  "unresolved_screen_count": 254,
+  "route_screen_count": 294,
+  "unresolved_screen_count": 251,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -127,6 +127,7 @@
     "FOS-GOAT-041",
     "FOS-GOAT-043",
     "FOS-GOAT-044",
+    "FOS-GOAT-046",
     "FOS-GOAT-051",
     "FOS-GOAT-052",
     "FOS-GOAT-053",
@@ -250,6 +251,8 @@
     "FOS-RABBIT-028",
     "FOS-RABBIT-029",
     "FOS-RABBIT-034",
+    "FOS-REPORT-001",
+    "FOS-REPORT-011",
     "FOS-SALES-001",
     "FOS-SALES-005",
     "FOS-SALES-011",
@@ -1667,6 +1670,17 @@
     },
     {
       "screen_id": "FOS-GOAT-044",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GOAT-046",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
       ],
@@ -3190,6 +3204,36 @@
       }
     },
     {
+      "screen_id": "FOS-REPORT-001",
+      "proof_classes": [
+        "ENTRY_ACTION_DESTINATION",
+        "RENDERED_SURFACE_OWNER",
+        "TYPED_ROUTE_OWNER"
+      ],
+      "evidence_sources": {
+        "ENTRY_ACTION_DESTINATION": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/ReportsScreensTest.kt"
+        ],
+        "TYPED_ROUTE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-REPORT-011",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/ReportsScreensTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-SALES-001",
       "proof_classes": [
         "ENTRY_ACTION_DESTINATION",
@@ -3955,7 +3999,6 @@
     "FOS-GOAT-023",
     "FOS-GOAT-042",
     "FOS-GOAT-045",
-    "FOS-GOAT-046",
     "FOS-GOAT-047",
     "FOS-GOAT-048",
     "FOS-GOAT-049",
@@ -4013,7 +4056,6 @@
     "FOS-RABBIT-033",
     "FOS-RABBIT-035",
     "FOS-RABBIT-036",
-    "FOS-REPORT-001",
     "FOS-REPORT-002",
     "FOS-REPORT-003",
     "FOS-REPORT-004",
@@ -4023,7 +4065,6 @@
     "FOS-REPORT-008",
     "FOS-REPORT-009",
     "FOS-REPORT-010",
-    "FOS-REPORT-011",
     "FOS-REPORT-012",
     "FOS-REPORT-013",
     "FOS-REPORT-014",

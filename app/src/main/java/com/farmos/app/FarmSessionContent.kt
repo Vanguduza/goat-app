@@ -1,5 +1,6 @@
 package com.farmos.app
 
+import com.farmos.domain.access.Permission
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -219,6 +220,7 @@ fun FarmSessionContent(
                 onBack = backHome,
                 loadRecords = { loadLabourRecords(app.database, membership.farmId) },
                 workers = { back -> WorkerRegisterHost(app.database, membership.farmId, membership.role, ::context, ::enqueueSync, back) },
+                capture = remember(membership.farmId, ops) { LabourCapture(app.database, membership.farmId, ops) },
             )
             FarmModule.ASSETS -> AssetsModuleHost(
                 farmId = membership.farmId,
@@ -290,6 +292,12 @@ fun FarmSessionContent(
                 farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
                 loadRecords = { loadRabbitCommerceRecords(app.database, membership.farmId) },
                 loadCurrency = { app.database.farmCurrency(membership.farmId) },
+            )
+            FarmModule.REPORTS -> ReportsModuleHost(
+                database = app.database,
+                farmId = membership.farmId,
+                canExport = rolePermits(membership.role, Permission.EXPORT_FARM_DATA),
+                onBack = backHome,
             )
             else -> OperatingModuleHost(
                 module = dest.module,

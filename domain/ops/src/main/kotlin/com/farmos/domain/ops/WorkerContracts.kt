@@ -28,3 +28,18 @@ object WorkerRules {
         else -> null
     }
 }
+
+/**
+ * Labour worked by a registered worker (resolution R1). [workerName] is the name when recorded, kept with
+ * the entry; totals follow [workerId], so a later rename does not split them. Replicated as `labour.record.v2`.
+ */
+@Serializable
+data class RecordWorkerLabour(
+    val entryId: String,
+    val workerId: String,
+    val workerName: String,
+    val taskCode: String,
+    val minutes: Int,
+    val occurredEpochDay: Long,
+    val note: String? = null,
+)

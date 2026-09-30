@@ -169,6 +169,7 @@ fun GoatModuleHost(
         ),
         entryPage = entryPage,
         searchSires = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "goat", "MALE") },
+        mateAnalysis = remember(membership.farmId) { goatMateAnalysis(app.database, membership.farmId) },
         onRegister = { tag, name, sex, dateText ->
             runGoatWrite {
                 val day = dateText.takeIf { it.isNotBlank() }?.let { LocalDate.parse(it).toEpochDay() }
@@ -403,31 +404,6 @@ fun GoatModuleHost(
                 }.onSuccess { local ->
                     searchResults = local
                     searchMessage = "${local.size} local result(s)"
-                    runCatching {
-                        app.farmSearchClient
-                            ?.searchAnimals(membership.farmId, query, 25)
-                            ?.filter { it.speciesCode == null || it.speciesCode == "goat" }
-                            ?.mapNotNull { hit ->
-                                val tag = hit.tag ?: return@mapNotNull null
-                                GoatSearchResult(
-                                    animalId = hit.id,
-                                    tag = tag,
-                                    name = hit.displayName?.takeUnless { it == tag },
-                                    status = hit.status ?: "active",
-                                    source = SearchSource.MEILISEARCH,
-                                )
-                            }
-                            .orEmpty()
-                    }.onSuccess { remote ->
-                        searchResults = (remote + local).distinctBy { it.animalId }
-                        searchMessage = "${local.size} local · ${remote.size} online result(s)"
-                    }.onFailure { remoteFailure ->
-                        if (remoteFailure is AuthenticationRequiredException) {
-                            onRequireReauth(remoteFailure.message)
-                        } else {
-                            searchMessage = "${local.size} local result(s) · online search unavailable"
-                        }
-                    }
                 }.onFailure(::handleFailure)
             }
         },
@@ -469,40 +445,9 @@ fun GoatModuleHost(
                 }
 
                 localOutcome.onSuccess { (localMatch, localMessage) ->
-                    if (localMatch != null || localMessage.startsWith("Identifier belongs")) {
-                        searchResults = listOfNotNull(localMatch)
-                        searchMessage = localMessage
-                    } else {
-                        runCatching {
-                            app.farmSearchClient
-                                ?.searchAnimals(membership.farmId, identifier, 25)
-                                ?.firstOrNull {
-                                    (it.speciesCode == null || it.speciesCode == "goat") &&
-                                        it.tag?.equals(identifier, ignoreCase = true) == true
-                                }
-                        }.onSuccess { hit ->
-                            if (hit == null) {
-                                searchMessage = "No goat matched this RFID, EID or tag"
-                            } else {
-                                searchResults = listOf(
-                                    GoatSearchResult(
-                                        animalId = hit.id,
-                                        tag = hit.tag ?: identifier,
-                                        name = hit.displayName?.takeUnless { it == hit.tag },
-                                        status = hit.status ?: "active",
-                                        source = SearchSource.MEILISEARCH,
-                                    ),
-                                )
-                                searchMessage = "Matched online goat tag"
-                            }
-                        }.onFailure { failure ->
-                            if (failure is AuthenticationRequiredException) {
-                                onRequireReauth(failure.message)
-                            } else {
-                                searchMessage = "No local match · online lookup unavailable"
-                            }
-                        }
-                    }
+                    // Local full-database search is the only search authority (D-027).
+                    searchResults = listOfNotNull(localMatch)
+                    searchMessage = if (localMatch != null || localMessage.startsWith("Identifier belongs")) localMessage else "No goat matched this RFID, EID or tag"
                 }.onFailure { failure ->
                     error = failure.message
                     searchMessage = "Identifier lookup failed"

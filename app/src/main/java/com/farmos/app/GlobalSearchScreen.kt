@@ -80,31 +80,6 @@ internal fun GlobalSearchHost(
                 results = local
                 message = "${local.size} local result(s)"
 
-                val client = app.farmSearchClient
-                if (client != null) {
-                    runCatching { client.searchAnimals(farmId, query, 50) }
-                        .onSuccess { remoteHits ->
-                            val remote = remoteHits.map { hit ->
-                                GlobalSearchResultUi(
-                                    animalId = hit.id,
-                                    speciesCode = hit.speciesCode ?: "animal",
-                                    tag = hit.tag ?: hit.id,
-                                    displayName = hit.displayName,
-                                    status = hit.status ?: "active",
-                                    source = "online",
-                                )
-                            }
-                            results = (local + remote).distinctBy { it.animalId }
-                            message = "${local.size} local · ${remote.size} online result(s)"
-                        }
-                        .onFailure { failure ->
-                            if (failure is AuthenticationRequiredException) {
-                                onRequireReauth(failure.message)
-                            } else {
-                                message = "${local.size} local result(s) · online search unavailable"
-                            }
-                        }
-                }
                     busy = false
                 }
             }
