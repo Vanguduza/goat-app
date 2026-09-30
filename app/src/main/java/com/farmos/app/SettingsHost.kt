@@ -52,6 +52,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Currency
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -98,20 +99,14 @@ internal fun SettingsHost(
     var refreshKey by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(farmId, actorId, refreshKey) {
-        snapshot = withContext(io) {
-            val access = database.localAccess()
-            SettingsSnapshot(
-                actor = actorId?.let { directory.account(farmId, it) },
-                accounts = directory.accounts(farmId),
-                audit = access.audit(farmId, AUDIT_PAGE),
-                auditTotal = access.auditCount(farmId),
-                devices = database.replication().devices(farmId),
-                journalCount = database.replication().count(farmId),
-                currencyCode = database.farmCurrency(farmId),
-                unapplied = database.replicationApplications().unappliedForReview(farmId, REVIEW_PAGE),
-                unappliedTotal = database.replicationApplications().count(farmId, ApplicationState.FAILED.name) +
-                    database.replicationApplications().count(farmId, ApplicationState.AWAITING_APPLIER.name),
-            )
+        // A failed read shows an error instead of taking the settings screen down; cancellation still propagates.
+        snapshot = try {
+            loadSnapshot(io, directory, database, farmId, actorId)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            error = failure.message ?: "Settings could not be read on this device"
+            return@LaunchedEffect
         }
     }
 
@@ -134,6 +129,7 @@ internal fun SettingsHost(
     when (page) {
         SettingsPage.HOME -> FarmOperationalPage("FOS-ADMIN-001", "Farm settings", "Accounts, storage and devices on this farm.", onBack = onBack) {
             if (!loaded) {
+                SettingsError(error)
                 Text("Loading settings saved on this device", color = AnimalFarmTheme.colors.mutedInk)
                 return@FarmOperationalPage
             }
@@ -554,3 +550,26 @@ private fun timestamp(epochMillis: Long): String =
 
 private const val AUDIT_PAGE = 100
 private const val REVIEW_PAGE = 50
+
+/** Everything the settings pages show, read from this device's database in one pass. */
+private suspend fun loadSnapshot(
+    io: CoroutineDispatcher,
+    directory: LocalFarmDirectory,
+    database: FarmOsDatabase,
+    farmId: String,
+    actorId: String?,
+): SettingsSnapshot = withContext(io) {
+    val access = database.localAccess()
+    SettingsSnapshot(
+        actor = actorId?.let { directory.account(farmId, it) },
+        accounts = directory.accounts(farmId),
+        audit = access.audit(farmId, AUDIT_PAGE),
+        auditTotal = access.auditCount(farmId),
+        devices = database.replication().devices(farmId),
+        journalCount = database.replication().count(farmId),
+        currencyCode = database.farmCurrency(farmId),
+        unapplied = database.replicationApplications().unappliedForReview(farmId, REVIEW_PAGE),
+        unappliedTotal = database.replicationApplications().count(farmId, ApplicationState.FAILED.name) +
+            database.replicationApplications().count(farmId, ApplicationState.AWAITING_APPLIER.name),
+    )
+}
