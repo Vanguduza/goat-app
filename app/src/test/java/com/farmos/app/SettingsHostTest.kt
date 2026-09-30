@@ -1,6 +1,8 @@
 package com.farmos.app
 
 import android.content.Context
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
@@ -15,7 +17,10 @@ import androidx.compose.ui.test.performTextInput
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.ReplicationApplicationEntity
+import com.farmos.core.database.journalLocalOperation
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.core.design.FarmSafetyAtoms
@@ -28,6 +33,8 @@ import com.farmos.domain.access.LocalAccount
 import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.SignInResult
 import com.farmos.domain.replication.MergeClass
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -63,7 +70,7 @@ class SettingsHostTest {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        directory = LocalFarmDirectory(database, CredentialHasher(iterations = 1_000))
+        directory = LocalFarmDirectory(database, "device-a", CredentialHasher(iterations = 1_000))
         runBlocking {
             farmId = directory.createFarm("Premier Farm") { id ->
                 owner = directory.access.setUpFarm(id, "tendai", "Tendai Moyo", Credential(CredentialKind.PIN, "482913")).owner
@@ -76,10 +83,10 @@ class SettingsHostTest {
         database.close()
     }
 
-    private fun render(actorId: String?) {
+    private fun render(actorId: String?, io: CoroutineDispatcher = Dispatchers.IO) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                SettingsHost(directory, database, farmId, actorId, deviceId = "device-a", onBack = {})
+                SettingsHost(directory, database, farmId, actorId, deviceId = "device-a", onBack = {}, io = io)
             }
         }
     }
@@ -195,7 +202,9 @@ class SettingsHostTest {
         waitForText("Signed in as Tendai Moyo")
         click("Storage and backup")
         waitForTag("farm-screen:FOS-ADMIN-023")
-        waitForText("0 operation(s) recorded")
+        val journalled = runBlocking { database.replication().count(farmId) }
+        assertTrue("Farm setup is journalled for replication", journalled > 0)
+        waitForText("$journalled operation(s) recorded")
         waitForText("No backup has been made.")
         waitForText("Disconnecting Google Drive never deletes farm records on this device.")
     }
@@ -247,7 +256,7 @@ class SettingsHostTest {
 
         waitForText("Records are kept in ZAR")
         assertEquals("ZAR", runBlocking { database.farmCurrency(farmId) })
-        val change = runBlocking { database.replication().operationsInRange(farmId, "device-a", 1, 10) }.single()
+        val change = runBlocking { database.replication().operationsInRange(farmId, "device-a", 1, 100) }.single { it.operationType == SET_FARM_CURRENCY_COMMAND }
         assertEquals(SET_FARM_CURRENCY_COMMAND, change.operationType)
         assertEquals(MergeClass.FIELD_UPDATE.name, change.mergeClass)
         assertEquals(owner.accountId, change.actorId)
@@ -263,6 +272,34 @@ class SettingsHostTest {
         compose.onNodeWithTag(FarmSafetyAtoms.PERMISSION_EXPLANATION).assertExists()
         assertTrue(compose.onAllNodesWithTag("settings-currency").fetchSemanticsNodes().isEmpty())
         assertEquals("USD", runBlocking { database.farmCurrency(farmId) })
+    }
+
+    @Test
+    fun storageListsReceivedChangesThatHaveNotTakenEffectWithTheReason() {
+        runBlocking {
+            database.journalLocalOperation(
+                "op-remote-1", farmId, "inventory_item", "item-x", "worker-9", "device-b", 1_790_000_000_000, 1_790_000_000_000,
+                null, "inventory.move.v1", "{}", 1,
+            )
+            database.replicationApplications().upsert(
+                ReplicationApplicationEntity("op-remote-1", farmId, ApplicationState.FAILED.name, "Inventory item not found", 1, 1_790_000_000_000),
+            )
+        }
+        // Unconfined keeps the retry and the refresh on the test thread, so nothing still holds the
+        // database when the test closes it.
+        render(owner.accountId, io = Dispatchers.Unconfined)
+        waitForText("Signed in as Tendai Moyo")
+        click("Storage and backup")
+        waitForTag("settings-review:op-remote-1")
+        waitForText("1 received change(s) not yet in effect")
+        waitForText("Inventory item not found")
+        click("Try again")
+        compose.waitUntil(10_000) {
+            runBlocking { database.replicationApplications().get(farmId, "op-remote-1") }!!.attempts > 1
+        }
+        compose.waitUntil(10_000) { compose.onAllNodes(hasClickAction() and hasText("Try again")).fetchSemanticsNodes().any { it.config.getOrNull(SemanticsProperties.Disabled) == null } }
+        compose.waitForIdle()
+        waitForText("1 received change(s) not yet in effect")
     }
 
     @Test

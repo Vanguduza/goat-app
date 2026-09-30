@@ -8,7 +8,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -21,8 +23,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.farmos.core.database.AccessAuditEntity
+import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.ReplicationDeviceEntity
+import com.farmos.core.database.UnappliedOperation
 import com.farmos.core.design.AnimalFarmQuickAction
 import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.FarmEntitySelector
@@ -42,11 +46,13 @@ import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.Permission
 import com.farmos.domain.access.RolePermissions
 import com.farmos.domain.ops.FarmCurrency
+import com.farmos.domain.replication.DeviceStatus
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Currency
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,6 +69,8 @@ private data class SettingsSnapshot(
     val devices: List<ReplicationDeviceEntity>,
     val journalCount: Long,
     val currencyCode: String,
+    val unapplied: List<UnappliedOperation> = emptyList(),
+    val unappliedTotal: Long = 0,
 )
 
 /**
@@ -79,6 +87,8 @@ internal fun SettingsHost(
     deviceId: String,
     onBack: () -> Unit,
     io: CoroutineDispatcher = Dispatchers.IO,
+    /** Farm-LAN replication for this farm, present while a local session runs it. */
+    lan: FarmLanRuntime? = null,
 ) {
     val scope = rememberCoroutineScope()
     var page by remember { mutableStateOf(SettingsPage.HOME) }
@@ -89,17 +99,14 @@ internal fun SettingsHost(
     var refreshKey by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(farmId, actorId, refreshKey) {
-        snapshot = withContext(io) {
-            val access = database.localAccess()
-            SettingsSnapshot(
-                actor = actorId?.let { directory.account(farmId, it) },
-                accounts = directory.accounts(farmId),
-                audit = access.audit(farmId, AUDIT_PAGE),
-                auditTotal = access.auditCount(farmId),
-                devices = database.replication().devices(farmId),
-                journalCount = database.replication().count(farmId),
-                currencyCode = database.farmCurrency(farmId),
-            )
+        // A failed read shows an error instead of taking the settings screen down; cancellation still propagates.
+        snapshot = try {
+            loadSnapshot(io, directory, database, farmId, actorId)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: Exception) {
+            error = failure.message ?: "Settings could not be read on this device"
+            return@LaunchedEffect
         }
     }
 
@@ -122,6 +129,7 @@ internal fun SettingsHost(
     when (page) {
         SettingsPage.HOME -> FarmOperationalPage("FOS-ADMIN-001", "Farm settings", "Accounts, storage and devices on this farm.", onBack = onBack) {
             if (!loaded) {
+                SettingsError(error)
                 Text("Loading settings saved on this device", color = AnimalFarmTheme.colors.mutedInk)
                 return@FarmOperationalPage
             }
@@ -161,7 +169,7 @@ internal fun SettingsHost(
             val actor = current.actor ?: return@FarmOperationalPage
             SettingsError(error)
             CreateAccountForm(assignableRoles(actor), busy) { displayName, username, role, pin ->
-                act(onDone = { page = SettingsPage.MEMBERS }) { directory.access.createAccount(it, username, displayName, role, Credential(CredentialKind.PIN, pin)) }
+                act(onDone = { page = SettingsPage.MEMBERS }) { actor -> directory.transact { it.createAccount(actor, username, displayName, role, Credential(CredentialKind.PIN, pin)) } }
             }
         }
         SettingsPage.MEMBER_DETAIL -> FarmOperationalPage("FOS-ADMIN-005", "Account and role", "Role, status and PIN for one account.", onBack = { page = SettingsPage.MEMBERS }, backLabel = "Accounts and access") {
@@ -172,9 +180,9 @@ internal fun SettingsHost(
                 subject = subject,
                 roles = assignableRoles(actor),
                 busy = busy,
-                onRole = { role -> act { directory.access.changeRole(it, subject.accountId, role) } },
-                onStatus = { status -> act { directory.access.setStatus(it, subject.accountId, status) } },
-                onResetPin = { pin -> act { directory.access.resetCredential(it, subject.accountId, Credential(CredentialKind.PIN, pin)) } },
+                onRole = { role -> act { actor -> directory.transact { it.changeRole(actor, subject.accountId, role) } } },
+                onStatus = { status -> act { actor -> directory.transact { it.setStatus(actor, subject.accountId, status) } } },
+                onResetPin = { pin -> act { actor -> directory.transact { it.resetCredential(actor, subject.accountId, Credential(CredentialKind.PIN, pin)) } } },
             )
         }
         SettingsPage.PERMISSIONS -> FarmOperationalPage("FOS-ADMIN-006", "Roles and permissions", "What each role may do on this farm.", onBack = home, backLabel = "Farm settings") {
@@ -213,7 +221,18 @@ internal fun SettingsHost(
                 Text("${current.journalCount} operation(s) recorded in this device's replication journal.", modifier = Modifier.testTag("settings-journal-count"))
                 Text("Farm work is always saved here first and never waits for a network.", color = AnimalFarmTheme.colors.mutedInk)
             }
-            FarmOperationalSection("Farm network sync") { Text("Not set up. No other farm devices are paired with this one.") }
+            FarmOperationalSection("Farm network sync") {
+                if (lan == null) {
+                    Text("Not running on this device.")
+                } else {
+                    LanStatus(lan, current.devices.count { it.deviceId != deviceId })
+                }
+            }
+            FarmOperationalSection("Received changes needing review") {
+                ReceivedChangesReview(current.unapplied, current.unappliedTotal, busy || !RolePermissions.allows(actor.role, Permission.RESOLVE_SYNC_CONFLICTS)) {
+                    act { RoomReplicaEndpoint(database, farmId, deviceId, replicationAppliers).applyPendingNow() }
+                }
+            }
             FarmOperationalSection("Google Drive") {
                 Text("Not connected.")
                 Text("Farm work continues on this device. Disconnecting Google Drive never deletes farm records on this device.", color = AnimalFarmTheme.colors.mutedInk)
@@ -249,8 +268,129 @@ internal fun SettingsHost(
             FarmOperationalSection("Known farm devices") {
                 val others = current.devices.filter { it.deviceId != deviceId }
                 if (others.isEmpty()) Text("No other devices yet.", color = AnimalFarmTheme.colors.mutedInk)
-                others.forEach { Text("${it.name} · ${it.status.lowercase().replace('_', ' ')} · ${it.lastReportedOwnSequence} operation(s)") }
+                others.forEach { device ->
+                    KnownDevice(device, busy) {
+                        act { actor -> database.setDeviceStatus(farmId, device.deviceId, DeviceStatus.LOST_REVOKED, actor.accountId, deviceId) }
+                    }
+                }
             }
+            if (lan != null && RolePermissions.allows(actor.role, Permission.APPROVE_DEVICE_PAIRING)) {
+                AddDevice(lan, actor, onJoined = { refreshKey++ })
+            }
+        }
+    }
+}
+
+/**
+ * Changes received from other farm devices that have not taken effect here, with the reason. They stay in
+ * the journal; one waiting on an earlier change is retried automatically, and Try again retries now.
+ */
+@Composable
+private fun ReceivedChangesReview(rows: List<UnappliedOperation>, total: Long, busy: Boolean, onRetry: () -> Unit) {
+    if (total == 0L) {
+        Text("Every change received from other farm devices has taken effect here.", modifier = Modifier.testTag("settings-review-count"))
+        return
+    }
+    Text(
+        if (total > rows.size) "Latest ${rows.size} of $total received change(s) not yet in effect" else "$total received change(s) not yet in effect",
+        modifier = Modifier.testTag("settings-review-count"),
+    )
+    rows.forEach { row ->
+        val why = when (row.state) {
+            ApplicationState.AWAITING_APPLIER.name -> "needs a newer version of this app"
+            else -> row.reason ?: "not applied yet"
+        }
+        Text(
+            listOf(timestamp(row.businessTimeEpochMillis), auditLabel(row.operationType.substringBeforeLast(".v").replace('.', '_')), "from ${row.deviceId}", why).joinToString(" · "),
+            modifier = Modifier.testTag("settings-review:${row.operationId}"),
+        )
+    }
+    SettingsButton("Try again", !busy, onRetry)
+}
+
+@Composable
+private fun LanStatus(lan: FarmLanRuntime, pairedDevices: Int) {
+    val state by lan.state.collectAsState()
+    Text(if (state.serving) "Sharing this farm on the local network." else "Starting the farm network on this device.")
+    Text("${state.peers.size} of $pairedDevices paired device(s) found on this network.", modifier = Modifier.testTag("settings-lan-peers"))
+    Text(
+        state.lastSyncEpochMillis?.let { "Last synchronised ${timestamp(it)}" } ?: "Not synchronised on this network yet.",
+        color = AnimalFarmTheme.colors.mutedInk,
+    )
+    state.lastError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    SettingsButton("Synchronise now", state.serving) { lan.requestSync() }
+}
+
+@Composable
+private fun KnownDevice(device: ReplicationDeviceEntity, busy: Boolean, onReportLost: () -> Unit) {
+    var confirming by remember(device.deviceId) { mutableStateOf(false) }
+    val active = device.status == DeviceStatus.ACTIVE.name || device.status == DeviceStatus.TEMPORARILY_OFFLINE.name
+    Text(
+        "${device.name} · ${device.status.lowercase().replace('_', ' ')} · ${device.lastReportedOwnSequence} operation(s)",
+        modifier = Modifier.testTag("settings-device:${device.deviceId}"),
+    )
+    if (!active) return
+    if (!confirming) {
+        SettingsButton("Report ${device.name} lost", !busy) { confirming = true }
+    } else {
+        Text("${device.name} will never synchronise with this farm again, and anything it recorded but had not shared is lost.", color = MaterialTheme.colorScheme.error)
+        SettingsButton("Confirm ${device.name} is lost", !busy) {
+            confirming = false
+            onReportLost()
+        }
+    }
+}
+
+/** Opens pairing on this device; each device asking to join is added only when its code is typed here. */
+@Composable
+private fun AddDevice(lan: FarmLanRuntime, approver: LocalAccount, onJoined: () -> Unit) {
+    var session by remember { mutableStateOf<PairingSession?>(null) }
+    var opening by remember { mutableStateOf(false) }
+    var failure by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    DisposableEffect(Unit) { onDispose { session?.close() } }
+    FarmOperationalSection("Add a device") {
+        val open = session
+        if (open == null) {
+            Text("A phone or tablet on this network can ask to join. You approve it by typing the code it shows.", color = AnimalFarmTheme.colors.mutedInk)
+            failure?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            SettingsButton(if (opening) "Opening" else "Add a device", !opening) {
+                opening = true
+                failure = null
+                scope.launch {
+                    // Opening waits for the network worker, which may be mid-sync; never on the main thread.
+                    withContext(Dispatchers.IO) { runCatching { lan.openPairing(approver) } }
+                        .onSuccess { session = it }
+                        .onFailure { failure = it.message ?: "Adding a device could not start on this device" }
+                    opening = false
+                }
+            }
+            return@FarmOperationalSection
+        }
+        val pending by open.pending.collectAsState()
+        val result by open.lastResult.collectAsState()
+        LaunchedEffect(result) { if (result != null) onJoined() }
+        result?.let { Text(it, modifier = Modifier.testTag("settings-pairing-result")) }
+        val request = pending
+        if (request == null) {
+            Text("Waiting for a device. On the new device choose Join a farm on this network.", modifier = Modifier.testTag("settings-pairing-waiting"))
+        } else {
+            var code by remember(request) { mutableStateOf("") }
+            Text("${request.deviceName} wants to join this farm.", modifier = Modifier.testTag("settings-pairing-request"))
+            OutlinedTextField(
+                value = code,
+                onValueChange = { typed -> code = typed.filter(Char::isDigit).take(6) },
+                label = { Text("Code shown on ${request.deviceName}") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            SettingsButton("Approve", code.length == 6) { open.approve(code) }
+            SettingsButton("Decline", true) { open.decline() }
+        }
+        SettingsButton("Stop adding devices", true) {
+            open.close()
+            session = null
         }
     }
 }
@@ -409,3 +549,27 @@ private fun timestamp(epochMillis: Long): String =
     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(epochMillis))
 
 private const val AUDIT_PAGE = 100
+private const val REVIEW_PAGE = 50
+
+/** Everything the settings pages show, read from this device's database in one pass. */
+private suspend fun loadSnapshot(
+    io: CoroutineDispatcher,
+    directory: LocalFarmDirectory,
+    database: FarmOsDatabase,
+    farmId: String,
+    actorId: String?,
+): SettingsSnapshot = withContext(io) {
+    val access = database.localAccess()
+    SettingsSnapshot(
+        actor = actorId?.let { directory.account(farmId, it) },
+        accounts = directory.accounts(farmId),
+        audit = access.audit(farmId, AUDIT_PAGE),
+        auditTotal = access.auditCount(farmId),
+        devices = database.replication().devices(farmId),
+        journalCount = database.replication().count(farmId),
+        currencyCode = database.farmCurrency(farmId),
+        unapplied = database.replicationApplications().unappliedForReview(farmId, REVIEW_PAGE),
+        unappliedTotal = database.replicationApplications().count(farmId, ApplicationState.FAILED.name) +
+            database.replicationApplications().count(farmId, ApplicationState.AWAITING_APPLIER.name),
+    )
+}

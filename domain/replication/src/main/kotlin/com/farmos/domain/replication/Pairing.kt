@@ -17,6 +17,8 @@ data class FarmDiscoveryDescriptor(
     /** Fingerprint of the farm's public pairing identity, checked again during pairing. */
     val pairingFingerprint: String,
     val driveFolderId: String? = null,
+    /** Port of the pairing exchange, present only while a manager is adding a device. */
+    val pairingPort: Int? = null,
 ) {
     fun toTxtRecord(): Map<String, String> {
         val record = buildMap {
@@ -27,6 +29,7 @@ data class FarmDiscoveryDescriptor(
             put(KEY_ID, currentKeyId)
             put(PAIRING, pairingFingerprint)
             driveFolderId?.let { put(DRIVE, it) }
+            pairingPort?.let { put(PAIRING_PORT, it.toString()) }
         }
         record.forEach { (key, value) -> require((key.length + 1 + value.toByteArray().size) <= MAX_ENTRY_BYTES) { "TXT entry $key is too long" } }
         return record
@@ -41,7 +44,8 @@ data class FarmDiscoveryDescriptor(
         private const val KEY_ID = "kid"
         private const val PAIRING = "pid"
         private const val DRIVE = "drv"
-        val ALLOWED_KEYS = setOf(FARM_ID, FARM_NAME, PROTOCOL, GENERATION, KEY_ID, PAIRING, DRIVE)
+        private const val PAIRING_PORT = "pp"
+        val ALLOWED_KEYS = setOf(FARM_ID, FARM_NAME, PROTOCOL, GENERATION, KEY_ID, PAIRING, DRIVE, PAIRING_PORT)
         private const val MAX_ENTRY_BYTES = 255
         private const val MAX_NAME = 60
 
@@ -59,6 +63,7 @@ data class FarmDiscoveryDescriptor(
                 currentKeyId = record[KEY_ID]?.takeIf { it.isNotBlank() } ?: return null,
                 pairingFingerprint = record[PAIRING]?.takeIf { it.isNotBlank() } ?: return null,
                 driveFolderId = record[DRIVE]?.takeIf { it.isNotBlank() },
+                pairingPort = record[PAIRING_PORT]?.toIntOrNull()?.takeIf { it in 1..65_535 },
             )
         }
     }
@@ -116,6 +121,8 @@ class DeviceGrant(
     val currentKeyId: String,
     val wrappedKeys: List<WrappedFarmKey>,
     val driveFolderId: String?,
+    /** The farm's devices as the approving device knows them, including the new one, so it can sync at once. */
+    val devices: List<FarmDevice> = emptyList(),
 )
 
 sealed interface PairingDecision {
@@ -206,6 +213,7 @@ class PairingAuthority(
                 currentKeyId = keys.currentKeyId,
                 wrappedKeys = keys.all().map { FarmKeyWrap.wrap(it, devicePublic, farmId, request.deviceId, random) },
                 driveFolderId = driveFolderId,
+                devices = registry.all(),
             ),
         )
     }

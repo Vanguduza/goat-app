@@ -60,7 +60,7 @@ class LocalFarmEntryTest {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        directory = LocalFarmDirectory(database, CredentialHasher(iterations = 1_000))
+        directory = LocalFarmDirectory(database, "device-a", CredentialHasher(iterations = 1_000))
     }
 
     @After

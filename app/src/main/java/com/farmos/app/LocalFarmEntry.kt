@@ -20,6 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +60,8 @@ private sealed interface EntryStep {
     data class SignIn(val farms: List<LocalFarmEntity>) : EntryStep
     data class Recover(val farms: List<LocalFarmEntity>) : EntryStep
     data class ShowRecoveryCode(val screenId: String, val code: String, val account: LocalAccount, val farmName: String) : EntryStep
+    data class Join(val farms: List<LocalFarmEntity>) : EntryStep
+    data class JoinWaiting(val code: String, val farmName: String) : EntryStep
 }
 
 /**
@@ -71,6 +74,9 @@ internal fun LocalFarmEntry(
     directory: LocalFarmDirectory,
     onSignedIn: (account: LocalAccount, farmName: String) -> Unit,
     io: CoroutineDispatcher = Dispatchers.IO,
+    /** Present when this device can look for farms on the local network and join one. */
+    discovery: FarmPeerDiscovery? = null,
+    joiner: FarmJoiner? = null,
 ) {
     val scope = rememberCoroutineScope()
     var step by remember { mutableStateOf<EntryStep>(EntryStep.Loading) }
@@ -96,7 +102,10 @@ internal fun LocalFarmEntry(
         EntryStep.Setup -> "FOS-GLOBAL-006"
         is EntryStep.Recover -> "FOS-GLOBAL-004"
         is EntryStep.ShowRecoveryCode -> current.screenId
+        is EntryStep.Join, is EntryStep.JoinWaiting -> "FOS-GLOBAL-007"
     }
+    val canJoin = discovery != null && joiner != null
+    fun farmsStep(farms: List<LocalFarmEntity>) = if (farms.isEmpty()) EntryStep.Setup else EntryStep.SignIn(farms)
     EntryShell(screenId) {
         when (val current = step) {
             EntryStep.Loading -> Text("Opening this device's farm records", color = AnimalFarmTheme.colors.mutedInk)
@@ -114,7 +123,7 @@ internal fun LocalFarmEntry(
             }
             is EntryStep.SignIn -> SignInForm(current.farms, busy, onRecover = { step = EntryStep.Recover(current.farms) }) { farm, username, pin ->
                 launchEntry {
-                    when (val result = withContext(io) { directory.access.signIn(farm.farmId, username, pin) }) {
+                    when (val result = withContext(io) { directory.transact { it.signIn(farm.farmId, username, pin) } }) {
                         is SignInResult.SignedIn -> onSignedIn(result.account, farm.name)
                         SignInResult.InvalidCredentials -> error = "The username or PIN is not correct."
                         SignInResult.Disabled -> error = "This account is disabled. Ask a manager to enable it."
@@ -125,8 +134,10 @@ internal fun LocalFarmEntry(
             is EntryStep.Recover -> RecoverForm(current.farms, busy, onBack = { step = EntryStep.SignIn(current.farms) }) { farm, username, code, pin ->
                 launchEntry {
                     val result = withContext(io) {
-                        val owner = directory.ownerByUsername(farm.farmId, username)
-                        if (owner == null) RecoveryResult.InvalidCode else directory.access.recoverOwner(farm.farmId, owner.accountId, code, Credential(CredentialKind.PIN, pin))
+                        directory.transact { access ->
+                            val owner = directory.ownerByUsername(farm.farmId, username)
+                            if (owner == null) RecoveryResult.InvalidCode else access.recoverOwner(farm.farmId, owner.accountId, code, Credential(CredentialKind.PIN, pin))
+                        }
                     }
                     when (result) {
                         is RecoveryResult.Recovered -> step = EntryStep.ShowRecoveryCode("FOS-GLOBAL-004", result.newRecoveryCode, result.owner, farm.name)
@@ -135,6 +146,30 @@ internal fun LocalFarmEntry(
                 }
             }
             is EntryStep.ShowRecoveryCode -> RecoveryCodeNotice(current.code) { onSignedIn(current.account, current.farmName) }
+            is EntryStep.Join -> JoinForm(requireNotNull(discovery), busy, onBack = { step = farmsStep(current.farms) }) { farm ->
+                launchEntry {
+                    val result = withContext(io) {
+                        runCatching { requireNotNull(joiner).join(farm) { code -> step = EntryStep.JoinWaiting(code, farm.descriptor.farmName) } }
+                            .getOrElse { JoinResult.Refused(it.message ?: "The farm device could not be reached. Try again.") }
+                    }
+                    val farms = withContext(io) { directory.farms() }
+                    when (result) {
+                        is JoinResult.Joined -> step = EntryStep.SignIn(farms)
+                        is JoinResult.Refused -> {
+                            step = EntryStep.Join(farms)
+                            error = result.message
+                        }
+                    }
+                }
+            }
+            is EntryStep.JoinWaiting -> JoinWaitingNotice(current.code, current.farmName)
+        }
+        val shown = step
+        if (canJoin && (shown is EntryStep.Setup || shown is EntryStep.SignIn)) {
+            val farms = (shown as? EntryStep.SignIn)?.farms.orEmpty()
+            TextButton(onClick = { error = null; step = EntryStep.Join(farms) }, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                Text("Join a farm on this network")
+            }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium) }
     }
@@ -231,6 +266,39 @@ private fun ColumnScope.RecoverForm(
     TextButton(onClick = onBack, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Back to sign in") }
 }
 
+/** FOS-GLOBAL-007: farms announcing themselves on this network; choosing one asks it to add this device. */
+@Composable
+private fun ColumnScope.JoinForm(discovery: FarmPeerDiscovery, busy: Boolean, onBack: () -> Unit, onJoin: (DiscoveredFarm) -> Unit) {
+    var found by remember { mutableStateOf(emptyList<DiscoveredFarm>()) }
+    DisposableEffect(discovery) {
+        val search = discovery.discover { farms -> found = farms.distinctBy { it.descriptor.farmId to it.descriptor.pairingPort } }
+        onDispose { search.close() }
+    }
+    Text("Join a farm on this network", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+    Text(
+        "Ask the farm owner or a manager to open Farm settings, then Devices, and choose Add a device. The farm appears here when it is ready.",
+        color = AnimalFarmTheme.colors.mutedInk,
+    )
+    val accepting = found.filter { it.descriptor.pairingPort != null }
+    if (accepting.isEmpty()) Text("Looking for farms on this network", color = AnimalFarmTheme.colors.mutedInk, modifier = Modifier.testTag("join-searching"))
+    accepting.forEach { farm ->
+        Button(
+            onClick = { onJoin(farm) },
+            enabled = !busy,
+            modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp).testTag("join-farm:${farm.descriptor.farmId}"),
+        ) { Text("Join ${farm.descriptor.farmName}") }
+    }
+    TextButton(onClick = onBack, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Back") }
+}
+
+@Composable
+private fun ColumnScope.JoinWaitingNotice(code: String, farmName: String) {
+    Text("Show this code to the farm owner", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+    Text("On the farm device they type this code to add this device to $farmName.", color = AnimalFarmTheme.colors.mutedInk)
+    Text(code.chunked(3).joinToString(" "), style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.testTag("join-code"))
+    Text("Waiting for approval", color = AnimalFarmTheme.colors.mutedInk)
+}
+
 @Composable
 private fun ColumnScope.RecoveryCodeNotice(code: String, onContinue: () -> Unit) {
     Text("Save your owner recovery code", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
@@ -293,15 +361,28 @@ private fun clockTime(epochMillis: Long): String =
  */
 @Composable
 internal fun LocalFarmSession(app: FarmOsApplication) {
-    val directory = remember { LocalFarmDirectory(app.database) }
+    val directory = remember { LocalFarmDirectory(app.database, app.deviceId) }
     var signedIn by remember { mutableStateOf<Pair<LocalAccount, String>?>(null) }
     val current = signedIn
     if (current == null) {
-        LocalFarmEntry(directory, onSignedIn = { account, farmName -> signedIn = account to farmName })
+        LocalFarmEntry(
+            directory,
+            onSignedIn = { account, farmName -> signedIn = account to farmName },
+            discovery = app.peerDiscovery,
+            joiner = remember { FarmJoiner(app.database, app.keyVault, app.deviceId, android.os.Build.MODEL ?: "Farm device") },
+        )
         return
     }
     val (account, farmName) = current
     val membership = account.membership()
+    DisposableEffect(account.farmId) {
+        val runtime = FarmLanRuntime(app.database, app.keyVault, app.peerDiscovery, account.farmId, farmName, app.deviceId).start()
+        app.farmLan = runtime
+        onDispose {
+            app.farmLan = null
+            runtime.close()
+        }
+    }
     FarmSessionContent(
         app = app,
         membership = membership,

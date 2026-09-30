@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:4c101890918fc9bb6ba975fc5a3dc686119d10fef78c7a8e2cf0e4690b187205",
-  "runtime_evidence_tested_commit": "8be48cc8566dad5f6ba00b95544a48559dc7b591",
-  "runtime_evidence_run_id": 36674986262,
+  "source_fingerprint": "sha256:7bf016dec930ae3ef3947c17c86130b0d8dc6f43ddd7aeaef435a7de574ab2c0",
+  "runtime_evidence_tested_commit": "2672ac6e3033249febc20ec6278cd426c3507930",
+  "runtime_evidence_run_id": 36682149836,
   "registry_screen_count": 545,
-  "route_screen_count": 276,
-  "unresolved_screen_count": 269,
+  "route_screen_count": 277,
+  "unresolved_screen_count": 268,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -82,6 +82,7 @@
     "FOS-GLOBAL-004",
     "FOS-GLOBAL-005",
     "FOS-GLOBAL-006",
+    "FOS-GLOBAL-007",
     "FOS-GLOBAL-016",
     "FOS-GLOBAL-017",
     "FOS-GLOBAL-018",
@@ -365,6 +366,7 @@
       ],
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmNetworkPairingUiTest.kt",
           "app/src/test/java/com/farmos/app/SettingsHostTest.kt"
         ]
       }
@@ -1082,6 +1084,7 @@
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
           "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt",
+          "app/src/test/java/com/farmos/app/FarmNetworkPairingUiTest.kt",
           "app/src/test/java/com/farmos/app/LocalFarmEntryTest.kt"
         ],
         "TYPED_ROUTE_OWNER": [
@@ -1123,6 +1126,17 @@
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FoundationAuthStateTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-GLOBAL-007",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/FarmNetworkPairingUiTest.kt"
         ]
       }
     },
@@ -3747,7 +3761,6 @@
     "FOS-GEN-009",
     "FOS-GEN-010",
     "FOS-GLOBAL-003",
-    "FOS-GLOBAL-007",
     "FOS-GLOBAL-008",
     "FOS-GLOBAL-009",
     "FOS-GLOBAL-010",

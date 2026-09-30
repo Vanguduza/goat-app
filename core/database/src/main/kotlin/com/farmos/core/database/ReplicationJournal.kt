@@ -55,10 +55,28 @@ data class ReplicationDeviceEntity(
     val lastReportedOwnSequence: Long,
     val revokedAfterSequence: Long?,
     val isLocal: Boolean,
+    /** Base64 X.509 key-agreement public key, used to wrap farm keys to this device after a rotation. */
+    val publicKey: String? = null,
 )
 
 /** Contiguous-watermark input: highest sequence and row count per originating device. */
 data class DeviceSequenceSpan(val deviceId: String, val maxSequence: Long, val operationCount: Long)
+
+/** Blocking journal access for callers that already run on a background thread inside a transaction. */
+@Dao
+interface ReplicationBlockingDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    fun insertOperation(operation: ReplicationOperationEntity)
+
+    @Upsert
+    fun upsertDevice(device: ReplicationDeviceEntity)
+
+    @Query("SELECT * FROM replication_devices WHERE farmId = :farmId AND deviceId = :deviceId LIMIT 1")
+    fun device(farmId: String, deviceId: String): ReplicationDeviceEntity?
+
+    @Query("SELECT * FROM replication_operations WHERE farmId = :farmId AND entityType = :entityType AND entityId = :entityId")
+    fun operationsForEntity(farmId: String, entityType: String, entityId: String): List<ReplicationOperationEntity>
+}
 
 @Dao
 interface ReplicationDao {
@@ -96,6 +114,10 @@ interface ReplicationDao {
 
     @Query("SELECT COUNT(*) FROM replication_operations WHERE farmId = :farmId")
     suspend fun count(farmId: String): Long
+
+    /** Every journalled operation on one record, for folding field updates in canonical order. */
+    @Query("SELECT * FROM replication_operations WHERE farmId = :farmId AND entityType = :entityType AND entityId = :entityId")
+    suspend fun operationsForEntity(farmId: String, entityType: String, entityId: String): List<ReplicationOperationEntity>
 }
 
 fun ReplicationOperationEntity.toEnvelope(): OperationEnvelope = OperationEnvelope(
@@ -185,8 +207,55 @@ suspend fun FarmOsDatabase.journalLocalOperation(
     schemaVersion: Int,
 ) {
     val journal = replication()
-    val device = journal.device(farmId, deviceId)
-    val sequence = (device?.lastReportedOwnSequence ?: 0) + 1
+    val (operation, device) = localOperation(
+        journal.device(farmId, deviceId), operationId, farmId, entityType, entityId, actorId, deviceId,
+        businessTimeEpochMillis, createdAtEpochMillis, baseVersion, operationType, payloadJson, schemaVersion,
+    )
+    journal.insertOperation(operation)
+    journal.upsertDevice(device)
+}
+
+/**
+ * Blocking form of [journalLocalOperation] for callers that run on a background thread with blocking
+ * DAOs, such as the local access store. Callers run it inside the transaction that makes the change.
+ */
+fun FarmOsDatabase.journalLocalOperationBlocking(
+    operationId: String,
+    farmId: String,
+    entityType: String,
+    entityId: String,
+    actorId: String,
+    deviceId: String,
+    businessTimeEpochMillis: Long,
+    operationType: String,
+    payloadJson: String,
+) {
+    val journal = replicationBlocking()
+    val (operation, device) = localOperation(
+        journal.device(farmId, deviceId), operationId, farmId, entityType, entityId, actorId, deviceId,
+        businessTimeEpochMillis, businessTimeEpochMillis, null, operationType, payloadJson, 1,
+    )
+    journal.insertOperation(operation)
+    journal.upsertDevice(device)
+}
+
+/** Seals the next operation of the local device and its updated device row. */
+private fun localOperation(
+    previous: ReplicationDeviceEntity?,
+    operationId: String,
+    farmId: String,
+    entityType: String,
+    entityId: String,
+    actorId: String,
+    deviceId: String,
+    businessTimeEpochMillis: Long,
+    createdAtEpochMillis: Long,
+    baseVersion: Long?,
+    operationType: String,
+    payloadJson: String,
+    schemaVersion: Int,
+): Pair<ReplicationOperationEntity, ReplicationDeviceEntity> {
+    val sequence = (previous?.lastReportedOwnSequence ?: 0) + 1
     val operation = OperationEnvelope.seal(
         operationId = operationId,
         farmId = farmId,
@@ -204,17 +273,15 @@ suspend fun FarmOsDatabase.journalLocalOperation(
         schemaVersion = schemaVersion,
         provenance = LOCAL_PROVENANCE,
     )
-    journal.insertOperation(operation.toEntity())
-    journal.upsertDevice(
-        ReplicationDeviceEntity(
-            farmId = farmId,
-            deviceId = deviceId,
-            name = device?.name ?: THIS_DEVICE_NAME,
-            status = device?.status ?: DeviceStatus.ACTIVE.name,
-            lastReportedOwnSequence = sequence,
-            revokedAfterSequence = device?.revokedAfterSequence,
-            isLocal = true,
-        ),
+    return operation.toEntity() to ReplicationDeviceEntity(
+        farmId = farmId,
+        deviceId = deviceId,
+        name = previous?.name ?: THIS_DEVICE_NAME,
+        status = previous?.status ?: DeviceStatus.ACTIVE.name,
+        lastReportedOwnSequence = sequence,
+        revokedAfterSequence = previous?.revokedAfterSequence,
+        isLocal = true,
+        publicKey = previous?.publicKey,
     )
 }
 

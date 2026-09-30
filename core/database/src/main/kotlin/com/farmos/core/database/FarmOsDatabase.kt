@@ -754,8 +754,9 @@ interface SyncCursorDao {
         AccessAuditEntity::class,
         FarmSettingsEntity::class,
         ReplicationApplicationEntity::class,
+        ReplicationPeerMarkEntity::class,
     ],
-    version = 17,
+    version = 20,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -763,9 +764,11 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun measurements(): MeasurementDao
     abstract fun outbox(): OutboxDao
     abstract fun replication(): ReplicationDao
+    abstract fun replicationBlocking(): ReplicationBlockingDao
     abstract fun localAccess(): LocalAccessDao
     abstract fun farmSettings(): FarmSettingsDao
     abstract fun replicationApplications(): ReplicationApplicationDao
+    abstract fun replicationPeerMarks(): ReplicationPeerMarkDao
     abstract fun aggregateVersions(): AggregateVersionDao
     abstract fun syncCursors(): SyncCursorDao
     abstract fun tasks(): TaskDao
@@ -1157,6 +1160,28 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17)
+        /** Local accounts and the recovery hash record when they last changed, so replicated changes merge by time. */
+        val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `local_accounts` ADD COLUMN `updatedAtEpochMillis` INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE `farm_recovery` ADD COLUMN `updatedAtEpochMillis` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        /** Farm devices record their public key, so a rotated farm key can be wrapped to each remaining device. */
+        val MIGRATION_18_19 = object : Migration(18, 19) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `replication_devices` ADD COLUMN `publicKey` TEXT")
+            }
+        }
+
+        /** Records how far each farm peer has confirmed holding this device's own operations. */
+        val MIGRATION_19_20 = object : Migration(19, 20) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `replication_peer_marks` (`farmId` TEXT NOT NULL, `peerDeviceId` TEXT NOT NULL, `holdsOwnThrough` INTEGER NOT NULL, `atEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`farmId`, `peerDeviceId`))")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20)
     }
 }

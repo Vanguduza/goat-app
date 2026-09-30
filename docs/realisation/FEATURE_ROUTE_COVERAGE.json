@@ -2,7 +2,7 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:4c101890918fc9bb6ba975fc5a3dc686119d10fef78c7a8e2cf0e4690b187205",
+  "source_fingerprint": "sha256:7bf016dec930ae3ef3947c17c86130b0d8dc6f43ddd7aeaef435a7de574ab2c0",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 89,
@@ -72,10 +72,10 @@
       ],
       "route_screen_ids": [
         "FOS-GLOBAL-005",
-        "FOS-GLOBAL-006"
+        "FOS-GLOBAL-006",
+        "FOS-GLOBAL-007"
       ],
       "unresolved_screen_ids": [
-        "FOS-GLOBAL-007",
         "FOS-GLOBAL-008",
         "FOS-GLOBAL-009",
         "FOS-GLOBAL-014",

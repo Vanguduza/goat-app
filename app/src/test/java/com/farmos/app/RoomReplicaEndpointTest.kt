@@ -5,8 +5,10 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.recordPeerHolds
 import com.farmos.core.database.replicationVector
 import com.farmos.core.database.toEnvelope
+import com.farmos.core.database.unsharedLocalOperations
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.RecordWater
@@ -69,7 +71,7 @@ class RoomReplicaEndpointTest {
     private fun recordWaterOnTablet(count: Int) = runBlocking {
         val ops = RoomOpsRepository(tabletDb, farm)
         repeat(count) {
-            ops.recordWater(RecordWater("water-$it", "Borehole", 1_000L * (it + 1), 20_700L + it), LocalCommandContext(farm, "worker-1", tabletId, UUID.randomUUID().toString(), 1_790_000_000_000 + it))
+            ops.recordWater(RecordWater("water-${UUID.randomUUID()}", "Borehole", 1_000L * (it + 1), 20_700L + it), LocalCommandContext(farm, "worker-1", tabletId, UUID.randomUUID().toString(), 1_790_000_000_000 + it))
         }
     }
 
@@ -143,5 +145,21 @@ class RoomReplicaEndpointTest {
         tabletDb.setFarmCurrency(farm, "USD", actorId = "owner-1", deviceId = tabletId, nowEpochMillis = 1_790_001_000_000)
         SyncSession.run(phone, LocalPeerTransport(tablet), remoteDeviceId = tabletId)
         assertEquals("USD", phoneDb.farmCurrency(farm))
+    }
+
+    @Test
+    fun localChangesCountAsWaitingToSyncUntilAPeerConfirmsHoldingThem() = runBlocking {
+        recordWaterOnTablet(3)
+        assertEquals(3L, tabletDb.unsharedLocalOperations(farm, tabletId))
+
+        val outcome = SyncSession.run(tablet, LocalPeerTransport(phone), remoteDeviceId = phoneId)
+        assertEquals(3L, outcome.peerHoldsOwnThrough)
+        tabletDb.recordPeerHolds(farm, phoneId, outcome.peerHoldsOwnThrough!!, 1_790_000_900_000)
+        assertEquals(0L, tabletDb.unsharedLocalOperations(farm, tabletId))
+
+        // A later, lower report never moves the mark backwards.
+        tabletDb.recordPeerHolds(farm, phoneId, 1, 1_790_000_950_000)
+        recordWaterOnTablet(1)
+        assertEquals(1L, tabletDb.unsharedLocalOperations(farm, tabletId))
     }
 }
