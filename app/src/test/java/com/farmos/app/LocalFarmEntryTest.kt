@@ -26,6 +26,7 @@ import com.farmos.domain.access.CredentialKind
 import com.farmos.domain.access.LocalAccount
 import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.SignInResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -70,16 +71,21 @@ class LocalFarmEntryTest {
     private fun render() {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                LocalFarmEntry(directory, onSignedIn = { account, farmName -> signedIn = account to farmName })
+                // Unconfined keeps the entry's database work on the test's main thread, so Compose idling
+                // covers it and nothing still holds the database when the test closes it.
+                LocalFarmEntry(directory, onSignedIn = { account, farmName -> signedIn = account to farmName }, io = Dispatchers.Unconfined)
             }
         }
     }
 
     private fun type(label: String, value: String) {
+        // The loading step shares the sign-in screen id, so wait for the field itself.
+        compose.waitUntil(10_000) { compose.onAllNodes(hasSetTextAction() and hasText(label)).fetchSemanticsNodes().isNotEmpty() }
         compose.onNode(hasSetTextAction() and hasText(label)).performScrollTo().performTextInput(value)
     }
 
     private fun click(label: String) {
+        compose.waitUntil(10_000) { compose.onAllNodes(hasClickAction() and hasText(label)).fetchSemanticsNodes().isNotEmpty() }
         compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
     }
 
