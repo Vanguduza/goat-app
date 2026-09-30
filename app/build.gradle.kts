@@ -10,9 +10,6 @@ val supabaseUrl = providers.gradleProperty("FARM_OS_SUPABASE_URL")
 val supabasePublishableKey = providers.gradleProperty("FARM_OS_SUPABASE_PUBLISHABLE_KEY")
     .orElse(providers.environmentVariable("FARM_OS_SUPABASE_PUBLISHABLE_KEY"))
     .orElse("")
-val meiliHost = providers.gradleProperty("FARM_OS_MEILI_HOST")
-    .orElse(providers.environmentVariable("FARM_OS_MEILI_HOST"))
-    .orElse("")
 val e2eEmail = providers.gradleProperty("FARM_OS_E2E_EMAIL")
     .orElse(providers.environmentVariable("FARM_OS_E2E_EMAIL"))
     .orElse("")
@@ -39,7 +36,6 @@ android {
         testInstrumentationRunnerArguments["farmosE2eFarmId"] = e2eFarmId.get()
         buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl.get()}\"")
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"${supabasePublishableKey.get()}\"")
-        buildConfigField("String", "MEILI_HOST", "\"${meiliHost.get()}\"")
     }
 
     buildFeatures {
