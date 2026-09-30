@@ -14,7 +14,7 @@ import java.util.UUID
  * Labour capture (resolution R1): once the farm has registered workers, work is recorded against one of
  * them (`labour.record.v2`); before that, a typed label is kept (`labour.record.v1`).
  */
-internal class LabourCapture(private val database: FarmOsDatabase, private val farmId: String, private val ops: RoomOpsRepository) {
+class LabourCapture(private val database: FarmOsDatabase, private val farmId: String, private val ops: RoomOpsRepository) {
     suspend fun activeWorkers(): List<LabourWorkerOption> = database.workers().active(farmId).map { LabourWorkerOption(it.id, it.name) }
 
     suspend fun record(

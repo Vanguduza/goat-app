@@ -599,6 +599,7 @@ private fun permissionLabel(permission: Permission): String = when (permission) 
     Permission.MANAGE_STORAGE_AND_BACKUP -> "Manage storage and backup"
     Permission.RESOLVE_SYNC_CONFLICTS -> "Resolve sync conflicts"
     Permission.MANAGE_FARM_SETTINGS -> "Change farm settings"
+    Permission.EXPORT_FARM_DATA -> "Export farm records"
     Permission.MANAGE_OWNERS -> "Manage Owner accounts"
 }
 

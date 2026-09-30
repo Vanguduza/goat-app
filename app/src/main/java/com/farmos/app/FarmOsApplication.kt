@@ -48,7 +48,6 @@ class FarmOsApplication : Application(), SyncEngineOwner {
         private set
     var pullClient: SupabasePullClient? = null
         private set
-        private set
     /** Read-only, member-gated server trace for one mutation; null when no backend is configured. */
     var mutationTraceClient: SupabaseMutationTraceClient? = null
         private set
