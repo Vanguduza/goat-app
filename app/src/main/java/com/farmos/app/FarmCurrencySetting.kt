@@ -72,7 +72,7 @@ internal val FarmCurrencyApplier = OperationApplier { database, operation ->
 internal val replicationAppliers: Map<String, OperationApplier> =
     mapOf(SET_FARM_CURRENCY_COMMAND to FarmCurrencyApplier, SET_FARM_GESTATION_COMMAND to FarmGestationApplier) +
         OpsReplicationAppliers.all + GoatReplicationAppliers.all + HerdReplicationAppliers.all + accessReplicationAppliers +
-        deviceReplicationAppliers
+        deviceReplicationAppliers + conflictReplicationAppliers
 
 /** The farm currency for a capture screen; null until loaded, so nothing is recorded in a guessed currency. */
 @Composable

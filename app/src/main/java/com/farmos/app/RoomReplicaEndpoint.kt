@@ -84,7 +84,10 @@ class RoomReplicaEndpoint(
             }
             fresh.forEach {
                 journal.insertOperation(it.toEntity())
-                applications.upsert(ReplicationApplicationEntity(it.operationId, farmId, ApplicationState.FAILED.name, NOT_YET_APPLIED, 0, clock()))
+                // A conflict-review decision to set it aside may have arrived first; it stands.
+                if (applications.get(farmId, it.operationId)?.state != ApplicationState.SET_ASIDE.name) {
+                    applications.upsert(ReplicationApplicationEntity(it.operationId, farmId, ApplicationState.FAILED.name, NOT_YET_APPLIED, 0, clock()))
+                }
             }
             if (fresh.isNotEmpty()) {
                 journal.upsertDevice(origin.copy(lastReportedOwnSequence = maxOf(origin.lastReportedOwnSequence, bundle.toSequence)))

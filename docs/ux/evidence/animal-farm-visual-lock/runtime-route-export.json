@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:e9ef95c0d4b911ce31ee8927c2795a9b523b5ff5625ebf2e15657aaf2dea29d0",
-  "runtime_evidence_tested_commit": "fcd2890ba3da84875ad5ad1f9ae3c7b3278f8491",
-  "runtime_evidence_run_id": 36737556301,
+  "source_fingerprint": "sha256:3996ceea48ae3cefab6b9a32593ae490beb03750107fb59613bb827637aa5b84",
+  "runtime_evidence_tested_commit": "48e9a912f53a44546fea0ad05b719e2550f313da",
+  "runtime_evidence_run_id": 36747990679,
   "registry_screen_count": 545,
-  "route_screen_count": 296,
-  "unresolved_screen_count": 249,
+  "route_screen_count": 298,
+  "unresolved_screen_count": 247,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -35,6 +35,7 @@
     "FOS-ATOM-011",
     "FOS-ATOM-014",
     "FOS-ATOM-026",
+    "FOS-ATOM-027",
     "FOS-ATOM-028",
     "FOS-ATOM-031",
     "FOS-ATOM-032",
@@ -290,6 +291,7 @@
     "FOS-SYNC-004",
     "FOS-SYNC-005",
     "FOS-SYNC-006",
+    "FOS-SYNC-007",
     "FOS-SYNC-008",
     "FOS-SYNC-009",
     "FOS-SYNC-018",
@@ -598,6 +600,17 @@
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
           "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-ATOM-027",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/ConflictCentreScreensTest.kt"
         ]
       }
     },
@@ -3675,10 +3688,22 @@
           "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt"
         ],
         "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/ConflictCentreScreensTest.kt",
           "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt"
         ],
         "TYPED_ROUTE_OWNER": [
           "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-SYNC-007",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/ConflictCentreScreensTest.kt"
         ]
       }
     },
@@ -3960,7 +3985,6 @@
     "FOS-ATOM-023",
     "FOS-ATOM-024",
     "FOS-ATOM-025",
-    "FOS-ATOM-027",
     "FOS-ATOM-029",
     "FOS-ATOM-030",
     "FOS-CAP-001",
@@ -4124,7 +4148,6 @@
     "FOS-SIM-008",
     "FOS-SIM-009",
     "FOS-SYNC-001",
-    "FOS-SYNC-007",
     "FOS-SYNC-010",
     "FOS-SYNC-011",
     "FOS-SYNC-012",

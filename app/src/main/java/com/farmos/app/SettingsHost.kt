@@ -57,11 +57,13 @@ import java.util.Currency
 import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import com.farmos.core.model.LocalCommandContext
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private enum class SettingsPage { HOME, MEMBERS, CREATE_MEMBER, MEMBER_DETAIL, PERMISSIONS, AUDIT, STORAGE, DEVICES, CURRENCY, SPECIES }
+private enum class SettingsPage { HOME, MEMBERS, CREATE_MEMBER, MEMBER_DETAIL, PERMISSIONS, AUDIT, STORAGE, DEVICES, CURRENCY, SPECIES, CONFLICTS }
 
 /** Everything the settings pages show, read from this device's database in one pass. */
 private data class SettingsSnapshot(
@@ -240,12 +242,24 @@ internal fun SettingsHost(
                 ReceivedChangesReview(current.unapplied, current.unappliedTotal, busy || !RolePermissions.allows(actor.role, Permission.RESOLVE_SYNC_CONFLICTS)) {
                     act { RoomReplicaEndpoint(database, farmId, deviceId, replicationAppliers).applyPendingNow() }
                 }
+                SettingsButton("Open Conflict Centre", !busy) { page = SettingsPage.CONFLICTS }
             }
             FarmOperationalSection("Google Drive") {
                 Text("Not connected.")
                 Text("Farm work continues on this device. Disconnecting Google Drive never deletes farm records on this device.", color = AnimalFarmTheme.colors.mutedInk)
             }
             FarmOperationalSection("Backup") { Text("No backup has been made.") }
+        }
+        SettingsPage.CONFLICTS -> {
+            val actor = current.actor
+            ConflictCentreHost(
+                database = database,
+                farmId = farmId,
+                canResolve = actor != null && RolePermissions.allows(actor.role, Permission.RESOLVE_SYNC_CONFLICTS),
+                newContext = { LocalCommandContext(farmId, actor?.accountId ?: "unknown", deviceId, UUID.randomUUID().toString(), System.currentTimeMillis()) },
+                onRetryAll = { RoomReplicaEndpoint(database, farmId, deviceId, replicationAppliers).applyPendingNow() },
+                onBack = { page = SettingsPage.STORAGE; refreshKey++ },
+            )
         }
         SettingsPage.CURRENCY -> FarmOperationalPage("FOS-ADMIN-011", "Currency", "The currency new money records use on this farm.", onBack = home, backLabel = "Farm settings") {
             val actor = current.actor
