@@ -1,8 +1,22 @@
 # Farm OS — Project Truth
 
 **Authority level:** Owner-approved implementation truth  
-**Effective:** 29 August 2026  
+**Effective:** 29 August 2026; architecture lock 30 September 2026 (§0)  
 **Applies to:** all Farm OS product, engineering, donor-reuse and release work.
+
+## 0. Owner architecture lock — 30 September 2026
+
+The owner's instruction of 30 September 2026 supersedes every conflicting rule in this document.
+
+- **GOAT has no application server.** The canonical architecture is the local Android app, a local Room/SQLite database on every device, local accounts/roles/permissions, local-first file storage, a deterministic replication journal, farm-LAN peer synchronisation, owner-configured Google Drive replication/backup through approved Drive Gateway devices, and optional hardware/AI adapters.
+- **Offline is normal operation.** Every ordinary farm workflow works without Internet; Internet availability changes only synchronisation state.
+- **Room/SQLite is the operational datastore on every device.** A local transaction that commits is a successful save. "Saved locally", "Synchronised" and "Backed up" are distinct states.
+- **Synchronisation is operation-level.** Whole SQLite files are never synchronised; no last-file, last-device or timestamp wins. Immutable operations with global IDs, per-device sequences, sync vectors, original business time, checksums and per-class merge semantics are specified in `docs/architecture/GOAT_OFFLINE_MULTI_DEVICE_SYNC.md` and executed by `domain/replication`.
+- **Google Drive is replication and backup, never the database.** A Drive folder ID never grants farm authority; Drive identity is not a GOAT account.
+- **Animals are data records.** There is no fixed catalogue; the 545 registered screens are templates. Capped presentation lists never feed selectors, metrics or reports; whole-farm selection searches the complete local database.
+- Owner decisions on money, reproduction due dates, tasks, stock, exits, breeding analysis, AI, hardware, analytics and reports are indexed in `docs/project-state/GOAT_OWNER_DECISION_REGISTER.md`.
+
+Superseded by this section and retained only as provenance until the migration tranches retire the server-era code: §2 (Supabase/Meilisearch backend), §3 (server RPC write path), the RLS/server-membership parts of §4, the server-cursor rule of §5, §6 (Meilisearch search law) and the Supabase/Meilisearch steps of §10. Their useful concepts — mutation IDs, durable outbox, idempotency, expected versions, farm scoping — carry forward into the replication protocol. Server-era code must not be extended as an authority.
 
 ## 1. Current product scope
 
@@ -36,7 +50,7 @@ Farm OS MVP is the complete documented Farm OS product. MVP includes all documen
 
 Internal delivery waves may sequence engineering, but they do not remove any item from MVP.
 
-## 2. Locked backend and infrastructure
+## 2. Locked backend and infrastructure (superseded by §0; provenance)
 
 - Native Android/Kotlin/Compose client.
 - Room is the local operational source for Android UI/offline workflows, never the server system of record.
@@ -49,7 +63,7 @@ Internal delivery waves may sequence engineering, but they do not remove any ite
 - Local search must remain usable offline.
 - No mandatory Ktor, Keycloak, MinIO, Kubernetes, Hermes, Ollama or Python/R genetics runtime is part of the MVP topology.
 
-## 3. Write-authority rule
+## 3. Write-authority rule (superseded by §0; provenance)
 
 Material business mutations use one canonical command boundary:
 
@@ -92,7 +106,7 @@ PENDING → IN_FLIGHT → ACKNOWLEDGED
 
 Server pull ordering uses a server-issued monotonic cursor, not device time.
 
-## 6. Search law
+## 6. Search law (superseded by §0; provenance)
 
 ```text
 Supabase authority

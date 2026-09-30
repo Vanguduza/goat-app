@@ -45,6 +45,7 @@ jobs:
           :domain:goat:test
           :domain:rabbit:test
           :domain:ops:test
+          :domain:replication:test
           :core:network:testDebugUnitTest
           :core:sync:testDebugUnitTest
           :app:testDebugUnitTest

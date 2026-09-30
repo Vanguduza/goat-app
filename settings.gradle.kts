@@ -26,6 +26,7 @@ include(
     ":domain:goat",
     ":domain:rabbit",
     ":domain:ops",
+    ":domain:replication",
     ":data:goat",
     ":data:herd",
     ":feature:goat",
