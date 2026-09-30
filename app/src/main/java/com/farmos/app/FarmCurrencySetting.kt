@@ -8,6 +8,8 @@ import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.COMMAND_PAYLOAD_KEY
 import com.farmos.core.database.FarmSettingsEntity
 import com.farmos.core.database.OperationApplier
+import com.farmos.data.goat.GoatReplicationAppliers
+import com.farmos.data.herd.HerdReplicationAppliers
 import com.farmos.data.herd.OpsReplicationAppliers
 import com.farmos.core.database.journalLocalOperation
 import com.farmos.domain.ops.FarmCurrency
@@ -68,7 +70,8 @@ internal val FarmCurrencyApplier = OperationApplier { database, operation ->
 
 /** Appliers for the operations this app can apply on receipt; others stay journalled until theirs exist. */
 internal val replicationAppliers: Map<String, OperationApplier> =
-    mapOf(SET_FARM_CURRENCY_COMMAND to FarmCurrencyApplier) + OpsReplicationAppliers.all
+    mapOf(SET_FARM_CURRENCY_COMMAND to FarmCurrencyApplier) +
+        OpsReplicationAppliers.all + GoatReplicationAppliers.all + HerdReplicationAppliers.all
 
 /** The farm currency for a capture screen; null until loaded, so nothing is recorded in a guessed currency. */
 @Composable

@@ -8,8 +8,15 @@ import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.toEnvelope
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.data.goat.GoatReplicationAppliers
+import com.farmos.data.goat.RoomGoatRepository
+import com.farmos.data.herd.HerdReplicationAppliers
 import com.farmos.data.herd.OpsReplicationAppliers
+import com.farmos.data.herd.RoomHerdRepository
 import com.farmos.data.herd.RoomOpsRepository
+import com.farmos.domain.goat.GoatSex
+import com.farmos.domain.goat.RecordGoatWeight
+import com.farmos.domain.goat.RegisterGoat
 import com.farmos.domain.ops.CreateInventoryItem
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.RecordSale
@@ -114,5 +121,41 @@ class OpsReplicationApplierTest {
         val journalled = Regex("\"([a-z_]+\\.[a-z_]+\\.v\\d)\"").findAll(source.readText()).map { it.groupValues[1] }.toSet()
         assertTrue(journalled.size > 80)
         assertEquals(journalled, journalled.intersect(OpsReplicationAppliers.all.keys))
+    }
+
+    @Test
+    fun goatsAndOtherSpeciesRegisteredOnOneDeviceAppearWithTheirWeightsOnAnother() = runBlocking {
+        val tabletDb = database()
+        val phoneDb = database()
+        val tablet = endpoint(tabletDb, "tablet", "phone")
+        val phone = endpoint(phoneDb, "phone", "tablet")
+        val goats = RoomGoatRepository(tabletDb, farm)
+        goats.registerGoat(RegisterGoat("goat-1", "G-001", "Nandi", GoatSex.FEMALE), context("tablet", 1_790_000_100_000))
+        goats.recordWeight(RecordGoatWeight("goat-1", "w-1", 31_500, 1_790_000_150_000), context("tablet", 1_790_000_150_000))
+        val sheep = RoomHerdRepository(tabletDb, farm, "sheep")
+        sheep.register("sheep-1", "S-001", null, "FEMALE", null, context("tablet", 1_790_000_200_000))
+        sheep.recordWeight("sheep-1", "w-2", 48_000, 1_790_000_250_000, context("tablet", 1_790_000_250_000))
+        sheep.setStatus("sheep-1", "sold", context("tablet", 1_790_000_300_000))
+
+        SyncSession.run(phone, LocalPeerTransport(tablet), remoteDeviceId = "tablet")
+
+        assertEquals(tabletDb.animals().get(farm, "goat-1"), phoneDb.animals().get(farm, "goat-1"))
+        assertEquals(31_500L, phoneDb.measurements().latest(farm, "goat-1", "weight")?.valueLong)
+        assertEquals("sold", phoneDb.animals().get(farm, "sheep-1")?.status)
+        assertEquals(48_000L, phoneDb.measurements().latest(farm, "sheep-1", "weight")?.valueLong)
+        assertEquals(5L, phoneDb.replicationApplications().count(farm, ApplicationState.APPLIED.name))
+        assertEquals(0L, phoneDb.outbox().countUnacknowledgedForFarm(farm))
+    }
+
+    @Test
+    fun everyGoatCommandHasAnApplier() {
+        val source = java.io.File("../data/goat/src/main/kotlin/com/farmos/data/goat/RoomGoatRepository.kt").takeIf { it.exists() }
+            ?: java.io.File("data/goat/src/main/kotlin/com/farmos/data/goat/RoomGoatRepository.kt")
+        val journalled = Regex("\"(goat\\.[a-z_]+\\.v\\d)\"").findAll(source.readText()).map { it.groupValues[1] }.toSet()
+        assertEquals(13, journalled.size)
+        assertEquals(journalled, journalled.intersect(GoatReplicationAppliers.all.keys))
+        HerdReplicationAppliers.SPECIES.forEach { species ->
+            listOf("register", "record_weight", "set_status").forEach { assertTrue("$species.$it.v1" in HerdReplicationAppliers.all) }
+        }
     }
 }
