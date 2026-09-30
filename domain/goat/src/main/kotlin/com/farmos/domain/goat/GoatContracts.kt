@@ -266,11 +266,6 @@ object GoatValidator {
  */
 data class GoatHerdCounts(val active: Int, val does: Int, val bucks: Int, val kids: Int, val notClosed: Int)
 
-/**
- * Every milk record for one goat, aggregated exhaustively. Litres are sums of recorded milli-litres
- * for this goat only; no yield curve, peak or projection is derived. [tag] is null when the goat
- * record is not on this device.
- */
 /** One doe expected to kid, with the window predicted from her latest service. */
 data class GoatKiddingDue(
     val animalId: String,
@@ -284,6 +279,11 @@ data class GoatKiddingDue(
     val latestDueEpochDay: Long,
 )
 
+/**
+ * Every milk record for one goat, aggregated exhaustively. Litres are sums of recorded milli-litres
+ * for this goat only; no yield curve, peak or projection is derived. [tag] is null when the goat
+ * record is not on this device.
+ */
 data class GoatLactationSummary(
     val animalId: String,
     val tag: String?,
