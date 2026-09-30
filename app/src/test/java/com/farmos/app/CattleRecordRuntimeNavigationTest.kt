@@ -11,6 +11,9 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.feature.ops.CattleCalvingDue
+import com.farmos.feature.ops.CattleCalvingDueView
+import com.farmos.feature.ops.CattleDueSource
 import com.farmos.feature.ops.CattleIdentifierRow
 import com.farmos.feature.ops.CattleLotCloseView
 import com.farmos.feature.ops.CattleLotDaysView
@@ -137,6 +140,53 @@ class CattleRecordRuntimeNavigationTest {
     }
 
     @Test
+    fun calvingDueGroupsCowsByWindowAndSaysWhereEachDateCameFrom() {
+        val served = day(1, 1)
+        fun cow(id: String, name: String?, source: CattleDueSource, typical: Long, pd: String?) =
+            CattleCalvingDueView(id, "C-$id", name, served, "ai", pd, source, typical - 7, typical, typical + 7)
+        render(null, calvingDue = {
+            CattleCalvingDue(
+                listOf(
+                    cow("late", "Bella", CattleDueSource.PREDICTED, day(9, 10), "pregnant"),
+                    cow("now", null, CattleDueSource.PREDICTED, day(9, 26), null),
+                    cow("soon", null, CattleDueSource.PREDICTED, day(10, 20), "pregnant"),
+                    cow("dried", "Rosa", CattleDueSource.STORED, day(12, 30), "pregnant").copy(earliestEpochDay = day(12, 30), latestEpochDay = day(12, 30)),
+                ),
+                285,
+            )
+        }) { records() }
+        traverse("Calving due", "FOS-CATTLE-014") {
+            compose.onNodeWithText("Past the latest expected day · 1").assertExists()
+            compose.onNodeWithText("In the expected window now · 1").assertExists()
+            compose.onNodeWithText("Window opens within three weeks · 1").assertExists()
+            compose.onNodeWithText("Later · 1").assertExists()
+            compose.onNodeWithTag("cattle-due-group:OVERDUE").assertExists()
+            compose.onNodeWithText("Bella · C-late").assertExists()
+            compose.onNodeWithText("Due about 2026-09-10 (2026-09-03 to 2026-09-17)").assertExists()
+            compose.onNodeWithText("Served, no PD recorded · ai 2026-01-01").assertExists()
+            compose.onNodeWithText("Expected 2026-12-30 · recorded at dry-off").performScrollTo().assertExists()
+            compose.onNodeWithText("this farm's 285-day gestation", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun calvingDueWithNoCowsSaysSo() {
+        render(null) { records() }
+        traverse("Calving due", "FOS-CATTLE-014") {
+            compose.onNodeWithText("No cows are expected to calve.").assertExists()
+        }
+    }
+
+    @Test
+    fun calvingDueFailureIsShown() {
+        render(null, calvingDue = { error("calving list unavailable") }) { records() }
+        traverse("Calving due", "FOS-CATTLE-014") {
+            compose.onNodeWithText("calving list unavailable").assertExists()
+            compose.onNodeWithText("No cows are expected to calve.").assertDoesNotExist()
+        }
+    }
+
+    @Test
     fun withoutASelectedAnimalRecordPagesSaySoAndLoadNothing() {
         var loads = 0
         render(null) { loads++; records() }
@@ -203,7 +253,12 @@ class CattleRecordRuntimeNavigationTest {
         ),
     )
 
-    private fun render(selected: String?, lots: suspend () -> List<CattleLotView> = { emptyList() }, load: suspend (String) -> CattleRecords) {
+    private fun render(
+        selected: String?,
+        lots: suspend () -> List<CattleLotView> = { emptyList() },
+        calvingDue: suspend () -> CattleCalvingDue = { CattleCalvingDue(emptyList(), 283) },
+        load: suspend (String) -> CattleRecords,
+    ) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 CattleOperationsScreen(
@@ -231,6 +286,7 @@ class CattleRecordRuntimeNavigationTest {
                     loadRecords = load,
                     today = today,
                     loadLots = lots,
+                    loadCalvingDue = calvingDue,
                 )
             }
         }

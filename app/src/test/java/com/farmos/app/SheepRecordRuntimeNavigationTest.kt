@@ -11,6 +11,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.feature.ops.SheepAnimalRecords
+import com.farmos.feature.ops.SheepInLambView
+import com.farmos.feature.ops.SheepLambingDue
+import com.farmos.feature.ops.SheepMobLambingView
 import com.farmos.feature.ops.SheepOperationsActions
 import com.farmos.feature.ops.SheepOperationsScreen
 import com.farmos.feature.ops.SheepTimelineRow
@@ -94,6 +97,46 @@ class SheepRecordRuntimeNavigationTest {
         }
     }
 
+    @Test
+    fun lambingDueShowsEachMobsWindowAndTheEwesStillInLamb() {
+        render(null, lambingDue = {
+            SheepLambingDue(
+                mobs = listOf(
+                    SheepMobLambingView("mob-a", "Ewes A", 120, day(4, 20), day(9, 9), day(9, 14)),
+                    SheepMobLambingView("mob-b", "Maidens", 40, day(6, 1), day(10, 22), day(10, 27)),
+                ),
+                ewes = listOf(SheepInLambView("e1", "S-0001", "Molly", "twin", day(7, 1))),
+                typicalDays = 147,
+            )
+        }) { SheepAnimalRecords() }
+        traverse("Lambing due", "FOS-SHEEP-013") {
+            compose.onNodeWithText("Ewes A · 120 head recorded").assertExists()
+            compose.onNodeWithText("Ram in 2026-04-20 · lambing from about 2026-09-14 (earliest 2026-09-09)").assertExists()
+            compose.onNodeWithText("Lambing window open since 2026-09-09").assertExists()
+            compose.onNodeWithText("Lambing opens in 28 days").assertExists()
+            compose.onNodeWithText("Molly · S-0001").performScrollTo().assertExists()
+            compose.onNodeWithText("Scanned twins on 2026-07-01").assertExists()
+            compose.onNodeWithText("this farm's 147-day gestation", substring = true).assertExists()
+        }
+    }
+
+    @Test
+    fun lambingDueWithNothingRecordedSaysSo() {
+        render(null) { SheepAnimalRecords() }
+        traverse("Lambing due", "FOS-SHEEP-013") {
+            compose.onNodeWithText("No joinings or in-lamb scans recorded.").assertExists()
+        }
+    }
+
+    @Test
+    fun lambingDueFailureIsShown() {
+        render(null, lambingDue = { error("lambing schedule unavailable") }) { SheepAnimalRecords() }
+        traverse("Lambing due", "FOS-SHEEP-013") {
+            compose.onNodeWithText("lambing schedule unavailable").assertExists()
+            compose.onNodeWithText("No joinings or in-lamb scans recorded.").assertDoesNotExist()
+        }
+    }
+
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
         compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
@@ -130,7 +173,11 @@ class SheepRecordRuntimeNavigationTest {
         micron = listOf(SheepWoolRow("mi1", day(9, 6), "SH-044", "19.5 µm")),
     )
 
-    private fun render(selected: String?, load: suspend (String) -> SheepAnimalRecords) {
+    private fun render(
+        selected: String?,
+        lambingDue: suspend () -> SheepLambingDue = { SheepLambingDue(emptyList(), emptyList(), 147) },
+        load: suspend (String) -> SheepAnimalRecords,
+    ) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
                 SheepOperationsScreen(
@@ -158,6 +205,7 @@ class SheepRecordRuntimeNavigationTest {
                     loadRecords = load,
                     loadWool = { if (selected == null) SheepWoolRecords() else wool() },
                     today = today,
+                    loadLambingDue = lambingDue,
                 )
             }
         }

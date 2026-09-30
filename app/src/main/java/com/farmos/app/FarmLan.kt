@@ -226,6 +226,17 @@ internal class FarmLanRuntime(
         if (!worker.isShutdown) runCatching { worker.execute { syncNow() } }
     }
 
+    /**
+     * Synchronises now with every farm device found on the network and returns each outcome; empty when no
+     * farm device is found. Null when this runtime has already closed. Blocks: call it off the main thread.
+     */
+    fun syncOnce(): List<SyncOutcome>? =
+        if (worker.isShutdown) {
+            null
+        } else {
+            runCatching { worker.submit<List<SyncOutcome>> { syncNow(); mutableState.value.lastOutcomes }.get() }.getOrNull()
+        }
+
     private fun syncNow() {
         val outcomes = mutableState.value.peers.map { peer ->
             LanPeerTransport(peer.host, peer.port, farmId, deviceId, keys, endpoint::maySynchronise, identity = identity()).use { transport ->

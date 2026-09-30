@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:b9d87df45810298a75edf6fc651e66e20ad51d3d868f62f04fcb4eeafaff2eb7",
-  "runtime_evidence_tested_commit": "0c37ec2f93fe0f72675dff7fc266980378f24334",
-  "runtime_evidence_run_id": 36687361344,
+  "source_fingerprint": "sha256:bdac089ebcb2e634de03db4b35382bcb97ea2d264d115b3c8178c0f567844bad",
+  "runtime_evidence_tested_commit": "1b0bbe321fa483b21bed54d966480c73b1e9cd2c",
+  "runtime_evidence_run_id": 36689900617,
   "registry_screen_count": 545,
-  "route_screen_count": 279,
-  "unresolved_screen_count": 266,
+  "route_screen_count": 281,
+  "unresolved_screen_count": 264,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -51,6 +51,7 @@
     "FOS-CATTLE-008",
     "FOS-CATTLE-010",
     "FOS-CATTLE-013",
+    "FOS-CATTLE-014",
     "FOS-CATTLE-015",
     "FOS-CATTLE-017",
     "FOS-CATTLE-018",
@@ -255,6 +256,7 @@
     "FOS-SHEEP-010",
     "FOS-SHEEP-011",
     "FOS-SHEEP-012",
+    "FOS-SHEEP-013",
     "FOS-SHEEP-014",
     "FOS-SHEEP-016",
     "FOS-SHEEP-017",
@@ -769,6 +771,17 @@
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-CATTLE-014",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt"
         ]
       }
     },
@@ -3237,6 +3250,17 @@
       }
     },
     {
+      "screen_id": "FOS-SHEEP-013",
+      "proof_classes": [
+        "RENDERED_DESTINATION_TRAVERSAL"
+      ],
+      "evidence_sources": {
+        "RENDERED_DESTINATION_TRAVERSAL": [
+          "app/src/test/java/com/farmos/app/SheepRecordRuntimeNavigationTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-SHEEP-014",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -3752,7 +3776,6 @@
     "FOS-CATTLE-009",
     "FOS-CATTLE-011",
     "FOS-CATTLE-012",
-    "FOS-CATTLE-014",
     "FOS-CATTLE-016",
     "FOS-CATTLE-036",
     "FOS-FEED-002",
@@ -3900,7 +3923,6 @@
     "FOS-SEARCH-009",
     "FOS-SHEEP-005",
     "FOS-SHEEP-008",
-    "FOS-SHEEP-013",
     "FOS-SHEEP-015",
     "FOS-SHEEP-028",
     "FOS-SHEEP-032",

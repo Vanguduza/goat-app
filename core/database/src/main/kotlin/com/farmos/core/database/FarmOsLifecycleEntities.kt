@@ -365,6 +365,64 @@ interface LifecycleDao {
         """,
     )
     suspend fun goatKiddingDue(farmId: String): List<GoatDueRow>
+
+    /**
+     * Every active cow whose latest service has no calving on or after it, with the latest pregnancy
+     * diagnosis since that service and the latest expected calving date recorded at a dry-off since then.
+     * Exhaustive over the farm: due lists never come from a capped herd page.
+     */
+    @Query(
+        """
+        SELECT a.id AS animalId, a.tag AS tag, a.name AS name, s.occurredEpochDay AS serviceEpochDay, s.method AS method,
+            (SELECT p.result FROM cattle_pd p
+             WHERE p.farmId = a.farmId AND p.animalId = a.id AND p.occurredEpochDay >= s.occurredEpochDay
+             ORDER BY p.occurredEpochDay DESC, p.id DESC LIMIT 1) AS latestPdResult,
+            (SELECT d.expectedCalvingEpochDay FROM cattle_dry_offs d
+             WHERE d.farmId = a.farmId AND d.animalId = a.id AND d.occurredEpochDay >= s.occurredEpochDay
+               AND d.expectedCalvingEpochDay IS NOT NULL
+             ORDER BY d.occurredEpochDay DESC, d.id DESC LIMIT 1) AS storedDueEpochDay
+        FROM animals a JOIN cattle_services s ON s.farmId = a.farmId AND s.animalId = a.id
+        WHERE a.farmId = :farmId AND a.speciesCode = 'cattle' AND a.status = 'active'
+          AND s.id = (SELECT s2.id FROM cattle_services s2 WHERE s2.farmId = a.farmId AND s2.animalId = a.id
+                      ORDER BY s2.occurredEpochDay DESC, s2.id DESC LIMIT 1)
+          AND NOT EXISTS (SELECT 1 FROM cattle_calvings c
+                          WHERE c.farmId = a.farmId AND c.damId = a.id AND c.occurredEpochDay >= s.occurredEpochDay)
+        ORDER BY s.occurredEpochDay, a.tag, a.id
+        """,
+    )
+    suspend fun cattleCalvingDue(farmId: String): List<CattleDueRow>
+
+    /** Each sheep mob's latest joining (ram-in day), with the mob's name and recorded head count. */
+    @Query(
+        """
+        SELECT j.id AS joiningId, j.groupId AS groupId, g.name AS groupName, g.headCount AS headCount, j.startedEpochDay AS startedEpochDay
+        FROM sheep_joinings j JOIN animal_groups g ON g.farmId = j.farmId AND g.id = j.groupId
+        WHERE j.farmId = :farmId
+          AND j.id = (SELECT j2.id FROM sheep_joinings j2 WHERE j2.farmId = j.farmId AND j2.groupId = j.groupId
+                      ORDER BY j2.startedEpochDay DESC, j2.id DESC LIMIT 1)
+        ORDER BY j.startedEpochDay, g.name, j.groupId
+        """,
+    )
+    suspend fun sheepLatestJoinings(farmId: String): List<SheepJoiningDueRow>
+
+    /**
+     * Every active ewe whose latest scan found her in lamb (not dry) with no lambing on or after that scan.
+     * Exhaustive over the farm.
+     */
+    @Query(
+        """
+        SELECT a.id AS animalId, a.tag AS tag, a.name AS name, s.result AS result, s.occurredEpochDay AS scanEpochDay
+        FROM animals a JOIN sheep_scans s ON s.farmId = a.farmId AND s.animalId = a.id
+        WHERE a.farmId = :farmId AND a.speciesCode = 'sheep' AND a.status = 'active'
+          AND s.id = (SELECT s2.id FROM sheep_scans s2 WHERE s2.farmId = a.farmId AND s2.animalId = a.id
+                      ORDER BY s2.occurredEpochDay DESC, s2.id DESC LIMIT 1)
+          AND s.result != 'dry'
+          AND NOT EXISTS (SELECT 1 FROM sheep_lambings l
+                          WHERE l.farmId = a.farmId AND l.damId = a.id AND l.occurredEpochDay >= s.occurredEpochDay)
+        ORDER BY s.occurredEpochDay, a.tag, a.id
+        """,
+    )
+    suspend fun sheepScannedInLamb(farmId: String): List<SheepInLambRow>
     /** Milk summed over each goat's latest recorded day, across every record on that day. */
     @Query(
         """
@@ -671,3 +729,17 @@ interface LifecycleDao {
 
 /** One doe awaiting kidding: her latest service and the latest pregnancy check since it, if any. */
 data class GoatDueRow(val animalId: String, val tag: String, val name: String?, val serviceEpochDay: Long, val latestCheckResult: String?)
+
+data class SheepJoiningDueRow(val joiningId: String, val groupId: String, val groupName: String, val headCount: Int, val startedEpochDay: Long)
+
+data class SheepInLambRow(val animalId: String, val tag: String, val name: String?, val result: String, val scanEpochDay: Long)
+
+data class CattleDueRow(
+    val animalId: String,
+    val tag: String,
+    val name: String?,
+    val serviceEpochDay: Long,
+    val method: String,
+    val latestPdResult: String?,
+    val storedDueEpochDay: Long?,
+)

@@ -1,7 +1,11 @@
 package com.farmos.app
 
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.domain.ops.GestationSpecies
 import com.farmos.feature.ops.SheepAnimalRecords
+import com.farmos.feature.ops.SheepInLambView
+import com.farmos.feature.ops.SheepLambingDue
+import com.farmos.feature.ops.SheepMobLambingView
 import com.farmos.feature.ops.SheepTimelineRow
 import com.farmos.feature.ops.SheepWithdrawalRow
 import com.farmos.feature.ops.SheepWoolRecords
@@ -93,4 +97,26 @@ internal suspend fun loadSheepWool(database: FarmOsDatabase, farmId: String): Sh
         shearingCount = lifecycle.sheepShearingEventCount(farmId),
         micronCount = lifecycle.sheepMicronTestCount(farmId),
     )
+}
+
+/**
+ * Lambing due (owner decision D-019). Joinings are recorded per mob, so each mob's latest ram-in is dated
+ * with the farm's own sheep gestation period; ewes are listed from their latest in-lamb scan without a
+ * predicted date, because no per-ewe service is recorded.
+ */
+internal suspend fun loadSheepLambingDue(database: FarmOsDatabase, farmId: String): SheepLambingDue {
+    val period = database.gestationPeriod(farmId, GestationSpecies.SHEEP)
+    val lifecycle = database.lifecycle()
+    val mobs = lifecycle.sheepLatestJoinings(farmId).map {
+        SheepMobLambingView(
+            groupId = it.groupId,
+            groupName = it.groupName,
+            headCount = it.headCount,
+            ramInEpochDay = it.startedEpochDay,
+            earliestEpochDay = it.startedEpochDay + period.earliestDays,
+            typicalEpochDay = it.startedEpochDay + period.typicalDays,
+        )
+    }
+    val ewes = lifecycle.sheepScannedInLamb(farmId).map { SheepInLambView(it.animalId, it.tag, it.name, it.result, it.scanEpochDay) }
+    return SheepLambingDue(mobs, ewes, period.typicalDays)
 }

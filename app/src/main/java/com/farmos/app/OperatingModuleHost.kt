@@ -323,6 +323,7 @@ fun OperatingModuleHost(
                             onBack = operationsBack,
                             loadRecords = { id -> loadSheepRecords(database, farmId, id) },
                             loadWool = { loadSheepWool(database, farmId) },
+                            loadLambingDue = { loadSheepLambingDue(database, farmId) },
                         )
                         FarmModule.CATTLE -> CattleOperationsScreen(
                             selectedAnimalId = selected?.animalId,
@@ -421,6 +422,7 @@ fun OperatingModuleHost(
                             onBack = operationsBack,
                             loadRecords = { id -> loadCattleRecords(database, farmId, id) },
                             loadLots = { loadCattleLots(database, farmId) },
+                            loadCalvingDue = { loadCattleCalvingDue(database, farmId) },
                         )
                         else -> error("Unsupported species operations module $module")
                     }
