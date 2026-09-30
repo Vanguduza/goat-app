@@ -13,6 +13,11 @@ import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateAnimalGroup
 import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.CreateFarmTask
+import com.farmos.domain.ops.SubmitStockCount
+import com.farmos.domain.ops.StartStockCount
+import com.farmos.domain.ops.RejectStockCount
+import com.farmos.domain.ops.RecordStockCountLine
+import com.farmos.domain.ops.PostStockCount
 import com.farmos.domain.ops.EndTaskSeries
 import com.farmos.domain.ops.EditTaskSeries
 import com.farmos.domain.ops.CreateTaskSeries
@@ -196,6 +201,11 @@ object OpsReplicationAppliers {
         "supplier.create.v1" to replay { ops, op -> ops.createSupplier(decode<CreateSupplier>(op), context(op)) },
         "task.complete.v1" to replay { ops, op -> ops.completeTask(decode<CompleteFarmTask>(op), context(op)) },
         "task.create.v1" to replay { ops, op -> ops.createTask(decode<CreateFarmTask>(op), context(op)) },
+        StockCountCommands.START to stock { commands, op -> commands.start(decode<StartStockCount>(op), context(op)) },
+        StockCountCommands.LINE to stock { commands, op -> commands.recordLine(decode<RecordStockCountLine>(op), context(op)) },
+        StockCountCommands.SUBMIT to stock { commands, op -> commands.submit(decode<SubmitStockCount>(op), context(op)) },
+        StockCountCommands.POST to stock { commands, op -> commands.post(decode<PostStockCount>(op), context(op)) },
+        StockCountCommands.REJECT to stock { commands, op -> commands.reject(decode<RejectStockCount>(op), context(op)) },
         TaskSeriesCommands.SERIES_CREATE to series { commands, op -> commands.create(decode<CreateTaskSeries>(op), context(op)) },
         TaskSeriesCommands.OCCURRENCE_COMPLETE to series { commands, op -> commands.complete(decode<CompleteTaskOccurrence>(op), context(op)) },
         TaskSeriesCommands.SERIES_EDIT to series { commands, op -> commands.edit(decode<EditTaskSeries>(op), context(op)) },
@@ -207,6 +217,9 @@ object OpsReplicationAppliers {
 
     private fun context(op: OperationEnvelope) =
         LocalCommandContext(op.farmId, op.actorId, op.deviceId, op.operationId, op.businessTimeEpochMillis)
+
+    private fun stock(block: suspend (StockCountCommands, OperationEnvelope) -> Unit) =
+        OperationApplier { database, op -> block(StockCountCommands(database, op.farmId, replaying = true), op) }
 
     private fun series(block: suspend (TaskSeriesCommands, OperationEnvelope) -> Unit) =
         OperationApplier { database, op -> block(TaskSeriesCommands(database, op.farmId, replaying = true), op) }

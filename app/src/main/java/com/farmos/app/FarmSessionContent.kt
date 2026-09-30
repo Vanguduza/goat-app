@@ -244,6 +244,7 @@ fun FarmSessionContent(
                 enqueueSync = ::enqueueSync,
                 onBack = backHome,
                 loadReadModel = { loadInventoryReadModel(app.database, membership.farmId) },
+                stockCount = { back -> StockCountHost(app.database, membership.farmId, membership.role, ::context, ::enqueueSync, back) },
             )
             FarmModule.HOME, FarmModule.GOAT, FarmModule.HEALTH -> FarmHomeHost(
                 farmName = farmName,

@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:9e39c90dedc94a43e5449f4abf43ea41054566ee8a147563f8c929801c1bc010",
-  "runtime_evidence_tested_commit": "412d8bd24461a71a2dc12189a161ea5ea6529d14",
-  "runtime_evidence_run_id": 36703274582,
+  "source_fingerprint": "sha256:0aa252a0ce9ba9a524f92267b1f3f7e30aa4570d4d6e241c3e57bb060f40bc9f",
+  "runtime_evidence_tested_commit": "09611efd188a3c9a6639cf42e27afd5973b91825",
+  "runtime_evidence_run_id": 36706893680,
   "registry_screen_count": 545,
-  "route_screen_count": 284,
-  "unresolved_screen_count": 261,
+  "route_screen_count": 286,
+  "unresolved_screen_count": 259,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -189,6 +189,8 @@
     "FOS-INV-012",
     "FOS-INV-013",
     "FOS-INV-014",
+    "FOS-INV-015",
+    "FOS-INV-016",
     "FOS-INV-017",
     "FOS-LABOUR-001",
     "FOS-LABOUR-005",
@@ -2448,6 +2450,28 @@
       }
     },
     {
+      "screen_id": "FOS-INV-015",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/StockCountScreensTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-INV-016",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/StockCountScreensTest.kt"
+        ]
+      }
+    },
+    {
       "screen_id": "FOS-INV-017",
       "proof_classes": [
         "RENDERED_DESTINATION_TRAVERSAL"
@@ -3884,8 +3908,6 @@
     "FOS-HEALTH-027",
     "FOS-HEALTH-028",
     "FOS-HEALTH-030",
-    "FOS-INV-015",
-    "FOS-INV-016",
     "FOS-INV-018",
     "FOS-INV-019",
     "FOS-LABOUR-002",
