@@ -31,6 +31,8 @@ import com.farmos.domain.ops.MetricDefinition
 import com.farmos.domain.ops.MetricResult
 import com.farmos.core.database.BirthTotalRow
 import com.farmos.core.database.HealthTotalRow
+import com.farmos.core.database.ProductionTotalRow
+import com.farmos.core.database.InventoryTotalRow
 import com.farmos.core.database.MoneyRecordEntity
 import com.farmos.core.database.MoneyTotalRow
 import com.farmos.domain.ops.FarmCurrency
@@ -106,11 +108,31 @@ internal fun healthMetrics(totals: HealthTotalRow): List<MetricResult> = listOf(
     MetricResult.count(MetricDefinition("health-withdrawals", "Withdrawals running", "Count of withdrawal windows whose last day is today or later", "windows", "Today", "This farm · all species"), totals.activeWithdrawals),
 )
 
+private val products = mapOf(
+    "goat-milk" to Triple("Goat milk", "L", "goat milk record"),
+    "cattle-milk" to Triple("Cattle milk", "L", "cattle milk record"),
+    "sheep-wool" to Triple("Sheep wool (greasy)", "kg", "wool clip record"),
+    "poultry-eggs" to Triple("Eggs", "eggs", "flock day record"),
+)
+
+/** Production over every record (D-026); a product with nothing recorded is left out rather than shown as zero. */
+internal fun productionMetrics(totals: List<ProductionTotalRow>): List<MetricResult> = totals.filter { it.records > 0 }.map { row ->
+    val (name, unit, record) = products[row.product] ?: Triple(row.product, "units", "record")
+    MetricResult(MetricDefinition("production-${row.product}", name, "Sum over every $record", unit, "All time", "This farm"), row.amount, row.records, 0)
+}
+
+/** Stock items and those needing reorder, over every item (D-026). */
+internal fun inventoryMetrics(totals: InventoryTotalRow): List<MetricResult> = if (totals.items == 0) emptyList() else listOf(
+    MetricResult.count(MetricDefinition("inventory-items", "Stock items", "Count of inventory items", "items", "Now", "This farm"), totals.items),
+    MetricResult.count(MetricDefinition("inventory-reorder", "Stock at or below reorder level", "Count of items whose quantity is at or below the reorder level set for them", "items", "Now", "This farm · items with a reorder level"), totals.atOrBelowReorder),
+)
+
 /** The metric value in its declared unit; weights are stored in grams and money in minor units. */
 internal fun metricValueText(result: MetricResult): String {
     val unit = result.definition.unit
     return when {
         unit == "kg" -> "%.1f kg".format(result.value / 1000.0)
+        unit == "L" -> "%.1f L".format(result.value / 1000.0)
         FarmCurrency.isRecordable(unit) -> "${BigDecimal.valueOf(result.value, FarmCurrency.minorDigits(unit)).toPlainString()} $unit"
         else -> "${result.value} $unit"
     }
@@ -155,7 +177,8 @@ internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExpo
     LaunchedEffect(farmId) {
         runCatching {
             money = database.reports().moneyTotals(farmId)
-            more = birthMetrics(database.reports().birthTotals(farmId)) + healthMetrics(database.reports().healthTotals(farmId, LocalDate.now().toEpochDay()))
+            more = birthMetrics(database.reports().birthTotals(farmId)) + healthMetrics(database.reports().healthTotals(farmId, LocalDate.now().toEpochDay())) +
+                productionMetrics(database.reports().productionTotals(farmId)) + inventoryMetrics(database.reports().inventoryTotals(farmId))
             database.reports().herdRegister(farmId)
         }.onSuccess { rows = it }.onFailure { failure = it.message ?: "Records could not be read" }
     }

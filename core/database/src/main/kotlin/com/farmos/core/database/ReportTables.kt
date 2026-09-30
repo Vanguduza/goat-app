@@ -69,6 +69,29 @@ interface FarmReportDao {
     )
     suspend fun healthTotals(farmId: String, todayEpochDay: Long): HealthTotalRow
 
+    /** Goat and cattle milk, sheep wool and poultry eggs over every production record (D-026). */
+    @Query(
+        """
+        SELECT 'goat-milk' AS product, COUNT(*) AS records, IFNULL(SUM(litresMilli), 0) AS amount FROM goat_milk_records WHERE farmId = :farmId
+        UNION ALL
+        SELECT 'cattle-milk', COUNT(*), IFNULL(SUM(litresMilli), 0) FROM cattle_milk_records WHERE farmId = :farmId
+        UNION ALL
+        SELECT 'sheep-wool', COUNT(*), IFNULL(SUM(greasyGrams), 0) FROM sheep_wool_clips WHERE farmId = :farmId
+        UNION ALL
+        SELECT 'poultry-eggs', COUNT(*), IFNULL(SUM(eggs), 0) FROM poultry_flock_days WHERE farmId = :farmId
+        """,
+    )
+    suspend fun productionTotals(farmId: String): List<ProductionTotalRow>
+
+    /** Every stock item, and those at or below the reorder level set for them. */
+    @Query(
+        """
+        SELECT COUNT(*) AS items, IFNULL(SUM(CASE WHEN reorderMilli > 0 AND quantityMilli <= reorderMilli THEN 1 ELSE 0 END), 0) AS atOrBelowReorder
+        FROM inventory_items WHERE farmId = :farmId
+        """,
+    )
+    suspend fun inventoryTotals(farmId: String): InventoryTotalRow
+
     /** Every money record on the farm, oldest first, for export. */
     @Query("SELECT * FROM money_records WHERE farmId = :farmId ORDER BY occurredEpochDay, id")
     suspend fun moneyRecords(farmId: String): List<MoneyRecordEntity>
@@ -79,6 +102,12 @@ data class BirthTotalRow(val speciesCode: String, val events: Int, val live: Lon
 
 /** Health records over the whole farm, with the withdrawal windows still running on the given day. */
 data class HealthTotalRow(val observations: Int, val treatments: Int, val activeWithdrawals: Int)
+
+/** One product over every record: milk in millilitres, wool in grams, eggs in eggs. */
+data class ProductionTotalRow(val product: String, val records: Int, val amount: Long)
+
+/** Stock items tracked, and those at or below a reorder level set for them. */
+data class InventoryTotalRow(val items: Int, val atOrBelowReorder: Int)
 
 /** Money of one kind (income or expense) in one currency, over every record. */
 data class MoneyTotalRow(val kind: String, val currency: String, val amountMinor: Long, val records: Int)

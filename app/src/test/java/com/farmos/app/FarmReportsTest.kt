@@ -5,7 +5,10 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.AnimalEntity
+import com.farmos.core.database.CattleMilkEntity
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.GoatMilkEntity
+import com.farmos.core.database.InventoryItemEntity
 import com.farmos.core.database.MeasurementEntity
 import com.farmos.core.database.KiddingEntity
 import com.farmos.core.database.MoneyRecordEntity
@@ -128,5 +131,28 @@ class FarmReportsTest {
         val health = healthMetrics(database.reports().healthTotals(farm, 20_300)).associateBy { it.definition.id }
         assertEquals(1L, health.getValue("health-withdrawals").value)
         assertEquals(0L, health.getValue("health-treatments").value)
+    }
+
+    @Test
+    fun productionAndStockAreTotalledOverEveryRecord(): Unit = runBlocking {
+        database.lifecycle().insertMilk(GoatMilkEntity("m1", farm, "doe-1", 2_000, 20_100))
+        database.lifecycle().insertMilk(GoatMilkEntity("m2", farm, "doe-2", 1_500, 20_101))
+        database.lifecycle().insertMilk(GoatMilkEntity("m3", otherFarm, "doe-9", 9_000, 20_101))
+        database.lifecycle().insertCattleMilk(CattleMilkEntity("c1", otherFarm, "cow-9", 9_000, 20_101))
+        database.inventory().insertItem(InventoryItemEntity("i1", farm, "FEED", "Feed", "kg", 5_000, 1, reorderMilli = 10_000))
+        database.inventory().insertItem(InventoryItemEntity("i2", farm, "SALT", "Salt", "kg", 50_000, 1, reorderMilli = 10_000))
+        database.inventory().insertItem(InventoryItemEntity("i3", farm, "WIRE", "Wire", "m", 0, 1))
+
+        val production = productionMetrics(database.reports().productionTotals(farm)).associateBy { it.definition.id }
+        // Cattle milk, wool and eggs have nothing recorded on this farm and are left out rather than shown as zero.
+        assertEquals(setOf("production-goat-milk"), production.keys)
+        assertEquals(3_500L, production.getValue("production-goat-milk").value)
+        assertEquals("3.5 L", metricValueText(production.getValue("production-goat-milk")))
+
+        val stock = inventoryMetrics(database.reports().inventoryTotals(farm)).associateBy { it.definition.id }
+        assertEquals(3L, stock.getValue("inventory-items").value)
+        // Only an item with a reorder level set can be at or below it.
+        assertEquals(1L, stock.getValue("inventory-reorder").value)
+        assertTrue(inventoryMetrics(database.reports().inventoryTotals("cdcdcdcd-cdcd-4dcd-8dcd-cdcdcdcdcdcd")).isEmpty())
     }
 }
