@@ -30,13 +30,16 @@ import kotlinx.coroutines.withContext
  * Planning repeating and assigned tasks (owner decision D-020): supervisors and management plan the work
  * (`MANAGE_WORKERS`); anyone who records farm work completes it.
  */
-internal fun canPlanFarmWork(role: String): Boolean {
+internal fun canPlanFarmWork(role: String): Boolean = rolePermits(role, Permission.MANAGE_WORKERS)
+
+/** Whether a membership role holds [permission] under the local role matrix; unknown roles hold nothing. */
+internal fun rolePermits(role: String, permission: Permission): Boolean {
     val local = LocalRole.entries.firstOrNull { it.name.equals(role, ignoreCase = true) }
         ?: when (role.lowercase()) {
             "farm_manager" -> LocalRole.MANAGER
             else -> return false
         }
-    return RolePermissions.allows(local, Permission.MANAGE_WORKERS)
+    return RolePermissions.allows(local, permission)
 }
 
 /** The task board's adapter to the repeating-task commands and reads for one farm. */

@@ -91,6 +91,8 @@ internal object InventoryRecords {
     fun directionLabel(direction: String): String = when (direction) {
         "receive" -> "Received"
         "issue" -> "Issued"
+        "count_gain" -> "Stock count gain"
+        "count_loss" -> "Stock count loss"
         else -> direction
     }
 

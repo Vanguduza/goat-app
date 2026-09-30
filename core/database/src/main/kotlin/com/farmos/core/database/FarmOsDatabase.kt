@@ -771,8 +771,10 @@ interface SyncCursorDao {
         ReplicationPeerMarkEntity::class,
         FarmGestationEntity::class,
         TaskSeriesEntity::class,
+        StockCountEntity::class,
+        StockCountLineEntity::class,
     ],
-    version = 22,
+    version = 23,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -785,6 +787,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun farmSettings(): FarmSettingsDao
     abstract fun farmGestation(): FarmGestationDao
     abstract fun taskSeries(): TaskSeriesDao
+    abstract fun stockCounts(): StockCountDao
     abstract fun replicationApplications(): ReplicationApplicationDao
     abstract fun replicationPeerMarks(): ReplicationPeerMarkDao
     abstract fun aggregateVersions(): AggregateVersionDao
@@ -1224,6 +1227,23 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22)
+        /** Stock counts and their lines (owner decision D-021). */
+        val MIGRATION_22_23 = object : Migration(22, 23) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `stock_counts` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `status` TEXT NOT NULL, " +
+                        "`startedByActorId` TEXT NOT NULL, `startedAtEpochMillis` INTEGER NOT NULL, `submittedByActorId` TEXT, `submittedAtEpochMillis` INTEGER, " +
+                        "`decidedByActorId` TEXT, `decidedAtEpochMillis` INTEGER, `rejectionReason` TEXT, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_stock_counts_farmId_status` ON `stock_counts` (`farmId`, `status`)")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `stock_count_lines` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `countId` TEXT NOT NULL, `itemId` TEXT NOT NULL, " +
+                        "`onHandAtCountMilli` INTEGER NOT NULL, `countedMilli` INTEGER NOT NULL, `countedByActorId` TEXT NOT NULL, `countedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_stock_count_lines_farmId_countId` ON `stock_count_lines` (`farmId`, `countId`)")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23)
     }
 }

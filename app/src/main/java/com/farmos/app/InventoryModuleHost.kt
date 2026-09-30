@@ -31,7 +31,11 @@ fun InventoryModuleHost(
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
     loadReadModel: suspend () -> InventoryReadModel = { InventoryReadModel() },
+    /** Stock count and review (D-021), shown in place of the inventory pages while open. */
+    stockCount: (@Composable (onBack: () -> Unit) -> Unit)? = null,
 ) {
+    var counting by remember { mutableStateOf(false) }
+    if (counting && stockCount != null) return stockCount { counting = false }
     val scope = rememberCoroutineScope()
     var rows by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var itemOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
@@ -150,5 +154,6 @@ fun InventoryModuleHost(
         },
         onBack = onBack,
         readModel = readModel,
+        onOpenStockCount = stockCount?.let { { counting = true } },
     )
 }
