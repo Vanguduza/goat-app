@@ -239,6 +239,9 @@ fun FarmSessionContent(
                 onBack = backHome,
                 loadRecords = { loadRabbitRecords(app.database, membership.farmId) },
                 searchRabbits = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "rabbit") },
+                exitFor = { rabbit, onRecorded ->
+                    SpeciesExitHost(app.database, membership.farmId, SpeciesAnimalRow(rabbit.animalId, rabbit.label, rabbit.active), null, ::context, onRecorded, onBack = {})
+                },
             )
             FarmModule.INVENTORY -> InventoryModuleHost(
                 farmId = membership.farmId,

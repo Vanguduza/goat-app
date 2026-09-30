@@ -246,7 +246,7 @@ private fun CattleServiceScreen(
         error,
         onBack,
     ) {
-        CattleField(animalId, { animalId = it }, "Cow id", busy)
+        OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
         CattleField(method, { method = it }, "Method", busy)
         CattleField(day, {
             day =
@@ -278,7 +278,7 @@ private fun CattlePdScreen(
         onBack,
         FarmVisualClass.I4,
     ) {
-        CattleField(animalId, { animalId = it }, "Cow id", busy)
+        OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
         CattleField(result, { result = it }, "PD result", busy)
         CattleField(day, {
             day =
@@ -304,7 +304,7 @@ private fun CattleCalvingScreen(
     var dead by remember { mutableStateOf("0") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-015", "Record calving", "Live plus dead must equal born.", busy, error, onBack, FarmVisualClass.I4) {
-        CattleField(animalId, { animalId = it }, "Cow id", busy)
+        OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             CattleCompactField(born, { born = it }, "Born", busy, Modifier.weight(1f))
             CattleCompactField(live, { live = it }, "Live", busy, Modifier.weight(1f))
@@ -343,7 +343,7 @@ private fun CattleBcsScreen(
         error,
         onBack,
     ) {
-        CattleField(animalId, { animalId = it }, "Cattle id", busy)
+        OpsAnimalPicker("Cattle", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
         CattleField(scale, { scale = it }, "Scale", busy)
         CattleField(score, {
             score =
@@ -371,7 +371,7 @@ private fun CattleMilkScreen(
     var litres by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-019", "Milk capture", "Enter litres; the device stores milli-litres exactly.", busy, error, onBack) {
-        CattleField(animalId, { animalId = it }, "Cow id", busy)
+        OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
         CattleField(litres, { litres = it }, "Litres", busy)
         CattleField(day, {
             day =
@@ -402,7 +402,7 @@ private fun CattleScoreScreen(
     var score by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage(screenId, title, subtitle, busy, error, onBack, visualClass) {
-        CattleField(animalId, { animalId = it }, "Cattle id", busy)
+        OpsAnimalPicker("Cattle", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
         CattleField(score, { score = it }, "Score", busy)
         CattleField(day, {
             day =
@@ -438,7 +438,7 @@ private fun CattleSccScreen(
         onBack,
         FarmVisualClass.I4,
     ) {
-        CattleField(animalId, { animalId = it }, "Cow id", busy)
+        OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
         CattleField(cells, { cells = it }, "Cells/ml", busy)
         CattleField(dim, {
             dim =
@@ -466,7 +466,7 @@ private fun CattleDryOffScreen(
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     var expected by remember { mutableStateOf("") }
     CattleFormPage("FOS-CATTLE-024", "Dry-off", "Record dry-off and an optional expected calving date.", busy, error, onBack) {
-        CattleField(animalId, { animalId = it }, "Cow id", busy)
+        OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
         CattleField(day, { day = it }, "Dry-off date", busy)
         CattleField(expected, {
             expected =
@@ -493,7 +493,7 @@ private fun CattleWeaningScreen(
     var grams by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-017", "Weaning", "Record calf weaning and optional weight in grams.", busy, error, onBack) {
-        CattleField(animalId, { animalId = it }, "Calf id", busy)
+        OpsAnimalPicker("Calf", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
         CattleField(grams, { grams = it }, "Weight grams (optional)", busy)
         CattleField(day, {
             day =
@@ -518,7 +518,7 @@ private fun CattleIdentifierScreen(
     var value by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-005", "Official identifier", "Bind an approved identifier to this cattle record.", busy, error, onBack) {
-        CattleField(animalId, { animalId = it }, "Cattle id", busy)
+        OpsAnimalPicker("Cattle", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
         CattleField(type, { type = it }, "Identifier type", busy)
         CattleField(value, {
             value =
@@ -548,7 +548,7 @@ private fun CattleMovementScreen(
     var to by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-030", "Movement", "Record on, off or transfer movement.", busy, error, onBack) {
-        CattleField(animalId, { animalId = it }, "Cattle id", busy)
+        OpsAnimalPicker("Cattle", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
         CattleField(direction, { direction = it }, "Direction", busy)
         CattleField(from, {
             from =
@@ -581,8 +581,8 @@ private fun CattlePedigreeScreen(
         error,
         onBack,
     ) {
-        CattleField(animalId, { animalId = it }, "Cattle id", busy)
-        CattleField(parent, { parent = it }, "Parent id", busy)
+        OpsAnimalPicker("Cattle", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
+        OpsAnimalPicker("Parent", parent, OpsAnimalFilter.ANY, busy, parent = true) { parent = it }
         CattleField(relation, {
             relation =
                 it
@@ -604,7 +604,7 @@ private fun CattleLotPlaceScreen(
     var heads by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-026", "Feedlot placement", "Place a cattle group onto feed with head count.", busy, error, onBack) {
-        CattleField(group, { group = it }, "Cattle lot/group id", busy)
+        OpsGroupPicker("Cattle lot", group, busy) { group = it }
         CattleField(heads, { heads = it }, "Head count", busy)
         CattleField(day, {
             day =
@@ -629,7 +629,7 @@ private fun CattleDaysOnFeedScreen(
     var days by remember { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-028", "Days on feed", "Record non-negative days on feed for a cattle lot.", busy, error, onBack) {
-        CattleField(group, { group = it }, "Cattle lot/group id", busy)
+        OpsGroupPicker("Cattle lot", group, busy) { group = it }
         CattleField(days, { days = it }, "Days on feed", busy)
         CattleField(day, {
             day =
@@ -663,7 +663,7 @@ private fun CattleLotCloseScreen(
         error,
         onBack,
     ) {
-        CattleField(group, { group = it }, "Cattle lot/group id", busy)
+        OpsGroupPicker("Cattle lot", group, busy) { group = it }
         CattleField(heads, { heads = it }, "Head out", busy)
         CattleField(grams, {
             grams =

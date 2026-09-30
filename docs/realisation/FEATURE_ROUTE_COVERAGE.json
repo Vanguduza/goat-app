@@ -2,11 +2,11 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_COVERAGE_IN_PROGRESS",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:3996ceea48ae3cefab6b9a32593ae490beb03750107fb59613bb827637aa5b84",
+  "source_fingerprint": "sha256:57cc6a931c7221c71fc1de61f186f899cd6a1e52e6b799f4f1776f984e4e8f3c",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 91,
-  "features_fully_route_bound": 42,
+  "features_fully_route_bound": 43,
   "features_without_route_evidence": 65,
   "explicit_headless_contracts": 0,
   "route_gate_ready": false,
@@ -531,14 +531,13 @@
       "route_screen_ids": [
         "FOS-RABBIT-001",
         "FOS-RABBIT-002",
+        "FOS-RABBIT-003",
+        "FOS-RABBIT-004",
         "FOS-RABBIT-005"
       ],
-      "unresolved_screen_ids": [
-        "FOS-RABBIT-003",
-        "FOS-RABBIT-004"
-      ],
+      "unresolved_screen_ids": [],
       "headless_contract": null,
-      "coverage_state": "PARTIAL_ROUTE_COVERAGE",
+      "coverage_state": "ALL_BOUND_SCREENS_ROUTE_PROVEN",
       "feature_green": false
     },
     {

@@ -13,6 +13,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +59,7 @@ private enum class RabbitPage {
     KINDLING_DUE,
     LITTER_PROFILE,
     KIT_CENSUS,
+    PROFILE,
 }
 
 /** Rabbit biology is wave/cage/litter-first; this is not a Goat layout with rabbit labels. */
@@ -92,15 +94,22 @@ fun RabbitProgrammeScreen(
     nestBoxChoices: List<RabbitNestBoxChoice> = emptyList(),
     /** Whole-farm rabbit search for health subjects; never the capped presentation list. */
     searchRabbits: FarmSelectorSearch = NoFarmSelectorSearch,
+    /** Registered does and bucks, each opening its profile; empty keeps the plain list. */
+    rabbits: List<RabbitAnimalView> = emptyList(),
+    /** A rabbit's exit record and reversal (D-022), shown on its profile. */
+    rabbitExit: @Composable (RabbitAnimalView) -> Unit = {},
 ) {
     var page by remember { mutableStateOf(RabbitPage.DASHBOARD) }
+    var profileId by remember { mutableStateOf<String?>(null) }
     val home = { page = RabbitPage.DASHBOARD }
     when (page) {
         RabbitPage.DASHBOARD -> {
             RabbitDashboard(does, rabbitCount, cages, waves, availableBoxes, error, { page = it }, onBack)
         }
 
-        RabbitPage.ANIMALS -> {
+        RabbitPage.ANIMALS -> if (rabbits.isNotEmpty()) {
+            RabbitAnimalsScreen(rabbits, rabbitCount, error, { profileId = it.animalId; page = RabbitPage.PROFILE }, home)
+        } else {
             RabbitRows(
                 "FOS-RABBIT-002",
                 "Breeding animals",
@@ -110,6 +119,15 @@ fun RabbitProgrammeScreen(
                 home,
                 note = rabbitCount?.takeIf { it > does.size }?.let { "Showing the first ${does.size} of $it rabbits by tag." },
             )
+        }
+
+        RabbitPage.PROFILE -> {
+            val rabbit = rabbits.firstOrNull { it.animalId == profileId }
+            if (rabbit == null) {
+                LaunchedEffect(profileId) { page = RabbitPage.ANIMALS }
+            } else {
+                RabbitProfileScreen(rabbit, rabbitExit) { page = RabbitPage.ANIMALS }
+            }
         }
 
         RabbitPage.REGISTER -> {

@@ -20,6 +20,7 @@ import com.farmos.domain.rabbit.CreateRabbitCage
 import com.farmos.domain.rabbit.CreateRabbitNestBox
 import com.farmos.domain.rabbit.CreateRabbitWave
 import com.farmos.domain.rabbit.RecordRabbitGiStasis
+import com.farmos.feature.rabbit.RabbitAnimalView
 import com.farmos.feature.rabbit.RabbitNestBoxChoice
 import com.farmos.feature.rabbit.RabbitProgrammeScreen
 import com.farmos.feature.rabbit.RabbitRecords
@@ -38,6 +39,8 @@ fun RabbitModuleHost(
     onBack: () -> Unit,
     loadRecords: suspend () -> RabbitRecords = { RabbitRecords() },
     searchRabbits: FarmSelectorSearch = NoFarmSelectorSearch,
+    /** A rabbit's exit record and reversal (D-022); onRecorded refreshes the rabbitry. */
+    exitFor: @Composable (rabbit: RabbitAnimalView, onRecorded: () -> Unit) -> Unit = { _, _ -> },
 ) {
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
@@ -48,6 +51,7 @@ fun RabbitModuleHost(
     var boxes by remember { mutableStateOf(0L) }
     var selectedCageId by remember { mutableStateOf<String?>(null) }
     var rabbitRows by remember { mutableStateOf(emptyList<String>()) }
+    var rabbits by remember(farmId) { mutableStateOf(emptyList<RabbitAnimalView>()) }
     var nestBoxRows by remember { mutableStateOf(emptyList<String>()) }
     var nestBoxChoices by remember(farmId) { mutableStateOf(emptyList<RabbitNestBoxChoice>()) }
     var records by remember(farmId) { mutableStateOf(RabbitRecords()) }
@@ -64,7 +68,9 @@ fun RabbitModuleHost(
         val boxRows = ops.nestBoxes()
         nestBoxRows = boxRows.map { "${it.id} ${it.code} · ${it.status}" }
         nestBoxChoices = boxRows.map { RabbitNestBoxChoice(it.id, it.code, it.status) }
-        rabbitRows = rabbitHerd.list().map { animal ->
+        val herd = rabbitHerd.list()
+        rabbits = herd.map { RabbitAnimalView(it.id, it.tag, it.name, it.sex == "FEMALE", it.status) }
+        rabbitRows = herd.map { animal ->
             buildString {
                 append(animal.tag)
                 animal.name?.let { append(" · ").append(it) }
@@ -95,6 +101,8 @@ fun RabbitModuleHost(
     }
 
     RabbitProgrammeScreen(
+        rabbits = rabbits,
+        rabbitExit = { rabbit -> exitFor(rabbit) { run { } } },
         waveOptions = waveOptions,
         nestBoxChoices = nestBoxChoices,
         searchRabbits = searchRabbits,

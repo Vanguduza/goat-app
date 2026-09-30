@@ -69,6 +69,10 @@ import com.farmos.feature.ops.SheepOperationsScreen
 import com.farmos.feature.ops.TaskUiRow
 import com.farmos.feature.ops.TasksBoardScreen
 import java.time.LocalDate
+import androidx.compose.runtime.CompositionLocalProvider
+import com.farmos.core.design.FarmSelectorOption
+import com.farmos.feature.ops.LocalOpsAnimalSearch
+import com.farmos.feature.ops.OpsAnimalSearch
 import java.util.UUID
 import kotlinx.coroutines.launch
 
@@ -92,6 +96,7 @@ fun OperatingModuleHost(
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
     var speciesCounts by remember { mutableStateOf<SpeciesHerdCounts?>(null) }
     var catalogRows by remember { mutableStateOf(emptyList<String>()) }
+    var speciesGroups by remember { mutableStateOf(emptyList<FarmSelectorOption>()) }
     var treatmentRows by remember { mutableStateOf(emptyList<String>()) }
     var packRows by remember { mutableStateOf(emptyList<String>()) }
     var withdrawalRows by remember { mutableStateOf(emptyList<String>()) }
@@ -133,6 +138,7 @@ fun OperatingModuleHost(
             )
         }.orEmpty()
         speciesCounts = herd?.let { SpeciesHerdCounts(total = it.listedTotal(), active = it.activeCount()) }
+        speciesGroups = speciesCode?.let { code -> database.groups().forFarm(farmId).filter { it.speciesCode == code }.map { FarmSelectorOption(it.id, it.name, "${it.headCount} head") } }.orEmpty()
         catalogRows = ops.diseases().map { "${it.speciesCode} · ${it.displayName} · ${it.firstAid}" }
         treatmentRows = ops.recentTreatments().map { "${it.speciesCode} · ${it.reason} · formulary ${it.formularyItemId}" }
         packRows = ops.packs().map { "${it.speciesCode} · ${it.name} · ${it.status} · ${it.acceptedByVet.orEmpty()}" }
@@ -207,7 +213,15 @@ fun OperatingModuleHost(
                 },
                 onBack = onBack,
                 extra = { selected, operationsBack ->
-                    when (module) {
+                    // Owner decision D-004: operations choose animals and groups from every record, never by typed id.
+                    val opsSearch = remember(farmId, speciesCode, selected?.animalId, speciesGroups) {
+                        val code = speciesCode.orEmpty()
+                        OpsAnimalSearch(
+                            animalSelectorSearch(database, farmId, code), animalSelectorSearch(database, farmId, code, "FEMALE"), animalSelectorSearch(database, farmId, code, "MALE"),
+                            selected?.animalId, selected?.label, speciesGroups,
+                        )
+                    }
+                    CompositionLocalProvider(LocalOpsAnimalSearch provides opsSearch) { when (module) {
                         FarmModule.SHEEP -> SheepOperationsScreen(
                             selectedAnimalId = selected?.animalId,
                             busy = busy,
@@ -435,7 +449,7 @@ fun OperatingModuleHost(
                             loadCalvingDue = { loadCattleCalvingDue(database, farmId) },
                         )
                         else -> error("Unsupported species operations module $module")
-                    }
+                    } }
                 },
             )
         }

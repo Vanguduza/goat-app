@@ -2,12 +2,12 @@
   "schema_version": 2,
   "evidence_class": "CI_PROVEN_ROUTE_OWNERSHIP_SUBSET",
   "certification_status": "PASS_EXACT_HEAD_CI",
-  "source_fingerprint": "sha256:3996ceea48ae3cefab6b9a32593ae490beb03750107fb59613bb827637aa5b84",
-  "runtime_evidence_tested_commit": "48e9a912f53a44546fea0ad05b719e2550f313da",
-  "runtime_evidence_run_id": 36747990679,
+  "source_fingerprint": "sha256:57cc6a931c7221c71fc1de61f186f899cd6a1e52e6b799f4f1776f984e4e8f3c",
+  "runtime_evidence_tested_commit": "f4a38f796c354ed2930fbeda0d3ebde86370d4c0",
+  "runtime_evidence_run_id": 36751082718,
   "registry_screen_count": 545,
-  "route_screen_count": 298,
-  "unresolved_screen_count": 247,
+  "route_screen_count": 300,
+  "unresolved_screen_count": 245,
   "coverage_complete": false,
   "screen_ids": [
     "FOS-ADMIN-001",
@@ -232,6 +232,8 @@
     "FOS-PROC-009",
     "FOS-RABBIT-001",
     "FOS-RABBIT-002",
+    "FOS-RABBIT-003",
+    "FOS-RABBIT-004",
     "FOS-RABBIT-005",
     "FOS-RABBIT-006",
     "FOS-RABBIT-007",
@@ -507,7 +509,8 @@
       ],
       "evidence_sources": {
         "RENDERED_SURFACE_OWNER": [
-          "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt"
+          "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt",
+          "app/src/test/java/com/farmos/app/OpsAnimalPickerTest.kt"
         ]
       }
     },
@@ -783,11 +786,15 @@
     {
       "screen_id": "FOS-CATTLE-010",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/OpsAnimalPickerTest.kt"
         ]
       }
     },
@@ -2978,11 +2985,37 @@
     {
       "screen_id": "FOS-RABBIT-002",
       "proof_classes": [
-        "RENDERED_DESTINATION_TRAVERSAL"
+        "RENDERED_DESTINATION_TRAVERSAL",
+        "RENDERED_SURFACE_OWNER"
       ],
       "evidence_sources": {
         "RENDERED_DESTINATION_TRAVERSAL": [
           "app/src/test/java/com/farmos/app/RabbitRuntimeNavigationTest.kt"
+        ],
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/RabbitProfileScreensTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-RABBIT-003",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/RabbitProfileScreensTest.kt"
+        ]
+      }
+    },
+    {
+      "screen_id": "FOS-RABBIT-004",
+      "proof_classes": [
+        "RENDERED_SURFACE_OWNER"
+      ],
+      "evidence_sources": {
+        "RENDERED_SURFACE_OWNER": [
+          "app/src/test/java/com/farmos/app/RabbitProfileScreensTest.kt"
         ]
       }
     },
@@ -4090,8 +4123,6 @@
     "FOS-PROC-007",
     "FOS-PROC-008",
     "FOS-PROC-010",
-    "FOS-RABBIT-003",
-    "FOS-RABBIT-004",
     "FOS-RABBIT-010",
     "FOS-RABBIT-014",
     "FOS-RABBIT-015",
