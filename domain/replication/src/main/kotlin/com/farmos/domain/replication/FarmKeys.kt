@@ -7,6 +7,7 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.SecureRandom
 import java.security.spec.ECGenParameterSpec
+import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 import javax.crypto.KeyAgreement
@@ -27,6 +28,9 @@ class FarmDataKey(val keyId: String, material: ByteArray) {
     }
 
     internal fun material(): ByteArray = bytes.copyOf()
+
+    /** The raw key, only for sealing into this device's key vault. Never log, send or store it unsealed. */
+    fun materialForVault(): ByteArray = bytes.copyOf()
 
     override fun toString(): String = "FarmDataKey($keyId)"
 
@@ -102,6 +106,19 @@ object DeviceKeys {
 
     /** Short, stable fingerprint of a public key, used to name a farm's pairing identity. */
     fun fingerprint(encoded: ByteArray): String = Sha256.hex(encoded).take(FINGERPRINT_HEX)
+
+    /**
+     * The farm's pairing fingerprint, the same on every farm device. It is public by design: pairing is
+     * protected by binding the new device's own key into the code the approver types, not by this value.
+     */
+    fun farmPairingFingerprint(farmId: String): String = Sha256.hex("goat-farm-pairing-v1|$farmId").take(FINGERPRINT_HEX)
+
+    fun encodePrivate(privateKey: PrivateKey): ByteArray = privateKey.encoded
+
+    fun keyPair(encodedPublic: ByteArray, encodedPrivate: ByteArray): KeyPair {
+        val factory = KeyFactory.getInstance("EC")
+        return KeyPair(factory.generatePublic(X509EncodedKeySpec(encodedPublic)), factory.generatePrivate(PKCS8EncodedKeySpec(encodedPrivate)))
+    }
 }
 
 /** A farm data key encrypted to one device: only that device's private key can recover it. */

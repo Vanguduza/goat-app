@@ -61,6 +61,9 @@ class FarmOsApplication : Application(), SyncEngineOwner {
     lateinit var deviceId: String
         private set
 
+    /** This device's farm keys and device identity, sealed by the Android Keystore; excluded from backups. */
+    internal val keyVault: FarmKeyVault by lazy { FarmKeyVault(java.io.File(noBackupFilesDir, "goat-vault"), KeystoreSealer()) }
+
     @Volatile
     var authorizationListener: ((AuthorizationLoss) -> Unit)? = null
 
