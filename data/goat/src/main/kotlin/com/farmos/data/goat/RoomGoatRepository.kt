@@ -8,6 +8,7 @@ import com.farmos.core.database.GoatMilkEntity
 import com.farmos.core.database.KiddingEntity
 import com.farmos.core.database.MeasurementEntity
 import com.farmos.core.database.OutboxEntity
+import com.farmos.core.database.insertOutboxAndJournal
 import com.farmos.core.model.SyncState
 import com.farmos.domain.goat.GoatGrowth
 import com.farmos.domain.goat.GoatRepository
@@ -82,7 +83,7 @@ class RoomGoatRepository(
                     updatedAtEpochMillis = context.occurredAtEpochMillis,
                 ),
             )
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 outbox(
                     context = context,
                     commandName = "goat.register.v1",
@@ -126,7 +127,7 @@ class RoomGoatRepository(
                     measuredAtEpochMillis = command.measuredAtEpochMillis,
                 ),
             )
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 outbox(
                     context = context,
                     commandName = "goat.record_weight.v1",
@@ -163,7 +164,7 @@ class RoomGoatRepository(
                 status = command.status.wireValue(),
                 updatedAtEpochMillis = context.occurredAtEpochMillis,
             )
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 outbox(
                     context = context,
                     commandName = "goat.set_status.v1",
@@ -205,7 +206,7 @@ class RoomGoatRepository(
                     occurredEpochDay = command.occurredEpochDay,
                 ),
             )
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 outbox(
                     context = context,
                     commandName = "goat.record_kidding.v1",
@@ -244,7 +245,7 @@ class RoomGoatRepository(
                     occurredEpochDay = command.occurredEpochDay,
                 ),
             )
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 outbox(
                     context = context,
                     commandName = "goat.record_famacha.v1",
@@ -283,7 +284,7 @@ class RoomGoatRepository(
                     occurredEpochDay = command.occurredEpochDay,
                 ),
             )
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 outbox(
                     context = context,
                     commandName = "goat.record_milk.v1",
@@ -316,7 +317,7 @@ class RoomGoatRepository(
                     command.scoreId, farmId, command.animalId, command.scoreTenths, command.occurredEpochDay,
                 ),
             )
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 outbox(
                     context = context,
                     commandName = "goat.record_bcs.v1",
@@ -349,7 +350,7 @@ class RoomGoatRepository(
                     command.recordId, farmId, command.animalId, command.cellsPerMl, command.dimDays, command.occurredEpochDay,
                 ),
             )
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 outbox(
                     context = context,
                     commandName = "goat.record_scc.v1",
@@ -372,7 +373,7 @@ class RoomGoatRepository(
         database.withTransaction {
             val aggregateOrdinal = database.outbox().nextAggregateOrdinal(farmId, ANIMAL_AGGREGATE, command.animalId)
             database.lifecycle().insertHeat(com.farmos.core.database.GoatHeatEntity(command.heatId, farmId, command.animalId, command.occurredEpochDay))
-            database.outbox().insert(outbox(context, "goat.record_heat.v1", command.animalId, aggregateOrdinal, nextExpectedStreamVersion(command.animalId), json.encodeToString(command)))
+            database.insertOutboxAndJournal(outbox(context, "goat.record_heat.v1", command.animalId, aggregateOrdinal, nextExpectedStreamVersion(command.animalId), json.encodeToString(command)))
         }
         return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
@@ -387,7 +388,7 @@ class RoomGoatRepository(
             val aggregateOrdinal = database.outbox().nextAggregateOrdinal(farmId, ANIMAL_AGGREGATE, command.damId)
             database.lifecycle().insertMating(com.farmos.core.database.GoatMatingEntity(command.matingId, farmId, command.damId, command.sireId, command.method, command.occurredEpochDay))
             database.tasks().insert(com.farmos.core.database.TaskEntity(command.pregCheckTaskId, farmId, "goat", "PREG_CHECK", "Pregnancy check", command.occurredEpochDay + 45, "open", command.damId, null, null, context.occurredAtEpochMillis))
-            database.outbox().insert(outbox(context, "goat.record_mating.v1", command.damId, aggregateOrdinal, nextExpectedStreamVersion(command.damId), json.encodeToString(command)))
+            database.insertOutboxAndJournal(outbox(context, "goat.record_mating.v1", command.damId, aggregateOrdinal, nextExpectedStreamVersion(command.damId), json.encodeToString(command)))
         }
         return LocalCommandResult(context.mutationId, command.damId, locallyDurable = true)
     }
@@ -400,7 +401,7 @@ class RoomGoatRepository(
         database.withTransaction {
             val aggregateOrdinal = database.outbox().nextAggregateOrdinal(farmId, ANIMAL_AGGREGATE, command.animalId)
             database.lifecycle().insertPregnancy(com.farmos.core.database.GoatPregnancyEntity(command.checkId, farmId, command.animalId, command.result, command.occurredEpochDay))
-            database.outbox().insert(outbox(context, "goat.record_pregnancy.v1", command.animalId, aggregateOrdinal, nextExpectedStreamVersion(command.animalId), json.encodeToString(command)))
+            database.insertOutboxAndJournal(outbox(context, "goat.record_pregnancy.v1", command.animalId, aggregateOrdinal, nextExpectedStreamVersion(command.animalId), json.encodeToString(command)))
         }
         return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
@@ -422,7 +423,7 @@ class RoomGoatRepository(
                     command.occurredEpochDay + 7, "open", command.animalId, null, null, context.occurredAtEpochMillis,
                 ),
             )
-            database.outbox().insert(outbox(context, "goat.plan_lactation.v1", command.animalId, aggregateOrdinal, nextExpectedStreamVersion(command.animalId), json.encodeToString(command)))
+            database.insertOutboxAndJournal(outbox(context, "goat.plan_lactation.v1", command.animalId, aggregateOrdinal, nextExpectedStreamVersion(command.animalId), json.encodeToString(command)))
         }
         return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
@@ -456,7 +457,7 @@ class RoomGoatRepository(
             database.lifecycle().insertPedigree(
                 com.farmos.core.database.PedigreeRelationEntity(command.pedigreeLinkId, farmId, command.animalId, kidding.damId, "dam"),
             )
-            database.outbox().insert(outbox(context, "goat.register_kid.v1", command.animalId, aggregateOrdinal, 0, json.encodeToString(command)))
+            database.insertOutboxAndJournal(outbox(context, "goat.register_kid.v1", command.animalId, aggregateOrdinal, 0, json.encodeToString(command)))
         }
         return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }

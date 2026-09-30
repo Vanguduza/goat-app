@@ -26,7 +26,9 @@ Each device issues sequences 1, 2, 3 … with no gaps and never reuses one. Orde
 
 `checksum` = SHA-256 over a length-prefixed canonical encoding of every other field (payload keys sorted), so any alteration is detected. Business time is the farm event time and is never replaced by upload or receipt time. **IMPLEMENTED.**
 
-Production requirement (**PLANNED**): the Room domain write and its operation row commit in one transaction.
+Room journal (**IMPLEMENTED**, schema version 14): `replication_operations` stores each sealed operation (unique per farm, device and sequence); `replication_devices` holds the farm device registry, and its local row carries the last issued sequence so sequences are never reused across restarts. Every local command writes its domain change, outbox row and operation in one Room transaction through `insertOutboxAndJournal`; the operation ID is the mutation ID and the merge class comes from `CommandMergeClassification`. `ReplicationJournalOwnerTest` proves sequencing, atomic rejection, per-farm sequences and that the Room journal is ingested by the protocol unchanged.
+
+Known gap: outbox rows written before schema version 14 have no journal entries. They are not lost; they remain on the server-era outbox path until the migration tranche retires it.
 
 ## 4. Sync vectors
 
