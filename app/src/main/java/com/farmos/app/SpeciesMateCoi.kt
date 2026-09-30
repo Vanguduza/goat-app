@@ -24,6 +24,8 @@ internal fun speciesMateCoi(database: FarmOsDatabase, farmId: String, speciesCod
                 database.animals().get(farmId, id)?.let { listOfNotNull(it.tag, it.name).joinToString(" · ") } ?: "Unregistered animal"
             }.sorted(),
             conflictingParentage = analysis.conflictingParentage.size,
+            sireDateOfBirthEpochDay = sire.dateOfBirthEpochDay,
+            sireLatestWeightGrams = database.measurements().latest(farmId, sireId, "weight")?.valueLong,
         )
     }
 }

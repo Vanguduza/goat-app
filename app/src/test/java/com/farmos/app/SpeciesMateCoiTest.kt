@@ -6,10 +6,12 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.MeasurementEntity
 import com.farmos.core.database.PedigreeRelationEntity
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,6 +47,12 @@ class SpeciesMateCoiTest {
         assertEquals(0.125, coi.coefficient, 1e-12)
         assertEquals(2, coi.generationsKnown)
         assertEquals(listOf("T-sire"), coi.commonAncestors)
+        // Candidate compare shows the sire's facts as recorded, and nothing where none is recorded.
+        assertNull(coi.sireDateOfBirthEpochDay)
+        assertNull(coi.sireLatestWeightGrams)
+        database.measurements().insert(MeasurementEntity("w1", farm, "ram", "weight", 61_000, "g", 10))
+        database.measurements().insert(MeasurementEntity("w2", farm, "ram", "weight", 64_500, "g", 20))
+        assertEquals(64_500L, speciesMateCoi(database, farm, "sheep").analyse("ram", "ewe").sireLatestWeightGrams)
 
         assertThrows(IllegalArgumentException::class.java) { runBlocking { speciesMateCoi(database, farm, "sheep").analyse("ewe", "ram") } }
         assertThrows(IllegalArgumentException::class.java) { runBlocking { speciesMateCoi(database, farm, "sheep").analyse("ram", "cow") } }

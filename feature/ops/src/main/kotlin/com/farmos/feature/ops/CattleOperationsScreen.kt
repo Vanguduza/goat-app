@@ -52,6 +52,7 @@ private enum class CattleOpsPage {
     MOVEMENT,
     PEDIGREE,
     COI,
+    MATE_COMPARE,
     LOT_PLACE,
     DAYS_ON_FEED,
     LOT_CLOSE,
@@ -144,6 +145,7 @@ fun CattleOperationsScreen(
         }
 
         CattleOpsPage.COI -> OpsCoiAnalysisPage("Cow", "Bull", "calves", busy, home)
+        CattleOpsPage.MATE_COMPARE -> OpsMateComparePage("Cow", "Bull", "calves", busy, home)
 
         CattleOpsPage.LOT_PLACE -> {
             CattleLotPlaceScreen(busy, error, actions.onPlaceLot, home)
@@ -211,6 +213,7 @@ private fun CattleOpsHome(
             CattleNav("Official movement record") { onOpen(CattleOpsPage.MOVEMENT_RECORD) }
             CattleNav("Pedigree link") { onOpen(CattleOpsPage.PEDIGREE) }
             CattleNav("Inbreeding check") { onOpen(CattleOpsPage.COI) }
+            CattleNav("Compare bulls") { onOpen(CattleOpsPage.MATE_COMPARE) }
         }
         FarmOperationalSection("Beef / feedlot") {
             CattleNav("Place lot on feed") { onOpen(CattleOpsPage.LOT_PLACE) }
