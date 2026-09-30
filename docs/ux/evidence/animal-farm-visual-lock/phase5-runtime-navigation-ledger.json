@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "fcd2890ba3da84875ad5ad1f9ae3c7b3278f8491",
-  "source_fingerprint": "sha256:e9ef95c0d4b911ce31ee8927c2795a9b523b5ff5625ebf2e15657aaf2dea29d0",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 36737556301,
+  "tested_commit": "02bf935782fd49c2f3c386c55b18e000dd6ebc2f",
+  "source_fingerprint": "sha256:3996ceea48ae3cefab6b9a32593ae490beb03750107fb59613bb827637aa5b84",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -433,6 +433,11 @@
       "app/src/test/java/com/farmos/app/CustomerScreensTest.kt": [
         "FOS-SALES-002",
         "FOS-SALES-003"
+      ],
+      "app/src/test/java/com/farmos/app/ConflictCentreScreensTest.kt": [
+        "FOS-ATOM-027",
+        "FOS-SYNC-006",
+        "FOS-SYNC-007"
       ]
     },
     "route_contract": {
@@ -510,9 +515,9 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 27,
     "rendered_traversal_screen_count": 199,
-    "rendered_owner_screen_count": 88,
+    "rendered_owner_screen_count": 90,
     "route_contract_screen_count": 62,
-    "combined_screen_count": 296,
+    "combined_screen_count": 298,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -763,6 +768,7 @@
       "FOS-ATOM-011",
       "FOS-ATOM-014",
       "FOS-ATOM-026",
+      "FOS-ATOM-027",
       "FOS-ATOM-028",
       "FOS-ATOM-031",
       "FOS-ATOM-033",
@@ -830,6 +836,7 @@
       "FOS-SYNC-004",
       "FOS-SYNC-005",
       "FOS-SYNC-006",
+      "FOS-SYNC-007",
       "FOS-SYNC-008",
       "FOS-SYNC-009"
     ],
@@ -917,12 +924,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 199,
-    "entry_action_emission_executed": 27,
-    "rendered_surface_owners_executed": 88,
-    "route_contracts_executed": 62,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 199,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {
