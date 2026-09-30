@@ -1,6 +1,8 @@
 package com.farmos.app
 
 import android.content.Context
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
@@ -31,6 +33,8 @@ import com.farmos.domain.access.LocalAccount
 import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.SignInResult
 import com.farmos.domain.replication.MergeClass
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -79,10 +83,10 @@ class SettingsHostTest {
         database.close()
     }
 
-    private fun render(actorId: String?) {
+    private fun render(actorId: String?, io: CoroutineDispatcher = Dispatchers.IO) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                SettingsHost(directory, database, farmId, actorId, deviceId = "device-a", onBack = {})
+                SettingsHost(directory, database, farmId, actorId, deviceId = "device-a", onBack = {}, io = io)
             }
         }
     }
@@ -281,7 +285,9 @@ class SettingsHostTest {
                 ReplicationApplicationEntity("op-remote-1", farmId, ApplicationState.FAILED.name, "Inventory item not found", 1, 1_790_000_000_000),
             )
         }
-        render(owner.accountId)
+        // Unconfined keeps the retry and the refresh on the test thread, so nothing still holds the
+        // database when the test closes it.
+        render(owner.accountId, io = Dispatchers.Unconfined)
         waitForText("Signed in as Tendai Moyo")
         click("Storage and backup")
         waitForTag("settings-review:op-remote-1")
@@ -291,6 +297,8 @@ class SettingsHostTest {
         compose.waitUntil(10_000) {
             runBlocking { database.replicationApplications().get(farmId, "op-remote-1") }!!.attempts > 1
         }
+        compose.waitUntil(10_000) { compose.onAllNodes(hasClickAction() and hasText("Try again")).fetchSemanticsNodes().any { it.config.getOrNull(SemanticsProperties.Disabled) == null } }
+        compose.waitForIdle()
         waitForText("1 received change(s) not yet in effect")
     }
 
