@@ -93,7 +93,8 @@ class WorkerRegisterScreensTest {
                 ) { actions -> actions() }
             }
         }
-        compose.onNode(hasClickAction() and hasText("Workers")).performScrollTo().performClick()
+        // The test renders the labour actions directly, without a scrolling page.
+        compose.onNode(hasClickAction() and hasText("Workers")).performClick()
         compose.onNodeWithTag("farm-screen:FOS-LABOUR-002").assertExists()
         // The back control sits in the page header, outside the scrolling content.
         compose.onNode(hasClickAction() and hasText("Labour")).performClick()
