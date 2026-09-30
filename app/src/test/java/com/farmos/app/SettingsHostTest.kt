@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -32,6 +33,7 @@ import com.farmos.domain.access.CredentialKind
 import com.farmos.domain.access.LocalAccount
 import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.SignInResult
+import com.farmos.domain.ops.GestationSpecies
 import com.farmos.domain.replication.MergeClass
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -300,6 +302,37 @@ class SettingsHostTest {
         compose.waitUntil(10_000) { compose.onAllNodes(hasClickAction() and hasText("Try again")).fetchSemanticsNodes().any { it.config.getOrNull(SemanticsProperties.Disabled) == null } }
         compose.waitForIdle()
         waitForText("1 received change(s) not yet in effect")
+    }
+
+    @Test
+    fun theOwnerSetsTheFarmsGoatGestationWhichIsJournalledAndOthersKeepTheirDefaults() {
+        render(owner.accountId)
+        waitForText("Signed in as Tendai Moyo")
+        click("Species configuration")
+        waitForTag("farm-screen:FOS-ADMIN-007")
+        waitForText("Typical 150 days, expected between day 145 and day 155")
+        compose.onNode(hasSetTextAction() and hasText("Goat typical days")).performScrollTo().performTextClearance()
+        type("Goat typical days", "152")
+        click("Save Goat")
+
+        waitForText("Typical 152 days, expected between day 145 and day 155")
+        val goat = runBlocking { database.gestationPeriod(farmId, GestationSpecies.GOAT) }
+        assertEquals(152, goat.typicalDays)
+        assertEquals(147, runBlocking { database.gestationPeriod(farmId, GestationSpecies.SHEEP) }.typicalDays)
+        val journalled = runBlocking { database.replication().operationsInRange(farmId, "device-a", 1, 100) }
+        assertTrue(journalled.any { it.operationType == SET_FARM_GESTATION_COMMAND })
+    }
+
+    @Test
+    fun aWorkerSeesGestationPeriodsButCannotChangeThem() {
+        val rudo = worker()
+        render(rudo.accountId)
+        waitForText("Signed in as Rudo Chari · Worker")
+        click("Species configuration")
+        waitForTag("farm-screen:FOS-ADMIN-007")
+        waitForText("Typical 283 days")
+        compose.onNodeWithTag(FarmSafetyAtoms.PERMISSION_EXPLANATION).assertExists()
+        assertTrue(compose.onAllNodes(hasSetTextAction() and hasText("Goat typical days")).fetchSemanticsNodes().isEmpty())
     }
 
     @Test

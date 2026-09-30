@@ -46,6 +46,9 @@ import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.Permission
 import com.farmos.domain.access.RolePermissions
 import com.farmos.domain.ops.FarmCurrency
+import com.farmos.domain.ops.GestationDefaults
+import com.farmos.domain.ops.GestationPeriod
+import com.farmos.domain.ops.GestationSpecies
 import com.farmos.domain.replication.DeviceStatus
 import java.time.Instant
 import java.time.ZoneId
@@ -58,7 +61,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private enum class SettingsPage { HOME, MEMBERS, CREATE_MEMBER, MEMBER_DETAIL, PERMISSIONS, AUDIT, STORAGE, DEVICES, CURRENCY }
+private enum class SettingsPage { HOME, MEMBERS, CREATE_MEMBER, MEMBER_DETAIL, PERMISSIONS, AUDIT, STORAGE, DEVICES, CURRENCY, SPECIES }
 
 /** Everything the settings pages show, read from this device's database in one pass. */
 private data class SettingsSnapshot(
@@ -71,6 +74,8 @@ private data class SettingsSnapshot(
     val currencyCode: String,
     val unapplied: List<UnappliedOperation> = emptyList(),
     val unappliedTotal: Long = 0,
+    /** The farm's own gestation periods; species absent here use the defaults. */
+    val gestationOverrides: Map<GestationSpecies, GestationPeriod> = emptyMap(),
 )
 
 /**
@@ -143,6 +148,7 @@ internal fun SettingsHost(
             AnimalFarmQuickAction("Roles and permissions", { page = SettingsPage.PERMISSIONS })
             AnimalFarmQuickAction("Access history", { page = SettingsPage.AUDIT })
             AnimalFarmQuickAction("Currency", { page = SettingsPage.CURRENCY })
+            AnimalFarmQuickAction("Species configuration", { page = SettingsPage.SPECIES })
             AnimalFarmQuickAction("Storage and backup", { page = SettingsPage.STORAGE })
             AnimalFarmQuickAction("Devices", { page = SettingsPage.DEVICES })
         }
@@ -254,6 +260,21 @@ internal fun SettingsHost(
                 }
             }
         }
+        SettingsPage.SPECIES -> FarmOperationalPage("FOS-ADMIN-007", "Species configuration", "Gestation periods used for due dates on this farm.", onBack = home, backLabel = "Farm settings") {
+            val actor = current.actor
+            val canEdit = actor != null && RolePermissions.allows(actor.role, Permission.MANAGE_FARM_SETTINGS)
+            SettingsError(error)
+            Text(
+                "Due dates are predicted from the service date. A due date recorded on a pregnancy wins over the prediction, and a recorded birth replaces it.",
+                color = AnimalFarmTheme.colors.mutedInk,
+            )
+            GestationSpecies.entries.forEach { species ->
+                GestationEditor(species, current.gestationOverrides[species], canEdit && !busy) { period ->
+                    act { database.setFarmGestation(farmId, species, period, it.accountId, deviceId) }
+                }
+            }
+            if (!canEdit) FarmPermissionExplanation("Gestation periods are set by farm management", "Only Owner and Manager accounts can change them.")
+        }
         SettingsPage.DEVICES -> FarmOperationalPage("FOS-ADMIN-021", "Devices", "This device and the farm devices it knows.", onBack = home, backLabel = "Farm settings") {
             val actor = current.actor
             if (actor == null || !RolePermissions.allows(actor.role, Permission.MANAGE_DEVICES)) {
@@ -310,6 +331,40 @@ private fun ReceivedChangesReview(rows: List<UnappliedOperation>, total: Long, b
         )
     }
     SettingsButton("Try again", !busy, onRetry)
+}
+
+@Composable
+private fun GestationEditor(species: GestationSpecies, farmPeriod: GestationPeriod?, editable: Boolean, onSave: (GestationPeriod) -> Unit) {
+    val period = farmPeriod ?: GestationDefaults.period(species)
+    var earliest by remember(period) { mutableStateOf(period.earliestDays.toString()) }
+    var typical by remember(period) { mutableStateOf(period.typicalDays.toString()) }
+    var latest by remember(period) { mutableStateOf(period.latestDays.toString()) }
+    val name = species.name.lowercase().replaceFirstChar { it.uppercase() }
+    FarmOperationalSection(name, if (farmPeriod == null) "Default for this species" else "Set for this farm") {
+        Text(
+            "Typical ${period.typicalDays} days, expected between day ${period.earliestDays} and day ${period.latestDays}",
+            modifier = Modifier.testTag("settings-gestation:${species.code}"),
+        )
+        if (!editable) return@FarmOperationalSection
+        SettingsNumber("$name earliest day", earliest) { earliest = it }
+        SettingsNumber("$name typical days", typical) { typical = it }
+        SettingsNumber("$name latest day", latest) { latest = it }
+        val candidate = runCatching { GestationPeriod(earliest.toInt(), typical.toInt(), latest.toInt()) }.getOrNull()
+        if (candidate == null) Text("Enter whole days with earliest ≤ typical ≤ latest.", color = MaterialTheme.colorScheme.error)
+        SettingsButton("Save $name", candidate != null && candidate != period) { candidate?.let(onSave) }
+    }
+}
+
+@Composable
+private fun SettingsNumber(label: String, value: String, onChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = { typed -> onChange(typed.filter(Char::isDigit).take(3)) },
+        label = { Text(label) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
@@ -575,5 +630,6 @@ private suspend fun loadSnapshot(
         unapplied = database.replicationApplications().unappliedForReview(farmId, REVIEW_PAGE),
         unappliedTotal = database.replicationApplications().count(farmId, ApplicationState.FAILED.name) +
             database.replicationApplications().count(farmId, ApplicationState.AWAITING_APPLIER.name),
+        gestationOverrides = database.farmGestationOverrides(farmId),
     )
 }

@@ -70,7 +70,7 @@ internal val FarmCurrencyApplier = OperationApplier { database, operation ->
 
 /** Appliers for the operations this app can apply on receipt; others stay journalled until theirs exist. */
 internal val replicationAppliers: Map<String, OperationApplier> =
-    mapOf(SET_FARM_CURRENCY_COMMAND to FarmCurrencyApplier) +
+    mapOf(SET_FARM_CURRENCY_COMMAND to FarmCurrencyApplier, SET_FARM_GESTATION_COMMAND to FarmGestationApplier) +
         OpsReplicationAppliers.all + GoatReplicationAppliers.all + HerdReplicationAppliers.all + accessReplicationAppliers +
         deviceReplicationAppliers
 

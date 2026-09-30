@@ -26,3 +26,27 @@ interface FarmSettingsDao {
     @Upsert
     suspend fun upsert(settings: FarmSettingsEntity)
 }
+
+/** A farm's own gestation period for one species (owner decision D-019); species without a row use the defaults. */
+@Entity(tableName = "farm_gestation", primaryKeys = ["farmId", "species"])
+data class FarmGestationEntity(
+    val farmId: String,
+    val species: String,
+    val earliestDays: Int,
+    val typicalDays: Int,
+    val latestDays: Int,
+    val updatedAtEpochMillis: Long,
+    val updatedByActorId: String,
+)
+
+@Dao
+interface FarmGestationDao {
+    @Query("SELECT * FROM farm_gestation WHERE farmId = :farmId ORDER BY species")
+    suspend fun all(farmId: String): List<FarmGestationEntity>
+
+    @Query("SELECT * FROM farm_gestation WHERE farmId = :farmId AND species = :species LIMIT 1")
+    suspend fun get(farmId: String, species: String): FarmGestationEntity?
+
+    @Upsert
+    suspend fun upsert(setting: FarmGestationEntity)
+}

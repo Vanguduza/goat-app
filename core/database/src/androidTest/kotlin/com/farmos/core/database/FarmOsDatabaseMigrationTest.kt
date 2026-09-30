@@ -31,7 +31,7 @@ class FarmOsDatabaseMigrationTest {
     }
 
     @Test
-    fun version1DatabaseMigratesThroughVersion20WithoutLosingFoundationData() = runBlocking {
+    fun version1DatabaseMigratesThroughVersion21WithoutLosingFoundationData() = runBlocking {
         val farmId = "11111111-1111-4111-8111-111111111111"
         val animalId = "33333333-3333-4333-8333-333333333333"
         val mutationId = "55555555-5555-4555-8555-555555555555"
@@ -41,7 +41,7 @@ class FarmOsDatabaseMigrationTest {
             .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
             .build()
 
-        // Force Room to execute the complete 1 -> 20 chain and validate the final schema.
+        // Force Room to execute the complete 1 -> 21 chain and validate the final schema.
         migrated.openHelper.writableDatabase
 
         val animal = migrated.animals().get(farmId, animalId)
@@ -73,6 +73,8 @@ class FarmOsDatabaseMigrationTest {
         assertEquals(0, migrated.replication().devices(farmId).size)
         // Version 20 adds peer confirmations; nothing has been shared yet.
         assertNull(migrated.replicationPeerMarks().highestHeld(farmId))
+        // Version 21 adds farm gestation periods; a migrated farm keeps the defaults.
+        assertEquals(0, migrated.farmGestation().all(farmId).size)
 
         migrated.close()
     }
