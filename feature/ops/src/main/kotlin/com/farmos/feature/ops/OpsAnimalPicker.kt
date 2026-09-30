@@ -54,14 +54,12 @@ internal fun OpsAnimalPicker(
     onChange: (String) -> Unit,
 ) {
     val search = LocalOpsAnimalSearch.current
-    var picked by remember(animalId.isBlank()) {
-        mutableStateOf(
-            when {
-                animalId.isNotBlank() -> FarmSelectorOption(animalId, if (animalId == search.selectedId) search.selectedLabel ?: "Selected animal" else "Selected animal")
-                optional -> NO_ANIMAL
-                else -> null
-            },
-        )
+    var picked by remember { mutableStateOf<FarmSelectorOption?>(null) }
+    // The option shown follows the chosen id; a picked option keeps its label while it is still the choice.
+    val shown = when {
+        animalId.isBlank() -> if (optional) NO_ANIMAL else null
+        picked?.id == animalId -> picked
+        else -> FarmSelectorOption(animalId, if (animalId == search.selectedId) search.selectedLabel ?: "Selected animal" else "Selected animal")
     }
     FarmSearchSelector(
         atomTag = if (parent) FarmSelectionAtoms.SIRE_DAM_SELECTOR else FarmSelectionAtoms.ANIMAL_SELECTOR,
@@ -71,7 +69,7 @@ internal fun OpsAnimalPicker(
             OpsAnimalFilter.FEMALE -> search.females
             OpsAnimalFilter.MALE -> search.males
         },
-        selected = picked,
+        selected = shown,
         onSelect = { option ->
             picked = option
             onChange(if (option.id == NO_ANIMAL.id) "" else option.id)
