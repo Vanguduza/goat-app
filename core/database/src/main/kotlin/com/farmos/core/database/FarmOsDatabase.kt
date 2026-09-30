@@ -746,14 +746,17 @@ interface SyncCursorDao {
         ReorderAlertEntity::class,
         GroupCensusEntity::class,
         GoatKidEntity::class,
+        ReplicationOperationEntity::class,
+        ReplicationDeviceEntity::class,
     ],
-    version = 13,
+    version = 14,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun animals(): AnimalDao
     abstract fun measurements(): MeasurementDao
     abstract fun outbox(): OutboxDao
+    abstract fun replication(): ReplicationDao
     abstract fun aggregateVersions(): AggregateVersionDao
     abstract fun syncCursors(): SyncCursorDao
     abstract fun tasks(): TaskDao
@@ -1108,6 +1111,16 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
+        /** Adds the local-first replication journal and the farm device registry. */
+        val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `replication_operations` (`operationId` TEXT NOT NULL, `farmId` TEXT NOT NULL, `entityType` TEXT NOT NULL, `entityId` TEXT NOT NULL, `actorId` TEXT NOT NULL, `deviceId` TEXT NOT NULL, `deviceSequence` INTEGER NOT NULL, `businessTimeEpochMillis` INTEGER NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, `baseVersion` INTEGER, `operationType` TEXT NOT NULL, `mergeClass` TEXT NOT NULL, `payloadJson` TEXT NOT NULL, `protocolVersion` INTEGER NOT NULL, `schemaVersion` INTEGER NOT NULL, `provenance` TEXT NOT NULL, `checksum` TEXT NOT NULL, PRIMARY KEY(`operationId`))")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_replication_operations_farmId_deviceId_deviceSequence` ON `replication_operations` (`farmId`, `deviceId`, `deviceSequence`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_replication_operations_farmId_entityType_entityId` ON `replication_operations` (`farmId`, `entityType`, `entityId`)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `replication_devices` (`farmId` TEXT NOT NULL, `deviceId` TEXT NOT NULL, `name` TEXT NOT NULL, `status` TEXT NOT NULL, `lastReportedOwnSequence` INTEGER NOT NULL, `revokedAfterSequence` INTEGER, `isLocal` INTEGER NOT NULL, PRIMARY KEY(`farmId`, `deviceId`))")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14)
     }
 }

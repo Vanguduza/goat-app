@@ -4,6 +4,7 @@ import androidx.room.withTransaction
 import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.OutboxEntity
+import com.farmos.core.database.insertOutboxAndJournal
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.model.LocalCommandResult
 import com.farmos.core.model.SyncState
@@ -56,7 +57,7 @@ class RoomHerdRepository(
                     updatedAtEpochMillis = context.occurredAtEpochMillis,
                 ),
             )
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 OutboxEntity(
                     mutationId = context.mutationId,
                     farmId = farmId,
@@ -175,7 +176,7 @@ class RoomHerdRepository(
     ) {
         database.withTransaction {
             localWrite()
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 OutboxEntity(
                     mutationId = context.mutationId,
                     farmId = farmId,

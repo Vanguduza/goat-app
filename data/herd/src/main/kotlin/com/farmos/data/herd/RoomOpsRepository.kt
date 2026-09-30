@@ -90,6 +90,7 @@ import com.farmos.core.database.RabbitNestBoxEntity
 import com.farmos.core.database.RabbitWaveEntity
 import com.farmos.core.database.SyncCursorEntity
 import com.farmos.core.database.TaskEntity
+import com.farmos.core.database.insertOutboxAndJournal
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.model.LocalCommandResult
 import com.farmos.core.model.SyncState
@@ -1331,7 +1332,7 @@ class RoomOpsRepository(
         database.withTransaction {
             val ordinal = database.outbox().nextAggregateOrdinal(farmId, aggregateType, aggregateId)
             localWrite()
-            database.outbox().insert(
+            database.insertOutboxAndJournal(
                 OutboxEntity(
                     mutationId = context.mutationId,
                     farmId = farmId,
