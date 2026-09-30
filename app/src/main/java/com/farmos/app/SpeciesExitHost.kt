@@ -1,5 +1,8 @@
 package com.farmos.app
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
@@ -50,7 +53,8 @@ internal fun SpeciesExitHost(
     database: FarmOsDatabase,
     farmId: String,
     animal: SpeciesAnimalRow,
-    screenId: String,
+    /** The page's Screen ID; null embeds the exit content in the caller's own page (a rabbit profile). */
+    screenId: String?,
     newContext: () -> LocalCommandContext,
     onRecorded: () -> Unit,
     onBack: () -> Unit,
@@ -76,6 +80,28 @@ internal fun SpeciesExitHost(
         }
     }
 
+    val onRecord: (SpeciesExitDraft) -> Unit = { draft ->
+        write {
+            val priceMinor = draft.price?.let { price ->
+                val code = requireNotNull(currency) { "The farm currency is still loading" }
+                price.toScaledLongExact(FarmCurrency.minorDigits(code), "Price")
+            }
+            exits.record(
+                RecordAnimalExit(
+                    UUID.randomUUID().toString(), animal.animalId, draft.kind.name, draft.day.toEpochDay(), draft.deathCause,
+                    draft.reason, draft.buyer, priceMinor, currency.takeIf { priceMinor != null },
+                ),
+                newContext(),
+            )
+        }
+    }
+    val onReverse: (String, String) -> Unit = { exitId, reason ->
+        write { exits.reverse(ReverseAnimalExit(UUID.randomUUID().toString(), animal.animalId, exitId, reason, LocalDate.now().toEpochDay()), newContext()) }
+    }
+    if (screenId == null) {
+        SpeciesExitContent(animal, standing, currency, busy, error, onRecord, onReverse)
+        return
+    }
     SpeciesExitScreen(
         screenId = screenId,
         animal = animal,
@@ -83,24 +109,8 @@ internal fun SpeciesExitHost(
         currency = currency,
         busy = busy,
         error = error,
-        onRecord = { draft ->
-            write {
-                val priceMinor = draft.price?.let { price ->
-                    val code = requireNotNull(currency) { "The farm currency is still loading" }
-                    price.toScaledLongExact(FarmCurrency.minorDigits(code), "Price")
-                }
-                exits.record(
-                    RecordAnimalExit(
-                        UUID.randomUUID().toString(), animal.animalId, draft.kind.name, draft.day.toEpochDay(), draft.deathCause,
-                        draft.reason, draft.buyer, priceMinor, currency.takeIf { priceMinor != null },
-                    ),
-                    newContext(),
-                )
-            }
-        },
-        onReverse = { exitId, reason ->
-            write { exits.reverse(ReverseAnimalExit(UUID.randomUUID().toString(), animal.animalId, exitId, reason, LocalDate.now().toEpochDay()), newContext()) }
-        },
+        onRecord = onRecord,
+        onReverse = onReverse,
         onBack = onBack,
     )
 }
@@ -117,6 +127,22 @@ internal fun SpeciesExitScreen(
     onReverse: (exitId: String, reason: String) -> Unit,
     onBack: () -> Unit,
 ) {
+    FarmOperationalPage(screenId, "Lifecycle status", animal.label, FarmVisualClass.I4, onBack) {
+        SpeciesExitContent(animal, standing, currency, busy, error, onRecord, onReverse)
+    }
+}
+
+/** The exit record and reversal for one animal (D-022), inside a lifecycle page or a species profile. */
+@Composable
+internal fun SpeciesExitContent(
+    animal: SpeciesAnimalRow,
+    standing: SpeciesStandingExit?,
+    currency: String?,
+    busy: Boolean,
+    error: String?,
+    onRecord: (SpeciesExitDraft) -> Unit,
+    onReverse: (exitId: String, reason: String) -> Unit,
+) {
     var kind by remember(animal.animalId) { mutableStateOf<AnimalExitKind?>(null) }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     var cause by remember { mutableStateOf<String?>(null) }
@@ -125,7 +151,7 @@ internal fun SpeciesExitScreen(
     var price by remember { mutableStateOf("") }
     var confirming by remember { mutableStateOf(false) }
     var reversal by remember { mutableStateOf("") }
-    FarmOperationalPage(screenId, "Lifecycle status", animal.label, FarmVisualClass.I4, onBack) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (!animal.active) {
             if (standing == null) {
                 Text("This animal left the herd before exits were recorded; there is no exit to reverse.")
