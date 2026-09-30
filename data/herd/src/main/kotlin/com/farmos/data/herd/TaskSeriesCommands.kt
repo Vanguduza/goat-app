@@ -90,12 +90,13 @@ class TaskSeriesCommands(
             when (scope) {
                 SeriesEditScope.THIS -> {
                     val base = stored ?: series.occurrence(command.epochDay, OPEN, context.occurredAtEpochMillis)
+                    val assignee = command.assignee
                     database.tasks().upsertFromServer(
                         base.copy(
                             title = command.title?.trim() ?: base.title,
                             dueOnEpochDay = command.movedToEpochDay ?: base.dueOnEpochDay,
-                            assigneeAccountId = if (command.assignee != null) command.assignee.accountId else base.assigneeAccountId,
-                            assigneeWorkerId = if (command.assignee != null) command.assignee.workerId else base.assigneeWorkerId,
+                            assigneeAccountId = if (assignee != null) assignee.accountId else base.assigneeAccountId,
+                            assigneeWorkerId = if (assignee != null) assignee.workerId else base.assigneeWorkerId,
                             updatedAtEpochMillis = context.occurredAtEpochMillis,
                         ),
                     )
@@ -163,14 +164,15 @@ class TaskSeriesCommands(
     private fun TaskSeriesEntity.edited(command: EditTaskSeries, context: LocalCommandContext): TaskSeriesEntity {
         val kind = command.recurrenceKind ?: recurrenceKind
         val interval = command.recurrenceInterval ?: if (command.recurrenceKind != null) 1 else recurrenceInterval
+        val assignee = command.assignee
         // Validates the resulting rule before anything is written.
         TaskSeriesSchedule(TaskSeriesRules.recurrence(kind, interval), startEpochDay, endEpochDay)
         return copy(
             title = command.title?.trim() ?: title,
             recurrenceKind = kind,
             recurrenceInterval = interval,
-            assigneeAccountId = if (command.assignee != null) command.assignee.accountId else assigneeAccountId,
-            assigneeWorkerId = if (command.assignee != null) command.assignee.workerId else assigneeWorkerId,
+            assigneeAccountId = if (assignee != null) assignee.accountId else assigneeAccountId,
+            assigneeWorkerId = if (assignee != null) assignee.workerId else assigneeWorkerId,
             updatedAtEpochMillis = context.occurredAtEpochMillis,
             updatedByActorId = context.actorId,
         )
