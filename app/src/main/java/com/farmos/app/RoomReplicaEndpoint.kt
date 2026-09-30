@@ -1,13 +1,15 @@
 package com.farmos.app
 
 import androidx.room.withTransaction
+import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.OperationApplier
+import com.farmos.core.database.ReplicationApplicationEntity
 import com.farmos.core.database.ReplicationDeviceEntity
 import com.farmos.core.database.replicationVector
 import com.farmos.core.database.toEntity
 import com.farmos.core.database.toEnvelope
 import com.farmos.domain.replication.BundleVerdict
-import com.farmos.domain.replication.CanonicalOperationOrder
 import com.farmos.domain.replication.DeviceStatus
 import com.farmos.domain.replication.IngestResult
 import com.farmos.domain.replication.OperationBundle
@@ -16,14 +18,6 @@ import com.farmos.domain.replication.ReplicaEndpoint
 import com.farmos.domain.replication.SequenceRange
 import com.farmos.domain.replication.SyncVector
 import kotlinx.coroutines.runBlocking
-
-/**
- * Makes a received operation take effect in this device's domain tables. Runs inside the ingest
- * transaction, so a failing applier rejects the bundle and leaves nothing behind.
- */
-fun interface OperationApplier {
-    suspend fun apply(database: FarmOsDatabase, operation: OperationEnvelope)
-}
 
 /**
  * This device's Room replication journal as a replication endpoint, so the LAN server, the Drive gateway
@@ -35,14 +29,21 @@ fun interface OperationApplier {
  * a position already held by another operation, rejects the whole bundle; everything else is inserted
  * in one transaction, so a rejected bundle changes nothing. Received operations enter the journal with
  * their original identity, device, sequence and business time.
+ *
+ * Once journalled, each received operation is applied to the domain tables by its [OperationApplier], in
+ * business order and in its own transaction. An operation that cannot be applied yet, for example
+ * because one it depends on has not arrived, is recorded as failed and retried after every later
+ * ingest; one without an applier waits for an app version that has it. Neither blocks synchronisation.
  */
 class RoomReplicaEndpoint(
     private val database: FarmOsDatabase,
     override val farmId: String,
     override val deviceId: String,
     private val appliers: Map<String, OperationApplier> = emptyMap(),
+    private val clock: () -> Long = System::currentTimeMillis,
 ) : ReplicaEndpoint {
     private val journal get() = database.replication()
+    private val applications get() = database.replicationApplications()
 
     override fun vector(): SyncVector = runBlocking { database.replicationVector(farmId) }
 
@@ -81,13 +82,52 @@ class RoomReplicaEndpoint(
                     else -> fresh += op
                 }
             }
-            fresh.forEach { journal.insertOperation(it.toEntity()) }
-            // Received operations take effect in the same transaction, in business order.
-            fresh.sortedWith(CanonicalOperationOrder).forEach { op -> appliers[op.operationType]?.apply(database, op) }
+            fresh.forEach {
+                journal.insertOperation(it.toEntity())
+                applications.upsert(ReplicationApplicationEntity(it.operationId, farmId, ApplicationState.FAILED.name, NOT_YET_APPLIED, 0, clock()))
+            }
             if (fresh.isNotEmpty()) {
                 journal.upsertDevice(origin.copy(lastReportedOwnSequence = maxOf(origin.lastReportedOwnSequence, bundle.toSequence)))
             }
             IngestResult(applied = fresh.size, duplicates = duplicates)
+        }.also { if (!it.rejected) applyPendingOperations() }
+    }
+
+    /**
+     * Applies every received operation that has not taken effect yet, in business order, repeating while
+     * a pass makes progress so an operation waiting on an earlier one is applied in the same call.
+     */
+    fun applyPending() = runBlocking { applyPendingOperations() }
+
+    private suspend fun applyPendingOperations() {
+        var progressed = true
+        while (progressed) {
+            progressed = false
+            for (row in applications.unapplied(farmId)) {
+                val op = row.toEnvelope()
+                val previous = applications.get(farmId, op.operationId)
+                val applier = appliers[op.operationType]
+                if (applier == null) {
+                    if (previous?.state != ApplicationState.AWAITING_APPLIER.name) {
+                        applications.upsert(ReplicationApplicationEntity(op.operationId, farmId, ApplicationState.AWAITING_APPLIER.name, null, previous?.attempts ?: 0, clock()))
+                    }
+                    continue
+                }
+                val attempts = (previous?.attempts ?: 0) + 1
+                val failure = runCatching {
+                    database.withTransaction {
+                        applier.apply(database, op)
+                        applications.upsert(ReplicationApplicationEntity(op.operationId, farmId, ApplicationState.APPLIED.name, null, attempts, clock()))
+                    }
+                }.exceptionOrNull()
+                if (failure == null) {
+                    progressed = true
+                } else {
+                    applications.upsert(
+                        ReplicationApplicationEntity(op.operationId, farmId, ApplicationState.FAILED.name, failure.message ?: failure.javaClass.simpleName, attempts, clock()),
+                    )
+                }
+            }
         }
     }
 
@@ -106,3 +146,5 @@ class RoomReplicaEndpoint(
         }
     }
 }
+
+private const val NOT_YET_APPLIED = "Not applied yet"
