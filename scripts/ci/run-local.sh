@@ -86,7 +86,7 @@ job_android() {
   run_job "android" bash -lc '
     bash scripts/ci/verify-kotlin-architecture.sh &&
     bash scripts/ci/verify-visual-authority.sh &&
-    ./gradlew :domain:goat:test :domain:rabbit:test :domain:ops:test :domain:replication:test :core:network:testDebugUnitTest :core:sync:testDebugUnitTest :app:compileDebugKotlin :core:database:compileDebugAndroidTestKotlin :app:compileDebugAndroidTestKotlin --stacktrace --offline
+    ./gradlew :domain:goat:test :domain:rabbit:test :domain:ops:test :domain:replication:test :domain:access:test :core:network:testDebugUnitTest :core:sync:testDebugUnitTest :app:compileDebugKotlin :core:database:compileDebugAndroidTestKotlin :app:compileDebugAndroidTestKotlin --stacktrace --offline
   '
 }
 
