@@ -150,20 +150,21 @@ A green vertical slice must never be promoted into a feature/module/MVP complete
 
 ## 10. Designated architecture slice
 
-The first architecture slice is:
+The first architecture slice, restated under §0, is:
 
 ```text
 Register Goat
 → Record Weight Offline
 → survive process/device restart
-→ synchronize through versioned Supabase RPC
-→ event/projection reconciliation
-→ Meilisearch projection
-→ farm-scoped search
+→ replicate missing operations to a second farm device (LAN; Drive when configured)
+→ journal reconciliation (idempotent; original business time)
+→ farm-scoped local search
 → second-device visibility
 ```
 
-The slice must additionally prove duplicate mutation handling, RLS/tenant attacks, clock drift, auth expiry/re-auth, revoked membership, backend outage, search outage/rebuild and observability.
+The slice must additionally prove duplicate mutation handling, farm-scoping attacks, clock drift, revoked or lost devices, transport outage, local search completeness and observability.
+
+The issued `VERTICAL_SLICE_GREEN` certificate (`docs/realisation/VERTICAL_SLICE_GATE.json`) remains the 3 September 2026 pre-lock proof against Supabase/Meilisearch. It authorises fan-out only. It is not proof of this locked slice. A post-lock evidence run is required before the certificate may be treated as architecture evidence.
 
 ## 11. Authority hierarchy
 
