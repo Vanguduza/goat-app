@@ -1,8 +1,9 @@
 {
   "schema_version": 2,
-  "source_fingerprint": "sha256:25e2e82f708119854d4a4bd03b6d60ea1340ddd84de755bce141a37a6bfaf5f2",
+  "source_fingerprint": "sha256:4e22f0c3337227177bbb17d637a466f91ebf020ffa90ad460227c8067e6fb038",
   "screen_count": 545,
   "qdu_count": 545,
+  "feature_count": 156,
   "feature_binding_status": "CANONICAL_FEATURE_IDS_BOUND",
   "qdus": [
     {
@@ -15810,6 +15811,5 @@
       "visual_green": false,
       "state": "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN"
     }
-  ],
-  "feature_count": 156
+  ]
 }

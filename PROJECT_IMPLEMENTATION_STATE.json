@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "repository": "Vanguduza/goat-app",
-  "source_fingerprint": "sha256:25e2e82f708119854d4a4bd03b6d60ea1340ddd84de755bce141a37a6bfaf5f2",
+  "source_fingerprint": "sha256:4e22f0c3337227177bbb17d637a466f91ebf020ffa90ad460227c8067e6fb038",
   "canonical_branch": "main",
   "release_state": "BLOCKED",
   "green_states": {
@@ -11,15 +11,22 @@
     "mvp_green": false,
     "visual_green_count": 0
   },
+  "completion_control_plane": {
+    "catalog_status": "CANONICAL_OWNER_AUTHORIZED",
+    "feature_count": 156,
+    "mandatory_feature_count": 156,
+    "bound_screen_count": 545,
+    "completion_state": "PROJECT_COMPLETION_STATE.json"
+  },
   "screen_coverage": {
     "registered": 545,
+    "feature_bound": 545,
     "kotlin_referenced": 306,
     "implementation_mapped": 128,
     "qdu_states": {
       "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 306,
       "PLANNED_NOT_IMPLEMENTED": 239
-    },
-    "feature_bound": 545
+    }
   },
   "module_coverage": {
     "admin": {
@@ -256,18 +263,11 @@
     }
   },
   "blocking_authority_gaps": [],
-  "status_law": "Feature binding is scope accounting only; it is not route reachability, FEATURE_GREEN, MODULE_GREEN, VISUAL_GREEN, or MVP_GREEN.",
-  "completion_control_plane": {
-    "catalog_status": "CANONICAL_OWNER_AUTHORIZED",
-    "feature_count": 156,
-    "mandatory_feature_count": 156,
-    "bound_screen_count": 545,
-    "completion_state": "PROJECT_COMPLETION_STATE.json"
-  },
   "blocking_completion_gaps": [
     "156 mandatory features remain not FEATURE_GREEN",
     "545 registered screens remain not VISUAL_GREEN until native evidence and independent approval exist",
     "239 registered screens remain PLANNED_NOT_IMPLEMENTED at this implementation fingerprint",
     "whole-product MODULE_GREEN and MVP_GREEN certification remains outstanding"
-  ]
+  ],
+  "status_law": "Feature binding is scope accounting only; it is not route reachability, FEATURE_GREEN, MODULE_GREEN, VISUAL_GREEN, or MVP_GREEN."
 }
