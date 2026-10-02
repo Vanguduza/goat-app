@@ -30,6 +30,7 @@ object FarmSelectionAtoms {
     const val SIRE_DAM_SELECTOR = "farm-atom:FOS-ATOM-008"
     const val ANIMAL_SELECTOR = "farm-atom:FOS-ATOM-004"
     const val CUSTOMER_SELECTOR = "farm-atom:FOS-ATOM-012"
+    const val ATTACHMENT_PICKER = "farm-atom:FOS-ATOM-016"
 }
 
 /**

@@ -145,6 +145,8 @@ internal class FarmLanRuntime(
     private val farmName: String,
     private val deviceId: String,
     private val clock: () -> Long = System::currentTimeMillis,
+    /** Attachment bytes this device serves and fetches (D-015); none move when null. */
+    private val attachments: FileAttachmentStore? = null,
 ) : Closeable {
     private val endpoint = RoomReplicaEndpoint(database, farmId, deviceId, farmAppliers(vault, deviceId))
     private val keys = { vault.secretsForLocalFarm(farmId).keys }
@@ -161,7 +163,7 @@ internal class FarmLanRuntime(
         worker.execute {
             runCatching {
                 runBlocking { database.announceIdentity(farmId, deviceId, vault.secretsForLocalFarm(farmId).device, clock()) }
-                val server = LanSyncServer(endpoint, keys, identity = identity()).start(InetSocketAddress(0))
+                val server = LanSyncServer(endpoint, keys, identity = identity(), blobs = attachments?.source(farmId)).start(InetSocketAddress(0))
                 resources += server
                 syncPort = server.port
                 advertise(pairingPort = null)
@@ -246,6 +248,11 @@ internal class FarmLanRuntime(
                 val held = outcome.peerHoldsOwnThrough
                 if (outcome.status == SyncSessionStatus.COMPLETED && peerId != null && held != null) {
                     runBlocking { database.recordPeerHolds(farmId, peerId, held, clock()) }
+                }
+                // Attachment metadata arrived with the operations; now fetch the bytes this device lacks.
+                val store = attachments
+                if (outcome.status == SyncSessionStatus.COMPLETED && store != null) {
+                    runCatching { runBlocking { pullMissingAttachments(database, farmId, store, fetch = transport::fetchAttachment) } }
                 }
                 outcome
             }

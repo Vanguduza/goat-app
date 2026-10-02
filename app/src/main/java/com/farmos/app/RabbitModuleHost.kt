@@ -43,6 +43,7 @@ fun RabbitModuleHost(
     /** A rabbit's exit record and reversal (D-022); onRecorded refreshes the rabbitry. */
     exitFor: @Composable (rabbit: RabbitAnimalView, onRecorded: () -> Unit) -> Unit = { _, _ -> },
     pedigree: RabbitPedigreePorts? = null,
+    attachmentsFor: @Composable (rabbit: RabbitAnimalView) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
@@ -105,6 +106,7 @@ fun RabbitModuleHost(
     RabbitProgrammeScreen(
         rabbits = rabbits,
         rabbitExit = { rabbit -> exitFor(rabbit) { run { } } },
+        rabbitAttachments = attachmentsFor,
         pedigree = pedigree,
         waveOptions = waveOptions,
         nestBoxChoices = nestBoxChoices,

@@ -46,6 +46,8 @@ fun GoatVerticalSliceScreen(
     onReverseExit: (exitId: String, reason: String) -> Unit = { _, _ -> },
     /** Reads a prospective mating from the local pedigree (D-023). */
     mateAnalysis: GoatMateAnalysis = NoGoatMateAnalysis,
+    /** Photos and documents on a goat's profile (D-015). */
+    profileAttachments: @Composable (animalId: String, active: Boolean) -> Unit = { _, _ -> },
 ) {
     GoatExperienceScreen(
         state = state,
@@ -72,6 +74,7 @@ fun GoatVerticalSliceScreen(
             onRecordExit = onRecordExit,
             onReverseExit = onReverseExit,
             mateAnalysis = mateAnalysis,
+            profileAttachments = profileAttachments,
         ),
         onBackToFarm = onBack,
         onSignOut = onSignOut,

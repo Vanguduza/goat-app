@@ -59,7 +59,13 @@ internal fun RabbitAnimalsScreen(rabbits: List<RabbitAnimalView>, rabbitCount: I
  * from the rabbitry (death, cull or sale, and its reversal) recorded in [exit] (owner decision D-022).
  */
 @Composable
-internal fun RabbitProfileScreen(rabbit: RabbitAnimalView, exit: @Composable (RabbitAnimalView) -> Unit, onBack: () -> Unit) {
+internal fun RabbitProfileScreen(
+    rabbit: RabbitAnimalView,
+    exit: @Composable (RabbitAnimalView) -> Unit,
+    onBack: () -> Unit,
+    /** Photos and documents of this rabbit (D-015), when the host provides them. */
+    attachments: @Composable (RabbitAnimalView) -> Unit = {},
+) {
     val screenId = if (rabbit.isDoe) "FOS-RABBIT-003" else "FOS-RABBIT-004"
     val kind = if (rabbit.isDoe) "Doe" else "Buck"
     FarmOperationalPage(screenId, rabbit.label, "$kind · ${rabbit.status}", FarmVisualClass.I3, onBack, backLabel = "Breeding animals") {
@@ -71,5 +77,6 @@ internal fun RabbitProfileScreen(rabbit: RabbitAnimalView, exit: @Composable (Ra
         FarmOperationalSection(if (rabbit.active) "Leaving the rabbitry" else "Exit record") {
             exit(rabbit)
         }
+        attachments(rabbit)
     }
 }

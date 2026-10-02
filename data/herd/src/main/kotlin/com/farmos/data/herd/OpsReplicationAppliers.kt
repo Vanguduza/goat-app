@@ -5,6 +5,7 @@ import com.farmos.core.database.OperationApplier
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.domain.ops.AcceptHealthPack
 import com.farmos.domain.ops.AddHealthPackSlot
+import com.farmos.domain.ops.AttachFile
 import com.farmos.domain.ops.CreateFarmCustomer
 import com.farmos.domain.ops.RecordCustomerSale
 import com.farmos.domain.ops.RecordExitSale
@@ -214,6 +215,7 @@ object OpsReplicationAppliers {
         AnimalExitCommands.RECORD to OperationApplier { database, op -> AnimalExitCommands(database, op.farmId, replaying = true).record(decode<RecordAnimalExit>(op), context(op)) },
         AnimalExitCommands.REVERSE to OperationApplier { database, op -> AnimalExitCommands(database, op.farmId, replaying = true).reverse(decode<ReverseAnimalExit>(op), context(op)) },
         WorkerRegisterCommands.CREATE to OperationApplier { database, op -> WorkerRegisterCommands(database, op.farmId, replaying = true).create(decode<CreateFarmWorker>(op), context(op)) },
+        AttachmentCommands.ATTACH to OperationApplier { database, op -> AttachmentCommands(database, op.farmId, replaying = true).attach(decode<AttachFile>(op), context(op)) },
         CustomerCommands.CREATE to OperationApplier { database, op -> CustomerCommands(database, op.farmId, replaying = true).create(decode<CreateFarmCustomer>(op), context(op)) },
         CustomerCommands.UPDATE to OperationApplier { database, op -> CustomerCommands(database, op.farmId, replaying = true).update(decode<UpdateFarmCustomer>(op), context(op)) },
         CustomerCommands.EXIT_SALE to OperationApplier { database, op -> CustomerCommands(database, op.farmId, replaying = true).recordExitSale(decode<RecordExitSale>(op), context(op)) },
