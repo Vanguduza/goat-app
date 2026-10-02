@@ -10,14 +10,9 @@ import com.farmos.data.goat.RoomGoatRepository
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.RegisterGoat
 import com.farmos.domain.replication.DeviceStatus
-import com.farmos.domain.replication.FarmDataKey
-import com.farmos.domain.replication.FarmKeyRing
-import com.farmos.domain.replication.LanPeerTransport
-import com.farmos.domain.replication.LanSyncServer
+import com.farmos.domain.replication.LocalPeerTransport
 import com.farmos.domain.replication.SyncSession
 import com.farmos.domain.replication.SyncSessionStatus
-import java.net.InetAddress
-import java.net.InetSocketAddress
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -74,23 +69,9 @@ class RevokedMembershipClientTest {
                 tabletRow.copy(status = DeviceStatus.LOST_REVOKED.name, revokedAfterSequence = 0),
             )
             assertEquals(false, phone.maySynchronise("tablet"))
-
-            val keys = FarmKeyRing(listOf(FarmDataKey.generate("k1")), "k1")
-            val loopback = InetAddress.getLoopbackAddress()
-            LanSyncServer(tablet, { keys }).start(InetSocketAddress(loopback, 0)).use { server ->
-                LanPeerTransport(
-                    loopback.hostAddress ?: "127.0.0.1",
-                    server.port,
-                    farmId,
-                    "phone",
-                    { keys },
-                    phone::maySynchronise,
-                ).use { transport ->
-                    val outcome = SyncSession.run(phone, transport, remoteDeviceId = "tablet")
-                    assertEquals(SyncSessionStatus.PEER_NOT_AUTHORISED, outcome.status)
-                    assertEquals(0, outcome.pulledOperations)
-                }
-            }
+            val outcome = SyncSession.run(phone, LocalPeerTransport(tablet), remoteDeviceId = "tablet")
+            assertEquals(SyncSessionStatus.PEER_NOT_AUTHORISED, outcome.status)
+            assertEquals(0, outcome.pulledOperations)
             assertTrue(RoomGoatRepository(phoneDb, farmId).getGoat(animalId) == null)
             assertNotNull(goats.getGoat(animalId))
             assertEquals("Nala", goats.getGoat(animalId)?.name)
