@@ -2,8 +2,8 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "d28144b449ff60bdd4316e14b09049597749424d",
-  "source_fingerprint": "sha256:25e2e82f708119854d4a4bd03b6d60ea1340ddd84de755bce141a37a6bfaf5f2",
+  "tested_commit": "e1d72de5731b791f604409026dd23d8949ecb87c",
+  "source_fingerprint": "sha256:b00601f98a3f92871bfdf4a91e6830cbe89d4488dc0315f231671243e1697f26",
   "ci_status": "CI_PENDING",
   "foundation_run_id": null,
   "test_sources": {
@@ -155,37 +155,6 @@
         "FOS-HOME-011",
         "FOS-HOME-012-A"
       ],
-      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt": [
-        "FOS-GOAT-009",
-        "FOS-GOAT-013",
-        "FOS-GOAT-014",
-        "FOS-GOAT-015",
-        "FOS-GOAT-019",
-        "FOS-GOAT-021",
-        "FOS-GOAT-024"
-      ],
-      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHealthRuntimeNavigationTest.kt": [
-        "FOS-GOAT-025",
-        "FOS-GOAT-026",
-        "FOS-GOAT-027",
-        "FOS-GOAT-028",
-        "FOS-GOAT-029"
-      ],
-      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt": [
-        "FOS-ATOM-001",
-        "FOS-ATOM-008",
-        "FOS-GOAT-030",
-        "FOS-GOAT-032",
-        "FOS-GOAT-033",
-        "FOS-GOAT-035",
-        "FOS-GOAT-044",
-        "FOS-GOAT-046"
-      ],
-      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKidRuntimeNavigationTest.kt": [
-        "FOS-GOAT-038",
-        "FOS-GOAT-040",
-        "FOS-GOAT-041"
-      ],
       "app/src/test/java/com/farmos/app/InventoryRecordRuntimeNavigationTest.kt": [
         "FOS-INV-003",
         "FOS-INV-009",
@@ -289,6 +258,37 @@
         "FOS-RABBIT-028",
         "FOS-RABBIT-029"
       ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt": [
+        "FOS-GOAT-009",
+        "FOS-GOAT-013",
+        "FOS-GOAT-014",
+        "FOS-GOAT-015",
+        "FOS-GOAT-019",
+        "FOS-GOAT-021",
+        "FOS-GOAT-024"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHealthRuntimeNavigationTest.kt": [
+        "FOS-GOAT-025",
+        "FOS-GOAT-026",
+        "FOS-GOAT-027",
+        "FOS-GOAT-028",
+        "FOS-GOAT-029"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt": [
+        "FOS-ATOM-001",
+        "FOS-ATOM-008",
+        "FOS-GOAT-030",
+        "FOS-GOAT-032",
+        "FOS-GOAT-033",
+        "FOS-GOAT-035",
+        "FOS-GOAT-044",
+        "FOS-GOAT-046"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKidRuntimeNavigationTest.kt": [
+        "FOS-GOAT-038",
+        "FOS-GOAT-040",
+        "FOS-GOAT-041"
+      ],
       "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatLactationRuntimeNavigationTest.kt": [
         "FOS-GOAT-018",
         "FOS-GOAT-035",
@@ -311,30 +311,6 @@
       "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt": [
         "FOS-CATTLE-018",
         "FOS-SHEEP-010"
-      ],
-      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt": [
-        "FOS-ATOM-026",
-        "FOS-GOAT-001",
-        "FOS-GOAT-002",
-        "FOS-GOAT-003",
-        "FOS-GOAT-004",
-        "FOS-GOAT-007",
-        "FOS-GOAT-011",
-        "FOS-GOAT-016",
-        "FOS-GOAT-017",
-        "FOS-GOAT-020",
-        "FOS-GOAT-022",
-        "FOS-GOAT-031",
-        "FOS-GOAT-032",
-        "FOS-GOAT-034",
-        "FOS-GOAT-037",
-        "FOS-GOAT-039",
-        "FOS-GOAT-043",
-        "FOS-GOAT-051",
-        "FOS-GOAT-052",
-        "FOS-GOAT-053",
-        "FOS-GOAT-054",
-        "FOS-SYNC-003"
       ],
       "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt": [
         "FOS-ATOM-028",
@@ -387,14 +363,14 @@
         "FOS-INV-005",
         "FOS-INV-012"
       ],
-      "app/src/test/java/com/farmos/app/RabbitCaptureOwnerTest.kt": [
-        "FOS-RABBIT-006",
-        "FOS-RABBIT-011"
-      ],
       "app/src/test/java/com/farmos/app/LocalFarmEntryTest.kt": [
         "FOS-GLOBAL-002",
         "FOS-GLOBAL-004",
         "FOS-GLOBAL-006"
+      ],
+      "app/src/test/java/com/farmos/app/RabbitCaptureOwnerTest.kt": [
+        "FOS-RABBIT-006",
+        "FOS-RABBIT-011"
       ],
       "app/src/test/java/com/farmos/app/SettingsHostTest.kt": [
         "FOS-ADMIN-001",
@@ -412,6 +388,30 @@
         "FOS-ADMIN-021",
         "FOS-GLOBAL-002",
         "FOS-GLOBAL-007"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt": [
+        "FOS-ATOM-026",
+        "FOS-GOAT-001",
+        "FOS-GOAT-002",
+        "FOS-GOAT-003",
+        "FOS-GOAT-004",
+        "FOS-GOAT-007",
+        "FOS-GOAT-011",
+        "FOS-GOAT-016",
+        "FOS-GOAT-017",
+        "FOS-GOAT-020",
+        "FOS-GOAT-022",
+        "FOS-GOAT-031",
+        "FOS-GOAT-032",
+        "FOS-GOAT-034",
+        "FOS-GOAT-037",
+        "FOS-GOAT-039",
+        "FOS-GOAT-043",
+        "FOS-GOAT-051",
+        "FOS-GOAT-052",
+        "FOS-GOAT-053",
+        "FOS-GOAT-054",
+        "FOS-SYNC-003"
       ],
       "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKiddingDueTest.kt": [
         "FOS-GOAT-036"

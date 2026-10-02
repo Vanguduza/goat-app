@@ -3,7 +3,7 @@
   "name": "Register Goat + Record Weight Offline + Sync + Search",
   "updated_at": "2026-10-02",
   "certificate": "VERTICAL_SLICE_GREEN",
-  "architecture_lock_note": "Certificate issued 3 September 2026 against the superseded Supabase/Meilisearch slice. Owner lock of 30 September 2026 requires a new local-first (LAN/Drive + local search) evidence run before this certificate can be treated as proof of current architecture. Fan-out remains authorized. FEATURE_GREEN remains false.",
+  "architecture_lock_note": "Gates VS-01–VS-20 remain the 3 September 2026 pre-lock Supabase/Meilisearch proof. Gates VS-21–VS-24 are the locked local-first slice (Room + LAN/Drive contract + local search). FEATURE_GREEN remains false. Re-pin certificate_commit only after canonical CI on the local-first tests succeeds on main.",
   "feature_green": false,
   "module_green": false,
   "mvp_green": false,
@@ -230,11 +230,57 @@
       "tests": [".github/workflows/foundation-ci.yml"],
       "latest_passing_evidence": "run 33801257315 on 6c7c79a: android, android-device-e2e, supabase, edge-functions, meilisearch-contract, search-pipeline all success",
       "remaining_limitation": null
+    },
+    {
+      "id": "VS-21",
+      "requirement": "Goat registration and weight are locally durable and visible on a second Room device over farm LAN, then local search",
+      "state": "IMPLEMENTED_AWAITING_CANONICAL_CI",
+      "evidence_type": "robolectric + connected android instrumentation",
+      "tests": [
+        "app/src/test/java/com/farmos/app/LocalFirstVerticalSliceTest.kt",
+        "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"
+      ],
+      "latest_passing_evidence": null,
+      "remaining_limitation": "Second-device proof uses two Room databases (unit: in-memory; e2e: file-backed) and loopback LAN, not two physical handsets. Flip to PROVEN only after canonical CI on main."
+    },
+    {
+      "id": "VS-22",
+      "requirement": "A down LAN transport cannot roll back an accepted local goat save; Drive journal catch-up applies the same operations",
+      "state": "IMPLEMENTED_AWAITING_CANONICAL_CI",
+      "evidence_type": "robolectric",
+      "tests": ["app/src/test/java/com/farmos/app/LocalFirstVerticalSliceTest.kt"],
+      "latest_passing_evidence": null,
+      "remaining_limitation": "Drive uses the in-process journal contract, not Google Drive REST. Flip to PROVEN only after canonical CI on main."
+    },
+    {
+      "id": "VS-23",
+      "requirement": "Another farm cannot ingest the goat journal; a lost device cannot synchronise; duplicate bundles apply once",
+      "state": "IMPLEMENTED_AWAITING_CANONICAL_CI",
+      "evidence_type": "robolectric + connected android instrumentation",
+      "tests": [
+        "app/src/test/java/com/farmos/app/LocalFirstVerticalSliceTest.kt",
+        "app/src/androidTest/kotlin/com/farmos/app/RevokedMembershipClientTest.kt"
+      ],
+      "latest_passing_evidence": null,
+      "remaining_limitation": "Flip to PROVEN only after canonical CI on main."
+    },
+    {
+      "id": "VS-24",
+      "requirement": "File-backed Room close/reopen keeps goat registration and weight before LAN transfer",
+      "state": "IMPLEMENTED_AWAITING_CANONICAL_CI",
+      "evidence_type": "connected android instrumentation",
+      "tests": [
+        "core/database/src/androidTest/kotlin/com/farmos/core/database/FarmOsDatabasePersistenceTest.kt",
+        "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"
+      ],
+      "latest_passing_evidence": null,
+      "remaining_limitation": "File-backed Room close/reopen is proven by the tests once CI runs. A full physical device reboot was not executed."
     }
   ],
   "activation_blockers": [
-    "Connect a non-local Supabase project/staging environment and configure publishable credentials outside git.",
-    "Provide/bundle the approved Inter font asset before UI certification.",
+    "Re-pin VERTICAL_SLICE_GREEN certificate_commit after canonical CI proves VS-21–VS-24 on main.",
+    "Google Drive REST gateway is not configured; Drive remains a transport contract.",
+    "VISUAL_GREEN remains 0 until native goldens have independent owner approval. Inter is bundled.",
     "Goat health, reproduction, and other species/shared modules have an operating spine only; FEATURE_GREEN, MODULE_GREEN, and MVP_GREEN are not claimed.",
     "Do not convert a green architecture slice or this fan-out spine into FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN."
   ]
