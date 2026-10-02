@@ -1,11 +1,5 @@
 name: Farm OS foundation CI
 
-# Authority: docs/00_PROJECT_TRUTH.md §0. Android and domain jobs certify the local-first app.
-# Jobs named supabase, meilisearch-contract, search-pipeline and edge-functions are
-# server-era provenance. Do not add product behaviour there. Retirement is a separate
-# audited tranche; deleting them without a replacement LAN/Drive slice run would drop
-# historical evidence without a successor certificate.
-
 on:
   workflow_dispatch:
   pull_request:
