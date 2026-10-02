@@ -16,13 +16,16 @@ Older documents are provenance only when they conflict with Project Truth.
 
 ## Locked MVP architecture
 
+Owner lock of 30 September 2026 (`docs/00_PROJECT_TRUTH.md` §0). There is **no application server**.
+
 - Native Android/Kotlin/Compose.
-- Room local operational store + transactional outbox.
-- WorkManager durable synchronization.
-- Supabase Auth + PostgreSQL + RLS + Storage + Database Functions/RPC + Edge Functions.
-- Append-only `domain_events` for event-ledger domains.
-- Meilisearch as mandatory, rebuildable server search projection; local search remains available offline.
+- Room/SQLite is the operational datastore on every device. A local commit is a successful save. "Saved locally", "Synchronised" and "Backed up" are distinct states.
+- Immutable replication operations in `domain/replication`, exchanged over the farm LAN and through owner Google Drive Gateways. Whole SQLite files are never synchronised.
+- Local accounts, roles and permissions. No service-role key in the APK.
+- Local full-database search is the search authority.
 - Full MVP scope includes all documented species and shared modules.
+
+Supabase, Meilisearch and the server RPC/outbox path remain in the tree as **superseded provenance**. Do not extend them as authorities. They are retired in audited tranches (`docs/architecture/GOAT_OFFLINE_MULTI_DEVICE_SYNC.md`).
 
 ## Canonical development branch
 
@@ -33,30 +36,27 @@ The designated architecture slice is:
 ```text
 Register Goat
 → Record Weight Offline
-→ survive restart
-→ synchronize through Supabase RPC
-→ reconcile authoritative state
-→ index/search through Meilisearch
-→ verify on a second device
+→ survive process/device restart
+→ replicate missing operations to a second farm device (LAN; Drive when configured)
+→ reconcile from the journal (idempotent, original business time)
+→ farm-scoped local search
+→ second-device visibility
 ```
 
 A successful slice earns only `VERTICAL_SLICE_GREEN`. It does **not** make the goat feature, goat module, or MVP complete.
 
-Current architecture-slice certificate: `VERTICAL_SLICE_GREEN` on `6c7c79a93dc54c74134a70b3763549b442c22349` from [canonical run 33801257315](https://github.com/Vanguduza/goat-app/actions/runs/33801257315). Fan-out of further feature work is authorized. `FEATURE_GREEN`, `MODULE_GREEN`, and `MVP_GREEN` remain false. See [`docs/realisation/VERTICAL_SLICE_GATE.json`](docs/realisation/VERTICAL_SLICE_GATE.json).
+Current architecture-slice certificate: `VERTICAL_SLICE_GREEN` on `6c7c79a93dc54c74134a70b3763549b442c22349` from [canonical run 33801257315](https://github.com/Vanguduza/goat-app/actions/runs/33801257315). That run proved the **pre-lock** Supabase/Meilisearch slice. Fan-out of further feature work remains authorized. The certificate is **not** proof of the locked LAN/Drive architecture; a post-lock evidence run is still required. `FEATURE_GREEN`, `MODULE_GREEN`, and `MVP_GREEN` remain false. See [`docs/realisation/VERTICAL_SLICE_GATE.json`](docs/realisation/VERTICAL_SLICE_GATE.json).
 
-Post-certificate fan-out remains intentionally uncertified at feature/module/MVP level. The consolidated `main` head now passes the strengthened canonical CI suite, including Room migration/reopen durability, representative fan-out offline durability, broader domain tests, instrumentation-source compilation, Supabase pgTAP, Meilisearch and search-pipeline verification. This does not promote any feature, module, visual surface or the MVP to green; those states require their separate evidence contracts.
+Post-certificate fan-out remains intentionally uncertified at feature/module/MVP level. Canonical CI currently still executes server-era provenance jobs (pgTAP, Meilisearch, search-pipeline) alongside Android/domain tests. Passing those jobs does not restore server authority and does not promote any feature, module, visual surface or the MVP to green.
 
 ## Build and verification
 
 Canonical CI (`.github/workflows/foundation-ci.yml`) runs:
 
-- Goat, rabbit and operations domain tests plus session/sync unit tests
-- Kotlin compilation for app and Android instrumentation sources; canonical CI does **not** run `assembleDebug`
-- Connected emulator proofs for Room migration/reopen durability, representative fan-out offline durability, two-device pull visibility, auth refresh, and revoked-membership client handling
-- Local Supabase migrations and the full pgTAP database suite
-- Edge Function type-checks and API-key compatibility tests
-- Live Meilisearch index contract and tenant isolation
-- Full search pipeline: authority → index job → outage/retry → rebuild
-- Kotlin duplicate-import and orchestration no-growth stabilization checks
+- Domain tests (`goat`, `rabbit`, `ops`, `replication`, `access`) plus session/sync/app unit tests
+- `assembleDebug` and a SHA-256 of the APK; instrumentation sources compile
+- Connected emulator proofs for Room migration/reopen durability and representative offline durability
+- Visual-lock token guards and Kotlin orchestration no-growth ceilings
+- **Provenance (superseded, do not extend):** local Supabase pgTAP, Edge Function checks, Meilisearch contract, search-pipeline
 
-Use JDK 17, Android compile SDK 37, Gradle 9.3.1, and pinned Supabase CLI 2.116.0. Local secrets and production credentials are never committed.
+Use JDK 21 (Temurin, as in CI), Android compile SDK 37, and Gradle 9.3.1. Local secrets and production credentials are never committed.
