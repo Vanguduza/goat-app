@@ -91,7 +91,7 @@ job_android() {
 }
 
 job_android_device_e2e() {
-  record "android-device-e2e" "UNAVAILABLE" "emulator AVD and supabase CLI are not provisioned on this host"
+  record "android-device-e2e" "UNAVAILABLE" "emulator AVD is not provisioned on this host"
 }
 
 job_edge_functions() {
