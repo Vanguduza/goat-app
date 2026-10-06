@@ -159,6 +159,18 @@ data class RecordHealthTreatment(
 )
 
 @Serializable
+data class RecordHealthVaccination(
+    val vaccinationId: String,
+    val speciesCode: String,
+    val formularyItemId: String,
+    val animalId: String? = null,
+    val groupId: String? = null,
+    val dose: String? = null,
+    val method: String? = null,
+    val occurredAtEpochMillis: Long,
+)
+
+@Serializable
 data class AssignAnimalIdentifier(
     val identifierId: String,
     val animalId: String,
@@ -723,6 +735,19 @@ object OpsValidator {
     fun treatment(command: RecordHealthTreatment): String? {
         if (command.formularyItemId.isBlank() || command.reason.isBlank()) {
             return "Treatment needs a vet-approved formulary item and reason"
+        }
+        return null
+    }
+
+    fun vaccination(command: RecordHealthVaccination): String? {
+        if (command.formularyItemId.isBlank()) {
+            return "Vaccination needs a vet-approved formulary item"
+        }
+        if (command.animalId.isNullOrBlank() && command.groupId.isNullOrBlank()) {
+            return "Vaccination needs an animal or a group target"
+        }
+        if (!command.animalId.isNullOrBlank() && !command.groupId.isNullOrBlank()) {
+            return "Vaccination targets exactly one of animal or group"
         }
         return null
     }

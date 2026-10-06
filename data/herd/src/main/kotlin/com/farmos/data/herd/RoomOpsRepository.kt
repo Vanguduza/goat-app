@@ -15,6 +15,7 @@ import com.farmos.core.database.GrazingSessionEntity
 import com.farmos.core.database.HealthObservationEntity
 import com.farmos.core.database.HealthPackEntity
 import com.farmos.core.database.HealthTreatmentEntity
+import com.farmos.core.database.HealthVaccinationEntity
 import com.farmos.core.database.InventoryItemEntity
 import com.farmos.core.database.InventoryMovementEntity
 import com.farmos.core.database.LabourEntryEntity
@@ -152,6 +153,7 @@ import com.farmos.domain.ops.RecordCattlePd
 import com.farmos.domain.ops.RecordCattleService
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
+import com.farmos.domain.ops.RecordHealthVaccination
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
 import com.farmos.domain.ops.RecordMoney
@@ -1045,6 +1047,30 @@ class RoomOpsRepository(
     }
 
     suspend fun recentTreatments() = database.treatments().recent(farmId, 50)
+
+    suspend fun recordVaccination(command: RecordHealthVaccination, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.vaccination(command)?.let { error(it) }
+        val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) { "Vet-approved formulary item not found" }
+        require(formulary.vetApproved) { "Vaccination needs a vet-approved formulary item" }
+        if (command.animalId != null) {
+            val animal = requireNotNull(database.animals().get(farmId, command.animalId)) { "Animal not found" }
+            require(animal.status == "active") { "Vaccination needs an active animal" }
+        }
+        enqueue(context, "health.record_vaccination.v1", "health_vaccination", command.vaccinationId, 0, json.encodeToString(command)) {
+            database.vaccinations().insert(
+                HealthVaccinationEntity(
+                    command.vaccinationId, farmId, command.animalId, command.groupId, command.speciesCode,
+                    command.formularyItemId, command.dose?.trim()?.takeIf { it.isNotBlank() },
+                    command.method?.trim()?.takeIf { it.isNotBlank() }, command.occurredAtEpochMillis,
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.vaccinationId, true)
+    }
+
+    suspend fun recentVaccinations() = database.vaccinations().recent(farmId, 50)
+
+    suspend fun vaccinationsForAnimal(animalId: String) = database.vaccinations().forAnimal(farmId, animalId)
 
     suspend fun recordFlockDay(command: RecordPoultryFlockDay, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.flockDay(command)?.let { error(it) }

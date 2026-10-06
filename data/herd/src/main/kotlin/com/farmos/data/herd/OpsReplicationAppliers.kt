@@ -62,6 +62,7 @@ import com.farmos.domain.ops.RecordFamacha
 import com.farmos.domain.ops.RecordGroupCensus
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
+import com.farmos.domain.ops.RecordHealthVaccination
 import com.farmos.domain.ops.RecordLabResult
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
@@ -152,6 +153,7 @@ object OpsReplicationAppliers {
         "health.record_lab.v1" to replay { ops, op -> ops.recordLab(decode<RecordLabResult>(op), context(op)) },
         "health.record_observation.v1" to replay { ops, op -> ops.recordObservation(decode<RecordHealthObservation>(op), context(op)) },
         "health.record_treatment.v1" to replay { ops, op -> ops.recordTreatment(decode<RecordHealthTreatment>(op), context(op)) },
+        "health.record_vaccination.v1" to replay { ops, op -> ops.recordVaccination(decode<RecordHealthVaccination>(op), context(op)) },
         "health.record_vet_visit.v1" to replay { ops, op -> ops.recordVetVisit(decode<RecordVetVisit>(op), context(op)) },
         "inventory.item_create.v1" to replay { ops, op -> ops.createItem(decode<CreateInventoryItem>(op), context(op)) },
         "inventory.lot_issue.v1" to replay { ops, op -> ops.issueLot(decode<IssueInventoryLot>(op), context(op)) },
