@@ -1,5 +1,10 @@
 package com.farmos.app
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -7,15 +12,33 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.design.FarmOperationalPage
+import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.EndTaskSeries
 import com.farmos.feature.ops.EditTaskScreen
+import com.farmos.feature.ops.TaskAssigneeChange
+import com.farmos.feature.ops.TaskAssigneeOption
 import com.farmos.feature.ops.TaskDetailScreen
 import com.farmos.feature.ops.TaskEntryPage
+import com.farmos.feature.ops.TaskUiRow
+import com.farmos.feature.ops.TaskUpdateDraft
 import com.farmos.feature.ops.TasksBoardScreen
+import com.farmos.feature.ops.assigneeChange
+import com.farmos.feature.ops.assigneeKey
 import java.time.LocalDate
 import kotlinx.coroutines.launch
+
+/** Tabs of the per-task workspace. FOS-GROUP-007 is intentionally absent: no group-move command exists. */
+private enum class TaskDetailTab(val label: String) {
+    DETAIL("Details"),
+    ASSIGN("Assign"),
+    ATTACHMENTS("Attachments"),
+    EVIDENCE("Evidence"),
+}
 
 @Composable
 fun TasksModuleHost(
@@ -29,6 +52,8 @@ fun TasksModuleHost(
     loadCompletedCount: suspend () -> Int? = { null },
     /** Repeating and assigned tasks (D-020); null keeps the board to one-off tasks. */
     planning: TaskPlanning? = null,
+    /** Local database for the attachment read side; null leaves task attachments unwired. */
+    database: FarmOsDatabase? = null,
 ) {
     val scope = rememberCoroutineScope()
     var board by remember(farmId) { mutableStateOf(TaskBoardData()) }
@@ -68,6 +93,14 @@ fun TasksModuleHost(
 
     fun complete(taskId: String) = runWrite { completeTaskRow(rows.firstOrNull { it.id == taskId }, taskId, ops, planning, newContext()) }
 
+    fun assign(taskId: String, change: TaskAssigneeChange?) {
+        val target = rows.firstOrNull { it.id == taskId }
+        val plan = planning
+        if (target != null && plan != null && target.seriesId == null && target.status == "open") {
+            runWrite { plan.update(TaskUpdateDraft(target.id, null, null, change), newContext()) }
+        }
+    }
+
     val editing = editingId?.let { id -> rows.firstOrNull { it.id == id && it.status == "open" } }
     if (editing != null && planning != null && planning.canPlanWork) {
         EditTaskScreen(
@@ -83,14 +116,20 @@ fun TasksModuleHost(
     }
 
     if (selectedId != null) {
-        TaskDetailScreen(
-            task = rows.firstOrNull { it.id == selectedId },
+        val taskId = selectedId
+        TaskDetailWorkspace(
+            taskId = taskId,
+            task = rows.firstOrNull { it.id == taskId },
+            assignees = board.assignees,
             busy = busy,
             error = error,
+            database = database,
+            farmId = farmId,
+            canAssign = planning?.canPlanWork == true,
+            onAssign = { change -> assign(taskId, change) },
             onComplete = ::complete,
+            onEdit = { editingId = taskId },
             onBack = { if (deepEntry) onBack() else selectedId = null },
-            canPlanWork = planning?.canPlanWork == true,
-            onEdit = { editingId = selectedId },
         )
         return
     }
@@ -113,4 +152,212 @@ fun TasksModuleHost(
         onEndSeries = { seriesId -> planning?.let { runWrite { it.commands.end(EndTaskSeries(seriesId, LocalDate.now().toEpochDay()), newContext()) } } },
         repeatHorizonDays = planning?.let { TaskPlanning.HORIZON_DAYS },
     )
+}
+
+/**
+ * One task with tabs for its detail, worker assignment (FOS-LABOUR-004), attachments
+ * (FOS-TASK-012) and completion evidence (FOS-TASK-013).
+ */
+@Composable
+private fun TaskDetailWorkspace(
+    taskId: String,
+    task: TaskUiRow?,
+    assignees: List<TaskAssigneeOption>,
+    busy: Boolean,
+    error: String?,
+    database: FarmOsDatabase?,
+    farmId: String,
+    canAssign: Boolean,
+    onAssign: (TaskAssigneeChange?) -> Unit,
+    onComplete: (String) -> Unit,
+    onEdit: () -> Unit,
+    onBack: () -> Unit,
+) {
+    var tab by remember(taskId) { mutableStateOf(TaskDetailTab.DETAIL) }
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            TaskDetailTab.entries.forEach { entry ->
+                androidx.compose.material3.TextButton(
+                    onClick = { tab = entry },
+                    enabled = tab != entry,
+                ) {
+                    androidx.compose.material3.Text(entry.label)
+                }
+            }
+        }
+        when (tab) {
+            TaskDetailTab.DETAIL -> TaskDetailScreen(
+                task = task,
+                busy = busy,
+                error = error,
+                onComplete = onComplete,
+                onBack = onBack,
+                canPlanWork = canAssign,
+                onEdit = onEdit,
+            )
+            TaskDetailTab.ASSIGN -> TaskAssignPage(
+                task = task,
+                assignees = assignees,
+                canAssign = canAssign,
+                busy = busy,
+                error = error,
+                onAssign = onAssign,
+                onBack = onBack,
+            )
+            TaskDetailTab.ATTACHMENTS -> TaskAttachmentsPage(
+                database = database,
+                farmId = farmId,
+                task = task,
+                onBack = onBack,
+            )
+            TaskDetailTab.EVIDENCE -> TaskEvidencePage(
+                task = task,
+                database = database,
+                farmId = farmId,
+                onBack = onBack,
+            )
+        }
+    }
+}
+
+/**
+ * FOS-LABOUR-004 — Worker Assignment: the account or worker an open one-off task is assigned to.
+ * Changes go through UpdateFarmTask (task.update.v1); only supervisors and farm management plan work.
+ */
+@Composable
+private fun TaskAssignPage(
+    task: TaskUiRow?,
+    assignees: List<TaskAssigneeOption>,
+    canAssign: Boolean,
+    busy: Boolean,
+    error: String?,
+    onAssign: (TaskAssigneeChange?) -> Unit,
+    onBack: () -> Unit,
+) {
+    val currentKey = assigneeKey(task?.assigneeAccountId, task?.assigneeWorkerId)
+    var selectedKey by remember(task?.id) { mutableStateOf(currentKey) }
+    FarmOperationalPage(
+        screenId = "FOS-LABOUR-004",
+        title = "Worker assignment",
+        subtitle = task?.title ?: "Task",
+        onBack = onBack,
+    ) {
+        if (task == null) {
+            androidx.compose.material3.Text("The task is not on this device.")
+            return@FarmOperationalPage
+        }
+        FarmOperationalSection("Current assignment") {
+            androidx.compose.material3.Text(task.assigneeLabel ?: "Unassigned")
+            androidx.compose.material3.Text("Status: ${task.status} · due ${LocalDate.ofEpochDay(task.dueEpochDay)}")
+        }
+        when {
+            task.seriesId != null ->
+                androidx.compose.material3.Text("A repeating task is assigned through its series.")
+            task.status != "open" ->
+                androidx.compose.material3.Text("A completed task keeps the assignment it was done with.")
+            !canAssign ->
+                androidx.compose.material3.Text("Only supervisors and farm management assign work.")
+            else -> FarmOperationalSection(
+                title = "Assign to",
+                description = "Choosing a name and saving writes the assignment to this device and the farm.",
+            ) {
+                androidx.compose.material3.TextButton(
+                    onClick = { selectedKey = null },
+                    enabled = !busy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    androidx.compose.material3.Text(if (selectedKey == null) "Nobody (current)" else "Nobody")
+                }
+                assignees.forEach { option ->
+                    androidx.compose.material3.TextButton(
+                        onClick = { selectedKey = option.key },
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        androidx.compose.material3.Text(option.label + if (option.key == selectedKey) " (current)" else "")
+                    }
+                }
+                androidx.compose.material3.Button(
+                    onClick = { onAssign(assigneeChange(selectedKey)) },
+                    enabled = !busy && selectedKey != currentKey,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    androidx.compose.material3.Text("Save assignment")
+                }
+                error?.let { androidx.compose.material3.Text(it) }
+            }
+        }
+    }
+}
+
+/**
+ * FOS-TASK-012 — Task Attachment: the files kept against one task. The list is the read side of
+ * the attachment pattern; adding files to a task has no domain command (see TaskAttachmentsHost).
+ */
+@Composable
+private fun TaskAttachmentsPage(
+    database: FarmOsDatabase?,
+    farmId: String,
+    task: TaskUiRow?,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        screenId = "FOS-TASK-012",
+        title = "Task attachments",
+        subtitle = task?.title ?: "Task",
+        onBack = onBack,
+    ) {
+        if (task == null) {
+            androidx.compose.material3.Text("The task is not on this device.")
+        } else if (database == null) {
+            androidx.compose.material3.Text("Attachments are unavailable: this task view is not wired to the database.")
+        } else {
+            TaskAttachmentsHost(database = database, farmId = farmId, taskId = task.id)
+        }
+    }
+}
+
+/**
+ * FOS-TASK-013 — Task Completion Evidence: whether the task is done, when it was due, and the
+ * files kept as evidence against it.
+ */
+@Composable
+private fun TaskEvidencePage(
+    task: TaskUiRow?,
+    database: FarmOsDatabase?,
+    farmId: String,
+    onBack: () -> Unit,
+) {
+    val today = LocalDate.now().toEpochDay()
+    FarmOperationalPage(
+        screenId = "FOS-TASK-013",
+        title = "Completion evidence",
+        subtitle = task?.title ?: "Task",
+        onBack = onBack,
+    ) {
+        if (task == null) {
+            androidx.compose.material3.Text("The task is not on this device.")
+            return@FarmOperationalPage
+        }
+        FarmOperationalSection("Completion state") {
+            val state = when {
+                task.status == "done" -> "Completed"
+                task.dueEpochDay < today -> "Open · overdue since ${LocalDate.ofEpochDay(task.dueEpochDay)}"
+                else -> "Open · due ${LocalDate.ofEpochDay(task.dueEpochDay)}"
+            }
+            androidx.compose.material3.Text(state)
+            androidx.compose.material3.Text("${task.moduleCode} · ${task.taskCode}")
+            task.assigneeLabel?.let { androidx.compose.material3.Text("Assigned to $it") }
+        }
+        FarmOperationalSection("Evidence files") {
+            if (database == null) {
+                androidx.compose.material3.Text("Attachments are unavailable: this task view is not wired to the database.")
+            } else {
+                TaskAttachmentsHost(database = database, farmId = farmId, taskId = task.id)
+            }
+        }
+    }
 }
