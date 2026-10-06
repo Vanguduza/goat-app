@@ -388,6 +388,9 @@ interface WaterDao {
         """,
     )
     suspend fun totalsBySource(farmId: String): List<WaterSourceTotal>
+
+    @Query("SELECT * FROM water_records WHERE farmId = :farmId AND source = :source ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun forSource(farmId: String, source: String, limit: Int): List<WaterRecordEntity>
 }
 
 /** Exhaustive per-source water aggregate over every recorded row; not bounded by any list limit. */
@@ -519,4 +522,66 @@ interface DiseaseCatalogDao {
 
     @Query("SELECT * FROM disease_catalog ORDER BY speciesCode, displayName")
     suspend fun all(): List<DiseaseCatalogEntity>
+}
+
+@Entity(tableName = "water_points", indices = [Index(value = ["farmId", "code"], unique = true)])
+data class WaterPointEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val code: String,
+    val name: String,
+    val kind: String,
+    val active: Boolean,
+)
+
+@Dao
+interface WaterPointDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(point: WaterPointEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(point: WaterPointEntity)
+
+    @Query("SELECT * FROM water_points WHERE farmId = :farmId ORDER BY code")
+    suspend fun forFarm(farmId: String): List<WaterPointEntity>
+
+    @Query("SELECT * FROM water_points WHERE farmId = :farmId AND active = 1 ORDER BY code")
+    suspend fun active(farmId: String): List<WaterPointEntity>
+
+    @Query("SELECT * FROM water_points WHERE farmId = :farmId AND id = :pointId")
+    suspend fun get(farmId: String, pointId: String): WaterPointEntity?
+
+    @Query("SELECT COUNT(*) FROM water_points WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+}
+
+@Entity(tableName = "feed_plans", indices = [Index(value = ["farmId", "startEpochDay"])])
+data class FeedPlanEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val name: String,
+    val speciesCode: String,
+    val rationGramsPerHeadPerDay: Long,
+    val headCount: Int,
+    val startEpochDay: Long,
+    val endEpochDay: Long,
+    val note: String?,
+)
+
+@Dao
+interface FeedPlanDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(plan: FeedPlanEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(plan: FeedPlanEntity)
+
+    @Query("SELECT * FROM feed_plans WHERE farmId = :farmId ORDER BY startEpochDay DESC, id")
+    suspend fun forFarm(farmId: String): List<FeedPlanEntity>
+
+    @Query("SELECT * FROM feed_plans WHERE farmId = :farmId AND id = :planId")
+    suspend fun get(farmId: String, planId: String): FeedPlanEntity?
+
+    @Query("SELECT COUNT(*) FROM feed_plans WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
 }

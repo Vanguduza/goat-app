@@ -63,6 +63,8 @@ import com.farmos.domain.ops.RecordGroupCensus
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordHealthVaccination
+import com.farmos.domain.ops.RecordWaterPoint
+import com.farmos.domain.ops.RecordFeedPlan
 import com.farmos.domain.ops.RecordLabResult
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
@@ -142,6 +144,7 @@ object OpsReplicationAppliers {
         },
         "cattle.record_weaning.v1" to replay { ops, op -> ops.recordCattleWeaning(decode<RecordCattleWeaning>(op), context(op)) },
         "feed.issue.v1" to replay { ops, op -> ops.issueFeed(decode<IssueFeed>(op), context(op)) },
+        "feed.record_plan.v1" to replay { ops, op -> ops.recordFeedPlan(decode<RecordFeedPlan>(op), context(op)) },
         "formulary.item_create.v1" to replay { ops, op -> ops.createFormulary(decode<CreateFormularyItem>(op), context(op)) },
         "grazing.end.v1" to replay { ops, op -> ops.endGrazing(decode<EndGrazing>(op), context(op)) },
         "grazing.start.v1" to replay { ops, op -> ops.startGrazing(decode<StartGrazing>(op), context(op)) },
@@ -235,6 +238,7 @@ object OpsReplicationAppliers {
         TaskSeriesCommands.SERIES_END to series { commands, op -> commands.end(decode<EndTaskSeries>(op), context(op)) },
         TaskSeriesCommands.TASK_UPDATE to series { commands, op -> commands.update(decode<UpdateFarmTask>(op), context(op)) },
         "water.record.v1" to replay { ops, op -> ops.recordWater(decode<RecordWater>(op), context(op)) },
+        "water.record_point.v1" to replay { ops, op -> ops.recordWaterPoint(decode<RecordWaterPoint>(op), context(op)) },
     )
 
     private inline fun <reified T> decode(op: OperationEnvelope): T = json.decodeFromString(op.payload.getValue(COMMAND_PAYLOAD_KEY))

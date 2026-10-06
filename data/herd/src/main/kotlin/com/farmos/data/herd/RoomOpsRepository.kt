@@ -16,6 +16,8 @@ import com.farmos.core.database.HealthObservationEntity
 import com.farmos.core.database.HealthPackEntity
 import com.farmos.core.database.HealthTreatmentEntity
 import com.farmos.core.database.HealthVaccinationEntity
+import com.farmos.core.database.WaterPointEntity
+import com.farmos.core.database.FeedPlanEntity
 import com.farmos.core.database.InventoryItemEntity
 import com.farmos.core.database.InventoryMovementEntity
 import com.farmos.core.database.LabourEntryEntity
@@ -154,6 +156,8 @@ import com.farmos.domain.ops.RecordCattleService
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordHealthVaccination
+import com.farmos.domain.ops.RecordWaterPoint
+import com.farmos.domain.ops.RecordFeedPlan
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
 import com.farmos.domain.ops.RecordMoney
@@ -942,6 +946,8 @@ class RoomOpsRepository(
 
     suspend fun openGrazing() = database.grazing().open(farmId)
 
+    suspend fun grazingSummary() = database.grazing().summaryByPaddock(farmId)
+
     suspend fun recordLabour(command: RecordLabour, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.labour(command)?.let { error(it) }
         enqueue(context, "labour.record.v1", "labour_entry", command.entryId, 0, json.encodeToString(command)) {
@@ -986,6 +992,24 @@ class RoomOpsRepository(
 
     suspend fun recentFeed() = database.feedIssues().recent(farmId, 50)
 
+    suspend fun recordFeedPlan(command: RecordFeedPlan, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.feedPlan(command)?.let { error(it) }
+        enqueue(context, "feed.record_plan.v1", "feed_plan", command.planId, 0, json.encodeToString(command)) {
+            database.feedPlans().insert(
+                FeedPlanEntity(
+                    command.planId, farmId, command.name.trim(), command.speciesCode.trim(),
+                    command.rationGramsPerHeadPerDay, command.headCount, command.startEpochDay, command.endEpochDay,
+                    command.note?.trim()?.takeIf { it.isNotBlank() },
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.planId, true)
+    }
+
+    suspend fun feedPlans() = database.feedPlans().forFarm(farmId)
+
+    suspend fun feedPlan(planId: String) = database.feedPlans().get(farmId, planId)
+
     suspend fun recordWater(command: RecordWater, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.water(command)?.let { error(it) }
         enqueue(context, "water.record.v1", "water_record", command.recordId, 0, json.encodeToString(command)) {
@@ -995,6 +1019,27 @@ class RoomOpsRepository(
     }
 
     suspend fun recentWater() = database.water().recent(farmId, 50)
+
+    suspend fun recordWaterPoint(command: RecordWaterPoint, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.waterPoint(command)?.let { error(it) }
+        enqueue(context, "water.record_point.v1", "water_point", command.pointId, 0, json.encodeToString(command)) {
+            database.waterPoints().insert(
+                WaterPointEntity(
+                    command.pointId, farmId, command.code.trim(),
+                    command.name.trim().ifBlank { command.code.trim() }, command.kind.trim(), command.active,
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.pointId, true)
+    }
+
+    suspend fun waterPoints() = database.waterPoints().forFarm(farmId)
+
+    suspend fun activeWaterPoints() = database.waterPoints().active(farmId)
+
+    suspend fun waterPoint(pointId: String) = database.waterPoints().get(farmId, pointId)
+
+    suspend fun waterRecordsForSource(source: String) = database.water().forSource(farmId, source, 50)
 
     suspend fun recordSale(command: RecordSale, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.sale(command)?.let { error(it) }

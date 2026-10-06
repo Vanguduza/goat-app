@@ -1,6 +1,7 @@
 package com.farmos.app
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -9,7 +10,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.farmos.core.database.PaddockEntity
 import com.farmos.core.design.FarmEntitySelector
+import com.farmos.core.design.FarmOperationalPage
+import com.farmos.core.design.FarmOperationalRows
+import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.design.FarmSelectionAtoms
 import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
@@ -29,6 +34,10 @@ import kotlinx.coroutines.launch
  *
  * FOS-PASTURE-004 — grazing rotation: start/end grazing moves groups through paddocks (root tag FOS-PASTURE-001).
  * FOS-PASTURE-005 — group movement: start/end grazing records a group moving into/out of a paddock (root tag FOS-PASTURE-001).
+ * FOS-PASTURE-006 — rest period: days since each active paddock's last session ended.
+ * FOS-PASTURE-007 — carrying capacity: area plus currently grazing head, head/ha.
+ * FOS-PASTURE-008 — pasture condition: grazing-derived indicators (not a field survey).
+ * FOS-PASTURE-011 — pasture report: combined per-paddock summary.
  */
 @Composable
 fun PastureModuleHost(
@@ -81,8 +90,10 @@ fun PastureModuleHost(
     val entered = remember { mutableStateOf("") }
     val sessionId = remember { mutableStateOf("") }
     val exited = remember { mutableStateOf("") }
+    var page by remember { mutableStateOf(PastureModulePage.HOME) }
 
-    PastureRecordNavigator(records) { recordActions -> SimpleCaptureScreen(
+    when (page) {
+        PastureModulePage.HOME -> PastureRecordNavigator(records) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-PASTURE-001",
         title = "Pasture",
         help = "One group grazes one paddock at a time. Rest starts when the session ends.",
@@ -124,6 +135,165 @@ fun PastureModuleHost(
                 onClick = { run { ops.endGrazing(EndGrazing(sessionId.value, LocalDate.parse(exited.value).toEpochDay()), newContext()) } },
                 enabled = !busy && sessionId.value.isNotBlank() && exited.value.isNotBlank(),
             ) { androidx.compose.material3.Text("End grazing") }
+            androidx.compose.material3.TextButton(onClick = { page = PastureModulePage.REST }) { androidx.compose.material3.Text("Rest period") }
+            androidx.compose.material3.TextButton(onClick = { page = PastureModulePage.CAPACITY }) { androidx.compose.material3.Text("Carrying capacity") }
+            androidx.compose.material3.TextButton(onClick = { page = PastureModulePage.CONDITION }) { androidx.compose.material3.Text("Pasture condition") }
+            androidx.compose.material3.TextButton(onClick = { page = PastureModulePage.REPORT }) { androidx.compose.material3.Text("Pasture report") }
         },
     ) }
+        PastureModulePage.REST -> PastureRestPeriodScreen(ops = ops, onBack = { page = PastureModulePage.HOME })
+        PastureModulePage.CAPACITY -> PastureCarryingCapacityScreen(ops = ops, onBack = { page = PastureModulePage.HOME })
+        PastureModulePage.CONDITION -> PastureConditionScreen(ops = ops, onBack = { page = PastureModulePage.HOME })
+        PastureModulePage.REPORT -> PastureReportScreen(ops = ops, onBack = { page = PastureModulePage.HOME })
+    }
+}
+
+private enum class PastureModulePage { HOME, REST, CAPACITY, CONDITION, REPORT }
+
+/** Per-paddock grazing aggregates backing the rest/capacity/condition/report screens. */
+private data class PaddockPastureStats(
+    val paddock: PaddockEntity,
+    val sessionCount: Int,
+    val openSessions: Int,
+    val openHeadCount: Int,
+    val latestEnteredEpochDay: Long?,
+    val latestExitedEpochDay: Long?,
+)
+
+private suspend fun loadPaddockPastureStats(ops: RoomOpsRepository): List<PaddockPastureStats> {
+    val summaries = ops.grazingSummary().associateBy { it.paddockId }
+    return ops.paddocks().map { paddock ->
+        val summary = summaries[paddock.id]
+        PaddockPastureStats(
+            paddock = paddock,
+            sessionCount = summary?.sessionCount ?: 0,
+            openSessions = summary?.openSessions ?: 0,
+            openHeadCount = summary?.openHeadCount ?: 0,
+            latestEnteredEpochDay = summary?.latestEnteredEpochDay,
+            latestExitedEpochDay = summary?.latestExitedEpochDay,
+        )
+    }
+}
+
+private fun restDaysLabel(todayEpochDay: Long, stats: PaddockPastureStats): String =
+    when {
+        stats.openSessions > 0 -> "in use — rest not accumulating"
+        stats.latestExitedEpochDay != null -> {
+            val days = todayEpochDay - stats.latestExitedEpochDay
+            "resting $days days (last session ended ${LocalDate.ofEpochDay(stats.latestExitedEpochDay)})"
+        }
+        stats.sessionCount > 0 -> "grazing recorded but no ended session"
+        else -> "no grazing recorded"
+    }
+
+private fun headPerHectareLabel(stats: PaddockPastureStats): String =
+    stats.paddock.areaM2
+        ?.takeIf { it > 0 }
+        ?.let { "%.1f".format(stats.openHeadCount / (it / 10_000.0)) + " head/ha" }
+        ?: "density unavailable"
+
+/** FOS-PASTURE-006 — rest period: days since each active paddock's last grazing session ended, computed from recorded grazing sessions. */
+@Composable
+fun PastureRestPeriodScreen(
+    ops: RoomOpsRepository,
+    onBack: () -> Unit,
+) {
+    var rows by remember { mutableStateOf(emptyList<String>()) }
+    LaunchedEffect(Unit) {
+        val today = LocalDate.now().toEpochDay()
+        rows = loadPaddockPastureStats(ops).map { stats ->
+            "${stats.paddock.code} · ${stats.paddock.displayName} — ${restDaysLabel(today, stats)}"
+        }
+    }
+    FarmOperationalPage(
+        screenId = "FOS-PASTURE-006",
+        title = "Rest period",
+        subtitle = "Computed from recorded grazing sessions. No field survey is taken.",
+        onBack = onBack,
+    ) {
+        FarmOperationalRows(rows, "No paddocks", "Create a paddock on the pasture home screen first.")
+    }
+}
+
+/** FOS-PASTURE-007 — carrying capacity: recorded area plus currently grazing head per paddock; head/ha is computed, not a grazing recommendation. */
+@Composable
+fun PastureCarryingCapacityScreen(
+    ops: RoomOpsRepository,
+    onBack: () -> Unit,
+) {
+    var rows by remember { mutableStateOf(emptyList<String>()) }
+    LaunchedEffect(Unit) {
+        rows = loadPaddockPastureStats(ops).map { stats ->
+            val areaLabel = stats.paddock.areaM2?.let { "$it m²" } ?: "area not recorded"
+            "${stats.paddock.code} · ${stats.paddock.displayName} — $areaLabel · ${stats.openHeadCount} head grazing · ${headPerHectareLabel(stats)}"
+        }
+    }
+    FarmOperationalPage(
+        screenId = "FOS-PASTURE-007",
+        title = "Carrying capacity",
+        subtitle = "Open-session head counts are recorded at session start; head/ha is computed, not a recommendation.",
+        onBack = onBack,
+    ) {
+        FarmOperationalRows(rows, "No paddocks", "Create a paddock on the pasture home screen first.")
+    }
+}
+
+/** FOS-PASTURE-008 — pasture condition: grazing-derived indicators per paddock. Computed from grazing records, not a field condition survey. */
+@Composable
+fun PastureConditionScreen(
+    ops: RoomOpsRepository,
+    onBack: () -> Unit,
+) {
+    var rows by remember { mutableStateOf(emptyList<String>()) }
+    LaunchedEffect(Unit) {
+        val today = LocalDate.now().toEpochDay()
+        rows = loadPaddockPastureStats(ops).map { stats ->
+            val openLabel = if (stats.openSessions > 0) "open session: yes (${stats.openHeadCount} head)" else "open session: no"
+            val lastGrazed = when {
+                stats.openSessions > 0 -> "grazing now"
+                stats.latestExitedEpochDay != null -> "${today - stats.latestExitedEpochDay} days ago"
+                stats.latestEnteredEpochDay != null -> "entered ${today - stats.latestEnteredEpochDay} days ago, exit not recorded"
+                else -> "never"
+            }
+            "${stats.paddock.code} · ${stats.paddock.displayName} — $openLabel · last grazed: $lastGrazed · ${stats.sessionCount} sessions"
+        }
+    }
+    FarmOperationalPage(
+        screenId = "FOS-PASTURE-008",
+        title = "Pasture condition",
+        subtitle = "Grazing-derived indicators only. This is not a field condition survey.",
+        onBack = onBack,
+    ) {
+        FarmOperationalRows(rows, "No paddocks", "Create a paddock on the pasture home screen first.")
+    }
+}
+
+/** FOS-PASTURE-011 — pasture report: one summary per active paddock combining area, grazing load, rest and session history. */
+@Composable
+fun PastureReportScreen(
+    ops: RoomOpsRepository,
+    onBack: () -> Unit,
+) {
+    var stats by remember { mutableStateOf(emptyList<PaddockPastureStats>()) }
+    LaunchedEffect(Unit) { stats = loadPaddockPastureStats(ops) }
+    val today = LocalDate.now().toEpochDay()
+    FarmOperationalPage(
+        screenId = "FOS-PASTURE-011",
+        title = "Pasture report",
+        subtitle = "Combined grazing summary for every active paddock, computed from recorded sessions.",
+        onBack = onBack,
+    ) {
+        if (stats.isEmpty()) {
+            FarmOperationalSection("No paddocks", "Create a paddock on the pasture home screen first.") {}
+        } else {
+            stats.forEach { item ->
+                FarmOperationalSection("${item.paddock.code} · ${item.paddock.displayName}") {
+                    Text("Area: ${item.paddock.areaM2?.let { "$it m²" } ?: "not recorded"} · water: ${item.paddock.waterSource}")
+                    Text("Grazing now: ${item.openHeadCount} head across ${item.openSessions} open sessions (${headPerHectareLabel(item)})")
+                    Text("Rest: ${restDaysLabel(today, item)}")
+                    Text("Sessions recorded: ${item.sessionCount}")
+                }
+            }
+        }
+    }
 }

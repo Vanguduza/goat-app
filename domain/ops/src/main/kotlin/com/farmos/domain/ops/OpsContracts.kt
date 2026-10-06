@@ -127,6 +127,27 @@ data class RecordWater(
 )
 
 @Serializable
+data class RecordWaterPoint(
+    val pointId: String,
+    val code: String,
+    val name: String,
+    val kind: String,
+    val active: Boolean,
+)
+
+@Serializable
+data class RecordFeedPlan(
+    val planId: String,
+    val name: String,
+    val speciesCode: String,
+    val rationGramsPerHeadPerDay: Long,
+    val headCount: Int,
+    val startEpochDay: Long,
+    val endEpochDay: Long,
+    val note: String? = null,
+)
+
+@Serializable
 data class RecordSale(
     val saleId: String,
     val itemKind: String,
@@ -715,6 +736,21 @@ object OpsValidator {
 
     fun water(command: RecordWater): String? =
         if (command.source.isBlank() || command.litresMilli <= 0L) "Water record needs a source and litres" else null
+
+    fun waterPoint(command: RecordWaterPoint): String? {
+        if (command.code.isBlank()) return "Water point needs a code"
+        if (command.kind.isBlank()) return "Water point needs a kind"
+        return null
+    }
+
+    fun feedPlan(command: RecordFeedPlan): String? {
+        if (command.name.isBlank()) return "Feed plan needs a name"
+        if (command.speciesCode.isBlank()) return "Feed plan needs a species"
+        if (command.rationGramsPerHeadPerDay <= 0L) return "Feed plan needs a positive ration per head per day"
+        if (command.headCount <= 0) return "Feed plan needs a positive head count"
+        if (command.startEpochDay > command.endEpochDay) return "Feed plan start must be on or before its end"
+        return null
+    }
 
     fun sale(command: RecordSale): String? {
         if (command.itemKind.isBlank() || command.quantityMilli <= 0L || command.amountMinor <= 0L) {

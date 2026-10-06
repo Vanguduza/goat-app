@@ -691,6 +691,8 @@ interface SyncCursorDao {
         MaintenanceEventEntity::class,
         FeedIssueEntity::class,
         WaterRecordEntity::class,
+        WaterPointEntity::class,
+        FeedPlanEntity::class,
         SaleRecordEntity::class,
         FormularyItemEntity::class,
         HealthTreatmentEntity::class,
@@ -779,7 +781,7 @@ interface SyncCursorDao {
         AttachmentEntity::class,
         HealthVaccinationEntity::class,
     ],
-    version = 30,
+    version = 31,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -812,7 +814,9 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun assets(): AssetDao
     abstract fun maintenance(): MaintenanceDao
     abstract fun feedIssues(): FeedIssueDao
+    abstract fun feedPlans(): FeedPlanDao
     abstract fun water(): WaterDao
+    abstract fun waterPoints(): WaterPointDao
     abstract fun sales(): SaleDao
     abstract fun formulary(): FormularyDao
     abstract fun treatments(): TreatmentDao
@@ -1327,6 +1331,22 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30)
+        val MIGRATION_30_31 = object : Migration(30, 31) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `water_points` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `code` TEXT NOT NULL, " +
+                        "`name` TEXT NOT NULL, `kind` TEXT NOT NULL, `active` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_water_points_farmId_code` ON `water_points` (`farmId`, `code`)")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `feed_plans` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `name` TEXT NOT NULL, " +
+                        "`speciesCode` TEXT NOT NULL, `rationGramsPerHeadPerDay` INTEGER NOT NULL, `headCount` INTEGER NOT NULL, " +
+                        "`startEpochDay` INTEGER NOT NULL, `endEpochDay` INTEGER NOT NULL, `note` TEXT, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_feed_plans_farmId_startEpochDay` ON `feed_plans` (`farmId`, `startEpochDay`)")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31)
     }
 }
