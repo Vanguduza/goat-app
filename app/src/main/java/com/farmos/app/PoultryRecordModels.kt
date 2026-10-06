@@ -1,0 +1,118 @@
+package com.farmos.app
+
+import com.farmos.core.database.FarmOsDatabase
+import com.farmos.feature.ops.PoultryDayView
+import com.farmos.feature.ops.PoultryFlockRecords
+import com.farmos.feature.ops.PoultryFlockView
+import com.farmos.feature.ops.PoultryHatchView
+import com.farmos.feature.ops.PoultryHouseView
+import com.farmos.feature.ops.PoultryPlacementView
+import com.farmos.feature.ops.PoultryRecords
+import com.farmos.feature.ops.PoultryVaccinationView
+import com.farmos.feature.ops.PoultryWalkView
+
+private const val POULTRY_RECORD_LIMIT = 500
+
+/**
+ * Farm-scoped read model for the read-only poultry record pages. Nothing here writes.
+ * Flock identity, placed heads and first placement come from exhaustive per-flock aggregates; the
+ * placement, vaccination and walk lists are the latest [POULTRY_RECORD_LIMIT] rows and carry
+ * exhaustive counts so the pages can say when a list is not complete.
+ */
+internal suspend fun loadPoultryRecords(database: FarmOsDatabase, farmId: String): PoultryRecords {
+    val lifecycle = database.lifecycle()
+    val houses = lifecycle.houses(farmId)
+    val houseCodes = houses.associate { it.id to it.code }
+    fun houseLabel(id: String?) = id?.let { houseCodes[it] ?: "House not on this device" }
+    val placements = lifecycle.placements(farmId, POULTRY_RECORD_LIMIT)
+    val vaccinations = lifecycle.vaccinations(farmId, POULTRY_RECORD_LIMIT)
+    val products = vaccinations.map { it.formularyItemId }.distinct().chunked(LOOKUP_CHUNK)
+        .flatMap { database.formulary().getMany(farmId, it) }
+        .associate { it.id to it.productName }
+    fun product(id: String) = products[id] ?: "Product not on this device"
+    val rawWalks = lifecycle.biosecurityWalks(farmId, POULTRY_RECORD_LIMIT)
+    val walks = rawWalks.map { walk ->
+        val subject = listOfNotNull(houseLabel(walk.houseId)?.let { "House $it" }, walk.groupId?.let { "Flock $it" }).joinToString(" · ").ifBlank { "Farm" }
+        PoultryWalkView(walk.id, walk.occurredEpochDay, subject, walk.findings, walk.mixedSpecies)
+    }
+    val groupHouses = lifecycle.poultryGroupHouses(farmId).groupBy({ it.groupId }, { it.houseId })
+    val vaccinationCounts = lifecycle.poultryVaccinationCountsByGroup(farmId).associate { it.key to it.count }
+    val placementCountsByHouse = lifecycle.poultryPlacementCountsByHouse(farmId).associate { it.key to it.count }
+    val walkCountsByHouse = lifecycle.poultryWalkCountsByHouse(farmId).associate { it.key to it.count }
+    val flocks = lifecycle.poultryPlacementTotals(farmId).map { total ->
+        val groupId = total.groupId
+        PoultryFlockView(
+            groupId = groupId,
+            poultryKind = total.poultryKindCode,
+            houseLabel = groupHouses[groupId].orEmpty().map { houseLabel(it) ?: "" }.distinct().joinToString(", "),
+            placedHeads = total.placedHeads,
+            firstPlacedEpochDay = total.firstPlacedEpochDay,
+            days = database.poultryFlockDays().forGroup(farmId, groupId).map { PoultryDayView(it.occurredEpochDay, it.eggs, it.dead, it.culls, it.feedGrams) },
+            vaccinations = vaccinations.filter { it.groupId == groupId }.map { PoultryVaccinationView(it.id, it.occurredEpochDay, product(it.formularyItemId)) },
+            vaccinationCount = vaccinationCounts[groupId] ?: 0,
+        )
+    }
+    return PoultryRecords(
+        flocks = flocks,
+        houses = houses.map { house ->
+            PoultryHouseView(
+                id = house.id,
+                code = house.code,
+                houseKind = house.kind,
+                poultryKind = house.poultryKindCode,
+                placements = placements.filter { it.houseId == house.id }.map { PoultryPlacementView(it.id, it.groupId, it.poultryKindCode, it.headCount, it.occurredEpochDay) },
+                walks = rawWalks.filter { it.houseId == house.id }.map { walk ->
+                    PoultryWalkView(walk.id, walk.occurredEpochDay, "House ${house.code}", walk.findings, walk.mixedSpecies)
+                },
+                placementCount = placementCountsByHouse[house.id] ?: 0,
+                walkCount = walkCountsByHouse[house.id] ?: 0,
+            )
+        },
+        hatches = lifecycle.hatches(farmId).map { hatch ->
+            PoultryHatchView(
+                id = hatch.id,
+                poultryKind = hatch.poultryKindCode,
+                setEpochDay = hatch.setEpochDay,
+                eggsSet = hatch.eggsSet,
+                incubationDays = hatch.incubationDays,
+                status = hatch.status,
+                location = listOfNotNull(houseLabel(hatch.houseId)?.let { "House $it" }, hatch.groupId?.let { "Flock $it" }).joinToString(" · ").ifBlank { "Not recorded" },
+                fertile = hatch.fertile,
+                infertile = hatch.infertile,
+                midDead = hatch.midDead,
+                hatched = hatch.hatched,
+                culls = hatch.culls,
+                placementGroupId = hatch.placementGroupId,
+            )
+        },
+        walks = walks,
+        walkCount = lifecycle.poultryWalkCount(farmId),
+        flockCount = flocks.size,
+        mixedSpeciesWalkCount = lifecycle.poultryMixedSpeciesWalkCount(farmId),
+    )
+}
+
+/** Every record for one flock, read exhaustively inside the farm. Nothing here writes. */
+internal suspend fun loadPoultryFlockRecords(database: FarmOsDatabase, farmId: String, groupId: String): PoultryFlockRecords {
+    val lifecycle = database.lifecycle()
+    val houseCodes = lifecycle.houses(farmId).associate { it.id to it.code }
+    val vaccinations = lifecycle.vaccinationsForGroup(farmId, groupId)
+    val products = vaccinations.map { it.formularyItemId }.distinct().chunked(LOOKUP_CHUNK)
+        .flatMap { database.formulary().getMany(farmId, it) }
+        .associate { it.id to it.productName }
+    return PoultryFlockRecords(
+        placements = lifecycle.placementsForGroup(farmId, groupId).map { PoultryPlacementView(it.id, it.groupId, it.poultryKindCode, it.headCount, it.occurredEpochDay) },
+        days = database.poultryFlockDays().forGroup(farmId, groupId).map { PoultryDayView(it.occurredEpochDay, it.eggs, it.dead, it.culls, it.feedGrams) },
+        vaccinations = vaccinations.map { PoultryVaccinationView(it.id, it.occurredEpochDay, products[it.formularyItemId] ?: "Product not on this device") },
+        walks = lifecycle.walksForGroup(farmId, groupId).map { walk ->
+            val house = walk.houseId?.let { "House " + (houseCodes[it] ?: "not on this device") }
+            PoultryWalkView(walk.id, walk.occurredEpochDay, listOfNotNull(house, "Flock $groupId").joinToString(" · "), walk.findings, walk.mixedSpecies)
+        },
+        hatches = lifecycle.hatchesPlacedInto(farmId, groupId).map { hatch ->
+            PoultryHatchView(
+                hatch.id, hatch.poultryKindCode, hatch.setEpochDay, hatch.eggsSet, hatch.incubationDays, hatch.status, "Flock $groupId",
+                hatch.fertile, hatch.infertile, hatch.midDead, hatch.hatched, hatch.culls, hatch.placementGroupId,
+            )
+        },
+    )
+}

@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-TASK-006",
+  "registry_name": "Assigned to Me",
+  "feature_ids": [],
+  "status": "DRAFT",
+  "user_job": "See the open work assigned to my account, including each occurrence of repeating work.",
+  "personas_and_grants": [
+    "Any signed-in local account: VIEW_FARM"
+  ],
+  "scope": {
+    "farm_source": "Signed-in farm session",
+    "species_kind": "N/A",
+    "subject": "Open tasks and occurrences assigned to the signed-in account",
+    "sensitive_fields": []
+  },
+  "navigation": {
+    "route": "Tasks > Assigned to me tab",
+    "entry_points": [
+      "TasksBoardScreen tab"
+    ],
+    "arguments": [],
+    "deep_link_authorization": "No deep link",
+    "back_and_draft_behavior": "Tab switch; Farm home returns",
+    "aliases": []
+  },
+  "design": {
+    "recipe": "P05",
+    "reference_ids": [],
+    "native_golden_family": "UNREVIEWED",
+    "token_version": "UNREVIEWED",
+    "ordered_sections": [
+      "Tabs",
+      "Assigned rows",
+      "Add task"
+    ],
+    "shared_components": [
+      "AnimalFarmCanvas",
+      "FarmIllustratedSectionSurface"
+    ],
+    "illustration_use": "None",
+    "copy": {},
+    "adaptive_layout": {
+      "phone": "Single column",
+      "tablet": "UNREVIEWED",
+      "large_text": "UNREVIEWED",
+      "outdoor": "UNREVIEWED"
+    }
+  },
+  "fields": [],
+  "queries": [
+    {
+      "name": "assigned open work",
+      "read_model": "Board rows filtered by assigneeAccountId == signed-in account",
+      "loading_empty_error": "Empty: 'Nothing assigned to you'",
+      "freshness": "Local Room at board load",
+      "offline_source": "Local Room"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Done",
+      "intent": "Complete the occurrence",
+      "permission": "RECORD_FARM_WORK",
+      "command_or_destination": "task.occurrence_complete.v1 or task.complete.v1",
+      "validation": [],
+      "effects": [
+        "Stored completed occurrence"
+      ],
+      "idempotency": "Completing the same occurrence again changes nothing, on any device",
+      "success_receipt": "Row leaves the list",
+      "failure_and_recovery": "Error shown; row stays"
+    }
+  ],
+  "state_matrix": [
+    {
+      "state": "content",
+      "fixture": "Two assigned occurrences, one mine",
+      "expected_ui": "Only mine listed",
+      "test_id": "TaskViewRuntimeNavigationTest.assignedToMeAndRepeatingViewsShowOnlyTheirOwnWork"
+    }
+  ],
+  "not_applicable_states": [],
+  "accessibility_tests": [],
+  "functional_tests": [
+    "TaskSeriesQueries.openOccurrences assignedToAccountId (TaskSeriesCommandsTest)"
+  ],
+  "linked_routes": [
+    "FOS-TASK-001",
+    "FOS-TASK-003"
+  ],
+  "guide_and_resource_links": [],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": null,
+  "notes": "feature_ids left empty: no canonical feature-ID catalogue maps D-020 screens yet (ANIMAL_FARM_PROGRESS_LEDGER). UNREVIEWED design items await visual-lock review; not design-ready."
+}

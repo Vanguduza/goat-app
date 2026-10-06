@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "screen_id": "REQUIRED",
+  "registry_name": "REQUIRED",
+  "feature_ids": [],
+  "status": "DRAFT",
+  "user_job": "REQUIRED: specific user outcome, not a feature description",
+  "personas_and_grants": [],
+  "scope": {"farm_source": "REQUIRED", "species_kind": "REQUIRED_OR_REASONED_NA", "subject": "REQUIRED_OR_REASONED_NA", "sensitive_fields": []},
+  "navigation": {"route": "REQUIRED", "entry_points": [], "arguments": [], "deep_link_authorization": "REQUIRED", "back_and_draft_behavior": "REQUIRED", "aliases": []},
+  "design": {"recipe": "REQUIRED_P01_TO_P16", "reference_ids": [], "native_golden_family": "REQUIRED", "token_version": "REQUIRED", "ordered_sections": [], "shared_components": [], "illustration_use": "REQUIRED", "copy": {}, "adaptive_layout": {"phone": "REQUIRED", "tablet": "REQUIRED_OR_REASONED_NA", "large_text": "REQUIRED", "outdoor": "REQUIRED"}},
+  "fields": [{"key": "REPLACE_ME", "label": "REQUIRED", "type": "REQUIRED", "unit": "REQUIRED_OR_NA", "required": true, "bounds_source": "REQUIRED_SPEC_REFERENCE", "default_source": "REQUIRED", "editable_by": [], "validation": []}],
+  "queries": [{"name": "REPLACE_ME", "read_model": "REQUIRED", "loading_empty_error": "REQUIRED", "freshness": "REQUIRED", "offline_source": "REQUIRED_OR_REASONED_NA"}],
+  "actions": [{"label": "REPLACE_ME", "intent": "REQUIRED", "permission": "REQUIRED", "command_or_destination": "REQUIRED", "validation": [], "effects": [], "idempotency": "REQUIRED_OR_REASONED_NA", "success_receipt": "REQUIRED", "failure_and_recovery": "REQUIRED"}],
+  "state_matrix": [{"state": "REPLACE_WITH_EACH_APPLICABLE_STATE", "fixture": "REQUIRED", "expected_ui": "REQUIRED", "test_id": "REQUIRED"}],
+  "not_applicable_states": [],
+  "accessibility_tests": [],
+  "functional_tests": [],
+  "linked_routes": [],
+  "guide_and_resource_links": [],
+  "review": {"design_contract_reviewer": null, "approval_reference": null},
+  "evidence_file": null
+}

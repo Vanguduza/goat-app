@@ -1,0 +1,467 @@
+package com.farmos.feature.goat
+
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.farmos.core.design.AnimalFarmThemeMode
+import com.farmos.core.design.FarmOsTheme
+import com.farmos.core.model.SearchSource
+import com.farmos.domain.goat.GoatSearchResult
+import com.farmos.domain.goat.GoatSex
+import com.farmos.domain.goat.GoatSnapshot
+import com.farmos.domain.goat.GoatStatus
+import com.farmos.domain.goat.WeightSample
+import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicReference
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(sdk = [36], qualifiers = "en-rUS")
+class GoatReferenceContractTest {
+    @get:Rule
+    val compose = createComposeRule()
+
+    private val fixedDate = LocalDate.of(2026, 9, 24)
+    private val state = referenceState()
+
+    @Test
+    fun dashboardRoutesToTheScopedHerdSurface() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.DASHBOARD,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-001").assertIsDisplayed()
+        compose.onNode(hasClickAction() and hasText("Herd")).performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-002").assertIsDisplayed()
+        compose.onNodeWithText("Register goat").assertExists()
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun herdSelectionOpensTheSelectedGoatProfile() {
+        var selectedId: String? = null
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(onSelect = { selectedId = it }),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.HERD,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-002").assertIsDisplayed()
+        compose.onNodeWithText("Nala").performClick()
+
+        assertEquals("goat-nala", selectedId)
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-003").assertIsDisplayed()
+        compose.onNodeWithText("Goat profile").assertIsDisplayed()
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun profileRoutesToWeightAndRecordsTheEnteredMeasurement() {
+        var weight: String? = null
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(onWeight = { weight = it }),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.PROFILE,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-003").assertIsDisplayed()
+        compose.onNode(hasClickAction() and hasText("Weight")).performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-011").assertIsDisplayed()
+        compose.onNodeWithText("Saving succeeds when the measurement is durable on this device. Sync can happen later.").assertExists()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("55.4")
+        compose.onNode(hasClickAction() and hasText("Record weight")).assertIsEnabled().performClick()
+
+        assertEquals("55.4", weight)
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun lifecycleChangeCancelIsNonDestructive() {
+        val exit = AtomicReference<GoatExitDraft?>(null)
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(onExit = exit::set),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.STATUS_CHANGE,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-051").assertIsDisplayed()
+        openSaleAndContinue()
+        compose.runOnIdle { assertNull(exit.get()) }
+        compose.onNodeWithText("Confirm sale exit").assertIsDisplayed()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-026").assertIsDisplayed()
+        compose.onNode(hasClickAction() and hasText("Cancel")).performScrollTo().performClick()
+        compose.runOnIdle { assertNull(exit.get()) }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-026").assertDoesNotExist()
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun registerSurfaceRendersItsCanonicalOwner() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.REGISTER,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-004").assertIsDisplayed()
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun rfidOrTagScanRendersCanonicalOwnerAndSubmitsIdentifier() {
+        var scanned: String? = null
+        val scanState = state.copy(
+            searchMessage = "Matched local rfid",
+            searchResults = listOf(
+                GoatSearchResult(
+                    animalId = "goat-nala",
+                    tag = "GT-024",
+                    name = "Nala",
+                    status = "active",
+                    source = SearchSource.LOCAL,
+                ),
+            ),
+        )
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = scanState,
+                    actions = noOpActions(onScan = { scanned = it }),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.SCAN,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-007").assertIsDisplayed()
+        compose.onAllNodes(hasSetTextAction())[0].performTextInput("RFID-00024")
+        compose.onNode(hasClickAction() and hasText("Find goat")).assertIsEnabled().performClick()
+        compose.runOnIdle { assertEquals("RFID-00024", scanned) }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun healthObservationAtomsRenderCanonicalOwners() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.HEALTH,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        listOf("FOS-GOAT-022", "FOS-GOAT-016", "FOS-GOAT-020").forEach { screenId ->
+            compose.onNodeWithTag("farm-screen:$screenId").performScrollTo().assertIsDisplayed()
+        }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun reproductionAtomsRenderCanonicalOwners() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.REPRODUCTION,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        listOf("FOS-GOAT-017", "FOS-GOAT-031", "FOS-GOAT-032", "FOS-GOAT-034", "FOS-GOAT-043").forEach { screenId ->
+            compose.onNodeWithTag("farm-screen:$screenId").performScrollTo().assertIsDisplayed()
+        }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun kiddingAtomsRenderCanonicalOwners() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.KIDDING,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-037").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-039").performScrollTo().assertIsDisplayed()
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun syncPendingChangesAtomRendersCanonicalOwner() {
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.SYNC,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-003").assertIsDisplayed()
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun lifecycleChangeRequiresExplicitConfirmation() {
+        val exit = AtomicReference<GoatExitDraft?>(null)
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(
+                    state = state,
+                    actions = noOpActions(onExit = exit::set),
+                    onBackToFarm = {},
+                    onSignOut = {},
+                    initialPage = GoatPage.STATUS_CHANGE,
+                    today = fixedDate,
+                )
+            }
+        }
+
+        openSaleAndContinue()
+        compose.onNodeWithText("Confirm sale exit").assertIsDisplayed()
+        compose.onNodeWithTag("goat-exit-confirm")
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("goat-exit-confirm").assertDoesNotExist()
+        compose.runOnIdle {
+            assertEquals(GoatExitKind.SALE, exit.get()?.kind)
+            assertEquals("Moyo Butchery", exit.get()?.buyer)
+        }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun mortalityNeedsACauseAndIsRecordedAfterConfirmation() {
+        val exit = AtomicReference<GoatExitDraft?>(null)
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(state = state, actions = noOpActions(onExit = exit::set), onBackToFarm = {}, onSignOut = {}, initialPage = GoatPage.STATUS_CHANGE, today = fixedDate)
+            }
+        }
+        compose.onNodeWithTag("goat-exit-open:MORTALITY").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-053").assertIsDisplayed()
+        compose.onNodeWithTag("goat-exit-continue").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag("goat-exit-cause:PREDATION").performScrollTo().performClick()
+        compose.onNodeWithTag("goat-exit-continue").performScrollTo().performClick()
+        compose.onNodeWithTag("goat-exit-confirm").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(GoatExitKind.DEATH, exit.get()?.kind)
+            assertEquals("PREDATION", exit.get()?.deathCause)
+        }
+        assertNamedClickTargets()
+    }
+
+    @Test
+    fun cullNeedsAReason() {
+        val exit = AtomicReference<GoatExitDraft?>(null)
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(state = state, actions = noOpActions(onExit = exit::set), onBackToFarm = {}, onSignOut = {}, initialPage = GoatPage.STATUS_CHANGE, today = fixedDate)
+            }
+        }
+        compose.onNodeWithTag("goat-exit-open:CULL").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-054").assertIsDisplayed()
+        compose.onNodeWithTag("goat-exit-continue").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag("goat-exit-reason").performScrollTo().performTextInput("Chronic lameness")
+        compose.onNodeWithTag("goat-exit-continue").performScrollTo().performClick()
+        compose.onNodeWithTag("goat-exit-confirm").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals(GoatExitKind.CULL, exit.get()?.kind)
+            assertEquals("Chronic lameness", exit.get()?.reason)
+        }
+    }
+
+    @Test
+    fun aGoatThatHasLeftShowsItsExitWhichCanBeReversedWithAReason() {
+        val reversed = AtomicReference<Pair<String, String>?>(null)
+        val sold = state.copy(
+            selected = state.selected!!.copy(status = GoatStatus.SOLD),
+            standingExit = GoatExitView("exit-1", "Sold to Moyo Butchery on 2026-09-20"),
+        )
+        compose.setContent {
+            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+                GoatExperienceScreen(state = sold, actions = noOpActions(onReverse = { id, reason -> reversed.set(id to reason) }), onBackToFarm = {}, onSignOut = {}, initialPage = GoatPage.STATUS_CHANGE, today = fixedDate)
+            }
+        }
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-051").assertIsDisplayed()
+        compose.onNodeWithText("Sold to Moyo Butchery on 2026-09-20").assertIsDisplayed()
+        compose.onNodeWithTag("goat-exit-open:SALE_EXIT").assertDoesNotExist()
+        compose.onNodeWithTag("goat-exit-reverse").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag("goat-exit-reverse-reason").performScrollTo().performTextInput("Wrong goat recorded")
+        compose.onNodeWithTag("goat-exit-reverse").performScrollTo().performClick()
+        compose.runOnIdle { assertEquals("exit-1" to "Wrong goat recorded", reversed.get()) }
+    }
+
+    /** From Lifecycle change, opens the sale exit (FOS-GOAT-052), names a buyer and continues to confirmation. */
+    private fun openSaleAndContinue() {
+        compose.onNodeWithTag("goat-exit-open:SALE_EXIT").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-052").assertIsDisplayed()
+        compose.onNodeWithTag("goat-exit-buyer").performScrollTo().performTextInput("Moyo Butchery")
+        compose.onNodeWithTag("goat-exit-continue").performScrollTo().performClick()
+    }
+
+    private fun assertNamedClickTargets() {
+        val nodes = compose.onAllNodes(hasClickAction()).fetchSemanticsNodes()
+        assertTrue("Expected at least one interactive node", nodes.isNotEmpty())
+        nodes.forEach { node ->
+            val named =
+                node.config.contains(SemanticsProperties.Text) ||
+                    node.config.contains(SemanticsProperties.ContentDescription)
+            assertTrue("Unnamed click target: ${node.config}", named)
+        }
+    }
+
+    private fun referenceState(): GoatSliceUiState {
+        val nala = GoatSnapshot(
+            animalId = "goat-nala",
+            farmId = "farm-reference",
+            tag = "GT-024",
+            name = "Nala",
+            sex = GoatSex.FEMALE,
+            status = GoatStatus.ACTIVE,
+            dateOfBirthEpochDay = LocalDate.of(2024, 4, 14).toEpochDay(),
+            latestWeightGrams = 54_250,
+            averageDailyGainGrams = 118,
+            weightHistory = listOf(
+                WeightSample("w1", 48_100, LocalDate.of(2026, 7, 1).toEpochDay() * 86_400_000L),
+                WeightSample("w2", 51_700, LocalDate.of(2026, 8, 1).toEpochDay() * 86_400_000L),
+                WeightSample("w3", 54_250, LocalDate.of(2026, 9, 20).toEpochDay() * 86_400_000L),
+            ),
+            syncPending = true,
+        )
+        val buck = GoatSnapshot(
+            animalId = "goat-kito",
+            farmId = "farm-reference",
+            tag = "GT-011",
+            name = "Kito",
+            sex = GoatSex.MALE,
+            status = GoatStatus.ACTIVE,
+            dateOfBirthEpochDay = LocalDate.of(2023, 9, 2).toEpochDay(),
+            latestWeightGrams = 72_400,
+            syncPending = false,
+        )
+        return GoatSliceUiState(
+            farmName = "Premier Farm",
+            herd = listOf(nala, buck),
+            herdState = LoadableSurfaceState.IDLE,
+            selected = nala,
+            animalId = nala.animalId,
+            pendingSyncCount = 2,
+            goatSummary = "24 active goats",
+            syncMessage = "2 local changes waiting to sync",
+            searchMessage = "Search this herd",
+            busy = false,
+            error = null,
+        )
+    }
+
+    private fun noOpActions(
+        onWeight: (String) -> Unit = {},
+        onStatus: (GoatStatus) -> Unit = {},
+        onSelect: (String) -> Unit = {},
+        onScan: (String) -> Unit = {},
+        onExit: (GoatExitDraft) -> Unit = {},
+        onReverse: (String, String) -> Unit = { _, _ -> },
+    ) = GoatExperienceActions(
+        onRegister = { _, _, _, _ -> },
+        onRecordWeight = onWeight,
+        onRecordKidding = { _, _, _, _ -> },
+        onRegisterKid = { _, _, _ -> },
+        onRecordFamacha = { _, _ -> },
+        onRecordMilk = { _, _ -> },
+        onRecordBcs = { _, _ -> },
+        onRecordScc = { _, _, _ -> },
+        onRecordHeat = {},
+        onRecordMating = { _, _, _ -> },
+        onRecordPregnancy = { _, _ -> },
+        onPlanLactation = {},
+        onSetStatus = onStatus,
+        onSelectGoat = onSelect,
+        onSyncNow = {},
+        onSearch = {},
+        onScanIdentifier = onScan,
+        onRecordExit = onExit,
+        onReverseExit = onReverse,
+    )
+}

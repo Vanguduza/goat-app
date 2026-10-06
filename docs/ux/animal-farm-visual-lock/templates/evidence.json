@@ -1,0 +1,19 @@
+{
+  "screen_id": "REQUIRED",
+  "tested_commit": "REQUIRED_FULL_SHA",
+  "contract_file": "REQUIRED_RELATIVE_PATH",
+  "ci_run_url": "REQUIRED",
+  "visual_green": false,
+  "feature_green": false,
+  "artifacts": [],
+  "state_matrix_complete": false,
+  "route_tests_passed": false,
+  "interaction_tests_passed": false,
+  "accessibility_passed": false,
+  "functional_contract_passed": false,
+  "reference_version": "animal-farm-lock-2026-09-05",
+  "baseline_approval": {"reviewer": null, "reference": null},
+  "independent_review": {"reviewer": null, "reference": null},
+  "exceptions": [],
+  "notes": "Artifacts need kind, relative path, and sha256. Include native_golden, screenshot_diff, tests, accessibility and state_matrix. Green remains false until externally verified."
+}

@@ -1,0 +1,459 @@
+package com.farmos.app
+
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.model.LocalCommandContext
+import com.farmos.data.herd.BreedingDueCommands
+import com.farmos.data.herd.RoomHerdRepository
+import com.farmos.data.herd.RoomOpsRepository
+import com.farmos.domain.ops.AcceptHealthPack
+import com.farmos.domain.ops.CompleteFarmTask
+import com.farmos.domain.ops.CreateFarmTask
+import com.farmos.domain.ops.CreateFormularyItem
+import com.farmos.domain.ops.CreateInventoryItem
+import com.farmos.domain.ops.MoveInventory
+import com.farmos.domain.ops.RecordCattleBcs
+import com.farmos.domain.ops.RecordCattleCalving
+import com.farmos.domain.ops.RecordCattleMilk
+import com.farmos.domain.ops.RecordCattlePd
+import com.farmos.domain.ops.RecordCattleServiceV2
+import com.farmos.domain.ops.RecordCattleDryOff
+import com.farmos.domain.ops.RecordCattleLocomotion
+import com.farmos.domain.ops.RecordCattleScc
+import com.farmos.domain.ops.RecordSheepDag
+import com.farmos.domain.ops.RecordSheepFlystrike
+import com.farmos.domain.ops.RecordSheepShearing
+import com.farmos.domain.ops.RecordSheepFootrot
+import com.farmos.domain.ops.RecordHealthObservation
+import com.farmos.domain.ops.RecordHealthTreatment
+import com.farmos.domain.ops.RecordMoney
+import com.farmos.domain.ops.RecordSheepJoiningV2
+import com.farmos.domain.ops.RecordSheepLambing
+import com.farmos.domain.ops.RecordSheepMarking
+import com.farmos.domain.ops.RecordSheepScan
+import com.farmos.domain.ops.RecordSheepWeaning
+import com.farmos.domain.ops.RecordSheepWool
+import com.farmos.domain.ops.AddHealthPackSlot
+import com.farmos.domain.ops.ApplyHealthPack
+import com.farmos.domain.ops.AssignAnimalIdentifier
+import com.farmos.domain.ops.GestationSpecies
+import com.farmos.domain.ops.CloseCattleLot
+import com.farmos.domain.ops.IssueInventoryLot
+import com.farmos.domain.ops.LinkPedigree
+import com.farmos.domain.ops.PlaceCattleLot
+import com.farmos.domain.ops.ReceiveInventoryLot
+import com.farmos.domain.ops.RecordCattleDaysOnFeed
+import com.farmos.domain.ops.RecordCattleWeaning
+import com.farmos.domain.ops.RecordFamacha
+import com.farmos.domain.ops.RecordLabResult
+import com.farmos.domain.ops.RecordOfficialMovement
+import com.farmos.domain.ops.RecordReorderAlert
+import com.farmos.domain.ops.RecordSheepMicron
+import com.farmos.domain.ops.RecordVetVisit
+import com.farmos.domain.ops.SetInventoryReorder
+import com.farmos.feature.ops.CattleOperationsActions
+import com.farmos.feature.ops.CattleOperationsScreen
+import com.farmos.feature.ops.HealthObservationScreen
+import com.farmos.feature.ops.InventoryScreen
+import com.farmos.feature.ops.MoneyCaptureScreen
+import com.farmos.feature.ops.SimpleCaptureScreen
+import com.farmos.feature.ops.SheepOperationsActions
+import com.farmos.feature.ops.SheepOperationsScreen
+import com.farmos.feature.ops.TaskUiRow
+import com.farmos.feature.ops.TasksBoardScreen
+import java.time.LocalDate
+import androidx.compose.runtime.CompositionLocalProvider
+import com.farmos.core.design.FarmSelectorOption
+import com.farmos.feature.ops.LocalOpsAnimalSearch
+import com.farmos.feature.ops.OpsAnimalSearch
+import java.util.UUID
+import kotlinx.coroutines.launch
+
+@Composable
+fun OperatingModuleHost(
+    module: FarmModule,
+    farmId: String,
+    database: FarmOsDatabase,
+    ops: RoomOpsRepository,
+    newContext: () -> LocalCommandContext,
+    enqueueSync: () -> Unit,
+    onBack: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var taskRows by remember { mutableStateOf(emptyList<TaskUiRow>()) }
+    var healthRows by remember { mutableStateOf(emptyList<String>()) }
+    var moneyRows by remember { mutableStateOf(emptyList<String>()) }
+    var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
+    var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
+    var speciesCounts by remember { mutableStateOf<SpeciesHerdCounts?>(null) }
+    var catalogRows by remember { mutableStateOf(emptyList<String>()) }
+    var speciesGroups by remember { mutableStateOf(emptyList<FarmSelectorOption>()) }
+    var treatmentRows by remember { mutableStateOf(emptyList<String>()) }
+    var packRows by remember { mutableStateOf(emptyList<String>()) }
+    var withdrawalRows by remember { mutableStateOf(emptyList<String>()) }
+
+    val speciesCode = when (module) {
+        FarmModule.SHEEP -> "sheep"
+        FarmModule.CATTLE -> "cattle"
+        else -> null
+    }
+    val herd = remember(farmId, speciesCode) {
+        speciesCode?.let { RoomHerdRepository(database, farmId, it) }
+    }
+
+    suspend fun refreshOps() {
+        taskRows = (ops.openTasks() + ops.completedTasks()).map { row ->
+            TaskUiRow(
+                id = row.id,
+                title = row.title,
+                moduleCode = row.moduleCode,
+                taskCode = row.taskCode,
+                dueEpochDay = row.dueOnEpochDay,
+                status = row.status,
+            )
+        }
+        healthRows = ops.recentObservations().map { "${it.speciesCode} · ${it.signs}" }
+        moneyRows = ops.recentMoney().map { "${it.kind} ${it.categoryCode} ${it.amountMinor} ${it.currency}" }
+        inventoryRows = ops.items().map { "${it.id} ${it.sku} · ${it.name} · ${it.quantityMilli} ${it.unit}" }
+        speciesRows = herd?.list()?.map { animal ->
+            SpeciesAnimalRow(
+                animalId = animal.id,
+                label = buildString {
+                    append(animal.tag)
+                    animal.name?.let { append(" · ").append(it) }
+                    append(" · ").append(animal.sex.lowercase())
+                    append(" · ").append(animal.status)
+                    animal.poultryKindCode?.let { append(" · ").append(it) }
+                },
+                active = animal.status == "active",
+            )
+        }.orEmpty()
+        speciesCounts = herd?.let { SpeciesHerdCounts(total = it.listedTotal(), active = it.activeCount()) }
+        speciesGroups = speciesCode?.let { code -> database.groups().forFarm(farmId).filter { it.speciesCode == code }.map { FarmSelectorOption(it.id, it.name, "${it.headCount} head") } }.orEmpty()
+        catalogRows = ops.diseases().map { "${it.speciesCode} · ${it.displayName} · ${it.firstAid}" }
+        treatmentRows = ops.recentTreatments().map { "${it.speciesCode} · ${it.reason} · formulary ${it.formularyItemId}" }
+        packRows = ops.packs().map { "${it.speciesCode} · ${it.name} · ${it.status} · ${it.acceptedByVet.orEmpty()}" }
+        withdrawalRows = ops.withdrawals().map { "${it.windowKind} · ${it.product} ends day ${it.endsEpochDay}" }
+    }
+
+    LaunchedEffect(module) { runCatching { refreshOps() } }
+
+    fun run(block: suspend () -> Unit) {
+        scope.launch {
+            busy = true
+            error = null
+            runCatching {
+                block()
+                refreshOps()
+            }.onSuccess {
+                enqueueSync()
+            }.onFailure {
+                error = it.message
+            }
+            busy = false
+        }
+    }
+
+    when (module) {
+        FarmModule.SHEEP, FarmModule.CATTLE -> {
+            val title = when (module) {
+                FarmModule.SHEEP -> "Sheep flock"
+                FarmModule.CATTLE -> "Cattle herd"
+                else -> "Poultry flock"
+            }
+            SpeciesHerdScreen(
+                module = module,
+                title = title,
+                femaleLabel = when (module) {
+                    FarmModule.SHEEP -> "Ewe"
+                    FarmModule.CATTLE -> "Cow"
+                    else -> "Female"
+                },
+                maleLabel = when (module) {
+                    FarmModule.SHEEP -> "Ram"
+                    FarmModule.CATTLE -> "Bull"
+                    else -> "Male"
+                },
+                kindRequired = false,
+                rows = speciesRows,
+                counts = speciesCounts,
+                busy = busy,
+                error = error,
+                onRegister = { tag, name, sex, kind ->
+                    run {
+                        herd?.register(UUID.randomUUID().toString(), tag, name, sex, kind, newContext())
+                    }
+                },
+                onRecordWeight = { animalId, weightText ->
+                    run {
+                        val weightGrams = weightText.toScaledLongExact(3, "Weight")
+                        herd?.recordWeight(
+                            animalId = animalId,
+                            measurementId = UUID.randomUUID().toString(),
+                            weightGrams = weightGrams,
+                            measuredAtEpochMillis = System.currentTimeMillis(),
+                            context = newContext(),
+                        )
+                    }
+                },
+                onSetStatus = { animalId, status ->
+                    run { herd?.setStatus(animalId, status, newContext()) }
+                },
+                exitContent = { animal, screenId, statusBack ->
+                    SpeciesExitHost(database, farmId, animal, screenId, newContext, onRecorded = { run { } }, onBack = statusBack)
+                },
+                attachmentContent = { animal -> AnimalAttachmentsHost(database, farmId, animal.animalId, canAttach = animal.active, newContext) },
+                onBack = onBack,
+                extra = { selected, operationsBack ->
+                    // Owner decision D-004: operations choose animals and groups from every record, never by typed id.
+                    val opsSearch = remember(farmId, speciesCode, selected?.animalId, speciesGroups) {
+                        val code = speciesCode.orEmpty()
+                        OpsAnimalSearch(
+                            animalSelectorSearch(database, farmId, code), animalSelectorSearch(database, farmId, code, "FEMALE"), animalSelectorSearch(database, farmId, code, "MALE"),
+                            selected?.animalId, selected?.label, speciesGroups, speciesMateCoi(database, farmId, code),
+                        )
+                    }
+                    CompositionLocalProvider(LocalOpsAnimalSearch provides opsSearch) { when (module) {
+                        FarmModule.SHEEP -> SheepOperationsScreen(
+                            selectedAnimalId = selected?.animalId,
+                            busy = busy,
+                            error = error,
+                            actions = SheepOperationsActions(
+                                onJoining = { groupId, day ->
+                                    run {
+                                        // The expected lambing day is set here from the farm's sheep gestation (D-019) and carried.
+                                        val started = LocalDate.parse(day).toEpochDay()
+                                        BreedingDueCommands(database, farmId).recordJoining(
+                                            RecordSheepJoiningV2(
+                                                joiningId = UUID.randomUUID().toString(), groupId = groupId, startedEpochDay = started,
+                                                expectedLambingEpochDay = started + database.gestationPeriod(farmId, GestationSpecies.SHEEP).typicalDays,
+                                                scanTaskId = UUID.randomUUID().toString(), preLambTaskId = UUID.randomUUID().toString(),
+                                                paddockTaskId = UUID.randomUUID().toString(), lambingTaskId = UUID.randomUUID().toString(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onScan = { animalId, result, day ->
+                                    run { ops.recordScan(RecordSheepScan(UUID.randomUUID().toString(), animalId, result, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onLambing = { animalId, born, live, dead, day ->
+                                    run {
+                                        ops.recordLambing(
+                                            RecordSheepLambing(
+                                                UUID.randomUUID().toString(), animalId, born.toIntOrNull() ?: 0, live.toIntOrNull() ?: 0,
+                                                dead.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onMarking = { groupId, animalId, count, day ->
+                                    run {
+                                        ops.recordMarking(
+                                            RecordSheepMarking(
+                                                UUID.randomUUID().toString(), groupId.trim().ifBlank { null }, animalId.trim().ifBlank { null },
+                                                count.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onWeaning = { groupId, animalId, count, day ->
+                                    run {
+                                        ops.recordSheepWeaning(
+                                            RecordSheepWeaning(
+                                                UUID.randomUUID().toString(), groupId.trim().ifBlank { null }, animalId.trim().ifBlank { null },
+                                                count.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onWool = { groupId, animalId, grams, day ->
+                                    run {
+                                        ops.recordWool(
+                                            RecordSheepWool(
+                                                UUID.randomUUID().toString(), animalId.trim().ifBlank { null }, groupId.trim().ifBlank { null },
+                                                grams.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onShearing = { groupId, animalId, kind, grams, day ->
+                                    run {
+                                        ops.recordShearing(
+                                            RecordSheepShearing(
+                                                UUID.randomUUID().toString(), animalId.trim().ifBlank { null }, groupId.trim().ifBlank { null }, kind,
+                                                grams.toIntOrNull(), LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onMicron = { groupId, animalId, tenths, day ->
+                                    run {
+                                        ops.recordMicron(
+                                            RecordSheepMicron(
+                                                UUID.randomUUID().toString(), animalId.trim().ifBlank { null }, groupId.trim().ifBlank { null },
+                                                tenths.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onFamacha = { animalId, score, day ->
+                                    run { ops.recordSheepFamacha(RecordFamacha(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onDag = { animalId, score, day ->
+                                    run { ops.recordDag(RecordSheepDag(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: -1, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onFootrot = { animalId, score, day ->
+                                    run { ops.recordFootrot(RecordSheepFootrot(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: -1, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onFlystrike = { animalId, score, day ->
+                                    run { ops.recordFlystrike(RecordSheepFlystrike(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: -1, occurredEpochDay = LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onIdentifier = { animalId, type, value, day ->
+                                    run { ops.assignIdentifier(AssignAnimalIdentifier(UUID.randomUUID().toString(), animalId, type, value, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onMovement = { animalId, direction, from, to, day ->
+                                    run {
+                                        ops.recordOfficialMovement(
+                                            RecordOfficialMovement(
+                                                UUID.randomUUID().toString(), animalId, direction, from.trim().ifBlank { null }, to.trim().ifBlank { null },
+                                                LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onPedigree = { animalId, parentId, relation ->
+                                    run { ops.linkPedigree(LinkPedigree(UUID.randomUUID().toString(), animalId, parentId, relation), newContext()) }
+                                },
+                            ),
+                            onBack = operationsBack,
+                            loadRecords = { id -> loadSheepRecords(database, farmId, id) },
+                            loadWool = { loadSheepWool(database, farmId) },
+                            loadLambingDue = { loadSheepLambingDue(database, farmId) },
+                        )
+                        FarmModule.CATTLE -> CattleOperationsScreen(
+                            selectedAnimalId = selected?.animalId,
+                            busy = busy,
+                            error = error,
+                            actions = CattleOperationsActions(
+                                onService = { animalId, method, day ->
+                                    run {
+                                        // The expected calving day is set here from the farm's cattle gestation (D-019) and carried.
+                                        val served = LocalDate.parse(day).toEpochDay()
+                                        BreedingDueCommands(database, farmId).recordCattleService(
+                                            RecordCattleServiceV2(
+                                                UUID.randomUUID().toString(), animalId, method, served,
+                                                served + database.gestationPeriod(farmId, GestationSpecies.CATTLE).typicalDays,
+                                                UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onPd = { animalId, result, day ->
+                                    run { ops.recordCattlePd(RecordCattlePd(UUID.randomUUID().toString(), animalId, result, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onCalving = { animalId, born, live, dead, day ->
+                                    run {
+                                        ops.recordCalving(
+                                            RecordCattleCalving(
+                                                UUID.randomUUID().toString(), animalId, born.toIntOrNull() ?: 0, live.toIntOrNull() ?: 0,
+                                                dead.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onBcs = { animalId, scale, score, day ->
+                                    run { ops.recordCattleBcs(RecordCattleBcs(UUID.randomUUID().toString(), animalId, scale, score.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onMilk = { animalId, litres, day ->
+                                    run {
+                                        val milli = ((litres.replace(',', '.').toBigDecimal()) * 1000.toBigDecimal()).longValueExact()
+                                        ops.recordCattleMilk(RecordCattleMilk(UUID.randomUUID().toString(), animalId, milli, LocalDate.parse(day).toEpochDay()), newContext())
+                                    }
+                                },
+                                onLocomotion = { animalId, score, day ->
+                                    run { ops.recordLocomotion(RecordCattleLocomotion(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onScc = { animalId, cells, dim, day ->
+                                    run { ops.recordScc(RecordCattleScc(UUID.randomUUID().toString(), animalId, cells.toIntOrNull() ?: 0, dim.toIntOrNull(), LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onDryOff = { animalId, day, expectedCalving ->
+                                    run {
+                                        ops.recordDryOff(
+                                            RecordCattleDryOff(
+                                                UUID.randomUUID().toString(), animalId, LocalDate.parse(day).toEpochDay(),
+                                                expectedCalving.trim().takeIf { it.isNotBlank() }?.let { LocalDate.parse(it).toEpochDay() },
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onWeaning = { animalId, weightGrams, day ->
+                                    run { ops.recordCattleWeaning(RecordCattleWeaning(UUID.randomUUID().toString(), animalId, null, weightGrams.toLongOrNull(), LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onIdentifier = { animalId, type, value, day ->
+                                    run { ops.assignIdentifier(AssignAnimalIdentifier(UUID.randomUUID().toString(), animalId, type, value, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onMovement = { animalId, direction, from, to, day ->
+                                    run {
+                                        ops.recordOfficialMovement(
+                                            RecordOfficialMovement(
+                                                UUID.randomUUID().toString(), animalId, direction, from.trim().ifBlank { null }, to.trim().ifBlank { null },
+                                                LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                                onPedigree = { animalId, parentId, relation ->
+                                    run { ops.linkPedigree(LinkPedigree(UUID.randomUUID().toString(), animalId, parentId, relation), newContext()) }
+                                },
+                                onPlaceLot = { groupId, heads, day ->
+                                    run { ops.placeCattleLot(PlaceCattleLot(UUID.randomUUID().toString(), groupId, heads.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onDaysOnFeed = { groupId, days, day ->
+                                    run { ops.recordDaysOnFeed(RecordCattleDaysOnFeed(UUID.randomUUID().toString(), groupId, days.toIntOrNull() ?: -1, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onCloseLot = { groupId, headOut, weightGrams, daysOnFeed, day ->
+                                    run {
+                                        ops.closeCattleLot(
+                                            CloseCattleLot(
+                                                UUID.randomUUID().toString(), groupId, headOut.toIntOrNull() ?: 0, weightGrams.toLongOrNull(),
+                                                daysOnFeed.toIntOrNull(), LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
+                            ),
+                            onBack = operationsBack,
+                            loadRecords = { id -> loadCattleRecords(database, farmId, id) },
+                            loadLots = { loadCattleLots(database, farmId) },
+                            loadCalvingDue = { loadCattleCalvingDue(database, farmId) },
+                        )
+                        else -> error("Unsupported species operations module $module")
+                    } }
+                },
+            )
+        }
+        else -> Unit
+    }
+}

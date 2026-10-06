@@ -1,0 +1,22 @@
+{
+  "displayedAttributes": [
+    "id",
+    "farm_id",
+    "module_id",
+    "species_code",
+    "poultry_kind_code",
+    "entity_type",
+    "display_name",
+    "tag",
+    "identifiers",
+    "status",
+    "updated_projection_version"
+  ],
+  "searchableAttributes": ["tag", "display_name", "identifiers", "search_text"],
+  "filterableAttributes": ["farm_id", "module_id", "species_code", "poultry_kind_code", "entity_type", "status"],
+  "sortableAttributes": ["display_name", "tag", "updated_projection_version"],
+  "typoTolerance": {
+    "enabled": true,
+    "disableOnAttributes": ["tag", "identifiers"]
+  }
+}

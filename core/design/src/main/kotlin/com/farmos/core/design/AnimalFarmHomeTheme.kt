@@ -1,0 +1,100 @@
+@file:Suppress("ktlint:standard:function-naming")
+
+package com.farmos.core.design
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.unit.dp
+
+/** Home-only settings affordance. It intentionally exposes Theme and nothing else. */
+@Composable
+fun HomeThemeButton(modifier: Modifier = Modifier) {
+    var open by remember { mutableStateOf(false) }
+    val mode = AnimalFarmTheme.mode
+    val onModeChange = AnimalFarmTheme.onModeChange
+    val target = AnimalFarmTheme.minimumTouchDp.dp
+
+    IconButton(
+        onClick = { open = true },
+        modifier = modifier.size(target),
+    ) {
+        Icon(Icons.Outlined.Settings, contentDescription = "Theme")
+    }
+
+    if (open) {
+        AlertDialog(
+            onDismissRequest = { open = false },
+            title = { Text("Theme") },
+            text = {
+                AnimalFarmThemeSelectionPanel(
+                    selected = mode,
+                    onModeChange = onModeChange,
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { open = false }, modifier = Modifier.heightIn(min = target)) { Text("Done") }
+            },
+        )
+    }
+}
+
+/** Canonical Theme-only choice panel used by the home dialog and native reference evidence. */
+@Composable
+fun AnimalFarmThemeSelectionPanel(
+    selected: AnimalFarmThemeMode,
+    onModeChange: (AnimalFarmThemeMode) -> Unit,
+) {
+    Column {
+        ThemeChoice("Light", AnimalFarmThemeMode.LIGHT, selected, onModeChange)
+        ThemeChoice("Dark", AnimalFarmThemeMode.DARK, selected, onModeChange)
+        ThemeChoice("Outdoor", AnimalFarmThemeMode.OUTDOOR, selected, onModeChange)
+    }
+}
+
+@Composable
+private fun ThemeChoice(
+    label: String,
+    value: AnimalFarmThemeMode,
+    selected: AnimalFarmThemeMode,
+    onModeChange: (AnimalFarmThemeMode) -> Unit,
+) {
+    val suffix = if (value.requiresNativeAcceptance) " · native candidate" else ""
+    val isSelected = selected == value
+    val target = AnimalFarmTheme.minimumTouchDp.dp
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = target)
+                .clickable(role = Role.RadioButton) { onModeChange(value) }
+                .semantics { this.selected = isSelected }
+                .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = isSelected, onClick = null)
+        Text("$label$suffix", modifier = Modifier.padding(start = 8.dp))
+    }
+}

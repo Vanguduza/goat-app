@@ -1,0 +1,81 @@
+name: Project Truth Guard
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: project-truth-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  project-truth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate canonical-state manifest
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, sys
+          p = pathlib.Path('PROJECT_CANONICAL_STATE.json')
+          if not p.exists(): sys.exit('BLOCKED: PROJECT_CANONICAL_STATE.json is missing')
+          d = json.loads(p.read_text())
+          if d.get('repository') != os.environ['GITHUB_REPOSITORY']:
+              sys.exit('BLOCKED: manifest repository mismatch')
+          policy = d.get('policy', {})
+          if not policy.get('main_is_only_persistent_branch'):
+              sys.exit('BLOCKED: single-main branch policy missing')
+          if not policy.get('project_truth_guard_required'):
+              sys.exit('BLOCKED: project-truth guard policy missing')
+          if d.get('canonical_state', {}).get('canonical_branch') != 'main':
+              sys.exit('BLOCKED: canonical branch is not main')
+          PY
+
+      - name: Attest checked commit
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess
+          sha = subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip()
+          tree = subprocess.check_output(['git','show','-s','--format=%T',sha], text=True).strip()
+          patch = subprocess.check_output(['git','show','--binary','--format=','--no-ext-diff',sha])
+          att = {
+              'schema_version': 2,
+              'repository': os.environ['GITHUB_REPOSITORY'],
+              'event': os.environ.get('GITHUB_EVENT_NAME'),
+              'ref': os.environ.get('GITHUB_REF_NAME'),
+              'commit_sha': sha,
+              'tree_sha': tree,
+              'diff_sha256': hashlib.sha256(patch).hexdigest(),
+          }
+          value = json.dumps(att, sort_keys=True)
+          print(value)
+          summary = os.environ.get('GITHUB_STEP_SUMMARY')
+          if summary:
+              with open(summary, 'a', encoding='utf-8') as out:
+                  out.write('## Project truth attestation\n\n```json\n' + value + '\n```\n')
+          PY
+
+      - name: Enforce one-branch estate after consolidation merge
+        if: github.event_name == 'push' && github.ref_name == 'main' && contains(github.event.head_commit.message, '[single-main-consolidation]')
+        run: |
+          set -euo pipefail
+          mapfile -t branches < <(git ls-remote --heads origin | awk '{sub("refs/heads/", "", $2); print $2}')
+          for branch in "${branches[@]}"; do
+            if [[ "$branch" != "main" ]]; then
+              echo "Deleting consolidated branch: $branch"
+              git push origin --delete "$branch"
+            fi
+          done
+          mapfile -t remaining < <(git ls-remote --heads origin | awk '{sub("refs/heads/", "", $2); print $2}')
+          printf 'Remaining branches: %s\n' "${remaining[*]}"
+          [[ ${#remaining[@]} -eq 1 && "${remaining[0]}" == "main" ]] || {
+            echo 'ERROR: repository did not converge to main-only branch estate'; exit 1;
+          }

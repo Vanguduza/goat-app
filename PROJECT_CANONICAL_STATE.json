@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "repository": "Vanguduza/goat-app",
+  "policy": {
+    "default_branch_is_not_authority": true,
+    "newest_commit_is_not_authority": true,
+    "canonical_lineage_must_be_verified_before_release": true,
+    "silent_feature_thinning_forbidden": true,
+    "release_requires_provenance": true,
+    "main_is_only_persistent_branch": true,
+    "project_truth_guard_required": true
+  },
+  "canonical_state": {
+    "status": "CANONICAL_LINEAGE_ESTABLISHED",
+    "reconciled_at_utc": "2026-09-10T14:20:53.692959+00:00",
+    "release_blocked": true,
+    "release_block_reason": "No certified build exists. FEATURE_GREEN/MODULE_GREEN/MVP_GREEN/VISUAL_GREEN are all unmet; 0 screens carry native visual evidence.",
+    "default_branch_at_bootstrap": "main",
+    "canonical_branch": "main",
+    "consolidation_merge": "46585520e1c1262b3e760199d7b98ac8324815b9",
+    "required_ancestors": [
+      {
+        "sha": "12e2e8cc37d14588e09eed2085d364a879bc54fa",
+        "was": "main",
+        "holds": "Project Truth Protocol (manifest, autolog workflow, hooks, local tooling)"
+      },
+      {
+        "sha": "224340255c466960e9ea0491952db6fcc37670ce",
+        "was": "cursor/animal-farm-project-green-b11a",
+        "holds": "Tip of the code lineage; strict superset of every other code branch"
+      },
+      {
+        "sha": "c603a903b570e5519cdc571b88a2c166177900ba",
+        "was": "agent/animal-farm-gate1-recovery",
+        "holds": "contained in the tip"
+      },
+      {
+        "sha": "afc53440b305a2ea086f16155c0d9227e4030180",
+        "was": "implementation/animal-farm-visual-lock",
+        "holds": "Layer 3 visual-lock install (contained in the tip)"
+      },
+      {
+        "sha": "e86981682748605e9db1570224e8c801c35b6058",
+        "was": "implementation/foundation-vertical-slice",
+        "holds": "contained in the tip"
+      },
+      {
+        "sha": "402ee5f0299e60cc29cf8be57e5f5cd500d8e4b9",
+        "was": "cursor/docs-handbook-design-guardrails",
+        "holds": "contained in the tip"
+      }
+    ],
+    "locked_authorities": {
+      "product_truth": "docs/00_PROJECT_TRUTH.md",
+      "constitution": "docs/FARM_OS_TECHNICAL_IMPLEMENTATION_HANDBOOK.md Ch.2",
+      "visual_authority": "docs/ux/animal-farm-visual-lock/ (sole owner-directed presentation authority; 24 Sep 2026 cleanup)",
+      "accepted_edrs": "docs/truth/edr/",
+      "feature_catalog": "docs/realisation/FEATURE_REGISTRY.yaml",
+      "completion_state": "PROJECT_COMPLETION_STATE.json",
+      "feature_dependency_graph": "docs/realisation/FEATURE_DEPENDENCY_GRAPH.json"
+    },
+    "notes": "Canonical trunk is main. The owner-authorized completion control plane binds all 545 screens to 156 mandatory Feature IDs. The Phase 2 dependency DAG contains 156 nodes and 332 prerequisite edges with zero cycles and phase inversions. Release remains blocked; Phase 3 platform correctness is next."
+  },
+  "tracking": {
+    "canonical_branch": "main",
+    "historical_ledger_snapshot": "docs/project-state/project-truth-ledger-snapshot/CHANGE_LEDGER.jsonl",
+    "historical_state_snapshot": "docs/project-state/project-truth-ledger-snapshot/CURRENT_STATE.json",
+    "protocol": "PROJECT_TRUTH_PROTOCOL.md",
+    "workflow": ".github/workflows/project-truth-autolog.yml",
+    "note": "Project truth now uses main Git history, PR review and the required project-truth check. No permanent auxiliary branch is permitted."
+  }
+}

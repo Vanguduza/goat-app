@@ -1,0 +1,2 @@
+# Preserve exact supplied handover bytes, including reference hashes across platforms.
+docs/ux/animal-farm-visual-lock/** -text

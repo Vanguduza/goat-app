@@ -1,0 +1,137 @@
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("io.github.takahirom.roborazzi")
+}
+
+val supabaseUrl = providers.gradleProperty("FARM_OS_SUPABASE_URL")
+    .orElse(providers.environmentVariable("FARM_OS_SUPABASE_URL"))
+    .orElse("")
+val supabasePublishableKey = providers.gradleProperty("FARM_OS_SUPABASE_PUBLISHABLE_KEY")
+    .orElse(providers.environmentVariable("FARM_OS_SUPABASE_PUBLISHABLE_KEY"))
+    .orElse("")
+val e2eEmail = providers.gradleProperty("FARM_OS_E2E_EMAIL")
+    .orElse(providers.environmentVariable("FARM_OS_E2E_EMAIL"))
+    .orElse("")
+val e2ePassword = providers.gradleProperty("FARM_OS_E2E_PASSWORD")
+    .orElse(providers.environmentVariable("FARM_OS_E2E_PASSWORD"))
+    .orElse("")
+val e2eFarmId = providers.gradleProperty("FARM_OS_E2E_FARM_ID")
+    .orElse(providers.environmentVariable("FARM_OS_E2E_FARM_ID"))
+    .orElse("")
+
+android {
+    namespace = "com.farmos.app"
+    compileSdk = 37
+
+    defaultConfig {
+        applicationId = "com.farmos.app"
+        minSdk = 26
+        targetSdk = 36
+        versionCode = 1
+        versionName = "0.1.0-foundation"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments["farmosE2eEmail"] = e2eEmail.get()
+        testInstrumentationRunnerArguments["farmosE2ePassword"] = e2ePassword.get()
+        testInstrumentationRunnerArguments["farmosE2eFarmId"] = e2eFarmId.get()
+        buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl.get()}\"")
+        buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", "\"${supabasePublishableKey.get()}\"")
+    }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
+                it.maxHeapSize = "4096m"
+                // CI logs show only the exception class otherwise; the message and trace are needed to diagnose.
+                it.testLogging {
+                    events("failed")
+                    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                }
+                it.jvmArgs(
+                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                    "--add-opens=java.base/java.util=ALL-UNNAMED",
+                    "--add-opens=java.base/java.io=ALL-UNNAMED",
+                    "--add-opens=java.base/java.net=ALL-UNNAMED",
+                    "--add-opens=java.base/java.security=ALL-UNNAMED",
+                    "--add-opens=java.base/java.text=ALL-UNNAMED",
+                    "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
+                    "--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
+                    "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+                )
+            }
+        }
+    }
+}
+
+kotlin { jvmToolchain(17) }
+
+tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(org.gradle.jvm.toolchain.JavaLanguageVersion.of(21))
+        },
+    )
+    jvmArgs(
+        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+        "--add-opens=java.base/java.io=ALL-UNNAMED",
+        "--add-opens=java.base/java.net=ALL-UNNAMED",
+        "--add-opens=java.base/java.nio=ALL-UNNAMED",
+        "--add-opens=java.base/java.security=ALL-UNNAMED",
+        "--add-opens=java.base/java.text=ALL-UNNAMED",
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
+        "--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
+        "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
+        "--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+    )
+}
+
+dependencies {
+    implementation(project(":core:database"))
+    implementation(project(":core:network"))
+    implementation(project(":core:sync"))
+    implementation(project(":core:design"))
+    implementation(project(":domain:goat"))
+    implementation(project(":domain:rabbit"))
+    implementation(project(":domain:ops"))
+    implementation(project(":domain:access"))
+    implementation(project(":data:goat"))
+    implementation(project(":data:herd"))
+    implementation(project(":feature:goat"))
+    implementation(project(":feature:rabbit"))
+    implementation(project(":feature:ops"))
+
+    implementation(platform("androidx.compose:compose-bom:2026.08.00"))
+    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.runtime:runtime")
+    implementation("androidx.room:room-runtime:2.8.4")
+    implementation("androidx.room:room-ktx:2.8.4")
+    implementation("androidx.work:work-runtime-ktx:2.11.2")
+
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:2.2.10")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.17")
+    testImplementation("androidx.test:core-ktx:1.7.0")
+    testImplementation("androidx.test.ext:junit:1.2.1")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.75.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.75.0")
+    androidTestImplementation("androidx.test:core-ktx:1.7.0")
+    androidTestImplementation("androidx.test:runner:1.7.0")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+}
