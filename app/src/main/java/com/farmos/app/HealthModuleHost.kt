@@ -23,6 +23,7 @@ import com.farmos.domain.ops.RecordHealthVaccination
 import com.farmos.domain.ops.RecordLabResult
 import com.farmos.domain.ops.RecordVetVisit
 import com.farmos.feature.ops.HealthReadModel
+import com.farmos.feature.ops.HealthReferenceDetail
 import com.farmos.feature.ops.HealthEntryPage
 import com.farmos.feature.ops.HealthObservationScreen
 import com.farmos.feature.ops.HealthReportStats
@@ -59,6 +60,8 @@ fun HealthModuleHost(
     var dueViews by remember(farmId) { mutableStateOf(emptyList<VaccinationDueView>()) }
     var groupOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
     var reportStats by remember(farmId) { mutableStateOf<HealthReportStats?>(null) }
+    var referenceDetails by remember(farmId) { mutableStateOf(emptyList<HealthReferenceDetail>()) }
+    var redFlagObservations by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val zone = ZoneId.systemDefault()
@@ -130,7 +133,22 @@ fun HealthModuleHost(
 
     suspend fun refresh() {
         observations = ops.recentObservations().map { row -> "${row.speciesCode} · ${row.signs}" }
-        catalog = ops.diseases().map { row -> "${row.speciesCode} · ${row.displayName} · ${row.firstAid}" }
+        redFlagObservations = ops.recentObservations().filter { it.redFlag }
+            .map { row -> "${row.speciesCode} · ${row.signs}" }
+        val diseaseRows = ops.diseases()
+        catalog = diseaseRows.map { row -> "${row.speciesCode} · ${row.displayName} · ${row.firstAid}" }
+        referenceDetails = diseaseRows.map { row ->
+            HealthReferenceDetail(
+                code = row.code,
+                speciesCode = row.speciesCode,
+                displayName = row.displayName,
+                signs = row.signs,
+                firstAid = row.firstAid,
+                prevention = row.prevention,
+                vetClass = row.vetClass,
+                redFlag = row.redFlag,
+            )
+        }
         val approved = ops.approvedFormulary()
         formulary = approved.map { row -> "${row.id} · ${row.productName} · ${row.speciesCode} · ${row.vetClass}" }
         formularyOptions = approved.map { row -> FarmSelectorOption(row.id, row.productName, "${row.speciesCode} · ${row.vetClass}") }
@@ -317,5 +335,7 @@ fun HealthModuleHost(
         dueCandidates = dueViews,
         groupOptions = groupOptions,
         reportStats = reportStats,
+        referenceDetails = referenceDetails,
+        redFlagObservations = redFlagObservations,
     )
 }

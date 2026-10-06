@@ -59,7 +59,21 @@ private enum class HealthPage {
     VACCINATION_DETAIL,
     TODAY_ACTIONS,
     HEALTH_REPORT,
+    REFERENCE_DETAIL,
+    EMERGENCY,
 }
+
+/** One disease reference entry for FOS-HEALTH-027. Read-only; from the local disease catalog. */
+data class HealthReferenceDetail(
+    val code: String,
+    val speciesCode: String,
+    val displayName: String,
+    val signs: String,
+    val firstAid: String,
+    val prevention: String,
+    val vetClass: String,
+    val redFlag: Boolean,
+)
 
 /** One recorded vaccination for the schedule, detail and report surfaces. Read-only view. */
 data class HealthVaccinationView(
@@ -138,6 +152,10 @@ fun HealthObservationScreen(
     /** Records a vaccination through the governed command handler; never a direct Room write. */
     onRecordVaccination: (species: String, animalId: String?, groupId: String?, formularyItemId: String, dose: String?, method: String?, day: String) -> Unit =
         { _, _, _, _, _, _, _ -> },
+    /** Structured disease reference entries for FOS-HEALTH-027; parallels the catalog strings. */
+    referenceDetails: List<HealthReferenceDetail> = emptyList(),
+    /** Red-flag observation summaries for FOS-HEALTH-028; empty when none are recorded. */
+    redFlagObservations: List<String> = emptyList(),
 ) {
     var page by remember { mutableStateOf(entryPage.toHealthPage()) }
     var backStack by remember { mutableStateOf(emptyList<HealthPage>()) }
@@ -213,7 +231,20 @@ fun HealthObservationScreen(
         }
 
         HealthPage.REFERENCES -> {
-            HealthRows("FOS-HEALTH-026", "Reference library", catalog, "No reference rows on this device", error, home)
+            HealthReferenceListScreen(
+                referenceDetails,
+                catalog,
+                { openRecord(HealthPage.REFERENCE_DETAIL, it) },
+                home,
+            )
+        }
+
+        HealthPage.REFERENCE_DETAIL -> {
+            HealthReferenceDetailScreen(referenceDetails, selectedRecordId, recordBack)
+        }
+
+        HealthPage.EMERGENCY -> {
+            HealthEmergencyScreen(redFlagObservations, home)
         }
 
         HealthPage.PROTOCOLS -> {
@@ -316,6 +347,7 @@ private fun HealthDashboard(
             TextButton(onClick = { onOpen(HealthPage.OBSERVATIONS) }) { Text("Observation list") }
             Button(onClick = { onOpen(HealthPage.RECORD_OBSERVATION) }) { Text("Record observation") }
             TextButton(onClick = { onOpen(HealthPage.REFERENCES) }) { Text("Reference library") }
+            TextButton(onClick = { onOpen(HealthPage.EMERGENCY) }) { Text("Emergency / red flag") }
             Button(onClick = { onOpen(HealthPage.TODAY_ACTIONS) }) { Text("Today health actions") }
         }
         FarmOperationalSection(
@@ -373,6 +405,111 @@ private fun HealthRows(
     FarmOperationalPage(screenId, title, "Recorded farm health information.", visualClass, onBack) {
         FarmOperationalRows(rows, empty, "Records captured on this device will appear here.")
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    }
+}
+
+/**
+ * FOS-HEALTH-026 — reference library list. Each row opens FOS-HEALTH-027 for the full entry.
+ */
+@Composable
+private fun HealthReferenceListScreen(
+    details: List<HealthReferenceDetail>,
+    fallbackRows: List<String>,
+    onOpenDetail: (String) -> Unit,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        "FOS-HEALTH-026",
+        "Reference library",
+        "Disease reference entries on this device.",
+        FarmVisualClass.I3,
+        onBack,
+    ) {
+        if (details.isEmpty()) {
+            FarmOperationalRows(fallbackRows, "No reference rows on this device", "Records captured on this device will appear here.")
+        } else {
+            details.forEach { detail ->
+                TextButton(
+                    onClick = { onOpenDetail(detail.code) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        detail.speciesCode.replaceFirstChar { it.uppercase() } + " · " + detail.displayName +
+                            if (detail.redFlag) " · red flag" else "",
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** FOS-HEALTH-027 — reference detail: the full catalog entry for one disease reference. */
+@Composable
+private fun HealthReferenceDetailScreen(
+    details: List<HealthReferenceDetail>,
+    code: String?,
+    onBack: () -> Unit,
+) {
+    val detail = details.firstOrNull { it.code == code }
+    FarmOperationalPage(
+        "FOS-HEALTH-027",
+        "Reference detail",
+        detail?.displayName ?: "Reference",
+        FarmVisualClass.I3,
+        onBack,
+    ) {
+        if (detail == null) {
+            Text("The reference entry is not on this device.")
+            return@FarmOperationalPage
+        }
+        FarmOperationalSection("Entry") {
+            Text(detail.speciesCode.replaceFirstChar { it.uppercase() } + " · " + detail.displayName)
+            Text("Vet class: ${detail.vetClass}")
+            if (detail.redFlag) Text("Red-flag condition: treat as urgent and call the vet.", color = MaterialTheme.colorScheme.error)
+        }
+        FarmOperationalSection("Signs") {
+            Text(detail.signs.ifBlank { "No signs recorded." })
+        }
+        FarmOperationalSection("First aid") {
+            Text(detail.firstAid.ifBlank { "No first aid recorded." })
+        }
+        FarmOperationalSection("Prevention") {
+            Text(detail.prevention.ifBlank { "No prevention recorded." })
+        }
+    }
+}
+
+/**
+ * FOS-HEALTH-028 — emergency / red flag: the farm's recorded red-flag observations with triage
+ * guidance. Advisory and recording only; this surface does not diagnose or prescribe.
+ */
+@Composable
+private fun HealthEmergencyScreen(
+    redFlagObservations: List<String>,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        "FOS-HEALTH-028",
+        "Emergency / red flag",
+        "Urgent health observations on this farm.",
+        FarmVisualClass.I3,
+        onBack,
+    ) {
+        FarmOperationalSection("What to do") {
+            Text(
+                "Isolate the animal if safe to do so, keep it calm and warm, and call the vet. " +
+                    "Record what you see; Farm OS does not diagnose.",
+            )
+        }
+        FarmOperationalSection("Red-flag observations") {
+            if (redFlagObservations.isEmpty()) {
+                Text("No red-flag observations recorded on this device.")
+            } else {
+                redFlagObservations.forEach { row ->
+                    Text(row, color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
     }
 }
 
