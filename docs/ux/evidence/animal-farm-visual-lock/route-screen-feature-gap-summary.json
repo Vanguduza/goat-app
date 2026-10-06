@@ -1,21 +1,21 @@
 {
   "schema_version": 2,
-  "tested_commit": "b81f13b246207b174a94802bf2443a4ad2048015",
+  "tested_commit": "d47e24db5c7eb67d89b1e045c974a63a6bcfbc48",
   "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_WITH_SEPARATE_RUNTIME_EVIDENCE",
   "registry_rows": 545,
   "route_evidence_counts": {
     "NON_ROUTE_BY_DESIGN": 24,
-    "NO_ROUTE_EVIDENCE": 141,
+    "NO_ROUTE_EVIDENCE": 105,
     "STATIC_AUTH_STATE_BRANCH": 4,
-    "STATIC_CODE_ID_REFERENCE_ONLY": 244,
+    "STATIC_CODE_ID_REFERENCE_ONLY": 280,
     "STATIC_GENERAL_HOME_FALLBACK": 1,
     "STATIC_HOME_NESTED_DESTINATION": 1,
     "STATIC_MAIN_ACTIVITY_SPLASH_BRANCH": 1,
     "STATIC_ROLE_DISPATCH_PRESENT": 8,
     "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 121
   },
-  "no_route_evidence": 141,
-  "some_static_route_evidence": 404,
+  "no_route_evidence": 105,
+  "some_static_route_evidence": 440,
   "runtime_reachability_executed": 0,
   "rendered_surface_owners_executed": 0,
   "entry_action_emission_executed": 0,
@@ -37,7 +37,7 @@
     },
     "asset": {
       "total": 12,
-      "no_route_evidence": 6
+      "no_route_evidence": 4
     },
     "atom": {
       "total": 35,
@@ -49,11 +49,11 @@
     },
     "cattle": {
       "total": 36,
-      "no_route_evidence": 5
+      "no_route_evidence": 3
     },
     "feed": {
       "total": 12,
-      "no_route_evidence": 8
+      "no_route_evidence": 6
     },
     "fin": {
       "total": 13,
@@ -69,15 +69,15 @@
     },
     "goat": {
       "total": 55,
-      "no_route_evidence": 12
+      "no_route_evidence": 10
     },
     "group": {
       "total": 9,
-      "no_route_evidence": 5
+      "no_route_evidence": 2
     },
     "health": {
       "total": 30,
-      "no_route_evidence": 7
+      "no_route_evidence": 6
     },
     "home": {
       "total": 20,
@@ -89,15 +89,15 @@
     },
     "labour": {
       "total": 9,
-      "no_route_evidence": 4
+      "no_route_evidence": 2
     },
     "pasture": {
       "total": 11,
-      "no_route_evidence": 5
+      "no_route_evidence": 1
     },
     "poultry": {
       "total": 27,
-      "no_route_evidence": 7
+      "no_route_evidence": 6
     },
     "proc": {
       "total": 10,
@@ -109,7 +109,7 @@
     },
     "report": {
       "total": 15,
-      "no_route_evidence": 13
+      "no_route_evidence": 0
     },
     "sales": {
       "total": 12,
@@ -133,11 +133,11 @@
     },
     "task": {
       "total": 15,
-      "no_route_evidence": 4
+      "no_route_evidence": 2
     },
     "water": {
       "total": 10,
-      "no_route_evidence": 7
+      "no_route_evidence": 5
     }
   },
   "known_navigation_defects": {
