@@ -1,21 +1,21 @@
 {
   "schema_version": 2,
-  "tested_commit": "9e7e08fbb58e28203e15d87bfc6509dbc8c36ce0",
+  "tested_commit": "e29fa2ba3c8bfed1039ca942e99d8237555ce8fa",
   "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_WITH_SEPARATE_RUNTIME_EVIDENCE",
   "registry_rows": 545,
   "route_evidence_counts": {
     "NON_ROUTE_BY_DESIGN": 24,
-    "NO_ROUTE_EVIDENCE": 38,
+    "NO_ROUTE_EVIDENCE": 17,
     "STATIC_AUTH_STATE_BRANCH": 4,
-    "STATIC_CODE_ID_REFERENCE_ONLY": 347,
+    "STATIC_CODE_ID_REFERENCE_ONLY": 368,
     "STATIC_GENERAL_HOME_FALLBACK": 1,
     "STATIC_HOME_NESTED_DESTINATION": 1,
     "STATIC_MAIN_ACTIVITY_SPLASH_BRANCH": 1,
     "STATIC_ROLE_DISPATCH_PRESENT": 8,
     "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 121
   },
-  "no_route_evidence": 38,
-  "some_static_route_evidence": 507,
+  "no_route_evidence": 17,
+  "some_static_route_evidence": 528,
   "runtime_reachability_executed": 0,
   "rendered_surface_owners_executed": 0,
   "entry_action_emission_executed": 0,
@@ -37,7 +37,7 @@
     },
     "asset": {
       "total": 12,
-      "no_route_evidence": 4
+      "no_route_evidence": 0
     },
     "atom": {
       "total": 35,
@@ -53,7 +53,7 @@
     },
     "feed": {
       "total": 12,
-      "no_route_evidence": 6
+      "no_route_evidence": 0
     },
     "fin": {
       "total": 13,
@@ -73,7 +73,7 @@
     },
     "group": {
       "total": 9,
-      "no_route_evidence": 2
+      "no_route_evidence": 0
     },
     "health": {
       "total": 30,
@@ -85,11 +85,11 @@
     },
     "inv": {
       "total": 19,
-      "no_route_evidence": 2
+      "no_route_evidence": 0
     },
     "labour": {
       "total": 9,
-      "no_route_evidence": 2
+      "no_route_evidence": 0
     },
     "pasture": {
       "total": 11,
@@ -137,7 +137,7 @@
     },
     "water": {
       "total": 10,
-      "no_route_evidence": 5
+      "no_route_evidence": 0
     }
   },
   "known_navigation_defects": {
