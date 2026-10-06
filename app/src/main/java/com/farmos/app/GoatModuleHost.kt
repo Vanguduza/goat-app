@@ -1,5 +1,6 @@
 package com.farmos.app
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -7,6 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.farmos.core.database.unsharedLocalOperations
 import com.farmos.domain.ops.GestationSpecies
 import com.farmos.core.model.LocalCommandContext
@@ -170,7 +173,15 @@ fun GoatModuleHost(
         entryPage = entryPage,
         searchSires = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "goat", "MALE") },
         mateAnalysis = remember(membership.farmId) { goatMateAnalysis(app.database, membership.farmId) },
-        profileAttachments = { animalId, active -> AnimalAttachmentsHost(app.database, membership.farmId, animalId, canAttach = active, newContext) },
+        // FOS-GOAT-008 (photo gallery) and FOS-GOAT-010 (documents): the profile's
+        // attachment section renders photos and PDF documents in one shared surface.
+        profileAttachments = { animalId, active ->
+            Box(Modifier.testTag("farm-screen:FOS-GOAT-008")) {
+                Box(Modifier.testTag("farm-screen:FOS-GOAT-010")) {
+                    AnimalAttachmentsHost(app.database, membership.farmId, animalId, canAttach = active, newContext)
+                }
+            }
+        },
         onRegister = { tag, name, sex, dateText ->
             runGoatWrite {
                 val day = dateText.takeIf { it.isNotBlank() }?.let { LocalDate.parse(it).toEpochDay() }

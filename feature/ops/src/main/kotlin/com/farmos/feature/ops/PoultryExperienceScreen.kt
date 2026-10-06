@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
@@ -213,6 +214,10 @@ private fun PoultryRows(
     }
 }
 
+/**
+ * FOS-POULTRY-002 — enabled poultry kinds; FOS-POULTRY-003 — enable kind, served as the
+ * "Enable kind" form section below (not a separate route).
+ */
 @Composable
 private fun PoultryKinds(
     enabled: List<String>,
@@ -238,7 +243,7 @@ private fun PoultryKinds(
             Button(
                 onClick = { onEnable(kind) },
                 enabled = !busy && kind.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().testTag("farm-screen:FOS-POULTRY-003"),
             ) { Text("Enable kind") }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }

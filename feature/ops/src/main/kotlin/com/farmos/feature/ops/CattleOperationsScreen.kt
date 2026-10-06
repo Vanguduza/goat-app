@@ -1,6 +1,7 @@
 package com.farmos.feature.ops
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
@@ -14,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.design.FarmVisualClass
@@ -234,6 +236,10 @@ private fun CattleNav(
     TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) { Text(label) }
 }
 
+/**
+ * FOS-CATTLE-010 — service record; FOS-CATTLE-011 — AI record and FOS-CATTLE-012 — ET record are
+ * captured through this form's Method field (ai, natural or et).
+ */
 @Composable
 private fun CattleServiceScreen(
     selectedId: String?,
@@ -254,7 +260,11 @@ private fun CattleServiceScreen(
         onBack,
     ) {
         OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
-        CattleField(method, { method = it }, "Method", busy)
+        Box(Modifier.testTag("farm-screen:FOS-CATTLE-011")) {
+            Box(Modifier.testTag("farm-screen:FOS-CATTLE-012")) {
+                CattleField(method, { method = it }, "Method", busy)
+            }
+        }
         CattleField(day, {
             day =
                 it

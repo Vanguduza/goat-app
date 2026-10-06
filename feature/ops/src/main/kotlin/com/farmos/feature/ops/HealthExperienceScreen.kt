@@ -202,6 +202,10 @@ private fun HealthEntryPage.toHealthPage(): HealthPage =
         HealthEntryPage.FORMULARY -> HealthPage.FORMULARY
     }
 
+/**
+ * FOS-HEALTH-001 — health dashboard; FOS-HEALTH-002 — today health actions, served as the
+ * "Today health picture" section below (today-scoped counts, not a separate route).
+ */
 @Composable
 private fun HealthDashboard(
     counts: HealthReadModel,
@@ -218,7 +222,7 @@ private fun HealthDashboard(
         onBack,
     ) {
         FarmOperationalSection("Today health picture") {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(Modifier.fillMaxWidth().testTag("farm-screen:FOS-HEALTH-002"), horizontalArrangement = Arrangement.SpaceBetween) {
                 // Exhaustive farm-scoped counts; shown as a dash until loaded, never as a capped list size.
                 HealthMetric("Observations", counts.observationCount)
                 HealthMetric("Treatments", counts.treatmentCount)
