@@ -15,6 +15,7 @@ import com.farmos.core.database.GrazingSessionEntity
 import com.farmos.core.database.HealthObservationEntity
 import com.farmos.core.database.HealthPackEntity
 import com.farmos.core.database.HealthTreatmentEntity
+import com.farmos.core.database.HealthVaccinationEntity
 import com.farmos.core.database.InventoryItemEntity
 import com.farmos.core.database.InventoryMovementEntity
 import com.farmos.core.database.LabourEntryEntity
@@ -152,6 +153,7 @@ import com.farmos.domain.ops.RecordCattlePd
 import com.farmos.domain.ops.RecordCattleService
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
+import com.farmos.domain.ops.RecordHealthVaccination
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
 import com.farmos.domain.ops.RecordMoney
@@ -1045,6 +1047,59 @@ class RoomOpsRepository(
     }
 
     suspend fun recentTreatments() = database.treatments().recent(farmId, 50)
+
+    suspend fun recordVaccination(command: RecordHealthVaccination, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.vaccination(command)?.let { error(it) }
+        val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) {
+            "Vaccination needs a vet-approved formulary item"
+        }
+        require(formulary.vetApproved && formulary.speciesCode == command.speciesCode) {
+            "Vaccination needs a vet-approved formulary item for " + command.speciesCode
+        }
+
+        val animalId = command.animalId?.trim()?.takeIf { it.isNotEmpty() }
+        val groupId = command.groupId?.trim()?.takeIf { it.isNotEmpty() }
+        if (animalId != null) {
+            val animal = requireNotNull(database.animals().get(farmId, animalId)) { "Vaccination animal not found" }
+            require(animal.status == "active" && animal.speciesCode == command.speciesCode) {
+                "Vaccination needs an active " + command.speciesCode + " animal"
+            }
+        }
+        if (groupId != null) {
+            val group = requireNotNull(database.groups().get(farmId, groupId)) { "Vaccination group not found" }
+            require(group.speciesCode == command.speciesCode) { "Vaccination group species mismatch" }
+        }
+
+        val aggregateType = if (animalId != null) "animal" else "animal_group"
+        val aggregateId = animalId ?: requireNotNull(groupId)
+        enqueue(
+            context,
+            "health.record_vaccination.v1",
+            aggregateType,
+            aggregateId,
+            expectedVersion(aggregateType, aggregateId),
+            json.encodeToString(command),
+        ) {
+            database.vaccinations().insert(
+                HealthVaccinationEntity(
+                    id = command.vaccinationId,
+                    farmId = farmId,
+                    animalId = animalId,
+                    groupId = groupId,
+                    speciesCode = command.speciesCode,
+                    formularyItemId = command.formularyItemId,
+                    dose = command.dose?.trim()?.takeIf { it.isNotEmpty() },
+                    method = command.method?.trim()?.takeIf { it.isNotEmpty() },
+                    occurredAtEpochMillis = command.occurredAtEpochMillis,
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.vaccinationId, true)
+    }
+
+    suspend fun recentVaccinations() = database.vaccinations().recent(farmId, 50)
+    suspend fun vaccinationsForAnimal(animalId: String) = database.vaccinations().forAnimal(farmId, animalId)
+    suspend fun vaccinationsForGroup(groupId: String) = database.vaccinations().forGroup(farmId, groupId)
 
     suspend fun recordFlockDay(command: RecordPoultryFlockDay, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.flockDay(command)?.let { error(it) }

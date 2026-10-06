@@ -31,7 +31,7 @@ class FarmOsDatabaseMigrationTest {
     }
 
     @Test
-    fun version1DatabaseMigratesThroughVersion29WithoutLosingFoundationData() = runBlocking {
+    fun version1DatabaseMigratesThroughVersion30WithoutLosingFoundationData() = runBlocking {
         val farmId = "11111111-1111-4111-8111-111111111111"
         val animalId = "33333333-3333-4333-8333-333333333333"
         val mutationId = "55555555-5555-4555-8555-555555555555"
@@ -41,7 +41,7 @@ class FarmOsDatabaseMigrationTest {
             .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
             .build()
 
-        // Force Room to execute the complete 1 -> 29 chain and validate the final schema.
+        // Force Room to execute the complete 1 -> 30 chain and validate the final schema.
         migrated.openHelper.writableDatabase
 
         val animal = migrated.animals().get(farmId, animalId)
@@ -91,6 +91,8 @@ class FarmOsDatabaseMigrationTest {
         assertEquals(0, migrated.animalExits().unsettledSaleExits(farmId).size)
         // Version 29 adds attachment metadata (D-015); the migrated animal carries none.
         assertEquals(0, migrated.attachments().forOwner(farmId, "animal", animalId).size)
+        // Version 30 adds general health vaccination records; a migrated farm starts with none.
+        assertEquals(0, migrated.vaccinations().recent(farmId, 10).size)
 
         migrated.close()
     }

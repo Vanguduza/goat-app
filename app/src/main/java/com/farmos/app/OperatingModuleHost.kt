@@ -454,6 +454,6 @@ fun OperatingModuleHost(
                 },
             )
         }
-        else -> Unit
+        else -> ModuleUnavailableScreen(module = module, onBack = onBack)
     }
 }
