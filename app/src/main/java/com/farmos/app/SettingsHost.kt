@@ -86,6 +86,10 @@ private data class SettingsSnapshot(
  * Farm settings for local accounts: Accounts & Access (FOS-ADMIN-003/004/005/006/024), Storage & Backup
  * (FOS-ADMIN-023) and Devices (FOS-ADMIN-021) under Settings Home (FOS-ADMIN-001). Every action runs
  * through the local access service, which authorises it against the signed-in account and audits it.
+ *
+ * Also serves FOS-GLOBAL-003 (create account → Add account page), FOS-GLOBAL-009 (role and permissions
+ * explanation → Roles and permissions page) and FOS-GLOBAL-019 (account profile → Account and role page);
+ * those pages keep their FOS-ADMIN-* runtime tags (one testTag per node).
  */
 @Composable
 internal fun SettingsHost(

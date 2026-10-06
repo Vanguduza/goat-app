@@ -20,7 +20,11 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
 
-/** Dedicated feed orchestration. Inventory is read for selection/context; feed owns the feed issue mutation. */
+/**
+ * Dedicated feed orchestration. Inventory is read for selection/context; feed owns the feed issue mutation.
+ *
+ * FOS-FEED-002 — feed inventory: the home surface lists inventory items with on-hand stock (root tag FOS-FEED-001).
+ */
 @Composable
 fun FeedModuleHost(
     farmId: String,

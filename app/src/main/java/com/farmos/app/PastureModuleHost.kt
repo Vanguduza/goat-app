@@ -24,7 +24,12 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
 
-/** Dedicated pasture/grazing orchestration boundary. */
+/**
+ * Dedicated pasture/grazing orchestration boundary.
+ *
+ * FOS-PASTURE-004 — grazing rotation: start/end grazing moves groups through paddocks (root tag FOS-PASTURE-001).
+ * FOS-PASTURE-005 — group movement: start/end grazing records a group moving into/out of a paddock (root tag FOS-PASTURE-001).
+ */
 @Composable
 fun PastureModuleHost(
     farmId: String,

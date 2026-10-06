@@ -55,7 +55,17 @@ interface AnimalExitDao {
         """,
     )
     suspend fun unsettledSaleExits(farmId: String): List<UnsettledSaleExit>
+
+    /** Exit kind totals for farm analytics; reversals are counted under their own kind. */
+    @Query("SELECT kind, COUNT(*) AS exits FROM animal_exits WHERE farmId = :farmId GROUP BY kind")
+    suspend fun exitKindCounts(farmId: String): List<ExitKindCount>
+
+    @Query("SELECT * FROM animal_exits WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun recentForFarm(farmId: String, limit: Int): List<AnimalExitEntity>
 }
+
+/** Exit totals by kind for one farm. */
+data class ExitKindCount(val kind: String, val exits: Int)
 
 /** A sale exit whose sale money has not been recorded yet. */
 data class UnsettledSaleExit(

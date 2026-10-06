@@ -15,7 +15,11 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
 
-/** Dedicated water-record orchestration preserving the existing command contract. */
+/**
+ * Dedicated water-record orchestration preserving the existing command contract.
+ *
+ * FOS-WATER-004 — consumption capture: the home surface records source, litres and date (root tag FOS-WATER-001).
+ */
 @Composable
 fun WaterModuleHost(
     farmId: String,

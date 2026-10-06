@@ -231,6 +231,7 @@ internal fun RabbitKindlingDueScreen(records: RabbitRecords, today: LocalDate, o
 }
 
 /** FOS-RABBIT-018 — one wave's stored schedule, recorded events and kits. */
+/** FOS-RABBIT-035 — rabbit timeline: the recorded-events section is the wave's dated event timeline (root tag FOS-RABBIT-018). */
 @Composable
 internal fun RabbitLitterProfileScreen(records: RabbitRecords, onBack: () -> Unit) {
     var selectedId by rememberSaveable { mutableStateOf(records.waves.firstOrNull()?.id) }
@@ -277,6 +278,7 @@ internal fun RabbitLitterProfileScreen(records: RabbitRecords, onBack: () -> Uni
 }
 
 /** FOS-RABBIT-019 — individual kits recorded on this device, grouped by wave. */
+/** FOS-RABBIT-023 — individualise kits: this census is the individual-kit surface (root tag FOS-RABBIT-019). */
 @Composable
 internal fun RabbitKitCensusScreen(records: RabbitRecords, onBack: () -> Unit) {
     FarmOperationalPage("FOS-RABBIT-019", "Kit census", "Individual kits recorded on this device.", FarmVisualClass.I3, onBack) {

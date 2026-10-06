@@ -91,6 +91,7 @@ internal fun GlobalSearchHost(
     )
 }
 
+/** FOS-SEARCH-001, FOS-SEARCH-002, FOS-SEARCH-004, FOS-SEARCH-005 — local-first search home: entry, results list, no-results state and offline local search. The results section keeps its FOS-HOME-007 runtime tag. */
 @Composable
 internal fun GlobalSearchScreen(
     busy: Boolean,
@@ -115,7 +116,7 @@ internal fun GlobalSearchScreen(
                 title = "Search farm",
                 subtitle = "Animals on this farm · offline first",
             )
-            FarmIllustratedSectionSurface {
+            FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-SEARCH-001")) {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
@@ -146,6 +147,7 @@ internal fun GlobalSearchScreen(
                         FarmSearchEmptyState(
                             title = "No matching animal records.",
                             hint = "Check the spelling, or search by tag, name or species. Only this farm's records are searched.",
+                            modifier = Modifier.testTag("farm-screen:FOS-SEARCH-004"),
                         )
                     } else {
                         results.forEach { result ->

@@ -308,6 +308,37 @@ fun FarmSessionContent(
                 canExport = rolePermits(membership.role, Permission.EXPORT_FARM_DATA),
                 onBack = backHome,
             )
+            FarmModule.GENETICS -> GeneticsModuleHost(
+                database = app.database,
+                farmId = membership.farmId,
+                ops = ops,
+                newContext = ::context,
+                enqueueSync = ::enqueueSync,
+                onBack = backHome,
+            )
+            FarmModule.CAPACITY -> CapacityModuleHost(
+                database = app.database,
+                farmId = membership.farmId,
+                onBack = backHome,
+            )
+            FarmModule.ANALYTICS -> AnalyticsModuleHost(
+                database = app.database,
+                farmId = membership.farmId,
+                onBack = backHome,
+            )
+            FarmModule.SIMULATION -> SimulationModuleHost(
+                database = app.database,
+                farmId = membership.farmId,
+                filesDir = app.filesDir,
+                onBack = backHome,
+            )
+            FarmModule.AI -> AiBoundaryHost(
+                database = app.database,
+                farmId = membership.farmId,
+                filesDir = app.filesDir,
+                onOpenModule = { destination = FarmDestination.Module(it) },
+                onBack = backHome,
+            )
             else -> OperatingModuleHost(
                 module = dest.module,
                 farmId = membership.farmId,

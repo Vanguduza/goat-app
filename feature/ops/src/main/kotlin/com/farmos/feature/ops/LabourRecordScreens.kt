@@ -77,6 +77,7 @@ fun LabourRecordNavigator(
 }
 
 /** FOS-LABOUR-005 — exhaustive minutes per worker label and recorded entries, newest first. */
+/** FOS-LABOUR-008 — workload: per-worker exhaustive minutes are the recorded workload view (root tag FOS-LABOUR-005). */
 @Composable
 internal fun LabourWorkLogScreen(records: LabourRecords, onBack: () -> Unit) {
     FarmOperationalPage("FOS-LABOUR-005", "Work log", "Recorded labour on this device, newest first. Worker names are farm labels.", FarmVisualClass.I3, onBack) {

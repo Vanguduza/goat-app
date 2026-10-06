@@ -23,7 +23,12 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
 
-/** Dedicated asset register and maintenance orchestration boundary. */
+/**
+ * Dedicated asset register and maintenance orchestration boundary.
+ *
+ * FOS-ASSET-004 — create asset: the home surface creates assets with code, name and kind (root tag FOS-ASSET-001).
+ * FOS-ASSET-007 — maintenance job: the home surface records maintenance events per asset (root tag FOS-ASSET-001).
+ */
 @Composable
 fun AssetsModuleHost(
     farmId: String,

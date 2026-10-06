@@ -687,6 +687,23 @@ interface LifecycleDao {
     suspend fun pedigreeParents(farmId: String, animalId: String): List<PedigreeRelationEntity>
     @Query("SELECT * FROM pedigree_relations WHERE farmId = :farmId AND parentId = :parentId ORDER BY animalId, id")
     suspend fun pedigreeChildren(farmId: String, parentId: String): List<PedigreeRelationEntity>
+    @Query("SELECT COUNT(*) FROM pedigree_relations WHERE farmId = :farmId")
+    suspend fun pedigreeRelationCount(farmId: String): Int
+    @Query("SELECT COUNT(DISTINCT animalId) FROM pedigree_relations WHERE farmId = :farmId")
+    suspend fun animalsWithParentageCount(farmId: String): Int
+    /**
+     * Animals with more than one distinct recorded sire, or more than one distinct recorded dam
+     * (genetic_dam outranks dam, mirroring [PedigreeQueries]).
+     */
+    @Query(
+        """
+        SELECT animalId FROM pedigree_relations WHERE farmId = :farmId
+        GROUP BY animalId
+        HAVING COUNT(DISTINCT CASE WHEN relationType = 'sire' THEN parentId END) > 1
+            OR COUNT(DISTINCT CASE WHEN relationType IN ('dam', 'genetic_dam') THEN parentId END) > 1
+        """,
+    )
+    suspend fun animalsWithConflictingParentage(farmId: String): List<String>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPackSlot(row: HealthPackSlotEntity)
     @Upsert suspend fun upsertPackSlot(row: HealthPackSlotEntity)
     @Query("SELECT * FROM health_schedule_slots WHERE farmId = :farmId AND packId = :packId AND isCore = 1")

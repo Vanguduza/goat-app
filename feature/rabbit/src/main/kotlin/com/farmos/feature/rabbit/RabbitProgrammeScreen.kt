@@ -341,6 +341,8 @@ private fun RabbitRegisterScreen(
     }
 }
 
+/** FOS-RABBIT-014 — nest placement: add a nest box and assign it through the nest-box cycle (root tag FOS-RABBIT-006). */
+/** FOS-RABBIT-015 — nest removal: cycle a box in-cage → dirty → sanitized/available (root tag FOS-RABBIT-006). */
 @Composable
 private fun RabbitCagesScreen(
     cages: List<String>,
@@ -420,6 +422,7 @@ private fun RabbitCagesScreen(
     }
 }
 
+/** FOS-RABBIT-010 — mating: breeding waves are created with a mating date and doe count (root tag FOS-RABBIT-009). */
 @Composable
 private fun RabbitWaveScreen(
     waves: List<String>,
@@ -500,6 +503,7 @@ private fun RabbitPalpationScreen(
     }
 }
 
+/** FOS-RABBIT-021 — kit mortality: kindling records live and dead kit counts (root tag FOS-RABBIT-017). */
 @Composable
 private fun RabbitKindlingScreen(
     waveOptions: List<FarmSelectorOption>,
@@ -628,6 +632,7 @@ private fun RabbitOutcomeScreen(
     }
 }
 
+/** FOS-RABBIT-033 — rabbit health: records signs observed on a rabbit and creates vet-call work (root tag FOS-RABBIT-034). */
 @Composable
 private fun RabbitGiStasisScreen(
     searchRabbits: FarmSelectorSearch,
