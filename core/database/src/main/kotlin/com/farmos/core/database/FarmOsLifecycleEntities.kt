@@ -233,6 +233,9 @@ data class LabResultEntity(@PrimaryKey val id: String, val farmId: String, val a
 @Entity(tableName = "cattle_weanings")
 data class CattleWeaningEntity(@PrimaryKey val id: String, val farmId: String, val animalId: String?, val groupId: String?, val weightGrams: Long?, val occurredEpochDay: Long)
 
+@Entity(tableName = "goat_weanings")
+data class GoatWeaningEntity(@PrimaryKey val id: String, val farmId: String, val animalId: String, val weightGrams: Long?, val occurredEpochDay: Long)
+
 @Entity(tableName = "sheep_micron_tests")
 data class SheepMicronEntity(@PrimaryKey val id: String, val farmId: String, val animalId: String?, val groupId: String?, val micronTenths: Int, val occurredEpochDay: Long)
 
@@ -577,6 +580,8 @@ interface LifecycleDao {
     suspend fun goatPregnanciesFor(farmId: String, animalId: String): List<GoatPregnancyEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertIdentifier(row: AnimalIdentifierEntity)
     @Upsert suspend fun upsertIdentifier(row: AnimalIdentifierEntity)
+    @Query("UPDATE animal_identifiers SET isActive = 0 WHERE farmId = :farmId AND animalId = :animalId AND type = :type")
+    suspend fun deactivateIdentifiers(farmId: String, animalId: String, type: String)
     @Query("""
         SELECT * FROM animal_identifiers
         WHERE farmId = :farmId
@@ -640,6 +645,10 @@ interface LifecycleDao {
     suspend fun cattleDryOffsFor(farmId: String, animalId: String): List<CattleDryOffEntity>
     @Query("SELECT * FROM cattle_weanings WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
     suspend fun cattleWeaningsFor(farmId: String, animalId: String): List<CattleWeaningEntity>
+    @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertGoatWeaning(row: GoatWeaningEntity)
+    @Upsert suspend fun upsertGoatWeaning(row: GoatWeaningEntity)
+    @Query("SELECT * FROM goat_weanings WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun goatWeaningsFor(farmId: String, animalId: String): List<GoatWeaningEntity>
     @Query("SELECT * FROM sheep_scans WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
     suspend fun sheepScansFor(farmId: String, animalId: String): List<SheepScanEntity>
     @Query("SELECT * FROM sheep_lambings WHERE farmId = :farmId AND damId = :animalId ORDER BY occurredEpochDay DESC, id")
