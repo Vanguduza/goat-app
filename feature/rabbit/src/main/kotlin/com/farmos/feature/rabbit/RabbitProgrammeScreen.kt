@@ -63,6 +63,9 @@ private enum class RabbitPage {
     PEDIGREE,
     COI,
     MATE_COMPARE,
+    REPLACEMENT_COMPARE,
+    SALE_ALLOCATION,
+    RABBIT_REPORT,
 }
 
 /** Rabbit biology is wave/cage/litter-first; this is not a Goat layout with rabbit labels. */
@@ -86,6 +89,8 @@ fun RabbitProgrammeScreen(
     onWean: (waveId: String, count: String, day: String) -> Unit = { _, _, _ -> },
     onRecordOutcome: (waveId: String, outcome: String, day: String) -> Unit = { _, _, _ -> },
     onRecordGiStasis: (animalId: String, signs: String, day: String) -> Unit = { _, _, _ -> },
+    onDecideRetention: (kitId: String, decision: String, day: String) -> Unit = { _, _, _ -> },
+    onAllocateSale: (kitId: String, targetWeightGrams: String, targetDay: String, purpose: String) -> Unit = { _, _, _, _ -> },
     onBack: () -> Unit,
     records: RabbitRecords = RabbitRecords(),
     today: LocalDate = LocalDate.now(),
@@ -199,6 +204,9 @@ fun RabbitProgrammeScreen(
         RabbitPage.KINDLING_DUE -> RabbitKindlingDueScreen(records, today, home)
         RabbitPage.LITTER_PROFILE -> RabbitLitterProfileScreen(records, home)
         RabbitPage.KIT_CENSUS -> RabbitKitCensusScreen(records, home)
+        RabbitPage.REPLACEMENT_COMPARE -> RabbitReplacementCompareScreen(records, busy, error, onDecideRetention, home)
+        RabbitPage.SALE_ALLOCATION -> RabbitSaleAllocationScreen(records, busy, error, onAllocateSale, home)
+        RabbitPage.RABBIT_REPORT -> RabbitReportScreen(records, home)
     }
 }
 
@@ -247,6 +255,9 @@ private fun RabbitDashboard(
             RabbitDashboardAction("Kindling due", "Waves with no kindling recorded yet", { onOpen(RabbitPage.KINDLING_DUE) })
             RabbitDashboardAction("Litter profiles", "Schedule, events and kits per wave", { onOpen(RabbitPage.LITTER_PROFILE) })
             RabbitDashboardAction("Kit census", "Individual kits by wave", { onOpen(RabbitPage.KIT_CENSUS) })
+            RabbitDashboardAction("Replacement compare", "Compare young rabbits for replacement selection", { onOpen(RabbitPage.REPLACEMENT_COMPARE) })
+            RabbitDashboardAction("Sale allocation", "Allocate rabbits to a planned sale", { onOpen(RabbitPage.SALE_ALLOCATION) })
+            RabbitDashboardAction("Rabbit report", "Rabbitry totals for this farm", { onOpen(RabbitPage.RABBIT_REPORT) })
             if (showPedigree) {
                 RabbitDashboardAction("Rabbit pedigree", "Sire and dam of each rabbit", { onOpen(RabbitPage.PEDIGREE) })
                 RabbitDashboardAction("Inbreeding check", "Kits' inbreeding for a doe and buck", { onOpen(RabbitPage.COI) })
@@ -722,3 +733,133 @@ private fun RabbitWaveSelector(
 data class RabbitNestBoxChoice(val id: String, val code: String, val status: String)
 
 private fun nestStatusLabel(status: String): String = status.replace('_', ' ').replaceFirstChar { it.uppercase() }
+
+/**
+ * FOS-RABBIT-025 — Replacement Candidate Compare: compare young rabbits side by side
+ * for replacement selection, then record keep/cull retention decisions via the
+ * governed DecideRabbitRetention command.
+ */
+@Composable
+private fun RabbitReplacementCompareScreen(
+    records: RabbitRecords,
+    busy: Boolean,
+    error: String?,
+    onDecideRetention: (kitId: String, decision: String, day: String) -> Unit,
+    onBack: () -> Unit,
+) {
+    val candidates = records.kits.filter { it.status == "active" && it.retention != "culled" }
+    var selected by remember { mutableStateOf(emptySet<String>()) }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    val compared = candidates.filter { it.id in selected }.take(4)
+    FarmOperationalPage("FOS-RABBIT-025", "Replacement compare", "Compare young rabbits for replacement selection.", onBack = onBack) {
+        FarmOperationalSection("Candidates") {
+            if (candidates.isEmpty()) Text("No active kits to compare.")
+            candidates.forEach { kit ->
+                val checked = kit.id in selected
+                TextButton(
+                    onClick = {
+                        selected = if (checked) selected - kit.id else (selected + kit.id).take(4).toSet()
+                    },
+                    enabled = !busy,
+                ) { Text("${if (checked) "[x]" else "[ ]"} ${kit.label} · ${kit.sex} · ${kit.status} · retention ${kit.retention}") }
+            }
+        }
+        if (compared.isNotEmpty()) {
+            FarmOperationalSection("Side by side") {
+                compared.forEach { kit ->
+                    Text("${kit.label}: sex ${kit.sex}, status ${kit.status}, retention ${kit.retention}, ear tag ${kit.earTag ?: "—"}")
+                }
+                OutlinedTextField(day, {
+                    day = it
+                }, label = { Text("Decision date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { compared.forEach { onDecideRetention(it.id, "keep", day) } },
+                        enabled = !busy,
+                        modifier = Modifier.weight(1f),
+                    ) { Text("Keep selected") }
+                    Button(
+                        onClick = { compared.forEach { onDecideRetention(it.id, "cull", day) } },
+                        enabled = !busy,
+                        modifier = Modifier.weight(1f),
+                    ) { Text("Cull selected") }
+                }
+            }
+        }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    }
+}
+
+/**
+ * FOS-RABBIT-030 — Sale Allocation: allocate rabbits to a planned sale via the
+ * governed RecordRabbitMarketPlan command (purpose "sale").
+ */
+@Composable
+private fun RabbitSaleAllocationScreen(
+    records: RabbitRecords,
+    busy: Boolean,
+    error: String?,
+    onAllocate: (kitId: String, targetWeightGrams: String, targetDay: String, purpose: String) -> Unit,
+    onBack: () -> Unit,
+) {
+    val candidates = records.kits.filter { it.status == "active" }
+    var selected by remember { mutableStateOf("") }
+    var targetWeight by remember { mutableStateOf("") }
+    var targetDay by remember { mutableStateOf(LocalDate.now().toString()) }
+    FarmOperationalPage("FOS-RABBIT-030", "Sale allocation", "Allocate rabbits to a planned sale.", onBack = onBack) {
+        FarmOperationalSection("Allocate") {
+            FarmEntitySelector(
+                atomTag = "rabbit-sale-kit-selector",
+                title = "Rabbit",
+                options = candidates.map { FarmSelectorOption(it.id, it.label, "${it.sex} · ${it.status}") },
+                selectedId = selected.ifBlank { null },
+                onSelect = { selected = it },
+                emptyText = "No active kits to allocate.",
+                enabled = !busy,
+            )
+            OutlinedTextField(targetWeight, {
+                targetWeight = it
+            }, label = { Text("Target weight (g)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(targetDay, {
+                targetDay = it
+            }, label = { Text("Target sale date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Button(
+                onClick = { onAllocate(selected, targetWeight, targetDay, "sale") },
+                enabled = !busy && selected.isNotBlank() && targetWeight.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Allocate to sale") }
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        }
+    }
+}
+
+/**
+ * FOS-RABBIT-036 — Rabbit Report: farm-scoped rabbitry totals computed from local
+ * records only.
+ *
+ * FOS-RABBIT-032 — Rabbit Weight is a GENUINE GAP: no rabbit weight table, DAO or
+ * governed command exists in the local schema; it needs a new rabbit_weight table,
+ * a RecordRabbitWeight command with validator, a repository handler with journal op
+ * and replay applier, plus migration evidence. Not faked here.
+ */
+@Composable
+private fun RabbitReportScreen(
+    records: RabbitRecords,
+    onBack: () -> Unit,
+) {
+    val activeKits = records.kits.count { it.status == "active" }
+    FarmOperationalPage("FOS-RABBIT-036", "Rabbit report", "Rabbitry totals for this farm.", onBack = onBack) {
+        FarmOperationalSection("Totals") {
+            Text("Cages: ${records.cages.size}")
+            Text("Waves: ${records.waves.size}")
+            Text("Kits: ${records.kits.size} (${activeKits} active)")
+        }
+        FarmOperationalSection("Per wave") {
+            if (records.waves.isEmpty()) Text("No waves recorded yet.")
+            records.waves.forEach { wave ->
+                val kits = records.kits.count { it.waveId == wave.id }
+                Text("Wave ${wave.id}: $kits kits")
+            }
+        }
+    }
+}

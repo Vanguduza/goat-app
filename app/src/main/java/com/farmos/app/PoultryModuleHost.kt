@@ -19,6 +19,8 @@ import com.farmos.domain.ops.RecordPoultryBiosecurity
 import com.farmos.domain.ops.RecordPoultryFlockDay
 import com.farmos.domain.ops.RecordPoultryHatch
 import com.farmos.domain.ops.RecordPoultryVaccination
+import com.farmos.domain.ops.MovePoultryFlock
+import com.farmos.domain.ops.ClosePoultryFlock
 import com.farmos.domain.ops.SetPoultryHatch
 import com.farmos.feature.ops.PoultryExperienceScreen
 import com.farmos.feature.ops.PoultryFlockRecords
@@ -195,6 +197,28 @@ fun PoultryModuleHost(
                         findings,
                         mixedSpecies,
                         LocalDate.parse(day).toEpochDay(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onMoveFlock = { groupId, fromHouseId, toHouseId, heads, day ->
+            run {
+                ops.moveFlock(
+                    MovePoultryFlock(
+                        UUID.randomUUID().toString(), groupId, fromHouseId, toHouseId,
+                        heads.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onCloseFlock = { groupId, headOut, reason, day ->
+            run {
+                ops.closeFlock(
+                    ClosePoultryFlock(
+                        UUID.randomUUID().toString(), groupId,
+                        headOut.toIntOrNull() ?: 0, reason.trim(), LocalDate.parse(day).toEpochDay(),
                     ),
                     newContext(),
                 )

@@ -19,7 +19,9 @@ import com.farmos.domain.ops.RecordRabbitPalpation
 import com.farmos.domain.rabbit.CreateRabbitCage
 import com.farmos.domain.rabbit.CreateRabbitNestBox
 import com.farmos.domain.rabbit.CreateRabbitWave
+import com.farmos.domain.rabbit.DecideRabbitRetention
 import com.farmos.domain.rabbit.RecordRabbitGiStasis
+import com.farmos.domain.rabbit.RecordRabbitMarketPlan
 import com.farmos.feature.rabbit.RabbitAnimalView
 import com.farmos.feature.rabbit.RabbitNestBoxChoice
 import com.farmos.feature.rabbit.RabbitPedigreePorts
@@ -220,6 +222,29 @@ fun RabbitModuleHost(
                         signs = signs,
                         occurredEpochDay = LocalDate.parse(day).toEpochDay(),
                         taskId = UUID.randomUUID().toString(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onDecideRetention = { kitId, decision, day ->
+            run {
+                ops.decideRetention(
+                    DecideRabbitRetention(
+                        UUID.randomUUID().toString(), kitId, decision,
+                        LocalDate.parse(day).toEpochDay(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onAllocateSale = { kitId, targetWeightGrams, targetDay, purpose ->
+            run {
+                ops.recordPlan(
+                    RecordRabbitMarketPlan(
+                        UUID.randomUUID().toString(), kitId, null,
+                        targetWeightGrams.toIntOrNull() ?: 0,
+                        LocalDate.parse(targetDay).toEpochDay(), purpose,
                     ),
                     newContext(),
                 )

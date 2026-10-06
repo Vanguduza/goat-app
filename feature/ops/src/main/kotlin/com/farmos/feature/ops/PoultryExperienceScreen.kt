@@ -56,6 +56,9 @@ private enum class PoultryPage {
     BIOSECURITY_RECORDS,
     FLOCK_HEALTH,
     FLOCK_TIMELINE,
+    FLOCK_MOVE,
+    FLOCK_CLOSEOUT,
+    POULTRY_REPORT,
 }
 
 /** Flock/house-first Poultry UX. Individual-bird CRUD is intentionally not the primary navigation model. */
@@ -78,6 +81,8 @@ fun PoultryExperienceScreen(
     onRecordHatch: (hatchId: String, hatched: String, culls: String, day: String) -> Unit,
     onVaccinate: (groupId: String, poultryKind: String, formularyId: String, day: String) -> Unit,
     onBiosecurity: (houseId: String, groupId: String, findings: String, mixedSpecies: Boolean, day: String) -> Unit,
+    onMoveFlock: (groupId: String, fromHouseId: String, toHouseId: String, heads: String, day: String) -> Unit = { _, _, _, _, _ -> },
+    onCloseFlock: (groupId: String, headOut: String, reason: String, day: String) -> Unit = { _, _, _, _ -> },
     onBack: () -> Unit,
     records: PoultryRecords = PoultryRecords(),
     loadFlock: suspend (String) -> PoultryFlockRecords = { PoultryFlockRecords() },
@@ -115,6 +120,9 @@ fun PoultryExperienceScreen(
         PoultryPage.BIOSECURITY_RECORDS -> PoultryBiosecurityDashboardScreen(records, home)
         PoultryPage.FLOCK_HEALTH -> PoultryFlockRecordScreen(timeline = false, records.flocks, loadFlock, home)
         PoultryPage.FLOCK_TIMELINE -> PoultryFlockRecordScreen(timeline = true, records.flocks, loadFlock, home)
+        PoultryPage.FLOCK_MOVE -> PoultryFlockMove(flockGroups, houseOptions, busy, error, onMoveFlock, home)
+        PoultryPage.FLOCK_CLOSEOUT -> PoultryFlockCloseout(flockGroups, records.flocks, busy, error, onCloseFlock, home)
+        PoultryPage.POULTRY_REPORT -> PoultryReportScreen(records, home)
     }
 }
 
@@ -166,6 +174,9 @@ private fun PoultryDashboard(
             PoultryAction("Biosecurity records", "Recorded walks and findings") { onOpen(PoultryPage.BIOSECURITY_RECORDS) }
             PoultryAction("Flock health", "Recorded losses, vaccinations and walks for one flock") { onOpen(PoultryPage.FLOCK_HEALTH) }
             PoultryAction("Flock timeline", "Every recorded event for one flock") { onOpen(PoultryPage.FLOCK_TIMELINE) }
+            PoultryAction("Move flock", "Move a flock to another house") { onOpen(PoultryPage.FLOCK_MOVE) }
+            PoultryAction("Close out flock", "End a flock's production cycle") { onOpen(PoultryPage.FLOCK_CLOSEOUT) }
+            PoultryAction("Poultry report", "Flock, egg and loss totals for this farm") { onOpen(PoultryPage.POULTRY_REPORT) }
             if (flockDays.isEmpty()) Text("No daily flock records yet.")
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             TextButton(onClick = onBack) { Text("Farm home") }
@@ -288,6 +299,10 @@ private fun PoultryHouses(
 }
 
 @Composable
+/**
+ * FOS-POULTRY-022 — Chick Placement: assign a flock (animal group) to a poultry house
+ * via the governed PlacePoultryFlock command.
+ */
 private fun PoultryPlacement(
     flockGroups: List<FarmSelectorOption>,
     houseOptions: List<FarmSelectorOption>,
@@ -334,6 +349,10 @@ private fun PoultryPlacement(
 }
 
 @Composable
+/**
+ * FOS-POULTRY-011 — Egg Collection: record one day's eggs, mortality, culls and feed
+ * for a flock via the governed RecordPoultryFlockDay command.
+ */
 private fun PoultryDaily(
     rows: List<String>,
     flockGroups: List<FarmSelectorOption>,
@@ -539,6 +558,10 @@ private fun PoultryHatchResult(
 }
 
 @Composable
+/**
+ * FOS-POULTRY-013 — Vaccination Schedule: the flock's recorded vaccinations and the
+ * capture form, using vet-approved formulary items via RecordPoultryVaccination.
+ */
 private fun PoultryVaccination(
     rows: List<String>,
     flockGroups: List<FarmSelectorOption>,
@@ -691,6 +714,135 @@ private fun OptionalPoultrySelector(
         emptyText = "",
         enabled = !busy,
     )
+}
+
+/**
+ * FOS-POULTRY-023 — Flock Move: move a flock to another house via the governed
+ * MovePoultryFlock command. Recorded as a new placement row for the same group.
+ */
+@Composable
+private fun PoultryFlockMove(
+    flockGroups: List<FarmSelectorOption>,
+    houseOptions: List<FarmSelectorOption>,
+    busy: Boolean,
+    error: String?,
+    onMove: (groupId: String, fromHouseId: String, toHouseId: String, heads: String, day: String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var group by remember { mutableStateOf("") }
+    var fromHouse by remember { mutableStateOf("") }
+    var toHouse by remember { mutableStateOf("") }
+    var heads by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    FarmOperationalPage("FOS-POULTRY-023", "Move flock", "Move a flock to another house.", onBack = onBack) {
+        FarmOperationalSection("Flock move") {
+            FlockGroupSelector(flockGroups, group, busy) { group = it }
+            FarmEntitySelector(
+                atomTag = FarmSelectionAtoms.LOCATION_SELECTOR,
+                title = "From house",
+                options = houseOptions,
+                selectedId = fromHouse.ifBlank { null },
+                onSelect = { fromHouse = it },
+                emptyText = "Create a poultry house first.",
+                enabled = !busy,
+            )
+            FarmEntitySelector(
+                atomTag = FarmSelectionAtoms.LOCATION_SELECTOR,
+                title = "To house",
+                options = houseOptions,
+                selectedId = toHouse.ifBlank { null },
+                onSelect = { toHouse = it },
+                emptyText = "Create a poultry house first.",
+                enabled = !busy,
+            )
+            OutlinedTextField(heads, {
+                heads = it
+            }, label = { Text("Head count moved") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(day, {
+                day = it
+            }, label = { Text("Move date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Button(
+                onClick = { onMove(group, fromHouse, toHouse, heads, day) },
+                enabled = !busy && group.isNotBlank() && fromHouse.isNotBlank() && toHouse.isNotBlank() && heads.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Move flock") }
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        }
+    }
+}
+
+/**
+ * FOS-POULTRY-024 — Flock Close-Out: end a flock's production cycle via the governed
+ * ClosePoultryFlock command. Shows the flock's lifetime totals before closing.
+ */
+@Composable
+private fun PoultryFlockCloseout(
+    flockGroups: List<FarmSelectorOption>,
+    flocks: List<PoultryFlockView>,
+    busy: Boolean,
+    error: String?,
+    onClose: (groupId: String, headOut: String, reason: String, day: String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var group by remember { mutableStateOf("") }
+    var headOut by remember { mutableStateOf("") }
+    var reason by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    val selected = flocks.firstOrNull { it.groupId == group }
+    FarmOperationalPage("FOS-POULTRY-024", "Close out flock", "End a flock's production cycle.", onBack = onBack) {
+        FarmOperationalSection("Flock close-out") {
+            FlockGroupSelector(flockGroups, group, busy) { group = it }
+            selected?.let {
+                Text("Placed ${it.placedHeads} head · ${PoultryRecordMath.eggs(it)} eggs · ${PoultryRecordMath.losses(it)} losses")
+            }
+            OutlinedTextField(headOut, {
+                headOut = it
+            }, label = { Text("Head count out") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(reason, {
+                reason = it
+            }, label = { Text("Reason (sold, culled, cycle end)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(day, {
+                day = it
+            }, label = { Text("Close-out date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Button(
+                onClick = { onClose(group, headOut, reason, day) },
+                enabled = !busy && group.isNotBlank() && headOut.isNotBlank() && reason.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Close out flock") }
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        }
+    }
+}
+
+/**
+ * FOS-POULTRY-027 — Poultry Report: farm-scoped flock, egg, loss and vaccination
+ * totals computed from local records only.
+ */
+@Composable
+private fun PoultryReportScreen(
+    records: PoultryRecords,
+    onBack: () -> Unit,
+) {
+    val flocks = records.flocks
+    val totalPlaced = flocks.sumOf { it.placedHeads }
+    val totalEggs = flocks.sumOf { PoultryRecordMath.eggs(it) }
+    val totalLosses = flocks.sumOf { PoultryRecordMath.losses(it) }
+    val totalVaccinations = flocks.sumOf { (it.vaccinationCount ?: it.vaccinations.size).toLong() }
+    FarmOperationalPage("FOS-POULTRY-027", "Poultry report", "Flock, egg and loss totals for this farm.", onBack = onBack) {
+        FarmOperationalSection("Totals") {
+            Text("Flocks: ${flocks.size}")
+            Text("Placed head: $totalPlaced")
+            Text("Eggs recorded: $totalEggs")
+            Text("Losses (dead + culls): $totalLosses")
+            Text("Vaccinations recorded: $totalVaccinations")
+        }
+        FarmOperationalSection("Per flock") {
+            if (flocks.isEmpty()) Text("No flocks recorded yet.")
+            flocks.forEach { flock ->
+                Text("${flock.poultryKind} · ${flock.houseLabel} · placed ${flock.placedHeads} · ${PoultryRecordMath.eggs(flock)} eggs · ${PoultryRecordMath.losses(flock)} losses")
+            }
+        }
+    }
 }
 
 private const val POULTRY_FORMULARY_SELECTOR = "poultry-formulary-selector"
