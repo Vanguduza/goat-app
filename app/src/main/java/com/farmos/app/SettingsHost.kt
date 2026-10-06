@@ -1,11 +1,19 @@
 package com.farmos.app
 
+import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -18,10 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.farmos.core.database.AccessAuditEntity
 import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
@@ -37,6 +47,7 @@ import com.farmos.core.design.FarmSearchPage
 import com.farmos.core.design.FarmSearchSelector
 import com.farmos.core.design.FarmSelectorSearch
 import com.farmos.core.design.FarmSelectorOption
+import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.access.AccessDenied
 import com.farmos.domain.access.AccountStatus
 import com.farmos.domain.access.Credential
@@ -45,11 +56,14 @@ import com.farmos.domain.access.LocalAccount
 import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.Permission
 import com.farmos.domain.access.RolePermissions
+import com.farmos.domain.ops.EnablePoultryKind
 import com.farmos.domain.ops.FarmCurrency
 import com.farmos.domain.ops.GestationDefaults
 import com.farmos.domain.ops.GestationPeriod
 import com.farmos.domain.ops.GestationSpecies
+import com.farmos.domain.ops.PoultryKindIncubation
 import com.farmos.domain.replication.DeviceStatus
+import java.io.File
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -63,7 +77,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private enum class SettingsPage { HOME, MEMBERS, CREATE_MEMBER, MEMBER_DETAIL, PERMISSIONS, AUDIT, STORAGE, DEVICES, CURRENCY, SPECIES, CONFLICTS }
+private enum class SettingsPage {
+    HOME, MEMBERS, CREATE_MEMBER, MEMBER_DETAIL, PERMISSIONS, AUDIT, STORAGE, DEVICES, CURRENCY, SPECIES, CONFLICTS,
+    PROFILE, POULTRY_KINDS, LOCATIONS, NOTIFICATIONS, SYNC_SETTINGS, SEARCH_SETTINGS, INTEGRATIONS, HARDWARE,
+    BLE_DEVICES, RFID_DEVICES, MODEL_API, SECURITY, DATA_EXPORT, ABOUT, PERM_NOTIFICATIONS, PERM_CAMERA,
+    PERM_BLUETOOTH, PERM_LOCATION, TERMS,
+}
 
 /** Everything the settings pages show, read from this device's database in one pass. */
 private data class SettingsSnapshot(
@@ -102,6 +121,12 @@ internal fun SettingsHost(
     io: CoroutineDispatcher = Dispatchers.IO,
     /** Farm-LAN replication for this farm, present while a local session runs it. */
     lan: FarmLanRuntime? = null,
+    /**
+     * Governed command writer for this farm. Present when the session wires it
+     * (FarmSessionContent passes app.opsRepository(farmId)); when null, pages that
+     * need a command write show their state read-only instead of a dead control.
+     */
+    ops: RoomOpsRepository? = null,
 ) {
     val scope = rememberCoroutineScope()
     var page by remember { mutableStateOf(SettingsPage.HOME) }
@@ -152,13 +177,26 @@ internal fun SettingsHost(
                 return@FarmOperationalPage
             }
             Text("Signed in as ${actor.displayName} · ${roleLabel(actor.role)}", modifier = Modifier.testTag("settings-signed-in"))
+            AnimalFarmQuickAction("Farm profile", { page = SettingsPage.PROFILE })
             AnimalFarmQuickAction("Accounts and access", { page = SettingsPage.MEMBERS })
             AnimalFarmQuickAction("Roles and permissions", { page = SettingsPage.PERMISSIONS })
             AnimalFarmQuickAction("Access history", { page = SettingsPage.AUDIT })
             AnimalFarmQuickAction("Currency", { page = SettingsPage.CURRENCY })
             AnimalFarmQuickAction("Species configuration", { page = SettingsPage.SPECIES })
+            AnimalFarmQuickAction("Poultry kinds", { page = SettingsPage.POULTRY_KINDS })
+            AnimalFarmQuickAction("Locations", { page = SettingsPage.LOCATIONS })
+            AnimalFarmQuickAction("Notifications", { page = SettingsPage.NOTIFICATIONS })
+            AnimalFarmQuickAction("Offline and sync", { page = SettingsPage.SYNC_SETTINGS })
+            AnimalFarmQuickAction("Search settings", { page = SettingsPage.SEARCH_SETTINGS })
+            AnimalFarmQuickAction("Integrations", { page = SettingsPage.INTEGRATIONS })
+            AnimalFarmQuickAction("Hardware", { page = SettingsPage.HARDWARE })
+            AnimalFarmQuickAction("Security", { page = SettingsPage.SECURITY })
+            AnimalFarmQuickAction("Data export", { page = SettingsPage.DATA_EXPORT })
             AnimalFarmQuickAction("Storage and backup", { page = SettingsPage.STORAGE })
             AnimalFarmQuickAction("Devices", { page = SettingsPage.DEVICES })
+            AnimalFarmQuickAction("App permissions", { page = SettingsPage.PERM_NOTIFICATIONS })
+            AnimalFarmQuickAction("Terms and privacy", { page = SettingsPage.TERMS })
+            AnimalFarmQuickAction("About", { page = SettingsPage.ABOUT })
         }
         SettingsPage.MEMBERS -> FarmOperationalPage("FOS-ADMIN-003", "Accounts and access", "People who can sign in to this farm.", onBack = home, backLabel = "Farm settings") {
             val actor = current.actor
@@ -323,7 +361,498 @@ internal fun SettingsHost(
                 AddDevice(lan, actor, onJoined = { refreshKey++ })
             }
         }
+        /** FOS-ADMIN-002 — Farm profile: this farm's identity, device and account counts, read from this device's database. */
+        SettingsPage.PROFILE -> FarmOperationalPage("FOS-ADMIN-002", "Farm profile", "This farm's identity on this device.", onBack = home, backLabel = "Farm settings") {
+            current.actor ?: return@FarmOperationalPage
+            var farmName by remember(farmId) { mutableStateOf<String?>(null) }
+            var createdAt by remember(farmId) { mutableStateOf<Long?>(null) }
+            var loadError by remember(farmId) { mutableStateOf<String?>(null) }
+            LaunchedEffect(farmId, refreshKey) {
+                runCatching {
+                    withContext(io) {
+                        database.localAccess().farms().firstOrNull { it.farmId == farmId }
+                    }
+                }.onSuccess { farm ->
+                    farmName = farm?.name
+                    createdAt = farm?.createdAtEpochMillis
+                }.onFailure { loadError = it.message }
+            }
+            SettingsError(loadError)
+            FarmOperationalSection("Identity") {
+                Text("Name: ${farmName ?: "Loading"}", modifier = Modifier.testTag("settings-farm-name"))
+                Text("Farm ID: $farmId", modifier = Modifier.testTag("settings-farm-id"))
+                Text(
+                    "Created: ${createdAt?.let { timestamp(it) } ?: "Loading"}",
+                    modifier = Modifier.testTag("settings-farm-created"),
+                )
+            }
+            FarmOperationalSection("On this farm") {
+                Text("${current.devices.size} device(s) known", modifier = Modifier.testTag("settings-farm-devices"))
+                Text("${current.accounts.size} account(s)", modifier = Modifier.testTag("settings-farm-accounts"))
+                Text("Recording currency: ${current.currencyCode}")
+            }
+        }
+        /** FOS-ADMIN-008 — Poultry kinds: enable farm poultry kinds from the governed kinds catalog via the EnablePoultryKind command. */
+        SettingsPage.POULTRY_KINDS -> FarmOperationalPage("FOS-ADMIN-008", "Poultry kinds", "Which poultry kinds this farm keeps.", onBack = home, backLabel = "Farm settings") {
+            val actor = current.actor ?: return@FarmOperationalPage
+            val canEdit = actor.let { RolePermissions.allows(it.role, Permission.MANAGE_FARM_SETTINGS) }
+            var enabled by remember(farmId, refreshKey) { mutableStateOf<Set<String>?>(null) }
+            var loadError by remember(farmId) { mutableStateOf<String?>(null) }
+            LaunchedEffect(farmId, refreshKey) {
+                runCatching { withContext(io) { database.lifecycle().enabledPoultryKinds(farmId).map { it.poultryKindCode }.toSet() } }
+                    .onSuccess { enabled = it }
+                    .onFailure { loadError = it.message }
+            }
+            SettingsError(error)
+            SettingsError(loadError)
+            val kinds = enabled
+            if (kinds == null) {
+                Text("Loading poultry kinds saved on this device", color = AnimalFarmTheme.colors.mutedInk)
+                return@FarmOperationalPage
+            }
+            Text(
+                "Kinds enabled here appear across poultry recording. Enabling a kind records a governed farm operation that replicates to other devices; kinds cannot be disabled once enabled.",
+                color = AnimalFarmTheme.colors.mutedInk,
+            )
+            FarmOperationalSection("Kinds") {
+                PoultryKindIncubation.KINDS.sorted().forEach { code ->
+                    val isOn = code in kinds
+                    Text(
+                        "${kindLabel(code)} · ${if (isOn) "enabled" else "not enabled"}",
+                        modifier = Modifier.testTag("settings-poultry-kind:$code"),
+                    )
+                    if (!isOn && canEdit) {
+                        val writer = ops
+                        SettingsButton(
+                            "Enable ${kindLabel(code)}",
+                            !busy && writer != null,
+                        ) {
+                            val w = writer ?: return@SettingsButton
+                            scope.launch {
+                                busy = true
+                                error = null
+                                runCatching {
+                                    withContext(io) {
+                                        w.enablePoultryKind(
+                                            EnablePoultryKind(code),
+                                            LocalCommandContext(farmId, actor.accountId, deviceId, UUID.randomUUID().toString(), System.currentTimeMillis()),
+                                        )
+                                    }
+                                }.onFailure { error = it.message ?: "The kind could not be enabled on this device" }
+                                refreshKey++
+                                busy = false
+                            }
+                        }
+                    }
+                }
+            }
+            if (ops == null) {
+                Text("Kind changes are read-only here: the session has not wired the command writer yet.", color = AnimalFarmTheme.colors.mutedInk)
+            }
+            if (!canEdit) FarmPermissionExplanation("Poultry kinds are set by farm management", "Only Owner and Manager accounts can enable poultry kinds.")
+        }
+        /** FOS-ADMIN-009 — Locations: active paddocks and poultry houses recorded on this farm. */
+        SettingsPage.LOCATIONS -> FarmOperationalPage("FOS-ADMIN-009", "Locations", "Paddocks and poultry houses on this farm.", onBack = home, backLabel = "Farm settings") {
+            current.actor ?: return@FarmOperationalPage
+            var paddocks by remember(farmId, refreshKey) { mutableStateOf<List<String>?>(null) }
+            var houses by remember(farmId, refreshKey) { mutableStateOf<List<String>?>(null) }
+            LaunchedEffect(farmId, refreshKey) {
+                runCatching {
+                    withContext(io) {
+                        database.paddocks().active(farmId).map { "${it.code} · ${it.name}" } to
+                            database.lifecycle().houses(farmId).map { "${it.code} · ${it.kind}" }
+                    }
+                }.onSuccess { (p, h) -> paddocks = p; houses = h }
+                    .onFailure { paddocks = emptyList(); houses = emptyList() }
+            }
+            FarmOperationalSection("Paddocks") {
+                val rows = paddocks
+                when {
+                    rows == null -> Text("Loading locations saved on this device", color = AnimalFarmTheme.colors.mutedInk)
+                    rows.isEmpty() -> Text("No paddocks recorded yet.", color = AnimalFarmTheme.colors.mutedInk)
+                    else -> rows.forEach { Text(it, modifier = Modifier.testTag("settings-location-paddock")) }
+                }
+            }
+            FarmOperationalSection("Poultry houses") {
+                val rows = houses
+                when {
+                    rows == null -> Text("Loading locations saved on this device", color = AnimalFarmTheme.colors.mutedInk)
+                    rows.isEmpty() -> Text("No poultry houses recorded yet.", color = AnimalFarmTheme.colors.mutedInk)
+                    else -> rows.forEach { Text(it, modifier = Modifier.testTag("settings-location-house")) }
+                }
+            }
+            Text("Paddocks and houses are recorded in the pasture and poultry modules.", color = AnimalFarmTheme.colors.mutedInk)
+        }
+        /** FOS-ADMIN-012 — Notifications: local alert preferences kept on this device; no notification server exists. */
+        SettingsPage.NOTIFICATIONS -> FarmOperationalPage("FOS-ADMIN-012", "Notifications", "What this device tells you about.", onBack = home, backLabel = "Farm settings") {
+            current.actor ?: return@FarmOperationalPage
+            val context = LocalContext.current
+            val prefs = remember(context) { context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE) }
+            Text("These stay on this device. Farm OS has no notification server.", color = AnimalFarmTheme.colors.mutedInk)
+            FarmOperationalSection("Local alerts") {
+                SettingsToggle("Health alerts", "Due vaccinations and red-flag observations.", prefs, PREF_NOTIFY_HEALTH)
+                SettingsToggle("Sync completed", "When this device finishes synchronising.", prefs, PREF_NOTIFY_SYNC)
+                SettingsToggle("Low stock", "Inventory falling below its reorder level.", prefs, PREF_NOTIFY_STOCK)
+            }
+        }
+        /** FOS-ADMIN-013 — Offline and sync settings: journal state, farm network sync and Drive state. */
+        SettingsPage.SYNC_SETTINGS -> FarmOperationalPage("FOS-ADMIN-013", "Offline and sync", "How this device keeps farm records without a network.", onBack = home, backLabel = "Farm settings") {
+            current.actor ?: return@FarmOperationalPage
+            FarmOperationalSection("Always offline-first") {
+                Text("Every change is saved on this device first and never waits for a network.", color = AnimalFarmTheme.colors.mutedInk)
+                Text("${current.journalCount} operation(s) recorded in this device's replication journal.", modifier = Modifier.testTag("settings-sync-journal"))
+            }
+            FarmOperationalSection("Farm network sync") {
+                if (lan == null) {
+                    Text("Not running on this device.")
+                } else {
+                    LanStatus(lan, current.devices.count { it.deviceId != deviceId })
+                }
+            }
+            FarmOperationalSection("Google Drive") {
+                Text("Not connected.")
+                Text("Connecting Google Drive never deletes farm records on this device.", color = AnimalFarmTheme.colors.mutedInk)
+            }
+            Text("Backup and conflict review live under Storage and backup.", color = AnimalFarmTheme.colors.mutedInk)
+        }
+        /** FOS-ADMIN-014 — Search settings: local search scope toggles over this device's database. */
+        SettingsPage.SEARCH_SETTINGS -> FarmOperationalPage("FOS-ADMIN-014", "Search settings", "What local search looks through.", onBack = home, backLabel = "Farm settings") {
+            current.actor ?: return@FarmOperationalPage
+            val context = LocalContext.current
+            val prefs = remember(context) { context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE) }
+            Text("Search runs against this device's database only. Nothing leaves the device.", color = AnimalFarmTheme.colors.mutedInk)
+            FarmOperationalSection("Search scope") {
+                SettingsToggle("Animals", "Individual animal records.", prefs, PREF_SEARCH_ANIMALS)
+                SettingsToggle("Groups", "Animal groups and flocks.", prefs, PREF_SEARCH_GROUPS)
+                SettingsToggle("Health", "Observations, treatments and vaccinations.", prefs, PREF_SEARCH_HEALTH)
+                SettingsToggle("Inventory", "Stock items and movements.", prefs, PREF_SEARCH_INVENTORY)
+                SettingsToggle("Money", "Sales, purchases and money records.", prefs, PREF_SEARCH_MONEY)
+            }
+        }
+        /** FOS-ADMIN-015 — Integrations: honest connected/not-connected state for each bounded adapter. */
+        SettingsPage.INTEGRATIONS -> FarmOperationalPage("FOS-ADMIN-015", "Integrations", "What this farm connects to.", onBack = home, backLabel = "Farm settings") {
+            current.actor ?: return@FarmOperationalPage
+            FarmOperationalSection("Connections") {
+                val serving = lan?.let { runtime ->
+                    val lanState by runtime.state.collectAsState()
+                    lanState.serving
+                }
+                Text(
+                    "Farm network (LAN): ${when (serving) { true -> "running"; false -> "not running"; null -> "not running on this device" }}",
+                    modifier = Modifier.testTag("settings-integration-lan"),
+                )
+                Text("Google Drive: not connected.", modifier = Modifier.testTag("settings-integration-drive"))
+                Text("AI provider: managed inside the Copilot module boundary; keys stay sealed in this device's Keystore.", modifier = Modifier.testTag("settings-integration-ai"))
+            }
+            Text("Farm OS has no application server. Integrations are bounded adapters, never authorities.", color = AnimalFarmTheme.colors.mutedInk)
+        }
+        /** FOS-ADMIN-016 — Hardware: this device and its reader pages. */
+        SettingsPage.HARDWARE -> FarmOperationalPage("FOS-ADMIN-016", "Hardware", "This device and its readers.", onBack = home, backLabel = "Farm settings") {
+            current.actor ?: return@FarmOperationalPage
+            FarmOperationalSection("This device") {
+                Text("${Build.MANUFACTURER} ${Build.MODEL}", modifier = Modifier.testTag("settings-hardware-device"))
+                Text("Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})", color = AnimalFarmTheme.colors.mutedInk)
+            }
+            AnimalFarmQuickAction("Bluetooth devices", { page = SettingsPage.BLE_DEVICES })
+            AnimalFarmQuickAction("RFID readers", { page = SettingsPage.RFID_DEVICES })
+        }
+        /** FOS-ADMIN-017 — Bluetooth devices: bonded devices read from this device's Bluetooth adapter. */
+        SettingsPage.BLE_DEVICES -> FarmOperationalPage("FOS-ADMIN-017", "Bluetooth devices", "Devices this phone or tablet knows.", onBack = { page = SettingsPage.HARDWARE }, backLabel = "Hardware") {
+            current.actor ?: return@FarmOperationalPage
+            val context = LocalContext.current
+            var names by remember { mutableStateOf<List<String>?>(null) }
+            var note by remember { mutableStateOf<String?>(null) }
+            LaunchedEffect(Unit) {
+                val adapter = runCatching { BluetoothAdapter.getDefaultAdapter() }.getOrNull()
+                if (adapter == null) {
+                    note = "This device has no Bluetooth adapter."
+                    names = emptyList()
+                    return@LaunchedEffect
+                }
+                if (Build.VERSION.SDK_INT >= 31 &&
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    note = "Bluetooth permission is not granted, so bonded devices cannot be listed."
+                    names = emptyList()
+                    return@LaunchedEffect
+                }
+                runCatching {
+                    withContext(Dispatchers.IO) {
+                        @Suppress("MissingPermission")
+                        adapter.bondedDevices.map { "${it.name ?: "Unnamed device"} · ${it.address}" }.sorted()
+                    }
+                }.onSuccess { names = it }
+                    .onFailure { note = "Bonded devices could not be read: ${it.message}"; names = emptyList() }
+            }
+            note?.let { Text(it, color = AnimalFarmTheme.colors.mutedInk) }
+            FarmOperationalSection("Bonded devices") {
+                val rows = names
+                when {
+                    rows == null -> Text("Reading Bluetooth devices", color = AnimalFarmTheme.colors.mutedInk)
+                    rows.isEmpty() -> Text("No bonded Bluetooth devices.", color = AnimalFarmTheme.colors.mutedInk)
+                    else -> rows.forEach { Text(it, modifier = Modifier.testTag("settings-ble-device")) }
+                }
+            }
+        }
+        /** FOS-ADMIN-018 — RFID readers: honest unavailable state; no reader adapter is bundled. */
+        SettingsPage.RFID_DEVICES -> FarmOperationalPage("FOS-ADMIN-018", "RFID readers", "Tag readers paired with this farm.", onBack = { page = SettingsPage.HARDWARE }, backLabel = "Hardware") {
+            current.actor ?: return@FarmOperationalPage
+            // No RFID reader adapter is bundled with Farm OS on this device.
+            FarmOperationalSection("Readers") {
+                Text("No RFID reader is connected.", modifier = Modifier.testTag("settings-rfid-state"))
+                Text(
+                    "When a reader adapter is fitted, it appears here and tag scans flow into animal recording. Nothing is simulated: with no reader, there is nothing to list.",
+                    color = AnimalFarmTheme.colors.mutedInk,
+                )
+            }
+        }
+        /** FOS-ADMIN-019 — Model API: provider configuration lives in the Copilot module boundary; settings does not duplicate it. */
+        SettingsPage.MODEL_API -> FarmOperationalPage("FOS-ADMIN-019", "Model API", "Where AI provider settings live.", onBack = home, backLabel = "Farm settings") {
+            current.actor ?: return@FarmOperationalPage
+            // The AI boundary owns provider keys and adapters; settings does not duplicate them.
+            FarmOperationalSection("Provider configuration") {
+                Text("AI provider keys and adapters are managed inside the Copilot module's Farm OS-owned boundary.", modifier = Modifier.testTag("settings-model-api"))
+                Text("Keys are sealed in this device's Keystore and never leave it through settings.", color = AnimalFarmTheme.colors.mutedInk)
+                Text("Suggested actions stay advisory: Copilot never prescribes, doses, treats, culls, sells or posts on its own.", color = AnimalFarmTheme.colors.mutedInk)
+            }
+        }
+        /** FOS-ADMIN-020 — Security: device keystore state, biometric presence and sign-in credential kind. */
+        SettingsPage.SECURITY -> FarmOperationalPage("FOS-ADMIN-020", "Security", "How this device protects farm records.", onBack = home, backLabel = "Farm settings") {
+            val actor = current.actor ?: return@FarmOperationalPage
+            val context = LocalContext.current
+            FarmOperationalSection("This device") {
+                val biometric = context.packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)
+                Text("Biometric hardware: ${if (biometric) "present" else "not present"}", modifier = Modifier.testTag("settings-security-biometric"))
+                Text("Farm keys are sealed in this device's Keystore and never leave it.", color = AnimalFarmTheme.colors.mutedInk)
+            }
+            FarmOperationalSection("Your sign-in") {
+                Text("Signed in as ${actor.displayName}", modifier = Modifier.testTag("settings-security-account"))
+                Text("Credential: ${actor.credentialKind.name.lowercase()}", color = AnimalFarmTheme.colors.mutedInk)
+                Text("Change your PIN from your account page under Accounts and access.", color = AnimalFarmTheme.colors.mutedInk)
+            }
+            FarmOperationalSection("Recovery") {
+                Text("Keep the owner recovery code written down somewhere safe. It is the only way back in if every PIN is lost.", color = AnimalFarmTheme.colors.mutedInk)
+            }
+        }
+        /** FOS-ADMIN-022 — Data export: farm-scoped JSON summary exports with an app-private export log. */
+        SettingsPage.DATA_EXPORT -> FarmOperationalPage("FOS-ADMIN-022", "Data export", "Copies of this farm's records, made on this device.", onBack = home, backLabel = "Farm settings") {
+            val actor = current.actor ?: return@FarmOperationalPage
+            if (!RolePermissions.allows(actor.role, Permission.EXPORT_FARM_DATA)) {
+                FarmPermissionExplanation("Exports are for farm management", "Only Owner and Manager accounts can export farm records.")
+                return@FarmOperationalPage
+            }
+            val context = LocalContext.current
+            var log by remember(refreshKey) { mutableStateOf(settingsExportLog(context, farmId)) }
+            var exporting by remember { mutableStateOf(false) }
+            SettingsError(error)
+            FarmOperationalSection("New export") {
+                Text("Writes a JSON summary of this farm's records to app-private storage and logs it below.", color = AnimalFarmTheme.colors.mutedInk)
+                SettingsButton("Export farm summary", !exporting && !busy) {
+                    exporting = true
+                    scope.launch {
+                        runCatching {
+                            withContext(io) { writeSettingsExport(context, database, farmId, current) }
+                        }.onSuccess { log = settingsExportLog(context, farmId) }
+                            .onFailure { error = it.message ?: "The export could not be written on this device" }
+                        exporting = false
+                    }
+                }
+            }
+            FarmOperationalSection("Export log") {
+                if (log.isEmpty()) {
+                    Text("No exports made yet.", color = AnimalFarmTheme.colors.mutedInk)
+                } else {
+                    log.forEach { entry ->
+                        Text("${entry.first} · ${entry.second}", modifier = Modifier.testTag("settings-export-log"))
+                    }
+                }
+            }
+        }
+        /** FOS-ADMIN-025 — About: app version and canonical registry scope. */
+        SettingsPage.ABOUT -> FarmOperationalPage("FOS-ADMIN-025", "About", "This app and its canonical scope.", onBack = home, backLabel = "Farm settings") {
+            current.actor ?: return@FarmOperationalPage
+            FarmOperationalSection("Farm OS") {
+                Text("Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})", modifier = Modifier.testTag("settings-about-version"))
+                Text("Local-first farm operating system. No application server: this device's database is the operational record.", color = AnimalFarmTheme.colors.mutedInk)
+            }
+            FarmOperationalSection("Canonical scope") {
+                Text("545 registered screens · 156 mandatory features · 29 modules", modifier = Modifier.testTag("settings-about-scope"))
+                Text("Counts come from the Farm OS screen and feature registries.", color = AnimalFarmTheme.colors.mutedInk)
+            }
+        }
+        /** FOS-GLOBAL-010 — Notification permission: current grant state and system request. */
+        SettingsPage.PERM_NOTIFICATIONS -> PermissionPage(
+            screenId = "FOS-GLOBAL-010",
+            title = "Notification permission",
+            subtitle = "Let Farm OS notify you about farm work on this device.",
+            permission = NOTIFICATION_PERMISSION,
+            rationale = "Notifications tell you about due vaccinations, red-flag observations and finished syncs. They never leave this device.",
+            onBack = home,
+        )
+        /** FOS-GLOBAL-011 — Camera permission: current grant state and system request. */
+        SettingsPage.PERM_CAMERA -> PermissionPage(
+            screenId = "FOS-GLOBAL-011",
+            title = "Camera permission",
+            subtitle = "Let Farm OS use the camera for photos and tag scans.",
+            permission = Manifest.permission.CAMERA,
+            rationale = "The camera takes animal photos and scans QR and barcodes. Photos stay in this farm's records on this device.",
+            onBack = home,
+        )
+        /** FOS-GLOBAL-012 — Bluetooth permission: current grant state and system request. */
+        SettingsPage.PERM_BLUETOOTH -> PermissionPage(
+            screenId = "FOS-GLOBAL-012",
+            title = "Bluetooth permission",
+            subtitle = "Let Farm OS find nearby Bluetooth devices.",
+            permission = BLUETOOTH_PERMISSION,
+            rationale = "Bluetooth lists bonded devices such as tag readers. Farm OS never scans silently in the background.",
+            onBack = home,
+        )
+        /** FOS-GLOBAL-013 — Location permission: current grant state and system request. */
+        SettingsPage.PERM_LOCATION -> PermissionPage(
+            screenId = "FOS-GLOBAL-013",
+            title = "Location permission",
+            subtitle = "Let Farm OS record where farm work happened.",
+            permission = Manifest.permission.ACCESS_FINE_LOCATION,
+            rationale = "Location stamps where observations and movements were recorded. It is stored with the farm record on this device.",
+            onBack = home,
+        )
+        /** FOS-GLOBAL-015 — Terms and privacy: how Farm OS treats the farm's records. */
+        SettingsPage.TERMS -> FarmOperationalPage("FOS-GLOBAL-015", "Terms and privacy", "How Farm OS treats your farm's records.", onBack = home, backLabel = "Farm settings") {
+            current.actor ?: return@FarmOperationalPage
+            FarmOperationalSection("Terms") {
+                Text("Farm OS is a local-first farm operating system. Your farm's records live in a database on your devices, not on our servers — there is no application server to hold them.", modifier = Modifier.testTag("settings-terms"))
+            }
+            FarmOperationalSection("Privacy") {
+                Text("Records replicate only between devices you pair on your farm network, and to Google Drive only if you connect it. Farm OS itself receives nothing.")
+                Text("AI features run against your local records; provider keys you add are sealed in this device's Keystore and never logged or backed up by Farm OS.")
+            }
+        }
     }
+}
+
+/** POST_NOTIFICATIONS exists only from API 33; below that, notifications need no runtime permission. */
+private val NOTIFICATION_PERMISSION: String
+    get() = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.POST_NOTIFICATIONS else ""
+
+/** BLUETOOTH_CONNECT exists only from API 31; below that, classic Bluetooth needs no runtime permission. */
+private val BLUETOOTH_PERMISSION: String
+    get() = if (Build.VERSION.SDK_INT >= 31) Manifest.permission.BLUETOOTH_CONNECT else ""
+
+/**
+ * FOS-GLOBAL-010/011/012/013 — one honest permission surface per permission. Shows the current grant
+ * state and offers the system request; the request only takes effect once the permission is declared
+ * in the app manifest, which is a one-line packaging change outside this file.
+ */
+@Composable
+private fun PermissionPage(
+    screenId: String,
+    title: String,
+    subtitle: String,
+    permission: String,
+    rationale: String,
+    onBack: () -> Unit,
+) {
+    val context = LocalContext.current
+    var granted by remember(permission) { mutableStateOf(permission.isEmpty() || ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        granted = isGranted
+    }
+    FarmOperationalPage(screenId, title, subtitle, onBack = onBack, backLabel = "Farm settings") {
+        FarmOperationalSection("Status") {
+            Text(
+                when {
+                    permission.isEmpty() -> "Not needed on this Android version."
+                    granted -> "Granted."
+                    else -> "Not granted."
+                },
+                modifier = Modifier.testTag("settings-permission:$screenId"),
+            )
+            Text(rationale, color = AnimalFarmTheme.colors.mutedInk)
+            if (permission.isNotEmpty() && !granted) {
+                Text("This permission is not declared in the app manifest yet; declaring it is a packaging change.", color = AnimalFarmTheme.colors.mutedInk)
+                SettingsButton("Request permission", true) { launcher.launch(permission) }
+            }
+        }
+    }
+}
+
+/** A local on/off preference kept in app-private SharedPreferences; no server, no account needed. */
+@Composable
+private fun SettingsToggle(label: String, description: String, prefs: android.content.SharedPreferences, key: String) {
+    var on by remember(key) { mutableStateOf(prefs.getBoolean(key, true)) }
+    androidx.compose.foundation.layout.Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+    ) {
+        androidx.compose.foundation.layout.Column(modifier = Modifier.weight(1f)) {
+            Text(label, modifier = Modifier.testTag("settings-toggle:$key"))
+            Text(description, color = AnimalFarmTheme.colors.mutedInk)
+        }
+        Switch(
+            checked = on,
+            onCheckedChange = {
+                on = it
+                prefs.edit().putBoolean(key, it).apply()
+            },
+        )
+    }
+}
+
+private fun kindLabel(code: String): String = code.replace('_', ' ').replaceFirstChar { it.uppercase() }
+
+private const val SETTINGS_PREFS = "farm_os_settings"
+private const val PREF_NOTIFY_HEALTH = "notify_health"
+private const val PREF_NOTIFY_SYNC = "notify_sync"
+private const val PREF_NOTIFY_STOCK = "notify_stock"
+private const val PREF_SEARCH_ANIMALS = "search_animals"
+private const val PREF_SEARCH_GROUPS = "search_groups"
+private const val PREF_SEARCH_HEALTH = "search_health"
+private const val PREF_SEARCH_INVENTORY = "search_inventory"
+private const val PREF_SEARCH_MONEY = "search_money"
+
+/** Farm-scoped export log in app-private storage, mirroring the reports export log pattern. */
+private fun settingsExportDir(context: Context, farmId: String): File {
+    val safe = farmId.filter { it.isLetterOrDigit() || it == '-' }.ifBlank { "farm" }
+    return File(File(context.filesDir, "settings_exports"), safe).also { it.mkdirs() }
+}
+
+private fun settingsExportLog(context: Context, farmId: String): List<Pair<String, String>> {
+    val file = File(settingsExportDir(context, farmId), "export_log.jsonl")
+    if (!file.exists()) return emptyList()
+    return file.readLines().mapNotNull { line ->
+        runCatching {
+            val at = line.substringAfter("\"at\":\"").substringBefore("\"")
+            val name = line.substringAfter("\"file\":\"").substringBefore("\"")
+            at to name
+        }.getOrNull()
+    }.takeLast(50)
+}
+
+private fun logSettingsExport(context: Context, farmId: String, fileName: String, at: String) {
+    val file = File(settingsExportDir(context, farmId), "export_log.jsonl")
+    file.appendText("{\"at\":\"$at\",\"file\":\"$fileName\"}\n")
+}
+
+/** Writes a JSON summary of the farm's records for [FOS-ADMIN-022]; every count comes from this device's database. */
+private suspend fun writeSettingsExport(context: Context, database: FarmOsDatabase, farmId: String, snapshot: SettingsSnapshot): String {
+    val at = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss").withZone(ZoneId.systemDefault()).format(Instant.now())
+    val fileName = "farm-summary-$at.json"
+    val dir = settingsExportDir(context, farmId)
+    val farm = database.localAccess().farms().firstOrNull { it.farmId == farmId }
+    val body = buildString {
+        appendLine("{")
+        appendLine("  \"farmId\": \"${farm?.farmId ?: farmId}\",")
+        appendLine("  \"farmName\": \"${(farm?.name ?: "").replace("\"", "'")}\",")
+        appendLine("  \"exportedAt\": \"$at\",")
+        appendLine("  \"accounts\": ${snapshot.accounts.size},")
+        appendLine("  \"devices\": ${snapshot.devices.size},")
+        appendLine("  \"journalOperations\": ${snapshot.journalCount},")
+        appendLine("  \"currencyCode\": \"${snapshot.currencyCode}\"")
+        appendLine("}")
+    }
+    File(dir, fileName).writeText(body)
+    logSettingsExport(context, farmId, fileName, at)
+    return fileName
 }
 
 /**
