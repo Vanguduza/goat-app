@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "c0cbb4d9e9fd40a18eeb5d546ab93d0043ea2e3c",
+  "tested_commit": "9e7e08fbb58e28203e15d87bfc6509dbc8c36ce0",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 458
+    "registered_ids_mentioned_in_kotlin": 483
   },
   "top_level": {
     "farm_modules": [
@@ -71,20 +71,20 @@
       "states": [
         {
           "value": "DASHBOARD",
+          "refs": 15,
+          "transition_refs": 14,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HERD",
           "refs": 12,
           "transition_refs": 11,
           "render_only_candidate": false
         },
         {
-          "value": "HERD",
-          "refs": 7,
-          "transition_refs": 6,
-          "render_only_candidate": false
-        },
-        {
           "value": "PROFILE",
-          "refs": 11,
-          "transition_refs": 10,
+          "refs": 16,
+          "transition_refs": 15,
           "render_only_candidate": false
         },
         {
@@ -284,6 +284,60 @@
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
+        },
+        {
+          "value": "IDENTITY_EDIT",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "WEANING",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "MOVEMENT",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "IDENTIFIERS",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FAMACHA_REF",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PARENTAGE_EDIT",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "GOAT_GROUPS",
+          "refs": 3,
+          "transition_refs": 2,
+          "render_only_candidate": false
+        },
+        {
+          "value": "GROUP_MEMBERSHIP",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "GOAT_REPORT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
         }
       ]
     },
@@ -416,6 +470,24 @@
         },
         {
           "value": "MATE_COMPARE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "REPLACEMENT_COMPARE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SALE_ALLOCATION",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "RABBIT_REPORT",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
@@ -835,6 +907,12 @@
           "render_only_candidate": false
         },
         {
+          "value": "BCS",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
           "value": "IDENTIFIER",
           "refs": 2,
           "transition_refs": 1,
@@ -842,6 +920,12 @@
         },
         {
           "value": "MOVEMENT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "PADDOCK_ASSIGN",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
@@ -890,6 +974,18 @@
         },
         {
           "value": "LAMBING_DUE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "LAMB_PROFILE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SHEEP_REPORT",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
@@ -1064,6 +1160,18 @@
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
+        },
+        {
+          "value": "CALF_REG",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "CATTLE_REPORT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
         }
       ]
     },
@@ -1190,6 +1298,24 @@
         },
         {
           "value": "FLOCK_TIMELINE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FLOCK_MOVE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "FLOCK_CLOSEOUT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "POULTRY_REPORT",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
