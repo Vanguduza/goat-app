@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "d47e24db5c7eb67d89b1e045c974a63a6bcfbc48",
+  "tested_commit": "d9b137b4dd9bb88842f5ee252371c7187cdb4110",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 416
+    "registered_ids_mentioned_in_kotlin": 430
   },
   "top_level": {
     "farm_modules": [
@@ -713,6 +713,36 @@
         },
         {
           "value": "TIMELINE",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "VACCINATION_SCHEDULE",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "VACCINATION_CAPTURE",
+          "refs": 3,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "VACCINATION_DETAIL",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "TODAY_ACTIONS",
+          "refs": 3,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HEALTH_REPORT",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
