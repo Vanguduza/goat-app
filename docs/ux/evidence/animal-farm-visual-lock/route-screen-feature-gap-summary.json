@@ -1,21 +1,21 @@
 {
   "schema_version": 2,
-  "tested_commit": "d9b137b4dd9bb88842f5ee252371c7187cdb4110",
+  "tested_commit": "c0cbb4d9e9fd40a18eeb5d546ab93d0043ea2e3c",
   "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_WITH_SEPARATE_RUNTIME_EVIDENCE",
   "registry_rows": 545,
   "route_evidence_counts": {
     "NON_ROUTE_BY_DESIGN": 24,
-    "NO_ROUTE_EVIDENCE": 91,
+    "NO_ROUTE_EVIDENCE": 63,
     "STATIC_AUTH_STATE_BRANCH": 4,
-    "STATIC_CODE_ID_REFERENCE_ONLY": 294,
+    "STATIC_CODE_ID_REFERENCE_ONLY": 322,
     "STATIC_GENERAL_HOME_FALLBACK": 1,
     "STATIC_HOME_NESTED_DESTINATION": 1,
     "STATIC_MAIN_ACTIVITY_SPLASH_BRANCH": 1,
     "STATIC_ROLE_DISPATCH_PRESENT": 8,
     "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 121
   },
-  "no_route_evidence": 91,
-  "some_static_route_evidence": 454,
+  "no_route_evidence": 63,
+  "some_static_route_evidence": 482,
   "runtime_reachability_executed": 0,
   "rendered_surface_owners_executed": 0,
   "entry_action_emission_executed": 0,
@@ -25,7 +25,7 @@
   "module_gap_counts": {
     "admin": {
       "total": 25,
-      "no_route_evidence": 15
+      "no_route_evidence": 1
     },
     "ai": {
       "total": 12,
@@ -57,7 +57,7 @@
     },
     "fin": {
       "total": 13,
-      "no_route_evidence": 9
+      "no_route_evidence": 0
     },
     "gen": {
       "total": 10,
@@ -65,7 +65,7 @@
     },
     "global": {
       "total": 20,
-      "no_route_evidence": 7
+      "no_route_evidence": 2
     },
     "goat": {
       "total": 55,
