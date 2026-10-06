@@ -19,6 +19,11 @@ import com.farmos.core.network.AuthorizationLoss
 import com.farmos.core.network.FarmMembership
 import com.farmos.domain.goat.GoatSearchResult
 import com.farmos.domain.goat.GoatSnapshot
+import com.farmos.domain.goat.AmendGoatIdentity
+import com.farmos.domain.goat.RecordGoatWeaning
+import com.farmos.domain.ops.AssignAnimalIdentifier
+import com.farmos.domain.ops.LinkPedigree
+import com.farmos.domain.ops.RecordOfficialMovement
 import com.farmos.domain.goat.PlanGoatLactation
 import com.farmos.domain.goat.RecordGoatBcs
 import com.farmos.domain.goat.RecordGoatFamacha
@@ -68,9 +73,52 @@ fun GoatModuleHost(
     var standingExit by remember { mutableStateOf<GoatExitView?>(null) }
     val exits = remember(membership.farmId) { AnimalExitCommands(app.database, membership.farmId) }
     val currency by rememberFarmCurrency(membership.farmId) { app.database.farmCurrency(membership.farmId) }
+    var weanings by remember { mutableStateOf(emptyList<com.farmos.feature.goat.GoatWeaningView>()) }
+    var movements by remember { mutableStateOf(emptyList<com.farmos.feature.goat.GoatMovementView>()) }
+    var identifiers by remember { mutableStateOf(emptyList<com.farmos.feature.goat.GoatIdentifierView>()) }
+    var goatGroups by remember { mutableStateOf(emptyList<com.farmos.feature.goat.GoatGroupView>()) }
+    var pedigreeParentLabels by remember { mutableStateOf(emptyList<String>()) }
     // The selected goat's standing exit (D-022), reloaded whenever the goat or its status changes.
     LaunchedEffect(selected?.animalId, selected?.status) {
         standingExit = selected?.animalId?.let { runCatching { loadStandingGoatExit(app.database, membership.farmId, it) }.getOrNull() }
+    }
+    // Per-goat management data for the FOS-GOAT-005/042/045/049/050 surfaces.
+    LaunchedEffect(selected?.animalId) {
+        val animalId = selected?.animalId
+        if (animalId == null) {
+            weanings = emptyList()
+            movements = emptyList()
+            identifiers = emptyList()
+            pedigreeParentLabels = emptyList()
+        } else {
+            weanings = runCatching {
+                app.database.lifecycle().goatWeaningsFor(membership.farmId, animalId).map {
+                    com.farmos.feature.goat.GoatWeaningView(it.id, it.occurredEpochDay, it.weightGrams)
+                }
+            }.getOrDefault(emptyList())
+            movements = runCatching {
+                app.database.lifecycle().movementsForAnimal(membership.farmId, animalId).map {
+                    com.farmos.feature.goat.GoatMovementView(it.id, it.direction, it.fromPlace, it.toPlace, it.occurredEpochDay)
+                }
+            }.getOrDefault(emptyList())
+            identifiers = runCatching {
+                app.database.lifecycle().identifiersForAnimal(membership.farmId, animalId).map {
+                    com.farmos.feature.goat.GoatIdentifierView(it.id, it.type, it.value, it.isActive, it.assignedEpochDay)
+                }
+            }.getOrDefault(emptyList())
+            pedigreeParentLabels = runCatching {
+                val parents = selected?.pedigree?.parents.orEmpty()
+                parents.map { link -> "${link.relationType}: ${link.label ?: link.relativeId}" }
+            }.getOrDefault(emptyList())
+        }
+    }
+    // Goat groups for FOS-GOAT-047/048, loaded with the farm.
+    LaunchedEffect(membership.farmId) {
+        goatGroups = runCatching {
+            app.database.groups().forFarm(membership.farmId)
+                .filter { it.speciesCode == "goat" }
+                .map { com.farmos.feature.goat.GoatGroupView(it.id, it.name, it.headCount) }
+        }.getOrDefault(emptyList())
     }
     var searchResults by remember { mutableStateOf<List<GoatSearchResult>>(emptyList()) }
     var syncMessage by remember { mutableStateOf("No local changes yet") }
@@ -172,7 +220,89 @@ fun GoatModuleHost(
         ),
         entryPage = entryPage,
         searchSires = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "goat", "MALE") },
+        searchDams = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "goat", "FEMALE") },
         mateAnalysis = remember(membership.farmId) { goatMateAnalysis(app.database, membership.farmId) },
+        onAmendIdentity = { tag, name, officialId ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                repository.amendIdentity(
+                    AmendGoatIdentity(
+                        animalId = animalId,
+                        name = name.takeIf { it.isNotBlank() },
+                        tag = tag.takeIf { it.isNotBlank() },
+                        officialId = officialId.takeIf { it.isNotBlank() },
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onRecordWeaning = { weightKgText, dayText ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                val grams = weightKgText.takeIf { it.isNotBlank() }?.let { (it.toBigDecimal() * 1000.toBigDecimal()).longValueExact() }
+                repository.recordWeaning(
+                    RecordGoatWeaning(
+                        weaningId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        weightGrams = grams,
+                        occurredEpochDay = LocalDate.parse(dayText).toEpochDay(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onRecordMovement = { direction, fromPlace, toPlace, dayText ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                app.opsRepository(membership.farmId).recordOfficialMovement(
+                    RecordOfficialMovement(
+                        movementId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        direction = direction,
+                        fromPlace = fromPlace.takeIf { it.isNotBlank() },
+                        toPlace = toPlace.takeIf { it.isNotBlank() },
+                        occurredEpochDay = LocalDate.parse(dayText).toEpochDay(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onAssignIdentifier = { type, value ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first"
+            else if (value.isBlank()) error = "Identifier value is required"
+            else runGoatWrite {
+                app.opsRepository(membership.farmId).assignIdentifier(
+                    AssignAnimalIdentifier(
+                        identifierId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        type = type,
+                        value = value.trim(),
+                        occurredEpochDay = LocalDate.now().toEpochDay(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onLinkParentage = { parentId, relationType ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                app.opsRepository(membership.farmId).linkPedigree(
+                    LinkPedigree(
+                        linkId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        parentId = parentId,
+                        relationType = relationType,
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        weanings = weanings,
+        movements = movements,
+        identifiers = identifiers,
+        goatGroups = goatGroups,
+        pedigreeParentLabels = pedigreeParentLabels,
         // FOS-GOAT-008 (photo gallery) and FOS-GOAT-010 (documents): the profile's
         // attachment section renders photos and PDF documents in one shared surface.
         profileAttachments = { animalId, active ->

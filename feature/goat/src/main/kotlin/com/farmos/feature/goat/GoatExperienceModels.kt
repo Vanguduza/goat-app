@@ -46,6 +46,15 @@ internal enum class GoatPage {
     KID_COHORT,
     KID_PROFILE,
     MATE_COMPARE,
+    IDENTITY_EDIT,
+    WEANING,
+    MOVEMENT,
+    IDENTIFIERS,
+    FAMACHA_REF,
+    PARENTAGE_EDIT,
+    GOAT_GROUPS,
+    GROUP_MEMBERSHIP,
+    GOAT_REPORT,
 }
 
 internal data class GoatExperienceActions(
@@ -72,10 +81,22 @@ internal data class GoatExperienceActions(
     val onReverseExit: (exitId: String, reason: String) -> Unit = { _, _ -> },
     /** Whole-farm buck search for the sire selector; never the capped herd list. */
     val searchSires: FarmSelectorSearch = NoFarmSelectorSearch,
+    /** Whole-farm doe search for the dam selector; never the capped herd list. */
+    val searchDams: FarmSelectorSearch = NoFarmSelectorSearch,
     /** Reads a prospective mating from the local pedigree (D-023). */
     val mateAnalysis: GoatMateAnalysis = NoGoatMateAnalysis,
     /** Photos and documents of a goat on its profile (D-015); the host renders them. */
     val profileAttachments: @Composable (animalId: String, active: Boolean) -> Unit = { _, _ -> },
+    /** Amends the selected goat's tag/name/official identifier (FOS-GOAT-005). */
+    val onAmendIdentity: (tag: String, name: String, officialId: String) -> Unit = { _, _, _ -> },
+    /** Records weaning for the selected goat (FOS-GOAT-042). */
+    val onRecordWeaning: (weightKgText: String, dayText: String) -> Unit = { _, _ -> },
+    /** Records an official movement for the selected goat (FOS-GOAT-049). */
+    val onRecordMovement: (direction: String, fromPlace: String, toPlace: String, dayText: String) -> Unit = { _, _, _, _ -> },
+    /** Assigns an identifier to the selected goat (FOS-GOAT-050). */
+    val onAssignIdentifier: (type: String, value: String) -> Unit = { _, _ -> },
+    /** Links a parent to the selected goat (FOS-GOAT-045). */
+    val onLinkParentage: (parentId: String, relationType: String) -> Unit = { _, _ -> },
 )
 
 internal fun goatDisplayName(goat: GoatSnapshot): String = goat.name?.takeIf { it.isNotBlank() } ?: goat.tag
@@ -105,3 +126,27 @@ internal fun herdSearchLabel(result: GoatSearchResult): String = buildString {
     append(" · ").append(goatStatusLabel(result.status))
     append(" · ").append(result.source.name.lowercase())
 }
+
+/** One recorded weaning for the management screens; read-only view. */
+data class GoatWeaningView(val weaningId: String, val occurredEpochDay: Long, val weightGrams: Long?)
+
+/** One recorded official movement; read-only view. */
+data class GoatMovementView(
+    val movementId: String,
+    val direction: String,
+    val fromPlace: String?,
+    val toPlace: String?,
+    val occurredEpochDay: Long,
+)
+
+/** One assigned animal identifier; read-only view. */
+data class GoatIdentifierView(
+    val identifierId: String,
+    val type: String,
+    val value: String,
+    val isActive: Boolean,
+    val assignedEpochDay: Long,
+)
+
+/** One goat group; read-only view. */
+data class GoatGroupView(val groupId: String, val name: String, val headCount: Int)

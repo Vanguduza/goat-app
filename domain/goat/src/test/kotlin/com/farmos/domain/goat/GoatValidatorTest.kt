@@ -205,4 +205,36 @@ class GoatValidatorTest {
             GoatValidator.kid(RegisterGoatKid("k1", "kid-1", "NALA-K1", sex = GoatSex.FEMALE, pedigreeLinkId = "p1")),
         )
     }
+
+    @Test
+    fun `identity amendment needs at least one change`() {
+        assertIs<GoatValidationResult.Invalid>(
+            GoatValidator.amendIdentity(AmendGoatIdentity("a1")),
+        )
+        assertIs<GoatValidationResult.Invalid>(
+            GoatValidator.amendIdentity(AmendGoatIdentity("a1", name = "  ", tag = "", officialId = "")),
+        )
+        assertIs<GoatValidationResult.Valid>(
+            GoatValidator.amendIdentity(AmendGoatIdentity("a1", name = "Nala")),
+        )
+        assertIs<GoatValidationResult.Valid>(
+            GoatValidator.amendIdentity(AmendGoatIdentity("a1", officialId = "UK123456")),
+        )
+    }
+
+    @Test
+    fun `weaning needs a kid and a plausible weight`() {
+        assertIs<GoatValidationResult.Invalid>(
+            GoatValidator.weaning(RecordGoatWeaning("w1", "", occurredEpochDay = 19_723)),
+        )
+        assertIs<GoatValidationResult.Invalid>(
+            GoatValidator.weaning(RecordGoatWeaning("w1", "a1", weightGrams = -5, occurredEpochDay = 19_723)),
+        )
+        assertIs<GoatValidationResult.Valid>(
+            GoatValidator.weaning(RecordGoatWeaning("w1", "a1", occurredEpochDay = 19_723)),
+        )
+        assertIs<GoatValidationResult.Valid>(
+            GoatValidator.weaning(RecordGoatWeaning("w1", "a1", weightGrams = 12_500, occurredEpochDay = 19_723)),
+        )
+    }
 }

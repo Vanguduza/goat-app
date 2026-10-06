@@ -153,6 +153,23 @@ data class RecordGoatKidding(
     val occurredEpochDay: Long,
 )
 
+@Serializable
+data class AmendGoatIdentity(
+    val animalId: String,
+    val name: String? = null,
+    val tag: String? = null,
+    /** Official identifier value; stored in the shared animal_identifiers registry. */
+    val officialId: String? = null,
+)
+
+@Serializable
+data class RecordGoatWeaning(
+    val weaningId: String,
+    val animalId: String,
+    val weightGrams: Long? = null,
+    val occurredEpochDay: Long,
+)
+
 sealed interface GoatValidationResult {
     data object Valid : GoatValidationResult
     data class Invalid(val code: String, val message: String) : GoatValidationResult
@@ -257,6 +274,29 @@ object GoatValidator {
         }
         return GoatValidationResult.Valid
     }
+
+    fun amendIdentity(command: AmendGoatIdentity): GoatValidationResult {
+        val name = command.name?.trim().orEmpty()
+        val tag = command.tag?.trim().orEmpty()
+        val officialId = command.officialId?.trim().orEmpty()
+        if (name.isEmpty() && tag.isEmpty() && officialId.isEmpty()) {
+            return GoatValidationResult.Invalid("IDENTITY_NO_CHANGE", "Change at least one of name, tag or official identifier")
+        }
+        if (tag.length > 64) return GoatValidationResult.Invalid("TAG_TOO_LONG", "Tag must be 64 characters or fewer")
+        if (name.length > 128) return GoatValidationResult.Invalid("NAME_TOO_LONG", "Name must be 128 characters or fewer")
+        if (officialId.length > 64) return GoatValidationResult.Invalid("OFFICIAL_ID_TOO_LONG", "Official identifier must be 64 characters or fewer")
+        return GoatValidationResult.Valid
+    }
+
+    fun weaning(command: RecordGoatWeaning): GoatValidationResult {
+        if (command.animalId.isBlank()) return GoatValidationResult.Invalid("WEANING_KID", "Weaning needs a kid")
+        if (command.occurredEpochDay < 0L) return GoatValidationResult.Invalid("WEANING_DAY", "Weaning needs a valid calendar day")
+        val weight = command.weightGrams
+        if (weight != null && (weight <= 0L || weight > 300_000L)) {
+            return GoatValidationResult.Invalid("WEANING_WEIGHT", "Weaning weight must be plausible")
+        }
+        return GoatValidationResult.Valid
+    }
 }
 
 /**
@@ -320,6 +360,8 @@ interface GoatRepository {
     suspend fun recordPregnancy(command: RecordGoatPregnancy, context: LocalCommandContext): LocalCommandResult
     suspend fun planLactation(command: PlanGoatLactation, context: LocalCommandContext): LocalCommandResult
     suspend fun registerKid(command: RegisterGoatKid, context: LocalCommandContext): LocalCommandResult
+    suspend fun amendIdentity(command: AmendGoatIdentity, context: LocalCommandContext): LocalCommandResult
+    suspend fun recordWeaning(command: RecordGoatWeaning, context: LocalCommandContext): LocalCommandResult
     suspend fun getGoat(animalId: String): GoatSnapshot?
     suspend fun listGoats(limit: Int = 100): List<GoatSnapshot>
     suspend fun searchGoats(query: String, limit: Int = 20): List<GoatSearchResult>
