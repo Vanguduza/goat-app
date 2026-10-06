@@ -4927,6 +4927,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-SYNC-001
+    route_kind: STATE
     name: Offline Banner
     module: sync
     visual_class: I3
@@ -5017,6 +5018,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-SYNC-010
+    route_kind: STATE
     name: Auth Required
     module: sync
     visual_class: I4
@@ -5027,6 +5029,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-SYNC-011
+    route_kind: STATE
     name: Farm Access Revoked
     module: sync
     visual_class: I4
@@ -5037,6 +5040,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-SYNC-012
+    route_kind: STATE
     name: Backend Outage
     module: sync
     visual_class: I4
@@ -5047,6 +5051,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-SYNC-013
+    route_kind: STATE
     name: Search Outage
     module: sync
     visual_class: I4
@@ -5057,6 +5062,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-SYNC-014
+    route_kind: STATE
     name: Local Data Safe Confirmation
     module: sync
     visual_class: I3
@@ -5067,6 +5073,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-SYNC-015
+    route_kind: STATE
     name: Manual Sync
     module: sync
     visual_class: I3
@@ -5077,6 +5084,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-SYNC-016
+    route_kind: STATE
     name: Last Successful Sync
     module: sync
     visual_class: I3
@@ -5087,6 +5095,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-SYNC-017
+    route_kind: STATE
     name: Reconciliation Detail
     module: sync
     visual_class: I3
@@ -5117,6 +5126,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-002
+    route_kind: COMPONENT
     name: Time Picker
     module: atom
     visual_class: I3
@@ -5197,6 +5207,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-010
+    route_kind: COMPONENT
     name: Lot Selector
     module: atom
     visual_class: I3
@@ -5227,6 +5238,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-013
+    route_kind: COMPONENT
     name: Worker Selector
     module: atom
     visual_class: I3
@@ -5247,6 +5259,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-015
+    route_kind: COMPONENT
     name: Photo Capture
     module: atom
     visual_class: I3
@@ -5267,6 +5280,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-017
+    route_kind: COMPONENT
     name: Document Picker
     module: atom
     visual_class: I3
@@ -5277,6 +5291,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-018
+    route_kind: COMPONENT
     name: QR or Barcode Scanner
     module: atom
     visual_class: I3
@@ -5287,6 +5302,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-019
+    route_kind: COMPONENT
     name: RFID Scanner
     module: atom
     visual_class: I3
@@ -5297,6 +5313,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-020
+    route_kind: COMPONENT
     name: BLE Device Picker
     module: atom
     visual_class: I3
@@ -5307,6 +5324,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-021
+    route_kind: COMPONENT
     name: Filter Sheet
     module: atom
     visual_class: I3
@@ -5317,6 +5335,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-022
+    route_kind: COMPONENT
     name: Sort Sheet
     module: atom
     visual_class: I3
@@ -5327,6 +5346,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-023
+    route_kind: COMPONENT
     name: Bulk Selection
     module: atom
     visual_class: I3
@@ -5337,6 +5357,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-024
+    route_kind: COMPONENT
     name: Bulk Action Sheet
     module: atom
     visual_class: I3
@@ -5347,6 +5368,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-025
+    route_kind: COMPONENT
     name: Delete Confirmation
     module: atom
     visual_class: I4
@@ -5387,6 +5409,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-029
+    route_kind: COMPONENT
     name: Export Format
     module: atom
     visual_class: I3
@@ -5397,6 +5420,7 @@ screens:
     required_roles: ROLE_MATRIX_APPLIES
     required_devices: DEVICE_MATRIX_APPLIES
   - screen_id: FOS-ATOM-030
+    route_kind: COMPONENT
     name: Share Sheet
     module: atom
     visual_class: I3
