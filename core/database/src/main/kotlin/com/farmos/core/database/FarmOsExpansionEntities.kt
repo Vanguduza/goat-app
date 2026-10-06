@@ -75,6 +75,32 @@ data class MaintenanceEventEntity(
     val note: String?,
 )
 
+@Entity(tableName = "asset_meter_readings", indices = [Index(value = ["farmId", "assetId"])])
+data class AssetMeterReadingEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val assetId: String,
+    val readingValue: Long,
+    val unit: String,
+    val occurredEpochDay: Long,
+    val note: String?,
+)
+
+@Dao
+interface AssetMeterDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(reading: AssetMeterReadingEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(reading: AssetMeterReadingEntity)
+
+    @Query("SELECT * FROM asset_meter_readings WHERE farmId = :farmId AND assetId = :assetId ORDER BY occurredEpochDay DESC, id")
+    suspend fun forAsset(farmId: String, assetId: String): List<AssetMeterReadingEntity>
+
+    @Query("SELECT * FROM asset_meter_readings WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun recent(farmId: String, limit: Int): List<AssetMeterReadingEntity>
+}
+
 @Entity(tableName = "feed_issues", indices = [Index(value = ["farmId", "occurredEpochDay"])])
 data class FeedIssueEntity(
     @PrimaryKey val id: String,
@@ -198,6 +224,9 @@ interface AnimalGroupDao {
 
     @Query("UPDATE animal_groups SET headCount = :headCount WHERE farmId = :farmId AND id = :groupId")
     suspend fun setHeadCount(farmId: String, groupId: String, headCount: Int)
+
+    @Query("UPDATE animal_groups SET name = :name, speciesCode = :speciesCode WHERE farmId = :farmId AND id = :groupId")
+    suspend fun updateDetails(farmId: String, groupId: String, name: String, speciesCode: String)
 }
 
 @Dao
@@ -553,6 +582,43 @@ interface WaterPointDao {
 
     @Query("SELECT COUNT(*) FROM water_points WHERE farmId = :farmId")
     suspend fun count(farmId: String): Int
+}
+
+/**
+ * Dated events against a water point: inspections, quality results, issues and maintenance.
+ * One table with a validated kind keeps the four FOS-WATER-005..008 capture screens on a
+ * single journaled command (RecordWaterPointEvent) without four near-identical tables.
+ */
+@Entity(tableName = "water_point_events", indices = [Index(value = ["farmId", "pointId"])])
+data class WaterPointEventEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val pointId: String,
+    /** inspection | quality | issue | maintenance — validated by OpsValidator.waterPointEvent. */
+    val kind: String,
+    val occurredEpochDay: Long,
+    val resultText: String?,
+    val valueMilli: Long?,
+    val unit: String?,
+    val note: String?,
+)
+
+@Dao
+interface WaterPointEventDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(row: WaterPointEventEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(row: WaterPointEventEntity)
+
+    @Query("SELECT * FROM water_point_events WHERE farmId = :farmId AND pointId = :pointId ORDER BY occurredEpochDay DESC, id")
+    suspend fun forPoint(farmId: String, pointId: String): List<WaterPointEventEntity>
+
+    @Query("SELECT * FROM water_point_events WHERE farmId = :farmId AND kind = :kind ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun recentByKind(farmId: String, kind: String, limit: Int): List<WaterPointEventEntity>
+
+    @Query("SELECT COUNT(*) FROM water_point_events WHERE farmId = :farmId AND kind = :kind")
+    suspend fun countByKind(farmId: String, kind: String): Int
 }
 
 @Entity(tableName = "feed_plans", indices = [Index(value = ["farmId", "startEpochDay"])])

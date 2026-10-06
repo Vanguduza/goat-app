@@ -706,9 +706,11 @@ interface SyncCursorDao {
         LabourEntryEntity::class,
         FarmAssetEntity::class,
         MaintenanceEventEntity::class,
+        AssetMeterReadingEntity::class,
         FeedIssueEntity::class,
         WaterRecordEntity::class,
         WaterPointEntity::class,
+        WaterPointEventEntity::class,
         FeedPlanEntity::class,
         SaleRecordEntity::class,
         FormularyItemEntity::class,
@@ -799,7 +801,7 @@ interface SyncCursorDao {
         AttachmentEntity::class,
         HealthVaccinationEntity::class,
     ],
-    version = 32,
+    version = 34,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -831,10 +833,12 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun labour(): LabourDao
     abstract fun assets(): AssetDao
     abstract fun maintenance(): MaintenanceDao
+    abstract fun assetMeters(): AssetMeterDao
     abstract fun feedIssues(): FeedIssueDao
     abstract fun feedPlans(): FeedPlanDao
     abstract fun water(): WaterDao
     abstract fun waterPoints(): WaterPointDao
+    abstract fun waterPointEvents(): WaterPointEventDao
     abstract fun sales(): SaleDao
     abstract fun formulary(): FormularyDao
     abstract fun treatments(): TreatmentDao
@@ -1375,6 +1379,28 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32)
+        val MIGRATION_32_33 = object : Migration(32, 33) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `water_point_events` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `pointId` TEXT NOT NULL, " +
+                        "`kind` TEXT NOT NULL, `occurredEpochDay` INTEGER NOT NULL, `resultText` TEXT, `valueMilli` INTEGER, " +
+                        "`unit` TEXT, `note` TEXT, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_water_point_events_farmId_pointId` ON `water_point_events` (`farmId`, `pointId`)")
+            }
+        }
+
+        val MIGRATION_33_34 = object : Migration(33, 34) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `asset_meter_readings` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `assetId` TEXT NOT NULL, " +
+                        "`readingValue` INTEGER NOT NULL, `unit` TEXT NOT NULL, `occurredEpochDay` INTEGER NOT NULL, " +
+                        "`note` TEXT, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_asset_meter_readings_farmId_assetId` ON `asset_meter_readings` (`farmId`, `assetId`)")
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34)
     }
 }

@@ -28,6 +28,8 @@ import kotlinx.coroutines.launch
 private enum class LabourPage {
     HOME,
     ATTENDANCE,
+    COST,
+    REPORT,
 }
 
 /** Dedicated labour/work-log orchestration boundary. */
@@ -111,12 +113,30 @@ fun LabourModuleHost(
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth(),
                     ) { androidx.compose.material3.Text("Attendance") }
+                    androidx.compose.material3.TextButton(
+                        onClick = { page = LabourPage.COST },
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { androidx.compose.material3.Text("Labour cost") }
+                    androidx.compose.material3.TextButton(
+                        onClick = { page = LabourPage.REPORT },
+                        enabled = !busy,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { androidx.compose.material3.Text("Labour report") }
                     recordActions()
                     LabourWorkerPicker(workerOptions, workerId, !busy) { workerId = it }
                 },
             ) }
         }
         LabourPage.ATTENDANCE -> LabourAttendancePage(
+            entries = attendanceEntries,
+            onBack = { page = LabourPage.HOME },
+        )
+        LabourPage.COST -> LabourCostPage(
+            entries = attendanceEntries,
+            onBack = { page = LabourPage.HOME },
+        )
+        LabourPage.REPORT -> LabourReportPage(
             entries = attendanceEntries,
             onBack = { page = LabourPage.HOME },
         )
@@ -150,6 +170,85 @@ private fun LabourAttendancePage(
                     val minutes = workerEntries.sumOf { it.minutes }
                     androidx.compose.material3.Text("$name · $minutes min · ${workerEntries.size} entries")
                 }
+            }
+        }
+    }
+}
+
+/**
+ * FOS-LABOUR-007 — Labour Cost.
+ *
+ * GENUINE GAP — not implemented: labour entries carry minutes but no wage rate, and no worker
+ * rate store exists in the schema. Cost cannot be computed from minutes alone.
+ * Required domain piece: a wage-rate store (per worker or per task code) with a governed
+ * record/revise command, joined to labour entries at report time.
+ *
+ * The surface below shows what IS recorded (hours by worker and task) with the gap stated
+ * plainly, so the screen is honest rather than a fabricated cost.
+ */
+@Composable
+private fun LabourCostPage(
+    entries: List<LabourEntryEntity>,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        screenId = "FOS-LABOUR-007",
+        title = "Labour cost",
+        subtitle = "Cost cannot be computed yet: no wage rates are recorded.",
+        onBack = onBack,
+    ) {
+        FarmOperationalSection(
+            title = "Hours on record",
+            description = "From the labour entries on this device. Rates are not recorded, so these are hours only, not cost.",
+        ) {
+            if (entries.isEmpty()) {
+                androidx.compose.material3.Text("No labour entries on this device.")
+            } else {
+                entries.groupBy { it.workerName }.toSortedMap().forEach { (name, workerEntries) ->
+                    val minutes = workerEntries.sumOf { it.minutes }
+                    val hours = minutes / 60.0
+                    androidx.compose.material3.Text("$name · ${"%.1f".format(hours)} h · ${workerEntries.size} entries · cost: not recorded")
+                }
+            }
+        }
+        androidx.compose.material3.Text("Labour cost needs wage rates: there is no rate table or governed rate command in this build.")
+    }
+}
+
+/**
+ * FOS-LABOUR-009 — Labour Report: minutes by worker, by task code and by day, from the labour
+ * entries on this device.
+ */
+@Composable
+private fun LabourReportPage(
+    entries: List<LabourEntryEntity>,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        screenId = "FOS-LABOUR-009",
+        title = "Labour report",
+        subtitle = "Work recorded on this device, grouped by worker, task and day.",
+        onBack = onBack,
+    ) {
+        if (entries.isEmpty()) {
+            androidx.compose.material3.Text("No labour entries on this device.")
+            return@FarmOperationalPage
+        }
+        val totalMinutes = entries.sumOf { it.minutes }
+        androidx.compose.material3.Text("${entries.size} entries · ${"%.1f".format(totalMinutes / 60.0)} h total.")
+        FarmOperationalSection("By worker") {
+            entries.groupBy { it.workerName }.toSortedMap().forEach { (name, workerEntries) ->
+                androidx.compose.material3.Text("$name · ${workerEntries.sumOf { it.minutes }} min · ${workerEntries.size} entries")
+            }
+        }
+        FarmOperationalSection("By task") {
+            entries.groupBy { it.taskCode }.toSortedMap().forEach { (code, taskEntries) ->
+                androidx.compose.material3.Text("$code · ${taskEntries.sumOf { it.minutes }} min · ${taskEntries.size} entries")
+            }
+        }
+        FarmOperationalSection("By day") {
+            entries.groupBy { it.occurredEpochDay }.toSortedMap(compareByDescending { it }).forEach { (day, dayEntries) ->
+                androidx.compose.material3.Text("${LocalDate.ofEpochDay(day)} · ${dayEntries.sumOf { it.minutes }} min · ${dayEntries.size} entries")
             }
         }
     }

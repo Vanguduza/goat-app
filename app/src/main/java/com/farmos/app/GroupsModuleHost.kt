@@ -17,6 +17,7 @@ import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreateAnimalGroup
+import com.farmos.domain.ops.AmendAnimalGroup
 import com.farmos.domain.ops.FarmSpeciesCodes
 import com.farmos.domain.ops.RecordGroupCensus
 import com.farmos.feature.ops.GroupCensusView
@@ -33,6 +34,8 @@ private enum class GroupsPage {
     HOME,
     CREATE,
     MEMBERSHIP,
+    EDIT,
+    HEALTH,
 }
 
 /** Dedicated group/census orchestration boundary. Species-specific production writes stay in species modules. */
@@ -113,6 +116,16 @@ fun GroupsModuleHost(
                     enabled = !busy,
                     modifier = Modifier.fillMaxWidth(),
                 ) { androidx.compose.material3.Text("Membership") }
+                androidx.compose.material3.TextButton(
+                    onClick = { page = GroupsPage.EDIT },
+                    enabled = !busy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { androidx.compose.material3.Text("Edit group") }
+                androidx.compose.material3.TextButton(
+                    onClick = { page = GroupsPage.HEALTH },
+                    enabled = !busy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { androidx.compose.material3.Text("Group health") }
                 FarmEntitySelector(
                     FarmSelectionAtoms.SPECIES_SELECTOR,
                     "Species",
@@ -173,6 +186,29 @@ fun GroupsModuleHost(
             groupOptions = groupOptions,
             busy = busy,
             loadCensus = { id -> loadGroup(id).census },
+            onBack = { page = GroupsPage.HOME },
+        )
+        GroupsPage.EDIT -> GroupEditPage(
+            groupOptions = groupOptions,
+            busy = busy,
+            error = error,
+            loadGroup = { id -> ops.group(id) },
+            onSave = { id, groupName, speciesCode ->
+                run {
+                    ops.amendGroup(
+                        AmendAnimalGroup(id, groupName, speciesCode),
+                        newContext(),
+                    )
+                    page = GroupsPage.HOME
+                }
+            },
+            onBack = { page = GroupsPage.HOME },
+        )
+        GroupsPage.HEALTH -> GroupHealthPage(
+            groupOptions = groupOptions,
+            loadGroup = { id -> ops.group(id) },
+            loadObservations = { ops.recentObservations() },
+            loadTreatments = { ops.recentTreatments() },
             onBack = { page = GroupsPage.HOME },
         )
     }
@@ -283,6 +319,149 @@ private fun GroupMembershipPage(
                 census!!.isEmpty() -> androidx.compose.material3.Text("No census records for this group yet.")
                 else -> census!!.forEach { row ->
                     androidx.compose.material3.Text("${LocalDate.ofEpochDay(row.epochDay)} · ${row.headCount} head")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * FOS-GROUP-004 — Edit Group: renames a group or moves it to another species, written through
+ * AmendAnimalGroup (group.amend.v1). The head count is not edited here; it is set by census.
+ */
+@Composable
+private fun GroupEditPage(
+    groupOptions: List<FarmSelectorOption>,
+    busy: Boolean,
+    error: String?,
+    loadGroup: suspend (String) -> com.farmos.core.database.AnimalGroupEntity?,
+    onSave: (id: String, name: String, speciesCode: String) -> Unit,
+    onBack: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var groupId by remember { mutableStateOf<String?>(null) }
+    val name = remember { mutableStateOf("") }
+    val species = remember { mutableStateOf("goat") }
+
+    fun load(id: String) {
+        scope.launch {
+            val group = runCatching { loadGroup(id) }.getOrNull()
+            if (group != null) {
+                name.value = group.name
+                species.value = group.speciesCode
+            }
+        }
+    }
+
+    FarmOperationalPage(
+        screenId = "FOS-GROUP-004",
+        title = "Edit group",
+        subtitle = "Rename a group or change its species.",
+        onBack = onBack,
+    ) {
+        FarmEntitySelector(
+            FarmSelectionAtoms.GROUP_SELECTOR,
+            "Group",
+            groupOptions,
+            groupId,
+            { groupId = it; load(it) },
+            "Create a group first.",
+            enabled = !busy,
+        )
+        FarmOperationalSection("Details") {
+            androidx.compose.material3.OutlinedTextField(
+                value = name.value,
+                onValueChange = { name.value = it },
+                label = { androidx.compose.material3.Text("Name") },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !busy && groupId != null,
+            )
+            FarmEntitySelector(
+                FarmSelectionAtoms.SPECIES_SELECTOR,
+                "Species",
+                FarmSpeciesCodes.ALL.map { code -> FarmSelectorOption(code, code.replaceFirstChar { it.uppercase() }) },
+                species.value,
+                { species.value = it },
+                "No species available.",
+                enabled = !busy && groupId != null,
+            )
+            androidx.compose.material3.Button(
+                onClick = { onSave(groupId!!, name.value.trim(), species.value) },
+                enabled = !busy && groupId != null && name.value.isNotBlank(),
+            ) {
+                androidx.compose.material3.Text("Save changes")
+            }
+            error?.let { androidx.compose.material3.Text(it) }
+        }
+    }
+}
+
+/**
+ * FOS-GROUP-008 — Group Health: health observations and treatments for the group's species,
+ * from the records on this device. Groups track head counts, not per-animal membership, so
+ * the summary is species-scoped and says so plainly.
+ */
+@Composable
+private fun GroupHealthPage(
+    groupOptions: List<FarmSelectorOption>,
+    loadGroup: suspend (String) -> com.farmos.core.database.AnimalGroupEntity?,
+    loadObservations: suspend () -> List<com.farmos.core.database.HealthObservationEntity>,
+    loadTreatments: suspend () -> List<com.farmos.core.database.HealthTreatmentEntity>,
+    onBack: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var groupId by remember { mutableStateOf<String?>(null) }
+    var species by remember { mutableStateOf<String?>(null) }
+    var observations by remember { mutableStateOf<List<com.farmos.core.database.HealthObservationEntity>?>(null) }
+    var treatments by remember { mutableStateOf<List<com.farmos.core.database.HealthTreatmentEntity>?>(null) }
+
+    fun load(id: String) {
+        scope.launch {
+            observations = null
+            treatments = null
+            val group = runCatching { loadGroup(id) }.getOrNull()
+            species = group?.speciesCode
+            val code = group?.speciesCode
+            observations = runCatching { loadObservations() }.getOrElse { emptyList() }.filter { it.speciesCode == code }
+            treatments = runCatching { loadTreatments() }.getOrElse { emptyList() }.filter { it.speciesCode == code }
+        }
+    }
+
+    FarmOperationalPage(
+        screenId = "FOS-GROUP-008",
+        title = "Group health",
+        subtitle = "Health records for the group's species, from this device.",
+        onBack = onBack,
+    ) {
+        FarmEntitySelector(
+            FarmSelectionAtoms.GROUP_SELECTOR,
+            "Group",
+            groupOptions,
+            groupId,
+            { groupId = it; load(it) },
+            "Create a group first.",
+            enabled = true,
+        )
+        FarmOperationalSection(
+            title = "Summary",
+            description = "Groups hold head counts, not per-animal links, so this is the species picture.",
+        ) {
+            when {
+                groupId == null -> androidx.compose.material3.Text("Choose a group.")
+                observations == null -> androidx.compose.material3.Text("Reading health records")
+                else -> {
+                    val obs = observations!!
+                    val trt = treatments.orEmpty()
+                    val redFlags = obs.count { it.redFlag }
+                    androidx.compose.material3.Text("Species: ${species ?: "-"}")
+                    androidx.compose.material3.Text("${obs.size} observations · $redFlags red flags · ${trt.size} treatments on this device.")
+                    val recent = obs.sortedByDescending { it.occurredAtEpochMillis }.take(10)
+                    if (recent.isNotEmpty()) {
+                        androidx.compose.material3.Text("Latest observations:")
+                        recent.forEach { o ->
+                            androidx.compose.material3.Text("${o.signs}${if (o.redFlag) " · RED FLAG" else ""}")
+                        }
+                    }
                 }
             }
         }
