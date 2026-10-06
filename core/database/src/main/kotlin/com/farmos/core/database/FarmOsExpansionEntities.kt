@@ -136,6 +136,19 @@ data class HealthTreatmentEntity(
     val occurredAtEpochMillis: Long,
 )
 
+@Entity(tableName = "health_vaccinations", indices = [Index(value = ["farmId", "occurredAtEpochMillis"])])
+data class HealthVaccinationEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val animalId: String?,
+    val groupId: String?,
+    val speciesCode: String,
+    val formularyItemId: String,
+    val dose: String?,
+    val method: String?,
+    val occurredAtEpochMillis: Long,
+)
+
 @Entity(tableName = "famacha_scores", indices = [Index(value = ["farmId", "animalId"])])
 data class FamachaScoreEntity(
     @PrimaryKey val id: String,
@@ -449,6 +462,27 @@ interface TreatmentDao {
 
     @Query("SELECT * FROM health_treatments WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredAtEpochMillis DESC, id")
     suspend fun forAnimal(farmId: String, animalId: String): List<HealthTreatmentEntity>
+}
+
+@Dao
+interface VaccinationDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(vaccination: HealthVaccinationEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(vaccination: HealthVaccinationEntity)
+
+    @Query("SELECT * FROM health_vaccinations WHERE farmId = :farmId ORDER BY occurredAtEpochMillis DESC, id LIMIT :limit")
+    suspend fun recent(farmId: String, limit: Int): List<HealthVaccinationEntity>
+
+    @Query("SELECT COUNT(*) FROM health_vaccinations WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    @Query("SELECT * FROM health_vaccinations WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredAtEpochMillis DESC, id")
+    suspend fun forAnimal(farmId: String, animalId: String): List<HealthVaccinationEntity>
+
+    @Query("SELECT * FROM health_vaccinations WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredAtEpochMillis DESC, id")
+    suspend fun forGroup(farmId: String, groupId: String): List<HealthVaccinationEntity>
 }
 
 @Dao
