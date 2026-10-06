@@ -454,6 +454,10 @@ fun OperatingModuleHost(
                 },
             )
         }
-        else -> Unit
+        else -> ModuleUnavailableScreen(
+            module = module,
+            reason = "No host is implemented for this module yet.",
+            onBack = onBack,
+        )
     }
 }
