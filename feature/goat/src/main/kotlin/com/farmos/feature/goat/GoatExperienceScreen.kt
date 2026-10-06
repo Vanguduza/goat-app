@@ -249,6 +249,9 @@ internal fun GoatExperienceScreen(
             kiddingDue = state.kiddingDue,
             onBack = { page = GoatPage.DASHBOARD },
         )
+        GoatPage.SCALE_PAIRING -> GoatScalePairingScreen(
+            onBack = { page = GoatPage.DASHBOARD },
+        )
         in goatHistoryPages -> GoatHistoryPage(
             page = page,
             goat = state.selected,
@@ -346,6 +349,7 @@ private fun GoatDashboardScreen(
             GoatDashboardAction("Goat groups", "Groups on this farm") { onOpen(GoatPage.GOAT_GROUPS) }
             GoatDashboardAction("FAMACHA chart", "Reference scoring chart") { onOpen(GoatPage.FAMACHA_REF) }
             GoatDashboardAction("Goat report", "Herd, milk and kidding summary") { onOpen(GoatPage.GOAT_REPORT) }
+            GoatDashboardAction("Scale pairing", "BLE scale — not available") { onOpen(GoatPage.SCALE_PAIRING) }
             GoatDashboardAction("Search", state.searchMessage) { onOpen(GoatPage.SEARCH) }
             GoatDashboardAction("Scan tag", "RFID, EID or animal tag") { onOpen(GoatPage.SCAN) }
 

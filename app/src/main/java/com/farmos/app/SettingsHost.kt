@@ -80,7 +80,7 @@ import kotlinx.coroutines.withContext
 private enum class SettingsPage {
     HOME, MEMBERS, CREATE_MEMBER, MEMBER_DETAIL, PERMISSIONS, AUDIT, STORAGE, DEVICES, CURRENCY, SPECIES, CONFLICTS,
     PROFILE, POULTRY_KINDS, LOCATIONS, NOTIFICATIONS, SYNC_SETTINGS, SEARCH_SETTINGS, INTEGRATIONS, HARDWARE,
-    BLE_DEVICES, RFID_DEVICES, MODEL_API, SECURITY, DATA_EXPORT, ABOUT, PERM_NOTIFICATIONS, PERM_CAMERA,
+    BLE_DEVICES, RFID_DEVICES, MODEL_API, SECURITY, DATA_EXPORT, ABOUT, UNITS, PERM_NOTIFICATIONS, PERM_CAMERA,
     PERM_BLUETOOTH, PERM_LOCATION, TERMS,
 }
 
@@ -197,6 +197,7 @@ internal fun SettingsHost(
             AnimalFarmQuickAction("App permissions", { page = SettingsPage.PERM_NOTIFICATIONS })
             AnimalFarmQuickAction("Terms and privacy", { page = SettingsPage.TERMS })
             AnimalFarmQuickAction("About", { page = SettingsPage.ABOUT })
+            AnimalFarmQuickAction("Units", { page = SettingsPage.UNITS })
         }
         SettingsPage.MEMBERS -> FarmOperationalPage("FOS-ADMIN-003", "Accounts and access", "People who can sign in to this farm.", onBack = home, backLabel = "Farm settings") {
             val actor = current.actor
@@ -680,6 +681,8 @@ internal fun SettingsHost(
                 Text("Counts come from the Farm OS screen and feature registries.", color = AnimalFarmTheme.colors.mutedInk)
             }
         }
+        /** FOS-ADMIN-010 — Units of measure: not configured in this build (genuine gap). */
+        SettingsPage.UNITS -> UnitsScreen(home)
         /** FOS-GLOBAL-010 — Notification permission: current grant state and system request. */
         SettingsPage.PERM_NOTIFICATIONS -> PermissionPage(
             screenId = "FOS-GLOBAL-010",
@@ -1205,4 +1208,33 @@ private suspend fun loadSnapshot(
         gestationOverrides = database.farmGestationOverrides(farmId),
         unpublished = database.replication().devices(farmId).associate { it.deviceId to database.unpublishedOperations(farmId, it.deviceId) },
     )
+}
+
+/**
+ * FOS-ADMIN-010 — Units of measure.
+ *
+ * GENUINE GAP — not implemented: there is no units-of-measure store, DAO, or governed command in
+ * the local schema; quantities are captured in fixed canonical units (grams, millilitres, head)
+ * with exact decimal conversion at the UI layer.
+ * Required domain piece: a farm-scoped units configuration with a governed command, validator
+ * and migration. This screen fails closed.
+ */
+@Composable
+private fun UnitsScreen(onBack: () -> Unit) {
+    FarmOperationalPage(
+        screenId = "FOS-ADMIN-010",
+        title = "Units",
+        subtitle = "Not configurable in this build.",
+        onBack = onBack,
+        backLabel = "Farm settings",
+    ) {
+        FarmOperationalSection("Unavailable") {
+            Text(
+                "Units of measure are not configurable in this build: there is no units store in the " +
+                    "local schema. Quantities are captured in canonical units (grams, millilitres, head).",
+                color = AnimalFarmTheme.colors.mutedInk,
+            )
+            Text("Required: a farm-scoped units configuration with a governed command, validator and migration.")
+        }
+    }
 }

@@ -71,6 +71,7 @@ private enum class CattleOpsPage {
     CALVING_DUE,
     CALF_REG,
     CATTLE_REPORT,
+    HEAT_DETECTION,
 }
 
 @Composable
@@ -184,6 +185,10 @@ fun CattleOperationsScreen(
         CattleOpsPage.CATTLE_REPORT -> {
             CattleHerdReportScreen(loadCattleReport, home)
         }
+
+        CattleOpsPage.HEAT_DETECTION -> {
+            CattleHeatDetectionScreen(home)
+        }
     }
 }
 
@@ -208,6 +213,7 @@ private fun CattleOpsHome(
             CattleNav("Calving due") { onOpen(CattleOpsPage.CALVING_DUE) }
             CattleNav("Calving") { onOpen(CattleOpsPage.CALVING) }
             CattleNav("Calf registration") { onOpen(CattleOpsPage.CALF_REG) }
+            CattleNav("Heat detection") { onOpen(CattleOpsPage.HEAT_DETECTION) }
             CattleNav("Weaning") { onOpen(CattleOpsPage.WEANING) }
         }
         FarmOperationalSection("Dairy & condition") {
@@ -789,3 +795,32 @@ private fun CattleCompactField(
 }
 
 private fun cattleDate(value: String): Boolean = runCatching { LocalDate.parse(value) }.isSuccess
+
+/**
+ * FOS-CATTLE-009 — Heat Detection.
+ *
+ * GENUINE GAP — not implemented: there is no cattle heat table, DAO, or governed command in the
+ * local schema (Room v34 frozen; goat_heats is species-specific and must not be reused for cattle),
+ * and inventing a shadow store would violate the single-source-of-truth rule.
+ * Required domain piece: a farm-scoped cattle_heats entity with RecordCattleHeat command,
+ * validator, journal operation, replay applier and migration 34->35. This screen fails closed.
+ */
+@Composable
+fun CattleHeatDetectionScreen(onBack: () -> Unit) {
+    FarmOperationalPage(
+        screenId = "FOS-CATTLE-009",
+        title = "Heat detection",
+        subtitle = "Not available in this build.",
+        visualClass = FarmVisualClass.I2,
+        onBack = onBack,
+        backLabel = "Cattle",
+    ) {
+        FarmOperationalSection("Unavailable") {
+            Text(
+                "Heat observations are not recorded in this build: there is no cattle heat table or " +
+                    "governed heat command in the local schema. No heat is shown rather than a fabricated one.",
+            )
+            Text("Required: a farm-scoped cattle_heats entity with a governed command, validator, journal operation and migration 34->35.")
+        }
+    }
+}

@@ -70,6 +70,7 @@ private enum class SheepOpsPage {
     LAMBING_DUE,
     LAMB_PROFILE,
     SHEEP_REPORT,
+    EID_SCAN,
 }
 
 @Composable
@@ -240,6 +241,7 @@ fun SheepOperationsScreen(
         SheepOpsPage.GROWTH_HISTORY -> SheepGrowthHistoryScreen(selectedAnimalId, loadRecords, home)
         SheepOpsPage.WOOL_DASHBOARD -> SheepWoolDashboardScreen(loadWool, home)
         SheepOpsPage.LAMBING_DUE -> SheepLambingDueScreen(loadLambingDue, today, home)
+        SheepOpsPage.EID_SCAN -> SheepEidScanScreen(home)
     }
 }
 
@@ -264,6 +266,7 @@ private fun SheepOpsHome(
             SheepNav("Lambing due") { onOpen(SheepOpsPage.LAMBING_DUE) }
             SheepNav("Record lambing") { onOpen(SheepOpsPage.LAMBING) }
             SheepNav("Lamb marking") { onOpen(SheepOpsPage.MARKING) }
+            SheepNav("EID scan") { onOpen(SheepOpsPage.EID_SCAN) }
             SheepNav("Weaning") { onOpen(SheepOpsPage.WEANING) }
         }
         FarmOperationalSection("Wool") {
@@ -725,3 +728,30 @@ private fun CompactField(
 }
 
 private fun validDate(value: String): Boolean = runCatching { LocalDate.parse(value) }.isSuccess
+
+/**
+ * FOS-SHEEP-005 — EID Scan.
+ *
+ * GENUINE GAP — not implemented: there is no RFID/EID hardware adapter in this build (no tag
+ * reader discovery, scan, or EID-ingest path), so a scan UI would be a fake.
+ * Required piece: a Farm OS-owned RFID reader adapter behind the hardware boundary, with a
+ * governed EID-ingest command. This screen fails closed.
+ */
+@Composable
+internal fun SheepEidScanScreen(onBack: () -> Unit) {
+    FarmOperationalPage(
+        screenId = "FOS-SHEEP-005",
+        title = "EID scan",
+        subtitle = "Not available in this build.",
+        onBack = onBack,
+        backLabel = "Sheep",
+    ) {
+        FarmOperationalSection("Unavailable") {
+            Text(
+                "EID scanning is not available in this build: there is no RFID reader adapter. " +
+                    "No tag is shown rather than a fabricated scan.",
+            )
+            Text("Required: a Farm OS-owned RFID reader adapter with a governed EID-ingest command.")
+        }
+    }
+}

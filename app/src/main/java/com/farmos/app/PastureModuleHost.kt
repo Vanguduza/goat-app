@@ -139,16 +139,18 @@ fun PastureModuleHost(
             androidx.compose.material3.TextButton(onClick = { page = PastureModulePage.CAPACITY }) { androidx.compose.material3.Text("Carrying capacity") }
             androidx.compose.material3.TextButton(onClick = { page = PastureModulePage.CONDITION }) { androidx.compose.material3.Text("Pasture condition") }
             androidx.compose.material3.TextButton(onClick = { page = PastureModulePage.REPORT }) { androidx.compose.material3.Text("Pasture report") }
+            androidx.compose.material3.TextButton(onClick = { page = PastureModulePage.MAP }) { androidx.compose.material3.Text("Pasture map") }
         },
     ) }
         PastureModulePage.REST -> PastureRestPeriodScreen(ops = ops, onBack = { page = PastureModulePage.HOME })
         PastureModulePage.CAPACITY -> PastureCarryingCapacityScreen(ops = ops, onBack = { page = PastureModulePage.HOME })
         PastureModulePage.CONDITION -> PastureConditionScreen(ops = ops, onBack = { page = PastureModulePage.HOME })
         PastureModulePage.REPORT -> PastureReportScreen(ops = ops, onBack = { page = PastureModulePage.HOME })
+        PastureModulePage.MAP -> PastureMapScreen(ops = ops, farmId = farmId, onBack = { page = PastureModulePage.HOME })
     }
 }
 
-private enum class PastureModulePage { HOME, REST, CAPACITY, CONDITION, REPORT }
+private enum class PastureModulePage { HOME, REST, CAPACITY, CONDITION, REPORT, MAP }
 
 /** Per-paddock grazing aggregates backing the rest/capacity/condition/report screens. */
 private data class PaddockPastureStats(
@@ -297,3 +299,69 @@ fun PastureReportScreen(
         }
     }
 }
+
+/**
+ * FOS-PASTURE-010 — Pasture Map.
+ *
+ * Schematic paddock layout: every active paddock is shown as a labelled cell in a grid, coloured
+ * by its real grazing state (grazing now / resting / idle) computed from recorded grazing sessions.
+ * This is a schematic, not a geographic map: paddock records carry no coordinates, so no
+ * geographic positions are fabricated.
+ */
+@Composable
+fun PastureMapScreen(
+    ops: RoomOpsRepository,
+    farmId: String,
+    onBack: () -> Unit,
+) {
+    var cells by remember { mutableStateOf(emptyList<PaddockMapCell>()) }
+    LaunchedEffect(farmId) {
+        val paddocks = ops.paddocks()
+        val open = ops.openGrazing().groupBy { it.paddockId }
+        val summaries = ops.grazingSummary().associateBy { it.paddockId }
+        cells = paddocks.map { p ->
+            val grazingNow = open[p.id].orEmpty().sumOf { it.headCount }
+            val lastEnd = summaries[p.id]?.latestExitedEpochDay
+            PaddockMapCell(p.code, p.displayName, grazingNow, lastEnd)
+        }
+    }
+    val today = LocalDate.now().toEpochDay()
+    FarmOperationalPage(
+        screenId = "FOS-PASTURE-010",
+        title = "Pasture map",
+        subtitle = "Schematic layout — cells are not geographic positions.",
+        onBack = onBack,
+        backLabel = "Pasture",
+    ) {
+        if (cells.isEmpty()) {
+            FarmOperationalSection("No paddocks", "Create a paddock on the pasture home screen first.") {}
+        } else {
+            FarmOperationalSection("Legend") {
+                Text("Green: grazing now · Amber: resting (a session ended, rest accumulating) · Grey: idle (no sessions recorded)")
+            }
+            cells.chunked(2).forEach { row ->
+                androidx.compose.foundation.layout.Row(modifier = Modifier.fillMaxWidth()) {
+                    row.forEach { cell ->
+                        val state = when {
+                            cell.grazingHead > 0 -> "GRAZING NOW — ${cell.grazingHead} head"
+                            cell.lastSessionEnd != null -> "RESTING — ${today - cell.lastSessionEnd}d since last session"
+                            else -> "IDLE — no sessions recorded"
+                        }
+                        androidx.compose.foundation.layout.Box(modifier = Modifier.weight(1f)) {
+                            FarmOperationalSection("${cell.code} · ${cell.displayName}") {
+                                Text(state)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private data class PaddockMapCell(
+    val code: String,
+    val displayName: String,
+    val grazingHead: Int,
+    val lastSessionEnd: Long?,
+)

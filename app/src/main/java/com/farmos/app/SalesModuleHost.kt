@@ -36,7 +36,7 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
 
-private enum class SalesModulePage { HOME, ORDERS, CREATE, PRODUCE, RESERVATION, REPORT }
+private enum class SalesModulePage { HOME, ORDERS, CREATE, PRODUCE, RESERVATION, REPORT, DELIVERY }
 
 /**
  * Dedicated sales-record orchestration preserving the existing unit-economics command path.
@@ -102,6 +102,7 @@ fun SalesModuleHost(
                 TextButton(onClick = { page.value = SalesModulePage.PRODUCE }, modifier = Modifier.fillMaxWidth()) { Text("Produce sale") }
                 TextButton(onClick = { page.value = SalesModulePage.RESERVATION }, modifier = Modifier.fillMaxWidth()) { Text("Rabbit reservation sale") }
                 TextButton(onClick = { page.value = SalesModulePage.REPORT }, modifier = Modifier.fillMaxWidth()) { Text("Sales report") }
+                TextButton(onClick = { page.value = SalesModulePage.DELIVERY }, modifier = Modifier.fillMaxWidth()) { Text("Delivery or collection") }
                 if (customerSearch != null) {
                     Text("Customer search is available on the create-sale form.", style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
                 }
@@ -160,6 +161,7 @@ fun SalesModuleHost(
             records = records.value,
             onBack = backHome,
         )
+        SalesModulePage.DELIVERY -> SaleDeliveryScreen(onBack = backHome)
     }
 }
 
@@ -384,3 +386,31 @@ private fun SalesReportScreen(
 }
 
 private val NO_CUSTOMER = FarmSelectorOption("no-customer", "No customer recorded")
+
+/**
+ * FOS-SALES-010 — Delivery or Collection.
+ *
+ * GENUINE GAP — not implemented: there is no sale-delivery entity, DAO, or governed command
+ * (RecordSaleDelivery) in the local schema, and delivery status must not be bolted onto the
+ * sale record as an ungoverned field.
+ * Required domain piece: a farm-scoped sale delivery/collection record with a governed command,
+ * validator, journal operation and migration. This screen fails closed.
+ */
+@Composable
+private fun SaleDeliveryScreen(onBack: () -> Unit) {
+    FarmOperationalPage(
+        screenId = "FOS-SALES-010",
+        title = "Delivery or collection",
+        subtitle = "Not available in this build.",
+        onBack = onBack,
+        backLabel = "Sales",
+    ) {
+        FarmOperationalSection("Unavailable") {
+            Text(
+                "Delivery and collection status is not recorded in this build: there is no delivery " +
+                    "table or governed delivery command in the local schema. No status is shown rather than a fabricated one.",
+            )
+            Text("Required: a farm-scoped sale delivery record with a governed command, validator, journal operation and migration.")
+        }
+    }
+}

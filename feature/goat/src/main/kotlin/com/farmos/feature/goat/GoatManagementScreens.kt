@@ -350,3 +350,25 @@ internal fun GoatReportScreen(
         }
     }
 }
+
+/**
+ * FOS-GOAT-012 — BLE Scale Pairing.
+ *
+ * GENUINE GAP — not implemented: there is no BLE hardware adapter in this build (no scale
+ * discovery, pairing, or weight-ingest path), so a pairing UI would be a fake.
+ * Required piece: a Farm OS-owned BLE scale adapter behind the hardware boundary, with a
+ * governed weight-ingest command. This screen fails closed.
+ */
+@Composable
+internal fun GoatScalePairingScreen(onBack: () -> Unit) {
+    IllustratedGoatPage("Scale pairing", "FOS-GOAT-012 · I3", onBack) {
+        FarmIllustratedSectionSurface {
+            Text("Unavailable", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(
+                "BLE scale pairing is not available in this build: there is no Bluetooth scale adapter. " +
+                    "No scale is shown rather than a fabricated one.",
+            )
+            Text("Required: a Farm OS-owned BLE scale adapter with a governed weight-ingest command.")
+        }
+    }
+}

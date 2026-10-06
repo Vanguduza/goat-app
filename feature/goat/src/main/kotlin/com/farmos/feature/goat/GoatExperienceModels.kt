@@ -55,6 +55,7 @@ internal enum class GoatPage {
     GOAT_GROUPS,
     GROUP_MEMBERSHIP,
     GOAT_REPORT,
+    SCALE_PAIRING,
 }
 
 internal data class GoatExperienceActions(
