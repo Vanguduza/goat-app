@@ -57,7 +57,9 @@ import kotlinx.coroutines.withContext
 
 private sealed interface EntryStep {
     data object Loading : EntryStep
+    data object OfflineIntro : EntryStep
     data object Setup : EntryStep
+    data class SpeciesSetup(val screenId: String, val code: String, val account: LocalAccount, val farmName: String) : EntryStep
     data class SignIn(val farms: List<LocalFarmEntity>) : EntryStep
     data class Recover(val farms: List<LocalFarmEntity>) : EntryStep
     data class ShowRecoveryCode(val screenId: String, val code: String, val account: LocalAccount, val farmName: String) : EntryStep
@@ -86,7 +88,7 @@ internal fun LocalFarmEntry(
 
     LaunchedEffect(directory) {
         val farms = withContext(io) { directory.farms() }
-        step = if (farms.isEmpty()) EntryStep.Setup else EntryStep.SignIn(farms)
+        step = if (farms.isEmpty()) EntryStep.OfflineIntro else EntryStep.SignIn(farms)
     }
 
     fun launchEntry(block: suspend () -> Unit) {
@@ -100,7 +102,9 @@ internal fun LocalFarmEntry(
 
     val screenId = when (val current = step) {
         EntryStep.Loading, is EntryStep.SignIn -> "FOS-GLOBAL-002"
+        EntryStep.OfflineIntro -> "FOS-GLOBAL-014"
         EntryStep.Setup -> "FOS-GLOBAL-006"
+        is EntryStep.SpeciesSetup -> "FOS-GLOBAL-008"
         is EntryStep.Recover -> "FOS-GLOBAL-004"
         is EntryStep.ShowRecoveryCode -> current.screenId
         is EntryStep.Join, is EntryStep.JoinWaiting -> "FOS-GLOBAL-007"
@@ -110,6 +114,8 @@ internal fun LocalFarmEntry(
     EntryShell(screenId) {
         when (val current = step) {
             EntryStep.Loading -> Text("Opening this device's farm records", color = AnimalFarmTheme.colors.mutedInk)
+            EntryStep.OfflineIntro -> OfflineIntroScreen(onContinue = { step = EntryStep.Setup })
+            is EntryStep.SpeciesSetup -> SpeciesSetupScreen(onDone = { onSignedIn(current.account, current.farmName) })
             EntryStep.Setup -> SetupForm(busy) { farmName, displayName, username, pin ->
                 launchEntry {
                     var result: FarmSetupResult? = null
@@ -146,7 +152,9 @@ internal fun LocalFarmEntry(
                     }
                 }
             }
-            is EntryStep.ShowRecoveryCode -> RecoveryCodeNotice(current.code) { onSignedIn(current.account, current.farmName) }
+            is EntryStep.ShowRecoveryCode -> RecoveryCodeNotice(current.code) {
+                step = EntryStep.SpeciesSetup(current.screenId, current.code, current.account, current.farmName)
+            }
             is EntryStep.Join -> JoinForm(requireNotNull(discovery), busy, onBack = { step = farmsStep(current.farms) }) { farm ->
                 launchEntry {
                     val result = withContext(io) {
@@ -309,6 +317,34 @@ private fun ColumnScope.RecoveryCodeNotice(code: String, onContinue: () -> Unit)
     )
     Text(code, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.testTag("local-recovery-code"))
     EntryButton("I have saved the recovery code", true, onContinue)
+}
+
+/**
+ * FOS-GLOBAL-014 — offline-first introduction: what local-first means before the farm is created.
+ */
+private fun ColumnScope.OfflineIntroScreen(onContinue: () -> Unit) {
+    Text("Your farm, on this device first", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+    Text(
+        "Everything you record is stored on this device first. No Internet or server is needed. " +
+            "Devices on the farm sync with each other over the local network, and the owner can back up to Google Drive. " +
+            "There is no application server holding your data.",
+        color = AnimalFarmTheme.colors.mutedInk,
+    )
+    EntryButton("Continue", true, onContinue)
+}
+
+/**
+ * FOS-GLOBAL-008 — first-run species setup: which animal modules this farm uses.
+ * Informational at first run; modules are enabled from the farm home afterwards.
+ */
+private fun ColumnScope.SpeciesSetupScreen(onDone: () -> Unit) {
+    Text("Which animals does this farm keep?", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+    Text(
+        "Goat, sheep, cattle, poultry and rabbit modules are all available. You can open any of them " +
+            "from the farm home; this step just confirms the farm is ready.",
+        color = AnimalFarmTheme.colors.mutedInk,
+    )
+    EntryButton("Open my farm", true, onDone)
 }
 
 @Composable

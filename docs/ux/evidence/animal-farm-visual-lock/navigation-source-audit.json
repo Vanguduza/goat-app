@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "e29fa2ba3c8bfed1039ca942e99d8237555ce8fa",
+  "tested_commit": "518729f773021342bbc22218967bf2ec2bd54ba3",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 504
+    "registered_ids_mentioned_in_kotlin": 521
   },
   "top_level": {
     "farm_modules": [
@@ -71,8 +71,8 @@
       "states": [
         {
           "value": "DASHBOARD",
-          "refs": 15,
-          "transition_refs": 14,
+          "refs": 16,
+          "transition_refs": 15,
           "render_only_candidate": false
         },
         {
@@ -335,6 +335,12 @@
         },
         {
           "value": "GOAT_REPORT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "SCALE_PAIRING",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
@@ -818,6 +824,18 @@
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
+        },
+        {
+          "value": "REFERENCE_DETAIL",
+          "refs": 2,
+          "transition_refs": 0,
+          "render_only_candidate": false
+        },
+        {
+          "value": "EMERGENCY",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
         }
       ]
     },
@@ -986,6 +1004,12 @@
         },
         {
           "value": "SHEEP_REPORT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "EID_SCAN",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
@@ -1169,6 +1193,12 @@
         },
         {
           "value": "CATTLE_REPORT",
+          "refs": 2,
+          "transition_refs": 1,
+          "render_only_candidate": false
+        },
+        {
+          "value": "HEAT_DETECTION",
           "refs": 2,
           "transition_refs": 1,
           "render_only_candidate": false
