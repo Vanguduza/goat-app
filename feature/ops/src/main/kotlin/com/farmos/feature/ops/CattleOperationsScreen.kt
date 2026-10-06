@@ -37,6 +37,8 @@ data class CattleOperationsActions(
     val onPlaceLot: (groupId: String, heads: String, day: String) -> Unit,
     val onDaysOnFeed: (groupId: String, days: String, day: String) -> Unit,
     val onCloseLot: (groupId: String, headOut: String, weightGrams: String, daysOnFeed: String, day: String) -> Unit,
+    /** FOS-CATTLE-016 — (damId, tag, sex, day); registers the newborn calf. */
+    val onCalfRegistration: (String, String, String, String) -> Unit = { _, _, _, _ -> },
 )
 
 private enum class CattleOpsPage {
@@ -67,6 +69,8 @@ private enum class CattleOpsPage {
     BEEF_DASHBOARD,
     LOT_DETAIL,
     CALVING_DUE,
+    CALF_REG,
+    CATTLE_REPORT,
 }
 
 @Composable
@@ -80,6 +84,8 @@ fun CattleOperationsScreen(
     today: LocalDate = LocalDate.now(),
     loadLots: suspend () -> List<CattleLotView> = { emptyList() },
     loadCalvingDue: suspend () -> CattleCalvingDue = { CattleCalvingDue(emptyList(), 283) },
+    /** FOS-CATTLE-036 — farm cattle aggregates. */
+    loadCattleReport: suspend () -> CattleHerdReport = { CattleHerdReport() },
 ) {
     var page by remember { mutableStateOf(CattleOpsPage.HOME) }
     val home = { page = CattleOpsPage.HOME }
@@ -170,6 +176,14 @@ fun CattleOperationsScreen(
         CattleOpsPage.BEEF_DASHBOARD -> CattleBeefDashboardScreen(loadLots, home)
         CattleOpsPage.LOT_DETAIL -> CattleLotDetailScreen(loadLots, home)
         CattleOpsPage.CALVING_DUE -> CattleCalvingDueScreen(loadCalvingDue, today, home)
+
+        CattleOpsPage.CALF_REG -> {
+            CattleCalfRegistrationScreen(selectedAnimalId, busy, error, actions.onCalfRegistration, home)
+        }
+
+        CattleOpsPage.CATTLE_REPORT -> {
+            CattleHerdReportScreen(loadCattleReport, home)
+        }
     }
 }
 
@@ -193,6 +207,7 @@ private fun CattleOpsHome(
             CattleNav("Pregnancy diagnosis") { onOpen(CattleOpsPage.PD) }
             CattleNav("Calving due") { onOpen(CattleOpsPage.CALVING_DUE) }
             CattleNav("Calving") { onOpen(CattleOpsPage.CALVING) }
+            CattleNav("Calf registration") { onOpen(CattleOpsPage.CALF_REG) }
             CattleNav("Weaning") { onOpen(CattleOpsPage.WEANING) }
         }
         FarmOperationalSection("Dairy & condition") {
@@ -203,6 +218,7 @@ private fun CattleOpsHome(
             CattleNav("Locomotion") { onOpen(CattleOpsPage.LOCOMOTION) }
         }
         FarmOperationalSection("Animal records") {
+            CattleNav("Cattle report") { onOpen(CattleOpsPage.CATTLE_REPORT) }
             CattleNav("Lactation history") { onOpen(CattleOpsPage.LACTATION_HISTORY) }
             CattleNav("SCC history") { onOpen(CattleOpsPage.SCC_HISTORY) }
             CattleNav("Health summary") { onOpen(CattleOpsPage.HEALTH_SUMMARY) }
@@ -701,6 +717,39 @@ private fun CattleLotCloseScreen(
 }
 
 @Composable
+/** FOS-CATTLE-016 — calf registration: register the newborn calf, linked to its dam. */
+@Composable
+private fun CattleCalfRegistrationScreen(
+    selectedId: String?,
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var damId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
+    var tag by remember { mutableStateOf("") }
+    var sex by remember { mutableStateOf("FEMALE") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    CattleFormPage(
+        "FOS-CATTLE-016",
+        "Calf registration",
+        "Register the newborn calf as a cattle animal on this farm.",
+        busy,
+        error,
+        onBack,
+    ) {
+        OpsAnimalPicker("Dam", damId, OpsAnimalFilter.FEMALE, busy) { damId = it }
+        CattleField(tag, { tag = it }, "Calf tag", busy)
+        CattleField(sex, { sex = it }, "Sex (FEMALE/MALE)", busy)
+        CattleField(day, { day = it }, "Birth date", busy)
+        Button(
+            onClick = { onRecord(damId, tag, sex, day) },
+            enabled = !busy && damId.isNotBlank() && tag.isNotBlank() && sex.isNotBlank() && cattleDate(day),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Register calf") }
+    }
+}
+
 private fun CattleFormPage(
     screenId: String,
     title: String,

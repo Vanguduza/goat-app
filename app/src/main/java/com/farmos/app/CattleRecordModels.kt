@@ -7,6 +7,7 @@ import com.farmos.domain.ops.GestationSpecies
 import com.farmos.feature.ops.CattleCalvingDue
 import com.farmos.feature.ops.CattleCalvingDueView
 import com.farmos.feature.ops.CattleDueSource
+import com.farmos.feature.ops.CattleHerdReport
 import com.farmos.feature.ops.CattleIdentifierRow
 import com.farmos.feature.ops.CattleLotCloseView
 import com.farmos.feature.ops.CattleLotDaysView
@@ -120,4 +121,21 @@ internal suspend fun loadCattleLots(database: FarmOsDatabase, farmId: String): L
             closeouts = closeouts[groupId].orEmpty().map { CattleLotCloseView(it.id, it.headOut, it.weightGrams, it.daysOnFeed, it.occurredEpochDay) },
         )
     }
+}
+
+/** FOS-CATTLE-036 — herd composition from herd counts and recorded calvings. */
+internal suspend fun loadCattleHerdReport(database: FarmOsDatabase, farmId: String): CattleHerdReport {
+    val today = java.time.LocalDate.now().toEpochDay()
+    val counts = database.animals().herdCounts(farmId, "cattle", "active", today)
+    val births = database.reports().birthTotals(farmId).firstOrNull { it.speciesCode == "cattle" }
+    return CattleHerdReport(
+        totalHead = counts.active,
+        cowCount = counts.females,
+        bullCount = counts.males,
+        calfCount = counts.young,
+        calvingsRecorded = births?.events ?: 0,
+        calvesBornAlive = births?.live?.toInt() ?: 0,
+        servicesRecorded = 0,
+        milkLitresMilli = 0L,
+    )
 }

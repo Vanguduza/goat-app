@@ -46,8 +46,11 @@ import com.farmos.domain.ops.LinkPedigree
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.PlaceCattleLot
 import com.farmos.domain.ops.PlacePoultryFlock
+import com.farmos.domain.ops.MovePoultryFlock
+import com.farmos.domain.ops.ClosePoultryFlock
 import com.farmos.domain.ops.ReceiveInventoryLot
 import com.farmos.domain.ops.RecordCattleBcs
+import com.farmos.domain.ops.RecordSheepBcs
 import com.farmos.domain.ops.RecordCattleCalving
 import com.farmos.domain.ops.RecordCattleDaysOnFeed
 import com.farmos.domain.ops.RecordCattleDryOff
@@ -172,6 +175,8 @@ object OpsReplicationAppliers {
         "pedigree.link.v1" to replay { ops, op -> ops.linkPedigree(decode<LinkPedigree>(op), context(op)) },
         "poultry.flock_day.v1" to replay { ops, op -> ops.recordFlockDay(decode<RecordPoultryFlockDay>(op), context(op)) },
         "poultry.flock_place.v1" to replay { ops, op -> ops.placeFlock(decode<PlacePoultryFlock>(op), context(op)) },
+        "poultry.flock_move.v1" to replay { ops, op -> ops.moveFlock(decode<MovePoultryFlock>(op), context(op)) },
+        "poultry.flock_close.v1" to replay { ops, op -> ops.closeFlock(decode<ClosePoultryFlock>(op), context(op)) },
         "poultry.hatch_candle.v1" to replay { ops, op -> ops.candleHatch(decode<CandlePoultryHatch>(op), context(op)) },
         "poultry.hatch_record.v1" to replay { ops, op -> ops.recordHatch(decode<RecordPoultryHatch>(op), context(op)) },
         "poultry.hatch_set.v1" to replay { ops, op -> ops.setHatch(decode<SetPoultryHatch>(op), context(op)) },
@@ -200,6 +205,7 @@ object OpsReplicationAppliers {
         "rabbit.wave_create.v1" to replay { ops, op -> ops.createWave(decode<CreateRabbitWave>(op), context(op)) },
         "sale.record.v1" to replay { ops, op -> ops.recordSale(decode<RecordSale>(op), context(op)) },
         "sheep.record_dag.v1" to replay { ops, op -> ops.recordDag(decode<RecordSheepDag>(op), context(op)) },
+        "sheep.record_bcs.v1" to replay { ops, op -> ops.recordSheepBcs(decode<RecordSheepBcs>(op), context(op)) },
         "sheep.record_famacha.v1" to replay { ops, op -> ops.recordSheepFamacha(decode<RecordFamacha>(op), context(op)) },
         "sheep.record_flystrike.v1" to replay { ops, op -> ops.recordFlystrike(decode<RecordSheepFlystrike>(op), context(op)) },
         "sheep.record_footrot.v1" to replay { ops, op -> ops.recordFootrot(decode<RecordSheepFootrot>(op), context(op)) },

@@ -503,6 +503,16 @@ data class RecordCattleBcs(
     val occurredEpochDay: Long,
 )
 
+/** FOS-SHEEP-008 — sheep body condition score; stored in the shared BCS table. */
+@Serializable
+data class RecordSheepBcs(
+    val scoreId: String,
+    val animalId: String,
+    val scale: String,
+    val scoreTenths: Int,
+    val occurredEpochDay: Long,
+)
+
 @Serializable
 data class RecordSheepWool(
     val clipId: String,
@@ -622,6 +632,34 @@ data class PlacePoultryFlock(
     val occurredEpochDay: Long,
     val inspectTaskId: String,
     val vaxTaskId: String,
+)
+
+/**
+ * FOS-POULTRY-023 — move a flock between houses. Recorded as a new placement row for
+ * the same group; the latest placement per group is the flock's current house.
+ */
+@Serializable
+data class MovePoultryFlock(
+    val moveId: String,
+    val groupId: String,
+    val fromHouseId: String,
+    val toHouseId: String,
+    val headCount: Int,
+    val occurredEpochDay: Long,
+)
+
+/**
+ * FOS-POULTRY-024 — close out a flock's production cycle. The close-out is a terminal
+ * journal operation; the handler zeroes the group's head count and the close-out
+ * details (head out, reason, date) stay durable in the operation payload.
+ */
+@Serializable
+data class ClosePoultryFlock(
+    val closeoutId: String,
+    val groupId: String,
+    val headOut: Int,
+    val reason: String,
+    val occurredEpochDay: Long,
 )
 
 @Serializable
@@ -873,6 +911,14 @@ object OpsValidator {
         return if (ok) null else "BCS must use the 1-5 or 1-9 scale"
     }
 
+    fun sheepBcs(command: RecordSheepBcs): String? {
+        val ok = when (command.scale) {
+            "1_5" -> command.scoreTenths in 10..50
+            else -> false
+        }
+        return if (ok) null else "Sheep BCS must use the 1-5 scale"
+    }
+
     fun cattleMilk(command: RecordCattleMilk): String? =
         if (command.litresMilli <= 0L) "Milk record needs litres" else null
 
@@ -944,6 +990,28 @@ object OpsValidator {
     fun flockPlace(command: PlacePoultryFlock): String? =
         if (command.headCount <= 0 || command.poultryKindCode !in PoultryKindIncubation.KINDS) {
             "Placement needs a poultry kind and head count"
+        } else {
+            null
+        }
+
+    fun flockMove(command: MovePoultryFlock): String? =
+        if (command.groupId.isBlank() || command.fromHouseId.isBlank() || command.toHouseId.isBlank()) {
+            "Flock move needs a flock and both houses"
+        } else if (command.fromHouseId == command.toHouseId) {
+            "Flock move needs a different destination house"
+        } else if (command.headCount <= 0) {
+            "Flock move needs a head count"
+        } else {
+            null
+        }
+
+    fun flockClose(command: ClosePoultryFlock): String? =
+        if (command.groupId.isBlank()) {
+            "Flock close-out needs a flock"
+        } else if (command.headOut < 0) {
+            "Flock close-out head count cannot be negative"
+        } else if (command.reason.isBlank()) {
+            "Flock close-out needs a reason"
         } else {
             null
         }

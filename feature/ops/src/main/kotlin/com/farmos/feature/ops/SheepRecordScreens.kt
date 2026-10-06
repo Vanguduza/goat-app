@@ -187,3 +187,92 @@ internal fun SheepWoolDashboardScreen(loadWool: suspend () -> SheepWoolRecords, 
         }
     }
 }
+
+/** FOS-SHEEP-015 — lamb birth profile: dam, birth date, birth type, weights. */
+data class SheepLambProfile(
+    val lambId: String = "",
+    val lambTag: String = "",
+    val birthEpochDay: Long? = null,
+    val birthType: String? = null,
+    val damId: String? = null,
+    val damTag: String? = null,
+    val birthWeightGrams: Long? = null,
+    val markingEpochDay: Long? = null,
+    val weaningEpochDay: Long? = null,
+)
+
+/** FOS-SHEEP-032 — farm sheep aggregates. */
+data class SheepFlockReport(
+    val totalHead: Int = 0,
+    val eweCount: Int = 0,
+    val ramCount: Int = 0,
+    val lambCount: Int = 0,
+    val lambingsRecorded: Int = 0,
+    val lambsBornAlive: Int = 0,
+    val weaningsRecorded: Int = 0,
+    val shearingsRecorded: Int = 0,
+)
+
+/** FOS-SHEEP-028 — sheep group option for paddock assignment. */
+data class SheepGroupOption(val groupId: String, val name: String, val headCount: Int)
+
+/** FOS-SHEEP-028 — paddock option for paddock assignment. */
+data class SheepPaddockOption(val paddockId: String, val name: String, val hasOpenSession: Boolean)
+
+/** FOS-SHEEP-015 — lamb profile: birth record, dam and early-life events from local records. */
+@Composable
+internal fun SheepLambProfileScreen(
+    selectedId: String?,
+    loadProfile: suspend (String) -> SheepLambProfile,
+    onBack: () -> Unit,
+) {
+    val state = rememberSheepLoad(selectedId, requireKey = true) { loadProfile(it!!) }
+    FarmOperationalPage("FOS-SHEEP-015", "Lamb profile", "Birth record, dam and early-life events for the selected lamb.", FarmVisualClass.I3, onBack) {
+        SheepLoadContent(state) { profile ->
+            FarmOperationalSection("Identity") {
+                SheepRow("Tag", profile.lambTag.ifBlank { profile.lambId }, "sheep-lamb-tag")
+                profile.birthEpochDay?.let { SheepRow("Birth date", LocalDate.ofEpochDay(it).toString(), "sheep-lamb-birth") }
+                profile.birthType?.let { SheepRow("Birth type", it, "sheep-lamb-type") }
+            }
+            FarmOperationalSection("Dam") {
+                if (profile.damId == null) {
+                    Text("Dam not linked on this device.", color = AnimalFarmTheme.colors.mutedInk)
+                } else {
+                    SheepRow("Dam", profile.damTag ?: profile.damId, "sheep-lamb-dam")
+                }
+            }
+            FarmOperationalSection("Early life") {
+                profile.birthWeightGrams?.let { SheepRow("Birth weight", sheepKg(it), "sheep-lamb-birth-weight") }
+                profile.markingEpochDay?.let { SheepRow("Marked", LocalDate.ofEpochDay(it).toString(), "sheep-lamb-marked") }
+                profile.weaningEpochDay?.let { SheepRow("Weaned", LocalDate.ofEpochDay(it).toString(), "sheep-lamb-weaned") }
+            }
+        }
+    }
+}
+
+/** FOS-SHEEP-032 — sheep report: flock composition and recorded reproduction events. */
+@Composable
+internal fun SheepFlockReportScreen(
+    loadReport: suspend () -> SheepFlockReport,
+    onBack: () -> Unit,
+) {
+    val state = rememberSheepLoad(key = "flock", requireKey = false) { loadReport() }
+    FarmOperationalPage("FOS-SHEEP-032", "Sheep report", "Flock composition and recorded reproduction events.", FarmVisualClass.I3, onBack) {
+        SheepLoadContent(state) { report ->
+            FarmOperationalSection("Flock") {
+                SheepRow("Total head", report.totalHead.toString(), "sheep-report-total")
+                SheepRow("Ewes", report.eweCount.toString(), "sheep-report-ewes")
+                SheepRow("Rams", report.ramCount.toString(), "sheep-report-rams")
+                SheepRow("Lambs", report.lambCount.toString(), "sheep-report-lambs")
+            }
+            FarmOperationalSection("Reproduction") {
+                SheepRow("Lambings recorded", report.lambingsRecorded.toString(), "sheep-report-lambings")
+                SheepRow("Lambs born alive", report.lambsBornAlive.toString(), "sheep-report-born-alive")
+                SheepRow("Weanings recorded", report.weaningsRecorded.toString(), "sheep-report-weanings")
+            }
+            FarmOperationalSection("Wool") {
+                SheepRow("Shearings recorded", report.shearingsRecorded.toString(), "sheep-report-shearings")
+            }
+        }
+    }
+}

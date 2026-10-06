@@ -245,3 +245,45 @@ private fun CattleMovementContent(records: CattleRecords) {
         }
     }
 }
+
+/** FOS-CATTLE-036 — farm cattle aggregates. */
+data class CattleHerdReport(
+    val totalHead: Int = 0,
+    val cowCount: Int = 0,
+    val bullCount: Int = 0,
+    val calfCount: Int = 0,
+    val calvingsRecorded: Int = 0,
+    val calvesBornAlive: Int = 0,
+    val servicesRecorded: Int = 0,
+    val milkLitresMilli: Long = 0L,
+)
+
+/** FOS-CATTLE-036 — cattle report: herd composition and recorded reproduction events. */
+@Composable
+internal fun CattleHerdReportScreen(
+    loadReport: suspend () -> CattleHerdReport,
+    onBack: () -> Unit,
+) {
+    var report by remember { mutableStateOf(CattleHerdReport()) }
+    LaunchedEffect(Unit) { runCatching { report = loadReport() } }
+    FarmOperationalPage("FOS-CATTLE-036", "Cattle report", "Herd composition and recorded reproduction events.", FarmVisualClass.I3, onBack) {
+        FarmOperationalSection("Herd") {
+            CattleRow("Total head", report.totalHead.toString(), "cattle-report-total")
+            CattleRow("Cows", report.cowCount.toString(), "cattle-report-cows")
+            CattleRow("Bulls", report.bullCount.toString(), "cattle-report-bulls")
+            CattleRow("Calves", report.calfCount.toString(), "cattle-report-calves")
+        }
+        FarmOperationalSection("Reproduction") {
+            CattleRow("Calvings recorded", report.calvingsRecorded.toString(), "cattle-report-calvings")
+            CattleRow("Calves born alive", report.calvesBornAlive.toString(), "cattle-report-born-alive")
+            CattleRow("Services recorded", report.servicesRecorded.toString(), "cattle-report-services")
+        }
+        FarmOperationalSection("Milk") {
+            CattleRow(
+                "Milk recorded",
+                BigDecimal.valueOf(report.milkLitresMilli, 3).stripTrailingZeros().toPlainString() + " L",
+                "cattle-report-milk",
+            )
+        }
+    }
+}

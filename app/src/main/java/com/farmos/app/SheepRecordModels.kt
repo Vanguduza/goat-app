@@ -3,7 +3,9 @@ package com.farmos.app
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.domain.ops.GestationSpecies
 import com.farmos.feature.ops.SheepAnimalRecords
+import com.farmos.feature.ops.SheepFlockReport
 import com.farmos.feature.ops.SheepInLambView
+import com.farmos.feature.ops.SheepLambProfile
 import com.farmos.feature.ops.SheepLambingDue
 import com.farmos.feature.ops.SheepMobLambingView
 import com.farmos.feature.ops.SheepTimelineRow
@@ -119,4 +121,40 @@ internal suspend fun loadSheepLambingDue(database: FarmOsDatabase, farmId: Strin
     }
     val ewes = lifecycle.sheepScannedInLamb(farmId).map { SheepInLambView(it.animalId, it.tag, it.name, it.result, it.scanEpochDay) }
     return SheepLambingDue(mobs, ewes, period.typicalDays)
+}
+
+/** FOS-SHEEP-015 — lamb birth profile from local records: identity, dam link and early-life events. */
+internal suspend fun loadSheepLambProfile(database: FarmOsDatabase, farmId: String, animalId: String): SheepLambProfile {
+    val animal = database.animals().get(farmId, animalId) ?: return SheepLambProfile(lambId = animalId)
+    val parents = database.lifecycle().pedigreeParents(farmId, animalId)
+    val damLink = parents.firstOrNull { it.relationType == "dam" } ?: parents.firstOrNull()
+    val dam = damLink?.let { database.animals().get(farmId, it.parentId) }
+    return SheepLambProfile(
+        lambId = animalId,
+        lambTag = animal.tag,
+        birthEpochDay = animal.dateOfBirthEpochDay,
+        birthType = null,
+        damId = dam?.id,
+        damTag = dam?.tag,
+        birthWeightGrams = null,
+        markingEpochDay = null,
+        weaningEpochDay = null,
+    )
+}
+
+/** FOS-SHEEP-032 — flock composition from herd counts and recorded lambings. */
+internal suspend fun loadSheepFlockReport(database: FarmOsDatabase, farmId: String): SheepFlockReport {
+    val today = java.time.LocalDate.now().toEpochDay()
+    val counts = database.animals().herdCounts(farmId, "sheep", "active", today)
+    val births = database.reports().birthTotals(farmId).firstOrNull { it.speciesCode == "sheep" }
+    return SheepFlockReport(
+        totalHead = counts.active,
+        eweCount = counts.females,
+        ramCount = counts.males,
+        lambCount = counts.young,
+        lambingsRecorded = births?.events ?: 0,
+        lambsBornAlive = births?.live?.toInt() ?: 0,
+        weaningsRecorded = 0,
+        shearingsRecorded = 0,
+    )
 }

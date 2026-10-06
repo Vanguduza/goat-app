@@ -142,6 +142,7 @@ import com.farmos.domain.ops.IssueFeed
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.OpsValidator
 import com.farmos.domain.ops.RecordCattleBcs
+import com.farmos.domain.ops.RecordSheepBcs
 import com.farmos.domain.ops.RecordCattleLocomotion
 import com.farmos.domain.ops.RecordCattleMilk
 import com.farmos.domain.ops.RecordCattleScc
@@ -164,6 +165,8 @@ import com.farmos.domain.ops.RecordMoney
 import com.farmos.domain.ops.PoultryKindIncubation
 import com.farmos.domain.ops.RecordPoultryFlockDay
 import com.farmos.domain.ops.PlacePoultryFlock
+import com.farmos.domain.ops.MovePoultryFlock
+import com.farmos.domain.ops.ClosePoultryFlock
 import com.farmos.domain.ops.RecordCattleDryOff
 import com.farmos.domain.ops.RecordPoultryBiosecurity
 import com.farmos.domain.ops.RecordPoultryHatch
@@ -359,6 +362,15 @@ class RoomOpsRepository(
     suspend fun recordCattleBcs(command: RecordCattleBcs, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.cattleBcs(command)?.let { error(it) }
         enqueue(context, "cattle.record_bcs.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+            database.lifecycle().insertBcs(CattleBcsEntity(command.scoreId, farmId, command.animalId, command.scale, command.scoreTenths, command.occurredEpochDay))
+        }
+        return LocalCommandResult(context.mutationId, command.scoreId, true)
+    }
+
+    /** FOS-SHEEP-008 — sheep BCS; reuses the shared BCS table, no schema change. */
+    suspend fun recordSheepBcs(command: RecordSheepBcs, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.sheepBcs(command)?.let { error(it) }
+        enqueue(context, "sheep.record_bcs.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
             database.lifecycle().insertBcs(CattleBcsEntity(command.scoreId, farmId, command.animalId, command.scale, command.scoreTenths, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.scoreId, true)
@@ -641,6 +653,33 @@ class RoomOpsRepository(
             database.tasks().insert(TaskEntity(command.vaxTaskId, farmId, "poultry", "FLOCK_VAX", "Kind vaccination pack", command.occurredEpochDay + 1, "open", null, null, null, context.occurredAtEpochMillis))
         }
         return LocalCommandResult(context.mutationId, command.placementId, true)
+    }
+
+    /** FOS-POULTRY-023 — flock move: a new placement row for the same group; the latest
+     * placement per group is the flock's current house. */
+    suspend fun moveFlock(command: MovePoultryFlock, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.flockMove(command)?.let { error(it) }
+        val latest = database.lifecycle().placementsForGroup(farmId, command.groupId).firstOrNull()
+            ?: error("Flock move needs a placed flock")
+        require(latest.houseId == command.fromHouseId) { "Flock is not in the selected house" }
+        val kind = latest.poultryKindCode
+        enqueue(context, "poultry.flock_move.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+            database.lifecycle().insertPlacement(
+                PoultryPlacementEntity(command.moveId, farmId, command.groupId, command.toHouseId, kind, command.headCount, command.occurredEpochDay),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.moveId, true)
+    }
+
+    /** FOS-POULTRY-024 — flock close-out: terminal journal operation; zeroes the group's
+     * head count. Close-out details stay durable in the operation payload. */
+    suspend fun closeFlock(command: ClosePoultryFlock, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.flockClose(command)?.let { error(it) }
+        requireNotNull(database.groups().get(farmId, command.groupId)) { "Flock close-out needs a flock" }
+        enqueue(context, "poultry.flock_close.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+            database.groups().setHeadCount(farmId, command.groupId, 0)
+        }
+        return LocalCommandResult(context.mutationId, command.closeoutId, true)
     }
 
     suspend fun recordBiosecurity(command: RecordPoultryBiosecurity, context: LocalCommandContext): LocalCommandResult {

@@ -31,6 +31,8 @@ import com.farmos.domain.ops.RecordSheepDag
 import com.farmos.domain.ops.RecordSheepFlystrike
 import com.farmos.domain.ops.RecordSheepShearing
 import com.farmos.domain.ops.RecordSheepFootrot
+import com.farmos.domain.ops.RecordSheepBcs
+import com.farmos.domain.ops.StartGrazing
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordMoney
@@ -64,8 +66,12 @@ import com.farmos.feature.ops.HealthObservationScreen
 import com.farmos.feature.ops.InventoryScreen
 import com.farmos.feature.ops.MoneyCaptureScreen
 import com.farmos.feature.ops.SimpleCaptureScreen
+import com.farmos.feature.ops.SheepFlockReport
+import com.farmos.feature.ops.SheepGroupOption
+import com.farmos.feature.ops.SheepLambProfile
 import com.farmos.feature.ops.SheepOperationsActions
 import com.farmos.feature.ops.SheepOperationsScreen
+import com.farmos.feature.ops.SheepPaddockOption
 import com.farmos.feature.ops.TaskUiRow
 import com.farmos.feature.ops.TasksBoardScreen
 import java.time.LocalDate
@@ -324,6 +330,21 @@ fun OperatingModuleHost(
                                 onFlystrike = { animalId, score, day ->
                                     run { ops.recordFlystrike(RecordSheepFlystrike(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: -1, occurredEpochDay = LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
+                                onSheepBcs = { animalId, score, day ->
+                                    run {
+                                        val tenths = (score.replace(',', '.').toBigDecimal() * 10.toBigDecimal()).intValueExact()
+                                        ops.recordSheepBcs(RecordSheepBcs(UUID.randomUUID().toString(), animalId, "1_5", tenths, LocalDate.parse(day).toEpochDay()), newContext())
+                                    }
+                                },
+                                onPaddockAssign = { groupId, paddockId, day ->
+                                    run {
+                                        val group = database.groups().get(farmId, groupId)
+                                        ops.startGrazing(
+                                            StartGrazing(UUID.randomUUID().toString(), paddockId, groupId, group?.headCount ?: 0, LocalDate.parse(day).toEpochDay()),
+                                            newContext(),
+                                        )
+                                    }
+                                },
                                 onIdentifier = { animalId, type, value, day ->
                                     run { ops.assignIdentifier(AssignAnimalIdentifier(UUID.randomUUID().toString(), animalId, type, value, LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
@@ -346,6 +367,10 @@ fun OperatingModuleHost(
                             loadRecords = { id -> loadSheepRecords(database, farmId, id) },
                             loadWool = { loadSheepWool(database, farmId) },
                             loadLambingDue = { loadSheepLambingDue(database, farmId) },
+                            loadLambProfile = { id -> loadSheepLambProfile(database, farmId, id) },
+                            loadSheepReport = { loadSheepFlockReport(database, farmId) },
+                            loadSheepGroups = { database.groups().forFarm(farmId).filter { it.speciesCode == "sheep" }.map { SheepGroupOption(it.id, it.name, it.headCount) } },
+                            loadPaddocks = { database.paddocks().forFarm(farmId).map { SheepPaddockOption(it.id, it.name, database.grazing().hasOpen(farmId, it.id)) } },
                         )
                         FarmModule.CATTLE -> CattleOperationsScreen(
                             selectedAnimalId = selected?.animalId,
@@ -443,11 +468,17 @@ fun OperatingModuleHost(
                                         )
                                     }
                                 },
+                                onCalfRegistration = { damId, tag, sex, day ->
+                                    run {
+                                        herd?.register(UUID.randomUUID().toString(), tag, null, sex.uppercase(), null, newContext())
+                                    }
+                                },
                             ),
                             onBack = operationsBack,
                             loadRecords = { id -> loadCattleRecords(database, farmId, id) },
                             loadLots = { loadCattleLots(database, farmId) },
                             loadCalvingDue = { loadCattleCalvingDue(database, farmId) },
+                            loadCattleReport = { loadCattleHerdReport(database, farmId) },
                         )
                         else -> error("Unsupported species operations module $module")
                     } }

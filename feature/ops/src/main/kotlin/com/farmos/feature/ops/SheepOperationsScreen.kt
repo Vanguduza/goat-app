@@ -9,6 +9,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,8 +33,12 @@ data class SheepOperationsActions(
     val onDag: (animalId: String, score: String, day: String) -> Unit,
     val onFootrot: (animalId: String, score: String, day: String) -> Unit,
     val onFlystrike: (animalId: String, score: String, day: String) -> Unit,
+    /** FOS-SHEEP-008 — (animalId, score tenths, day); scale is fixed to 1-5 for sheep. */
+    val onSheepBcs: (String, String, String) -> Unit = { _, _, _ -> },
     val onIdentifier: (animalId: String, type: String, value: String, day: String) -> Unit,
     val onMovement: (animalId: String, direction: String, from: String, to: String, day: String) -> Unit,
+    /** FOS-SHEEP-028 — (groupId, paddockId, day); starts a grazing session for the group. */
+    val onPaddockAssign: (String, String, String) -> Unit = { _, _, _ -> },
     val onPedigree: (animalId: String, parentId: String, relation: String) -> Unit,
 )
 
@@ -51,8 +56,10 @@ private enum class SheepOpsPage {
     DAG,
     FOOTROT,
     FLYSTRIKE,
+    BCS,
     IDENTIFIER,
     MOVEMENT,
+    PADDOCK_ASSIGN,
     PEDIGREE,
     COI,
     MATE_COMPARE,
@@ -61,6 +68,8 @@ private enum class SheepOpsPage {
     WOOL_DASHBOARD,
     GROWTH_HISTORY,
     LAMBING_DUE,
+    LAMB_PROFILE,
+    SHEEP_REPORT,
 }
 
 @Composable
@@ -74,6 +83,14 @@ fun SheepOperationsScreen(
     loadWool: suspend () -> SheepWoolRecords = { SheepWoolRecords() },
     today: LocalDate = LocalDate.now(),
     loadLambingDue: suspend () -> SheepLambingDue = { SheepLambingDue(emptyList(), emptyList(), 147) },
+    /** FOS-SHEEP-015 — lamb birth profile for the selected animal. */
+    loadLambProfile: suspend (String) -> SheepLambProfile = { SheepLambProfile() },
+    /** FOS-SHEEP-032 — farm sheep aggregates. */
+    loadSheepReport: suspend () -> SheepFlockReport = { SheepFlockReport() },
+    /** FOS-SHEEP-028 — (groupId, groupName) options for paddock assignment. */
+    loadSheepGroups: suspend () -> List<SheepGroupOption> = { emptyList() },
+    /** FOS-SHEEP-028 — (paddockId, paddockName) options for paddock assignment. */
+    loadPaddocks: suspend () -> List<SheepPaddockOption> = { emptyList() },
 ) {
     var page by remember { mutableStateOf(SheepOpsPage.HOME) }
     val home = { page = SheepOpsPage.HOME }
@@ -195,6 +212,22 @@ fun SheepOperationsScreen(
             SheepMovementScreen(selectedAnimalId, busy, error, actions.onMovement, home)
         }
 
+        SheepOpsPage.BCS -> {
+            SheepBcsScreen(selectedAnimalId, busy, error, actions.onSheepBcs, home)
+        }
+
+        SheepOpsPage.PADDOCK_ASSIGN -> {
+            SheepPaddockAssignScreen(busy, error, loadSheepGroups, loadPaddocks, actions.onPaddockAssign, home)
+        }
+
+        SheepOpsPage.LAMB_PROFILE -> {
+            SheepLambProfileScreen(selectedAnimalId, loadLambProfile, home)
+        }
+
+        SheepOpsPage.SHEEP_REPORT -> {
+            SheepFlockReportScreen(loadSheepReport, home)
+        }
+
         SheepOpsPage.PEDIGREE -> {
             SheepPedigreeScreen(selectedAnimalId, busy, error, actions.onPedigree, home)
         }
@@ -240,15 +273,21 @@ private fun SheepOpsHome(
             SheepNav("Wool dashboard") { onOpen(SheepOpsPage.WOOL_DASHBOARD) }
         }
         FarmOperationalSection("Sheep records") {
+            SheepNav("Lamb profile") { onOpen(SheepOpsPage.LAMB_PROFILE) }
+            SheepNav("Sheep report") { onOpen(SheepOpsPage.SHEEP_REPORT) }
             SheepNav("Health summary") { onOpen(SheepOpsPage.HEALTH_SUMMARY) }
             SheepNav("Timeline") { onOpen(SheepOpsPage.TIMELINE) }
             SheepNav("Growth history") { onOpen(SheepOpsPage.GROWTH_HISTORY) }
         }
         FarmOperationalSection("Field health") {
             SheepNav("FAMACHA") { onOpen(SheepOpsPage.FAMACHA) }
+            SheepNav("Body condition score") { onOpen(SheepOpsPage.BCS) }
             SheepNav("Dag score") { onOpen(SheepOpsPage.DAG) }
             SheepNav("Footrot") { onOpen(SheepOpsPage.FOOTROT) }
             SheepNav("Flystrike") { onOpen(SheepOpsPage.FLYSTRIKE) }
+        }
+        FarmOperationalSection("Grazing") {
+            SheepNav("Paddock assignment") { onOpen(SheepOpsPage.PADDOCK_ASSIGN) }
         }
         FarmOperationalSection("Identity & traceability") {
             SheepNav("Official identifier") { onOpen(SheepOpsPage.IDENTIFIER) }
@@ -564,6 +603,85 @@ private fun SheepPedigreeScreen(
         Button(onClick = {
             onRecord(animalId, parentId, relation)
         }, enabled = !busy && animalId.isNotBlank() && parentId.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Link parent") }
+    }
+}
+
+/** FOS-SHEEP-008 — sheep body condition score on the fixed 1-5 scale, stored as tenths. */
+@Composable
+private fun SheepBcsScreen(
+    selectedId: String?,
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
+    var score by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    SheepFormPage(
+        "FOS-SHEEP-008",
+        "Body condition score",
+        "Sheep use the 1-5 scale; the score is stored as tenths (e.g. 3.0).",
+        busy,
+        error,
+        onBack,
+    ) {
+        OpsAnimalPicker("Sheep", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
+        Field(score, { score = it }, "Score (1.0-5.0)", busy)
+        Field(day, { day = it }, "Date", busy)
+        Button(
+            onClick = { onRecord(animalId, score, day) },
+            enabled = !busy && animalId.isNotBlank() && score.isNotBlank() && validDate(day),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Record BCS") }
+    }
+}
+
+/** FOS-SHEEP-028 — paddock assignment: start a grazing session for a sheep group in a paddock. */
+@Composable
+private fun SheepPaddockAssignScreen(
+    busy: Boolean,
+    error: String?,
+    loadGroups: suspend () -> List<SheepGroupOption>,
+    loadPaddocks: suspend () -> List<SheepPaddockOption>,
+    onAssign: (String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var groups by remember { mutableStateOf(emptyList<SheepGroupOption>()) }
+    var paddocks by remember { mutableStateOf(emptyList<SheepPaddockOption>()) }
+    var groupId by remember { mutableStateOf("") }
+    var paddockId by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    LaunchedEffect(Unit) {
+        runCatching {
+            groups = loadGroups()
+            paddocks = loadPaddocks()
+        }
+    }
+    SheepFormPage(
+        "FOS-SHEEP-028",
+        "Paddock assignment",
+        "Move a sheep group into a paddock by starting a grazing session.",
+        busy,
+        error,
+        onBack,
+    ) {
+        if (groups.isEmpty()) {
+            Text("No sheep groups on this device.", color = MaterialTheme.colorScheme.error)
+        } else {
+            Field(groupId, { groupId = it }, "Group ID", busy)
+        }
+        if (paddocks.isEmpty()) {
+            Text("No paddocks on this device.", color = MaterialTheme.colorScheme.error)
+        } else {
+            Field(paddockId, { paddockId = it }, "Paddock ID", busy)
+        }
+        Field(day, { day = it }, "Date", busy)
+        Button(
+            onClick = { onAssign(groupId, paddockId, day) },
+            enabled = !busy && groupId.isNotBlank() && paddockId.isNotBlank() && validDate(day),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Assign to paddock") }
     }
 }
 
