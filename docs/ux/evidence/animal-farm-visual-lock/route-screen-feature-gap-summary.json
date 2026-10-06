@@ -1,20 +1,20 @@
 {
   "schema_version": 2,
-  "tested_commit": "e1d72de5731b791f604409026dd23d8949ecb87c",
+  "tested_commit": "3b031b168e6c9daac3465a9a91a0e22ffdb03b99",
   "evidence_class": "STATIC_SOURCE_DERIVED_GAP_INVENTORY_WITH_SEPARATE_RUNTIME_EVIDENCE",
   "registry_rows": 545,
   "route_evidence_counts": {
-    "NO_ROUTE_EVIDENCE": 239,
+    "NO_ROUTE_EVIDENCE": 165,
     "STATIC_AUTH_STATE_BRANCH": 4,
-    "STATIC_CODE_ID_REFERENCE_ONLY": 170,
+    "STATIC_CODE_ID_REFERENCE_ONLY": 244,
     "STATIC_GENERAL_HOME_FALLBACK": 1,
     "STATIC_HOME_NESTED_DESTINATION": 1,
     "STATIC_MAIN_ACTIVITY_SPLASH_BRANCH": 1,
     "STATIC_ROLE_DISPATCH_PRESENT": 8,
     "STATIC_SOURCE_MAP_PLUS_CODE_ID_REFERENCE": 121
   },
-  "no_route_evidence": 239,
-  "some_static_route_evidence": 306,
+  "no_route_evidence": 165,
+  "some_static_route_evidence": 380,
   "runtime_reachability_executed": 0,
   "rendered_surface_owners_executed": 0,
   "entry_action_emission_executed": 0,
@@ -28,15 +28,15 @@
     },
     "ai": {
       "total": 12,
-      "no_route_evidence": 12
+      "no_route_evidence": 0
     },
     "an": {
       "total": 14,
-      "no_route_evidence": 14
+      "no_route_evidence": 0
     },
     "asset": {
       "total": 12,
-      "no_route_evidence": 8
+      "no_route_evidence": 6
     },
     "atom": {
       "total": 35,
@@ -44,7 +44,7 @@
     },
     "cap": {
       "total": 10,
-      "no_route_evidence": 10
+      "no_route_evidence": 0
     },
     "cattle": {
       "total": 36,
@@ -52,7 +52,7 @@
     },
     "feed": {
       "total": 12,
-      "no_route_evidence": 9
+      "no_route_evidence": 8
     },
     "fin": {
       "total": 13,
@@ -60,11 +60,11 @@
     },
     "gen": {
       "total": 10,
-      "no_route_evidence": 8
+      "no_route_evidence": 0
     },
     "global": {
       "total": 20,
-      "no_route_evidence": 10
+      "no_route_evidence": 7
     },
     "goat": {
       "total": 55,
@@ -88,11 +88,11 @@
     },
     "labour": {
       "total": 9,
-      "no_route_evidence": 5
+      "no_route_evidence": 4
     },
     "pasture": {
       "total": 11,
-      "no_route_evidence": 7
+      "no_route_evidence": 5
     },
     "poultry": {
       "total": 27,
@@ -104,7 +104,7 @@
     },
     "rabbit": {
       "total": 36,
-      "no_route_evidence": 11
+      "no_route_evidence": 4
     },
     "report": {
       "total": 15,
@@ -116,7 +116,7 @@
     },
     "search": {
       "total": 9,
-      "no_route_evidence": 9
+      "no_route_evidence": 5
     },
     "sheep": {
       "total": 32,
@@ -124,7 +124,7 @@
     },
     "sim": {
       "total": 9,
-      "no_route_evidence": 9
+      "no_route_evidence": 0
     },
     "sync": {
       "total": 18,
@@ -136,7 +136,7 @@
     },
     "water": {
       "total": 10,
-      "no_route_evidence": 8
+      "no_route_evidence": 7
     }
   },
   "known_navigation_defects": {

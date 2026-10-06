@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "e1d72de5731b791f604409026dd23d8949ecb87c",
+  "tested_commit": "3b031b168e6c9daac3465a9a91a0e22ffdb03b99",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 306
+    "registered_ids_mentioned_in_kotlin": 380
   },
   "top_level": {
     "farm_modules": [
@@ -30,7 +30,12 @@
       "SALES",
       "PROCUREMENT",
       "WAITLIST",
-      "REPORTS"
+      "REPORTS",
+      "GENETICS",
+      "CAPACITY",
+      "ANALYTICS",
+      "SIMULATION",
+      "AI"
     ],
     "role_personas": [
       "OWNER",
