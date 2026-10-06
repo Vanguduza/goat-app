@@ -92,6 +92,16 @@ internal fun managementHomeActions(): List<Pair<String, FarmDestination>> =
         "Open waitlist" to FarmDestination.Module(FarmModule.WAITLIST),
         // FOS-REPORT-001 — metrics and device exports are management work (D-026).
         "Open reports" to FarmDestination.Module(FarmModule.REPORTS),
+        // FOS-GEN-001 — pedigree and breeding analysis is management work.
+        "Open genetics" to FarmDestination.Module(FarmModule.GENETICS),
+        // FOS-CAP-001 — capacity utilisation is management work.
+        "Open capacity" to FarmDestination.Module(FarmModule.CAPACITY),
+        // FOS-AN-001 — analytics is management work.
+        "Open analytics" to FarmDestination.Module(FarmModule.ANALYTICS),
+        // FOS-SIM-001 — what-if projections are management work.
+        "Open simulation" to FarmDestination.Module(FarmModule.SIMULATION),
+        // FOS-AI-001 — advisory copilot is management work.
+        "Open copilot" to FarmDestination.Module(FarmModule.AI),
     )
 
 /** Exact-owner actions for specialist homes. Buyer/read-only does not gain Sync. */
@@ -119,6 +129,8 @@ internal fun specialistHomeActions(persona: FarmHomePersona): List<Pair<String, 
             "Due work" to FarmDestination.Tasks(TaskEntryPage.BOARD),
             // FOS-RABBIT-027 — breeding already opens rabbits; waitlist stays a distinct existing module.
             "Open waitlist" to FarmDestination.Module(FarmModule.WAITLIST),
+            // FOS-GEN-001 — pedigree and mating analysis belongs on the breeding home.
+            "Open genetics" to FarmDestination.Module(FarmModule.GENETICS),
         )
         FarmHomePersona.VET -> listOf(
             "Health centre" to FarmDestination.Health(),
@@ -145,6 +157,8 @@ internal fun specialistHomeActions(persona: FarmHomePersona): List<Pair<String, 
             "Inventory" to FarmDestination.Module(FarmModule.INVENTORY),
             "Labour" to FarmDestination.Module(FarmModule.LABOUR),
             "Assets" to FarmDestination.Module(FarmModule.ASSETS),
+            // FOS-AN-001 — financial performance analytics belongs on the finance home.
+            "Open analytics" to FarmDestination.Module(FarmModule.ANALYTICS),
         )
         FarmHomePersona.BUYER -> listOf(
             "Purchases" to FarmDestination.Module(FarmModule.PROCUREMENT),
