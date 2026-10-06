@@ -17,6 +17,7 @@ import com.farmos.domain.ops.CandlePoultryHatch
 import com.farmos.domain.ops.CloseCattleLot
 import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateAnimalGroup
+import com.farmos.domain.ops.AmendAnimalGroup
 import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.CreateFarmTask
 import com.farmos.domain.ops.ReverseAnimalExit
@@ -67,10 +68,12 @@ import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordHealthVaccination
 import com.farmos.domain.ops.RecordWaterPoint
+import com.farmos.domain.ops.RecordWaterPointEvent
 import com.farmos.domain.ops.RecordFeedPlan
 import com.farmos.domain.ops.RecordLabResult
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
+import com.farmos.domain.ops.RecordAssetMeter
 import com.farmos.domain.ops.RecordMoney
 import com.farmos.domain.ops.RecordOfficialMovement
 import com.farmos.domain.ops.RecordPoultryBiosecurity
@@ -153,6 +156,7 @@ object OpsReplicationAppliers {
         "grazing.start.v1" to replay { ops, op -> ops.startGrazing(decode<StartGrazing>(op), context(op)) },
         "group.census.v1" to replay { ops, op -> ops.recordCensus(decode<RecordGroupCensus>(op), context(op)) },
         "group.create.v1" to replay { ops, op -> ops.createGroup(decode<CreateAnimalGroup>(op), context(op)) },
+        "group.amend.v1" to replay { ops, op -> ops.amendGroup(decode<AmendAnimalGroup>(op), context(op)) },
         "health.pack_accept.v1" to replay { ops, op -> ops.acceptPack(decode<AcceptHealthPack>(op), context(op)) },
         "health.pack_apply.v1" to replay { ops, op -> ops.applyPack(decode<ApplyHealthPack>(op), context(op)) },
         "health.pack_slot_add.v1" to replay { ops, op -> ops.addPackSlot(decode<AddHealthPackSlot>(op), context(op)) },
@@ -169,6 +173,7 @@ object OpsReplicationAppliers {
         "inventory.set_reorder.v1" to replay { ops, op -> ops.setReorder(decode<SetInventoryReorder>(op), context(op)) },
         "labour.record.v1" to replay { ops, op -> ops.recordLabour(decode<RecordLabour>(op), context(op)) },
         "maintenance.record.v1" to replay { ops, op -> ops.recordMaintenance(decode<RecordMaintenance>(op), context(op)) },
+        "asset.meter_record.v1" to replay { ops, op -> ops.recordAssetMeter(decode<RecordAssetMeter>(op), context(op)) },
         "money.record.v1" to replay { ops, op -> ops.recordMoney(decode<RecordMoney>(op), context(op)) },
         "official.record_movement.v1" to replay { ops, op -> ops.recordOfficialMovement(decode<RecordOfficialMovement>(op), context(op)) },
         "paddock.create.v1" to replay { ops, op -> ops.createPaddock(decode<CreatePaddock>(op), context(op)) },
@@ -245,6 +250,7 @@ object OpsReplicationAppliers {
         TaskSeriesCommands.TASK_UPDATE to series { commands, op -> commands.update(decode<UpdateFarmTask>(op), context(op)) },
         "water.record.v1" to replay { ops, op -> ops.recordWater(decode<RecordWater>(op), context(op)) },
         "water.record_point.v1" to replay { ops, op -> ops.recordWaterPoint(decode<RecordWaterPoint>(op), context(op)) },
+        "water.record_point_event.v1" to replay { ops, op -> ops.recordWaterPointEvent(decode<RecordWaterPointEvent>(op), context(op)) },
     )
 
     private inline fun <reified T> decode(op: OperationEnvelope): T = json.decodeFromString(op.payload.getValue(COMMAND_PAYLOAD_KEY))

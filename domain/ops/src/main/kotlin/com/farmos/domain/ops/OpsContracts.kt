@@ -110,6 +110,23 @@ data class RecordMaintenance(
 )
 
 @Serializable
+data class RecordAssetMeter(
+    val readingId: String,
+    val assetId: String,
+    val readingValue: Long,
+    val unit: String,
+    val occurredEpochDay: Long,
+    val note: String? = null,
+)
+
+@Serializable
+data class AmendAnimalGroup(
+    val groupId: String,
+    val name: String,
+    val speciesCode: String,
+)
+
+@Serializable
 data class IssueFeed(
     val issueId: String,
     val itemId: String,
@@ -134,6 +151,28 @@ data class RecordWaterPoint(
     val kind: String,
     val active: Boolean,
 )
+
+/**
+ * One journaled event against a water point. The kind selects which capture screen owns the
+ * record: inspection (FOS-WATER-005), quality (FOS-WATER-006), issue (FOS-WATER-007) or
+ * maintenance (FOS-WATER-008). Optional valueMilli/unit carry a measured reading (e.g. litres
+ * or a quality metric); resultText carries a textual outcome.
+ */
+@Serializable
+data class RecordWaterPointEvent(
+    val eventId: String,
+    val pointId: String,
+    val kind: String,
+    val occurredEpochDay: Long,
+    val resultText: String? = null,
+    val valueMilli: Long? = null,
+    val unit: String? = null,
+    val note: String? = null,
+) {
+    companion object {
+        val KINDS = setOf("inspection", "quality", "issue", "maintenance")
+    }
+}
 
 @Serializable
 data class RecordFeedPlan(
@@ -766,6 +805,18 @@ object OpsValidator {
     fun asset(command: CreateFarmAsset): String? =
         if (command.code.isBlank() || command.name.isBlank()) "Asset needs a code and name" else null
 
+    fun assetMeter(command: RecordAssetMeter): String? {
+        if (command.readingValue < 0L) return "Meter reading cannot be negative"
+        if (command.unit.isBlank()) return "Meter reading needs a unit"
+        return null
+    }
+
+    fun amendGroup(command: AmendAnimalGroup): String? {
+        if (command.name.isBlank()) return "Group needs a name"
+        if (command.speciesCode !in FarmSpeciesCodes.ALL) return "Group needs a farm species"
+        return null
+    }
+
     fun feed(command: IssueFeed, onHandMilli: Long): String? {
         if (command.quantityMilli <= 0L) return "Feed quantity must be greater than zero"
         if (onHandMilli < command.quantityMilli) return "Not enough feed on this farm"
@@ -778,6 +829,13 @@ object OpsValidator {
     fun waterPoint(command: RecordWaterPoint): String? {
         if (command.code.isBlank()) return "Water point needs a code"
         if (command.kind.isBlank()) return "Water point needs a kind"
+        return null
+    }
+
+    fun waterPointEvent(command: RecordWaterPointEvent): String? {
+        if (command.pointId.isBlank()) return "Water event needs a water point"
+        if (command.kind !in RecordWaterPointEvent.KINDS) return "Unknown water event kind"
+        if ((command.valueMilli ?: 0L) < 0L) return "Water event reading cannot be negative"
         return null
     }
 

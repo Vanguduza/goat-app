@@ -59,6 +59,7 @@ fun WaterModuleHost(
     val day = remember { mutableStateOf("") }
     val page = remember { mutableStateOf(WaterModulePage.HOME) }
     val selectedPoint = remember { mutableStateOf<String?>(null) }
+    val eventKind = remember { mutableStateOf("inspection") }
 
     when (page.value) {
         WaterModulePage.HOME -> WaterRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
@@ -77,6 +78,7 @@ fun WaterModuleHost(
         extra = {
             recordActions()
             androidx.compose.material3.TextButton(onClick = { page.value = WaterModulePage.POINTS }) { androidx.compose.material3.Text("Water points") }
+            androidx.compose.material3.TextButton(onClick = { page.value = WaterModulePage.REPORT }) { androidx.compose.material3.Text("Water report") }
         },
     ) }
         WaterModulePage.POINTS -> WaterPointListScreen(
@@ -89,12 +91,25 @@ fun WaterModuleHost(
         WaterModulePage.POINT_DETAIL -> WaterPointDetailScreen(
             ops = ops,
             pointId = selectedPoint.value.orEmpty(),
+            onRecordEvent = { kind -> eventKind.value = kind; page.value = WaterModulePage.EVENT },
             onBack = { page.value = WaterModulePage.POINTS },
+        )
+        WaterModulePage.EVENT -> WaterPointEventCaptureScreen(
+            ops = ops,
+            newContext = newContext,
+            enqueueSync = enqueueSync,
+            pointId = selectedPoint.value,
+            kind = eventKind.value,
+            onBack = { page.value = if (selectedPoint.value.isNullOrBlank()) WaterModulePage.POINTS else WaterModulePage.POINT_DETAIL },
+        )
+        WaterModulePage.REPORT -> WaterReportScreen(
+            ops = ops,
+            onBack = { page.value = WaterModulePage.HOME },
         )
     }
 }
 
-private enum class WaterModulePage { HOME, POINTS, POINT_DETAIL }
+private enum class WaterModulePage { HOME, POINTS, POINT_DETAIL, EVENT, REPORT }
 
 /** FOS-WATER-002 — water point register: recorded points with kind and active state, plus point registration. */
 @Composable
@@ -170,10 +185,12 @@ fun WaterPointListScreen(
 fun WaterPointDetailScreen(
     ops: RoomOpsRepository,
     pointId: String,
+    onRecordEvent: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     val point = remember { mutableStateOf<WaterPointEntity?>(null) }
     val records = remember { mutableStateOf(emptyList<String>()) }
+    val events = remember { mutableStateOf(emptyList<com.farmos.core.database.WaterPointEventEntity>()) }
     LaunchedEffect(pointId) {
         val loaded = ops.waterPoint(pointId)
         point.value = loaded
@@ -181,6 +198,7 @@ fun WaterPointDetailScreen(
             ?.let { ops.waterRecordsForSource(it.code) }
             ?.map { "${LocalDate.ofEpochDay(it.occurredEpochDay)} · ${it.litresMilli} ml" }
             ?: emptyList()
+        events.value = loaded?.let { ops.waterPointEvents(it.id) } ?: emptyList()
     }
     FarmOperationalPage(
         screenId = "FOS-WATER-003",
@@ -196,11 +214,34 @@ fun WaterPointDetailScreen(
                 androidx.compose.material3.Text("Kind: ${current.kind}")
                 androidx.compose.material3.Text("Status: ${if (current.active) "active" else "inactive"}")
             }
+            FarmOperationalSection("Record a point event") {
+                androidx.compose.foundation.layout.Row {
+                    androidx.compose.material3.TextButton(onClick = { onRecordEvent("inspection") }) { androidx.compose.material3.Text("Inspection") }
+                    androidx.compose.material3.TextButton(onClick = { onRecordEvent("quality") }) { androidx.compose.material3.Text("Quality result") }
+                }
+                androidx.compose.foundation.layout.Row {
+                    androidx.compose.material3.TextButton(onClick = { onRecordEvent("issue") }) { androidx.compose.material3.Text("Report issue") }
+                    androidx.compose.material3.TextButton(onClick = { onRecordEvent("maintenance") }) { androidx.compose.material3.Text("Maintenance") }
+                }
+            }
             FarmOperationalSection("Water records for this source") {
                 if (records.value.isEmpty()) {
                     androidx.compose.material3.Text("No consumption records logged against ${current.code} yet.")
                 } else {
                     records.value.forEach { androidx.compose.material3.Text(it) }
+                }
+            }
+            FarmOperationalSection("Point events") {
+                if (events.value.isEmpty()) {
+                    androidx.compose.material3.Text("No inspections, quality results, issues or maintenance recorded for this point.")
+                } else {
+                    events.value.forEach { event ->
+                        androidx.compose.material3.Text(
+                            "${LocalDate.ofEpochDay(event.occurredEpochDay)} · ${event.kind}" +
+                                (event.resultText?.let { " — $it" } ?: "") +
+                                (event.note?.let { " ($it)" } ?: ""),
+                        )
+                    }
                 }
             }
         }

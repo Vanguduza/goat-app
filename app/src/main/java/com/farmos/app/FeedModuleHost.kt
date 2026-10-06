@@ -96,6 +96,12 @@ fun FeedModuleHost(
             FarmEntitySelector(FarmSelectionAtoms.INVENTORY_ITEM_SELECTOR, "Feed item", itemOptions, itemId.value.ifBlank { null }, { itemId.value = it }, "No inventory items on this device.", enabled = !busy)
             recordActions()
             androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.PLANS }) { androidx.compose.material3.Text("Feed plans") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.COST }) { androidx.compose.material3.Text("Feed cost") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.RATION_BUILDER }) { androidx.compose.material3.Text("Ration builder") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.RATION_ANALYSIS }) { androidx.compose.material3.Text("Ration analysis") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.RATION_COMPARE }) { androidx.compose.material3.Text("Compare rations") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.ALERTS }) { androidx.compose.material3.Text("Feed alerts") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.REPORT }) { androidx.compose.material3.Text("Feed report") }
         },
     ) }
         FeedModulePage.PLANS -> FeedPlanListScreen(
@@ -110,12 +116,23 @@ fun FeedModuleHost(
             planId = selectedPlan.orEmpty(),
             onBack = { page = FeedModulePage.PLANS },
         )
+        FeedModulePage.COST -> FeedCostScreen(ops = ops, onBack = { page = FeedModulePage.HOME })
+        FeedModulePage.RATION_BUILDER -> RationBuilderScreen(
+            ops = ops,
+            newContext = newContext,
+            enqueueSync = enqueueSync,
+            onBack = { page = FeedModulePage.HOME },
+        )
+        FeedModulePage.RATION_ANALYSIS -> RationAnalysisScreen(ops = ops, onBack = { page = FeedModulePage.HOME })
+        FeedModulePage.RATION_COMPARE -> RationCompareScreen(ops = ops, onBack = { page = FeedModulePage.HOME })
+        FeedModulePage.ALERTS -> FeedAlertScreen(ops = ops, onBack = { page = FeedModulePage.HOME })
+        FeedModulePage.REPORT -> FeedReportScreen(ops = ops, onBack = { page = FeedModulePage.HOME })
     }
 }
 
-private enum class FeedModulePage { HOME, PLANS, PLAN_DETAIL }
+private enum class FeedModulePage { HOME, PLANS, PLAN_DETAIL, COST, RATION_BUILDER, RATION_ANALYSIS, RATION_COMPARE, ALERTS, REPORT }
 
-private fun dailyKgLabel(rationGramsPerHeadPerDay: Long, headCount: Int): String =
+internal fun dailyKgLabel(rationGramsPerHeadPerDay: Long, headCount: Int): String =
     "%.1f".format(rationGramsPerHeadPerDay * headCount / 1000.0) + " kg/day"
 
 /** FOS-FEED-004 — feed plans: recorded ration plans with computed daily totals, plus plan capture. */

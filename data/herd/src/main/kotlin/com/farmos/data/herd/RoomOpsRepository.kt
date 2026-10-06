@@ -17,11 +17,13 @@ import com.farmos.core.database.HealthPackEntity
 import com.farmos.core.database.HealthTreatmentEntity
 import com.farmos.core.database.HealthVaccinationEntity
 import com.farmos.core.database.WaterPointEntity
+import com.farmos.core.database.WaterPointEventEntity
 import com.farmos.core.database.FeedPlanEntity
 import com.farmos.core.database.InventoryItemEntity
 import com.farmos.core.database.InventoryMovementEntity
 import com.farmos.core.database.LabourEntryEntity
 import com.farmos.core.database.MaintenanceEventEntity
+import com.farmos.core.database.AssetMeterReadingEntity
 import com.farmos.core.database.PaddockEntity
 import com.farmos.core.database.PoultryFlockDayEntity
 import com.farmos.core.database.PurchaseEntity
@@ -119,6 +121,7 @@ import com.farmos.domain.ops.RecordReorderAlert
 import com.farmos.domain.ops.SetInventoryReorder
 import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateAnimalGroup
+import com.farmos.domain.ops.AmendAnimalGroup
 import com.farmos.domain.ops.EnablePoultryKind
 import com.farmos.domain.ops.IssueInventoryLot
 import com.farmos.domain.ops.LinkPedigree
@@ -158,9 +161,11 @@ import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordHealthVaccination
 import com.farmos.domain.ops.RecordWaterPoint
+import com.farmos.domain.ops.RecordWaterPointEvent
 import com.farmos.domain.ops.RecordFeedPlan
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
+import com.farmos.domain.ops.RecordAssetMeter
 import com.farmos.domain.ops.RecordMoney
 import com.farmos.domain.ops.PoultryKindIncubation
 import com.farmos.domain.ops.RecordPoultryFlockDay
@@ -953,6 +958,16 @@ class RoomOpsRepository(
 
     suspend fun groups() = database.groups().forFarm(farmId)
 
+    suspend fun group(groupId: String) = database.groups().get(farmId, groupId)
+
+    suspend fun amendGroup(command: AmendAnimalGroup, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.amendGroup(command)?.let { error(it) }
+        enqueue(context, "group.amend.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+            database.groups().updateDetails(farmId, command.groupId, command.name.trim(), command.speciesCode)
+        }
+        return LocalCommandResult(context.mutationId, command.groupId, true)
+    }
+
     suspend fun createPaddock(command: CreatePaddock, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.paddock(command)?.let { error(it) }
         enqueue(context, "paddock.create.v1", "paddock", command.paddockId, 0, json.encodeToString(command)) {
@@ -1015,6 +1030,24 @@ class RoomOpsRepository(
     }
 
     suspend fun recentMaintenance() = database.maintenance().recent(farmId, 50)
+
+    suspend fun recordAssetMeter(command: RecordAssetMeter, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.assetMeter(command)?.let { error(it) }
+        enqueue(context, "asset.meter_record.v1", "farm_asset", command.assetId, 0, json.encodeToString(command)) {
+            database.assetMeters().insert(
+                AssetMeterReadingEntity(
+                    command.readingId, farmId, command.assetId, command.readingValue,
+                    command.unit.trim(), command.occurredEpochDay, command.note?.trim()?.takeIf { it.isNotBlank() },
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.readingId, true)
+    }
+
+    suspend fun meterReadings(assetId: String) = database.assetMeters().forAsset(farmId, assetId)
+
+    suspend fun attachmentsForOwner(ownerType: String, ownerId: String) =
+        database.attachments().forOwner(farmId, ownerType, ownerId)
 
     suspend fun issueFeed(command: IssueFeed, context: LocalCommandContext): LocalCommandResult {
         val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
@@ -1079,6 +1112,31 @@ class RoomOpsRepository(
     suspend fun waterPoint(pointId: String) = database.waterPoints().get(farmId, pointId)
 
     suspend fun waterRecordsForSource(source: String) = database.water().forSource(farmId, source, 50)
+
+    suspend fun recordWaterPointEvent(command: RecordWaterPointEvent, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.waterPointEvent(command)?.let { error(it) }
+        val point = requireNotNull(database.waterPoints().get(farmId, command.pointId)) { "Water point not found" }
+        enqueue(context, "water.record_point_event.v1", "water_point_event", command.eventId, 0, json.encodeToString(command)) {
+            database.waterPointEvents().insert(
+                WaterPointEventEntity(
+                    command.eventId, farmId, point.id, command.kind.trim(),
+                    command.occurredEpochDay,
+                    command.resultText?.trim()?.takeIf { it.isNotBlank() },
+                    command.valueMilli,
+                    command.unit?.trim()?.takeIf { it.isNotBlank() },
+                    command.note?.trim()?.takeIf { it.isNotBlank() },
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.eventId, true)
+    }
+
+    suspend fun waterPointEvents(pointId: String) = database.waterPointEvents().forPoint(farmId, pointId)
+
+    suspend fun recentWaterPointEvents(kind: String, limit: Int = 50) =
+        database.waterPointEvents().recentByKind(farmId, kind, limit)
+
+    suspend fun waterPointEventCount(kind: String) = database.waterPointEvents().countByKind(farmId, kind)
 
     suspend fun recordSale(command: RecordSale, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.sale(command)?.let { error(it) }
