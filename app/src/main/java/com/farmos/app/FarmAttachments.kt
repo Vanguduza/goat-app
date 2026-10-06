@@ -45,6 +45,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.farmos.core.design.runSuspendCatching
 
 /**
  * Attachment bytes on this device (owner decision D-015), one file per farm named by the SHA-256 of its
@@ -208,7 +209,7 @@ internal fun AnimalAttachmentsHost(database: FarmOsDatabase, farmId: String, ani
     var busy by remember { mutableStateOf(false) }
     var message by remember(animalId) { mutableStateOf<String?>(null) }
     LaunchedEffect(farmId, animalId, version) {
-        items = runCatching {
+        items = runSuspendCatching {
             withContext(Dispatchers.IO) {
                 database.attachments().forOwner(farmId, "animal", animalId).map { row ->
                     val bytes = if (row.mediaType.startsWith("image/")) store.read(farmId, row.contentSha256) else null
@@ -224,7 +225,7 @@ internal fun AnimalAttachmentsHost(database: FarmOsDatabase, farmId: String, ani
         if (uri != null) {
             scope.launch {
                 busy = true
-                message = runCatching {
+                message = runSuspendCatching {
                     val (bytes, type, name) = withContext(Dispatchers.IO) { readPicked(context, uri) }
                     attachToAnimal(database, farmId, store, animalId, bytes, type, name, newContext())
                     version++

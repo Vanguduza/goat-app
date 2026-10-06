@@ -15,6 +15,7 @@ import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
+import com.farmos.core.design.runSuspendCatching
 
 /** Capacity module pages; each maps to one canonical FOS-CAP-* screen. */
 private enum class CapacityPage(val screenId: String, val title: String) {
@@ -52,7 +53,7 @@ fun CapacityModuleHost(
     var error by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(farmId) {
-        runCatching {
+        runSuspendCatching {
             // Poultry houses: placed head per house from placement records (houses record no capacity figure).
             val houses = database.lifecycle().houses(farmId)
             val placements = database.lifecycle().placements(farmId, 500)

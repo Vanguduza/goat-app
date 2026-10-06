@@ -28,6 +28,7 @@ import com.farmos.feature.ops.PoultryRecords
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** Dedicated poultry orchestration boundary preserving the existing governed command paths. */
 @Composable
@@ -77,13 +78,13 @@ fun PoultryModuleHost(
         records = loadRecords()
     }
 
-    LaunchedEffect(farmId) { runCatching { refresh() } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
 
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refresh()
             }.onSuccess { enqueueSync() }

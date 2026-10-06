@@ -35,6 +35,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 private enum class SalesModulePage { HOME, ORDERS, CREATE, PRODUCE, RESERVATION, REPORT, DELIVERY }
 
@@ -77,9 +78,9 @@ fun SalesModuleHost(
         rows.value = ops.recentSales().map { "${it.itemKind} · ${it.amountMinor} ${it.currency}" }
         records.value = loadRecords()
     }
-    LaunchedEffect(farmId) { runCatching { refresh() } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
-        scope.launch { busy.value = true; error.value = null; saved.value = false; runCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }; busy.value = false }
+        scope.launch { busy.value = true; error.value = null; saved.value = false; runSuspendCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }; busy.value = false }
     }
     val page = remember { mutableStateOf(SalesModulePage.HOME) }
     val selectedSale = remember { mutableStateOf<SaleView?>(null) }
@@ -305,7 +306,7 @@ private fun RabbitReservationSaleScreen(
     val day = remember { mutableStateOf(LocalDate.now().toString()) }
     LaunchedEffect(loadRabbitContracts) {
         if (loadRabbitContracts != null) {
-            runCatching { contracts.value = loadRabbitContracts() }
+            runSuspendCatching { contracts.value = loadRabbitContracts() }
         }
     }
     FarmOperationalPage(

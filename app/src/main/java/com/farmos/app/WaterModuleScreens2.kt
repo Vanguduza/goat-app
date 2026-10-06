@@ -17,6 +17,7 @@ import com.farmos.domain.ops.RecordWaterPointEvent
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 private val WATER_EVENT_KINDS = mapOf(
     "inspection" to "FOS-WATER-005",
@@ -132,7 +133,7 @@ fun WaterPointEventCaptureScreen(
                 onClick = {
                     scope.launch {
                         busy = true; error = null
-                        runCatching {
+                        runSuspendCatching {
                             ops.recordWaterPointEvent(
                                 RecordWaterPointEvent(
                                     UUID.randomUUID().toString(),

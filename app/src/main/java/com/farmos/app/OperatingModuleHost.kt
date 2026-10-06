@@ -81,6 +81,7 @@ import com.farmos.feature.ops.LocalOpsAnimalSearch
 import com.farmos.feature.ops.OpsAnimalSearch
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 @Composable
 fun OperatingModuleHost(
@@ -151,13 +152,13 @@ fun OperatingModuleHost(
         withdrawalRows = ops.withdrawals().map { "${it.windowKind} · ${it.product} ends day ${it.endsEpochDay}" }
     }
 
-    LaunchedEffect(module) { runCatching { refreshOps() } }
+    LaunchedEffect(module) { runSuspendCatching { refreshOps() } }
 
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refreshOps()
             }.onSuccess {

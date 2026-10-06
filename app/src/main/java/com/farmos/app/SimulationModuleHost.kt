@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import com.farmos.core.design.runSuspendCatching
 
 /** Simulation module pages; each maps to one canonical FOS-SIM-* screen. */
 private enum class SimulationPage(val screenId: String, val title: String) {
@@ -122,7 +123,7 @@ fun SimulationModuleHost(
     }
 
     LaunchedEffect(farmId) {
-        runCatching { refresh() }.onFailure { error = it.message }
+        runSuspendCatching { refresh() }.onFailure { error = it.message }
     }
 
     fun runScenario(kind: String): FarmScenario {

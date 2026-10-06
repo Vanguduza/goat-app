@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import com.farmos.core.design.runSuspendCatching
 
 /** AI module pages; each maps to one canonical FOS-AI-* screen. */
 private enum class AiPage(val screenId: String, val title: String) {
@@ -150,7 +151,7 @@ fun AiBoundaryHost(
     }
 
     LaunchedEffect(farmId) {
-        runCatching {
+        runSuspendCatching {
             withContext(Dispatchers.IO) { config = store.load() }
             refreshSuggestions()
         }.onFailure { error = it.message }
@@ -309,7 +310,7 @@ fun AiBoundaryHost(
                     OutlinedTextField(value = endpoint, onValueChange = { endpoint = it }, label = { Text("Endpoint (optional)") }, modifier = Modifier.fillMaxWidth())
                     Button(onClick = {
                         scope.launch {
-                            runCatching { withContext(Dispatchers.IO) { store.saveProvider(providerId.trim(), endpoint.trim()); config = store.load() } }
+                            runSuspendCatching { withContext(Dispatchers.IO) { store.saveProvider(providerId.trim(), endpoint.trim()); config = store.load() } }
                                 .onFailure { error = it.message }
                         }
                     }, modifier = Modifier.fillMaxWidth()) { Text("Save provider") }
@@ -327,7 +328,7 @@ fun AiBoundaryHost(
                     OutlinedTextField(value = key, onValueChange = { key = it }, label = { Text("API key") }, modifier = Modifier.fillMaxWidth())
                     Button(onClick = {
                         scope.launch {
-                            runCatching {
+                            runSuspendCatching {
                                 require(key.isNotBlank()) { "Enter a key to store it" }
                                 withContext(Dispatchers.IO) { store.storeKey(key); key = ""; config = store.load() }
                             }.onFailure { error = it.message }
@@ -335,7 +336,7 @@ fun AiBoundaryHost(
                     }, modifier = Modifier.fillMaxWidth()) { Text("Store key") }
                     TextButton(onClick = {
                         scope.launch {
-                            runCatching { withContext(Dispatchers.IO) { store.clearKey(); config = store.load() } }
+                            runSuspendCatching { withContext(Dispatchers.IO) { store.clearKey(); config = store.load() } }
                                 .onFailure { error = it.message }
                         }
                     }, modifier = Modifier.fillMaxWidth()) { Text("Remove stored key") }

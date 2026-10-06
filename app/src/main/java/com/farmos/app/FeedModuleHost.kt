@@ -23,6 +23,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /**
  * Dedicated feed orchestration. Inventory is read for selection/context; feed owns the feed issue mutation.
@@ -55,12 +56,12 @@ fun FeedModuleHost(
         itemOptions = items.map { FarmSelectorOption(it.id, "${it.name} · ${it.sku}", "${BigDecimal.valueOf(it.quantityMilli, 3).stripTrailingZeros().toPlainString()} ${it.unit} on hand") }
         records = loadRecords()
     }
-    LaunchedEffect(farmId) { runCatching { refresh() } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy = true
             error = null
-            runCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error = it.message }
+            runSuspendCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error = it.message }
             busy = false
         }
     }
@@ -151,12 +152,12 @@ fun FeedPlanListScreen(
     suspend fun refresh() {
         plans = ops.feedPlans()
     }
-    androidx.compose.runtime.LaunchedEffect(Unit) { runCatching { refresh() } }
+    androidx.compose.runtime.LaunchedEffect(Unit) { runSuspendCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy = true
             error = null
-            runCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error = it.message }
+            runSuspendCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error = it.message }
             busy = false
         }
     }

@@ -51,6 +51,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.farmos.core.design.runSuspendCatching
 
 @Composable
 fun GoatModuleHost(
@@ -80,7 +81,7 @@ fun GoatModuleHost(
     var pedigreeParentLabels by remember { mutableStateOf(emptyList<String>()) }
     // The selected goat's standing exit (D-022), reloaded whenever the goat or its status changes.
     LaunchedEffect(selected?.animalId, selected?.status) {
-        standingExit = selected?.animalId?.let { runCatching { loadStandingGoatExit(app.database, membership.farmId, it) }.getOrNull() }
+        standingExit = selected?.animalId?.let { runSuspendCatching { loadStandingGoatExit(app.database, membership.farmId, it) }.getOrNull() }
     }
     // Per-goat management data for the FOS-GOAT-005/042/045/049/050 surfaces.
     LaunchedEffect(selected?.animalId) {
@@ -91,22 +92,22 @@ fun GoatModuleHost(
             identifiers = emptyList()
             pedigreeParentLabels = emptyList()
         } else {
-            weanings = runCatching {
+            weanings = runSuspendCatching {
                 app.database.lifecycle().goatWeaningsFor(membership.farmId, animalId).map {
                     com.farmos.feature.goat.GoatWeaningView(it.id, it.occurredEpochDay, it.weightGrams)
                 }
             }.getOrDefault(emptyList())
-            movements = runCatching {
+            movements = runSuspendCatching {
                 app.database.lifecycle().movementsForAnimal(membership.farmId, animalId).map {
                     com.farmos.feature.goat.GoatMovementView(it.id, it.direction, it.fromPlace, it.toPlace, it.occurredEpochDay)
                 }
             }.getOrDefault(emptyList())
-            identifiers = runCatching {
+            identifiers = runSuspendCatching {
                 app.database.lifecycle().identifiersForAnimal(membership.farmId, animalId).map {
                     com.farmos.feature.goat.GoatIdentifierView(it.id, it.type, it.value, it.isActive, it.assignedEpochDay)
                 }
             }.getOrDefault(emptyList())
-            pedigreeParentLabels = runCatching {
+            pedigreeParentLabels = runSuspendCatching {
                 val parents = selected?.pedigree?.parents.orEmpty()
                 parents.map { link -> "${link.relationType}: ${link.label ?: link.relativeId}" }
             }.getOrDefault(emptyList())
@@ -114,7 +115,7 @@ fun GoatModuleHost(
     }
     // Goat groups for FOS-GOAT-047/048, loaded with the farm.
     LaunchedEffect(membership.farmId) {
-        goatGroups = runCatching {
+        goatGroups = runSuspendCatching {
             app.database.groups().forFarm(membership.farmId)
                 .filter { it.speciesCode == "goat" }
                 .map { com.farmos.feature.goat.GoatGroupView(it.id, it.name, it.headCount) }
@@ -133,7 +134,7 @@ fun GoatModuleHost(
 
     suspend fun refreshGoatState() {
         herdState = LoadableSurfaceState.LOADING
-        runCatching {
+        runSuspendCatching {
             val loaded = repository.listGoats(500)
             val autoSelect =
                 entryPage != GoatEntryPage.WEIGHT &&
@@ -160,10 +161,10 @@ fun GoatModuleHost(
             herdState = LoadableSurfaceState.ERROR
         }
         // Exhaustive counts; on failure the dashboard falls back to the bounded herd list.
-        herdCounts = runCatching { repository.herdCounts(java.time.LocalDate.now().toEpochDay()) }.getOrNull()
-        lactation = runCatching { repository.lactationSummaries() }
+        herdCounts = runSuspendCatching { repository.herdCounts(java.time.LocalDate.now().toEpochDay()) }.getOrNull()
+        lactation = runSuspendCatching { repository.lactationSummaries() }
             .fold({ GoatLactationState.Loaded(it) }, { GoatLactationState.Failed(it.message ?: "Lactation records could not be loaded") })
-        kiddingDue = runCatching {
+        kiddingDue = runSuspendCatching {
             // The farm's own goat gestation period (owner decision D-019), or the default.
             val period = app.database.gestationPeriod(membership.farmId, GestationSpecies.GOAT)
             GoatKiddingDueState.Loaded(repository.kiddingDue(period.earliestDays, period.typicalDays, period.latestDays), period.typicalDays)
@@ -186,7 +187,7 @@ fun GoatModuleHost(
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refreshGoatState()
             }.onSuccess {
@@ -541,7 +542,7 @@ fun GoatModuleHost(
         onSearch = { query ->
             scope.launch {
                 error = null
-                runCatching {
+                runSuspendCatching {
                     if (query.isBlank()) emptyList() else repository.searchGoats(query, 25)
                 }.onSuccess { local ->
                     searchResults = local
@@ -558,7 +559,7 @@ fun GoatModuleHost(
                 searchResults = emptyList()
                 searchMessage = "Looking up identifier"
 
-                val localOutcome = runCatching {
+                val localOutcome = runSuspendCatching {
                     val assigned = app.database.lifecycle().activeIdentifierByValue(membership.farmId, identifier)
                     val assignedAnimal = assigned?.let { app.database.animals().get(membership.farmId, it.animalId) }
                     when {

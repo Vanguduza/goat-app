@@ -28,6 +28,7 @@ import com.farmos.domain.ops.LinkPedigree
 import com.farmos.domain.ops.PedigreeParents
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** Genetics module pages; each maps to one canonical FOS-GEN-* screen. */
 private enum class GeneticsPage(val screenId: String, val title: String) {
@@ -87,7 +88,7 @@ fun GeneticsModuleHost(
     }
 
     LaunchedEffect(farmId) {
-        runCatching { refreshSummary() }.onFailure { error = it.message }
+        runSuspendCatching { refreshSummary() }.onFailure { error = it.message }
     }
 
     suspend fun resolveAnimalId(tag: String) =
@@ -97,7 +98,7 @@ fun GeneticsModuleHost(
     fun recordParentage(animalTag: String, parentTag: String, relationType: String, done: (String) -> Unit) {
         scope.launch {
             error = null
-            runCatching {
+            runSuspendCatching {
                 val animalId = requireNotNull(resolveAnimalId(animalTag)) { "Animal '$animalTag' not found on this farm" }
                 val parentId = requireNotNull(resolveAnimalId(parentTag)) { "Parent '$parentTag' not found on this farm" }
                 require(relationType in setOf("sire", "dam", "genetic_dam")) { "Relation must be sire, dam or genetic_dam" }
@@ -168,12 +169,12 @@ private fun PedigreeExplorer(pedigree: PedigreeQueries, database: FarmOsDatabase
         Button(onClick = {
             scope.launch {
                 busy = true
-                lines = runCatching {
+                lines = runSuspendCatching {
                     val animal = database.animals().search(farmId, null, null, "%${escapeLike(tag.trim())}%", 50, 0)
                         .firstOrNull { it.tag.equals(tag.trim(), ignoreCase = true) }
                         ?: error("Animal '${tag.trim()}' not found on this farm")
                     val graph = pedigree.graph(listOf(animal.id))
-                    if (graph.parents.isEmpty()) return@runCatching listOf("No recorded parentage for ${animal.tag}.")
+                    if (graph.parents.isEmpty()) return@runSuspendCatching listOf("No recorded parentage for ${animal.tag}.")
                     suspend fun label(id: String): String =
                         database.animals().get(farmId, id)?.let { "${it.tag}${it.name?.let { n -> " ($n)" } ?: ""}" } ?: id
                     val out = mutableListOf("Ancestors of ${animal.tag}:")
@@ -259,7 +260,7 @@ private fun RelationshipExplorer(pedigree: PedigreeQueries, database: FarmOsData
         Button(onClick = {
             scope.launch {
                 busy = true
-                lines = runCatching {
+                lines = runSuspendCatching {
                     val a = requireNotNull(resolve(first)) { "Animal '${first.trim()}' not found" }
                     val b = requireNotNull(resolve(second)) { "Animal '${second.trim()}' not found" }
                     val common = ancestorsOf(pedigree.graph(listOf(a.id)).parents) intersect ancestorsOf(pedigree.graph(listOf(b.id)).parents)
@@ -297,7 +298,7 @@ private fun CandidateRanking(pedigree: PedigreeQueries, database: FarmOsDatabase
                         ?: error("Dam '${damTag.trim()}' not found")
                     val sires = database.animals().search(farmId, dam.speciesCode, "male", null, 200, 0)
                         .filter { it.status == "active" }
-                    if (sires.isEmpty()) return@runCatching listOf("No active sires of ${dam.speciesCode} on this farm.")
+                    if (sires.isEmpty()) return@runSuspendCatching listOf("No active sires of ${dam.speciesCode} on this farm.")
                     val ranked = sires.map { sire ->
                         val analysis = pedigree.mating(sire.id, dam.id)
                         Triple(sire, analysis.inbreeding.coefficient, analysis.inbreeding.generationsKnown)

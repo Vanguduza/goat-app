@@ -32,6 +32,7 @@ import com.farmos.feature.ops.assigneeChange
 import com.farmos.feature.ops.assigneeKey
 import java.time.LocalDate
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** Tabs of the per-task workspace. FOS-GROUP-007 is intentionally absent: no group-move command exists. */
 private enum class TaskDetailTab(val label: String) {
@@ -75,7 +76,7 @@ fun TasksModuleHost(
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refresh()
             }.onSuccess {
@@ -88,7 +89,7 @@ fun TasksModuleHost(
     }
 
     LaunchedEffect(farmId) {
-        runCatching { refresh() }
+        runSuspendCatching { refresh() }
             .onFailure { error = it.message }
     }
 

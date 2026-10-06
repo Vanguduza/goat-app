@@ -19,6 +19,7 @@ import com.farmos.feature.ops.WaterRecords
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /**
  * Dedicated water-record orchestration preserving the existing command contract.
@@ -46,11 +47,11 @@ fun WaterModuleHost(
         rows.value = ops.recentWater().map { "${it.source} · ${it.litresMilli} ml" }
         records.value = loadRecords()
     }
-    LaunchedEffect(farmId) { runCatching { refresh() } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy.value = true; error.value = null; saved.value = false
-            runCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }
+            runSuspendCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }
             busy.value = false
         }
     }
@@ -127,11 +128,11 @@ fun WaterPointListScreen(
     suspend fun refresh() {
         points.value = ops.waterPoints()
     }
-    LaunchedEffect(Unit) { runCatching { refresh() } }
+    LaunchedEffect(Unit) { runSuspendCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy.value = true; error.value = null
-            runCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error.value = it.message }
+            runSuspendCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error.value = it.message }
             busy.value = false
         }
     }

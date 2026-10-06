@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import com.farmos.core.design.runSuspendCatching
 
 private enum class MoneyHubPage {
     HOME,
@@ -124,7 +125,7 @@ fun MoneyModuleHost(
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refresh()
             }.onSuccess {
@@ -137,7 +138,7 @@ fun MoneyModuleHost(
     }
 
     LaunchedEffect(farmId) {
-        runCatching { refresh() }
+        runSuspendCatching { refresh() }
             .onFailure { error = it.message }
     }
 

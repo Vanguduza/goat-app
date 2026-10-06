@@ -10,6 +10,7 @@ import com.farmos.domain.ops.RecordFeedPlan
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** FOS-FEED-007 — feed cost: issued feed valued at the farm's weighted-average purchase cost per item. */
 @Composable
@@ -106,7 +107,7 @@ fun RationBuilderScreen(
                 onClick = {
                     scope.launch {
                         busy = true; error = null
-                        runCatching {
+                        runSuspendCatching {
                             ops.recordFeedPlan(
                                 RecordFeedPlan(
                                     UUID.randomUUID().toString(), name.value, species.value,

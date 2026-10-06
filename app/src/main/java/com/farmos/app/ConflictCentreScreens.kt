@@ -40,6 +40,7 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.farmos.core.design.runSuspendCatching
 
 private val conflictTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
@@ -73,11 +74,11 @@ internal fun ConflictCentreHost(
         scope.launch {
             busy = true
             error = null
-            runCatching { withContext(Dispatchers.IO) { block() }; reload(); open = null }.onFailure { error = it.message ?: "The change could not be resolved on this device" }
+            runSuspendCatching { withContext(Dispatchers.IO) { block() }; reload(); open = null }.onFailure { error = it.message ?: "The change could not be resolved on this device" }
             busy = false
         }
     }
-    LaunchedEffect(farmId) { runCatching { reload() }.onFailure { error = it.message } }
+    LaunchedEffect(farmId) { runSuspendCatching { reload() }.onFailure { error = it.message } }
     val detail = open
     if (detail != null) {
         ConflictDetailScreen(

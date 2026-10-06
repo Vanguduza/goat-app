@@ -34,6 +34,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 @Composable
 fun HealthModuleHost(
@@ -172,7 +173,7 @@ fun HealthModuleHost(
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refresh()
             }.onSuccess {
@@ -185,7 +186,7 @@ fun HealthModuleHost(
     }
 
     LaunchedEffect(farmId) {
-        runCatching { refresh() }
+        runSuspendCatching { refresh() }
             .onFailure { error = it.message }
     }
 

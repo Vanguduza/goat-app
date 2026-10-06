@@ -18,6 +18,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** Every sale exit still waiting for its sale money, newest first (D-022). */
 internal suspend fun loadUnsettledSaleExits(database: FarmOsDatabase, farmId: String): List<SaleExitView> =
@@ -41,7 +42,7 @@ internal fun AnimalSaleHost(database: FarmOsDatabase, farmId: String, newContext
     var exits by remember(farmId) { mutableStateOf(emptyList<SaleExitView>()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    LaunchedEffect(farmId) { runCatching { exits = loadUnsettledSaleExits(database, farmId) }.onFailure { error = it.message } }
+    LaunchedEffect(farmId) { runSuspendCatching { exits = loadUnsettledSaleExits(database, farmId) }.onFailure { error = it.message } }
     AnimalSaleScreen(
         exits = exits,
         currency = currency,
@@ -52,7 +53,7 @@ internal fun AnimalSaleHost(database: FarmOsDatabase, farmId: String, newContext
             scope.launch {
                 busy = true
                 error = null
-                runCatching {
+                runSuspendCatching {
                     val code = checkNotNull(currency) { "The farm currency is still loading" }
                     commands.recordExitSale(
                         RecordExitSale(UUID.randomUUID().toString(), exit.exitId, exit.animalId, exit.animalLabel, amount.toScaledLongExact(FarmCurrency.minorDigits(code), "Amount"), code, day.toEpochDay(), customerId),

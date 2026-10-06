@@ -23,6 +23,7 @@ import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** Internal pages of the labour module. */
 private enum class LabourPage {
@@ -63,13 +64,13 @@ fun LabourModuleHost(
         attendanceEntries = ops.recentLabour()
     }
 
-    LaunchedEffect(farmId) { runCatching { refresh() } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
 
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refresh()
             }.onSuccess { enqueueSync() }
@@ -86,7 +87,7 @@ fun LabourModuleHost(
     when (page) {
         LabourPage.HOME -> {
             // Returning from the register refreshes the worker choice, so a worker just added can be chosen.
-            val register: (@Composable (onBack: () -> Unit) -> Unit)? = if (workers == null) null else { back -> workers { back(); scope.launch { runCatching { refresh() } } } }
+            val register: (@Composable (onBack: () -> Unit) -> Unit)? = if (workers == null) null else { back -> workers { back(); scope.launch { runSuspendCatching { refresh() } } } }
             LabourRecordNavigator(records, register) { recordActions -> SimpleCaptureScreen(
                 screenId = "FOS-LABOUR-001",
                 title = "Labour",

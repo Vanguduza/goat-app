@@ -14,6 +14,7 @@ import com.farmos.core.database.FarmOsDatabase
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.farmos.core.design.runSuspendCatching
 
 /**
  * FOS-TASK-012 — Task Attachment (read side): the files kept against one task, newest first,
@@ -35,7 +36,7 @@ internal fun TaskAttachmentsHost(
     var message by remember(taskId) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(farmId, taskId) {
-        items = runCatching {
+        items = runSuspendCatching {
             withContext(Dispatchers.IO) {
                 database.attachments().forOwner(farmId, "task", taskId).map { row ->
                     val bytes = if (row.mediaType.startsWith("image/")) store.read(farmId, row.contentSha256) else null

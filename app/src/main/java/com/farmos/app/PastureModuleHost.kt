@@ -28,6 +28,7 @@ import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /**
  * Dedicated pasture/grazing orchestration boundary.
@@ -66,13 +67,13 @@ fun PastureModuleHost(
         records = loadRecords()
     }
 
-    LaunchedEffect(farmId) { runCatching { refresh() } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
 
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refresh()
             }.onSuccess { enqueueSync() }

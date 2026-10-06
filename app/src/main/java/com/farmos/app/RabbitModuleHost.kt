@@ -30,6 +30,7 @@ import com.farmos.feature.rabbit.RabbitRecords
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** Dedicated Rabbit presentation/orchestration boundary; preserves existing governed commands. */
 @Composable
@@ -87,13 +88,13 @@ fun RabbitModuleHost(
         rabbitCount = rabbitHerd.listedTotal()
     }
 
-    LaunchedEffect(farmId) { runCatching { refresh() } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
 
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refresh()
             }.onSuccess {

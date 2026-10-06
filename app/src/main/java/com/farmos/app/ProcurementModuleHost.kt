@@ -34,6 +34,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 private enum class ProcurementModulePage { HOME, ORDERS, CREATE, RECEIVE, TO_INVENTORY, REPORT }
 
@@ -80,9 +81,9 @@ fun ProcurementModuleHost(
         rows.value = suppliers + purchases
         records.value = loadRecords()
     }
-    LaunchedEffect(farmId) { runCatching { refresh() } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
-        scope.launch { busy.value = true; error.value = null; saved.value = false; runCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }; busy.value = false }
+        scope.launch { busy.value = true; error.value = null; saved.value = false; runSuspendCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }; busy.value = false }
     }
     val page = remember { mutableStateOf(ProcurementModulePage.HOME) }
     val selectedPurchase = remember { mutableStateOf<ProcurementPurchaseView?>(null) }

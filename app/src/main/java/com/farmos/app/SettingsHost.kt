@@ -76,6 +76,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.farmos.core.design.runSuspendCatching
 
 private enum class SettingsPage {
     HOME, MEMBERS, CREATE_MEMBER, MEMBER_DETAIL, PERMISSIONS, AUDIT, STORAGE, DEVICES, CURRENCY, SPECIES, CONFLICTS,
@@ -153,7 +154,7 @@ internal fun SettingsHost(
         scope.launch {
             busy = true
             error = null
-            runCatching { withContext(io) { block(actor) } }
+            runSuspendCatching { withContext(io) { block(actor) } }
                 .onSuccess { onDone() }
                 .onFailure { error = it.message ?: "The change could not be saved on this device" }
             refreshKey++
@@ -369,7 +370,7 @@ internal fun SettingsHost(
             var createdAt by remember(farmId) { mutableStateOf<Long?>(null) }
             var loadError by remember(farmId) { mutableStateOf<String?>(null) }
             LaunchedEffect(farmId, refreshKey) {
-                runCatching {
+                runSuspendCatching {
                     withContext(io) {
                         database.localAccess().farms().firstOrNull { it.farmId == farmId }
                     }
@@ -400,7 +401,7 @@ internal fun SettingsHost(
             var enabled by remember(farmId, refreshKey) { mutableStateOf<Set<String>?>(null) }
             var loadError by remember(farmId) { mutableStateOf<String?>(null) }
             LaunchedEffect(farmId, refreshKey) {
-                runCatching { withContext(io) { database.lifecycle().enabledPoultryKinds(farmId).map { it.poultryKindCode }.toSet() } }
+                runSuspendCatching { withContext(io) { database.lifecycle().enabledPoultryKinds(farmId).map { it.poultryKindCode }.toSet() } }
                     .onSuccess { enabled = it }
                     .onFailure { loadError = it.message }
             }
@@ -432,7 +433,7 @@ internal fun SettingsHost(
                             scope.launch {
                                 busy = true
                                 error = null
-                                runCatching {
+                                runSuspendCatching {
                                     withContext(io) {
                                         w.enablePoultryKind(
                                             EnablePoultryKind(code),
@@ -458,7 +459,7 @@ internal fun SettingsHost(
             var paddocks by remember(farmId, refreshKey) { mutableStateOf<List<String>?>(null) }
             var houses by remember(farmId, refreshKey) { mutableStateOf<List<String>?>(null) }
             LaunchedEffect(farmId, refreshKey) {
-                runCatching {
+                runSuspendCatching {
                     withContext(io) {
                         database.paddocks().active(farmId).map { "${it.code} · ${it.name}" } to
                             database.lifecycle().houses(farmId).map { "${it.code} · ${it.kind}" }
@@ -577,7 +578,7 @@ internal fun SettingsHost(
                     names = emptyList()
                     return@LaunchedEffect
                 }
-                runCatching {
+                runSuspendCatching {
                     withContext(Dispatchers.IO) {
                         @Suppress("MissingPermission")
                         adapter.bondedDevices.map { "${it.name ?: "Unnamed device"} · ${it.address}" }.sorted()
@@ -651,7 +652,7 @@ internal fun SettingsHost(
                 SettingsButton("Export farm summary", !exporting && !busy) {
                     exporting = true
                     scope.launch {
-                        runCatching {
+                        runSuspendCatching {
                             withContext(io) { writeSettingsExport(context, database, farmId, current) }
                         }.onSuccess { log = settingsExportLog(context, farmId) }
                             .onFailure { error = it.message ?: "The export could not be written on this device" }

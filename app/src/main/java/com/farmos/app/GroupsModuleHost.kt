@@ -28,6 +28,7 @@ import com.farmos.feature.ops.SimpleCaptureScreen
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** Internal pages of the group module. FOS-GROUP-007 (Group Move) has no domain command and is not a page. */
 private enum class GroupsPage {
@@ -64,13 +65,13 @@ fun GroupsModuleHost(
         groupViews = loadGroups()
     }
 
-    LaunchedEffect(farmId) { runCatching { refresh() } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
 
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refresh()
             }.onSuccess { enqueueSync() }
