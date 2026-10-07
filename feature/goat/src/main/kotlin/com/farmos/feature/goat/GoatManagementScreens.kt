@@ -7,21 +7,31 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.farmos.core.design.FarmDateField
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmSearchSelector
 import com.farmos.core.design.FarmSelectorSearch
+import com.farmos.core.design.NoOpScaleAdapter
+import com.farmos.core.design.ScaleAdapter
+import com.farmos.core.design.ScaleDevice
+import com.farmos.core.design.ScaleReading
+import com.farmos.core.design.runSuspendCatching
 import com.farmos.domain.goat.GoatSnapshot
+import java.math.BigDecimal
 import java.time.LocalDate
+import kotlinx.coroutines.launch
 
 /** FOS-GOAT-005 — Edit Goat Identity: amend tag, name and official identifier of the selected goat. */
 @Composable
@@ -354,21 +364,147 @@ internal fun GoatReportScreen(
 /**
  * FOS-GOAT-012 — BLE Scale Pairing.
  *
- * GENUINE GAP — not implemented: there is no BLE hardware adapter in this build (no scale
- * discovery, pairing, or weight-ingest path), so a pairing UI would be a fake.
- * Required piece: a Farm OS-owned BLE scale adapter behind the hardware boundary, with a
- * governed weight-ingest command. This screen fails closed.
+ * Optional bounded hardware adapter. Manual weight entry is the primary path and always
+ * works; the BLE adapter path is disabled by default and only runs after the user
+ * explicitly enables it (the host requests Bluetooth permission at that point, never
+ * before). Scale readings are advisory until confirmed and enter Farm OS through the
+ * existing governed weight-record command — the adapter never writes to Room.
  */
 @Composable
-internal fun GoatScalePairingScreen(onBack: () -> Unit) {
+internal fun GoatScalePairingScreen(
+    adapter: ScaleAdapter = NoOpScaleAdapter,
+    adapterEnabled: Boolean = false,
+    onToggleAdapter: (Boolean) -> Unit = {},
+    selectedGoatLabel: String? = null,
+    onRecordWeight: (String) -> Unit = {},
+    onBack: () -> Unit,
+) {
     IllustratedGoatPage("Scale pairing", "FOS-GOAT-012 · I3", onBack) {
         FarmIllustratedSectionSurface {
-            Text("Unavailable", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text(
-                "BLE scale pairing is not available in this build: there is no Bluetooth scale adapter. " +
-                    "No scale is shown rather than a fabricated one.",
+            Text("Manual weight entry", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("Primary path — always available, no hardware needed.")
+            var kgText by remember { mutableStateOf("") }
+            OutlinedTextField(
+                value = kgText,
+                onValueChange = { kgText = it },
+                label = { Text("Weight (kg)") },
+                modifier = Modifier.fillMaxWidth(),
             )
-            Text("Required: a Farm OS-owned BLE scale adapter with a governed weight-ingest command.")
+            Button(onClick = { onRecordWeight(kgText) }) { Text("Record weight") }
+            Text(
+                if (selectedGoatLabel != null) "Recording for $selectedGoatLabel."
+                else "Select a goat first: the weight records against the selected animal.",
+            )
+        }
+        FarmIllustratedSectionSurface {
+            Text("BLE scale adapter (optional)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(
+                "Disabled by default. Enabling lets this screen scan for Bluetooth weigh scales; " +
+                    "the adapter path requests Bluetooth permission only when you enable it.",
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("Enable BLE scale adapter")
+                Switch(checked = adapterEnabled, onCheckedChange = onToggleAdapter)
+            }
+            if (adapterEnabled) {
+                ScaleScanUi(
+                    adapter = adapter,
+                    onUseReading = { grams ->
+                        onRecordWeight(grams.toBigDecimal().movePointLeft(3).stripTrailingZeros().toPlainString())
+                    },
+                )
+            } else {
+                Text("No scale is shown rather than a fabricated one.")
+            }
+        }
+    }
+}
+
+/** FOS-GOAT-012 — scan/connect/read UI over a [ScaleAdapter]; readings stay advisory until confirmed. */
+@Composable
+private fun ScaleScanUi(
+    adapter: ScaleAdapter,
+    onUseReading: (Long) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var scanning by remember { mutableStateOf(false) }
+    var devices by remember { mutableStateOf(emptyList<ScaleDevice>()) }
+    var connected by remember { mutableStateOf<ScaleDevice?>(null) }
+    var reading by remember { mutableStateOf<ScaleReading?>(null) }
+    var note by remember { mutableStateOf<String?>(null) }
+
+    fun runAdapter(label: String, block: suspend () -> Unit) {
+        scope.launch {
+            note = null
+            runSuspendCatching { block() }.onFailure { note = "$label: ${it.message}" }
+        }
+    }
+
+    note?.let { Text(it) }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Button(
+            onClick = {
+                scanning = true
+                devices = emptyList()
+                connected?.let { scope.launch { adapter.disconnect() } }
+                connected = null
+                reading = null
+                runAdapter("Scan") {
+                    try {
+                        devices = adapter.scanForScales().getOrThrow()
+                    } finally {
+                        scanning = false
+                    }
+                }
+            },
+            enabled = !scanning,
+        ) { Text(if (scanning) "Scanning…" else "Scan for scales") }
+        connected?.let {
+            TextButton(onClick = {
+                runAdapter("Disconnect") {
+                    adapter.disconnect().getOrThrow()
+                    connected = null
+                    reading = null
+                }
+            }) { Text("Disconnect") }
+        }
+    }
+    devices.forEach { device ->
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text("${device.name} · ${device.address}")
+            if (connected?.address == device.address) {
+                Text("Connected")
+            } else {
+                TextButton(onClick = {
+                    runAdapter("Connect") {
+                        adapter.connect(device).getOrThrow()
+                        connected = device
+                        reading = null
+                    }
+                }) { Text("Connect") }
+            }
+        }
+    }
+    if (connected != null) {
+        Button(onClick = {
+            runAdapter("Read") { reading = adapter.readWeight().getOrThrow() }
+        }) { Text("Read weight") }
+    }
+    reading?.let {
+        val kg = it.weightGrams.toBigDecimal().movePointLeft(3).stripTrailingZeros().toPlainString()
+        Text("Scale reading: $kg kg (${it.weightGrams} g) — confirm to record.")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = {
+                onUseReading(it.weightGrams)
+                reading = null
+            }) { Text("Record this weight") }
+            TextButton(onClick = { reading = null }) { Text("Discard") }
         }
     }
 }

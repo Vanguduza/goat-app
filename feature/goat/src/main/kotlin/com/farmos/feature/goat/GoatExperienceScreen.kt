@@ -250,6 +250,11 @@ internal fun GoatExperienceScreen(
             onBack = { page = GoatPage.DASHBOARD },
         )
         GoatPage.SCALE_PAIRING -> GoatScalePairingScreen(
+            adapter = actions.scaleAdapter,
+            adapterEnabled = actions.isScaleAdapterEnabled,
+            onToggleAdapter = actions.onToggleScaleAdapter,
+            selectedGoatLabel = selected?.let { "${it.tag}${it.name?.let { n -> " · $n" } ?: ""}" },
+            onRecordWeight = actions.onRecordWeight,
             onBack = { page = GoatPage.DASHBOARD },
         )
         in goatHistoryPages -> GoatHistoryPage(

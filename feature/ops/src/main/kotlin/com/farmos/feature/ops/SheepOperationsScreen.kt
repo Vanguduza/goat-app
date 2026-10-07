@@ -8,17 +8,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.farmos.core.design.EidReaderAdapter
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.design.FarmVisualClass
+import com.farmos.core.design.NoOpEidReaderAdapter
+import com.farmos.core.design.runSuspendCatching
 import java.time.LocalDate
+import kotlinx.coroutines.launch
 
 data class SheepOperationsActions(
     val onJoining: (groupId: String, day: String) -> Unit,
@@ -40,6 +46,14 @@ data class SheepOperationsActions(
     /** FOS-SHEEP-028 — (groupId, paddockId, day); starts a grazing session for the group. */
     val onPaddockAssign: (String, String, String) -> Unit = { _, _, _ -> },
     val onPedigree: (animalId: String, parentId: String, relation: String) -> Unit,
+    /** FOS-SHEEP-005 — EID reader adapter; NoOp unless the host fits the reader path. */
+    val eidReaderAdapter: EidReaderAdapter = NoOpEidReaderAdapter,
+    /** Whether the user explicitly enabled the EID reader path. */
+    val isEidReaderEnabled: Boolean = false,
+    /** Explicit user opt-in for the EID reader path (host handles permission). */
+    val onToggleEidReader: (Boolean) -> Unit = {},
+    /** Assigns a scanned or typed EID value through the governed identifier command. */
+    val onAssignEid: (animalId: String, value: String, day: String) -> Unit = { _, _, _ -> },
 )
 
 private enum class SheepOpsPage {
@@ -241,7 +255,15 @@ fun SheepOperationsScreen(
         SheepOpsPage.GROWTH_HISTORY -> SheepGrowthHistoryScreen(selectedAnimalId, loadRecords, home)
         SheepOpsPage.WOOL_DASHBOARD -> SheepWoolDashboardScreen(loadWool, home)
         SheepOpsPage.LAMBING_DUE -> SheepLambingDueScreen(loadLambingDue, today, home)
-        SheepOpsPage.EID_SCAN -> SheepEidScanScreen(home)
+        SheepOpsPage.EID_SCAN -> SheepEidScanScreen(
+            selectedAnimalId = selectedAnimalId,
+            adapter = actions.eidReaderAdapter,
+            adapterEnabled = actions.isEidReaderEnabled,
+            onToggleAdapter = actions.onToggleEidReader,
+            onAssignEid = actions.onAssignEid,
+            today = today,
+            onBack = home,
+        )
     }
 }
 
@@ -737,21 +759,91 @@ private fun validDate(value: String): Boolean = runCatching { LocalDate.parse(va
  * Required piece: a Farm OS-owned RFID reader adapter behind the hardware boundary, with a
  * governed EID-ingest command. This screen fails closed.
  */
+/**
+ * FOS-SHEEP-005 — EID scan: optional bounded reader adapter.
+ *
+ * Manual identifier entry is the primary path and always works. The reader path is
+ * disabled by default and only runs after explicit user opt-in. A scanned tag is
+ * advisory: it fills the entry field and the user confirms it through the exact same
+ * governed assign-identifier command (with farm-scoped uniqueness validation) as a
+ * typed value. Hardware never has authority over domain truth.
+ */
 @Composable
-internal fun SheepEidScanScreen(onBack: () -> Unit) {
+internal fun SheepEidScanScreen(
+    selectedAnimalId: String?,
+    adapter: EidReaderAdapter = NoOpEidReaderAdapter,
+    adapterEnabled: Boolean = false,
+    onToggleAdapter: (Boolean) -> Unit = {},
+    onAssignEid: (animalId: String, value: String, day: String) -> Unit = { _, _, _ -> },
+    today: LocalDate = LocalDate.now(),
+    onBack: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var eidValue by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf<String?>(null) }
+    var reading by remember { mutableStateOf(false) }
     FarmOperationalPage(
         screenId = "FOS-SHEEP-005",
         title = "EID scan",
-        subtitle = "Not available in this build.",
+        subtitle = "Electronic identification, manual-first.",
         onBack = onBack,
         backLabel = "Sheep",
     ) {
-        FarmOperationalSection("Unavailable") {
-            Text(
-                "EID scanning is not available in this build: there is no RFID reader adapter. " +
-                    "No tag is shown rather than a fabricated scan.",
+        FarmOperationalSection("Manual EID entry (primary)") {
+            Text("Always available — no reader needed. The value is validated and checked for farm-wide uniqueness before it is recorded.")
+            OutlinedTextField(
+                value = eidValue,
+                onValueChange = { eidValue = it },
+                label = { Text("EID tag value") },
+                modifier = Modifier.fillMaxWidth(),
             )
-            Text("Required: a Farm OS-owned RFID reader adapter with a governed EID-ingest command.")
+            Button(onClick = {
+                val animalId = selectedAnimalId
+                when {
+                    animalId == null -> note = "Select a sheep first: the EID records against the selected animal."
+                    eidValue.isBlank() -> note = "Enter an EID tag value first."
+                    else -> {
+                        note = null
+                        onAssignEid(animalId, eidValue.trim(), today.toString())
+                        eidValue = ""
+                    }
+                }
+            }) { Text("Assign EID") }
+            if (selectedAnimalId == null) {
+                Text("No individual selected — group workflows remain available elsewhere.")
+            }
+        }
+        FarmOperationalSection("EID reader (optional)") {
+            Text(
+                "Disabled by default. A scanned tag only fills the entry field above; " +
+                    "you review and confirm it exactly like a typed value. No tag is shown rather than a fabricated scan.",
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("Enable EID reader")
+                Switch(checked = adapterEnabled, onCheckedChange = onToggleAdapter)
+            }
+            if (adapterEnabled) {
+                note?.let { Text(it) }
+                Button(
+                    onClick = {
+                        reading = true
+                        note = null
+                        scope.launch {
+                            runSuspendCatching { adapter.readTag().getOrThrow() }
+                                .onSuccess { tag ->
+                                    eidValue = tag.rawValue
+                                    note = "Tag read (${tag.kind}). Review the value above, then Assign EID."
+                                }
+                                .onFailure { note = "Read failed: ${it.message}" }
+                            reading = false
+                        }
+                    },
+                    enabled = !reading,
+                ) { Text(if (reading) "Reading…" else "Read tag") }
+            }
         }
     }
 }

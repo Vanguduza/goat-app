@@ -1,5 +1,7 @@
 package com.farmos.app
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,7 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import com.farmos.app.hardware.ScaleAdapters
+import com.farmos.app.hardware.blePermissionsNeeded
 import com.farmos.core.database.unsharedLocalOperations
 import com.farmos.domain.ops.GestationSpecies
 import com.farmos.core.model.LocalCommandContext
@@ -126,6 +131,35 @@ fun GoatModuleHost(
     var searchMessage by remember { mutableStateOf("Local search is always available") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    // FOS-GOAT-012 — BLE scale adapter path: disabled by default; the permission request below
+    // only fires when the user explicitly enables the adapter on the scale pairing screen.
+    val context = LocalContext.current
+    var scaleAdapterEnabled by remember { mutableStateOf(ScaleAdapters.bleScaleEnabled) }
+    val blePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { grants ->
+        if (grants.values.all { it }) {
+            ScaleAdapters.bleScaleEnabled = true
+            scaleAdapterEnabled = true
+        } else {
+            error = "Bluetooth permission denied — the BLE scale adapter stays off; manual entry still works."
+        }
+    }
+    /** Explicit user opt-in for the BLE scale adapter path; permission-aware, host-owned. */
+    fun toggleScaleAdapter(wantEnabled: Boolean) {
+        if (!wantEnabled) {
+            ScaleAdapters.bleScaleEnabled = false
+            scaleAdapterEnabled = false
+            return
+        }
+        val missing = blePermissionsNeeded(context)
+        if (missing.isEmpty()) {
+            ScaleAdapters.bleScaleEnabled = true
+            scaleAdapterEnabled = true
+        } else {
+            blePermissionLauncher.launch(missing)
+        }
+    }
     var herdState by remember { mutableStateOf(LoadableSurfaceState.LOADING) }
     var pendingSyncCount by remember { mutableStateOf(0L) }
     var herdCounts by remember { mutableStateOf<com.farmos.domain.goat.GoatHerdCounts?>(null) }
@@ -304,6 +338,10 @@ fun GoatModuleHost(
         identifiers = identifiers,
         goatGroups = goatGroups,
         pedigreeParentLabels = pedigreeParentLabels,
+        // FOS-GOAT-012 — BLE scale adapter: NoOp until the user explicitly enables it.
+        scaleAdapter = remember(scaleAdapterEnabled) { ScaleAdapters.current(context) },
+        isScaleAdapterEnabled = scaleAdapterEnabled,
+        onToggleScaleAdapter = ::toggleScaleAdapter,
         // FOS-GOAT-008 (photo gallery) and FOS-GOAT-010 (documents): the profile's
         // attachment section renders photos and PDF documents in one shared surface.
         profileAttachments = { animalId, active ->

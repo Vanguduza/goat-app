@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.farmos.core.design.FarmSelectorSearch
 import com.farmos.core.design.NoFarmSelectorSearch
+import com.farmos.core.design.NoOpScaleAdapter
+import com.farmos.core.design.ScaleAdapter
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.GoatStatus
 
@@ -60,6 +62,12 @@ fun GoatVerticalSliceScreen(
     onAssignIdentifier: (type: String, value: String) -> Unit = { _, _ -> },
     /** Links a parent to the selected goat (FOS-GOAT-045). */
     onLinkParentage: (parentId: String, relationType: String) -> Unit = { _, _ -> },
+    /** BLE scale adapter for FOS-GOAT-012; NoOp unless the host fits the BLE path. */
+    scaleAdapter: ScaleAdapter = NoOpScaleAdapter,
+    /** Whether the user explicitly enabled the BLE scale adapter path. */
+    isScaleAdapterEnabled: Boolean = false,
+    /** Explicit user opt-in for the BLE scale adapter path (host handles permission). */
+    onToggleScaleAdapter: (Boolean) -> Unit = {},
     weanings: List<GoatWeaningView> = emptyList(),
     movements: List<GoatMovementView> = emptyList(),
     identifiers: List<GoatIdentifierView> = emptyList(),
@@ -98,6 +106,9 @@ fun GoatVerticalSliceScreen(
             onRecordMovement = onRecordMovement,
             onAssignIdentifier = onAssignIdentifier,
             onLinkParentage = onLinkParentage,
+            scaleAdapter = scaleAdapter,
+            isScaleAdapterEnabled = isScaleAdapterEnabled,
+            onToggleScaleAdapter = onToggleScaleAdapter,
         ),
         onBackToFarm = onBack,
         onSignOut = onSignOut,

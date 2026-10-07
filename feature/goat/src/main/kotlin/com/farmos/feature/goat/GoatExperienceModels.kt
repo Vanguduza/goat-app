@@ -3,6 +3,8 @@ package com.farmos.feature.goat
 import androidx.compose.runtime.Composable
 import com.farmos.core.design.FarmSelectorSearch
 import com.farmos.core.design.NoFarmSelectorSearch
+import com.farmos.core.design.NoOpScaleAdapter
+import com.farmos.core.design.ScaleAdapter
 import com.farmos.domain.goat.GoatSearchResult
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.GoatSnapshot
@@ -98,6 +100,12 @@ internal data class GoatExperienceActions(
     val onAssignIdentifier: (type: String, value: String) -> Unit = { _, _ -> },
     /** Links a parent to the selected goat (FOS-GOAT-045). */
     val onLinkParentage: (parentId: String, relationType: String) -> Unit = { _, _ -> },
+    /** BLE scale adapter for FOS-GOAT-012; NoOp unless the host fits the BLE path. */
+    val scaleAdapter: ScaleAdapter = NoOpScaleAdapter,
+    /** Whether the user explicitly enabled the BLE scale adapter path. */
+    val isScaleAdapterEnabled: Boolean = false,
+    /** Explicit user opt-in for the BLE scale adapter path (host handles permission). */
+    val onToggleScaleAdapter: (Boolean) -> Unit = {},
 )
 
 internal fun goatDisplayName(goat: GoatSnapshot): String = goat.name?.takeIf { it.isNotBlank() } ?: goat.tag
