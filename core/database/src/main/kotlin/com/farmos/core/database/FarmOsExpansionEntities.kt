@@ -651,3 +651,56 @@ interface FeedPlanDao {
     @Query("SELECT COUNT(*) FROM feed_plans WHERE farmId = :farmId")
     suspend fun count(farmId: String): Int
 }
+
+/**
+ * FOS-FIN-010 — budget line revisions. One row per revision: revising a budget
+ * inserts a new row with version + 1 and marks prior rows superseded. Rows are
+ * never updated or deleted in place (audit trail). Amounts are integer minor
+ * units in a single currency per budgetKey.
+ */
+@Entity(
+    tableName = "budgets",
+    indices = [
+        Index(value = ["farmId", "budgetKey", "version"], unique = true),
+        Index(value = ["farmId", "superseded"]),
+    ],
+)
+data class BudgetEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val budgetKey: String,
+    val version: Long,
+    val name: String,
+    val kind: String,
+    val categoryCode: String,
+    val periodStartYearMonth: String,
+    val periodEndYearMonth: String,
+    val amountMinor: Long,
+    val currency: String,
+    val superseded: Boolean,
+    val createdAtEpochMillis: Long,
+)
+
+@Dao
+interface BudgetDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(budget: BudgetEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(budget: BudgetEntity)
+
+    @Query("UPDATE budgets SET superseded = 1 WHERE farmId = :farmId AND budgetKey = :budgetKey AND superseded = 0")
+    suspend fun supersedePrior(farmId: String, budgetKey: String)
+
+    @Query("SELECT * FROM budgets WHERE farmId = :farmId AND superseded = 0 ORDER BY categoryCode, periodStartYearMonth, budgetKey")
+    suspend fun active(farmId: String): List<BudgetEntity>
+
+    @Query("SELECT * FROM budgets WHERE farmId = :farmId AND budgetKey = :budgetKey ORDER BY version DESC")
+    suspend fun revisions(farmId: String, budgetKey: String): List<BudgetEntity>
+
+    @Query("SELECT MAX(version) FROM budgets WHERE farmId = :farmId AND budgetKey = :budgetKey")
+    suspend fun maxVersion(farmId: String, budgetKey: String): Long?
+
+    @Query("SELECT COUNT(*) FROM budgets WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+}

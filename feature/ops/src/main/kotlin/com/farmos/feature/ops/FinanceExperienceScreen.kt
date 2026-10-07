@@ -442,57 +442,194 @@ fun CashFlowScreen(
     }
 }
 
+/** One active budget line for display, mapped from the local budgets table. Currencies are never mixed. */
+data class BudgetView(
+    val budgetKey: String,
+    val version: Long,
+    val name: String,
+    val kind: String,
+    val categoryCode: String,
+    val periodStartYearMonth: String,
+    val periodEndYearMonth: String,
+    val amountMinor: Long,
+    val currency: String,
+)
+
+/** One superseded-or-current revision of a budget line, for the audit trail. */
+data class BudgetRevisionView(
+    val version: Long,
+    val name: String,
+    val amountMinor: Long,
+    val currency: String,
+    val superseded: Boolean,
+    val createdAtEpochMillis: Long,
+)
+
 /**
  * FOS-FIN-010 — Budget.
  *
- * GENUINE GAP — not implemented: no budget entity, DAO, or governed command exists in the
- * local schema, and inventing a shadow ledger would violate the single-source-of-truth rule.
- * Required domain piece: a farm-scoped budget entity with a governed record/revise command,
- * validator, journal operation and migration. This screen fails closed.
+ * Active budget lines on this farm, each scoped to exactly one (kind, category,
+ * currency, year-month period). Amounts are integer minor units. Revising a
+ * budget records a new revision; prior revisions are kept as the audit trail.
  */
 @Composable
-fun BudgetScreen(onBack: () -> Unit) {
+fun BudgetScreen(
+    budgets: List<BudgetView>,
+    minorDigitsFor: (String) -> Int,
+    onCreateBudget: () -> Unit,
+    onReviseBudget: (BudgetView) -> Unit,
+    onBack: () -> Unit,
+) {
     FarmOperationalPage(
         screenId = "FOS-FIN-010",
         title = "Budget",
-        subtitle = "Not available in this build.",
+        subtitle = "Planned spending and income per category and period.",
         onBack = onBack,
         backLabel = "Reports",
     ) {
-        FarmOperationalSection("Unavailable") {
-            Text(
-                "Budgets are not recorded in this build: there is no budget table or governed budget " +
-                    "command in the local schema. No budget is shown rather than a fabricated one.",
-                fontWeight = FontWeight.Bold,
-            )
-            Text("Required: a farm-scoped budget entity with a governed command, validator and migration.")
+        FarmOperationalSection("Budgets") {
+            if (budgets.isEmpty()) {
+                Text("No budgets recorded yet.")
+            }
+            budgets.forEach { budget ->
+                val digits = minorDigitsFor(budget.currency)
+                TextButton(onClick = { onReviseBudget(budget) }, modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        "${budget.name} — ${formatMoneyMinor(budget.amountMinor, budget.currency, digits)}\n" +
+                            "${budget.kind} · ${budget.categoryCode} · ${budget.periodStartYearMonth} to ${budget.periodEndYearMonth} · v${budget.version}",
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
+        FarmOperationalSection("Actions") {
+            Button(onClick = onCreateBudget, modifier = Modifier.fillMaxWidth()) { Text("Record budget") }
+            Text("Tap a budget to revise it. A revision keeps every prior version.")
         }
     }
 }
 
 /**
- * FOS-FIN-011 — Budget Variance.
- *
- * GENUINE GAP — not implemented: variance is actuals versus budget, and budgets do not exist
- * in the local schema (see FOS-FIN-010). Required domain piece: the same budget entity and
- * command as FOS-FIN-010. This screen fails closed.
+ * FOS-FIN-010 — budget capture. Creates a new budget line or revises an
+ * existing one. The scope (kind, category, currency, period) is fixed at
+ * creation; a revision changes only the name and amount, as a new version.
  */
 @Composable
-fun VarianceScreen(onBack: () -> Unit) {
+fun BudgetCaptureScreen(
+    currency: String,
+    busy: Boolean,
+    error: String?,
+    existing: BudgetView?,
+    revisions: List<BudgetRevisionView>,
+    minorDigitsFor: (String) -> Int,
+    onSave: (name: String, kind: String, category: String, periodStart: String, periodEnd: String, amount: String) -> Unit,
+    onBack: () -> Unit,
+) {
+    val revising = existing != null
+    var name by remember { mutableStateOf(existing?.name ?: "") }
+    var kind by remember { mutableStateOf(existing?.kind ?: "expense") }
+    var category by remember { mutableStateOf(existing?.categoryCode ?: "") }
+    var periodStart by remember { mutableStateOf(existing?.periodStartYearMonth ?: LocalDate.now().let { "%04d-%02d".format(it.year, it.monthValue) }) }
+    var periodEnd by remember { mutableStateOf(existing?.periodEndYearMonth ?: periodStart) }
+    var amount by remember { mutableStateOf("") }
+    val digits = minorDigitsFor(currency)
+    val canSave = !busy && name.isNotBlank() && category.isNotBlank() && amount.isNotBlank() &&
+        runCatching { java.time.YearMonth.parse(periodStart) }.isSuccess &&
+        runCatching { java.time.YearMonth.parse(periodEnd) }.isSuccess
+    FarmOperationalPage(
+        screenId = "FOS-FIN-010",
+        title = if (revising) "Revise budget" else "Record budget",
+        subtitle = if (revising) "A revision is saved as a new version; nothing is overwritten." else "Plan spending or income for one category and period.",
+        onBack = onBack,
+        backLabel = "Budget",
+    ) {
+        FarmOperationalSection("Details", "Enter a decimal amount such as 12.50. Storage converts it to exact minor units.") {
+            OutlinedTextField(name, { name = it }, label = { Text("Name") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            if (!revising) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Button(onClick = { kind = "expense" }, enabled = !busy && kind != "expense") { Text("Expense") }
+                    Button(onClick = { kind = "income" }, enabled = !busy && kind != "income") { Text("Income") }
+                }
+                OutlinedTextField(category, { category = it }, label = { Text("Category code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+                OutlinedTextField(periodStart, { periodStart = it }, label = { Text("Period start (YYYY-MM)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+                OutlinedTextField(periodEnd, { periodEnd = it }, label = { Text("Period end (YYYY-MM)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+                Text("Currency: $currency (farm currency)")
+            } else {
+                Text("Scope (fixed): ${existing.kind} · ${existing.categoryCode} · ${existing.periodStartYearMonth} to ${existing.periodEndYearMonth} · $currency")
+                Text("Current: ${formatMoneyMinor(existing.amountMinor, existing.currency, digits)} (v${existing.version})")
+            }
+            OutlinedTextField(amount, { amount = it }, label = { Text("Amount") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Button(
+                onClick = { onSave(name, kind, category, periodStart, periodEnd, amount) },
+                enabled = canSave,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(if (revising) "Save revision" else "Save budget") }
+        }
+        if (revising && revisions.isNotEmpty()) {
+            FarmOperationalSection("Revision history") {
+                revisions.forEach { revision ->
+                    Text(
+                        "v${revision.version} — ${formatMoneyMinor(revision.amountMinor, revision.currency, minorDigitsFor(revision.currency))}" +
+                            if (revision.superseded) " (superseded)" else " (current)",
+                    )
+                }
+            }
+        }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    }
+}
+
+/** One budget line compared against actuals, in a single currency. Variance = actual − budget. */
+data class BudgetVarianceView(
+    val budget: BudgetView,
+    val actualMinor: Long,
+    val varianceMinor: Long,
+)
+
+/**
+ * FOS-FIN-011 — Budget Variance.
+ *
+ * Budget versus actuals per category per currency per period. Actuals come
+ * from the local money_records table (same kind, category, currency, with the
+ * record's year-month inside the budget period). Variance is actual minus
+ * budget in integer minor units; currencies are never summed.
+ */
+@Composable
+fun VarianceScreen(
+    variances: List<BudgetVarianceView>,
+    minorDigitsFor: (String) -> Int,
+    onBack: () -> Unit,
+) {
     FarmOperationalPage(
         screenId = "FOS-FIN-011",
         title = "Budget variance",
-        subtitle = "Not available in this build.",
+        subtitle = "Actuals against plan, per category and period.",
         onBack = onBack,
         backLabel = "Reports",
     ) {
-        FarmOperationalSection("Unavailable") {
-            Text(
-                "Variance compares actuals against a budget, and no budget is recorded in this build. " +
-                    "No variance is shown rather than a fabricated comparison.",
-                fontWeight = FontWeight.Bold,
-            )
-            Text("Required: the budget entity and governed command from FOS-FIN-010.")
+        FarmOperationalSection("Variance") {
+            if (variances.isEmpty()) {
+                Text("No budgets recorded yet, so there is nothing to compare.")
+            }
+            variances.forEach { row ->
+                val budget = row.budget
+                val digits = minorDigitsFor(budget.currency)
+                val over = row.varianceMinor > 0 && budget.kind == "expense"
+                Text(
+                    "${budget.name} (${budget.periodStartYearMonth} to ${budget.periodEndYearMonth})",
+                    fontWeight = FontWeight.Bold,
+                )
+                Text("Budget: ${formatMoneyMinor(budget.amountMinor, budget.currency, digits)}")
+                Text("Actual: ${formatMoneyMinor(row.actualMinor, budget.currency, digits)}")
+                Text(
+                    "Variance: ${formatMoneyMinor(row.varianceMinor, budget.currency, digits)}",
+                    fontWeight = FontWeight.Bold,
+                    color = if (over) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+        FarmOperationalSection("Reading variance") {
+            Text("For expense budgets, a positive variance means overspend. For income budgets, a positive variance means beating the plan. Every figure is exact minor units; no currency is ever converted or summed.")
         }
     }
 }

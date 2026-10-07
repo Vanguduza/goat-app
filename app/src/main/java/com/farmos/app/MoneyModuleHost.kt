@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import com.farmos.core.database.BudgetEntity
 import com.farmos.core.database.MoneyRecordEntity
 import com.farmos.core.database.MoneyTotalRow
 import com.farmos.core.design.FarmOperationalPage
@@ -23,9 +24,15 @@ import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.FarmCurrency
+import com.farmos.domain.ops.RecordBudget
 import com.farmos.domain.ops.RecordMoney
+import com.farmos.domain.ops.ReviseBudget
 import com.farmos.feature.ops.ActivityCostScreen
+import com.farmos.feature.ops.BudgetCaptureScreen
+import com.farmos.feature.ops.BudgetRevisionView
 import com.farmos.feature.ops.BudgetScreen
+import com.farmos.feature.ops.BudgetVarianceView
+import com.farmos.feature.ops.BudgetView
 import com.farmos.feature.ops.CashFlowScreen
 import com.farmos.feature.ops.EnterpriseProfitabilityScreen
 import com.farmos.feature.ops.FinanceCategoryTotalView
@@ -61,6 +68,8 @@ private enum class MoneyHubPage {
     ACTIVITY_COST,
     CASH_FLOW,
     BUDGET,
+    BUDGET_CREATE,
+    BUDGET_REVISE,
     VARIANCE,
     FINANCE_REPORT,
     EXPORT,
@@ -81,6 +90,27 @@ private fun MoneyTotalRow.toKindView() = FinanceKindTotalView(
     currency = currency,
     amountMinor = amountMinor,
     recordCount = records,
+)
+
+private fun BudgetEntity.toView() = BudgetView(
+    budgetKey = budgetKey,
+    version = version,
+    name = name,
+    kind = kind,
+    categoryCode = categoryCode,
+    periodStartYearMonth = periodStartYearMonth,
+    periodEndYearMonth = periodEndYearMonth,
+    amountMinor = amountMinor,
+    currency = currency,
+)
+
+private fun BudgetEntity.toRevisionView() = BudgetRevisionView(
+    version = version,
+    name = name,
+    amountMinor = amountMinor,
+    currency = currency,
+    superseded = superseded,
+    createdAtEpochMillis = createdAtEpochMillis,
 )
 
 @Composable
@@ -104,6 +134,9 @@ fun MoneyModuleHost(
     var error by remember { mutableStateOf<String?>(null) }
     var hubPage by remember { mutableStateOf(MoneyHubPage.HOME) }
     var selectedTransactionId by remember { mutableStateOf<String?>(null) }
+    var budgets by remember(farmId) { mutableStateOf(emptyList<BudgetView>()) }
+    var budgetRevisions by remember(farmId) { mutableStateOf(emptyList<BudgetRevisionView>()) }
+    var selectedBudgetKey by remember { mutableStateOf<String?>(null) }
 
     val minorDigitsFor: (String) -> Int = { code ->
         runCatching { FarmCurrency.minorDigits(code) }.getOrDefault(2)
@@ -119,6 +152,11 @@ fun MoneyModuleHost(
             "${row.kind} ${row.categoryCode} ${row.amountMinor} ${row.currency}"
         }
         kindTotals = totals.map { it.toKindView() }
+        budgets = withContext(Dispatchers.IO) { ops.budgets().map { it.toView() } }
+    }
+
+    suspend fun refreshRevisions(budgetKey: String) {
+        budgetRevisions = withContext(Dispatchers.IO) { ops.budgetRevisions(budgetKey).map { it.toRevisionView() } }
     }
 
     fun runWrite(block: suspend () -> Unit) {
@@ -246,8 +284,103 @@ fun MoneyModuleHost(
                 onBack = backToReports,
             )
         }
-        MoneyHubPage.BUDGET -> BudgetScreen(onBack = backToReports)
-        MoneyHubPage.VARIANCE -> VarianceScreen(onBack = backToReports)
+        MoneyHubPage.BUDGET -> BudgetScreen(
+            budgets = budgets,
+            minorDigitsFor = minorDigitsFor,
+            onCreateBudget = { hubPage = MoneyHubPage.BUDGET_CREATE },
+            onReviseBudget = { budget ->
+                selectedBudgetKey = budget.budgetKey
+                hubPage = MoneyHubPage.BUDGET_REVISE
+            },
+            onBack = backToReports,
+        )
+        MoneyHubPage.BUDGET_CREATE -> {
+            val code = currency
+            BudgetCaptureScreen(
+                currency = code ?: FarmCurrency.DEFAULT_CODE,
+                busy = busy,
+                error = error,
+                existing = null,
+                revisions = emptyList(),
+                minorDigitsFor = minorDigitsFor,
+                onSave = { name, kind, category, periodStart, periodEnd, amount ->
+                    runWrite {
+                        val budgetCurrency = checkNotNull(currency) { "The farm currency is still loading" }
+                        val amountMinor = amount.toScaledLongExact(FarmCurrency.minorDigits(budgetCurrency), "Amount")
+                        ops.recordBudget(
+                            RecordBudget(
+                                budgetId = UUID.randomUUID().toString(),
+                                budgetKey = UUID.randomUUID().toString(),
+                                name = name,
+                                kind = kind,
+                                categoryCode = category,
+                                periodStartYearMonth = periodStart,
+                                periodEndYearMonth = periodEnd,
+                                amountMinor = amountMinor,
+                                currency = budgetCurrency,
+                            ),
+                            newContext(),
+                        )
+                        hubPage = MoneyHubPage.BUDGET
+                    }
+                },
+                onBack = { hubPage = MoneyHubPage.BUDGET },
+            )
+        }
+        MoneyHubPage.BUDGET_REVISE -> {
+            val selected = budgets.firstOrNull { it.budgetKey == selectedBudgetKey }
+            if (selected == null) {
+                LaunchedEffect(Unit) { hubPage = MoneyHubPage.BUDGET }
+            } else {
+                LaunchedEffect(selected.budgetKey) {
+                    runSuspendCatching { refreshRevisions(selected.budgetKey) }
+                        .onFailure { failure -> error = failure.message }
+                }
+                BudgetCaptureScreen(
+                    currency = selected.currency,
+                    busy = busy,
+                    error = error,
+                    existing = selected,
+                    revisions = budgetRevisions,
+                    minorDigitsFor = minorDigitsFor,
+                    onSave = { name, _, _, _, _, amount ->
+                        runWrite {
+                            val amountMinor = amount.toScaledLongExact(FarmCurrency.minorDigits(selected.currency), "Amount")
+                            ops.reviseBudget(
+                                ReviseBudget(
+                                    budgetId = UUID.randomUUID().toString(),
+                                    budgetKey = selected.budgetKey,
+                                    name = name,
+                                    amountMinor = amountMinor,
+                                ),
+                                newContext(),
+                            )
+                            hubPage = MoneyHubPage.BUDGET
+                        }
+                    },
+                    onBack = { hubPage = MoneyHubPage.BUDGET },
+                )
+            }
+        }
+        MoneyHubPage.VARIANCE -> {
+            val variances = budgets.map { budget ->
+                val start = YearMonth.parse(budget.periodStartYearMonth)
+                val end = YearMonth.parse(budget.periodEndYearMonth)
+                val actual = allTransactions
+                    .filter { it.kind == budget.kind && it.category == budget.categoryCode && it.currency == budget.currency }
+                    .filter {
+                        val ym = YearMonth.from(LocalDate.ofEpochDay(it.epochDay))
+                        !ym.isBefore(start) && !ym.isAfter(end)
+                    }
+                    .sumOf { it.amountMinor }
+                BudgetVarianceView(budget = budget, actualMinor = actual, varianceMinor = actual - budget.amountMinor)
+            }
+            VarianceScreen(
+                variances = variances,
+                minorDigitsFor = minorDigitsFor,
+                onBack = backToReports,
+            )
+        }
         MoneyHubPage.FINANCE_REPORT -> FinanceReportSummaryScreen(
             totals = kindTotals,
             transactionCount = allTransactions.size,
