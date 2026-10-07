@@ -62,6 +62,8 @@ import com.farmos.domain.ops.GestationDefaults
 import com.farmos.domain.ops.GestationPeriod
 import com.farmos.domain.ops.GestationSpecies
 import com.farmos.domain.ops.PoultryKindIncubation
+import com.farmos.domain.ops.RecordUnitPreference
+import com.farmos.domain.ops.UnitSystems
 import com.farmos.domain.replication.DeviceStatus
 import java.io.File
 import java.time.Instant
@@ -122,6 +124,8 @@ internal fun SettingsHost(
     io: CoroutineDispatcher = Dispatchers.IO,
     /** Farm-LAN replication for this farm, present while a local session runs it. */
     lan: FarmLanRuntime? = null,
+    /** Google Drive replication gateway for this farm, present while a local session runs it. */
+    drive: FarmDriveRuntime? = null,
     /**
      * Governed command writer for this farm. Present when the session wires it
      * (FarmSessionContent passes app.opsRepository(farmId)); when null, pages that
@@ -512,8 +516,14 @@ internal fun SettingsHost(
                 }
             }
             FarmOperationalSection("Google Drive") {
-                Text("Not connected.")
-                Text("Connecting Google Drive never deletes farm records on this device.", color = AnimalFarmTheme.colors.mutedInk)
+                val canManage = current.actor?.let { RolePermissions.allows(it.role, Permission.MANAGE_FARM_SETTINGS) } == true
+                DriveGatewaySection(
+                    drive = drive,
+                    canManage = canManage,
+                    busy = busy,
+                    onBusyChange = { busy = it },
+                    onError = { error = it },
+                )
             }
             Text("Backup and conflict review live under Storage and backup.", color = AnimalFarmTheme.colors.mutedInk)
         }
@@ -543,7 +553,7 @@ internal fun SettingsHost(
                     "Farm network (LAN): ${when (serving) { true -> "running"; false -> "not running"; null -> "not running on this device" }}",
                     modifier = Modifier.testTag("settings-integration-lan"),
                 )
-                Text("Google Drive: not connected.", modifier = Modifier.testTag("settings-integration-drive"))
+                Text("Google Drive: ${driveSummary(drive)}", modifier = Modifier.testTag("settings-integration-drive"))
                 Text("AI provider: managed inside the Copilot module boundary; keys stay sealed in this device's Keystore.", modifier = Modifier.testTag("settings-integration-ai"))
             }
             Text("Farm OS has no application server. Integrations are bounded adapters, never authorities.", color = AnimalFarmTheme.colors.mutedInk)
@@ -558,7 +568,7 @@ internal fun SettingsHost(
             AnimalFarmQuickAction("Bluetooth devices", { page = SettingsPage.BLE_DEVICES })
             AnimalFarmQuickAction("RFID readers", { page = SettingsPage.RFID_DEVICES })
         }
-        /** FOS-ADMIN-017 — Bluetooth devices: bonded devices read from this device's Bluetooth adapter. */
+        /** FOS-ADMIN-017 — Bluetooth devices: bonded devices read from this device's Bluetooth adapter; BLE scale adapter toggle lives on the goat scale pairing screen (FOS-GOAT-012). */
         SettingsPage.BLE_DEVICES -> FarmOperationalPage("FOS-ADMIN-017", "Bluetooth devices", "Devices this phone or tablet knows.", onBack = { page = SettingsPage.HARDWARE }, backLabel = "Hardware") {
             current.actor ?: return@FarmOperationalPage
             val context = LocalContext.current
@@ -595,8 +605,17 @@ internal fun SettingsHost(
                     else -> rows.forEach { Text(it, modifier = Modifier.testTag("settings-ble-device")) }
                 }
             }
+            // FOS-GOAT-012 — the BLE scale adapter is enabled from the goat module's scale
+            // pairing screen, where the user explicitly opts in (Bluetooth permission is
+            // requested there and only there). Settings lists devices; it does not enable hardware.
+            FarmOperationalSection("BLE scale adapter") {
+                Text(
+                    "The BLE scale adapter is off by default and is switched on from Goat → Scale pairing (FOS-GOAT-012).",
+                    color = AnimalFarmTheme.colors.mutedInk,
+                )
+            }
         }
-        /** FOS-ADMIN-018 — RFID readers: honest unavailable state; no reader adapter is bundled. */
+        /** FOS-ADMIN-018 — RFID readers: honest unavailable state; no reader adapter is bundled. The EID reader toggle lives on the sheep EID scan screen (FOS-SHEEP-005). */
         SettingsPage.RFID_DEVICES -> FarmOperationalPage("FOS-ADMIN-018", "RFID readers", "Tag readers paired with this farm.", onBack = { page = SettingsPage.HARDWARE }, backLabel = "Hardware") {
             current.actor ?: return@FarmOperationalPage
             // No RFID reader adapter is bundled with Farm OS on this device.
@@ -604,6 +623,10 @@ internal fun SettingsHost(
                 Text("No RFID reader is connected.", modifier = Modifier.testTag("settings-rfid-state"))
                 Text(
                     "When a reader adapter is fitted, it appears here and tag scans flow into animal recording. Nothing is simulated: with no reader, there is nothing to list.",
+                    color = AnimalFarmTheme.colors.mutedInk,
+                )
+                Text(
+                    "The EID reader path is switched on from Sheep → EID scan (FOS-SHEEP-005), where the user explicitly opts in; a scan only fills the entry field for review.",
                     color = AnimalFarmTheme.colors.mutedInk,
                 )
             }
@@ -682,8 +705,8 @@ internal fun SettingsHost(
                 Text("Counts come from the Farm OS screen and feature registries.", color = AnimalFarmTheme.colors.mutedInk)
             }
         }
-        /** FOS-ADMIN-010 — Units of measure: not configured in this build (genuine gap). */
-        SettingsPage.UNITS -> UnitsScreen(home)
+        /** FOS-ADMIN-010 — Units of measure: farm display-unit preferences via governed command. */
+        SettingsPage.UNITS -> UnitsScreen(farmId, current.actor, deviceId, database, ops, io, home)
         /** FOS-GLOBAL-010 — Notification permission: current grant state and system request. */
         SettingsPage.PERM_NOTIFICATIONS -> PermissionPage(
             screenId = "FOS-GLOBAL-010",
@@ -931,6 +954,106 @@ private fun LanStatus(lan: FarmLanRuntime, pairedDevices: Int) {
     )
     state.lastError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     SettingsButton("Synchronise now", state.serving) { lan.requestSync() }
+}
+
+/**
+ * FOS-ADMIN-013 — Google Drive gateway state, connect/disconnect and synchronise-now. This content
+ * lives inside the FOS-ADMIN-013 page, whose Screen ID covers it; no separate route exists by design.
+ */
+@Composable
+private fun DriveGatewaySection(
+    drive: FarmDriveRuntime?,
+    canManage: Boolean,
+    busy: Boolean,
+    onBusyChange: (Boolean) -> Unit,
+    onError: (String?) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    if (drive == null) {
+        Text("Not running on this device.")
+        return
+    }
+    val state by drive.state.collectAsState()
+    val config = state.config
+    var connecting by remember { mutableStateOf(false) }
+    var account by remember { mutableStateOf("") }
+    var folderId by remember { mutableStateOf("") }
+
+    fun runDrive(onDone: () -> Unit = {}, block: suspend () -> Unit) {
+        scope.launch {
+            onBusyChange(true)
+            onError(null)
+            runSuspendCatching { withContext(Dispatchers.IO) { block() } }
+                .onSuccess { onDone() }
+                .onFailure { onError(it.message ?: "Google Drive could not be reached") }
+            onBusyChange(false)
+        }
+    }
+
+    if (config == null) {
+        Text("Not connected.", modifier = Modifier.testTag("settings-drive-state"))
+        Text(
+            "Connecting Google Drive never deletes farm records on this device.",
+            color = AnimalFarmTheme.colors.mutedInk,
+        )
+        if (connecting) {
+            SettingsField("Google account email", account, busy) { account = it }
+            SettingsField("Drive folder ID", folderId, busy) { folderId = it }
+            SettingsButton("Connect", canManage && !busy && account.isNotBlank() && folderId.isNotBlank()) {
+                runDrive(onDone = { connecting = false }) { drive.connect(account, folderId, "") }
+            }
+            SettingsButton("Cancel", !busy) { connecting = false }
+        } else {
+            SettingsButton("Connect Google Drive", canManage && !busy) { connecting = true }
+        }
+        return
+    }
+    Text("Connected as ${config.accountEmail}.", modifier = Modifier.testTag("settings-drive-state"))
+    if (config.folderName.isNotBlank()) Text("Folder: ${config.folderName}", color = AnimalFarmTheme.colors.mutedInk)
+    if (state.authNeeded) {
+        Text(
+            "Sign-in required: complete Google sign-in on this device to synchronise.",
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.testTag("settings-drive-auth"),
+        )
+    }
+    Text(
+        state.lastSyncEpochMillis?.let { "Last synchronised ${timestamp(it)}" } ?: "Not synchronised with Drive yet.",
+        color = AnimalFarmTheme.colors.mutedInk,
+    )
+    state.counts?.let { counts ->
+        Text(
+            "${counts.backedUp} backed up · ${counts.synced} synchronised · ${counts.localOnly} saved locally · ${counts.failed} failed",
+            modifier = Modifier.testTag("settings-drive-counts"),
+        )
+    }
+    state.lastError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    state.nextAttemptEpochMillis?.let {
+        Text("Retrying after ${timestamp(it)}.", color = AnimalFarmTheme.colors.mutedInk)
+    }
+    SettingsButton("Synchronise now", canManage && !busy && !state.syncing) {
+        runDrive { drive.requestSync() }
+    }
+    SettingsButton("Disconnect", canManage && !busy) {
+        runDrive { drive.disconnect() }
+    }
+    Text(
+        "Disconnecting Google Drive never deletes farm records on this device.",
+        color = AnimalFarmTheme.colors.mutedInk,
+    )
+}
+
+/** One-line Drive state for FOS-ADMIN-015; the page's own Screen ID covers it. */
+@Composable
+private fun driveSummary(drive: FarmDriveRuntime?): String {
+    if (drive == null) return "not running on this device"
+    val state by drive.state.collectAsState()
+    val config = state.config ?: return "not connected"
+    return buildString {
+        append("connected as ${config.accountEmail}")
+        if (state.authNeeded) append(" — sign-in required")
+        state.lastError?.let { append(" — $it") }
+    }
 }
 
 @Composable
@@ -1214,28 +1337,94 @@ private suspend fun loadSnapshot(
 /**
  * FOS-ADMIN-010 — Units of measure.
  *
- * GENUINE GAP — not implemented: there is no units-of-measure store, DAO, or governed command in
- * the local schema; quantities are captured in fixed canonical units (grams, millilitres, head)
- * with exact decimal conversion at the UI layer.
- * Required domain piece: a farm-scoped units configuration with a governed command, validator
- * and migration. This screen fails closed.
+ * Farm unit display preferences. Canonical STORED units never change (weight in grams,
+ * volume in millilitres, length in millimetres); this screen only selects the display
+ * and input unit per quantity kind through the governed RecordUnitPreference command,
+ * which replicates to the farm's other devices via the journal. A missing preference
+ * means the canonical unit applies.
  */
 @Composable
-private fun UnitsScreen(onBack: () -> Unit) {
+private fun UnitsScreen(
+    farmId: String,
+    actor: LocalAccount?,
+    deviceId: String,
+    database: FarmOsDatabase,
+    ops: RoomOpsRepository?,
+    io: CoroutineDispatcher,
+    onBack: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var prefs by remember(farmId) { mutableStateOf<Map<String, String>?>(null) }
+    var loadError by remember(farmId) { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var refreshKey by remember { mutableIntStateOf(0) }
+    val canEdit = actor?.let { RolePermissions.allows(it.role, Permission.MANAGE_FARM_SETTINGS) } == true
+    LaunchedEffect(farmId, refreshKey) {
+        runSuspendCatching { withContext(io) { database.unitPreferences().all(farmId).associate { it.quantityKind to it.displayUnit } } }
+            .onSuccess { prefs = it }
+            .onFailure { loadError = it.message }
+    }
     FarmOperationalPage(
         screenId = "FOS-ADMIN-010",
         title = "Units",
-        subtitle = "Not configurable in this build.",
+        subtitle = "Display units for this farm.",
         onBack = onBack,
         backLabel = "Farm settings",
     ) {
-        FarmOperationalSection("Unavailable") {
-            Text(
-                "Units of measure are not configurable in this build: there is no units store in the " +
-                    "local schema. Quantities are captured in canonical units (grams, millilitres, head).",
-                color = AnimalFarmTheme.colors.mutedInk,
-            )
-            Text("Required: a farm-scoped units configuration with a governed command, validator and migration.")
+        SettingsError(error)
+        SettingsError(loadError)
+        val current = prefs
+        if (current == null) {
+            Text("Loading unit preferences saved on this device", color = AnimalFarmTheme.colors.mutedInk)
+            return@FarmOperationalPage
         }
+        Text(
+            "Stored quantities never change: weight is kept in grams, volume in millilitres, length in millimetres. " +
+                "This only chooses the unit shown on screens and accepted on input.",
+            color = AnimalFarmTheme.colors.mutedInk,
+        )
+        UnitSystems.KINDS.forEach { kind ->
+            val selected = current[kind.kind] ?: kind.canonicalUnit
+            FarmOperationalSection(kind.label) {
+                Text(
+                    "Stored in ${kind.canonicalUnit}; showing in $selected.",
+                    color = AnimalFarmTheme.colors.mutedInk,
+                    modifier = Modifier.testTag("settings-units-kind:${kind.kind}"),
+                )
+                kind.units.forEach { unit ->
+                    val isOn = unit.code == selected
+                    Text(
+                        "${unit.code} · ${unit.label}${if (isOn) " · selected" else ""}",
+                        modifier = Modifier.testTag("settings-unit:${kind.kind}:${unit.code}"),
+                    )
+                    if (!isOn && canEdit) {
+                        val writer = ops
+                        SettingsButton("Use ${unit.code} for ${kind.label.lowercase()}", !busy && writer != null) {
+                            val w = writer ?: return@SettingsButton
+                            val actorId = actor?.accountId ?: return@SettingsButton
+                            scope.launch {
+                                busy = true
+                                error = null
+                                runSuspendCatching {
+                                    withContext(io) {
+                                        w.recordUnitPreference(
+                                            RecordUnitPreference(farmId, kind.kind, unit.code),
+                                            LocalCommandContext(farmId, actorId, deviceId, UUID.randomUUID().toString(), System.currentTimeMillis()),
+                                        )
+                                    }
+                                }.onFailure { error = it.message ?: "The unit could not be saved on this device" }
+                                refreshKey++
+                                busy = false
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (ops == null) {
+            Text("Unit changes are read-only here: the session has not wired the command writer yet.", color = AnimalFarmTheme.colors.mutedInk)
+        }
+        if (!canEdit) FarmPermissionExplanation("Units are set by farm management", "Only Owner and Manager accounts can change units.")
     }
 }

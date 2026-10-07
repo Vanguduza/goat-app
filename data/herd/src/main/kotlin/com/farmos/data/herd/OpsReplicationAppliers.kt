@@ -74,7 +74,11 @@ import com.farmos.domain.ops.RecordLabResult
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
 import com.farmos.domain.ops.RecordAssetMeter
+import com.farmos.domain.ops.RecordBudget
+import com.farmos.domain.ops.RecordCattleHeat
 import com.farmos.domain.ops.RecordMoney
+import com.farmos.domain.ops.RecordUnitPreference
+import com.farmos.domain.ops.ReviseBudget
 import com.farmos.domain.ops.RecordOfficialMovement
 import com.farmos.domain.ops.RecordPoultryBiosecurity
 import com.farmos.domain.ops.RecordPoultryFlockDay
@@ -175,6 +179,10 @@ object OpsReplicationAppliers {
         "maintenance.record.v1" to replay { ops, op -> ops.recordMaintenance(decode<RecordMaintenance>(op), context(op)) },
         "asset.meter_record.v1" to replay { ops, op -> ops.recordAssetMeter(decode<RecordAssetMeter>(op), context(op)) },
         "money.record.v1" to replay { ops, op -> ops.recordMoney(decode<RecordMoney>(op), context(op)) },
+        "finance.record_budget.v1" to replay { ops, op -> ops.recordBudget(decode<RecordBudget>(op), context(op)) },
+        "finance.revise_budget.v1" to replay { ops, op -> ops.reviseBudget(decode<ReviseBudget>(op), context(op)) },
+        "cattle.record_heat.v1" to replay { ops, op -> ops.recordCattleHeat(decode<RecordCattleHeat>(op), context(op)) },
+        "farm.record_unit_preference.v1" to replay { ops, op -> ops.recordUnitPreference(decode<RecordUnitPreference>(op), context(op)) },
         "official.record_movement.v1" to replay { ops, op -> ops.recordOfficialMovement(decode<RecordOfficialMovement>(op), context(op)) },
         "paddock.create.v1" to replay { ops, op -> ops.createPaddock(decode<CreatePaddock>(op), context(op)) },
         "pedigree.link.v1" to replay { ops, op -> ops.linkPedigree(decode<LinkPedigree>(op), context(op)) },

@@ -1,5 +1,7 @@
 package com.farmos.app
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,6 +10,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.farmos.app.hardware.EidReaderAdapters
+import com.farmos.app.hardware.blePermissionsNeeded
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.BreedingDueCommands
@@ -25,6 +30,7 @@ import com.farmos.domain.ops.RecordCattleMilk
 import com.farmos.domain.ops.RecordCattlePd
 import com.farmos.domain.ops.RecordCattleServiceV2
 import com.farmos.domain.ops.RecordCattleDryOff
+import com.farmos.domain.ops.RecordCattleHeat
 import com.farmos.domain.ops.RecordCattleLocomotion
 import com.farmos.domain.ops.RecordCattleScc
 import com.farmos.domain.ops.RecordSheepDag
@@ -102,6 +108,35 @@ fun OperatingModuleHost(
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
     var speciesCounts by remember { mutableStateOf<SpeciesHerdCounts?>(null) }
+    // FOS-SHEEP-005 — EID reader path: disabled by default; the permission request below
+    // only fires when the user explicitly enables the reader on the EID scan screen.
+    val context = LocalContext.current
+    var eidReaderEnabled by remember { mutableStateOf(EidReaderAdapters.eidReaderEnabled) }
+    val blePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { grants ->
+        if (grants.values.all { it }) {
+            EidReaderAdapters.eidReaderEnabled = true
+            eidReaderEnabled = true
+        } else {
+            error = "Bluetooth permission denied — the EID reader stays off; manual entry still works."
+        }
+    }
+    /** Explicit user opt-in for the EID reader path; permission-aware, host-owned. */
+    fun toggleEidReader(wantEnabled: Boolean) {
+        if (!wantEnabled) {
+            EidReaderAdapters.eidReaderEnabled = false
+            eidReaderEnabled = false
+            return
+        }
+        val missing = blePermissionsNeeded(context)
+        if (missing.isEmpty()) {
+            EidReaderAdapters.eidReaderEnabled = true
+            eidReaderEnabled = true
+        } else {
+            blePermissionLauncher.launch(missing)
+        }
+    }
     var catalogRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesGroups by remember { mutableStateOf(emptyList<FarmSelectorOption>()) }
     var treatmentRows by remember { mutableStateOf(emptyList<String>()) }
@@ -363,6 +398,24 @@ fun OperatingModuleHost(
                                 onPedigree = { animalId, parentId, relation ->
                                     run { ops.linkPedigree(LinkPedigree(UUID.randomUUID().toString(), animalId, parentId, relation), newContext()) }
                                 },
+                                // FOS-SHEEP-005 — EID reader: NoOp until the user explicitly enables it.
+                                eidReaderAdapter = remember(eidReaderEnabled) { EidReaderAdapters.current(context) },
+                                isEidReaderEnabled = eidReaderEnabled,
+                                onToggleEidReader = ::toggleEidReader,
+                                onAssignEid = { animalId, value, day ->
+                                    run {
+                                        ops.assignIdentifier(
+                                            AssignAnimalIdentifier(
+                                                UUID.randomUUID().toString(),
+                                                animalId,
+                                                "eid",
+                                                value,
+                                                LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
                             ),
                             onBack = operationsBack,
                             loadRecords = { id -> loadSheepRecords(database, farmId, id) },
@@ -408,6 +461,14 @@ fun OperatingModuleHost(
                                 },
                                 onBcs = { animalId, scale, score, day ->
                                     run { ops.recordCattleBcs(RecordCattleBcs(UUID.randomUUID().toString(), animalId, scale, score.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onHeat = { animalId, signs, note, day ->
+                                    run {
+                                        ops.recordCattleHeat(
+                                            RecordCattleHeat(UUID.randomUUID().toString(), animalId, LocalDate.parse(day).toEpochDay(), signs, note.ifBlank { null }),
+                                            newContext(),
+                                        )
+                                    }
                                 },
                                 onMilk = { animalId, litres, day ->
                                     run {

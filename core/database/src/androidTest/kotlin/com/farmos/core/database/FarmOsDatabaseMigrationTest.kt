@@ -31,7 +31,7 @@ class FarmOsDatabaseMigrationTest {
     }
 
     @Test
-    fun version1DatabaseMigratesThroughVersion34WithoutLosingFoundationData() = runBlocking {
+    fun version1DatabaseMigratesThroughVersion36WithoutLosingFoundationData() = runBlocking {
         val farmId = "11111111-1111-4111-8111-111111111111"
         val animalId = "33333333-3333-4333-8333-333333333333"
         val mutationId = "55555555-5555-4555-8555-555555555555"
@@ -41,7 +41,7 @@ class FarmOsDatabaseMigrationTest {
             .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
             .build()
 
-        // Force Room to execute the complete 1 -> 34 chain and validate the final schema.
+        // Force Room to execute the complete 1 -> 36 chain and validate the final schema.
         migrated.openHelper.writableDatabase
 
         val animal = migrated.animals().get(farmId, animalId)
@@ -102,6 +102,13 @@ class FarmOsDatabaseMigrationTest {
         assertEquals(0, migrated.waterPointEvents().countByKind(farmId, "inspection"))
         // Version 34 adds asset meter readings (FOS-ASSET-005); the migrated farm has none.
         assertEquals(0, migrated.assetMeters().forAsset(farmId, "no-such-asset").size)
+        // Version 35 adds budget lines (FOS-FIN-010); the migrated farm has none.
+        assertEquals(0, migrated.budgets().count(farmId))
+        assertEquals(0, migrated.budgets().active(farmId).size)
+        // Version 36 adds cattle heats (FOS-CATTLE-009) and unit preferences (FOS-ADMIN-010); the migrated farm has none.
+        assertEquals(0, migrated.lifecycle().cattleHeatsFor(farmId, animalId).size)
+        assertEquals(0, migrated.lifecycle().cattleHeatCount(farmId))
+        assertEquals(0, migrated.unitPreferences().all(farmId).size)
 
         migrated.close()
     }

@@ -707,6 +707,8 @@ interface SyncCursorDao {
         FarmAssetEntity::class,
         MaintenanceEventEntity::class,
         AssetMeterReadingEntity::class,
+        BudgetEntity::class,
+        CattleHeatEntity::class,
         FeedIssueEntity::class,
         WaterRecordEntity::class,
         WaterPointEntity::class,
@@ -792,6 +794,7 @@ interface SyncCursorDao {
         ReplicationApplicationEntity::class,
         ReplicationPeerMarkEntity::class,
         FarmGestationEntity::class,
+        UnitPreferenceEntity::class,
         TaskSeriesEntity::class,
         StockCountEntity::class,
         StockCountLineEntity::class,
@@ -801,7 +804,7 @@ interface SyncCursorDao {
         AttachmentEntity::class,
         HealthVaccinationEntity::class,
     ],
-    version = 34,
+    version = 36,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -813,6 +816,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun localAccess(): LocalAccessDao
     abstract fun farmSettings(): FarmSettingsDao
     abstract fun farmGestation(): FarmGestationDao
+    abstract fun unitPreferences(): UnitPreferenceDao
     abstract fun taskSeries(): TaskSeriesDao
     abstract fun stockCounts(): StockCountDao
     abstract fun workers(): FarmWorkerDao
@@ -834,6 +838,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun assets(): AssetDao
     abstract fun maintenance(): MaintenanceDao
     abstract fun assetMeters(): AssetMeterDao
+    abstract fun budgets(): BudgetDao
     abstract fun feedIssues(): FeedIssueDao
     abstract fun feedPlans(): FeedPlanDao
     abstract fun water(): WaterDao
@@ -1401,6 +1406,35 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34)
+        val MIGRATION_34_35 = object : Migration(34, 35) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `budgets` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `budgetKey` TEXT NOT NULL, " +
+                        "`version` INTEGER NOT NULL, `name` TEXT NOT NULL, `kind` TEXT NOT NULL, `categoryCode` TEXT NOT NULL, " +
+                        "`periodStartYearMonth` TEXT NOT NULL, `periodEndYearMonth` TEXT NOT NULL, `amountMinor` INTEGER NOT NULL, " +
+                        "`currency` TEXT NOT NULL, `superseded` INTEGER NOT NULL, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_budgets_farmId_budgetKey_version` ON `budgets` (`farmId`, `budgetKey`, `version`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_budgets_farmId_superseded` ON `budgets` (`farmId`, `superseded`)")
+            }
+        }
+
+        val MIGRATION_35_36 = object : Migration(35, 36) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `cattle_heats` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `animalId` TEXT NOT NULL, " +
+                        "`occurredEpochDay` INTEGER NOT NULL, `signs` TEXT NOT NULL, `note` TEXT, `recordedByActorId` TEXT, " +
+                        "`createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_cattle_heats_farmId_animalId` ON `cattle_heats` (`farmId`, `animalId`)")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `unit_preferences` (`farmId` TEXT NOT NULL, `quantityKind` TEXT NOT NULL, " +
+                        "`displayUnit` TEXT NOT NULL, `updatedAtEpochMillis` INTEGER NOT NULL, `updatedByActorId` TEXT, " +
+                        "PRIMARY KEY(`farmId`, `quantityKind`))",
+                )
+            }
+        }
+
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36)
     }
 }

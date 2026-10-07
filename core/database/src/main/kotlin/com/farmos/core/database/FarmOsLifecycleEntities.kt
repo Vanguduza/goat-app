@@ -72,6 +72,19 @@ data class SheepWoolEntity(@PrimaryKey val id: String, val farmId: String, val a
 @Entity(tableName = "cattle_milk_records")
 data class CattleMilkEntity(@PrimaryKey val id: String, val farmId: String, val animalId: String, val litresMilli: Long, val occurredEpochDay: Long)
 
+/** FOS-CATTLE-009 — one observed heat for a cow. Species-specific; goat_heats is never reused. */
+@Entity(tableName = "cattle_heats")
+data class CattleHeatEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val animalId: String,
+    val occurredEpochDay: Long,
+    val signs: String,
+    val note: String?,
+    val recordedByActorId: String?,
+    val createdAtEpochMillis: Long,
+)
+
 @Entity(tableName = "sheep_dag_scores")
 data class SheepDagEntity(@PrimaryKey val id: String, val farmId: String, val animalId: String, val score: Int, val occurredEpochDay: Long)
 
@@ -455,6 +468,9 @@ interface LifecycleDao {
     @Upsert suspend fun upsertWool(row: SheepWoolEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertCattleMilk(row: CattleMilkEntity)
     @Upsert suspend fun upsertCattleMilk(row: CattleMilkEntity)
+    /** FOS-CATTLE-009 — cattle heat observations; own table, never goat_heats. */
+    @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertCattleHeat(row: CattleHeatEntity)
+    @Upsert suspend fun upsertCattleHeat(row: CattleHeatEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertDag(row: SheepDagEntity)
     @Upsert suspend fun upsertDag(row: SheepDagEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertFootrot(row: SheepFootrotEntity)
@@ -592,6 +608,31 @@ interface LifecycleDao {
         LIMIT 1
     """)
     suspend fun activeIdentifierByValue(farmId: String, value: String): AnimalIdentifierEntity?
+
+    /**
+     * FOS-SHEEP-005 — farm-scoped identifier uniqueness support: active identifier values of
+     * every animal on this farm except [excludeAnimalId] (the animal being assigned keeps its
+     * own values). Read-only query; no schema change.
+     */
+    @Query("SELECT value FROM animal_identifiers WHERE farmId = :farmId AND isActive = 1 AND animalId != :excludeAnimalId")
+    suspend fun activeIdentifierValuesExcept(farmId: String, excludeAnimalId: String): List<String>
+
+    /**
+     * FOS-SEARCH-007 / FOS-SEARCH-008 — identifier-driven local search: active identifiers
+     * whose value contains the query (tag, RFID, EID, QR payload pasted as text). The local
+     * database is the search authority; no server is consulted. Read-only query; no schema change.
+     */
+    @Query("""
+        SELECT * FROM animal_identifiers
+        WHERE farmId = :farmId
+          AND isActive = 1
+          AND value LIKE '%' || :query || '%' COLLATE NOCASE
+        ORDER BY
+            CASE WHEN value = :query COLLATE NOCASE THEN 0 ELSE 1 END,
+            assignedEpochDay DESC
+        LIMIT :limit
+    """)
+    suspend fun searchActiveIdentifiers(farmId: String, query: String, limit: Int): List<AnimalIdentifierEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertMovement(row: OfficialMovementEntity)
     @Upsert suspend fun upsertMovement(row: OfficialMovementEntity)
     @Query("SELECT * FROM official_movements WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
@@ -637,6 +678,10 @@ interface LifecycleDao {
     suspend fun cattleBcsFor(farmId: String, animalId: String): List<CattleBcsEntity>
     @Query("SELECT * FROM cattle_milk_records WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
     suspend fun cattleMilkFor(farmId: String, animalId: String): List<CattleMilkEntity>
+    @Query("SELECT * FROM cattle_heats WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun cattleHeatsFor(farmId: String, animalId: String): List<CattleHeatEntity>
+    @Query("SELECT COUNT(*) FROM cattle_heats WHERE farmId = :farmId")
+    suspend fun cattleHeatCount(farmId: String): Int
     @Query("SELECT * FROM cattle_locomotion_scores WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
     suspend fun cattleLocomotionFor(farmId: String, animalId: String): List<CattleLocomotionEntity>
     @Query("SELECT * FROM cattle_scc_records WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")

@@ -1,5 +1,6 @@
 package com.farmos.domain.ops
 
+import java.time.YearMonth
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -39,6 +40,38 @@ data class RecordMoney(
     val currency: String = "USD",
     val occurredEpochDay: Long,
     val note: String? = null,
+)
+
+/**
+ * FOS-FIN-010 — record a budget line. A budget is a plan scoped to exactly one
+ * (kind, categoryCode, currency, year-month period range). Amounts are integer
+ * minor units; currencies are never mixed within a budget line.
+ */
+@Serializable
+data class RecordBudget(
+    val budgetId: String,
+    val budgetKey: String,
+    val name: String,
+    val kind: String,
+    val categoryCode: String,
+    val periodStartYearMonth: String,
+    val periodEndYearMonth: String,
+    val amountMinor: Long,
+    val currency: String = "USD",
+)
+
+/**
+ * FOS-FIN-010 — revise a budget line. A revision is a NEW row (version + 1);
+ * prior revisions are marked superseded, never edited or deleted. The scope
+ * (kind, categoryCode, currency, period) is immutable per budgetKey: changing
+ * the scope means recording a new budget, not revising.
+ */
+@Serializable
+data class ReviseBudget(
+    val budgetId: String,
+    val budgetKey: String,
+    val name: String,
+    val amountMinor: Long,
 )
 
 @Serializable
@@ -569,6 +602,31 @@ data class RecordCattleMilk(
     val occurredEpochDay: Long,
 )
 
+/**
+ * FOS-CATTLE-009 — record one observed heat for a cow. Stored in the
+ * species-specific cattle_heats table; goat_heats is never reused.
+ */
+@Serializable
+data class RecordCattleHeat(
+    val heatId: String,
+    val animalId: String,
+    val occurredEpochDay: Long,
+    val signs: String,
+    val note: String? = null,
+)
+
+/**
+ * FOS-ADMIN-010 — record a farm unit display preference. Canonical stored
+ * units never change; this only selects the display/input unit per quantity
+ * kind. Validated against [UnitSystems].
+ */
+@Serializable
+data class RecordUnitPreference(
+    val farmId: String,
+    val quantityKind: String,
+    val displayUnit: String,
+)
+
 @Serializable
 data class RecordSheepDag(
     val scoreId: String,
@@ -782,6 +840,30 @@ object OpsValidator {
         return null
     }
 
+    private fun budgetScope(commandKind: String, categoryCode: String, currency: String, startYm: String, endYm: String): String? {
+        if (commandKind !in setOf("expense", "income")) return "Budget kind must be expense or income"
+        if (categoryCode.isBlank()) return "Budget needs exactly one category code"
+        if (!FarmCurrency.isRecordable(currency)) return "Budget currency must be an ISO 4217 code"
+        val start = runCatching { YearMonth.parse(startYm) }.getOrNull()
+            ?: return "Budget period start must be a valid year-month (YYYY-MM)"
+        val end = runCatching { YearMonth.parse(endYm) }.getOrNull()
+            ?: return "Budget period end must be a valid year-month (YYYY-MM)"
+        if (end.isBefore(start)) return "Budget period end must not be before period start"
+        return null
+    }
+
+    fun budget(command: RecordBudget): String? {
+        if (command.name.isBlank()) return "Budget needs a name"
+        if (command.amountMinor <= 0L) return "Budget amount must be greater than zero"
+        return budgetScope(command.kind, command.categoryCode, command.currency, command.periodStartYearMonth, command.periodEndYearMonth)
+    }
+
+    fun reviseBudget(command: ReviseBudget): String? {
+        if (command.name.isBlank()) return "Budget revision needs a name"
+        if (command.amountMinor <= 0L) return "Budget revision amount must be greater than zero"
+        return null
+    }
+
     fun inventoryItem(command: CreateInventoryItem): String? =
         if (command.sku.isBlank() || command.name.isBlank()) "Inventory sku and name are required" else null
 
@@ -980,6 +1062,23 @@ object OpsValidator {
     fun cattleMilk(command: RecordCattleMilk): String? =
         if (command.litresMilli <= 0L) "Milk record needs litres" else null
 
+    fun cattleHeat(command: RecordCattleHeat): String? {
+        if (command.heatId.isBlank()) return "Heat record needs an id"
+        if (command.animalId.isBlank()) return "Heat record needs an animal"
+        if (command.signs.isBlank()) return "Heat record needs observed signs"
+        if (command.occurredEpochDay <= 0L) return "Heat record needs a valid date"
+        return null
+    }
+
+    fun unitPreference(command: RecordUnitPreference): String? {
+        if (command.farmId.isBlank()) return "Unit preference needs a farm"
+        if (UnitSystems.kindOf(command.quantityKind) == null) return "Unknown quantity kind"
+        if (!UnitSystems.isValid(command.quantityKind, command.displayUnit)) {
+            return "Unit ${command.displayUnit} is not valid for ${command.quantityKind}"
+        }
+        return null
+    }
+
     fun dag(command: RecordSheepDag): String? =
         if (command.score !in 0..5) "Dag score must be 0 to 5" else null
 
@@ -1087,6 +1186,22 @@ object OpsValidator {
         } else {
             null
         }
+
+    /**
+     * FOS-SHEEP-005 — farm-scoped identifier uniqueness. [otherActiveValuesOnFarm] carries
+     * the active identifier values of *other* animals on this farm (supplied by the
+     * repository; the validator itself stays pure). Comparison is case-insensitive on the
+     * trimmed value: a scanned EID/RFID tag must resolve to exactly one animal per farm.
+     * Hardware readers never decide this — the domain rule does.
+     */
+    fun identifierUnique(command: AssignAnimalIdentifier, otherActiveValuesOnFarm: Collection<String>): String? {
+        val trimmed = command.value.trim()
+        return if (otherActiveValuesOnFarm.any { it.equals(trimmed, ignoreCase = true) }) {
+            "Identifier '$trimmed' is already recorded on this farm"
+        } else {
+            null
+        }
+    }
 
     fun movement(command: RecordOfficialMovement): String? =
         if (command.direction !in setOf("on", "off", "transfer")) "Movement must be on, off, or transfer" else null

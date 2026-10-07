@@ -29,8 +29,10 @@ import com.farmos.core.database.PoultryFlockDayEntity
 import com.farmos.core.database.PurchaseEntity
 import com.farmos.core.database.CattleBcsEntity
 import com.farmos.core.database.CattleLocomotionEntity
+import com.farmos.core.database.CattleHeatEntity
 import com.farmos.core.database.CattleMilkEntity
 import com.farmos.core.database.CattleSccEntity
+import com.farmos.core.database.UnitPreferenceEntity
 import com.farmos.core.database.GoatBcsEntity
 import com.farmos.core.database.AnimalIdentifierEntity
 import com.farmos.core.database.CattleDofEntity
@@ -86,6 +88,7 @@ import com.farmos.core.database.WaterRecordEntity
 import com.farmos.core.database.WithdrawalWindowEntity
 import com.farmos.core.database.KiddingEntity
 import com.farmos.core.database.MeasurementEntity
+import com.farmos.core.database.BudgetEntity
 import com.farmos.core.database.MoneyRecordEntity
 import com.farmos.core.database.OutboxEntity
 import com.farmos.core.database.RabbitCageEntity
@@ -147,8 +150,10 @@ import com.farmos.domain.ops.OpsValidator
 import com.farmos.domain.ops.RecordCattleBcs
 import com.farmos.domain.ops.RecordSheepBcs
 import com.farmos.domain.ops.RecordCattleLocomotion
+import com.farmos.domain.ops.RecordCattleHeat
 import com.farmos.domain.ops.RecordCattleMilk
 import com.farmos.domain.ops.RecordCattleScc
+import com.farmos.domain.ops.RecordUnitPreference
 import com.farmos.domain.ops.RecordSheepDag
 import com.farmos.domain.ops.RecordSheepFootrot
 import com.farmos.domain.ops.RecordSheepShearing
@@ -166,7 +171,9 @@ import com.farmos.domain.ops.RecordFeedPlan
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
 import com.farmos.domain.ops.RecordAssetMeter
+import com.farmos.domain.ops.RecordBudget
 import com.farmos.domain.ops.RecordMoney
+import com.farmos.domain.ops.ReviseBudget
 import com.farmos.domain.ops.PoultryKindIncubation
 import com.farmos.domain.ops.RecordPoultryFlockDay
 import com.farmos.domain.ops.PlacePoultryFlock
@@ -400,6 +407,44 @@ class RoomOpsRepository(
         }
         return LocalCommandResult(context.mutationId, command.milkId, true)
     }
+
+    /** FOS-CATTLE-009 — cattle heat observation; own table, never goat_heats. */
+    suspend fun recordCattleHeat(command: RecordCattleHeat, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.cattleHeat(command)?.let { error(it) }
+        val cow = requireNotNull(database.animals().get(farmId, command.animalId)) { "Active cow not found" }
+        require(cow.speciesCode == "cattle" && cow.status == "active") { "Heat records are for active cattle" }
+        enqueue(context, "cattle.record_heat.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+            database.lifecycle().insertCattleHeat(
+                CattleHeatEntity(
+                    command.heatId, farmId, command.animalId, command.occurredEpochDay,
+                    command.signs, command.note, context.actorId, context.occurredAtEpochMillis,
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.heatId, true)
+    }
+
+    suspend fun cattleHeatsFor(animalId: String): List<CattleHeatEntity> =
+        database.lifecycle().cattleHeatsFor(farmId, animalId)
+
+    suspend fun cattleHeatCount(): Int = database.lifecycle().cattleHeatCount(farmId)
+
+    /**
+     * FOS-ADMIN-010 — farm unit display preference. Canonical stored units never
+     * change; this only selects the display/input unit per quantity kind.
+     */
+    suspend fun recordUnitPreference(command: RecordUnitPreference, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.unitPreference(command)?.let { error(it) }
+        require(command.farmId == farmId) { "Farm context mismatch" }
+        enqueue(context, "farm.record_unit_preference.v1", "farm", farmId, expectedVersion("farm", farmId), json.encodeToString(command)) {
+            database.unitPreferences().upsert(
+                UnitPreferenceEntity(farmId, command.quantityKind, command.displayUnit, context.occurredAtEpochMillis, context.actorId),
+            )
+        }
+        return LocalCommandResult(context.mutationId, "$farmId:${command.quantityKind}", true)
+    }
+
+    suspend fun unitPreferences(): List<UnitPreferenceEntity> = database.unitPreferences().all(farmId)
 
     suspend fun recordDag(command: RecordSheepDag, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.dag(command)?.let { error(it) }
@@ -711,6 +756,11 @@ class RoomOpsRepository(
     suspend fun assignIdentifier(command: AssignAnimalIdentifier, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.identifier(command)?.let { error(it) }
         requireNotNull(database.animals().get(farmId, command.animalId)) { "Identifier needs an animal on this farm" }
+        // FOS-SHEEP-005 — farm-scoped uniqueness: a scanned or typed value must resolve to
+        // exactly one animal per farm. The animal's own active values are excluded so
+        // re-assignment and journal replay of its own identifiers stay convergent.
+        val otherActiveValues = database.lifecycle().activeIdentifierValuesExcept(farmId, command.animalId)
+        OpsValidator.identifierUnique(command, otherActiveValues)?.let { error(it) }
         enqueue(context, "animal.identifier_assign.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
             database.lifecycle().insertIdentifier(
                 AnimalIdentifierEntity(command.identifierId, farmId, command.animalId, command.type, command.value.trim(), true, command.occurredEpochDay),
@@ -896,6 +946,70 @@ class RoomOpsRepository(
     }
 
     suspend fun recentMoney() = database.money().recent(farmId, 50)
+
+    suspend fun recordBudget(command: RecordBudget, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.budget(command)?.let { error(it) }
+        val duplicate = database.budgets().active(farmId).any {
+            it.kind == command.kind.trim() &&
+                it.categoryCode == command.categoryCode.trim() &&
+                it.currency == command.currency &&
+                it.periodStartYearMonth == command.periodStartYearMonth &&
+                it.periodEndYearMonth == command.periodEndYearMonth
+        }
+        if (duplicate) error("A budget already exists for this kind, category, currency and period")
+        enqueue(context, "finance.record_budget.v1", "budget", command.budgetKey, 0, json.encodeToString(command)) {
+            database.budgets().insert(
+                BudgetEntity(
+                    id = command.budgetId,
+                    farmId = farmId,
+                    budgetKey = command.budgetKey,
+                    version = 1L,
+                    name = command.name.trim(),
+                    kind = command.kind.trim(),
+                    categoryCode = command.categoryCode.trim(),
+                    periodStartYearMonth = command.periodStartYearMonth,
+                    periodEndYearMonth = command.periodEndYearMonth,
+                    amountMinor = command.amountMinor,
+                    currency = command.currency,
+                    superseded = false,
+                    createdAtEpochMillis = context.occurredAtEpochMillis,
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.budgetId, true)
+    }
+
+    suspend fun reviseBudget(command: ReviseBudget, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.reviseBudget(command)?.let { error(it) }
+        val latest = database.budgets().revisions(farmId, command.budgetKey).firstOrNull()
+            ?: error("Budget not found")
+        val nextVersion = latest.version + 1L
+        enqueue(context, "finance.revise_budget.v1", "budget", command.budgetKey, latest.version, json.encodeToString(command)) {
+            database.budgets().supersedePrior(farmId, command.budgetKey)
+            database.budgets().insert(
+                BudgetEntity(
+                    id = command.budgetId,
+                    farmId = farmId,
+                    budgetKey = command.budgetKey,
+                    version = nextVersion,
+                    name = command.name.trim(),
+                    kind = latest.kind,
+                    categoryCode = latest.categoryCode,
+                    periodStartYearMonth = latest.periodStartYearMonth,
+                    periodEndYearMonth = latest.periodEndYearMonth,
+                    amountMinor = command.amountMinor,
+                    currency = latest.currency,
+                    superseded = false,
+                    createdAtEpochMillis = context.occurredAtEpochMillis,
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.budgetId, true)
+    }
+
+    suspend fun budgets() = database.budgets().active(farmId)
+
+    suspend fun budgetRevisions(budgetKey: String) = database.budgets().revisions(farmId, budgetKey)
 
     suspend fun createItem(command: CreateInventoryItem, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.inventoryItem(command)?.let { error(it) }
