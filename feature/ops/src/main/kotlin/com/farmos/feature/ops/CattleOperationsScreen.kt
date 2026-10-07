@@ -10,10 +10,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.farmos.core.design.runSuspendCatching
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.farmos.core.design.FarmOperationalPage
@@ -39,6 +41,8 @@ data class CattleOperationsActions(
     val onCloseLot: (groupId: String, headOut: String, weightGrams: String, daysOnFeed: String, day: String) -> Unit,
     /** FOS-CATTLE-016 — (damId, tag, sex, day); registers the newborn calf. */
     val onCalfRegistration: (String, String, String, String) -> Unit = { _, _, _, _ -> },
+    /** FOS-CATTLE-009 — (animalId, signs, note, day); records an observed heat. */
+    val onHeat: (String, String, String, String) -> Unit = { _, _, _, _ -> },
 )
 
 private enum class CattleOpsPage {
@@ -187,7 +191,7 @@ fun CattleOperationsScreen(
         }
 
         CattleOpsPage.HEAT_DETECTION -> {
-            CattleHeatDetectionScreen(home)
+            CattleHeatScreen(selectedAnimalId, busy, error, actions.onHeat, loadRecords, home)
         }
     }
 }
@@ -799,28 +803,59 @@ private fun cattleDate(value: String): Boolean = runCatching { LocalDate.parse(v
 /**
  * FOS-CATTLE-009 — Heat Detection.
  *
- * GENUINE GAP — not implemented: there is no cattle heat table, DAO, or governed command in the
- * local schema (Room v34 frozen; goat_heats is species-specific and must not be reused for cattle),
- * and inventing a shadow store would violate the single-source-of-truth rule.
- * Required domain piece: a farm-scoped cattle_heats entity with RecordCattleHeat command,
- * validator, journal operation, replay applier and migration 34->35. This screen fails closed.
+ * Records an observed heat for a cow through the governed RecordCattleHeat
+ * command (species-specific cattle_heats table; goat_heats is never reused).
+ * History below is read from the local farm-scoped table; heats also appear
+ * on the animal timeline and in the cattle report reproduction section.
  */
 @Composable
-fun CattleHeatDetectionScreen(onBack: () -> Unit) {
-    FarmOperationalPage(
-        screenId = "FOS-CATTLE-009",
-        title = "Heat detection",
-        subtitle = "Not available in this build.",
-        visualClass = FarmVisualClass.I2,
-        onBack = onBack,
-        backLabel = "Cattle",
+fun CattleHeatScreen(
+    selectedId: String?,
+    busy: Boolean,
+    error: String?,
+    onHeat: (animalId: String, signs: String, note: String, day: String) -> Unit,
+    loadRecords: suspend (String) -> CattleRecords,
+    onBack: () -> Unit,
+) {
+    var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
+    var signs by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    var heats by remember { mutableStateOf<List<CattleHeatRow>>(emptyList()) }
+    LaunchedEffect(animalId) {
+        heats = if (animalId.isBlank()) {
+            emptyList()
+        } else {
+            runSuspendCatching { loadRecords(animalId).heats }.getOrElse { emptyList() }
+        }
+    }
+    CattleFormPage(
+        "FOS-CATTLE-009",
+        "Heat detection",
+        "Record an observed heat for a cow. Heats inform breeding timing; this screen records observations only.",
+        busy,
+        error,
+        onBack,
     ) {
-        FarmOperationalSection("Unavailable") {
-            Text(
-                "Heat observations are not recorded in this build: there is no cattle heat table or " +
-                    "governed heat command in the local schema. No heat is shown rather than a fabricated one.",
-            )
-            Text("Required: a farm-scoped cattle_heats entity with a governed command, validator, journal operation and migration 34->35.")
+        OpsAnimalPicker("Cattle", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
+        CattleField(signs, { signs = it }, "Observed signs", busy)
+        CattleField(note, { note = it }, "Note (optional)", busy)
+        CattleField(day, { day = it }, "Date", busy)
+        Button(
+            onClick = { onHeat(animalId, signs, note, day) },
+            enabled = !busy && animalId.isNotBlank() && signs.isNotBlank() && cattleDate(day),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Record heat") }
+    }
+    if (heats.isNotEmpty()) {
+        FarmOperationalSection("Recorded heats") {
+            heats.forEach { heat ->
+                Text(
+                    "${LocalDate.ofEpochDay(heat.epochDay)} · ${heat.signs}" +
+                        (heat.note?.takeIf { it.isNotBlank() }?.let { " · $it" } ?: ""),
+                    modifier = Modifier.testTag("cattle-heat:${heat.id}"),
+                )
+            }
         }
     }
 }

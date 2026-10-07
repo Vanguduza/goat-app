@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.farmos.core.design.runSuspendCatching
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +43,9 @@ data class CattleMovementRow(val id: String, val epochDay: Long, val direction: 
 /** One recorded identifier for the animal; inactive identifiers stay listed as history. */
 data class CattleIdentifierRow(val id: String, val type: String, val value: String, val active: Boolean, val assignedEpochDay: Long)
 
+/** FOS-CATTLE-009 — one recorded heat observation, newest first. */
+data class CattleHeatRow(val id: String, val epochDay: Long, val signs: String, val note: String?)
+
 /** One dated entry on the animal timeline; [kind] is the record family, [summary] its recorded facts. */
 data class CattleTimelineRow(val id: String, val epochDay: Long, val kind: String, val summary: String)
 
@@ -62,6 +66,8 @@ data class CattleRecords(
     val movements: List<CattleMovementRow> = emptyList(),
     /** Every recorded identifier, active first. */
     val identifiers: List<CattleIdentifierRow> = emptyList(),
+    /** Every recorded heat observation, newest first. */
+    val heats: List<CattleHeatRow> = emptyList(),
 )
 
 private sealed interface CattleRecordsState {
@@ -104,7 +110,7 @@ internal fun CattleRecordPageHost(
     }
     LaunchedEffect(selectedId, attempt) {
         val id = selectedId ?: return@LaunchedEffect
-        state = runCatching { loadRecords(id) }
+        state = runSuspendCatching { loadRecords(id) }
             .fold({ CattleRecordsState.Loaded(it) }, { CattleRecordsState.Failed(it.message ?: "Records could not be loaded") })
     }
     val visualClass = if (page == CattleRecordPage.HEALTH_SUMMARY) FarmVisualClass.I4 else FarmVisualClass.I3
@@ -255,6 +261,8 @@ data class CattleHerdReport(
     val calvingsRecorded: Int = 0,
     val calvesBornAlive: Int = 0,
     val servicesRecorded: Int = 0,
+    /** FOS-CATTLE-009 — recorded heat observations on this farm. */
+    val heatsRecorded: Int = 0,
     val milkLitresMilli: Long = 0L,
 )
 
@@ -265,7 +273,7 @@ internal fun CattleHerdReportScreen(
     onBack: () -> Unit,
 ) {
     var report by remember { mutableStateOf(CattleHerdReport()) }
-    LaunchedEffect(Unit) { runCatching { report = loadReport() } }
+    LaunchedEffect(Unit) { runSuspendCatching { report = loadReport() } }
     FarmOperationalPage("FOS-CATTLE-036", "Cattle report", "Herd composition and recorded reproduction events.", FarmVisualClass.I3, onBack) {
         FarmOperationalSection("Herd") {
             CattleRow("Total head", report.totalHead.toString(), "cattle-report-total")
@@ -277,6 +285,7 @@ internal fun CattleHerdReportScreen(
             CattleRow("Calvings recorded", report.calvingsRecorded.toString(), "cattle-report-calvings")
             CattleRow("Calves born alive", report.calvesBornAlive.toString(), "cattle-report-born-alive")
             CattleRow("Services recorded", report.servicesRecorded.toString(), "cattle-report-services")
+            CattleRow("Heats recorded", report.heatsRecorded.toString(), "cattle-report-heats")
         }
         FarmOperationalSection("Milk") {
             CattleRow(

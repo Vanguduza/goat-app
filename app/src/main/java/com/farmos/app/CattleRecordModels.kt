@@ -12,6 +12,7 @@ import com.farmos.feature.ops.CattleIdentifierRow
 import com.farmos.feature.ops.CattleLotCloseView
 import com.farmos.feature.ops.CattleLotDaysView
 import com.farmos.feature.ops.CattleLotPlacementView
+import com.farmos.feature.ops.CattleHeatRow
 import com.farmos.feature.ops.CattleLotView
 import com.farmos.feature.ops.CattleMilkRow
 import com.farmos.feature.ops.CattleMovementRow
@@ -40,6 +41,7 @@ internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String,
     val scc = lifecycle.cattleSccFor(farmId, animalId)
     val dryOffs = lifecycle.cattleDryOffsFor(farmId, animalId)
     val weanings = lifecycle.cattleWeaningsFor(farmId, animalId)
+    val heats = lifecycle.cattleHeatsFor(farmId, animalId)
     val treatments = database.treatments().forAnimal(farmId, animalId)
     val observations = database.healthObservations().forAnimal(farmId, animalId)
     val movements = lifecycle.movementsForAnimal(farmId, animalId)
@@ -55,6 +57,7 @@ internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String,
             add(CattleTimelineRow(row.id, row.occurredEpochDay, "Dry-off", row.expectedCalvingEpochDay?.let { "Recorded expected calving ${java.time.LocalDate.ofEpochDay(it)}" } ?: "Dried off"))
         }
         weanings.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "Weaning", it.weightGrams?.let { g -> "${java.math.BigDecimal.valueOf(g, 3).stripTrailingZeros().toPlainString()} kg" } ?: "Weaned")) }
+        heats.forEach { add(CattleTimelineRow(it.id, it.occurredEpochDay, "Heat", it.signs + (it.note?.takeIf { n -> n.isNotBlank() }?.let { n -> " · $n" } ?: ""))) }
         treatments.forEach { add(CattleTimelineRow(it.id, day(it.occurredAtEpochMillis), "Treatment", it.reason)) }
         observations.forEach { add(CattleTimelineRow(it.id, day(it.occurredAtEpochMillis), "Observation", (if (it.redFlag) "Red flag · " else "") + it.signs)) }
         movements.forEach {
@@ -73,6 +76,7 @@ internal suspend fun loadCattleRecords(database: FarmOsDatabase, farmId: String,
         weights = database.measurements().history(farmId, animalId, "weight").map { WeightView(it.id, day(it.measuredAtEpochMillis), it.valueLong, it.unit) },
         movements = movements.map { CattleMovementRow(it.id, it.occurredEpochDay, it.direction, it.fromPlace, it.toPlace) },
         identifiers = lifecycle.identifiersForAnimal(farmId, animalId).map { CattleIdentifierRow(it.id, it.type, it.value, it.isActive, it.assignedEpochDay) },
+        heats = heats.map { CattleHeatRow(it.id, it.occurredEpochDay, it.signs, it.note) },
     )
 }
 
@@ -136,6 +140,7 @@ internal suspend fun loadCattleHerdReport(database: FarmOsDatabase, farmId: Stri
         calvingsRecorded = births?.events ?: 0,
         calvesBornAlive = births?.live?.toInt() ?: 0,
         servicesRecorded = 0,
+        heatsRecorded = database.lifecycle().cattleHeatCount(farmId),
         milkLitresMilli = 0L,
     )
 }

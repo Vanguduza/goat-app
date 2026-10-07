@@ -50,3 +50,31 @@ interface FarmGestationDao {
     @Upsert
     suspend fun upsert(setting: FarmGestationEntity)
 }
+
+/**
+ * FOS-ADMIN-010 — farm unit display preferences. One row per (farm, quantity kind).
+ * A missing row means the canonical unit applies. Canonical STORED units never change:
+ * conversions happen only at the presentation/input boundary via UnitSystems.
+ */
+@Entity(tableName = "unit_preferences", primaryKeys = ["farmId", "quantityKind"])
+data class UnitPreferenceEntity(
+    val farmId: String,
+    /** "weight" | "volume" | "length" — see UnitSystems.KINDS. */
+    val quantityKind: String,
+    /** Display unit code, e.g. "kg", "lb", "L", "gal" — must belong to the kind. */
+    val displayUnit: String,
+    val updatedAtEpochMillis: Long,
+    val updatedByActorId: String?,
+)
+
+@Dao
+interface UnitPreferenceDao {
+    @Query("SELECT * FROM unit_preferences WHERE farmId = :farmId ORDER BY quantityKind")
+    suspend fun all(farmId: String): List<UnitPreferenceEntity>
+
+    @Query("SELECT * FROM unit_preferences WHERE farmId = :farmId AND quantityKind = :quantityKind LIMIT 1")
+    suspend fun get(farmId: String, quantityKind: String): UnitPreferenceEntity?
+
+    @Upsert
+    suspend fun upsert(preference: UnitPreferenceEntity)
+}
