@@ -113,6 +113,7 @@ fun FarmSessionContent(
             deviceId = app.deviceId,
             onBack = backHome,
             lan = app.farmLan,
+            drive = app.farmDrive,
         )
         is FarmDestination.SyncQueue -> SyncQueueHost(
             view = dest.view,

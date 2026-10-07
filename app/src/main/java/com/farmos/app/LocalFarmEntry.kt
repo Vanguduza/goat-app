@@ -413,11 +413,16 @@ internal fun LocalFarmSession(app: FarmOsApplication) {
     val (account, farmName) = current
     val membership = account.membership()
     DisposableEffect(account.farmId) {
-        val runtime = FarmLanRuntime(app.database, app.keyVault, app.peerDiscovery, account.farmId, farmName, app.deviceId, attachments = FileAttachmentStore(File(app.filesDir, "attachments"))).start()
+        val attachmentStore = FileAttachmentStore(File(app.filesDir, "attachments"))
+        val runtime = FarmLanRuntime(app.database, app.keyVault, app.peerDiscovery, account.farmId, farmName, app.deviceId, attachments = attachmentStore).start()
         app.farmLan = runtime
+        val drive = FarmDriveRuntime(app, app.database, app.keyVault, account.farmId, app.deviceId, attachmentStore).start()
+        app.farmDrive = drive
         onDispose {
             app.farmLan = null
             runtime.close()
+            app.farmDrive = null
+            drive.close()
         }
     }
     FarmSessionContent(
