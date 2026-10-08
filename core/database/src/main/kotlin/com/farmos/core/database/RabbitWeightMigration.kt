@@ -10,8 +10,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  * `index_rabbit_weights_farmId_animalId`.
  *
  * Integration (owned by the schema integrator; FarmOsDatabase.kt is not touched by this batch):
- * add `RabbitWeightEntity::class` to the entities list, bump `version` to 37, and append
- * `MIGRATION_36_37_RABBIT_WEIGHT` to `ALL_MIGRATIONS`.
+ * add `RabbitWeightEntity::class` to the entities list, bump `version` to 37, and cover this migration
+ * body in the merged MIGRATION_36_37. Do NOT register a second Migration(36, 37) in ALL_MIGRATIONS:
+ * Room keys migrations by (startVersion, endVersion) and silently keeps only the last object
+ * registered for a duplicate key.
  */
 val MIGRATION_36_37_RABBIT_WEIGHT = object : Migration(36, 37) {
     override fun migrate(db: SupportSQLiteDatabase) {

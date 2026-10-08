@@ -20,7 +20,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  * 1. Add `AnimalGroupMembershipEntity::class` to the `@Database entities` list.
  * 2. Bump `version = 36` to `version = 37`.
  * 3. Add `abstract fun groupMemberships(): AnimalGroupMembershipDao`.
- * 4. Add `MigrationGroupMove36To37` to `ALL_MIGRATIONS`.
+ * 4. Cover `MigrationGroupMove36To37` in the merged `MIGRATION_36_37` in `ALL_MIGRATIONS`
+ *    (never register it as a second Migration(36, 37) — Room keeps only one object per (start, end) key).
  */
 @Entity(
     tableName = "animal_group_memberships",
@@ -66,6 +67,11 @@ interface AnimalGroupMembershipDao {
 /**
  * FOS-GROUP-007 — schema 36 to 37: creates the per-animal group membership link table.
  * The CREATE TABLE column order mirrors the entity field order, matching Room's generated schema.
+ *
+ * This object owns ONLY the SQL body. It is invoked by the merged MIGRATION_36_37 in FarmOsDatabase.kt
+ * and must NOT be registered in ALL_MIGRATIONS itself: Room keys migrations by (startVersion, endVersion)
+ * and silently keeps only the last object registered for a duplicate key, so a second Migration(36, 37)
+ * would drop one table from the chain.
  */
 object MigrationGroupMove36To37 : Migration(36, 37) {
     override fun migrate(db: SupportSQLiteDatabase) {

@@ -30,8 +30,12 @@ class FarmOsDatabaseMigrationTest {
         context.deleteDatabase(databaseName)
     }
 
+    // UNEXECUTED: this test has never run. The CI/authoring runtime has no JVM, no Gradle and no
+    // Android SDK, so the androidTest suite cannot execute here. The 1 -> 37 chain and the new
+    // version-37 assertions below are statically verified only (SQL/entity cross-check, migration
+    // ordering, brace balance); they must pass in Android CI before any green claim.
     @Test
-    fun version1DatabaseMigratesThroughVersion36WithoutLosingFoundationData() = runBlocking {
+    fun version1DatabaseMigratesThroughVersion37WithoutLosingFoundationData() = runBlocking {
         val farmId = "11111111-1111-4111-8111-111111111111"
         val animalId = "33333333-3333-4333-8333-333333333333"
         val mutationId = "55555555-5555-4555-8555-555555555555"
@@ -41,7 +45,7 @@ class FarmOsDatabaseMigrationTest {
             .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
             .build()
 
-        // Force Room to execute the complete 1 -> 36 chain and validate the final schema.
+        // Force Room to execute the complete 1 -> 37 chain and validate the final schema.
         migrated.openHelper.writableDatabase
 
         val animal = migrated.animals().get(farmId, animalId)
@@ -109,6 +113,13 @@ class FarmOsDatabaseMigrationTest {
         assertEquals(0, migrated.lifecycle().cattleHeatsFor(farmId, animalId).size)
         assertEquals(0, migrated.lifecycle().cattleHeatCount(farmId))
         assertEquals(0, migrated.unitPreferences().all(farmId).size)
+        // Version 37 adds animal group memberships (FOS-GROUP-007); the migrated animal has no recorded group.
+        assertNull(migrated.groupMemberships().get(farmId, animalId))
+        assertEquals(0, migrated.groupMemberships().getMany(farmId, listOf(animalId)).size)
+        // Version 37 adds rabbit weights (FOS-RABBIT-032); the migrated farm has none.
+        assertNull(migrated.lifecycle().latestRabbitWeight(farmId, animalId))
+        assertEquals(0, migrated.lifecycle().rabbitWeightHistory(farmId, animalId).size)
+        assertEquals(0, migrated.lifecycle().rabbitWeights(farmId).size)
 
         migrated.close()
     }
