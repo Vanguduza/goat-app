@@ -22,7 +22,7 @@ val e2eFarmId = providers.gradleProperty("FARM_OS_E2E_FARM_ID")
 
 android {
     namespace = "com.farmos.app"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.farmos.app"
