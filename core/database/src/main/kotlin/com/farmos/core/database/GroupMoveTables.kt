@@ -64,8 +64,15 @@ interface AnimalGroupMembershipDao {
 }
 
 /**
- * FOS-GROUP-007 — schema 36 to 37: creates the per-animal group membership link table.
- * The CREATE TABLE column order mirrors the entity field order, matching Room's generated schema.
+ * FOS-GROUP-007 + FOS-RABBIT-032 — schema 36 to 37: creates the per-animal group membership
+ * link table AND the `rabbit_weights` table in a single migration.
+ *
+ * P0 fix (independent review 2026-10-08): Room's MigrationContainer keys migrations by
+ * (startVersion, endVersion), so two `Migration(36, 37)` objects cannot coexist — the second
+ * silently overrides the first and its tables are never created. Both CREATE TABLEs (and both
+ * indexes) therefore live in this one migration.
+ *
+ * The CREATE TABLE column orders mirror the entity field orders, matching Room's generated schema.
  */
 object MigrationGroupMove36To37 : Migration(36, 37) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -74,5 +81,11 @@ object MigrationGroupMove36To37 : Migration(36, 37) {
                 "`groupId` TEXT NOT NULL, `movedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`farmId`, `animalId`))",
         )
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_animal_group_memberships_farmId_groupId` ON `animal_group_memberships` (`farmId`, `groupId`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `rabbit_weights` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `animalId` TEXT NOT NULL, " +
+                "`weighedAtEpochMillis` INTEGER NOT NULL, `weightKg` REAL NOT NULL, `notes` TEXT, " +
+                "`recordedByActorId` TEXT, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_rabbit_weights_farmId_animalId` ON `rabbit_weights` (`farmId`, `animalId`)")
     }
 }

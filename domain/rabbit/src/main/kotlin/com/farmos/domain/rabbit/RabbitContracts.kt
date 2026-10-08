@@ -252,6 +252,8 @@ object RabbitProgrammeValidator {
      * command context clock); the validator itself never reads the wall clock.
      */
     fun weight(command: RecordRabbitWeight, nowEpochMillis: Long): String? {
+        // P2-1 (independent review 2026-10-08): a blank id would insert an empty-string PK row.
+        if (command.weightId.isBlank()) return "Rabbit weight needs an id"
         if (command.animalId.isBlank()) return "Rabbit weight needs a rabbit"
         if (command.weightKg <= 0.0) return "Rabbit weight must be positive"
         if (command.weightKg > MAX_RABBIT_WEIGHT_KG) return "Rabbit weight is outside sane bounds"
