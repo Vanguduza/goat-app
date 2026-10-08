@@ -239,6 +239,20 @@ fun RabbitModuleHost(
                 )
             }
         },
+        onRecordWeight = { animalId, weightKg, day, notes ->
+            run {
+                ops.recordRabbitWeight(
+                    com.farmos.domain.rabbit.RecordRabbitWeight(
+                        weightId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        weightKg = weightKg.toDoubleOrNull() ?: 0.0,
+                        weighedAtEpochMillis = LocalDate.parse(day).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                        notes = notes,
+                    ),
+                    newContext(),
+                )
+            }
+        },
         onAllocateSale = { kitId, targetWeightGrams, targetDay, purpose ->
             run {
                 ops.recordPlan(

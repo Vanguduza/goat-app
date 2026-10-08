@@ -96,11 +96,22 @@ data class RabbitCageView(val id: String, val code: String, val doeCapacity: Int
 
 data class RabbitKitView(val id: String, val waveId: String, val label: String, val sex: String, val status: String, val retention: String, val earTag: String?)
 
+/** FOS-RABBIT-032 — one governed rabbit weighing, read model for the weight record pages. */
+data class RabbitWeightView(
+    val id: String,
+    val animalId: String,
+    val animalLabel: String,
+    val weightKg: Double,
+    val weighedAtEpochMillis: Long,
+    val notes: String?,
+)
+
 /** Local, farm-scoped rabbitry records for the read-only record pages. Nothing here writes. */
 data class RabbitRecords(
     val cages: List<RabbitCageView> = emptyList(),
     val waves: List<RabbitWaveView> = emptyList(),
     val kits: List<RabbitKitView> = emptyList(),
+    val weights: List<RabbitWeightView> = emptyList(),
 )
 
 private val AVAILABLE_BOX_STATES = setOf("available", "sanitized")

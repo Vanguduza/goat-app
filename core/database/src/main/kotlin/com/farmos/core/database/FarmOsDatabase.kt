@@ -701,6 +701,7 @@ interface SyncCursorDao {
         InventoryItemEntity::class,
         InventoryMovementEntity::class,
         AnimalGroupEntity::class,
+        AnimalGroupMembershipEntity::class,
         PaddockEntity::class,
         GrazingSessionEntity::class,
         LabourEntryEntity::class,
@@ -735,6 +736,7 @@ interface SyncCursorDao {
         GoatMilkEntity::class,
         HealthPackEntity::class,
         RabbitWeanEntity::class,
+        RabbitWeightEntity::class,
         SheepMarkingEntity::class,
         SheepWeaningEntity::class,
         CattleBcsEntity::class,
@@ -804,7 +806,7 @@ interface SyncCursorDao {
         AttachmentEntity::class,
         HealthVaccinationEntity::class,
     ],
-    version = 36,
+    version = 37,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -832,6 +834,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun money(): MoneyDao
     abstract fun inventory(): InventoryDao
     abstract fun groups(): AnimalGroupDao
+    abstract fun groupMemberships(): AnimalGroupMembershipDao
     abstract fun paddocks(): PaddockDao
     abstract fun grazing(): GrazingDao
     abstract fun labour(): LabourDao
@@ -1435,6 +1438,6 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36)
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MigrationGroupMove36To37, MIGRATION_36_37_RABBIT_WEIGHT)
     }
 }

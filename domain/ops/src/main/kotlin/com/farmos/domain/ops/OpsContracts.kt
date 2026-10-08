@@ -159,6 +159,20 @@ data class AmendAnimalGroup(
     val speciesCode: String,
 )
 
+/**
+ * FOS-GROUP-007 — move one or more animals between groups of the same species. [animalIds] lists
+ * every animal to move; [fromGroupId] is the asserted current group. Animals with no recorded
+ * membership are treated as unassigned and may be claimed by the move as their first group
+ * assignment. Journalled as `group.animal_move.v1` and replayed through the same handler.
+ */
+@Serializable
+data class MoveAnimalGroup(
+    val moveId: String,
+    val animalIds: List<String>,
+    val fromGroupId: String,
+    val toGroupId: String,
+)
+
 @Serializable
 data class IssueFeed(
     val issueId: String,
@@ -896,6 +910,17 @@ object OpsValidator {
     fun amendGroup(command: AmendAnimalGroup): String? {
         if (command.name.isBlank()) return "Group needs a name"
         if (command.speciesCode !in FarmSpeciesCodes.ALL) return "Group needs a farm species"
+        return null
+    }
+
+    fun moveAnimalGroup(command: MoveAnimalGroup): String? {
+        if (command.moveId.isBlank()) return "Group move needs an id"
+        if (command.animalIds.isEmpty()) return "Group move needs at least one animal"
+        if (command.animalIds.any { it.isBlank() }) return "Group move animal ids must not be blank"
+        if (command.animalIds.size != command.animalIds.toSet().size) return "Group move lists an animal more than once"
+        if (command.fromGroupId.isBlank()) return "Group move needs a source group"
+        if (command.toGroupId.isBlank()) return "Group move needs a target group"
+        if (command.fromGroupId == command.toGroupId) return "Group move needs a target group different from the source"
         return null
     }
 

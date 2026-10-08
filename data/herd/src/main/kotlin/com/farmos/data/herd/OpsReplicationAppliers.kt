@@ -18,6 +18,7 @@ import com.farmos.domain.ops.CloseCattleLot
 import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateAnimalGroup
 import com.farmos.domain.ops.AmendAnimalGroup
+import com.farmos.domain.ops.MoveAnimalGroup
 import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.CreateFarmTask
 import com.farmos.domain.ops.ReverseAnimalExit
@@ -120,6 +121,7 @@ import com.farmos.domain.rabbit.RecordRabbitGiStasis
 import com.farmos.domain.rabbit.RecordRabbitMarketPlan
 import com.farmos.domain.rabbit.RecordRabbitMatingOutcome
 import com.farmos.domain.rabbit.RecordRabbitWean
+import com.farmos.domain.rabbit.RecordRabbitWeight
 import com.farmos.domain.rabbit.RegisterRabbitKit
 import com.farmos.domain.rabbit.SetRabbitNestBoxStatus
 import com.farmos.domain.replication.OperationEnvelope
@@ -161,6 +163,7 @@ object OpsReplicationAppliers {
         "group.census.v1" to replay { ops, op -> ops.recordCensus(decode<RecordGroupCensus>(op), context(op)) },
         "group.create.v1" to replay { ops, op -> ops.createGroup(decode<CreateAnimalGroup>(op), context(op)) },
         "group.amend.v1" to replay { ops, op -> ops.amendGroup(decode<AmendAnimalGroup>(op), context(op)) },
+        "group.animal_move.v1" to replay { ops, op -> ops.moveAnimalGroup(decode<MoveAnimalGroup>(op), context(op)) },
         "health.pack_accept.v1" to replay { ops, op -> ops.acceptPack(decode<AcceptHealthPack>(op), context(op)) },
         "health.pack_apply.v1" to replay { ops, op -> ops.applyPack(decode<ApplyHealthPack>(op), context(op)) },
         "health.pack_slot_add.v1" to replay { ops, op -> ops.addPackSlot(decode<AddHealthPackSlot>(op), context(op)) },
@@ -212,6 +215,7 @@ object OpsReplicationAppliers {
         "rabbit.record_mating_outcome.v1" to replay { ops, op -> ops.recordMatingOutcome(decode<RecordRabbitMatingOutcome>(op), context(op)) },
         "rabbit.record_palpation.v1" to replay { ops, op -> ops.recordPalpation(decode<RecordRabbitPalpation>(op), context(op)) },
         "rabbit.record_wean.v1" to replay { ops, op -> ops.recordWean(decode<RecordRabbitWean>(op), context(op)) },
+        "rabbit.record_weight.v1" to replay { ops, op -> ops.recordRabbitWeight(decode<RecordRabbitWeight>(op), context(op)) },
         "rabbit.retention_decide.v1" to replay { ops, op -> ops.decideRetention(decode<DecideRabbitRetention>(op), context(op)) },
         "rabbit.waitlist_enqueue.v1" to replay { ops, op -> ops.enqueueWaitlist(decode<EnqueueRabbitWaitlist>(op), context(op)) },
         "rabbit.waitlist_fulfill.v1" to replay { ops, op -> ops.fulfillWaitlist(decode<FulfillRabbitWaitlist>(op), context(op)) },

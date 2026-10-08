@@ -491,6 +491,15 @@ interface LifecycleDao {
     suspend fun rabbitFosters(farmId: String): List<RabbitFosterEntity>
     @Query("SELECT * FROM rabbit_weans WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
     suspend fun rabbitWeans(farmId: String): List<RabbitWeanEntity>
+    /** FOS-RABBIT-032 — governed rabbit weight records; own table, never the goat measurements table. */
+    @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertRabbitWeight(row: RabbitWeightEntity)
+    @Upsert suspend fun upsertRabbitWeight(row: RabbitWeightEntity)
+    @Query("SELECT * FROM rabbit_weights WHERE farmId = :farmId AND animalId = :animalId ORDER BY weighedAtEpochMillis DESC, id LIMIT 1")
+    suspend fun latestRabbitWeight(farmId: String, animalId: String): RabbitWeightEntity?
+    @Query("SELECT * FROM rabbit_weights WHERE farmId = :farmId AND animalId = :animalId ORDER BY weighedAtEpochMillis DESC, id")
+    suspend fun rabbitWeightHistory(farmId: String, animalId: String): List<RabbitWeightEntity>
+    @Query("SELECT * FROM rabbit_weights WHERE farmId = :farmId ORDER BY weighedAtEpochMillis DESC, id")
+    suspend fun rabbitWeights(farmId: String): List<RabbitWeightEntity>
     @Query("SELECT * FROM rabbit_mating_outcomes WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id")
     suspend fun rabbitMatingOutcomes(farmId: String): List<RabbitMatingOutcomeEntity>
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertRetention(row: RabbitRetentionEntity)

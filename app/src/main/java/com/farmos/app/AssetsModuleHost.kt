@@ -442,8 +442,8 @@ private enum class AssetAttachmentKind { DOCUMENTS, PHOTOS }
 
 /**
  * FOS-ASSET-010 — Asset Documents, FOS-ASSET-011 — Asset Photo Gallery: the files kept against
- * one asset, newest first. Read-only: AttachmentRules.OWNER_TYPES allows animal records only
- * (owner decision D-015), so the add side is deliberately absent, mirroring TaskAttachmentsHost.
+ * one asset, newest first. Read-only: asset records are not in AttachmentRules.OWNER_TYPES
+ * (only animal and task records carry attachments), so the add side is deliberately absent.
  */
 @Composable
 private fun AssetAttachmentsPage(

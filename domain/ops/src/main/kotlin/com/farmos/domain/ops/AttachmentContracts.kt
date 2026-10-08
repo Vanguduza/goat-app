@@ -27,13 +27,13 @@ object AttachmentRules {
     /** What a farm record can carry: photos and PDF documents. */
     val MEDIA_TYPES: Set<String> = setOf("image/jpeg", "image/png", "image/webp", "application/pdf")
 
-    /** Records that can carry attachments. */
-    val OWNER_TYPES: Set<String> = setOf("animal")
+    /** Records that can carry attachments: animals and tasks (FOS-TASK-012). */
+    val OWNER_TYPES: Set<String> = setOf("animal", "task")
 
     private val sha256 = Regex("^[0-9a-f]{64}$")
 
     fun attach(command: AttachFile): String? = when {
-        command.ownerType !in OWNER_TYPES -> "Attachments can be added to animals only"
+        command.ownerType !in OWNER_TYPES -> "Attachments can be added to animal and task records only"
         command.ownerId.isBlank() -> "Choose the record to attach to"
         !sha256.matches(command.contentSha256) -> "The file could not be identified"
         command.byteSize <= 0 -> "The file is empty"
@@ -43,4 +43,33 @@ object AttachmentRules {
         command.displayName.length > MAX_NAME -> "A file name is at most $MAX_NAME characters"
         else -> null
     }
+
+    /**
+     * The task create side (FOS-TASK-012). [sourceReadable] is whether the local file could be opened
+     * and read; the caller establishes it by reading the bytes, for example through the document picker.
+     */
+    fun attachTask(command: AttachTaskAttachment, sourceReadable: Boolean): String? = when {
+        command.taskId.isBlank() -> "Choose the task to attach to"
+        !sourceReadable -> "The file could not be read"
+        else -> attach(command.asAttachFile())
+    }
+}
+
+/**
+ * FOS-TASK-012 — attaches a photo or document to a task. The governed create side of a task attachment:
+ * identical file identity rules to [AttachFile], fixed to ownerType "task". The repository handler turns
+ * it into the shared attachment.attach.v1 operation, so task-owned attachments replicate through the same
+ * journal layout and Drive blob path as animal attachments, keyed by content SHA-256, not owner.
+ */
+@Serializable
+data class AttachTaskAttachment(
+    val attachmentId: String,
+    val taskId: String,
+    val contentSha256: String,
+    val byteSize: Long,
+    val mediaType: String,
+    val displayName: String,
+) {
+    fun asAttachFile(): AttachFile =
+        AttachFile(attachmentId, "task", taskId, contentSha256, byteSize, mediaType, displayName)
 }

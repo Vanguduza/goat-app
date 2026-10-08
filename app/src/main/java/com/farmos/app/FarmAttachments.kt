@@ -247,8 +247,8 @@ internal fun AnimalAttachmentsHost(database: FarmOsDatabase, farmId: String, ani
     )
 }
 
-/** Reads a picked file up to the size limit, with its media type and display name. */
-private fun readPicked(context: Context, uri: Uri): Triple<ByteArray, String, String> {
+/** Reads a picked file up to the size limit, with its media type and display name. Shared with the task attachment host. */
+internal fun readPicked(context: Context, uri: Uri): Triple<ByteArray, String, String> {
     val resolver = context.contentResolver
     val type = resolver.getType(uri) ?: error("The file type could not be read")
     val name = resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->

@@ -34,7 +34,7 @@ import java.time.LocalDate
 import kotlinx.coroutines.launch
 import com.farmos.core.design.runSuspendCatching
 
-/** Tabs of the per-task workspace. FOS-GROUP-007 is intentionally absent: no group-move command exists. */
+/** Tabs of the per-task workspace. FOS-GROUP-007 group moves are governed by the MoveAnimalGroup command in the Groups module. */
 private enum class TaskDetailTab(val label: String) {
     DETAIL("Details"),
     ASSIGN("Assign"),
@@ -131,6 +131,7 @@ fun TasksModuleHost(
             onAssign = { change -> assign(taskId, change) },
             onComplete = ::complete,
             onEdit = { editingId = taskId },
+            newContext = newContext,
             onBack = { if (deepEntry) onBack() else selectedId = null },
         )
         return
@@ -279,6 +280,7 @@ private fun TaskDetailWorkspace(
     onAssign: (TaskAssigneeChange?) -> Unit,
     onComplete: (String) -> Unit,
     onEdit: () -> Unit,
+    newContext: () -> LocalCommandContext,
     onBack: () -> Unit,
 ) {
     var tab by remember(taskId) { mutableStateOf(TaskDetailTab.DETAIL) }
@@ -319,12 +321,14 @@ private fun TaskDetailWorkspace(
                 database = database,
                 farmId = farmId,
                 task = task,
+                newContext = newContext,
                 onBack = onBack,
             )
             TaskDetailTab.EVIDENCE -> TaskEvidencePage(
                 task = task,
                 database = database,
                 farmId = farmId,
+                newContext = newContext,
                 onBack = onBack,
             )
         }
@@ -402,14 +406,15 @@ private fun TaskAssignPage(
 }
 
 /**
- * FOS-TASK-012 — Task Attachment: the files kept against one task. The list is the read side of
- * the attachment pattern; adding files to a task has no domain command (see TaskAttachmentsHost).
+ * FOS-TASK-012 — Task Attachment: the files kept against one task. New photos and PDFs are added
+ * through the governed AttachTaskAttachment command; a completed task keeps the files it was finished with.
  */
 @Composable
 private fun TaskAttachmentsPage(
     database: FarmOsDatabase?,
     farmId: String,
     task: TaskUiRow?,
+    newContext: () -> LocalCommandContext,
     onBack: () -> Unit,
 ) {
     FarmOperationalPage(
@@ -423,7 +428,16 @@ private fun TaskAttachmentsPage(
         } else if (database == null) {
             androidx.compose.material3.Text("Attachments are unavailable: this task view is not wired to the database.")
         } else {
-            TaskAttachmentsHost(database = database, farmId = farmId, taskId = task.id)
+            TaskAttachmentsHost(
+                database = database,
+                farmId = farmId,
+                taskId = task.id,
+                canAttach = task.status == "open",
+                newContext = newContext,
+            )
+            if (task.status != "open") {
+                androidx.compose.material3.Text("A completed task keeps the files it was finished with.")
+            }
         }
     }
 }
@@ -437,6 +451,7 @@ private fun TaskEvidencePage(
     task: TaskUiRow?,
     database: FarmOsDatabase?,
     farmId: String,
+    newContext: () -> LocalCommandContext,
     onBack: () -> Unit,
 ) {
     val today = LocalDate.now().toEpochDay()
@@ -464,7 +479,8 @@ private fun TaskEvidencePage(
             if (database == null) {
                 androidx.compose.material3.Text("Attachments are unavailable: this task view is not wired to the database.")
             } else {
-                TaskAttachmentsHost(database = database, farmId = farmId, taskId = task.id)
+                // Evidence lists the same files; new files are added from the Attachments tab.
+                TaskAttachmentsHost(database = database, farmId = farmId, taskId = task.id, canAttach = false, newContext = newContext)
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.farmos.app
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.farmos.core.database.AnimalEntity
 import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalSection
@@ -18,6 +20,7 @@ import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.CreateAnimalGroup
 import com.farmos.domain.ops.AmendAnimalGroup
+import com.farmos.domain.ops.MoveAnimalGroup
 import com.farmos.domain.ops.FarmSpeciesCodes
 import com.farmos.domain.ops.RecordGroupCensus
 import com.farmos.feature.ops.GroupCensusView
@@ -30,13 +33,14 @@ import java.util.UUID
 import kotlinx.coroutines.launch
 import com.farmos.core.design.runSuspendCatching
 
-/** Internal pages of the group module. FOS-GROUP-007 (Group Move) has no domain command and is not a page. */
+/** Internal pages of the group module, including FOS-GROUP-007 (Group Move) wired to MoveAnimalGroup (group.animal_move.v1). */
 private enum class GroupsPage {
     HOME,
     CREATE,
     MEMBERSHIP,
     EDIT,
     HEALTH,
+    MOVE,
 }
 
 /** Dedicated group/census orchestration boundary. Species-specific production writes stay in species modules. */
@@ -127,6 +131,11 @@ fun GroupsModuleHost(
                     enabled = !busy,
                     modifier = Modifier.fillMaxWidth(),
                 ) { androidx.compose.material3.Text("Group health") }
+                androidx.compose.material3.TextButton(
+                    onClick = { page = GroupsPage.MOVE },
+                    enabled = !busy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { androidx.compose.material3.Text("Move animals") }
                 FarmEntitySelector(
                     FarmSelectionAtoms.SPECIES_SELECTOR,
                     "Species",
@@ -212,6 +221,24 @@ fun GroupsModuleHost(
             loadTreatments = { ops.recentTreatments() },
             onBack = { page = GroupsPage.HOME },
         )
+        GroupsPage.MOVE -> GroupMovePage(
+            groupOptions = groupOptions,
+            busy = busy,
+            error = error,
+            loadGroup = { id -> ops.group(id) },
+            loadMembers = { id -> ops.animalsInGroup(id) },
+            loadUnassigned = { speciesCode -> ops.unassignedAnimals(speciesCode) },
+            loadTargets = { speciesCode, excludeId ->
+                ops.groups().filter { it.speciesCode == speciesCode && it.id != excludeId }
+                    .map { FarmSelectorOption(it.id, it.name, "${it.speciesCode} · ${it.headCount} head recorded") }
+            },
+            onMove = { command ->
+                run {
+                    ops.moveAnimalGroup(command, newContext())
+                }
+            },
+            onBack = { page = GroupsPage.HOME },
+        )
     }
 }
 
@@ -291,7 +318,7 @@ private fun GroupMembershipPage(
     fun load(id: String) {
         scope.launch {
             census = null
-            census = runCatching { loadCensus(id) }.getOrNull().orEmpty()
+            census = runSuspendCatching { loadCensus(id) }.getOrNull().orEmpty()
         }
     }
 
@@ -346,7 +373,7 @@ private fun GroupEditPage(
 
     fun load(id: String) {
         scope.launch {
-            val group = runCatching { loadGroup(id) }.getOrNull()
+            val group = runSuspendCatching { loadGroup(id) }.getOrNull()
             if (group != null) {
                 name.value = group.name
                 species.value = group.speciesCode
@@ -420,11 +447,11 @@ private fun GroupHealthPage(
         scope.launch {
             observations = null
             treatments = null
-            val group = runCatching { loadGroup(id) }.getOrNull()
+            val group = runSuspendCatching { loadGroup(id) }.getOrNull()
             species = group?.speciesCode
             val code = group?.speciesCode
-            observations = runCatching { loadObservations() }.getOrElse { emptyList() }.filter { it.speciesCode == code }
-            treatments = runCatching { loadTreatments() }.getOrElse { emptyList() }.filter { it.speciesCode == code }
+            observations = runSuspendCatching { loadObservations() }.getOrElse { emptyList() }.filter { it.speciesCode == code }
+            treatments = runSuspendCatching { loadTreatments() }.getOrElse { emptyList() }.filter { it.speciesCode == code }
         }
     }
 
@@ -466,5 +493,183 @@ private fun GroupHealthPage(
                 }
             }
         }
+    }
+}
+
+/**
+ * FOS-GROUP-007 — Group Move: move one or more animals between groups of the same species, written
+ * through MoveAnimalGroup (group.animal_move.v1). The source group's recorded members are listed
+ * with checkboxes; animals of the same species with no recorded membership are listed as unassigned
+ * and may be claimed by the move as their first group assignment. The move is a two-tap confirm;
+ * success is reported only after the host's local Room transaction commits (error stays null).
+ */
+@Composable
+private fun GroupMovePage(
+    groupOptions: List<FarmSelectorOption>,
+    busy: Boolean,
+    error: String?,
+    loadGroup: suspend (String) -> com.farmos.core.database.AnimalGroupEntity?,
+    loadMembers: suspend (String) -> List<AnimalEntity>,
+    loadUnassigned: suspend (String) -> List<AnimalEntity>,
+    loadTargets: suspend (String, String) -> List<FarmSelectorOption>,
+    onMove: (MoveAnimalGroup) -> Unit,
+    onBack: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var fromGroupId by remember { mutableStateOf<String?>(null) }
+    var toGroupId by remember { mutableStateOf<String?>(null) }
+    var species by remember { mutableStateOf<String?>(null) }
+    var members by remember { mutableStateOf<List<AnimalEntity>?>(null) }
+    var unassigned by remember { mutableStateOf<List<AnimalEntity>?>(null) }
+    var targets by remember { mutableStateOf(emptyList<FarmSelectorOption>()) }
+    var selected by remember { mutableStateOf(setOf<String>()) }
+    var armed by remember { mutableStateOf(false) }
+    var submitted by remember { mutableStateOf(0) }
+    var done by remember { mutableStateOf<String?>(null) }
+
+    fun load(id: String) {
+        scope.launch {
+            members = null
+            unassigned = null
+            targets = emptyList()
+            selected = emptySet()
+            armed = false
+            done = null
+            val group = runSuspendCatching { loadGroup(id) }.getOrNull()
+            species = group?.speciesCode
+            members = runSuspendCatching { loadMembers(id) }.getOrElse { emptyList() }
+            if (group != null) {
+                unassigned = runSuspendCatching { loadUnassigned(group.speciesCode) }.getOrElse { emptyList() }
+                targets = runSuspendCatching { loadTargets(group.speciesCode, id) }.getOrElse { emptyList() }
+            } else {
+                unassigned = emptyList()
+            }
+        }
+    }
+
+    // A submitted move reports its outcome once the host finishes: success only when the host
+    // reports no error; otherwise the host's error state carries the rejection reason.
+    LaunchedEffect(busy) {
+        if (submitted > 0 && !busy) {
+            if (error == null) {
+                done = "Moved $submitted animal(s). Saved on this device · waiting to sync."
+                selected = emptySet()
+                armed = false
+                fromGroupId?.let { load(it) }
+            }
+            submitted = 0
+        }
+    }
+    LaunchedEffect(selected, toGroupId) { armed = false }
+
+    val fromId = fromGroupId
+    val toId = toGroupId
+    val targetName = targets.firstOrNull { it.id == toId }?.label
+
+    FarmOperationalPage(
+        screenId = "FOS-GROUP-007",
+        title = "Move animals",
+        subtitle = "Move animals between groups of the same species.",
+        onBack = onBack,
+    ) {
+        FarmEntitySelector(
+            FarmSelectionAtoms.GROUP_SELECTOR,
+            "Source group",
+            groupOptions,
+            fromId,
+            { fromGroupId = it; toGroupId = null; load(it) },
+            "Create a group first.",
+            enabled = !busy,
+        )
+        when {
+            fromId == null -> androidx.compose.material3.Text("Choose a source group.")
+            members == null -> androidx.compose.material3.Text("Reading group members")
+            else -> {
+                FarmOperationalSection(
+                    title = "Animals in this group",
+                    description = "Recorded members. Tick the animals to move.",
+                ) {
+                    val memberList = members!!
+                    if (memberList.isEmpty()) {
+                        androidx.compose.material3.Text("No animals recorded in this group yet.")
+                    } else {
+                        memberList.forEach { animal ->
+                            AnimalCheckRow(animal, selected.contains(animal.id), !busy) { checked ->
+                                selected = if (checked) selected + animal.id else selected - animal.id
+                            }
+                        }
+                    }
+                }
+                val unassignedList = unassigned.orEmpty()
+                if (unassignedList.isNotEmpty()) {
+                    FarmOperationalSection(
+                        title = "Unassigned ${species ?: ""} animals",
+                        description = "No recorded group yet. Moving one assigns it to the target group.",
+                    ) {
+                        unassignedList.forEach { animal ->
+                            AnimalCheckRow(animal, selected.contains(animal.id), !busy) { checked ->
+                                selected = if (checked) selected + animal.id else selected - animal.id
+                            }
+                        }
+                    }
+                }
+                FarmOperationalSection(
+                    title = "Target group",
+                    description = "Same species as the source group.",
+                ) {
+                    FarmEntitySelector(
+                        FarmSelectionAtoms.GROUP_SELECTOR,
+                        "Target group",
+                        targets,
+                        toId,
+                        { toGroupId = it },
+                        "No other group of this species on this device.",
+                        enabled = !busy,
+                    )
+                }
+                FarmOperationalSection(title = "Confirm") {
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            if (armed) {
+                                submitted = selected.size
+                                done = null
+                                onMove(MoveAnimalGroup(UUID.randomUUID().toString(), selected.toList(), fromId, toId!!))
+                            } else {
+                                armed = true
+                            }
+                        },
+                        enabled = !busy && toId != null && selected.isNotEmpty(),
+                    ) {
+                        androidx.compose.material3.Text(
+                            if (armed) "Confirm move of ${selected.size} animal(s)" + (targetName?.let { " to $it" } ?: "")
+                            else "Move ${selected.size} animal(s)",
+                        )
+                    }
+                    if (busy) androidx.compose.material3.Text("Saving move")
+                    error?.let { androidx.compose.material3.Text(it) }
+                    done?.let { androidx.compose.material3.Text(it) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnimalCheckRow(
+    animal: AnimalEntity,
+    checked: Boolean,
+    enabled: Boolean,
+    onChecked: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+    ) {
+        androidx.compose.material3.Checkbox(checked, onChecked, enabled = enabled)
+        val name = animal.name?.takeIf { it.isNotBlank() }?.let { " · $it" } ?: ""
+        androidx.compose.material3.Text(
+            "${animal.tag}$name · ${animal.sex}",
+            modifier = Modifier.weight(1f),
+        )
     }
 }

@@ -3,6 +3,7 @@ package com.farmos.data.herd
 import androidx.room.withTransaction
 import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.AnimalGroupEntity
+import com.farmos.core.database.AnimalGroupMembershipEntity
 import com.farmos.core.database.FarmAssetEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.CattleCalvingEntity
@@ -77,6 +78,7 @@ import com.farmos.core.database.RabbitFosterEntity
 import com.farmos.core.database.RabbitKindlingEntity
 import com.farmos.core.database.RabbitPalpationEntity
 import com.farmos.core.database.RabbitWeanEntity
+import com.farmos.core.database.RabbitWeightEntity
 import com.farmos.core.database.SheepMarkingEntity
 import com.farmos.core.database.SheepWeaningEntity
 import com.farmos.core.database.SheepWoolEntity
@@ -145,6 +147,7 @@ import com.farmos.domain.ops.CreatePoultryHouse
 import com.farmos.domain.ops.CreateSupplier
 import com.farmos.domain.ops.EndGrazing
 import com.farmos.domain.ops.IssueFeed
+import com.farmos.domain.ops.MoveAnimalGroup
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.OpsValidator
 import com.farmos.domain.ops.RecordCattleBcs
@@ -212,6 +215,7 @@ import com.farmos.domain.rabbit.RecordRabbitMarketPlan
 import com.farmos.domain.rabbit.RecordRabbitGiStasis
 import com.farmos.domain.rabbit.RecordRabbitMatingOutcome
 import com.farmos.domain.rabbit.RecordRabbitWean
+import com.farmos.domain.rabbit.RecordRabbitWeight
 import com.farmos.domain.rabbit.RegisterRabbitKit
 import com.farmos.domain.rabbit.SetRabbitNestBoxStatus
 import com.farmos.domain.rabbit.KudbatSemiIntensiveExcel
@@ -349,6 +353,28 @@ class RoomOpsRepository(
             database.lifecycle().insertWean(RabbitWeanEntity(command.weanId, farmId, command.waveId, command.weanedCount, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.weanId, true)
+    }
+
+    /** FOS-RABBIT-032 — governed rabbit weighing; persists locally and journals `rabbit.record_weight.v1`. */
+    suspend fun recordRabbitWeight(command: RecordRabbitWeight, context: LocalCommandContext): LocalCommandResult {
+        RabbitProgrammeValidator.weight(command, context.occurredAtEpochMillis)?.let { error(it) }
+        val rabbit = requireNotNull(database.animals().get(farmId, command.animalId)) { "Rabbit weight needs a rabbit" }
+        require(rabbit.speciesCode == "rabbit") { "Rabbit weight needs a rabbit" }
+        enqueue(context, "rabbit.record_weight.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+            database.lifecycle().insertRabbitWeight(
+                RabbitWeightEntity(
+                    id = command.weightId,
+                    farmId = farmId,
+                    animalId = command.animalId,
+                    weighedAtEpochMillis = command.weighedAtEpochMillis,
+                    weightKg = command.weightKg,
+                    notes = command.notes?.trim()?.ifBlank { null },
+                    recordedByActorId = context.actorId,
+                    createdAtEpochMillis = context.occurredAtEpochMillis,
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.weightId, true)
     }
 
     suspend fun recordMarking(command: RecordSheepMarking, context: LocalCommandContext): LocalCommandResult {
@@ -1081,6 +1107,74 @@ class RoomOpsRepository(
         }
         return LocalCommandResult(context.mutationId, command.groupId, true)
     }
+
+    /**
+     * FOS-GROUP-007 — move one or more animals between groups of the same species. The membership
+     * link is the authoritative per-animal record: every animal is re-linked to the target group and
+     * both groups' recorded head counts follow the animals that actually change membership. Animals
+     * with no recorded membership are treated as unassigned and may be claimed by the move as their
+     * first group assignment. On replay the same handler runs in replay mode; re-application of an
+     * already-applied animal is a no-op, and a move whose precondition no longer holds (a genuinely
+     * concurrent move) fails loudly so the Conflict Centre can reconcile it — never silently
+     * overwritten.
+     *
+     * INTEGRATION: calls `database.groupMemberships()`, which the integrator must add to
+     * FarmOsDatabase (see the integration notes in GroupMoveTables.kt) before this compiles.
+     */
+    suspend fun moveAnimalGroup(command: MoveAnimalGroup, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.moveAnimalGroup(command)?.let { error(it) }
+        val fromGroup = requireNotNull(database.groups().get(farmId, command.fromGroupId)) { "Group move needs a source group on this farm" }
+        val toGroup = requireNotNull(database.groups().get(farmId, command.toGroupId)) { "Group move needs a target group on this farm" }
+        require(fromGroup.speciesCode == toGroup.speciesCode) {
+            "Group move needs two groups of the same species (${fromGroup.speciesCode} to ${toGroup.speciesCode})"
+        }
+        val animals = database.animals().getMany(farmId, command.animalIds)
+        val byId = animals.associateBy { it.id }
+        command.animalIds.forEach { animalId ->
+            requireNotNull(byId[animalId]) { "Group move needs animal $animalId on this farm" }
+        }
+        val memberships = database.groupMemberships().getMany(farmId, command.animalIds).associateBy { it.animalId }
+        animals.forEach { animal ->
+            val label = animal.tag.ifBlank { animal.id }
+            require(animal.speciesCode == fromGroup.speciesCode) {
+                "Group move needs $label to be a ${fromGroup.speciesCode}, not a ${animal.speciesCode}"
+            }
+            val current = memberships[animal.id]?.groupId
+            require(current == null || current == command.fromGroupId || current == command.toGroupId) {
+                val currentName = database.groups().get(farmId, current!!)?.name ?: current
+                "Group move needs $label to be a member of ${fromGroup.name}; it is in $currentName"
+            }
+        }
+        enqueue(context, "group.animal_move.v1", "animal_group", command.fromGroupId, expectedVersion("animal_group", command.fromGroupId), json.encodeToString(command)) {
+            val live = database.groupMemberships().getMany(farmId, command.animalIds).associateBy { it.animalId }
+            var fromDelta = 0
+            var toDelta = 0
+            command.animalIds.forEach { animalId ->
+                val current = live[animalId]?.groupId
+                if (current == command.toGroupId) return@forEach // already applied: replay is idempotent
+                database.groupMemberships().upsert(
+                    AnimalGroupMembershipEntity(farmId, animalId, command.toGroupId, context.occurredAtEpochMillis),
+                )
+                if (current == command.fromGroupId) fromDelta -= 1
+                toDelta += 1
+            }
+            if (fromDelta != 0) {
+                val from = requireNotNull(database.groups().get(farmId, command.fromGroupId)) { "Group move lost its source group" }
+                database.groups().setHeadCount(farmId, command.fromGroupId, (from.headCount + fromDelta).coerceAtLeast(0))
+            }
+            if (toDelta != 0) {
+                val to = requireNotNull(database.groups().get(farmId, command.toGroupId)) { "Group move lost its target group" }
+                database.groups().setHeadCount(farmId, command.toGroupId, to.headCount + toDelta)
+            }
+        }
+        return LocalCommandResult(context.mutationId, command.moveId, true)
+    }
+
+    /** Animals whose recorded membership is [groupId], for the FOS-GROUP-007 move screen. */
+    suspend fun animalsInGroup(groupId: String) = database.groupMemberships().animalsInGroup(farmId, groupId)
+
+    /** Animals of [speciesCode] with no recorded group membership, for first-assignment moves. */
+    suspend fun unassignedAnimals(speciesCode: String) = database.groupMemberships().unassignedAnimals(farmId, speciesCode)
 
     suspend fun createPaddock(command: CreatePaddock, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.paddock(command)?.let { error(it) }
