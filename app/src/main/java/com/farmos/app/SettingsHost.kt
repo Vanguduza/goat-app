@@ -293,7 +293,11 @@ internal fun SettingsHost(
                 SettingsButton("Open Conflict Centre", !busy) { page = SettingsPage.CONFLICTS }
             }
             FarmOperationalSection("Google Drive") {
-                Text("Not connected.")
+                val driveState = driveSummary(drive)
+                Text(driveState, modifier = Modifier.testTag("settings-storage-drive"))
+                if (driveState == "not connected") {
+                    Text("You can connect it later from Offline and sync.", color = AnimalFarmTheme.colors.mutedInk)
+                }
                 Text("Farm work continues on this device. Disconnecting Google Drive never deletes farm records on this device.", color = AnimalFarmTheme.colors.mutedInk)
             }
             FarmOperationalSection("Backup") { Text("No backup has been made.") }
