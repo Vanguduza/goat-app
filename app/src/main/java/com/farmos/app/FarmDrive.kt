@@ -74,36 +74,33 @@ internal data class DriveGatewayConfig(
 internal class DriveConfigStore(context: Context) {
     private val prefs = context.getSharedPreferences(DRIVE_PREFS, Context.MODE_PRIVATE)
 
-    fun get(farmId: String): DriveGatewayConfig? {
-        val account = prefs.getString(key(farmId, "account"), null) ?: return null
-        val folder = prefs.getString(key(farmId, "folder"), null) ?: return null
-        return DriveGatewayConfig(
-            accountEmail = account,
-            folderId = folder,
-            folderName = prefs.getString(key(farmId, "folder_name"), "") ?: "",
-            connectedAtEpochMillis = prefs.getLong(key(farmId, "connected_at"), 0),
-        )
-    }
+    fun get(farmId: String): DriveGatewayConfig? = DriveGatewayConfigCodec.decode(
+        mapOf(
+            "account" to prefs.getString(DriveConfigKeys.configKey(farmId, "account"), null),
+            "folder" to prefs.getString(DriveConfigKeys.configKey(farmId, "folder"), null),
+            "folder_name" to prefs.getString(DriveConfigKeys.configKey(farmId, "folder_name"), null),
+            "connected_at" to prefs.getLong(DriveConfigKeys.configKey(farmId, "connected_at"), 0).toString(),
+        ),
+    )
 
     fun save(farmId: String, config: DriveGatewayConfig) {
+        val encoded = DriveGatewayConfigCodec.encode(config)
         prefs.edit()
-            .putString(key(farmId, "account"), config.accountEmail)
-            .putString(key(farmId, "folder"), config.folderId)
-            .putString(key(farmId, "folder_name"), config.folderName)
-            .putLong(key(farmId, "connected_at"), config.connectedAtEpochMillis)
+            .putString(DriveConfigKeys.configKey(farmId, "account"), encoded.getValue("account"))
+            .putString(DriveConfigKeys.configKey(farmId, "folder"), encoded.getValue("folder"))
+            .putString(DriveConfigKeys.configKey(farmId, "folder_name"), encoded.getValue("folder_name"))
+            .putLong(DriveConfigKeys.configKey(farmId, "connected_at"), encoded.getValue("connected_at").toLongOrNull() ?: 0)
             .apply()
     }
 
     fun clear(farmId: String) {
         prefs.edit()
-            .remove(key(farmId, "account"))
-            .remove(key(farmId, "folder"))
-            .remove(key(farmId, "folder_name"))
-            .remove(key(farmId, "connected_at"))
+            .remove(DriveConfigKeys.configKey(farmId, "account"))
+            .remove(DriveConfigKeys.configKey(farmId, "folder"))
+            .remove(DriveConfigKeys.configKey(farmId, "folder_name"))
+            .remove(DriveConfigKeys.configKey(farmId, "connected_at"))
             .apply()
     }
-
-    private fun key(farmId: String, name: String) = "drive_cfg_${farmId}_$name"
 
     private companion object {
         const val DRIVE_PREFS = "farm_drive"
@@ -844,13 +841,16 @@ internal class FarmDriveRuntime(
 
     /**
      * Connects the owner's Drive: records the account and folder, keeps any existing cursor so a
-     * reconnect resumes from the last acknowledged operation, then synchronises at once.
+     * reconnect resumes from the last acknowledged operation, then synchronises at once. A
+     * successful connect also clears the first-run "Drive setup dismissed" flag, so the choice to
+     * connect later is the durable one.
      */
     fun connect(accountEmail: String, folderId: String, folderName: String) {
         worker.execute {
             require(accountEmail.isNotBlank() && folderId.isNotBlank()) { "A Drive account and folder are required" }
             val config = DriveGatewayConfig(accountEmail.trim(), folderId.trim(), folderName.trim(), clock())
             configStore.save(farmId, config)
+            DriveSetupFlags(context).setDismissed(farmId, false)
             mutableState.value = mutableState.value.copy(config = config, authNeeded = false, lastError = null)
             syncGuarded()
         }
