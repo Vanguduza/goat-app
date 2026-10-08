@@ -1400,16 +1400,32 @@ class RoomOpsRepository(
 
     suspend fun recordVaccination(command: RecordHealthVaccination, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.vaccination(command)?.let { error(it) }
-        val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) { "Vet-approved formulary item not found" }
-        require(formulary.vetApproved) { "Vaccination needs a vet-approved formulary item" }
-        if (command.animalId != null) {
-            val animal = requireNotNull(database.animals().get(farmId, command.animalId)) { "Animal not found" }
-            require(animal.status == "active") { "Vaccination needs an active animal" }
+        val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) {
+            "Vaccination needs a vet-approved formulary item"
+        }
+        // Restored from owner commit 474e8ef (merge 30eba5a): the formulary item
+        // must be vet-approved AND species-matched; the target animal/group must
+        // exist and match the command species. The local port had dropped these.
+        require(formulary.vetApproved && formulary.speciesCode == command.speciesCode) {
+            "Vaccination needs a vet-approved formulary item for " + command.speciesCode
+        }
+
+        val animalId = command.animalId?.trim()?.takeIf { it.isNotEmpty() }
+        val groupId = command.groupId?.trim()?.takeIf { it.isNotEmpty() }
+        if (animalId != null) {
+            val animal = requireNotNull(database.animals().get(farmId, animalId)) { "Vaccination animal not found" }
+            require(animal.status == "active" && animal.speciesCode == command.speciesCode) {
+                "Vaccination needs an active " + command.speciesCode + " animal"
+            }
+        }
+        if (groupId != null) {
+            val group = requireNotNull(database.groups().get(farmId, groupId)) { "Vaccination group not found" }
+            require(group.speciesCode == command.speciesCode) { "Vaccination group species mismatch" }
         }
         enqueue(context, "health.record_vaccination.v1", "health_vaccination", command.vaccinationId, 0, json.encodeToString(command)) {
             database.vaccinations().insert(
                 HealthVaccinationEntity(
-                    command.vaccinationId, farmId, command.animalId, command.groupId, command.speciesCode,
+                    command.vaccinationId, farmId, animalId, groupId, command.speciesCode,
                     command.formularyItemId, command.dose?.trim()?.takeIf { it.isNotBlank() },
                     command.method?.trim()?.takeIf { it.isNotBlank() }, command.occurredAtEpochMillis,
                 ),

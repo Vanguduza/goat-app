@@ -27,6 +27,22 @@ class VaccinationRulesTest {
     }
 
     @Test
+    fun vaccinationNeedsASpecies() {
+        assertEquals(
+            "Vaccination needs a species",
+            OpsValidator.vaccination(
+                RecordHealthVaccination(
+                    vaccinationId = "vax-1",
+                    speciesCode = "  ",
+                    formularyItemId = "form-1",
+                    animalId = "goat-1",
+                    occurredAtEpochMillis = 1_700_000_000_000L,
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun vaccinationNeedsATarget() {
         assertEquals(
             "Vaccination needs an animal or a group target",

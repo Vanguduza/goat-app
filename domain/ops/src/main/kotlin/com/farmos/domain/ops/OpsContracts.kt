@@ -982,6 +982,10 @@ object OpsValidator {
         if (command.formularyItemId.isBlank()) {
             return "Vaccination needs a vet-approved formulary item"
         }
+        // Restored from owner commit 474e8ef (merge 30eba5a): species is mandatory.
+        if (command.speciesCode.isBlank()) {
+            return "Vaccination needs a species"
+        }
         if (command.animalId.isNullOrBlank() && command.groupId.isNullOrBlank()) {
             return "Vaccination needs an animal or a group target"
         }
