@@ -44,8 +44,8 @@ internal class LocalFarmEntryReferenceFixture(context: Context) : Closeable {
 
     @Composable
     fun Content(onSignedIn: (LocalAccount, String) -> Unit = { _, _ -> }) {
-        // Match LocalFarmEntryTest: keep Room reads in Compose's idle accounting so captures
-        // settle on the sign-in fields and no background read survives fixture disposal.
+        // Match LocalFarmEntryTest for repeatable initial captures. Room still schedules
+        // transactions on its own executor; interaction tests must await the onSignedIn callback.
         LocalFarmEntry(directory, onSignedIn = onSignedIn, io = Dispatchers.Unconfined)
     }
 

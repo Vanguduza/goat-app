@@ -105,11 +105,17 @@ def debug_certificate(keytool: Path, expected_sha1: str) -> bytes:
 
 
 def apk_identity(signature_output: str, badging: str, expected_sha1: str) -> tuple[dict, str]:
-    sha1s = re.findall(r"^Signer #\d+ certificate SHA-1 digest: ([0-9a-fA-F]+)$", signature_output, re.M)
-    sha256s = re.findall(r"^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]+)$", signature_output, re.M)
+    require(re.findall(r"^Number of signers: ([0-9]+)$", signature_output, re.M) == ["1"],
+            "Require exactly one reported APK signer")
+    # SDK 37 labels the verified signer by scheme (for example, "V2 Signer:").
+    # Earlier SDK tools use "Signer #1". Both must describe one identical certificate.
+    signer = r"(Signer #[1-9][0-9]*|V[1-4](?:\.[0-9]+)? Signer:)"
+    sha1s = re.findall(rf"^{signer} certificate SHA-1 digest: ([0-9a-fA-F]+)$", signature_output, re.M)
+    sha256s = re.findall(rf"^{signer} certificate SHA-256 digest: ([0-9a-fA-F]+)$", signature_output, re.M)
     require(len(sha1s) == 1 and len(sha256s) == 1, "Require exactly one verified APK signing certificate")
-    cert_sha1 = fingerprint(sha1s[0], 40)
-    cert_sha256 = fingerprint(sha256s[0], 64)
+    require(sha1s[0][0] == sha256s[0][0], "APK certificate digest records refer to different signers")
+    cert_sha1 = fingerprint(sha1s[0][1], 40)
+    cert_sha256 = fingerprint(sha256s[0][1], 64)
     require(cert_sha1 == expected_sha1, "APK signer differs from the pinned Android OAuth certificate")
     certificates = re.findall(r"-----BEGIN CERTIFICATE-----\s+([A-Za-z0-9+/=\s]+?)-----END CERTIFICATE-----", signature_output)
     require(len(certificates) == 1, "Require one exported public APK certificate")
@@ -123,15 +129,16 @@ def apk_identity(signature_output: str, badging: str, expected_sha1: str) -> tup
     require(package.get("name") == PACKAGE, "APK package differs from the Android OAuth package")
     require(bool(re.fullmatch(r"[0-9]+", package.get("versionCode", ""))) and
             bool(package.get("versionName")), "APK version metadata is missing")
-    minimum = re.search(r"^sdkVersion:'([0-9]+)'$", badging, re.M)
-    target = re.search(r"^targetSdkVersion:'([0-9]+)'$", badging, re.M)
-    require(minimum is not None and target is not None, "APK SDK metadata is missing")
+    # aapt2 37 names this minSdkVersion; older build tools print sdkVersion.
+    minimum = re.findall(r"^(?:minSdkVersion|sdkVersion):'([0-9]+)'$", badging, re.M)
+    target = re.findall(r"^targetSdkVersion:'([0-9]+)'$", badging, re.M)
+    require(len(minimum) == 1 and len(target) == 1, "APK SDK metadata is missing or ambiguous")
     require(re.search(r"^application-debuggable(?:\s|$)", badging, re.M) is not None,
             "This preparation command is only for the existing debug testing variant")
     return {
         "package": package["name"], "version_code": int(package["versionCode"]),
-        "version_name": package["versionName"], "minimum_sdk": int(minimum.group(1)),
-        "target_sdk": int(target.group(1)), "debuggable": True,
+        "version_name": package["versionName"], "minimum_sdk": int(minimum[0]),
+        "target_sdk": int(target[0]), "debuggable": True,
         "certificate_sha1": display_fingerprint(cert_sha1),
         "certificate_sha256": display_fingerprint(cert_sha256),
     }, "-----BEGIN CERTIFICATE-----\n" + certificates[0].strip() + "\n-----END CERTIFICATE-----\n"

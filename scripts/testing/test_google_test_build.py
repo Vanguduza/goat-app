@@ -56,6 +56,7 @@ class TestBuildProvenanceTest(unittest.TestCase):
         sha1 = hashlib.sha1(public_bytes).hexdigest().upper()
         sha256 = hashlib.sha256(public_bytes).hexdigest().upper()
         signature = (
+            "Number of signers: 1\n"
             f"Signer #1 certificate SHA-1 digest: {sha1}\n"
             f"Signer #1 certificate SHA-256 digest: {sha256}\n"
             "-----BEGIN CERTIFICATE-----\n" + base64.b64encode(public_bytes).decode() +
@@ -78,6 +79,45 @@ class TestBuildProvenanceTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     build.apk_identity(tampered_signature, tampered_manifest, pinned_sha1)
 
+
+    def test_sdk37_output_retains_single_signer_and_manifest_binding(self) -> None:
+        public_bytes = b"SDK 37 public certificate fixture only"
+        sha1 = hashlib.sha1(public_bytes).hexdigest().upper()
+        sha256 = hashlib.sha256(public_bytes).hexdigest().upper()
+        signature = (
+            "Verifies\nVerified using v2 scheme (APK Signature Scheme v2): true\n"
+            "Number of signers: 1\n"
+            f"V2 Signer: certificate SHA-1 digest: {sha1}\n"
+            f"V2 Signer: certificate SHA-256 digest: {sha256}\n"
+            "-----BEGIN CERTIFICATE-----\n" + base64.b64encode(public_bytes).decode() +
+            "\n-----END CERTIFICATE-----\n"
+        )
+        badging = (
+            "package: name='com.farmos.app' versionCode='1' versionName='test'\n"
+            "minSdkVersion:'26'\ntargetSdkVersion:'36'\napplication-debuggable\n"
+        )
+        identity, _ = build.apk_identity(signature, badging, sha1)
+        self.assertEqual(build.display_fingerprint(sha1), identity["certificate_sha1"])
+        self.assertEqual(26, identity["minimum_sdk"])
+        self.assertEqual(36, identity["target_sdk"])
+        for altered_badging in (
+            badging.replace("minSdkVersion:'26'\n", ""),
+            badging + "sdkVersion:'25'\n",
+            badging + "targetSdkVersion:'37'\n",
+        ):
+            with self.subTest(manifest=altered_badging):
+                with self.assertRaises(ValueError):
+                    build.apk_identity(signature, altered_badging, sha1)
+        for altered in (
+            signature.replace("Number of signers: 1", "Number of signers: 2"),
+            signature.replace("Number of signers: 1\n", ""),
+            signature.replace("V2 Signer: certificate SHA-256", "Signer #2 certificate SHA-256"),
+            signature + f"V2 Signer: certificate SHA-1 digest: {sha1}\n",
+            signature.replace(sha256, "C" * 64),
+        ):
+            with self.subTest(output=altered):
+                with self.assertRaises(ValueError):
+                    build.apk_identity(altered, badging, sha1)
 
     def test_prepare_verifies_retained_bytes_when_gradle_replaces_its_original_apk(self) -> None:
         with tempfile.TemporaryDirectory(prefix="goat-retained-apk-") as temporary:
@@ -108,6 +148,7 @@ class TestBuildProvenanceTest(unittest.TestCase):
             public_cert = b"public certificate fixture only; no private key"
             cert_sha1 = hashlib.sha1(public_cert).hexdigest().upper()
             signature = (
+                "Number of signers: 1\n"
                 f"Signer #1 certificate SHA-1 digest: {cert_sha1}\n"
                 f"Signer #1 certificate SHA-256 digest: {hashlib.sha256(public_cert).hexdigest().upper()}\n"
                 "-----BEGIN CERTIFICATE-----\n" + base64.b64encode(public_cert).decode() +

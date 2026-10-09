@@ -14,6 +14,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.domain.access.LocalAccount
+import java.util.concurrent.atomic.AtomicReference
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -45,10 +46,10 @@ class LocalFarmEntryReferenceTest {
 
     @Test
     fun referenceShowsLocalCredentialsAndSignsIntoItsFarmWithoutAServer() {
-        var signedIn: Pair<LocalAccount, String>? = null
+        val signedIn = AtomicReference<Pair<LocalAccount, String>?>(null)
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                fixture.Content { account, farmName -> signedIn = account to farmName }
+                fixture.Content { account, farmName -> signedIn.set(account to farmName) }
             }
         }
 
@@ -63,10 +64,19 @@ class LocalFarmEntryReferenceTest {
             .performScrollTo().performTextInput(fixture.pin)
         compose.onNode(hasClickAction() and hasText("Sign in"))
             .performScrollTo().performClick()
-        compose.waitForIdle()
+        val signInError = hasText("The username or PIN is not correct.") or
+            hasText("This account is disabled. Ask a manager to enable it.") or
+            hasText("Too many attempts. Try again after", substring = true)
+        // Compose can be idle while Room finishes its transaction. Wait for the actual handoff,
+        // observing the callback across threads, and fail directly if local sign-in is rejected.
+        compose.waitUntil(timeoutMillis = 5_000) {
+            signedIn.get() != null || compose.onAllNodes(signInError).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNode(signInError).assertDoesNotExist()
+        val result = requireNotNull(signedIn.get())
 
-        assertEquals(fixture.owner.accountId, signedIn?.first?.accountId)
-        assertEquals(fixture.owner.farmId, signedIn?.first?.farmId)
-        assertEquals(fixture.farmName, signedIn?.second)
+        assertEquals(fixture.owner.accountId, result.first.accountId)
+        assertEquals(fixture.owner.farmId, result.first.farmId)
+        assertEquals(fixture.farmName, result.second)
     }
 }
