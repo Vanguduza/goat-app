@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "ee514f2f98d6872dcf941ad18d6e9dde69f09457",
+  "tested_commit": "a8b1c9e4330624370d10cb986ad9c8aa2375c44a",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
@@ -83,8 +83,8 @@
         },
         {
           "value": "PROFILE",
-          "refs": 16,
-          "transition_refs": 15,
+          "refs": 17,
+          "transition_refs": 16,
           "render_only_candidate": false
         },
         {
@@ -357,7 +357,7 @@
         {
           "value": "DASHBOARD",
           "refs": 3,
-          "transition_refs": 1,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -464,8 +464,8 @@
         },
         {
           "value": "PROFILE",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 3,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -515,8 +515,8 @@
       "states": [
         {
           "value": "DASHBOARD",
-          "refs": 3,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 3,
           "render_only_candidate": false
         },
         {
@@ -527,8 +527,8 @@
         },
         {
           "value": "PROFILE",
-          "refs": 3,
-          "transition_refs": 2,
+          "refs": 5,
+          "transition_refs": 4,
           "render_only_candidate": false
         },
         {
@@ -1453,6 +1453,7 @@
     "render_only_state_candidates": [],
     "operating_module_host_callers": [
       "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
+      "app/src/main/java/com/farmos/app/FarmSpeciesModuleHost.kt",
       "app/src/main/java/com/farmos/app/OperatingModuleHost.kt"
     ],
     "operating_module_branches_preempted_by_dedicated_hosts": [],
