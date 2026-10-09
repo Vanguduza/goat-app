@@ -26,6 +26,10 @@ fun FarmDestination.runtimeRouteContract(): FarmRuntimeRoute =
         FarmDestination.Settings -> FarmRuntimeRoute("settings", "FOS-ADMIN-001")
         is FarmDestination.HomePanel -> surface.runtimeRouteContract()
         is FarmDestination.Module -> module.runtimeRouteContract()
+        is FarmDestination.AnimalProfile -> {
+            require(animalId.isNotBlank()) { "Animal profile requires a non-blank animal id" }
+            FarmRuntimeRoute(kind.routeKey, kind.screenId, "animalId=$animalId")
+        }
         is FarmDestination.Goat -> {
             require(animalId == null || animalId.isNotBlank()) { "Goat destination requires a non-blank animal id" }
             require(entry != GoatEntryPage.PROFILE || animalId != null) { "Goat profile requires an animal id" }

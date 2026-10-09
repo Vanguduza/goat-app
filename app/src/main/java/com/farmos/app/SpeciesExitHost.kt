@@ -59,6 +59,7 @@ internal fun SpeciesExitHost(
     newContext: () -> LocalCommandContext,
     onRecorded: () -> Unit,
     onBack: () -> Unit,
+    backLabel: String = "Farm home",
 ) {
     val scope = rememberCoroutineScope()
     val exits = remember(farmId) { AnimalExitCommands(database, farmId) }
@@ -113,6 +114,7 @@ internal fun SpeciesExitHost(
         onRecord = onRecord,
         onReverse = onReverse,
         onBack = onBack,
+        backLabel = backLabel,
     )
 }
 
@@ -127,8 +129,9 @@ internal fun SpeciesExitScreen(
     onRecord: (SpeciesExitDraft) -> Unit,
     onReverse: (exitId: String, reason: String) -> Unit,
     onBack: () -> Unit,
+    backLabel: String = "Farm home",
 ) {
-    FarmOperationalPage(screenId, "Lifecycle status", animal.label, FarmVisualClass.I4, onBack) {
+    FarmOperationalPage(screenId, "Lifecycle status", animal.label, FarmVisualClass.I4, onBack, backLabel = backLabel) {
         SpeciesExitContent(animal, standing, currency, busy, error, onRecord, onReverse)
     }
 }

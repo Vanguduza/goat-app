@@ -141,6 +141,10 @@ class RoomHerdRepository(
         return LocalCommandResult(context.mutationId, animalId, true)
     }
 
+    /** Exact farm/species subject lookup; an entry must never depend on the presentation window. */
+    suspend fun get(animalId: String): AnimalEntity? =
+        database.animals().get(farmId, animalId)?.takeIf { it.speciesCode == species }
+
     suspend fun list(): List<AnimalEntity> = database.animals().listBySpecies(farmId, species, 200)
 
     /** Exhaustive count of the animals [list] can show (every status except closed), past its 200-row bound. */

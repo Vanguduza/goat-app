@@ -113,9 +113,11 @@ fun RabbitProgrammeScreen(
     rabbitAttachments: @Composable (RabbitAnimalView) -> Unit = {},
     /** Rabbit pedigree and the kits' inbreeding (D-023); null hides both. */
     pedigree: RabbitPedigreePorts? = null,
+    entryProfile: RabbitProfileEntry? = null,
+    loading: Boolean = false,
 ) {
-    var page by remember { mutableStateOf(RabbitPage.DASHBOARD) }
-    var profileId by remember { mutableStateOf<String?>(null) }
+    var page by remember(entryProfile) { mutableStateOf(if (entryProfile == null) RabbitPage.DASHBOARD else RabbitPage.PROFILE) }
+    var profileId by remember(entryProfile) { mutableStateOf(entryProfile?.animalId) }
     val home = { page = RabbitPage.DASHBOARD }
     when (page) {
         RabbitPage.DASHBOARD -> {
@@ -137,11 +139,17 @@ fun RabbitProgrammeScreen(
         }
 
         RabbitPage.PROFILE -> {
-            val rabbit = rabbits.firstOrNull { it.animalId == profileId }
-            if (rabbit == null) {
+            val rabbit = rabbits.firstOrNull { it.animalId == profileId }?.takeIf { entryProfile == null || it.isDoe == entryProfile.isDoe }
+            if (rabbit == null && entryProfile != null) {
+                FarmOperationalPage(entryProfile.screenId, "Rabbit profile", "A selected rabbit on this farm.", onBack = onBack, backLabel = "Back") {
+                    Text(if (loading) "Loading the selected rabbit" else error ?: "The selected rabbit is not available on this farm.")
+                }
+            } else if (rabbit == null) {
                 LaunchedEffect(profileId) { page = RabbitPage.ANIMALS }
             } else {
-                RabbitProfileScreen(rabbit, rabbitExit, { page = RabbitPage.ANIMALS }, rabbitAttachments)
+                val profileBack: () -> Unit = { if (entryProfile != null) onBack() else page = RabbitPage.ANIMALS }
+                RabbitProfileScreen(rabbit, rabbitExit, profileBack, rabbitAttachments,
+                    backLabel = if (entryProfile != null) "Back" else "Breeding animals")
             }
         }
 

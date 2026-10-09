@@ -12,6 +12,7 @@ import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.feature.rabbit.RabbitAnimalView
 import com.farmos.feature.rabbit.RabbitPedigreePorts
 import com.farmos.feature.rabbit.RabbitRecords
+import com.farmos.feature.rabbit.RabbitProfileEntry
 import com.farmos.core.design.runSuspendCatching
 import androidx.compose.runtime.SideEffect
 
@@ -29,10 +30,11 @@ fun RabbitModuleHost(
     exitFor: @Composable (rabbit: RabbitAnimalView, onRecorded: () -> Unit) -> Unit = { _, _ -> },
     pedigree: RabbitPedigreePorts? = null,
     attachmentsFor: @Composable (rabbit: RabbitAnimalView) -> Unit = {},
+    entryProfile: RabbitProfileEntry? = null,
 ) {
     val scope = rememberCoroutineScope()
-    val state = remember(farmId, ops, rabbitHerd) {
-        RabbitModuleState(farmId, ops, rabbitHerd, newContext, enqueueSync, onBack, loadRecords, searchRabbits, exitFor, pedigree, attachmentsFor, scope)
+    val state = remember(farmId, ops, rabbitHerd, entryProfile) {
+        RabbitModuleState(farmId, ops, rabbitHerd, newContext, enqueueSync, onBack, loadRecords, searchRabbits, exitFor, pedigree, attachmentsFor, scope, entryProfile)
     }
     SideEffect {
         state.newContext = newContext
@@ -45,7 +47,11 @@ fun RabbitModuleHost(
         state.attachmentsFor = attachmentsFor
     }
     LaunchedEffect(state) {
-        runSuspendCatching { state.refresh() }.onFailure { state.error = it.message }
+        try {
+            runSuspendCatching { state.refresh() }.onFailure { state.error = it.message ?: "Local rabbit records could not be read." }
+        } finally {
+            state.loading = false
+        }
     }
     RabbitModuleContent(state)
 }

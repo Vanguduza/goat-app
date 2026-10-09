@@ -139,6 +139,16 @@ fun FarmSessionContent(
             },
         )
         is FarmDestination.HomePanel -> error("Home panels are nested owners and must be intercepted by RoleAwareFarmHomeScreen")
+        is FarmDestination.AnimalProfile -> FarmSpeciesModuleHost(
+            module = dest.kind.module,
+            database = app.database,
+            farmId = membership.farmId,
+            ops = ops,
+            newContext = ::context,
+            enqueueSync = ::enqueueSync,
+            onBack = backFromDestination,
+            profile = dest,
+        )
         is FarmDestination.Goat -> GoatModuleHost(
             app = app,
             membership = membership,
@@ -246,20 +256,14 @@ fun FarmSessionContent(
                 onBack = backFromDestination,
                 loadRecords = { loadAssetRecords(app.database, membership.farmId) },
             )
-            FarmModule.RABBIT -> RabbitModuleHost(
+            FarmModule.RABBIT, FarmModule.SHEEP, FarmModule.CATTLE -> FarmSpeciesModuleHost(
+                module = dest.module,
+                database = app.database,
                 farmId = membership.farmId,
                 ops = ops,
-                rabbitHerd = com.farmos.data.herd.RoomHerdRepository(app.database, membership.farmId, "rabbit"),
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
                 onBack = backFromDestination,
-                loadRecords = { loadRabbitRecords(app.database, membership.farmId) },
-                searchRabbits = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "rabbit") },
-                pedigree = remember(membership.farmId) { rabbitPedigreePorts(app.database, membership.farmId, ops, ::context, ::enqueueSync) },
-                exitFor = { rabbit, onRecorded ->
-                    SpeciesExitHost(app.database, membership.farmId, SpeciesAnimalRow(rabbit.animalId, rabbit.label, rabbit.active), null, ::context, onRecorded, onBack = {})
-                },
-                attachmentsFor = { rabbit -> AnimalAttachmentsHost(app.database, membership.farmId, rabbit.animalId, canAttach = rabbit.active, ::context) },
             )
             FarmModule.INVENTORY -> InventoryModuleHost(
                 farmId = membership.farmId,

@@ -13,6 +13,7 @@ import com.farmos.feature.rabbit.RabbitAnimalView
 import com.farmos.feature.rabbit.RabbitNestBoxChoice
 import com.farmos.feature.rabbit.RabbitPedigreePorts
 import com.farmos.feature.rabbit.RabbitRecords
+import com.farmos.feature.rabbit.RabbitProfileEntry
 import java.time.LocalDate
 import kotlinx.coroutines.launch
 import com.farmos.core.design.runSuspendCatching
@@ -30,6 +31,7 @@ internal class RabbitModuleState(
     pedigree: RabbitPedigreePorts?,
     attachmentsFor: @Composable (rabbit: RabbitAnimalView) -> Unit,
     val scope: kotlinx.coroutines.CoroutineScope,
+    val entryProfile: RabbitProfileEntry? = null,
 ) {
     var newContext: () -> LocalCommandContext by mutableStateOf(newContext)
     var enqueueSync: () -> Unit by mutableStateOf(enqueueSync)
@@ -41,6 +43,7 @@ internal class RabbitModuleState(
     var attachmentsFor: @Composable (rabbit: RabbitAnimalView) -> Unit by mutableStateOf(attachmentsFor)
 
     var busy by mutableStateOf(false)
+    var loading by mutableStateOf(true)
     var error by mutableStateOf<String?>(null)
     var cages by mutableStateOf(emptyList<String>())
     var waves by mutableStateOf(emptyList<String>())
@@ -55,6 +58,14 @@ internal class RabbitModuleState(
     var rabbitCount by mutableStateOf<Int?>(null)
 
     suspend fun refresh() {
+        entryProfile?.let { entry ->
+            val animal = requireNotNull(rabbitHerd.get(entry.animalId)) { "The selected rabbit is not available on this farm." }
+            require(animal.sex == (if (entry.isDoe) "FEMALE" else "MALE")) { "The selected rabbit does not match this profile." }
+            rabbits = listOf(RabbitAnimalView(animal.id, animal.tag, animal.name, entry.isDoe, animal.status))
+            rabbitRows = rabbits.map { "${it.label} · ${if (it.isDoe) "doe" else "buck"} · ${it.status}" }
+            rabbitCount = rabbitHerd.listedTotal()
+            return
+        }
         val cageEntities = ops.cages()
         cages = cageEntities.map { it.code }
         if (selectedCageId == null) selectedCageId = cageEntities.firstOrNull()?.id

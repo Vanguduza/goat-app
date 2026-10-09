@@ -68,4 +68,5 @@ private fun AnimalEntity.toGlobalSearchResult(source: String) = GlobalSearchResu
     displayName = name,
     status = status,
     source = source,
+    sex = sex,
 )

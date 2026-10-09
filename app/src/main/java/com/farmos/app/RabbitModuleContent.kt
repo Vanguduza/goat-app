@@ -19,6 +19,8 @@ internal fun RabbitModuleContent(state: RabbitModuleState) {
     with(state) {
     RabbitProgrammeScreen(
         rabbits = rabbits,
+        entryProfile = entryProfile,
+        loading = loading,
         rabbitExit = { rabbit -> exitFor(rabbit) { run { } } },
         rabbitAttachments = attachmentsFor,
         pedigree = pedigree,

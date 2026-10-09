@@ -163,4 +163,24 @@ class FarmRuntimeRouteTest {
             assertEquals(null, route.scopedParameter)
         }
     }
+
+    @Test
+    fun exactSpeciesProfilesPreserveTheirCanonicalOwnerAndRequiredSubject() {
+        val expected = mapOf(
+            AnimalProfileKind.SHEEP to ("sheep.profile" to "FOS-SHEEP-003"),
+            AnimalProfileKind.CATTLE to ("cattle.profile" to "FOS-CATTLE-003"),
+            AnimalProfileKind.RABBIT_DOE to ("rabbit.doe_profile" to "FOS-RABBIT-003"),
+            AnimalProfileKind.RABBIT_BUCK to ("rabbit.buck_profile" to "FOS-RABBIT-004"),
+        )
+        assertEquals(AnimalProfileKind.entries.toSet(), expected.keys)
+        expected.forEach { (kind, owner) ->
+            val route = FarmDestination.AnimalProfile(kind, "exact-subject").runtimeRouteContract()
+            assertEquals(owner.first, route.routeKey)
+            assertEquals(owner.second, route.screenId)
+            assertEquals("animalId=exact-subject", route.scopedParameter)
+            assertFailsWith<IllegalArgumentException> {
+                FarmDestination.AnimalProfile(kind, " ").runtimeRouteContract()
+            }
+        }
+    }
 }

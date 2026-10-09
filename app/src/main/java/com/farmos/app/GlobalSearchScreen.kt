@@ -35,6 +35,7 @@ internal data class GlobalSearchResultUi(
     val displayName: String?,
     val status: String,
     val source: String,
+    val sex: String? = null,
 )
 
 @Composable
@@ -254,6 +255,10 @@ internal fun GlobalSearchScreen(
                                         }
                                     } else {
                                         Text(label)
+                                        when (result.speciesCode.lowercase()) {
+                                            "poultry" -> Text("Individual bird profiles are not available here.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            "rabbit" -> Text("Rabbit profile unavailable: recorded sex has no Doe or Buck profile.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
                                     }
                                 }
                             }
@@ -356,9 +361,13 @@ internal fun GlobalSearchScreen(
 internal fun GlobalSearchResultUi.destination(): FarmDestination? =
     when (speciesCode.lowercase()) {
         "goat" -> FarmDestination.Goat(com.farmos.feature.goat.GoatEntryPage.PROFILE, animalId)
-        "rabbit" -> FarmDestination.Module(FarmModule.RABBIT)
-        "sheep" -> FarmDestination.Module(FarmModule.SHEEP)
-        "cattle" -> FarmDestination.Module(FarmModule.CATTLE)
-        "poultry" -> FarmDestination.Module(FarmModule.POULTRY)
+        "rabbit" -> when (sex?.uppercase()) {
+            "FEMALE" -> FarmDestination.AnimalProfile(AnimalProfileKind.RABBIT_DOE, animalId)
+            "MALE" -> FarmDestination.AnimalProfile(AnimalProfileKind.RABBIT_BUCK, animalId)
+            else -> null
+        }
+        "sheep" -> FarmDestination.AnimalProfile(AnimalProfileKind.SHEEP, animalId)
+        "cattle" -> FarmDestination.AnimalProfile(AnimalProfileKind.CATTLE, animalId)
+        "poultry" -> null
         else -> null
     }
