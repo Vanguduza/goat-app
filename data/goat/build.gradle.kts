@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.farmos.data.goat"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig { minSdk = 26 }
 }
 
@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:network"))
     implementation(project(":domain:goat"))
+    implementation(project(":domain:access"))
     implementation("androidx.room:room-ktx:2.8.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 }

@@ -30,10 +30,7 @@ class FarmOsDatabaseMigrationTest {
         context.deleteDatabase(databaseName)
     }
 
-    // UNEXECUTED: this test has never run. The CI/authoring runtime has no JVM, no Gradle and no
-    // Android SDK, so the androidTest suite cannot execute here. The 1 -> 37 chain and the new
-    // version-37 assertions below are statically verified only (SQL/entity cross-check, migration
-    // ordering, brace balance); they must pass in Android CI before any green claim.
+    // Execute the full upgrade chain: a fresh database alone cannot prove migration compatibility.
     @Test
     fun version1DatabaseMigratesThroughVersion37WithoutLosingFoundationData() = runBlocking {
         val farmId = "11111111-1111-4111-8111-111111111111"
@@ -122,6 +119,63 @@ class FarmOsDatabaseMigrationTest {
         assertEquals(0, migrated.lifecycle().rabbitWeights(farmId).size)
 
         migrated.close()
+    }
+
+
+    @Test
+    fun version29LocalFarmMigratesWithoutLosingAccountsSettingsOrAttachments() = runBlocking {
+        val farmId = "11111111-1111-4111-8111-111111111111"
+        val animalId = "33333333-3333-4333-8333-333333333333"
+        createVersion1Fixture(farmId, animalId, "55555555-5555-4555-8555-555555555555")
+        val helper = androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory().create(
+            androidx.sqlite.db.SupportSQLiteOpenHelper.Configuration.builder(context)
+                .name(databaseName)
+                .callback(object : androidx.sqlite.db.SupportSQLiteOpenHelper.Callback(29) {
+                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) = error("Expected a version-1 fixture")
+                    override fun onUpgrade(db: androidx.sqlite.db.SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+                        var version = oldVersion
+                        for (migration in FarmOsDatabase.ALL_MIGRATIONS.filter { it.endVersion <= newVersion }) {
+                            assertEquals(version, migration.startVersion)
+                            migration.migrate(db)
+                            version = migration.endVersion
+                        }
+                        assertEquals(newVersion, version)
+                    }
+                }).build(),
+        )
+        try {
+            val legacy = helper.writableDatabase
+            legacy.execSQL("INSERT INTO local_farms(farmId,name,createdAtEpochMillis) VALUES(?,?,?)", arrayOf(farmId, "Existing local farm", 1L))
+            legacy.execSQL(
+                "INSERT INTO local_accounts(accountId,farmId,username,displayName,role,status,credentialKind,credentialHash,failedAttempts,createdAtEpochMillis,updatedAtEpochMillis) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                arrayOf("account-1", farmId, "owner", "Farm Owner", "OWNER", "ACTIVE", "PIN", "fixture-hash-only", 0, 1L, 1L),
+            )
+            legacy.execSQL(
+                "INSERT INTO farm_settings(farmId,currencyCode,updatedAtEpochMillis,updatedByActorId) VALUES(?,?,?,?)",
+                arrayOf(farmId, "ZAR", 1L, "account-1"),
+            )
+            legacy.execSQL(
+                "INSERT INTO attachments(id,farmId,ownerType,ownerId,contentSha256,byteSize,mediaType,displayName,attachedAtEpochMillis,attachedByActorId) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                arrayOf("attachment-1", farmId, "animal", animalId, "a".repeat(64), 3L, "image/jpeg", "Existing photo", 1L, "account-1"),
+            )
+        } finally {
+            helper.close()
+        }
+        val migrated = Room.databaseBuilder(context, FarmOsDatabase::class.java, databaseName)
+            .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS).build()
+        try {
+            migrated.openHelper.writableDatabase
+            assertEquals("Existing local farm", migrated.localAccess().farms().single().name)
+            assertEquals("owner", migrated.localAccess().accounts(farmId).single().username)
+            assertEquals("ZAR", migrated.farmSettings().get(farmId)?.currencyCode)
+            assertEquals("Existing photo", migrated.attachments().forOwner(farmId, "animal", animalId).single().displayName)
+            assertEquals("MIG-001", migrated.animals().get(farmId, animalId)?.tag)
+            assertEquals(0, migrated.lifecycle().goatWeaningsFor(farmId, animalId).size)
+            assertEquals(0, migrated.lifecycle().cattleHeatsFor(farmId, animalId).size)
+            assertEquals(0, migrated.lifecycle().rabbitWeights(farmId).size)
+        } finally {
+            migrated.close()
+        }
     }
 
     private fun createVersion1Fixture(farmId: String, animalId: String, mutationId: String) {

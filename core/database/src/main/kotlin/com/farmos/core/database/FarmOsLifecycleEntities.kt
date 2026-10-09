@@ -73,7 +73,7 @@ data class SheepWoolEntity(@PrimaryKey val id: String, val farmId: String, val a
 data class CattleMilkEntity(@PrimaryKey val id: String, val farmId: String, val animalId: String, val litresMilli: Long, val occurredEpochDay: Long)
 
 /** FOS-CATTLE-009 — one observed heat for a cow. Species-specific; goat_heats is never reused. */
-@Entity(tableName = "cattle_heats")
+@Entity(tableName = "cattle_heats", indices = [Index(value = ["farmId", "animalId"])])
 data class CattleHeatEntity(
     @PrimaryKey val id: String,
     val farmId: String,
@@ -246,7 +246,7 @@ data class LabResultEntity(@PrimaryKey val id: String, val farmId: String, val a
 @Entity(tableName = "cattle_weanings")
 data class CattleWeaningEntity(@PrimaryKey val id: String, val farmId: String, val animalId: String?, val groupId: String?, val weightGrams: Long?, val occurredEpochDay: Long)
 
-@Entity(tableName = "goat_weanings")
+@Entity(tableName = "goat_weanings", indices = [Index(value = ["farmId", "animalId"])])
 data class GoatWeaningEntity(@PrimaryKey val id: String, val farmId: String, val animalId: String, val weightGrams: Long?, val occurredEpochDay: Long)
 
 @Entity(tableName = "sheep_micron_tests")
