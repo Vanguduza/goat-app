@@ -31,7 +31,6 @@ import com.farmos.feature.goat.GoatEntryPage
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -39,6 +38,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ExternalResource
+import org.junit.rules.RuleChain
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
@@ -48,7 +50,18 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(application = FarmOsApplication::class, sdk = [36], qualifiers = "en-rUS")
 class GlobalSearchRuntimeNavigationTest {
-    @get:Rule val compose = createComposeRule()
+    private val compose = createComposeRule()
+
+    // JUnit runs @After before rule teardown. Keep Room alive until the Compose rule
+    // has disposed the activity/composition and completed its coroutine cleanup.
+    @get:Rule
+    val resources: TestRule = RuleChain.outerRule(
+        object : ExternalResource() {
+            override fun after() {
+                app.database.close()
+            }
+        },
+    ).around(compose)
 
     private val app get() = ApplicationProvider.getApplicationContext<FarmOsApplication>()
     private val farmA = UUID.randomUUID().toString()
@@ -73,9 +86,6 @@ class GlobalSearchRuntimeNavigationTest {
             }
         }
     }
-
-    @After
-    fun closeDatabase() = app.database.close()
 
     @Test
     fun anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch() {
