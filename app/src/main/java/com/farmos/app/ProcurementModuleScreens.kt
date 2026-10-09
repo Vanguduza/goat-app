@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.farmos.core.database.InventoryItemEntity
 import com.farmos.core.design.FarmEntitySelector
+import com.farmos.core.design.FarmOfflineSaveReceipt
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
@@ -36,7 +37,7 @@ internal enum class ProcurementModulePage { HOME, ORDERS, CREATE, RECEIVE, TO_IN
  * transaction boundary.
  *
  * FOS-PROC-004 — purchase orders: the recorded purchase register with purchase detail.
- * FOS-PROC-006 — create purchase: the governed purchase capture form (root tag FOS-PROC-001).
+ * FOS-PROC-006 — create purchase: the governed purchase capture form.
  * FOS-PROC-007 — receive purchase: receipt detail; purchases are received at record by the domain
  * boundary (RecordPurchase posts the inventory receive movement and the expense atomically), so
  * there is no separate mark-received transition.
@@ -107,8 +108,10 @@ internal fun PurchaseCaptureScreen(
         subtitle = "Recording a purchase receives the quantity into inventory and posts the expense in one governed boundary.",
         onBack = onBack,
     ) {
-        if (saved.value) {
-            FarmOperationalSection("Recorded") { Text("The purchase committed locally; inventory and expense posted.") }
+        if (saved.value && !busy.value) {
+            FarmOperationalSection("Recorded") {
+                FarmOfflineSaveReceipt(text = "Purchase saved on this device · inventory and expense posted")
+            }
         }
         error.value?.let { FarmOperationalSection("Needs attention") { Text(it) } }
         FarmOperationalSection("Purchase") {

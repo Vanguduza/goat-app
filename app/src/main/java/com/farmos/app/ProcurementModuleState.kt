@@ -52,6 +52,8 @@ internal class ProcurementModuleState(
     }
     fun run(block: suspend () -> Unit) {
         if (busy.value) return
+        val capturePage = page.value
+        val captureVisit = pageVisit
         busy.value = true
         error.value = null
         saved.value = false
@@ -60,7 +62,7 @@ internal class ProcurementModuleState(
                 runSuspendCatching {
                     completeModuleWrite(
                         write = block,
-                        onCommitted = { saved.value = true },
+                        onCommitted = { saved.value = page.value == capturePage && pageVisit == captureVisit },
                         enqueueSync = { enqueueSync() },
                         refresh = ::refresh,
                     )
@@ -72,8 +74,16 @@ internal class ProcurementModuleState(
         }
     }
     val page = mutableStateOf(ProcurementModulePage.HOME)
+    private var pageVisit = 0L
     val selectedPurchase = mutableStateOf<ProcurementPurchaseView?>(null)
-    val backHome = { page.value = ProcurementModulePage.HOME; selectedPurchase.value = null }
+    fun openPage(destination: ProcurementModulePage) {
+        pageVisit++
+        saved.value = false
+        error.value = null
+        selectedPurchase.value = null
+        page.value = destination
+    }
+    val backHome = { openPage(ProcurementModulePage.HOME) }
 
 
 }

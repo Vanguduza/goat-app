@@ -50,7 +50,7 @@ class GoatIdentityCommandsTest {
             .build()
 
     @Before
-    fun setUp() = runBlocking {
+    fun setUp(): Unit = runBlocking {
         leftDb = database()
         rightDb = database()
         for ((db, localId) in listOf(leftDb to leftDevice, rightDb to rightDevice)) {

@@ -50,6 +50,7 @@ class GroupsCaptureOwnerTest {
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java).build()
         runBlocking {
+            database.seedCaptureOwner(farm)
             database.groups().insert(AnimalGroupEntity("grp-ewes", farm, "sheep", "Ewe flock", 120))
             database.groups().insert(AnimalGroupEntity("grp-other", otherFarm, "cattle", "Other farm herd", 30))
         }
@@ -76,6 +77,7 @@ class GroupsCaptureOwnerTest {
         assertEquals("cattle", created.speciesCode)
         assertEquals(40, created.headCount)
         compose.waitUntil(10_000) { syncRequests == 1 }
+        runBlocking { database.assertLocalCaptureJournal(farm, "group.create.v1") }
     }
 
     @Test
@@ -92,6 +94,7 @@ class GroupsCaptureOwnerTest {
         compose.waitUntil(10_000) { runBlocking { database.lifecycle().censusForGroup(farm, "grp-ewes") }.isNotEmpty() }
         assertEquals(118, runBlocking { database.lifecycle().censusForGroup(farm, "grp-ewes") }.single().headCount)
         compose.waitUntil(10_000) { syncRequests == 1 }
+        runBlocking { database.assertLocalCaptureJournal(farm, "group.census.v1") }
     }
 
     private fun render(onSync: () -> Unit) {

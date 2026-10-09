@@ -105,6 +105,9 @@ class LocalFarmEntryTest {
     @Test
     fun firstRunCreatesTheFarmAndOwnerOfflineAndShowsTheRecoveryCodeOnce() {
         render()
+        waitForTag("farm-screen:FOS-GLOBAL-014")
+        assertEquals(0, database.localAccess().farms().size)
+        click("Continue")
         waitForTag("farm-screen:FOS-GLOBAL-006")
         type("Farm name", "Premier Farm")
         type("Your name", "Tendai Moyo")
@@ -124,7 +127,18 @@ class LocalFarmEntryTest {
         assertFalse(database.localAccess().recoveryHash(farm.farmId)!!.contains(code))
 
         click("I have saved the recovery code")
+        waitForTag("farm-screen:FOS-GLOBAL-008")
+        compose.onNodeWithTag("local-recovery-code").assertDoesNotExist()
+        assertEquals(null, signedIn)
+        click("Open my farm")
+        waitForTag("farm-screen:FOS-ADMIN-013")
+        compose.onNodeWithTag("local-recovery-code").assertDoesNotExist()
+        assertEquals(null, signedIn)
+        click("Skip for now")
         compose.waitUntil(10_000) { signedIn != null }
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        assertTrue(DriveSetupFlags(context).isDismissed(farm.farmId))
+        assertEquals(null, DriveConfigStore(context).get(farm.farmId))
         assertEquals(LocalRole.OWNER, signedIn!!.first.role)
         assertEquals("Premier Farm", signedIn!!.second)
         assertEquals("owner", signedIn!!.first.membership().role)
@@ -170,6 +184,10 @@ class LocalFarmEntryTest {
         assertNotEquals(original, rotated)
         click("I have saved the recovery code")
         compose.waitUntil(10_000) { signedIn != null }
+        compose.onNodeWithTag("local-recovery-code").assertDoesNotExist()
+        compose.onNodeWithTag("farm-screen:FOS-GLOBAL-008").assertDoesNotExist()
+        compose.onNodeWithTag("farm-screen:FOS-ADMIN-013").assertDoesNotExist()
+        assertEquals("Premier Farm", signedIn!!.second)
 
         val farmId = signedIn!!.first.farmId
         assertTrue(directory.access.signIn(farmId, "tendai", "591047") is SignInResult.SignedIn)

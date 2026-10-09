@@ -60,11 +60,21 @@ Genetics resolves exact tags and all relevant active candidates without a 50-row
 
 The Android compile SDK was restored to 37 to match the declared Compose dependencies; targetSdk remains 36. Missing imports, Compose annotations, callback signatures, nullable accesses and BLE interface integration errors were corrected.
 
+The CI follow-up separates existing-owner recovery from first-run onboarding. After acknowledging the rotated recovery code, a recovered owner directly resumes the existing farm session through onSignedIn, without repeating species or Drive setup. The displayed code is removed from entry state before that handoff. New-farm setup explicitly follows the offline introduction, farm/owner creation, recovery-code acknowledgment, species confirmation and connect-or-skip Drive choice. Skipping Drive remains durable and does not create a backup configuration.
+
+A fresh device can join an existing farm directly from the offline introduction, and returning from network discovery restores that introduction without creating a farm. Local search also retains both the canonical search-screen tag and the shared empty-state atom in the semantics tree, so one tag no longer hides the other.
+
+Procurement again shows the canonical offline receipt on FOS-PROC-006 after an accepted purchase. Saved receipts are scoped to the current page visit, preventing a supplier save or a late successful completion from an earlier form visit from falsely acknowledging a new purchase. Navigation also clears the prior error state. The UI tests use the actual purchase route, visible currency labels and replacement of the prefilled date, and add a supplier-to-purchase regression that checks no purchase receipt appears for the supplier save.
+
 ## Validation and evidence discipline
 
-The canonical merge evidence is the completed [Foundation workflow](https://github.com/Vanguduza/goat-app/actions/workflows/foundation-ci.yml) and the other checks attached to PR #109's final candidate. Use the exact tested head/run, not an earlier passing branch or a same-tree assumption.
+Canonical merge evidence requires a successful completed [Foundation workflow](https://github.com/Vanguduza/goat-app/actions/workflows/foundation-ci.yml) and the other checks attached to PR #109's final candidate. Use the exact tested head/run, not an earlier passing branch or a same-tree assumption. A pending or failed run is not a successful merge gate.
 
-During review, all 187 domain/network/sync tests passed. A compiler checkpoint passed app Kotlin plus both Android instrumentation source sets. Final candidate app tests, APK assembly, native-reference evidence and Android instrumentation are separate checks; test source or successful compilation alone does not establish their execution.
+An earlier review checkpoint passed all 187 domain/network/sync tests; their unchanged tasks were UP-TO-DATE in local validation2. A compiler checkpoint passed app Kotlin plus both Android instrumentation source sets. Final candidate app tests, APK assembly, native-reference evidence and Android instrumentation are separate checks; test source or successful compilation alone does not establish their execution.
+
+Candidate `ce215c233dfa01cf6249fd7332698d21c0510a75` completed the debug-APK compile checkpoint. Its first [Foundation run 37902708633](https://github.com/Vanguduza/goat-app/actions/runs/37902708633) failed the app-test phase with **14 failing tests**. Separately, local validation2 executed and passed all 52 feature/goat unit tests across 10 suites; its baseline app run reported 369 tests with 14 failures before the latest corrections.
+
+Follow-up production and test-fixture corrections address the reported onboarding, pairing, search, capture and authorization-test issues. Local validation3 completed source compilation and passed 35 of 37 focused app tests; the two timeouts were in ProcurementCaptureOwnerTest. After the procurement repairs, local validation5 passed source compilation and all 3 ProcurementCaptureOwnerTest cases with no failures, errors or skips. The latest targeted evidence therefore comprises 38 passing cases: 35 unchanged passing cases from validation3 plus the 3 procurement cases from validation5. The final full CI result remains pending; no full CI success is claimed.
 
 New or extended regression coverage includes:
 
@@ -75,12 +85,13 @@ New or extended regression coverage includes:
 | Encrypted Drive objects, path/tamper/range checks, retries, missing destinations and consent/setup failure | DriveTransportSecurityTest; DriveSetupAttemptTest |
 | Correct quantities, prices, currencies and vaccination target/due-date behavior | OperationsReportMathTest; HealthVaccinationRecordsTest; VaccinationTargetNavigationTest |
 | Duplicate submits, rejected commands, cancellation, committed-save refresh failure and callback replacement | ModuleWriteStateTest; ModuleCallbackReplacementTest |
+| Explicit first-run offline/skip-Drive flow, direct recovered-owner sign-in, joining from the introduction, and visible search/empty-state identities | LocalFarmEntryTest; FarmNetworkPairingUiTest; GlobalSearchContractTest |
 | Populated upgrade and full migration chain | FarmOsDatabaseMigrationTest |
 | Stable source fingerprints before/after KSP output and sensitivity to new source/tests | scripts/development/test_source_evidence.py |
 
 The source-evidence scripts now share a Git-aware source inventory. Tracked and new non-ignored Kotlin production/test files bind the fingerprint; ignored Gradle/KSP output does not. This fixes the prior situation in which building on a development machine made its evidence disagree with clean CI. YAML feature registries are parsed as YAML, and the navigation audit asserts the exact 25 module identities.
 
-The guarded refresh helper regenerates source inventories as CI_PENDING with no run ID and zero executed/green claims. It preserves historical passing evidence and refuses to promote product status. All545 screen IDs and 156 mandatory features remain. Unapproved route-kind exemptions were removed; no missing route is silently declared headless. Locked reference hashes, token parity and independent visual-approval requirements remain unchanged.
+The guarded refresh helper regenerates source inventories as CI_PENDING with no run ID and zero executed/green claims. It preserves historical passing evidence and refuses to promote product status. All 545 screen IDs and 156 mandatory features remain. Unapproved route-kind exemptions were removed; no missing route is silently declared headless. Locked reference hashes, token parity and independent visual-approval requirements remain unchanged.
 
 To reproduce static validation:
 
@@ -98,6 +109,6 @@ The Foundation workflow remains responsible for the complete declared Gradle uni
 - **Background delivery:** The Drive gateway currently operates while the local farm session is open. Delivery after the app is closed is a separate implementation/acceptance item.
 - **Origin authentication:** Farm-key AEAD prevents a Drive-only writer without farm keys from inventing accepted payloads. It is not per-origin operation signing. A formerly trusted device retaining an old farm key and Drive write access is not proven unable to forge old-key history claiming another origin. Do not treat basic revoked-device tests as proof of that stronger property.
 - **Legacy command authorization:** The strengthened transaction-level checks cover the goat identity command and the 23 extracted paths. Untouched older RoomOpsRepository handlers still retain their prior farm-only command boundary and need a separate complete authorization migration.
-- **Product/visual completeness:** Green integration CI does not establish all 545 screen contracts or156 feature contracts. FEATURE_GREEN, MODULE_GREEN, MVP_GREEN and visual certification are not promoted here. The existing release block remains in force.
+- **Product/visual completeness:** Green integration CI does not establish all 545 screen contracts or 156 feature contracts. FEATURE_GREEN, MODULE_GREEN, MVP_GREEN and visual certification are not promoted here. The existing release block remains in force.
 
 After the tested integration is merged, PR #108 can be closed as superseded by its corrected content in #109. Temporary branches may be removed only after their work is verified merged or explicitly superseded, following PROJECT_TRUTH_PROTOCOL.md.

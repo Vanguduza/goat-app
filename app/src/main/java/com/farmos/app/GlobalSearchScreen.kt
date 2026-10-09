@@ -238,11 +238,12 @@ internal fun GlobalSearchScreen(
                     )
                     val shown = if (speciesFilter != null || statusFilter != null) filteredResults else results
                     if (shown.isEmpty()) {
-                        FarmSearchEmptyState(
-                            title = "No matching animal records.",
-                            hint = "Check the spelling, or search by tag, name, species, or an identifier value (RFID/EID/QR). Only this farm's records are searched.",
-                            modifier = Modifier.testTag("farm-screen:FOS-SEARCH-004"),
-                        )
+                        Column(Modifier.testTag("farm-screen:FOS-SEARCH-004")) {
+                            FarmSearchEmptyState(
+                                title = "No matching animal records.",
+                                hint = "Check the spelling, or search by tag, name, species, or an identifier value (RFID/EID/QR). Only this farm's records are searched.",
+                            )
+                        }
                     } else {
                         shown.forEach { result ->
                             val label = buildString {

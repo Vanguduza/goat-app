@@ -30,15 +30,20 @@ class OperationalRuntimeNavigationTest {
     @get:Rule
     val compose = createComposeRule()
 
-    private fun exercise(routes: List<Pair<String, String>>) {
+    private fun exercise(
+        routes: List<Pair<String, String>>,
+        backLabel: String = "Farm home",
+        parentScreenId: String? = null,
+    ) {
         routes.forEach { (action, screenId) ->
             compose.onNode(hasClickAction() and hasText(action))
                 .performScrollTo()
                 .performClick()
             compose.onNodeWithTag("farm-screen:$screenId").assertExists()
-            compose.onNode(hasClickAction() and hasText("Farm home"))
+            compose.onNode(hasClickAction() and hasText(backLabel))
                 .performScrollTo()
                 .performClick()
+            parentScreenId?.let { compose.onNodeWithTag("farm-screen:$it").assertExists() }
             compose.onNode(hasClickAction() and hasText(action)).assertExists()
         }
     }
@@ -90,6 +95,8 @@ class OperationalRuntimeNavigationTest {
                 "Record expense" to "FOS-FIN-005",
                 "View transactions" to "FOS-FIN-002",
             ),
+            backLabel = "Finance",
+            parentScreenId = "FOS-FIN-001",
         )
     }
 

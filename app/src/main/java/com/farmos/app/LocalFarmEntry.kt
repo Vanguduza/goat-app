@@ -60,12 +60,12 @@ private sealed interface EntryStep {
     data object Loading : EntryStep
     data object OfflineIntro : EntryStep
     data object Setup : EntryStep
-    data class SpeciesSetup(val screenId: String, val code: String, val account: LocalAccount, val farmName: String) : EntryStep
+    data class SpeciesSetup(val account: LocalAccount, val farmName: String) : EntryStep
     /** FOS-ADMIN-013 — first-run Drive backup setup, shown once after species setup. */
     data class DriveSetup(val account: LocalAccount, val farmName: String) : EntryStep
     data class SignIn(val farms: List<LocalFarmEntity>) : EntryStep
     data class Recover(val farms: List<LocalFarmEntity>) : EntryStep
-    data class ShowRecoveryCode(val screenId: String, val code: String, val account: LocalAccount, val farmName: String) : EntryStep
+    data class ShowRecoveryCode(val screenId: String, val code: String, val account: LocalAccount, val farmName: String, val firstRun: Boolean) : EntryStep
     data class Join(val farms: List<LocalFarmEntity>) : EntryStep
     data class JoinWaiting(val code: String, val farmName: String) : EntryStep
 }
@@ -117,7 +117,7 @@ internal fun LocalFarmEntry(
         is EntryStep.Join, is EntryStep.JoinWaiting -> "FOS-GLOBAL-007"
     }
     val canJoin = discovery != null && joiner != null
-    fun farmsStep(farms: List<LocalFarmEntity>) = if (farms.isEmpty()) EntryStep.Setup else EntryStep.SignIn(farms)
+    fun farmsStep(farms: List<LocalFarmEntity>) = if (farms.isEmpty()) EntryStep.OfflineIntro else EntryStep.SignIn(farms)
     EntryShell(screenId) {
         when (val current = step) {
             EntryStep.Loading -> Text("Opening this device's farm records", color = AnimalFarmTheme.colors.mutedInk)
@@ -140,7 +140,7 @@ internal fun LocalFarmEntry(
                         }
                     }
                     val setup = requireNotNull(result)
-                    step = EntryStep.ShowRecoveryCode("FOS-GLOBAL-006", setup.recoveryCode, setup.owner, farm.name)
+                    step = EntryStep.ShowRecoveryCode("FOS-GLOBAL-006", setup.recoveryCode, setup.owner, farm.name, firstRun = true)
                 }
             }
             is EntryStep.SignIn -> SignInForm(current.farms, busy, onRecover = { step = EntryStep.Recover(current.farms) }) { farm, username, pin ->
@@ -162,13 +162,19 @@ internal fun LocalFarmEntry(
                         }
                     }
                     when (result) {
-                        is RecoveryResult.Recovered -> step = EntryStep.ShowRecoveryCode("FOS-GLOBAL-004", result.newRecoveryCode, result.owner, farm.name)
+                        is RecoveryResult.Recovered -> step = EntryStep.ShowRecoveryCode("FOS-GLOBAL-004", result.newRecoveryCode, result.owner, farm.name, firstRun = false)
                         RecoveryResult.InvalidCode -> error = "That owner username and recovery code do not match this farm."
                     }
                 }
             }
             is EntryStep.ShowRecoveryCode -> RecoveryCodeNotice(current.code) {
-                step = EntryStep.SpeciesSetup(current.screenId, current.code, current.account, current.farmName)
+                if (current.firstRun) {
+                    step = EntryStep.SpeciesSetup(current.account, current.farmName)
+                } else {
+                    // Recovery resumes the existing farm; discard the displayed code before handoff.
+                    step = EntryStep.Loading
+                    onSignedIn(current.account, current.farmName)
+                }
             }
             is EntryStep.Join -> JoinForm(requireNotNull(discovery), busy, onBack = { step = farmsStep(current.farms) }) { farm ->
                 launchEntry {
@@ -189,7 +195,7 @@ internal fun LocalFarmEntry(
             is EntryStep.JoinWaiting -> JoinWaitingNotice(current.code, current.farmName)
         }
         val shown = step
-        if (canJoin && (shown is EntryStep.Setup || shown is EntryStep.SignIn)) {
+        if (canJoin && (shown is EntryStep.OfflineIntro || shown is EntryStep.Setup || shown is EntryStep.SignIn)) {
             val farms = (shown as? EntryStep.SignIn)?.farms.orEmpty()
             TextButton(onClick = { error = null; step = EntryStep.Join(farms) }, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 Text("Join a farm on this network")

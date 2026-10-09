@@ -28,11 +28,11 @@ internal fun ProcurementModuleContent(state: ProcurementModuleState) {
                 saved = saved.value,
                 extra = {
                     recordActions()
-                    TextButton(onClick = { page.value = ProcurementModulePage.ORDERS }, modifier = Modifier.fillMaxWidth()) { Text("Purchase orders") }
-                    TextButton(onClick = { page.value = ProcurementModulePage.CREATE }, modifier = Modifier.fillMaxWidth()) { Text("Create purchase") }
-                    TextButton(onClick = { page.value = ProcurementModulePage.RECEIVE }, modifier = Modifier.fillMaxWidth()) { Text("Receive purchase") }
-                    TextButton(onClick = { page.value = ProcurementModulePage.TO_INVENTORY }, modifier = Modifier.fillMaxWidth()) { Text("Purchase to inventory") }
-                    TextButton(onClick = { page.value = ProcurementModulePage.REPORT }, modifier = Modifier.fillMaxWidth()) { Text("Procurement report") }
+                    TextButton(onClick = { openPage(ProcurementModulePage.ORDERS) }, modifier = Modifier.fillMaxWidth()) { Text("Purchase orders") }
+                    TextButton(onClick = { openPage(ProcurementModulePage.CREATE) }, modifier = Modifier.fillMaxWidth()) { Text("Create purchase") }
+                    TextButton(onClick = { openPage(ProcurementModulePage.RECEIVE) }, modifier = Modifier.fillMaxWidth()) { Text("Receive purchase") }
+                    TextButton(onClick = { openPage(ProcurementModulePage.TO_INVENTORY) }, modifier = Modifier.fillMaxWidth()) { Text("Purchase to inventory") }
+                    TextButton(onClick = { openPage(ProcurementModulePage.REPORT) }, modifier = Modifier.fillMaxWidth()) { Text("Procurement report") }
                 },
             ) }
         }

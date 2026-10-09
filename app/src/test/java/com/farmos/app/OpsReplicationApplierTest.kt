@@ -163,10 +163,13 @@ class OpsReplicationApplierTest {
 
     @Test
     fun everyGoatCommandHasAnApplier() {
-        val source = java.io.File("../data/goat/src/main/kotlin/com/farmos/data/goat/RoomGoatRepository.kt").takeIf { it.exists() }
-            ?: java.io.File("data/goat/src/main/kotlin/com/farmos/data/goat/RoomGoatRepository.kt")
-        val journalled = Regex("\"(goat\\.[a-z_]+\\.v\\d)\"").findAll(source.readText()).map { it.groupValues[1] }.toSet()
-        assertEquals(13, journalled.size)
+        fun source(name: String): java.io.File =
+            java.io.File("../data/goat/src/main/kotlin/com/farmos/data/goat/$name").takeIf { it.exists() }
+                ?: java.io.File("data/goat/src/main/kotlin/com/farmos/data/goat/$name")
+        val sources = listOf("RoomGoatRepository.kt", "GoatIdentityCommands.kt")
+            .joinToString("\n") { source(it).readText() }
+        val journalled = Regex("\"(goat\\.[a-z_]+\\.v\\d)\"").findAll(sources).map { it.groupValues[1] }.toSet()
+        assertEquals(15, journalled.size)
         assertEquals(journalled, journalled.intersect(GoatReplicationAppliers.all.keys))
         HerdReplicationAppliers.SPECIES.forEach { species ->
             listOf("register", "record_weight", "set_status").forEach { assertTrue("$species.$it.v1" in HerdReplicationAppliers.all) }
