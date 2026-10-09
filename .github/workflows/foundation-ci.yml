@@ -45,7 +45,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
       - name: Domain, session, sync tests + reproducible APK assembly
         run: >-
-          ./gradlew
+          ./gradlew -I scripts/testing/fresh-test-evidence.gradle
           :domain:goat:test
           :domain:rabbit:test
           :domain:ops:test
@@ -109,7 +109,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
       - name: Record deterministic native reference evidence
         run: >-
-          ./gradlew
+          ./gradlew -I scripts/testing/fresh-test-evidence.gradle
           :app:recordRoborazziDebug
           :feature:goat:recordRoborazziDebug
           -Proborazzi.dumpUiTree=true
