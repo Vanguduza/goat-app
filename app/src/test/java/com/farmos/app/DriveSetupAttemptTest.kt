@@ -12,10 +12,7 @@ import kotlinx.coroutines.runBlocking
 /**
  * First-run Drive setup logic that runs without the Android framework.
  *
- * UNEXECUTED: this runtime has no JVM/Gradle/Android toolchain, so these tests were written but
- * not executed here. The Android-dependent parts are not covered at all: the SharedPreferences
- * plumbing of [DriveConfigStore] and [DriveSetupFlags], and the Compose states of the first-run
- * Drive setup screen (idle / connecting / sign-in-unavailable / failed).
+ * Pure connection tests do not prove a live Google consent session or Android preference durability.
  */
 class DriveSetupAttemptTest {
     private val farmId = "farm-1"
@@ -162,5 +159,78 @@ class DriveSetupAttemptTest {
         val store = FakeStore(onList = { throw IOException("network down") })
         val outcome = assertIs<DriveSetupOutcome.Failed>(connect(FakeAuthorizer("token"), store))
         assertEquals("network down", outcome.reason)
+    }
+
+    @Test
+    fun `a blank token is unavailable and never opens a destination`() {
+        assertIs<DriveSetupOutcome.AuthUnavailable>(connect(FakeAuthorizer("")))
+    }
+
+    @Test
+    fun `failure to obtain an access token becomes a failed attempt`(): Unit = runBlocking {
+        val failing = object : DriveAuthorizer {
+            override suspend fun accessToken(): String? = throw IOException("network down")
+        }
+        val result = DriveSetupAttempt.connect(farmId, "owner@example.com", "Farm", "folder-abc", failing, 1L)
+        assertIs<DriveSetupOutcome.Failed>(result)
+    }
+
+    @Test
+    fun `an invalid folder is rejected before lookup`(): Unit = runBlocking {
+        val store = FakeStore(onList = { error("Must not list an invalid destination") })
+        val result = DriveSetupAttempt.connect(
+            farmId, "owner@example.com", "Farm", "bad'folder", FakeAuthorizer("token"), 1L,
+            openStore = { _, _ -> store },
+        )
+        assertIs<DriveSetupOutcome.Failed>(result)
+        assertNull(store.listedPrefix)
+    }
+
+    @Test
+    fun `missing folder is created before destination validation and persistence`(): Unit = runBlocking {
+        val events = mutableListOf<String>()
+        var destination: (() -> String)? = null
+        val store = object : DriveObjectStore {
+            override suspend fun ensureFarmFolder(farmId: String, folderName: String, accountEmail: String): String {
+                events += "create:$farmId:$folderName"
+                return "created-folder"
+            }
+            override suspend fun validateDestination(accountEmail: String) {
+                events += "validate:${destination!!.invoke()}:$accountEmail"
+            }
+            override suspend fun list(prefix: String): List<DriveObjectStore.DriveObject> {
+                events += "list"
+                return emptyList()
+            }
+            override suspend fun read(path: String): ByteArray? = null
+            override suspend fun putIfAbsent(path: String, bytes: ByteArray, sha256: String) = true
+        }
+        val outcome = DriveSetupAttempt.connect(
+            farmId, "owner@example.com", "Farm", "", FakeAuthorizer("token"), 1L,
+            openStore = { _, folder -> destination = folder; store },
+        )
+        assertEquals("created-folder", assertIs<DriveSetupOutcome.Connected>(outcome).config.folderId)
+        assertEquals(listOf("create:$farmId:Farm", "validate:created-folder:owner@example.com", "list"), events)
+    }
+
+    @Test
+    fun `a folder without account access never returns connected`(): Unit = runBlocking {
+        val denied = object : DriveObjectStore {
+            override suspend fun validateDestination(accountEmail: String) { throw IOException("folder is inaccessible") }
+            override suspend fun list(prefix: String): List<DriveObjectStore.DriveObject> = error("Must not list")
+            override suspend fun read(path: String): ByteArray? = null
+            override suspend fun putIfAbsent(path: String, bytes: ByteArray, sha256: String) = false
+        }
+        val outcome = DriveSetupAttempt.connect(
+            farmId, "owner@example.com", "Farm", "folder-abc", FakeAuthorizer("token"), 1L,
+            openStore = { _, _ -> denied },
+        )
+        assertIs<DriveSetupOutcome.Failed>(outcome)
+    }
+
+    @Test
+    fun `blank stored configuration does not pretend to be connected`() {
+        assertNull(DriveGatewayConfigCodec.decode(mapOf("account" to "", "folder" to "folder")))
+        assertNull(DriveGatewayConfigCodec.decode(mapOf("account" to "a@b.c", "folder" to "")))
     }
 }

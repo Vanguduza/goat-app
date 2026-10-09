@@ -22,7 +22,7 @@ val e2eFarmId = providers.gradleProperty("FARM_OS_E2E_FARM_ID")
 
 android {
     namespace = "com.farmos.app"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.farmos.app"
@@ -99,6 +99,8 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
 }
 
 dependencies {
+    implementation("com.google.android.gms:play-services-auth:22.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     implementation(project(":core:database"))
     implementation(project(":core:network"))
     implementation(project(":core:sync"))

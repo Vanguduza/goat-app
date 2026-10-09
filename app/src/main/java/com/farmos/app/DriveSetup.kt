@@ -33,8 +33,8 @@ internal object DriveGatewayConfigCodec {
 
     /** Null when the account or folder is absent — a missing row means Drive is not connected. */
     fun decode(values: Map<String, String?>): DriveGatewayConfig? {
-        val account = values["account"] ?: return null
-        val folder = values["folder"] ?: return null
+        val account = values["account"]?.takeIf { it.isNotBlank() } ?: return null
+        val folder = values["folder"]?.takeIf { it.isNotBlank() } ?: return null
         return DriveGatewayConfig(
             accountEmail = account,
             folderId = folder,
@@ -103,19 +103,8 @@ internal sealed interface DriveSetupOutcome {
 }
 
 /**
- * One executable Drive connect attempt for first-run setup.
- *
- * SEAM — how a real Google sign-in plugs in later, without touching this call site:
- * 1. Write a Keystore-backed adapter implementing [DriveAuthorizer]: it owns the Google consent
- *    screen, keeps refresh tokens in Keystore-backed storage (never in SharedPreferences, never
- *    beside the config), and returns a short-lived bearer token from [DriveAuthorizer.accessToken].
- * 2. Wire that adapter where [NoDriveAuthorizer] is passed today; the adapter also supplies the
- *    owner's Google account email and the Drive folder id (creating the owner's folder when needed).
- * 3. Nothing else changes: this helper verifies the folder through the gateway
- *    ([DriveObjectStore.list] under the farm's journal prefix) and returns the config to persist.
- * No OAuth client id, no token and no secret is invented anywhere in this file; until such an
- * adapter exists the only implementer is [NoDriveAuthorizer], which reports no sign-in, so the
- * [DriveSetupOutcome.AuthUnavailable] branch below is the live behaviour of this build.
+ * Shared checked connection boundary for onboarding and Settings. Google identity only grants
+ * Drive access; the existing local farm account remains the app's authority.
  */
 internal object DriveSetupAttempt {
     suspend fun connect(
@@ -124,30 +113,28 @@ internal object DriveSetupAttempt {
         folderName: String,
         folderId: String,
         authorizer: DriveAuthorizer,
-        /** Business timestamp for the connection, injected — see the repo convention of passing
-         * [System.currentTimeMillis] as business time at the call site (e.g. LocalCommandContext). */
         nowEpochMillis: Long,
         openStore: (DriveAuthorizer, () -> String) -> DriveObjectStore = ::DriveRestStore,
     ): DriveSetupOutcome {
-        val signedIn = try {
-            authorizer.accessToken() != null
-        } catch (auth: DriveAuthNeededException) {
-            return DriveSetupOutcome.AuthUnavailable
-        }
-        if (!signedIn) return DriveSetupOutcome.AuthUnavailable
         return try {
-            // Verify the folder through the gateway: a listing under the farm's journal prefix both
-            // proves the token works and confirms the folder is reachable. An empty listing is fine —
-            // it is the expected state for a folder that holds no bundles yet.
-            val store = openStore(authorizer) { folderId }
+            if (authorizer.accessToken().isNullOrBlank()) return DriveSetupOutcome.AuthUnavailable
+            require(farmId.matches(Regex("[A-Za-z0-9-]{1,64}"))) { "Invalid farm identity" }
+            require(accountEmail.isNotBlank()) { "Choose the Google account for this backup" }
+            var destination = folderId.trim()
+            val store = openStore(authorizer) { destination }
+            if (destination.isBlank()) {
+                destination = store.ensureFarmFolder(farmId, folderName.trim(), accountEmail.trim())
+            }
+            requireDriveFolderId(destination)
+            store.validateDestination(accountEmail.trim())
             store.list("GOAT/farms/$farmId/")
-            DriveSetupOutcome.Connected(DriveGatewayConfig(accountEmail, folderId, folderName, nowEpochMillis))
+            DriveSetupOutcome.Connected(
+                DriveGatewayConfig(accountEmail.trim(), destination, folderName.trim(), nowEpochMillis),
+            )
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (auth: DriveAuthNeededException) {
             DriveSetupOutcome.AuthUnavailable
-        } catch (failure: IOException) {
-            DriveSetupOutcome.Failed(failure.message ?: "Google Drive could not be reached")
         } catch (failure: Exception) {
             DriveSetupOutcome.Failed(failure.message ?: "Google Drive could not be reached")
         }

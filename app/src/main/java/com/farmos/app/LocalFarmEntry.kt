@@ -84,6 +84,7 @@ internal fun LocalFarmEntry(
     discovery: FarmPeerDiscovery? = null,
     joiner: FarmJoiner? = null,
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var step by remember { mutableStateOf<EntryStep>(EntryStep.Loading) }
     var busy by remember { mutableStateOf(false) }
@@ -123,11 +124,11 @@ internal fun LocalFarmEntry(
             EntryStep.OfflineIntro -> OfflineIntroScreen(onContinue = { step = EntryStep.Setup })
             is EntryStep.SpeciesSetup -> SpeciesSetupScreen(onDone = { step = EntryStep.DriveSetup(current.account, current.farmName) })
             is EntryStep.DriveSetup -> DriveSetupScreen(current.account, onSkip = {
-                DriveSetupFlags(LocalContext.current).setDismissed(current.account.farmId, true)
+                DriveSetupFlags(context).setDismissed(current.account.farmId, true)
                 onSignedIn(current.account, current.farmName)
             }) { config ->
-                DriveConfigStore(LocalContext.current).save(current.account.farmId, config)
-                DriveSetupFlags(LocalContext.current).setDismissed(current.account.farmId, false)
+                DriveConfigStore(context).save(current.account.farmId, config)
+                DriveSetupFlags(context).setDismissed(current.account.farmId, false)
                 onSignedIn(current.account, current.farmName)
             }
             EntryStep.Setup -> SetupForm(busy) { farmName, displayName, username, pin ->
@@ -336,6 +337,7 @@ private fun ColumnScope.RecoveryCodeNotice(code: String, onContinue: () -> Unit)
 /**
  * FOS-GLOBAL-014 — offline-first introduction: what local-first means before the farm is created.
  */
+@Composable
 private fun ColumnScope.OfflineIntroScreen(onContinue: () -> Unit) {
     Text("Your farm, on this device first", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
     Text(
@@ -351,6 +353,7 @@ private fun ColumnScope.OfflineIntroScreen(onContinue: () -> Unit) {
  * FOS-GLOBAL-008 — first-run species setup: which animal modules this farm uses.
  * Informational at first run; modules are enabled from the farm home afterwards.
  */
+@Composable
 private fun ColumnScope.SpeciesSetupScreen(onDone: () -> Unit) {
     Text("Which animals does this farm keep?", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
     Text(
@@ -363,16 +366,18 @@ private fun ColumnScope.SpeciesSetupScreen(onDone: () -> Unit) {
 
 /**
  * FOS-ADMIN-013 — first-run Drive setup: what the gateway backs up, the owner's folder name, and an
- * honest connect/skip choice. The only wired [DriveAuthorizer] is [NoDriveAuthorizer], so Connect
- * reports that Google sign-in is not available in this build instead of faking it. Skipping is
- * explicit and durable via [DriveSetupFlags]; the owner can connect later from Offline and sync.
+ * explicit Google consent and checked connect/skip choice. Skipping is durable via
+ * [DriveSetupFlags]; the owner can connect later from Offline and sync.
  */
+@Composable
 private fun ColumnScope.DriveSetupScreen(
     account: LocalAccount,
     onSkip: () -> Unit,
     onConnected: (DriveGatewayConfig) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val authorizer = remember(context) { GoogleDriveAuthorizer(context) }
     var folderName by remember { mutableStateOf("Farm OS") }
     var accountEmail by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
@@ -382,15 +387,13 @@ private fun ColumnScope.DriveSetupScreen(
         scope.launch {
             busy = true
             outcome = null
-            // No Drive folder id can be known without the future OAuth adapter; the attempt returns
-            // AuthUnavailable before the id is used. A future Keystore-backed adapter replaces
-            // NoDriveAuthorizer here without changing this call site (see DriveSetupAttempt).
+            // A blank ID creates or reuses this farm's app-owned folder after Google consent.
             val result = DriveSetupAttempt.connect(
                 farmId = account.farmId,
                 accountEmail = accountEmail.trim(),
                 folderName = folderName.trim(),
                 folderId = "",
-                authorizer = NoDriveAuthorizer,
+                authorizer = authorizer,
                 // Repo business-clock convention: the caller stamps business time with the system
                 // clock (as LocalCommandContext does); the helper takes it as an injected value.
                 nowEpochMillis = System.currentTimeMillis(),
@@ -403,6 +406,12 @@ private fun ColumnScope.DriveSetupScreen(
         }
     }
 
+    val consent = rememberDriveConsent(
+        authorizer,
+        onAuthorized = { attempt() },
+        onFailure = { reason -> busy = false; outcome = DriveSetupOutcome.Failed(reason) },
+    )
+
     Text("Back up to Google Drive", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
     Text(
         "Farm OS can copy this farm's operation journal — the record of every change — into a folder " +
@@ -414,7 +423,7 @@ private fun ColumnScope.DriveSetupScreen(
     EntryField("Google account email", accountEmail, busy) { accountEmail = it }
     when (val failed = outcome) {
         is DriveSetupOutcome.AuthUnavailable -> Text(
-            "Google sign-in is not available in this build, so the Drive backup stays off. Nothing on " +
+            "Google Drive permission was not granted, so backup stays off. Nothing on " +
                 "this farm changes, and you can connect it later from Settings.",
             color = MaterialTheme.colorScheme.error,
             modifier = Modifier.testTag("drive-setup-state"),
@@ -430,9 +439,9 @@ private fun ColumnScope.DriveSetupScreen(
         EntryButton(
             if (busy) "Connecting" else "Connect Google Drive",
             !busy && folderName.isNotBlank() && accountEmail.isNotBlank(),
-        ) { attempt() }
+        ) { busy = true; consent(accountEmail.trim()) }
     } else {
-        EntryButton("Try again", !busy) { attempt() }
+        EntryButton("Try again", !busy) { busy = true; consent(accountEmail.trim()) }
     }
     TextButton(onClick = onSkip, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Skip for now") }
 }

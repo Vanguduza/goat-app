@@ -253,7 +253,7 @@ internal class FarmLanRuntime(
                 // Attachment metadata arrived with the operations; now fetch the bytes this device lacks.
                 val store = attachments
                 if (outcome.status == SyncSessionStatus.COMPLETED && store != null) {
-                    runSuspendCatching { runBlocking { pullMissingAttachments(database, farmId, store, fetch = transport::fetchAttachment) } }
+                    runCatching { runBlocking { pullMissingAttachments(database, farmId, store, fetch = transport::fetchAttachment) } }
                 }
                 outcome
             }

@@ -2,7 +2,6 @@ package com.farmos.app
 
 import android.content.Context
 import com.farmos.core.database.FarmOsDatabase
-import com.farmos.core.design.runSuspendCatching
 import com.farmos.domain.replication.BundleVerdict
 import com.farmos.domain.replication.DriveJournalLayout
 import com.farmos.domain.replication.MergeClass
@@ -19,9 +18,6 @@ import java.io.Closeable
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +26,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Google Drive replication gateway boundary for one farm on this device (FOS-ADMIN-013, FOS-ADMIN-015).
@@ -54,7 +52,7 @@ import kotlinx.coroutines.withContext
  *   SharedPreferences, so retry and reconnect resume from the last acknowledged operation and survive
  *   process death.
  * - Attachments travel by content hash only: bytes are kept under their SHA-256, verified on receipt,
- *   and a damaged file reads as missing rather than as the wrong photo.
+ *   and damaged content is rejected without entering local storage.
  *
  * Connecting or disconnecting Drive never deletes farm records on this device.
  */
@@ -90,7 +88,7 @@ internal class DriveConfigStore(context: Context) {
             .putString(DriveConfigKeys.configKey(farmId, "folder"), encoded.getValue("folder"))
             .putString(DriveConfigKeys.configKey(farmId, "folder_name"), encoded.getValue("folder_name"))
             .putLong(DriveConfigKeys.configKey(farmId, "connected_at"), encoded.getValue("connected_at").toLongOrNull() ?: 0)
-            .apply()
+            .commit().also { check(it) { "Drive configuration could not be saved" } }
     }
 
     fun clear(farmId: String) {
@@ -99,7 +97,7 @@ internal class DriveConfigStore(context: Context) {
             .remove(DriveConfigKeys.configKey(farmId, "folder"))
             .remove(DriveConfigKeys.configKey(farmId, "folder_name"))
             .remove(DriveConfigKeys.configKey(farmId, "connected_at"))
-            .apply()
+            .commit().also { check(it) { "Drive configuration could not be cleared" } }
     }
 
     private companion object {
@@ -109,8 +107,8 @@ internal class DriveConfigStore(context: Context) {
 
 /**
  * Supplies a Google OAuth2 bearer token for Drive. The consent/refresh flow is a bounded platform
- * adapter outside this boundary; until one is wired, [NoDriveAuthorizer] reports sign-in as needed
- * and the gateway stays honestly disconnected.
+ * adapter outside this boundary. [GoogleDriveAuthorizer] delegates consent and token renewal to
+ * Google Play services; [NoDriveAuthorizer] is retained for offline/test configurations.
  *
  * Owner lock: tokens are privileged credentials and MUST live in Keystore-backed storage, never in
  * SharedPreferences, never in a file beside the config, and never broadcast. This interface only
@@ -120,6 +118,9 @@ internal class DriveConfigStore(context: Context) {
 internal interface DriveAuthorizer {
     /** A valid bearer token, or null when the owner has not signed in. Never throws for auth state. */
     suspend fun accessToken(): String?
+
+    /** Clear an invalid token from the platform cache; tokens are never logged or written by GOAT. */
+    suspend fun invalidateToken(token: String) = Unit
 }
 
 internal object NoDriveAuthorizer : DriveAuthorizer {
@@ -134,6 +135,12 @@ internal class DriveAuthNeededException : IOException("Google Drive sign-in is r
  * objects are write-once.
  */
 internal interface DriveObjectStore {
+    /** Verify that the authenticated account can write to this actual folder. */
+    suspend fun validateDestination(accountEmail: String) = Unit
+
+    suspend fun ensureFarmFolder(farmId: String, folderName: String, accountEmail: String): String =
+        throw IOException("This Drive carrier cannot create a folder")
+
     data class DriveObject(val path: String, val sizeBytes: Long, val sha256: String?)
 
     /** Every object whose path starts with [prefix], in path order. */
@@ -219,6 +226,7 @@ internal object DriveBundleCodec {
             val count = dis.readInt()
             require(count in 1..MAX_OPERATIONS) { "Bundle operation count out of bounds: $count" }
             val operations = List(count) { readOperation(dis) }
+            require(dis.read() == -1) { "Trailing bytes after Drive bundle" }
             val bundle = OperationBundle(farmId, deviceId, from, to, operations, protocol, checksum)
             when (val verdict = bundle.verify(farmId)) {
                 is BundleVerdict.Rejected -> throw IOException("Drive bundle failed verification: ${verdict.reason}")
@@ -296,323 +304,6 @@ internal object DriveBundleCodec {
     }
 }
 
-/** Minimal JSON reader for the Drive v3 shapes this gateway uses: objects, arrays, strings, numbers. */
-internal sealed interface DriveJson {
-    data class Obj(val map: Map<String, DriveJson>) : DriveJson
-    data class Arr(val items: List<DriveJson>) : DriveJson
-    data class Str(val value: String) : DriveJson
-    data class Num(val value: String) : DriveJson
-    data object True : DriveJson
-    data object False : DriveJson
-    data object Null : DriveJson
-
-    fun obj(key: String): Obj? = (this as? Obj)?.map?.get(key) as? Obj
-    fun str(key: String): String? = ((this as? Obj)?.map?.get(key) as? Str)?.value
-}
-
-internal object DriveJsonParser {
-    fun parse(text: String): DriveJson {
-        val parser = Parser(text)
-        val value = parser.value()
-        parser.skipWs()
-        require(parser.atEnd()) { "Trailing JSON content" }
-        return value
-    }
-
-    private class Parser(val text: String) {
-        var pos = 0
-
-        fun atEnd(): Boolean = pos >= text.length
-
-        fun skipWs() {
-            while (pos < text.length && text[pos].isWhitespace()) pos++
-        }
-
-        fun value(): DriveJson {
-            skipWs()
-            require(pos < text.length) { "Unexpected end of JSON" }
-            return when (text[pos]) {
-                '{' -> obj()
-                '[' -> arr()
-                '"' -> DriveJson.Str(string())
-                't' -> {
-                    expect("true")
-                    DriveJson.True
-                }
-                'f' -> {
-                    expect("false")
-                    DriveJson.False
-                }
-                'n' -> {
-                    expect("null")
-                    DriveJson.Null
-                }
-                else -> DriveJson.Num(number())
-            }
-        }
-
-        private fun obj(): DriveJson.Obj {
-            pos++ // {
-            val map = LinkedHashMap<String, DriveJson>()
-            skipWs()
-            if (peek() == '}') {
-                pos++
-                return DriveJson.Obj(map)
-            }
-            while (true) {
-                skipWs()
-                require(peek() == '"') { "Object key must be a string" }
-                val key = string()
-                skipWs()
-                require(peek() == ':') { "Expected ':'" }
-                pos++
-                map[key] = value()
-                skipWs()
-                when (peek()) {
-                    ',' -> pos++
-                    '}' -> {
-                        pos++
-                        return DriveJson.Obj(map)
-                    }
-                    else -> throw IllegalArgumentException("Expected ',' or '}'")
-                }
-            }
-        }
-
-        private fun arr(): DriveJson.Arr {
-            pos++ // [
-            val items = mutableListOf<DriveJson>()
-            skipWs()
-            if (peek() == ']') {
-                pos++
-                return DriveJson.Arr(items)
-            }
-            while (true) {
-                items.add(value())
-                skipWs()
-                when (peek()) {
-                    ',' -> pos++
-                    ']' -> {
-                        pos++
-                        return DriveJson.Arr(items)
-                    }
-                    else -> throw IllegalArgumentException("Expected ',' or ']'")
-                }
-            }
-        }
-
-        private fun string(): String {
-            require(text[pos] == '"')
-            pos++
-            val out = StringBuilder()
-            while (true) {
-                require(pos < text.length) { "Unterminated string" }
-                val c = text[pos++]
-                if (c == '"') return out.toString()
-                if (c == '\\') {
-                    require(pos < text.length) { "Unterminated escape" }
-                    when (val e = text[pos++]) {
-                        '"', '\\', '/' -> out.append(e)
-                        'b' -> out.append('\b')
-                        'f' -> out.append('\u000C')
-                        'n' -> out.append('\n')
-                        'r' -> out.append('\r')
-                        't' -> out.append('\t')
-                        'u' -> {
-                            require(pos + 4 <= text.length) { "Bad unicode escape" }
-                            out.append(text.substring(pos, pos + 4).toInt(16).toChar())
-                            pos += 4
-                        }
-                        else -> throw IllegalArgumentException("Bad escape \\$e")
-                    }
-                } else {
-                    out.append(c)
-                }
-            }
-        }
-
-        private fun number(): String {
-            val start = pos
-            while (pos < text.length && text[pos] in "-+0123456789.eE") pos++
-            require(pos > start) { "Bad number" }
-            return text.substring(start, pos)
-        }
-
-        private fun expect(word: String) {
-            require(text.startsWith(word, pos)) { "Expected $word" }
-            pos += word.length
-        }
-
-        private fun peek(): Char {
-            require(pos < text.length) { "Unexpected end of JSON" }
-            return text[pos]
-        }
-    }
-}
-
-private fun jsonEscape(value: String): String = buildString {
-    value.forEach { c ->
-        when (c) {
-            '"' -> append("\\\"")
-            '\\' -> append("\\\\")
-            '\n' -> append("\\n")
-            '\r' -> append("\\r")
-            '\t' -> append("\\t")
-            else -> if (c < ' ') append("\\u%04x".format(c.code)) else append(c)
-        }
-    }
-}
-
-/**
- * Google Drive v3 as a [DriveObjectStore], over plain HTTPS with no extra dependencies. File names
- * are the deterministic journal paths; content identity rides in `appProperties.sha256` and is
- * re-verified against the bytes on read. Drive never sees a database file: [requireDriveSafePayload]
- * guards every write, and reads verify the SHA-256 before the bytes are trusted.
- */
-internal class DriveRestStore(
-    private val authorizer: DriveAuthorizer,
-    private val folderId: () -> String,
-) : DriveObjectStore {
-    override suspend fun list(prefix: String): List<DriveObjectStore.DriveObject> = withContext(Dispatchers.IO) {
-        val token = authorizer.accessToken() ?: throw DriveAuthNeededException()
-        val found = mutableListOf<DriveObjectStore.DriveObject>()
-        var pageToken: String? = null
-        do {
-            val query = buildString {
-                append("https://www.googleapis.com/drive/v3/files?q=")
-                append(URLEncoder.encode("'$folderId' in parents and trashed = false", "UTF-8"))
-                append("&fields=nextPageToken,files(id,name,size,appProperties)")
-                append("&pageSize=1000")
-                if (pageToken != null) append("&pageToken=").append(URLEncoder.encode(pageToken, "UTF-8"))
-            }
-            val json = DriveJsonParser.parse(driveGet(query.toString(), token)) as? DriveJson.Obj
-                ?: throw IOException("Drive list returned an unexpected response")
-            val files = (json.map["files"] as? DriveJson.Arr)?.items ?: emptyList()
-            files.forEach { file ->
-                val name = file.str("name") ?: return@forEach
-                if (!name.startsWith(prefix)) return@forEach
-                found += DriveObjectStore.DriveObject(
-                    path = name,
-                    sizeBytes = file.str("size")?.toLongOrNull() ?: 0,
-                    sha256 = file.obj("appProperties")?.str("sha256"),
-                )
-            }
-            pageToken = json.str("nextPageToken")
-        } while (pageToken != null)
-        found.sortedBy { it.path }
-    }
-
-    override suspend fun read(path: String): ByteArray? = withContext(Dispatchers.IO) {
-        val token = authorizer.accessToken() ?: throw DriveAuthNeededException()
-        val id = findId(path, token) ?: return@withContext null
-        val bytes = driveDownload("https://www.googleapis.com/drive/v3/files/$id?alt=media", token)
-        requireDriveSafePayload(path, bytes)
-        val hex = sha256Hex(bytes)
-        // The bytes must hash to a 64-hex name for attachments; bundles carry their own checksum.
-        if (ATTACHMENT_PATH.matches(path)) {
-            val expected = path.substringAfterLast("/")
-            require(hex == expected) { "Drive attachment failed its content-hash check" }
-        }
-        bytes
-    }
-
-    override suspend fun putIfAbsent(path: String, bytes: ByteArray, sha256: String): Boolean =
-        withContext(Dispatchers.IO) {
-            requireDriveSafePayload(path, bytes)
-            val token = authorizer.accessToken() ?: throw DriveAuthNeededException()
-            val existing = findMeta(path, token)
-            if (existing != null) {
-                // Idempotent retry: the same content already there counts as success; anything else
-                // is refused — a published object is never rewritten.
-                return@withContext existing.sha256?.equals(sha256, ignoreCase = true) == true
-            }
-            driveUploadMultipart(token, path, bytes, sha256)
-            true
-        }
-
-    private data class FileMeta(val id: String, val sha256: String?)
-
-    private fun findMeta(path: String, token: String): FileMeta? {
-        val query = buildString {
-            append("https://www.googleapis.com/drive/v3/files?q=")
-            append(URLEncoder.encode("'$folderId' in parents and name = '$path' and trashed = false", "UTF-8"))
-            append("&fields=files(id,appProperties)")
-            append("&pageSize=2")
-        }
-        val json = DriveJsonParser.parse(driveGet(query.toString(), token)) as? DriveJson.Obj
-            ?: throw IOException("Drive lookup returned an unexpected response")
-        val files = (json.map["files"] as? DriveJson.Arr)?.items ?: return null
-        if (files.isEmpty()) return null
-        val first = files.first()
-        return FileMeta(
-            id = first.str("id") ?: throw IOException("Drive lookup returned a file without an id"),
-            sha256 = first.obj("appProperties")?.str("sha256"),
-        )
-    }
-
-    private fun findId(path: String, token: String): String? = findMeta(path, token)?.id
-
-    private fun authHeader(token: String) = "Bearer $token"
-
-    private fun driveGet(url: String, token: String): String {
-        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
-            setRequestProperty("Authorization", authHeader(token))
-            connectTimeout = 15_000
-            readTimeout = 30_000
-        }
-        val code = connection.responseCode
-        if (code == 401 || code == 403) throw DriveAuthNeededException()
-        if (code !in 200..299) throw IOException("Drive request failed: HTTP $code")
-        return connection.inputStream.bufferedReader().readText()
-    }
-
-    private fun driveDownload(url: String, token: String): ByteArray {
-        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
-            setRequestProperty("Authorization", authHeader(token))
-            connectTimeout = 15_000
-            readTimeout = 60_000
-        }
-        val code = connection.responseCode
-        if (code == 401 || code == 403) throw DriveAuthNeededException()
-        if (code !in 200..299) throw IOException("Drive download failed: HTTP $code")
-        return connection.inputStream.readBytes()
-    }
-
-    private fun driveUploadMultipart(token: String, path: String, bytes: ByteArray, sha256: String) {
-        val boundary = "farm_os_${System.currentTimeMillis()}"
-        val metadata =
-            "{\"name\":\"${jsonEscape(path)}\"," +
-                "\"parents\":[\"${jsonEscape(folderId())}\"]," +
-                "\"mimeType\":\"application/octet-stream\"," +
-                "\"appProperties\":{\"sha256\":\"${jsonEscape(sha256)}\",\"kind\":\"farm_journal\"}}"
-        val body = ByteArrayOutputStream().also { out ->
-            out.write("--$boundary\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n".toByteArray(Charsets.UTF_8))
-            out.write(metadata.toByteArray(Charsets.UTF_8))
-            out.write("\r\n--$boundary\r\nContent-Type: application/octet-stream\r\n\r\n".toByteArray(Charsets.UTF_8))
-            out.write(bytes)
-            out.write("\r\n--$boundary--\r\n".toByteArray(Charsets.UTF_8))
-        }.toByteArray()
-        val connection = (URL("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart").openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
-            doOutput = true
-            setRequestProperty("Authorization", authHeader(token))
-            setRequestProperty("Content-Type", "multipart/related; boundary=$boundary")
-            connectTimeout = 15_000
-            readTimeout = 120_000
-            setFixedLengthStreamingMode(body.size)
-        }
-        connection.outputStream.use { it.write(body) }
-        val code = connection.responseCode
-        if (code == 401 || code == 403) throw DriveAuthNeededException()
-        if (code !in 200..299) {
-            val detail = runCatching { connection.errorStream?.bufferedReader()?.readText() }.getOrNull()
-            throw IOException("Drive upload failed: HTTP $code${detail?.let { " $it" } ?: ""}")
-        }
-    }
-}
-
 /** One journal operation's Drive replication state, derived deterministically from the local journal. */
 internal enum class DriveOpState {
     /** Saved on this device; Drive does not hold it yet. */
@@ -660,57 +351,51 @@ internal fun driveOpStateFor(
     return DriveOpState.LOCAL_ONLY
 }
 
+/** Cursor storage is specific to the farm and the verified Google account/folder destination. */
+internal fun driveCursorScope(farmId: String, config: DriveGatewayConfig): String =
+    farmId + "_" + sha256Hex((config.accountEmail.trim().lowercase(java.util.Locale.ROOT) + "\u0000" + config.folderId).toByteArray(Charsets.UTF_8))
+
+internal fun confirmedDriveCursor(vector: SyncVector): DriveCursor =
+    DriveCursor(uploadedThrough = vector.entries, verifiedThrough = vector.entries)
+
 internal class DriveCursorStore(context: Context) {
-    private val prefs = context.getSharedPreferences(DRIVE_PREFS, Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("farm_drive", Context.MODE_PRIVATE)
 
-    fun load(farmId: String): DriveCursor = DriveCursor(
-        uploadedThrough = readMap(farmId, "up"),
-        verifiedThrough = readMap(farmId, "ver"),
-        failedThrough = readMap(farmId, "fail"),
-        consecutiveFailures = prefs.getInt(key(farmId, "n"), 0),
-        nextAttemptAtEpochMillis = prefs.getLong(key(farmId, "next"), 0),
-        lastError = prefs.getString(key(farmId, "err"), null),
-    )
-
-    fun save(farmId: String, cursor: DriveCursor) {
-        prefs.edit()
-            .putString(key(farmId, "up"), writeMap(cursor.uploadedThrough))
-            .putString(key(farmId, "ver"), writeMap(cursor.verifiedThrough))
-            .putString(key(farmId, "fail"), writeMap(cursor.failedThrough))
-            .putInt(key(farmId, "n"), cursor.consecutiveFailures)
-            .putLong(key(farmId, "next"), cursor.nextAttemptAtEpochMillis)
-            .putString(key(farmId, "err"), cursor.lastError)
-            .apply()
+    fun load(farmId: String, config: DriveGatewayConfig): DriveCursor {
+        val scope = driveCursorScope(farmId, config)
+        return DriveCursor(
+            uploadedThrough = readMap(scope, "up"), verifiedThrough = readMap(scope, "ver"),
+            failedThrough = readMap(scope, "fail"),
+            consecutiveFailures = prefs.getInt(key(scope, "n"), 0),
+            nextAttemptAtEpochMillis = prefs.getLong(key(scope, "next"), 0),
+            lastError = prefs.getString(key(scope, "err"), null),
+        )
     }
 
-    fun clear(farmId: String) {
-        prefs.edit()
-            .remove(key(farmId, "up"))
-            .remove(key(farmId, "ver"))
-            .remove(key(farmId, "fail"))
-            .remove(key(farmId, "n"))
-            .remove(key(farmId, "next"))
-            .remove(key(farmId, "err"))
-            .apply()
+    fun save(farmId: String, config: DriveGatewayConfig, cursor: DriveCursor) {
+        val scope = driveCursorScope(farmId, config)
+        check(prefs.edit()
+            .putString(key(scope, "up"), writeMap(cursor.uploadedThrough))
+            .putString(key(scope, "ver"), writeMap(cursor.verifiedThrough))
+            .putString(key(scope, "fail"), writeMap(cursor.failedThrough))
+            .putInt(key(scope, "n"), cursor.consecutiveFailures)
+            .putLong(key(scope, "next"), cursor.nextAttemptAtEpochMillis)
+            .putString(key(scope, "err"), cursor.lastError)
+            .commit()) { "Drive progress could not be saved on this device" }
     }
 
-    private fun key(farmId: String, name: String) = "drive_cur_${farmId}_$name"
+    private fun key(scope: String, name: String) = "drive_cursor_v2_${scope}_$name"
 
-    private fun readMap(farmId: String, name: String): Map<String, Long> =
-        prefs.getString(key(farmId, name), null)
-            ?.split(";")
-            ?.mapNotNull { entry ->
-                val parts = entry.split(":")
-                if (parts.size == 2) parts[0] to (parts[1].toLongOrNull() ?: return@mapNotNull null) else null
-            }
-            ?.toMap() ?: emptyMap()
+    private fun readMap(scope: String, name: String): Map<String, Long> =
+        prefs.getString(key(scope, name), null)?.split(";")?.mapNotNull { entry ->
+            val parts = entry.split(":")
+            if (parts.size != 2) return@mapNotNull null
+            val mark = parts[1].toLongOrNull()?.takeIf { it >= 0 } ?: return@mapNotNull null
+            parts[0] to mark
+        }?.toMap() ?: emptyMap()
 
     private fun writeMap(map: Map<String, Long>): String =
         map.entries.joinToString(";") { "${it.key}:${it.value}" }
-
-    private companion object {
-        const val DRIVE_PREFS = "farm_drive"
-    }
 }
 
 /**
@@ -723,71 +408,71 @@ internal class DriveReplicationTransport(
     private val store: DriveObjectStore,
     private val farmId: String,
     private val online: () -> Boolean = { true },
-    /** Called for every bundle the transport hands to Drive, so the gateway can advance its cursor. */
     private val onPublished: (OperationBundle) -> Unit = {},
 ) : ReplicationTransport {
     override val kind = TransportKind.GOOGLE_DRIVE
-
     override fun isAvailable(): Boolean = online()
 
     override fun remoteVector(farmId: String): SyncVector = runBlocking {
-        check(farmId == this@DriveReplicationTransport.farmId) { "Drive transport serves another farm" }
-        val byDevice = listedBundles()
-            .groupBy { it.deviceId }
-        SyncVector(
-            byDevice.mapValues { (_, bundles) ->
-                var mark = 0L
-                bundles.sortedBy { it.fromSequence }.forEach { bundle ->
-                    if (bundle.fromSequence <= mark + 1) mark = maxOf(mark, bundle.toSequence)
-                }
-                mark
-            },
-        )
+        requireFarm(farmId)
+        vectorFor(validatedBundles())
     }
 
     override fun fetch(farmId: String, ranges: List<SequenceRange>): List<OperationBundle> = runBlocking {
-        check(farmId == this@DriveReplicationTransport.farmId) { "Drive transport serves another farm" }
-        val wanted = listedBundles()
-        val paths = wanted.filter { bundle ->
+        requireFarm(farmId)
+        val bundles = validatedBundles()
+        val vector = vectorFor(bundles)
+        require(ranges.all { vector.watermark(it.deviceId) >= it.to }) { "Drive no longer holds the requested operations" }
+        bundles.filter { bundle ->
             ranges.any { it.deviceId == bundle.deviceId && bundle.toSequence >= it.from && bundle.fromSequence <= it.to }
-        }.map { DriveJournalLayout.bundlePath(farmId, it) }
-        paths.mapNotNull { path ->
-            runSuspendCatching {
-                val bytes = store.read(path) ?: return@runSuspendCatching null
-                DriveBundleCodec.decode(bytes)
-            }.getOrNull()
         }
     }
 
     override fun publish(farmId: String, bundles: List<OperationBundle>) = runBlocking {
-        check(farmId == this@DriveReplicationTransport.farmId) { "Drive transport serves another farm" }
+        requireFarm(farmId)
         bundles.forEach { bundle ->
+            require(bundle.verify(farmId) == BundleVerdict.Valid) { "Cannot publish an invalid or foreign-farm bundle" }
             val path = DriveJournalLayout.bundlePath(farmId, bundle)
             val bytes = DriveBundleCodec.encode(bundle)
-            val ok = runSuspendCatching { store.putIfAbsent(path, bytes, sha256Hex(bytes)) }.getOrElse { throw it }
-            if (!ok) throw IOException("Drive refused bundle $path: a different object occupies the path")
+            if (!store.putIfAbsent(path, bytes, sha256Hex(bytes))) {
+                throw IOException("Drive refused a conflicting bundle at $path")
+            }
             onPublished(bundle)
         }
     }
 
-    /**
-     * Bundle headers parsed from object names only — no downloads — so the vector listing stays
-     * cheap. A name that does not parse is ignored here; [fetch] verifies every downloaded bundle.
-     */
-    private suspend fun listedBundles(): List<ParsedBundle> =
-        store.list("GOAT/farms/$farmId/sync/").mapNotNull { obj ->
-            val rest = obj.path.removePrefix("GOAT/farms/$farmId/sync/")
-            val device = rest.substringBefore("/", "")
-            val range = rest.substringAfter("/", "")
-            val match = BUNDLE_NAME.matchEntire(range) ?: return@mapNotNull null
-            if (device.isEmpty()) return@mapNotNull null
-            ParsedBundle(device, match.groupValues[1].toLong(), match.groupValues[2].toLong())
+    private fun requireFarm(candidate: String) {
+        require(candidate == farmId) { "Drive transport serves another farm" }
+    }
+
+    /** Object names are hints only. Only authenticated, decoded, matching bytes advance a vector. */
+    private suspend fun validatedBundles(): List<OperationBundle> {
+        val prefix = "GOAT/farms/$farmId/sync/"
+        return store.list(prefix).map { obj ->
+            require(obj.path.startsWith(prefix) && BUNDLE_PATH.matches(obj.path)) { "Invalid Drive journal path" }
+            require(obj.sizeBytes in 0..MAX_DRIVE_OBJECT_BYTES.toLong()) { "Drive bundle exceeds the permitted size" }
+            val bytes = store.read(obj.path) ?: throw IOException("A listed Drive bundle is missing")
+            val bundle = DriveBundleCodec.decode(bytes)
+            require(bundle.verify(farmId) == BundleVerdict.Valid) { "Drive bundle is invalid or belongs to another farm" }
+            require(DriveJournalLayout.bundlePath(farmId, bundle) == obj.path) { "Drive bundle does not match its journal path" }
+            bundle
         }
+    }
 
-    private data class ParsedBundle(val deviceId: String, val fromSequence: Long, val toSequence: Long)
-
-    private companion object {
-        val BUNDLE_NAME = Regex("^([0-9]{12})-([0-9]{12})\\.bundle$")
+    private fun vectorFor(bundles: List<OperationBundle>): SyncVector {
+        val devices = mutableMapOf<String, MutableMap<Long, String>>()
+        bundles.forEach { bundle ->
+            val positions = devices.getOrPut(bundle.deviceId) { mutableMapOf() }
+            bundle.operations.forEach { operation ->
+                val previous = positions.put(operation.deviceSequence, operation.checksum)
+                require(previous == null || previous == operation.checksum) { "Drive contains conflicting device positions" }
+            }
+        }
+        return SyncVector(devices.mapValues { (_, positions) ->
+            var mark = 0L
+            while (positions.containsKey(mark + 1)) mark++
+            mark
+        })
     }
 }
 
@@ -822,9 +507,10 @@ internal class FarmDriveRuntime(
     private val farmId: String,
     private val deviceId: String,
     private val attachments: FileAttachmentStore,
-    private val authorizer: DriveAuthorizer = NoDriveAuthorizer,
+    private val authorizer: DriveAuthorizer = GoogleDriveAuthorizer(context) { DriveConfigStore(context).get(farmId)?.accountEmail },
     private val clock: () -> Long = System::currentTimeMillis,
 ) : Closeable {
+    private val connectionMutex = Mutex()
     private val configStore = DriveConfigStore(context)
     private val cursorStore = DriveCursorStore(context)
     private val worker = Executors.newSingleThreadScheduledExecutor { runnable ->
@@ -832,6 +518,7 @@ internal class FarmDriveRuntime(
     }
     private val mutableState = MutableStateFlow(DriveGatewayState(config = configStore.get(farmId)))
     val state: StateFlow<DriveGatewayState> = mutableState.asStateFlow()
+    val googleAuthorizer: GoogleDriveAuthorizer? get() = authorizer as? GoogleDriveAuthorizer
 
     /** Starts the periodic Drive sync loop; synchronises every [intervalSeconds] when connected. */
     fun start(intervalSeconds: Long = DRIVE_SYNC_INTERVAL_SECONDS): FarmDriveRuntime {
@@ -839,31 +526,33 @@ internal class FarmDriveRuntime(
         return this
     }
 
-    /**
-     * Connects the owner's Drive: records the account and folder, keeps any existing cursor so a
-     * reconnect resumes from the last acknowledged operation, then synchronises at once. A
-     * successful connect also clears the first-run "Drive setup dismissed" flag, so the choice to
-     * connect later is the durable one.
-     */
-    fun connect(accountEmail: String, folderId: String, folderName: String) {
-        worker.execute {
-            require(accountEmail.isNotBlank() && folderId.isNotBlank()) { "A Drive account and folder are required" }
-            val config = DriveGatewayConfig(accountEmail.trim(), folderId.trim(), folderName.trim(), clock())
-            configStore.save(farmId, config)
-            DriveSetupFlags(context).setDismissed(farmId, false)
-            mutableState.value = mutableState.value.copy(config = config, authNeeded = false, lastError = null)
-            syncGuarded()
+    /** Persist a connection only after consent and destination validation have completed. */
+    suspend fun connect(accountEmail: String, folderId: String, folderName: String): DriveSetupOutcome =
+        withContext(Dispatchers.IO) {
+            val outcome = connectionMutex.withLock {
+                val result = DriveSetupAttempt.connect(
+                    farmId, accountEmail, folderName, folderId, googleAuthorizer?.forAccount(accountEmail) ?: authorizer, clock(),
+                )
+                if (result is DriveSetupOutcome.Connected) {
+                    configStore.save(farmId, result.config)
+                    DriveSetupFlags(context).setDismissed(farmId, false)
+                    mutableState.value = DriveGatewayState(config = result.config)
+                }
+                result
+            }
+            if (outcome is DriveSetupOutcome.Connected) requestSync()
+            outcome
         }
-    }
 
-    /**
-     * Disconnects Drive for this farm. The configuration is removed; the local journal, the cursor
-     * and every farm record stay exactly as they are — disconnecting never deletes farm data.
-     */
+    /** Disconnecting removes only the transport configuration, never the farm's local data. */
     fun disconnect() {
-        worker.execute {
-            configStore.clear(farmId)
-            mutableState.value = DriveGatewayState()
+        if (!worker.isShutdown) worker.execute {
+            runBlocking {
+                connectionMutex.withLock {
+                    configStore.clear(farmId)
+                    mutableState.value = DriveGatewayState()
+                }
+            }
         }
     }
 
@@ -881,7 +570,7 @@ internal class FarmDriveRuntime(
     private fun syncGuarded() {
         if (worker.isShutdown) return
         try {
-            syncNow()
+            runBlocking { connectionMutex.withLock { syncNow() } }
         } catch (failure: Exception) {
             mutableState.value = mutableState.value.copy(
                 syncing = false,
@@ -891,103 +580,70 @@ internal class FarmDriveRuntime(
     }
 
     private fun syncNow() {
-        val config = configStore.get(farmId)
-        if (config == null) return
-        val cursor = cursorStore.load(farmId)
+        val config = configStore.get(farmId) ?: return
+        var cursor = cursorStore.load(farmId, config)
         if (clock() < cursor.nextAttemptAtEpochMillis) {
             mutableState.value = mutableState.value.copy(nextAttemptEpochMillis = cursor.nextAttemptAtEpochMillis)
             return
         }
         mutableState.value = mutableState.value.copy(syncing = true, authNeeded = false, lastError = null)
-        val store = DriveRestStore(authorizer) { config.folderId }
-        val transport = DriveReplicationTransport(store, farmId)
+        val store = EncryptedDriveStore(DriveRestStore(authorizer) { config.folderId }, farmId) {
+            vault.secretsForLocalFarm(farmId).keys
+        }
+        val transport = DriveReplicationTransport(store, farmId, onPublished = { bundle ->
+            cursor = cursor.copy(uploadedThrough = cursor.uploadedThrough +
+                (bundle.deviceId to maxOf(cursor.uploadedThrough[bundle.deviceId] ?: 0, bundle.toSequence)))
+            cursorStore.save(farmId, config, cursor)
+        })
         val endpoint = RoomReplicaEndpoint(database, farmId, deviceId, farmAppliers(vault, deviceId))
+        var offer = emptyList<SequenceRange>()
         try {
-            // Phase 1 — verify: an independent listing confirms what earlier uploads actually hold.
+            offer = SyncVector().missingFrom(endpoint.vector())
             val before = transport.remoteVector(farmId)
-            // Phase 2 — converge: pull what Drive holds that we lack, push what we hold that it lacks.
-            val offer = before.missingFrom(endpoint.vector())
+            // This is an authenticated observation. Deleted objects cannot retain old backup marks.
+            cursor = confirmedDriveCursor(before)
+            cursorStore.save(farmId, config, cursor)
+            offer = before.missingFrom(endpoint.vector())
             val outcome = SyncSession.run(endpoint, transport)
-            // Phase 3 — acknowledge: the post-publish listing advances the upload cursor.
-            val after = transport.remoteVector(farmId)
-            advanceCursor(cursor, offer, before, after)
+            if (outcome.status != com.farmos.domain.replication.SyncSessionStatus.COMPLETED || outcome.rejectedReasons.isNotEmpty()) {
+                throw IOException(outcome.rejectedReasons.firstOrNull() ?: "This device is not authorised to synchronise")
+            }
+            // A second download verifies the bytes after publishing, independently of the upload ACK.
+            cursor = confirmedDriveCursor(transport.remoteVector(farmId))
+            cursorStore.save(farmId, config, cursor)
             syncAttachments(store)
-            val counts = runBlocking { stateCounts(config) }
             mutableState.value = mutableState.value.copy(
-                syncing = false,
-                lastSyncEpochMillis = clock(),
-                lastOutcome = outcome,
-                lastError = outcome.rejectedReasons.firstOrNull(),
-                nextAttemptEpochMillis = null,
-                counts = counts,
+                syncing = false, lastSyncEpochMillis = clock(), lastOutcome = outcome,
+                lastError = null, nextAttemptEpochMillis = null,
+                counts = runBlocking { stateCounts(config) },
             )
         } catch (auth: DriveAuthNeededException) {
-            // Sign-in state, not a failure: surface it without consuming the retry budget.
-            mutableState.value = mutableState.value.copy(syncing = false, authNeeded = true, lastError = null)
+            mutableState.value = mutableState.value.copy(syncing = false, authNeeded = true, lastError = null, counts = null)
         } catch (failure: Exception) {
-            recordFailure(cursor, offer, failure)
+            recordFailure(config, cursor, offer, failure)
             throw failure
         }
     }
 
-    /**
-     * Advances the durable cursor. Uploaded marks come from this sync's post-publish listing;
-     * verified marks come from the pre-sync listing, so SYNCED only becomes BACKED_UP after an
-     * independent read confirms the object. A successful sync clears the failure state.
-     */
-    private fun advanceCursor(
+    private fun recordFailure(
+        config: DriveGatewayConfig,
         cursor: DriveCursor,
         offer: List<SequenceRange>,
-        before: SyncVector,
-        after: SyncVector,
+        failure: Exception,
     ) {
-        val uploaded = cursor.uploadedThrough.toMutableMap()
-        val verified = cursor.verifiedThrough.toMutableMap()
-        for ((device, mark) in after.entries) {
-            uploaded[device] = maxOf(uploaded[device] ?: 0, mark)
-            val wasUploaded = cursor.uploadedThrough[device] ?: 0
-            verified[device] = maxOf(verified[device] ?: 0, minOf(wasUploaded, before.watermark(device)))
-        }
-        // Ranges we offered but Drive still lacks after this sync stay below the cursor: they will
-        // be offered again next time, so the cursor never claims an unacknowledged upload.
-        for (range in offer) {
-            val mark = after.watermark(range.deviceId)
-            if (mark < range.to) uploaded[range.deviceId] = minOf(uploaded[range.deviceId] ?: 0, mark)
-        }
-        cursorStore.save(
-            farmId,
-            cursor.copy(
-                uploadedThrough = uploaded,
-                verifiedThrough = verified,
-                failedThrough = emptyMap(),
-                consecutiveFailures = 0,
-                nextAttemptAtEpochMillis = 0,
-                lastError = null,
-            ),
-        )
-    }
-
-    /** Records a failed sync with exponential backoff; the failed ranges surface as FAILED operations. */
-    private fun recordFailure(cursor: DriveCursor, offer: List<SequenceRange>, failure: Exception) {
-        val failures = cursor.consecutiveFailures + 1
+        val failures = (cursor.consecutiveFailures + 1).coerceAtMost(30)
         val delay = minOf(DRIVE_MAX_BACKOFF_MILLIS, DRIVE_BASE_BACKOFF_MILLIS * (1L shl minOf(failures, 10)))
         val failed = cursor.failedThrough.toMutableMap()
-        for (range in offer) {
-            failed[range.deviceId] = maxOf(failed[range.deviceId] ?: 0, range.to)
-        }
-        cursorStore.save(
-            farmId,
-            cursor.copy(
-                failedThrough = failed,
-                consecutiveFailures = failures,
-                nextAttemptAtEpochMillis = clock() + delay,
-                lastError = failure.message ?: failure.javaClass.simpleName,
-            ),
-        )
+        for (range in offer) failed[range.deviceId] = maxOf(failed[range.deviceId] ?: 0, range.to)
+        val retryAt = clock() + delay
+        cursorStore.save(farmId, config, cursor.copy(
+            // A failed integrity observation cannot certify current Drive availability.
+            verifiedThrough = emptyMap(), failedThrough = failed, consecutiveFailures = failures,
+            nextAttemptAtEpochMillis = retryAt, lastError = failure.message ?: failure.javaClass.simpleName,
+        ))
         mutableState.value = mutableState.value.copy(
-            syncing = false,
-            lastError = failure.message ?: "Drive synchronisation failed",
-            nextAttemptEpochMillis = clock() + delay,
+            syncing = false, lastError = failure.message ?: "Drive synchronisation failed",
+            nextAttemptEpochMillis = retryAt, counts = null,
         )
     }
 
@@ -995,31 +651,29 @@ internal class FarmDriveRuntime(
      * Attachment bytes by content hash: uploads local bytes Drive lacks, then pulls the bytes this
      * device lacks. Every byte is verified against its SHA-256 on the way in and on the way out.
      */
-    private fun syncAttachments(store: DriveObjectStore) {
+    private fun syncAttachments(store: DriveObjectStore) = runBlocking {
         val prefix = "GOAT/farms/$farmId/attachments/"
-        val remote = runBlocking { store.list(prefix) }.map { it.path.removePrefix(prefix) }.toSet()
-        val local = runBlocking { database.attachments().contents(farmId) }
+        val remote = store.list(prefix).map { it.path.removePrefix(prefix) }.toSet()
+        val local = database.attachments().contents(farmId)
         var uploaded = 0
         for (row in local) {
             if (uploaded >= DRIVE_ATTACHMENTS_PER_SESSION) break
             if (remote.contains(row.contentSha256)) continue
             val bytes = attachments.read(farmId, row.contentSha256) ?: continue
-            val ok = runBlocking {
-                runSuspendCatching { store.putIfAbsent(prefix + row.contentSha256, bytes, row.contentSha256) }
-                    .getOrDefault(false)
+            require(bytes.size.toLong() == row.byteSize) { "Local attachment size does not match its metadata" }
+            if (!store.putIfAbsent(prefix + row.contentSha256, bytes, row.contentSha256)) {
+                throw IOException("Drive refused a conflicting attachment")
             }
-            if (ok) uploaded++
+            uploaded++
         }
-        runBlocking {
-            runSuspendCatching {
-                pullMissingAttachments(
-                    database,
-                    farmId,
-                    attachments,
-                    limit = DRIVE_ATTACHMENTS_PER_SESSION,
-                    fetch = { sha, max -> store.read(prefix + sha)?.takeIf { it.size <= max } },
-                )
+        for (row in local.filterNot { attachments.has(farmId, it.contentSha256) }.take(DRIVE_ATTACHMENTS_PER_SESSION)) {
+            // No copy on Drive yet is normal; a listed but corrupt or missing copy is an explicit failure.
+            if (row.contentSha256 !in remote) continue
+            val bytes = store.read(prefix + row.contentSha256) ?: throw IOException("A listed Drive attachment is missing")
+            require(bytes.size.toLong() == row.byteSize && sha256Hex(bytes) == row.contentSha256) {
+                "Drive attachment does not match its metadata"
             }
+            attachments.put(farmId, bytes)
         }
     }
 
@@ -1030,7 +684,7 @@ internal class FarmDriveRuntime(
     }
 
     private suspend fun stateCounts(config: DriveGatewayConfig): DriveOpCounts {
-        val cursor = cursorStore.load(farmId)
+        val cursor = cursorStore.load(farmId, config)
         val journal = database.replication()
         var localOnly = 0L
         var synced = 0L

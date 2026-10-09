@@ -469,7 +469,7 @@ internal fun SettingsHost(
             LaunchedEffect(farmId, refreshKey) {
                 runSuspendCatching {
                     withContext(io) {
-                        database.paddocks().active(farmId).map { "${it.code} · ${it.name}" } to
+                        database.paddocks().active(farmId).map { "${it.code} · ${it.displayName}" } to
                             database.lifecycle().houses(farmId).map { "${it.code} · ${it.kind}" }
                     }
                 }.onSuccess { (p, h) -> paddocks = p; houses = h }
@@ -994,6 +994,32 @@ private fun DriveGatewaySection(
         }
     }
 
+    fun finishConnection() {
+        val email = account.ifBlank { config?.accountEmail.orEmpty() }
+        val destination = folderId.ifBlank { config?.folderId.orEmpty() }
+        runDrive(onDone = { connecting = false }) {
+            when (val result = drive.connect(email, destination, config?.folderName?.ifBlank { "Farm OS" } ?: "Farm OS")) {
+                is DriveSetupOutcome.Connected -> Unit
+                DriveSetupOutcome.AuthUnavailable -> error("Google Drive permission is required before connecting")
+                is DriveSetupOutcome.Failed -> error(result.reason)
+            }
+        }
+    }
+
+    val consent = drive.googleAuthorizer?.let { authorizer ->
+        rememberDriveConsent(
+            authorizer,
+            onAuthorized = { finishConnection() },
+            onFailure = { reason -> onBusyChange(false); onError(reason) },
+        )
+    }
+
+    fun connectWithConsent(email: String) {
+        onBusyChange(true)
+        onError(null)
+        if (consent != null) consent(email) else finishConnection()
+    }
+
     if (config == null) {
         Text("Not connected.", modifier = Modifier.testTag("settings-drive-state"))
         Text(
@@ -1002,19 +1028,19 @@ private fun DriveGatewaySection(
         )
         if (connecting) {
             SettingsField("Google account email", account, busy) { account = it }
-            SettingsField("Drive folder ID", folderId, busy) { folderId = it }
-            SettingsButton("Connect", canManage && !busy && account.isNotBlank() && folderId.isNotBlank()) {
-                runDrive(onDone = { connecting = false }) { drive.connect(account, folderId, "") }
-            }
+            SettingsField("Drive folder ID (optional)", folderId, busy) { folderId = it }
+            Text("Leave the folder ID empty to create this farm's backup folder.", color = AnimalFarmTheme.colors.mutedInk)
+            SettingsButton("Connect", canManage && !busy && account.isNotBlank()) { connectWithConsent(account) }
             SettingsButton("Cancel", !busy) { connecting = false }
         } else {
             SettingsButton("Connect Google Drive", canManage && !busy) { connecting = true }
         }
         return
     }
-    Text("Connected as ${config.accountEmail}.", modifier = Modifier.testTag("settings-drive-state"))
+    Text("Backup folder configured for ${config.accountEmail}.", modifier = Modifier.testTag("settings-drive-state"))
     if (config.folderName.isNotBlank()) Text("Folder: ${config.folderName}", color = AnimalFarmTheme.colors.mutedInk)
     if (state.authNeeded) {
+        SettingsButton("Authorise Google Drive", canManage && !busy) { connectWithConsent(config.accountEmail) }
         Text(
             "Sign-in required: complete Google sign-in on this device to synchronise.",
             color = MaterialTheme.colorScheme.error,
@@ -1027,7 +1053,7 @@ private fun DriveGatewaySection(
     )
     state.counts?.let { counts ->
         Text(
-            "${counts.backedUp} backed up · ${counts.synced} synchronised · ${counts.localOnly} saved locally · ${counts.failed} failed",
+            "Journal operations: ${counts.backedUp} backed up · ${counts.synced} synchronised · ${counts.localOnly} saved locally · ${counts.failed} failed",
             modifier = Modifier.testTag("settings-drive-counts"),
         )
     }
@@ -1054,7 +1080,7 @@ private fun driveSummary(drive: FarmDriveRuntime?): String {
     val state by drive.state.collectAsState()
     val config = state.config ?: return "not connected"
     return buildString {
-        append("connected as ${config.accountEmail}")
+        append("backup configured for ${config.accountEmail}")
         if (state.authNeeded) append(" — sign-in required")
         state.lastError?.let { append(" — $it") }
     }
