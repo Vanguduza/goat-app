@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "package_name": "com.farmos.app",
+  "authority": "TEST_SCENARIOS_ONLY_NO_GATE_PROMOTION",
+  "scope_note": "These two bounded UI journeys exercise the governed emulator target. They are not all GOAT E2E tests or product qualification.",
+  "scenarios": [
+    {
+      "id": "local-entry-inspection",
+      "screen_ids": [
+        "FOS-GLOBAL-014",
+        "FOS-GLOBAL-006"
+      ],
+      "preconditions": [
+        "Use only the dedicated admitted test emulator. GOAT must have no existing local farm, with the first-run introduction visible. If a farm or sign-in form exists, stop; do not clear it."
+      ],
+      "steps": [
+        "Open the installed GOAT app and inspect its first-run introduction.",
+        "Tap Continue and inspect the setup form, scrolling as necessary. Leave all fields empty and do not submit Create farm."
+      ],
+      "assertions": [
+        {
+          "id": "ENTRY-01",
+          "description": "The actual introduction displays 'Your farm, on this device first' and a reachable Continue action."
+        },
+        {
+          "id": "ENTRY-02",
+          "description": "Continue opens 'Set up this farm', with Farm name, Your name, Owner username, Owner PIN (6 to 12 digits), and Confirm PIN fields."
+        },
+        {
+          "id": "ENTRY-03",
+          "description": "The setup form identifies on-device storage and does not demand a server email/password or Google sign-in before local setup."
+        },
+        {
+          "id": "ENTRY-04",
+          "description": "With the fields empty, Create farm is disabled; no farm is submitted during this inspection."
+        }
+      ]
+    },
+    {
+      "id": "management-home-navigation",
+      "screen_ids": [
+        "FOS-HOME-012-A",
+        "FOS-HOME-002"
+      ],
+      "preconditions": [
+        "An operator has already opened the synthetic farm named 'GOAT Artemis Qualification' as its local owner/manager. Its management farm home is visible. Stop if that exact test farm or role cannot be established; do not log into another farm."
+      ],
+      "steps": [
+        "Inspect the management home and its Home, Animals, Tasks and Records controls.",
+        "Open Animals, verify the species chooser, and return to the same farm home.",
+        "Open Tasks, then return to the same farm home. Open Records, then return to the same farm home.",
+        "Inspect the Theme control's separate lower-right placement without changing any farm or theme setting."
+      ],
+      "assertions": [
+        {
+          "id": "HOME-01",
+          "description": "The management home belongs to the exact synthetic farm GOAT Artemis Qualification."
+        },
+        {
+          "id": "HOME-02",
+          "description": "Home, Animals, Tasks and Records labels are complete, readable, separate and reachable at the current device size and font scale."
+        },
+        {
+          "id": "HOME-03",
+          "description": "Animals opens the species chooser, including goat, rabbit, poultry, sheep and cattle, and navigation returns to the same farm home."
+        },
+        {
+          "id": "HOME-04",
+          "description": "Tasks and Records each open their corresponding rendered content, with a working return to the same farm home and no duplicate action."
+        },
+        {
+          "id": "HOME-05",
+          "description": "Theme remains a separate lower-right control on the farm home; no credentials, farm records or settings were changed."
+        }
+      ]
+    }
+  ]
+}
