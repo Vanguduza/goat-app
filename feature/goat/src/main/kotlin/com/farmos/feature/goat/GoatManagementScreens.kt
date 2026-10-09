@@ -465,7 +465,7 @@ private fun ScaleScanUi(
         connected?.let {
             TextButton(onClick = {
                 runAdapter("Disconnect") {
-                    adapter.disconnect().getOrThrow()
+                    adapter.disconnect()
                     connected = null
                     reading = null
                 }

@@ -1,6 +1,10 @@
 package com.farmos.app
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.farmos.core.database.FeedPlanEntity
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalSection
@@ -18,41 +22,15 @@ fun FeedCostScreen(
     ops: RoomOpsRepository,
     onBack: () -> Unit,
 ) {
-    var lines by androidx.compose.runtime.remember { mutableStateOf(emptyList<String>()) }
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-        val issues = ops.recentFeed()
-        val purchases = ops.purchases()
-        val items = ops.items().associateBy { it.id }
-        // Weighted-average cost per milli-unit per item from recorded purchases.
-        val costPerMilli = purchases.groupBy { it.itemId }.mapValues { (_, rows) ->
-            val qty = rows.sumOf { it.quantityMilli }
-            val amt = rows.sumOf { it.amountMinor }
-            if (qty > 0L) amt.toDouble() / qty.toDouble() else null
-        }
-        val issuedByItem = issues.groupBy { it.itemId }.mapValues { (_, rows) -> rows.sumOf { it.quantityMilli } }
-        val out = mutableListOf<String>()
-        var totalMinor = 0.0
-        var costed = false
-        issuedByItem.forEach { (itemId, milli) ->
-            val unitCost = costPerMilli[itemId]
-            val name = items[itemId]?.name ?: itemId
-            if (unitCost == null) {
-                out += "$name — ${"%.1f".format(milli / 1000.0)} kg issued · no purchase cost on record"
-            } else {
-                val cost = milli * unitCost
-                totalMinor += cost
-                costed = true
-                out += "$name — ${"%.1f".format(milli / 1000.0)} kg issued · ${"%.2f".format(cost / 100.0)} cost"
-            }
-        }
-        if (out.isEmpty()) out += "No feed issues recorded on this device."
-        if (costed) out.add(0, "Total issued feed cost: ${"%.2f".format(totalMinor / 100.0)} (weighted-average purchase cost)")
-        lines = out
+    var lines by androidx.compose.runtime.remember { mutableStateOf(listOf("Reading feed costs…")) }
+    androidx.compose.runtime.LaunchedEffect(ops) {
+        lines = runSuspendCatching { feedCostLines(ops.feedTotalsByItem(), ops.allPurchases(), ops.items()) }
+            .getOrElse { listOf("Feed costs could not be read: ${it.message.orEmpty()}") }
     }
     FarmOperationalPage(
         screenId = "FOS-FEED-007",
         title = "Feed cost",
-        subtitle = "Issued feed valued from recorded purchases. Estimates, not ledger postings.",
+        subtitle = "Separate estimates at each currency's purchase prices. Totals cover priced items only.",
         onBack = onBack,
     ) {
         FarmOperationalSection("Cost by item") {
@@ -101,7 +79,7 @@ fun RationBuilderScreen(
                 LocalDate.parse(end.value).toEpochDay() - LocalDate.parse(start.value).toEpochDay() + 1
             }.getOrDefault(0L)
             androidx.compose.material3.Text("Daily requirement: ${dailyKgLabel(rationG, headCount)}")
-            androidx.compose.material3.Text("Whole-ration requirement: ${"%.1f".format(rationG * headCount * days / 1000.0)} kg over $days days")
+            androidx.compose.material3.Text("Whole-ration requirement: ${reportKg(feedDailyGrams(rationG, headCount).multiply(java.math.BigDecimal.valueOf(days)))} over $days days")
             error?.let { androidx.compose.material3.Text(it) }
             androidx.compose.material3.Button(
                 onClick = {
@@ -141,7 +119,7 @@ fun RationAnalysisScreen(
     androidx.compose.runtime.LaunchedEffect(Unit) {
         plans = ops.feedPlans()
         items = ops.items()
-        purchases = ops.purchases()
+        purchases = ops.allPurchases()
     }
     val plan = plans.firstOrNull { it.id == selectedPlan }
     FarmOperationalPage(
@@ -163,12 +141,11 @@ fun RationAnalysisScreen(
         }
         if (plan != null) {
             val days = plan.endEpochDay - plan.startEpochDay + 1
-            val dailyGrams = plan.rationGramsPerHeadPerDay * plan.headCount
-            val totalGrams = dailyGrams * days
+            val totalGrams = feedPlanTotalGrams(plan)
             FarmOperationalSection("Analysis — ${plan.name}") {
                 androidx.compose.material3.Text("Daily requirement: ${dailyKgLabel(plan.rationGramsPerHeadPerDay, plan.headCount)}")
                 androidx.compose.material3.Text("Period: ${LocalDate.ofEpochDay(plan.startEpochDay)} → ${LocalDate.ofEpochDay(plan.endEpochDay)} ($days days)")
-                androidx.compose.material3.Text("Total requirement: ${"%.1f".format(totalGrams / 1000.0)} kg")
+                androidx.compose.material3.Text("Total requirement: ${reportKg(totalGrams)}")
             }
             FarmOperationalSection("Price against an inventory item (optional)") {
                 items.forEach { item ->
@@ -178,16 +155,15 @@ fun RationAnalysisScreen(
                 }
                 val itemId = selectedItem
                 if (itemId != null) {
-                    val rows = purchases.filter { it.itemId == itemId }
-                    val qty = rows.sumOf { it.quantityMilli }
-                    if (qty > 0L) {
-                        val avgPerGram = rows.sumOf { it.amountMinor }.toDouble() / qty.toDouble()
-                        androidx.compose.material3.Text(
-                            "Estimated cost: ${"%.2f".format(totalGrams * avgPerGram / 100.0)} " +
-                                "at the weighted-average purchase price of ${items.firstOrNull { it.id == itemId }?.name}.",
-                        )
-                    } else {
-                        androidx.compose.material3.Text("No purchase cost on record for that item; cost estimate unavailable.")
+                    val item = items.firstOrNull { it.id == itemId }
+                    val quantityMilli = item?.let { rationQuantityMilli(totalGrams, it.unit) }
+                    val rates = feedPurchaseRates(purchases).filter { it.itemId == itemId }
+                    when {
+                        quantityMilli == null -> androidx.compose.material3.Text("A ration in grams cannot be priced in ${item?.unit ?: "an unknown unit"} without a recorded mass conversion.")
+                        rates.isEmpty() -> androidx.compose.material3.Text("No purchase cost on record for that item; cost estimate unavailable.")
+                        else -> rates.forEach { rate ->
+                            androidx.compose.material3.Text("Estimated cost: ${reportMoney(rate.estimateMinor(quantityMilli), rate.currency)} at ${rate.currency} purchase prices.")
+                        }
                     }
                 }
             }
@@ -212,7 +188,7 @@ fun RationCompareScreen(
             "Ration: ${plan.rationGramsPerHeadPerDay} g/head/day × ${plan.headCount} head",
             "Daily: ${dailyKgLabel(plan.rationGramsPerHeadPerDay, plan.headCount)}",
             "Period: $days days",
-            "Total: ${"%.1f".format(plan.rationGramsPerHeadPerDay * plan.headCount * days / 1000.0)} kg",
+            "Total: ${reportKg(feedPlanTotalGrams(plan))}",
         )
     }
     FarmOperationalPage(
@@ -242,10 +218,10 @@ fun RationCompareScreen(
         if (a != null && b != null && a.id != b.id) {
             FarmOperationalSection("A — ${a.name}") { summary(a).forEach { androidx.compose.material3.Text(it) } }
             FarmOperationalSection("B — ${b.name}") { summary(b).forEach { androidx.compose.material3.Text(it) } }
-            val totalA = a.rationGramsPerHeadPerDay * a.headCount * (a.endEpochDay - a.startEpochDay + 1)
-            val totalB = b.rationGramsPerHeadPerDay * b.headCount * (b.endEpochDay - b.startEpochDay + 1)
+            val totalA = feedPlanTotalGrams(a)
+            val totalB = feedPlanTotalGrams(b)
             FarmOperationalSection("Difference") {
-                androidx.compose.material3.Text("B − A total requirement: ${"%.1f".format((totalB - totalA) / 1000.0)} kg")
+                androidx.compose.material3.Text("B − A total requirement: ${reportKg(totalB.subtract(totalA))}")
             }
         }
     }
@@ -294,22 +270,26 @@ fun FeedReportScreen(
     onBack: () -> Unit,
 ) {
     var lines by androidx.compose.runtime.remember { mutableStateOf(emptyList<String>()) }
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-        val issues = ops.recentFeed()
+    androidx.compose.runtime.LaunchedEffect(ops) {
+        lines = runSuspendCatching {
+
+        val issueCount = ops.feedIssueCount()
+        val totals = ops.feedTotalsByItem()
         val plans = ops.feedPlans()
         val items = ops.items()
         val today = LocalDate.now().toEpochDay()
-        val issuedByItem = issues.groupBy { it.itemId }.mapValues { (_, rows) -> rows.sumOf { it.quantityMilli } }
-        val itemNames = items.associateBy({ it.id }, { it.name })
+        val itemNames = items.associateBy { it.id }
         val out = mutableListOf(
-            "Feed issues recorded: ${issues.size}",
-            "Feed plans recorded: ${plans.size} (${plans.count { it.endEpochDay >= today }} active)",
-            "Inventory feed items: ${items.size}",
+            "Feed issues recorded: $issueCount",
+            "Feed plans recorded: ${plans.size} (${plans.count { today in it.startEpochDay..it.endEpochDay }} active)",
+            "Inventory items: ${items.size}",
         )
-        issuedByItem.forEach { (itemId, milli) ->
-            out += "Issued ${(itemNames[itemId] ?: itemId)}: ${"%.1f".format(milli / 1000.0)} kg"
+        totals.forEach { total ->
+            val item = itemNames[total.itemId]
+            out += "Issued ${item?.name ?: total.itemId}: ${reportMilli(total.quantityMilli)} ${item?.unit ?: "(unit unavailable)"}"
         }
-        lines = out
+        out
+            }.getOrElse { listOf("Feed records could not be read: ${it.message.orEmpty()}") }
     }
     FarmOperationalPage(
         screenId = "FOS-FEED-012",

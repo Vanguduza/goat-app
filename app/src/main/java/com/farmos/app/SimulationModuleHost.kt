@@ -19,6 +19,13 @@ import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
 import java.io.File
+import java.math.BigDecimal
+import java.math.MathContext
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import com.farmos.domain.ops.FarmSpeciesCodes
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -60,14 +67,18 @@ private data class ScenarioParams(
     val feedGramsPerHeadPerDay: Long = 1500,
 )
 
+private data class ScenarioFinanceBasis(
+    val currency: String,
+    val netMinor: BigDecimal,
+    val firstEpochDay: Long,
+    val lastEpochDay: Long,
+)
+
 private data class FarmStats(
     val activeBySpecies: Map<String, Int>,
     val femalesBySpecies: Map<String, Int>,
-    val birthsPerYearBySpecies: Map<String, Double>,
-    val feedGramsPerHeadPerDay: Map<String, Double>,
     val doeCageCapacity: Int,
-    val moneyNetPerYearMinor: Long,
-    val currency: String,
+    val finances: List<ScenarioFinanceBasis>,
 )
 
 private fun scenarioDirectory(filesDir: File, farmId: String): File =
@@ -94,32 +105,37 @@ fun SimulationModuleHost(
     var params by remember(farmId) { mutableStateOf(ScenarioParams()) }
     var stats by remember(farmId) { mutableStateOf<FarmStats?>(null) }
     var saved by remember(farmId) { mutableStateOf(listOf<FarmScenario>()) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember(farmId) { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
     suspend fun refresh() {
         val register = database.reports().herdRegister(farmId)
         val active = register.filter { it.status == "active" }
         val activeBySpecies = active.groupBy { it.speciesCode }.mapValues { it.value.size }
-        val femalesBySpecies = active.filter { it.sex == "female" }.groupBy { it.speciesCode }.mapValues { it.value.size }
-        val births = database.reports().birthTotals(farmId)
-        val birthsPerYear = births.associate { it.speciesCode to it.live.toDouble() }
-        val feedTotals = database.feedIssues().totalsByItem(farmId)
-        val totalFeedG = feedTotals.sumOf { it.quantityMilli } / 1000.0
-        val totalHead = activeBySpecies.values.sum().coerceAtLeast(1)
-        val money = database.reports().moneyTotals(farmId)
-        val currency = money.firstOrNull()?.currency ?: ""
-        val netMinor = money.sumOf { if (it.kind == "income") it.amountMinor else -it.amountMinor }
+        val femalesBySpecies = active.filter { it.sex.equals("FEMALE", ignoreCase = true) }
+            .groupBy { it.speciesCode }.mapValues { it.value.size }
+        val finances = database.reports().moneyRecords(farmId).groupBy { it.currency }.map { (currency, rows) ->
+            ScenarioFinanceBasis(
+                currency = currency,
+                netMinor = rows.fold(BigDecimal.ZERO) { net, record ->
+                    val amount = BigDecimal.valueOf(record.amountMinor)
+                    when (record.kind) {
+                        "income" -> net.add(amount)
+                        "expense" -> net.subtract(amount)
+                        else -> error("Unrecognised money record kind: " + record.kind)
+                    }
+                },
+                firstEpochDay = rows.minOf { it.occurredEpochDay },
+                lastEpochDay = rows.maxOf { it.occurredEpochDay },
+            )
+        }.sortedBy { it.currency }
         stats = FarmStats(
             activeBySpecies = activeBySpecies,
             femalesBySpecies = femalesBySpecies,
-            birthsPerYearBySpecies = birthsPerYear,
-            feedGramsPerHeadPerDay = activeBySpecies.mapValues { (_, head) -> totalFeedG / 30.0 / head.coerceAtLeast(1) },
             doeCageCapacity = database.rabbitProgramme().cages(farmId).sumOf { it.doeCapacity },
-            moneyNetPerYearMinor = netMinor,
-            currency = currency,
+            finances = finances,
         )
-        saved = loadScenarios(filesDir, farmId)
+        saved = withContext(Dispatchers.IO) { loadScenarios(filesDir, farmId) }
     }
 
     LaunchedEffect(farmId) {
@@ -129,11 +145,21 @@ fun SimulationModuleHost(
     fun runScenario(kind: String): FarmScenario {
         val s = requireNotNull(stats) { "Farm figures are still loading" }
         val p = params
+        require(p.speciesCode in FarmSpeciesCodes.ALL) { "Select a supported species code" }
+        require(p.periodsMonths in 1..120 && p.birthRate.isFinite() && p.birthRate in 0.0..10.0 &&
+            p.deathRate.isFinite() && p.deathRate in 0.0..1.0 && p.feedGramsPerHeadPerDay in 0..100_000) {
+            "Enter finite scenario parameters within their stated ranges"
+        }
         val head = s.activeBySpecies[p.speciesCode] ?: 0
         val females = s.femalesBySpecies[p.speciesCode] ?: 0
         val years = p.periodsMonths / 12.0
+        val today = LocalDate.now()
+        val horizonDays = ChronoUnit.DAYS.between(today, today.plusMonths(p.periodsMonths.toLong()))
         val lines = mutableListOf<String>()
-        lines += "Basis: $head active ${p.speciesCode}, $females females, over ${p.periodsMonths} months."
+        lines += "Basis: " + head + " individually registered active " + p.speciesCode +
+            ", " + females + " females, over " + p.periodsMonths + " months (" + horizonDays + " days)."
+        lines += "Assumptions: " + p.birthRate + " births per female per year; " +
+            p.deathRate + " annual death rate. Group-only head counts are not included."
         when (kind) {
             "GROWTH" -> {
                 val births = females * p.birthRate * years
@@ -149,29 +175,43 @@ fun SimulationModuleHost(
                 lines += "At 50% female ratio: ${(births / 2).toLong()} replacement females"
             }
             "FEED" -> {
-                val perHead = s.feedGramsPerHeadPerDay[p.speciesCode] ?: p.feedGramsPerHeadPerDay.toDouble()
-                val days = (p.periodsMonths * 30.44).toLong()
-                val totalKg = perHead * head * days / 1000.0
-                lines += "Recorded intake basis: ${"%.0f".format(perHead)} g/head/day"
-                lines += "Projected feed for $head head over ${p.periodsMonths} months: ${"%.0f".format(totalKg)} kg"
+                val totalGrams = BigDecimal.valueOf(p.feedGramsPerHeadPerDay)
+                    .multiply(BigDecimal.valueOf(head.toLong())).multiply(BigDecimal.valueOf(horizonDays))
+                lines += "Entered feed assumption: " + p.feedGramsPerHeadPerDay + " g/head/day"
+                lines += "Projected feed for " + head + " head: " + reportKg(totalGrams)
+                lines += "Feed issues alone do not establish measured intake per animal per day."
             }
             "CAPACITY" -> {
                 val births = females * p.birthRate * years
                 val projected = (head + births - head * p.deathRate * years).toLong().coerceAtLeast(0)
                 lines += "Projected head: $projected"
                 if (p.speciesCode == "rabbit") {
-                    lines += "Recorded doe cage capacity: ${s.doeCageCapacity}"
-                    if (projected > s.doeCageCapacity) lines += "Shortfall: ${projected - s.doeCageCapacity} places"
-                    else lines += "Within recorded capacity."
+                    val projectedFemales = (females + births / 2.0 - females * p.deathRate * years).toLong().coerceAtLeast(0)
+                    lines += "Assuming 50% female offspring: " + projectedFemales + " projected females."
+                    lines += "Recorded doe cage capacity: " + s.doeCageCapacity
+                    if (projectedFemales > s.doeCageCapacity) {
+                        lines += "If every projected female needs a doe place, shortfall: " + (projectedFemales - s.doeCageCapacity)
+                    } else {
+                        lines += "Projected females fit the recorded doe places under that assumption."
+                    }
+                    lines += "Doe capacity does not represent capacity for the whole rabbit population."
                 } else {
                     lines += "Compare against recorded housing in the capacity module."
                 }
             }
             "FINANCE" -> {
-                val netPerYear = s.moneyNetPerYearMinor / 100.0
-                val projected = netPerYear * years
-                lines += "Recorded net ${s.currency}: ${"%.2f".format(netPerYear)}/year"
-                lines += "Projected net over ${p.periodsMonths} months at same rate: ${"%.2f".format(projected)} ${s.currency}"
+                lines += "Financial scope: all farm money records, separated by currency."
+                if (s.finances.isEmpty()) lines += "Record dated income and expenses before projecting a financial baseline."
+                s.finances.forEach { basis ->
+                    val observedDays = Math.addExact(Math.subtractExact(basis.lastEpochDay, basis.firstEpochDay), 1L)
+                    val projected = basis.netMinor.multiply(BigDecimal.valueOf(horizonDays))
+                        .divide(BigDecimal.valueOf(observedDays), MathContext.DECIMAL128)
+                    lines += "Recorded net " + reportMoney(basis.netMinor, basis.currency) + " from " +
+                        LocalDate.ofEpochDay(basis.firstEpochDay) + " to " + LocalDate.ofEpochDay(basis.lastEpochDay) +
+                        " (" + observedDays + " days)."
+                    lines += "If that daily net continues for " + horizonDays + " days: " + reportMoney(projected, basis.currency)
+                }
+                lines += "The baseline assumes records cover their first-to-last date span; missing entries change the result."
             }
         }
         lines += "Deterministic projection from recorded figures and entered parameters."
@@ -188,16 +228,20 @@ fun SimulationModuleHost(
         )
     }
 
-    var lastResult by remember { mutableStateOf<FarmScenario?>(null) }
+    var lastResult by remember(farmId) { mutableStateOf<FarmScenario?>(null) }
 
     fun saveScenario(name: String) {
         scope.launch {
-            runCatching {
+            error = null
+            runSuspendCatching {
                 require(name.isNotBlank()) { "Scenario needs a name" }
-                val scenario = (lastResult ?: runScenario("GROWTH")).copy(name = name.trim())
-                val file = File(scenarioDirectory(filesDir, farmId), "${name.trim().replace(Regex("[^A-Za-z0-9_-]"), "_")}.json")
-                file.writeText(Json.encodeToString(scenario))
-                saved = loadScenarios(filesDir, farmId)
+                val scenario = requireNotNull(lastResult) { "Run a scenario before saving it" }.copy(name = name.trim())
+                saved = withContext(Dispatchers.IO) {
+                    val file = File(scenarioDirectory(filesDir, farmId), name.trim().replace(Regex("[^A-Za-z0-9_-]"), "_") + ".json")
+                    require(!file.exists()) { "A saved scenario has this name; choose another name" }
+                    file.writeText(Json.encodeToString(scenario))
+                    loadScenarios(filesDir, farmId)
+                }
             }.onFailure { error = it.message }
         }
     }
@@ -213,6 +257,7 @@ fun SimulationModuleHost(
         if (error != null) {
             FarmOperationalSection("Attention", error) {}
         }
+        @Composable
         fun nav(target: SimulationPage, label: String) {
             TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text(label) }
         }
@@ -248,6 +293,7 @@ fun SimulationModuleHost(
                 }
                 ScenarioEditor(params = params, onParams = { params = it })
                 Button(onClick = {
+                    error = null
                     lastResult = runCatching { runScenario(kind) }.getOrElse {
                         error = it.message
                         null
@@ -275,9 +321,9 @@ fun SimulationModuleHost(
             }
             SimulationPage.SAVE -> {
                 var name by remember { mutableStateOf("") }
-                FarmOperationalSection("Save scenario", "Persists the last run projection as farm-scoped JSON in app-private storage.") {
+                FarmOperationalSection("Save scenario", "Save the last completed projection for this farm.") {
                     OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Scenario name") }, modifier = Modifier.fillMaxWidth())
-                    Button(onClick = { saveScenario(name) }, modifier = Modifier.fillMaxWidth()) { Text("Save") }
+                    Button(onClick = { saveScenario(name) }, enabled = lastResult != null, modifier = Modifier.fillMaxWidth()) { Text("Save") }
                     if (lastResult == null) Text("Run a scenario first.", style = MaterialTheme.typography.bodyMedium)
                 }
                 FarmOperationalRows(
@@ -318,20 +364,20 @@ private fun ScenarioEditor(params: ScenarioParams, onParams: (ScenarioParams) ->
         )
         OutlinedTextField(
             value = params.birthRate.toString(),
-            onValueChange = { onParams(params.copy(birthRate = it.toDoubleOrNull()?.coerceIn(0.0, 10.0) ?: params.birthRate)) },
+            onValueChange = { onParams(params.copy(birthRate = it.toDoubleOrNull()?.takeIf { value -> value.isFinite() }?.coerceIn(0.0, 10.0) ?: params.birthRate)) },
             label = { Text("Births per female per year") },
             modifier = Modifier.fillMaxWidth(),
         )
         OutlinedTextField(
             value = params.deathRate.toString(),
-            onValueChange = { onParams(params.copy(deathRate = it.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: params.deathRate)) },
+            onValueChange = { onParams(params.copy(deathRate = it.toDoubleOrNull()?.takeIf { value -> value.isFinite() }?.coerceIn(0.0, 1.0) ?: params.deathRate)) },
             label = { Text("Death rate per year") },
             modifier = Modifier.fillMaxWidth(),
         )
         OutlinedTextField(
             value = params.feedGramsPerHeadPerDay.toString(),
             onValueChange = { onParams(params.copy(feedGramsPerHeadPerDay = it.toLongOrNull()?.coerceIn(0, 100000) ?: params.feedGramsPerHeadPerDay)) },
-            label = { Text("Feed g/head/day (fallback)") },
+            label = { Text("Assumed feed g/head/day") },
             modifier = Modifier.fillMaxWidth(),
         )
     }

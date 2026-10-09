@@ -218,17 +218,26 @@ fun GoatModuleHost(
     }
 
     fun runGoatWrite(block: suspend () -> Unit) {
+        if (busy) return
+        busy = true
+        error = null
         scope.launch {
-            busy = true
-            error = null
-            runSuspendCatching {
-                block()
-                refreshGoatState()
-            }.onSuccess {
-                syncMessage = "Saved on this device · waiting to sync"
-                enqueueSync()
-            }.onFailure(::handleFailure)
-            busy = false
+            try {
+                runSuspendCatching {
+                    completeModuleWrite(
+                        write = block,
+                        onCommitted = { syncMessage = "Saved on this device · waiting to sync" },
+                        enqueueSync = enqueueSync,
+                        refresh = {
+                            refreshGoatState()
+                            check(herdState != LoadableSurfaceState.ERROR) { error ?: "Goat records could not refresh" }
+                        },
+                    )
+                }.onSuccess { warning -> error = warning }
+                    .onFailure(::handleFailure)
+            } finally {
+                busy = false
+            }
         }
     }
 

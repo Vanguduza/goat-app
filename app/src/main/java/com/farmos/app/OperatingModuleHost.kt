@@ -424,7 +424,7 @@ fun OperatingModuleHost(
                             loadLambProfile = { id -> loadSheepLambProfile(database, farmId, id) },
                             loadSheepReport = { loadSheepFlockReport(database, farmId) },
                             loadSheepGroups = { database.groups().forFarm(farmId).filter { it.speciesCode == "sheep" }.map { SheepGroupOption(it.id, it.name, it.headCount) } },
-                            loadPaddocks = { database.paddocks().forFarm(farmId).map { SheepPaddockOption(it.id, it.name, database.grazing().hasOpen(farmId, it.id)) } },
+                            loadPaddocks = { database.paddocks().forFarm(farmId).map { SheepPaddockOption(it.id, it.displayName, database.grazing().hasOpen(farmId, it.id)) } },
                         )
                         FarmModule.CATTLE -> CattleOperationsScreen(
                             selectedAnimalId = selected?.animalId,

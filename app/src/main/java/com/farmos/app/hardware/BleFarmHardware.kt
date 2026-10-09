@@ -28,6 +28,7 @@ import com.farmos.core.design.runSuspendCatching
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -128,12 +129,12 @@ class BleScaleAdapter(private val appContext: Context) : ScaleAdapter {
         }
 
         @Suppress("Deprecated")
-        override fun onCharacteristicRead(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
+        override fun onCharacteristicRead(gatt: BluetoothGatt, characteristic: BluetoothGattCharacteristic, status: Int) {
             if (characteristic.uuid == weightMeasurementChar) {
                 pendingRead.getAndSet(null)?.let { cont ->
                     val value = characteristic.value
-                    if (value != null) cont.resume(value)
-                    else cont.resumeWithException(ScaleHardwareException("Scale returned no value."))
+                    if (status == BluetoothGatt.GATT_SUCCESS && value != null) cont.resume(value)
+                    else cont.resumeWithException(ScaleHardwareException("Scale read failed or returned no value (GATT status $status)."))
                 }
             }
         }
@@ -273,7 +274,7 @@ class BleScaleAdapter(private val appContext: Context) : ScaleAdapter {
         }
     }
 
-    override suspend fun disconnect(): Result<Unit> = runSuspendCatching {
+    override suspend fun disconnect() {
         disconnectQuietly()
     }
 

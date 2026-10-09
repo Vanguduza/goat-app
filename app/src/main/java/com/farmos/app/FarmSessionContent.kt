@@ -158,6 +158,7 @@ fun FarmSessionContent(
             onBack = backHome,
             focusTaskId = dest.taskId,
             planning = taskPlanning,
+            database = app.database,
         )
         is FarmDestination.Tasks -> TasksModuleHost(
             farmId = membership.farmId,
@@ -168,6 +169,7 @@ fun FarmSessionContent(
             entryPage = dest.entry,
             loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
             planning = taskPlanning,
+            database = app.database,
         )
         is FarmDestination.Module -> when (dest.module) {
             FarmModule.TASKS -> TasksModuleHost(
@@ -178,6 +180,7 @@ fun FarmSessionContent(
                 onBack = backHome,
                 loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
                 planning = taskPlanning,
+                database = app.database,
             )
             FarmModule.MONEY -> MoneyModuleHost(
                 farmId = membership.farmId,

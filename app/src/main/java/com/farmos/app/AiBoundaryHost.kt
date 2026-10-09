@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
@@ -103,9 +104,9 @@ fun AiBoundaryHost(
     var config by remember(farmId) { mutableStateOf<AiProviderConfig?>(null) }
     var suggestions by remember(farmId) { mutableStateOf(listOf<SuggestedAction>()) }
     var dismissed by remember(farmId) { mutableStateOf(setOf<String>()) }
-    var selectedAction by remember { mutableStateOf<SuggestedAction?>(null) }
+    var selectedAction by remember(farmId) { mutableStateOf<SuggestedAction?>(null) }
     var log by remember(farmId) { mutableStateOf(listOf<String>()) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember(farmId) { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     val store = remember(farmId) { AiProviderStore(filesDir, farmId) }
 
@@ -172,6 +173,7 @@ fun AiBoundaryHost(
         if (error != null) {
             FarmOperationalSection("Attention", error) {}
         }
+        @Composable
         fun nav(target: AiPage, label: String) {
             TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text(label) }
         }
@@ -269,7 +271,7 @@ fun AiBoundaryHost(
             }
             AiPage.REVIEW -> {
                 val action = selectedAction
-                FarmOperationalSection("Action review", "Accepting opens the owning screen. The action itself is yours to take.") {
+                FarmOperationalSection("Action review", "Open the related module to review the suggested action.") {
                     if (action == null) {
                         Text("Select a suggested action to review it.", style = MaterialTheme.typography.bodyMedium)
                     } else {
@@ -277,7 +279,7 @@ fun AiBoundaryHost(
                         Text(action.detail, style = MaterialTheme.typography.bodyMedium)
                         Text("Owner screen: ${action.ownerScreenId}", style = MaterialTheme.typography.bodyMedium)
                         Button(onClick = { onOpenModule(action.ownerModule) }, modifier = Modifier.fillMaxWidth()) {
-                            Text("Open owning screen")
+                            Text("Open related module")
                         }
                         TextButton(onClick = {
                             dismissed = dismissed + action.id
@@ -322,10 +324,10 @@ fun AiBoundaryHost(
                 var key by remember { mutableStateOf("") }
                 FarmOperationalSection(
                     "Provider connection",
-                    "The key is sealed with this device's Keystore and stored in app-private storage. It is never logged, backed up, or sent anywhere by Farm OS itself.",
+                    "The key is sealed with this device's Keystore and stored in app-private storage. No model provider adapter is connected in this build.",
                 ) {
                     Text("Key status: ${if (config?.keyStored == true) "stored" else "not stored"}", style = MaterialTheme.typography.bodyMedium)
-                    OutlinedTextField(value = key, onValueChange = { key = it }, label = { Text("API key") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = key, onValueChange = { key = it }, label = { Text("API key") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth())
                     Button(onClick = {
                         scope.launch {
                             runSuspendCatching {
@@ -345,8 +347,8 @@ fun AiBoundaryHost(
             AiPage.PRIVACY -> {
                 FarmOperationalSection("AI privacy and controls") {
                     Text("• Analysis runs on-device against your farm's local database.", style = MaterialTheme.typography.bodyMedium)
-                    Text("• No farm records leave the device for AI processing unless you connect a provider.", style = MaterialTheme.typography.bodyMedium)
-                    Text("• Provider keys are sealed in this device's Keystore and excluded from backups.", style = MaterialTheme.typography.bodyMedium)
+                    Text("• Current on-device analysis does not send farm records to a model provider.", style = MaterialTheme.typography.bodyMedium)
+                    Text("• Provider keys are sealed with this device's Keystore in app-private storage.", style = MaterialTheme.typography.bodyMedium)
                     Text("• AI never prescribes, doses, treats, culls, sells, posts accounts, or bypasses your role permissions.", style = MaterialTheme.typography.bodyMedium)
                     Text("• Suggested actions always need your explicit review in the owning screen.", style = MaterialTheme.typography.bodyMedium)
                 }

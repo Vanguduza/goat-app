@@ -19,6 +19,8 @@ import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
 import java.time.LocalDate
+import java.math.BigDecimal
+import com.farmos.core.design.runSuspendCatching
 
 /** Analytics module pages; each maps to one canonical FOS-AN-* screen. */
 private enum class AnalyticsPage(val screenId: String, val title: String) {
@@ -66,30 +68,42 @@ fun AnalyticsModuleHost(
     var page by remember(farmId) { mutableStateOf(AnalyticsPage.OVERVIEW) }
     var selectedAnomaly by remember(farmId) { mutableStateOf<Anomaly?>(null) }
     var model by remember(farmId) { mutableStateOf<AnalyticsModel?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember(farmId) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(farmId) {
-        runCatching {
+        runSuspendCatching {
             val today = LocalDate.now().toEpochDay()
             val register = database.reports().herdRegister(farmId)
             val bySpecies = register.groupBy { it.speciesCode }
             val speciesLines = bySpecies.map { (species, rows) ->
                 val active = rows.count { it.status == "active" }
                 val weighed = rows.mapNotNull { it.latestWeightGrams }
-                val avgWeight = if (weighed.isEmpty()) "no weights" else "${weighed.average().toLong() / 1000} kg avg latest"
+                val avgWeight = if (weighed.isEmpty()) "no weights" else reportMilli(weighed.average().toLong()) + " kg avg latest"
                 "${species.replaceFirstChar { c -> c.uppercase() }}: $active active of ${rows.size} · $avgWeight"
             }.sorted()
             val births = database.reports().birthTotals(farmId)
             val birthLines = births.map { "${it.speciesCode}: ${it.events} event(s) · ${it.live} live · ${it.dead} dead" }
             val exitKinds = database.animalExits().exitKindCounts(farmId)
             val health = database.reports().healthTotals(farmId, today)
-            val productionLines = database.reports().productionTotals(farmId)
-                .map { "${it.product}: ${it.records} record(s) · ${it.amount} total" }
-            val moneyLines = database.reports().moneyTotals(farmId)
-                .map { "${it.kind} ${it.currency}: ${it.amountMinor / 100} (${it.records} record(s))" }
+            val productionLines = database.reports().productionTotals(farmId).map {
+                val quantity = when (it.product) {
+                    "goat-milk", "cattle-milk" -> reportMilli(it.amount) + " L"
+                    "sheep-wool" -> reportMilli(it.amount) + " kg"
+                    "poultry-eggs" -> it.amount.toString() + " eggs"
+                    else -> it.amount.toString() + " recorded units"
+                }
+                it.product + ": " + it.records + " record(s) · " + quantity + " total"
+            }
+            val moneyLines = database.reports().moneyTotals(farmId).map {
+                it.kind + " " + reportMoney(BigDecimal.valueOf(it.amountMinor), it.currency) +
+                    " (" + it.records + " record(s))"
+            }
             val inventory = database.reports().inventoryTotals(farmId)
-            val feedLines = database.feedIssues().totalsByItem(farmId)
-                .map { "${it.itemId}: ${it.quantityMilli / 1000} g in ${it.issueCount} issue(s)" }
+            val feedLines = database.feedIssues().totalsByItem(farmId).map {
+                val item = database.inventory().item(farmId, it.itemId)
+                (item?.name ?: it.itemId) + ": " + reportMilli(it.quantityMilli) + " " +
+                    (item?.unit ?: "(unit unavailable)") + " in " + it.issueCount + " issue(s)"
+            }
             val growthLines = bySpecies.map { (species, rows) ->
                 val weighed = rows.mapNotNull { it.latestWeightGrams }
                 "$species: ${weighed.size} of ${rows.size} animals have a recorded weight"
@@ -145,6 +159,7 @@ fun AnalyticsModuleHost(
             FarmOperationalSection("Attention", error) {}
         }
         val m = model
+        @Composable
         fun nav(target: AnalyticsPage, label: String) {
             TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text(label) }
         }
@@ -237,11 +252,10 @@ fun AnalyticsModuleHost(
             AnalyticsPage.FORECASTS -> {
                 FarmOperationalSection(
                     "Forecasts",
-                    "Straight-line projection of the recorded run-rate. A projection, not a prediction.",
+                    "Whole-history totals do not establish a rate. A forecast needs a dated baseline and explicit assumptions.",
                 ) {
-                    val rows = m?.productionLines?.map { "$it → next period at same recorded rate" }
-                        ?: listOf("Loading…")
-                    if (rows.isEmpty()) Text("No production records to project.", style = MaterialTheme.typography.bodyMedium)
+                    val rows = m?.productionLines ?: listOf("Loading…")
+                    if (rows.isEmpty()) Text("No production records available for a baseline.", style = MaterialTheme.typography.bodyMedium)
                     rows.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
                 }
             }

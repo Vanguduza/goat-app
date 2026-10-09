@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.farmos.core.design"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig { minSdk = 26 }
     buildFeatures { compose = true }
 }

@@ -54,7 +54,7 @@ object NoOpScaleAdapter : ScaleAdapter {
     override suspend fun scanForScales(): Result<List<ScaleDevice>> = unavailable()
     override suspend fun connect(device: ScaleDevice): Result<Unit> = unavailable()
     override suspend fun readWeight(): Result<ScaleReading> = unavailable()
-    override suspend fun disconnect(): Result<Unit> = Result.success(Unit)
+    override suspend fun disconnect() = Unit
 }
 
 /**

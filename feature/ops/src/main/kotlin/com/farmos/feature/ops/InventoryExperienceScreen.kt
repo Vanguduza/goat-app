@@ -63,6 +63,7 @@ fun InventoryScreen(
     itemOptions: List<FarmSelectorOption> = emptyList(),
     /** Opens stock count and review (FOS-INV-016 / 015, D-021); null hides the entry. */
     onOpenStockCount: (() -> Unit)? = null,
+    extraActions: @Composable () -> Unit = {},
 ) {
     var page by remember { mutableStateOf(InventoryPage.DASHBOARD) }
     var backStack by remember { mutableStateOf(emptyList<InventoryPage>()) }
@@ -89,7 +90,7 @@ fun InventoryScreen(
         open(InventoryPage.LOT_DETAIL)
     }
     when (page) {
-        InventoryPage.DASHBOARD -> InventoryDashboard(rows, error, { open(it) }, onBack, onOpenStockCount)
+        InventoryPage.DASHBOARD -> InventoryDashboard(rows, error, { open(it) }, onBack, onOpenStockCount, extraActions)
         InventoryPage.ITEM_DETAIL -> InventoryItemDetailScreen(readModel, selectedItemId, today, zone, openLot, back)
         InventoryPage.LOT_DETAIL -> InventoryLotDetailScreen(readModel, selectedLotId, today, back)
         InventoryPage.EXPIRY_QUEUE -> InventoryExpiryQueueScreen(readModel, today, openLot, back)
@@ -114,6 +115,7 @@ private fun InventoryDashboard(
     onOpen: (InventoryPage) -> Unit,
     onBack: () -> Unit,
     onOpenStockCount: (() -> Unit)?,
+    extraActions: @Composable () -> Unit,
 ) {
     FarmOperationalPage("FOS-INV-001", "Inventory", "On-hand lots, dates and reorder points.", FarmVisualClass.I2, onBack) {
         FarmOperationalSection("Stock overview") {
@@ -146,6 +148,7 @@ private fun InventoryDashboard(
             TextButton(onClick = { onOpen(InventoryPage.REORDER_RULE) }) { Text("Set reorder point") }
             TextButton(onClick = { onOpen(InventoryPage.REORDER_ALERT) }) { Text("Record reorder alert") }
         }
+        extraActions()
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }

@@ -1,5 +1,6 @@
 package com.farmos.app
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -141,7 +142,7 @@ fun WaterPointEventCaptureScreen(
                                     kind,
                                     LocalDate.parse(day.value).toEpochDay(),
                                     result.value.ifBlank { null },
-                                    value.value.ifBlank { null }?.toLongOrNull(),
+                                    value.value.takeIf { it.isNotBlank() }?.toScaledLongExact(3, "Reading"),
                                     unit.value.ifBlank { null },
                                     note.value.ifBlank { null },
                                 ),
@@ -164,19 +165,23 @@ fun WaterReportScreen(
     onBack: () -> Unit,
 ) {
     var lines by remember { mutableStateOf(emptyList<String>()) }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(ops) {
+        lines = runSuspendCatching {
+
         val points = ops.waterPoints()
-        val records = ops.recentWater()
+        val recordCount = ops.waterRecordCount()
+        val totals = ops.waterTotalsBySource()
         val out = mutableListOf(
             "Water points: ${points.size} (${points.count { it.active }} active)",
-            "Consumption records: ${records.size}",
-            "Total recorded: ${"%.1f".format(records.sumOf { it.litresMilli } / 1_000_000.0)} kL",
+            "Consumption records: $recordCount",
+            "Total recorded: ${totals.fold(java.math.BigDecimal.ZERO) { total, row -> total.add(java.math.BigDecimal.valueOf(row.litresMilli)) }.movePointLeft(6).stripTrailingZeros().toPlainString()} kL",
             "Inspections: ${ops.waterPointEventCount("inspection")}",
             "Quality results: ${ops.waterPointEventCount("quality")}",
             "Issues reported: ${ops.waterPointEventCount("issue")}",
             "Maintenance events: ${ops.waterPointEventCount("maintenance")}",
         )
-        lines = out
+        out
+            }.getOrElse { listOf("Water records could not be read: ${it.message.orEmpty()}") }
     }
     FarmOperationalPage(
         screenId = "FOS-WATER-010",

@@ -726,7 +726,6 @@ private fun CattleLotCloseScreen(
     }
 }
 
-@Composable
 /** FOS-CATTLE-016 — calf registration: register the newborn calf, linked to its dam. */
 @Composable
 private fun CattleCalfRegistrationScreen(
@@ -760,6 +759,7 @@ private fun CattleCalfRegistrationScreen(
     }
 }
 
+@Composable
 private fun CattleFormPage(
     screenId: String,
     title: String,

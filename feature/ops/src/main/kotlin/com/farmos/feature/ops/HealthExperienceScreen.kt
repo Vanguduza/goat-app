@@ -86,11 +86,7 @@ data class HealthVaccinationView(
     val occurredEpochDay: Long,
 )
 
-/**
- * A record-based vaccination review candidate. No protocol engine exists on device: "No vaccination
- * recorded" means no vaccination row for the animal; "review due" means its latest recorded
- * vaccination is older than 365 days. Advisory only; never a prescribed schedule.
- */
+/** Individual vaccination record review; no next due date is inferred without an approved protocol. */
 data class VaccinationDueView(
     val animalId: String,
     val label: String,
@@ -336,7 +332,7 @@ private fun HealthDashboard(
         onBack,
     ) {
         FarmOperationalSection("Today health picture") {
-            Row(Modifier.fillMaxWidth().testTag("farm-screen:FOS-HEALTH-002"), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 // Exhaustive farm-scoped counts; shown as a dash until loaded, never as a capped list size.
                 HealthMetric("Observations", counts.observationCount)
                 HealthMetric("Treatments", counts.treatmentCount)
@@ -501,9 +497,9 @@ private fun HealthEmergencyScreen(
                     "Record what you see; Farm OS does not diagnose.",
             )
         }
-        FarmOperationalSection("Red-flag observations") {
+        FarmOperationalSection("Recent red-flag observations") {
             if (redFlagObservations.isEmpty()) {
-                Text("No red-flag observations recorded on this device.")
+                Text("No red flags in the recent observations shown on this device.")
             } else {
                 redFlagObservations.forEach { row ->
                     Text(row, color = MaterialTheme.colorScheme.error)
@@ -918,7 +914,7 @@ private fun VaccinationScheduleScreen(
     ) {
         FarmOperationalSection(
             "Review candidates",
-            "Advisory only: animals with no recorded vaccination, or a latest record older than 365 days. Not a protocol schedule.",
+            "Recorded dates only. A next vaccination date requires an approved protocol; no date is inferred here.",
         ) {
             if (dueCandidates.isEmpty()) {
                 Text("No review candidates on this device")
@@ -978,7 +974,7 @@ private fun VaccinationCaptureScreen(
         onBack,
     ) {
         FarmOperationalSection("Vaccination") {
-            FarmSpeciesSelector(speciesCodes, species, busy) { species = it }
+            FarmSpeciesSelector(speciesCodes, species, busy) { species = it; animal = null; groupId = ""; formularyId = "" }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(FosDimens.Grid)) {
                 TextButton(onClick = { useGroup = false }, enabled = !busy) { Text("Individual animal") }
                 TextButton(onClick = { useGroup = true }, enabled = !busy) { Text("Group") }
@@ -1018,7 +1014,7 @@ private fun VaccinationCaptureScreen(
             OutlinedTextField(day, { day = it }, label = { Text("Vaccination date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
             Button(
                 onClick = {
-                    onRecord(species, animal?.id, groupId.ifBlank { null }, formularyId, dose.ifBlank { null }, method.ifBlank { null }, day)
+                    onRecord(species, animal?.id.takeUnless { useGroup }, groupId.takeIf { useGroup && it.isNotBlank() }, formularyId, dose.ifBlank { null }, method.ifBlank { null }, day)
                 },
                 enabled = !busy && species.isNotBlank() && targetOk && formularyId.isNotBlank() && dayOk,
                 modifier = Modifier.fillMaxWidth(),
@@ -1076,13 +1072,13 @@ private fun TodayHealthActionsScreen(
     FarmOperationalPage(
         "FOS-HEALTH-002",
         "Today health actions",
-        "Vaccination review candidates and pending health work for today.",
+        "Individual vaccination records and farm health work.",
         FarmVisualClass.I2,
         onBack,
     ) {
         FarmOperationalSection("Vaccination review") {
             if (dueCandidates.isEmpty()) {
-                Text("No vaccination review candidates today")
+                Text("No active individual animals to review")
             } else {
                 dueCandidates.take(20).forEach { candidate ->
                     Text("${candidate.label} — ${candidate.reason}")
@@ -1120,19 +1116,19 @@ private fun HealthReportScreen(
         FarmVisualClass.I2,
         onBack,
     ) {
-        FarmOperationalSection("Vaccination coverage") {
+        FarmOperationalSection("Individual vaccination records") {
             val s = stats
             if (s == null) {
                 Text("Loading…")
             } else {
                 val coverage =
                     if (s.activeAnimalCount != null && s.activeAnimalCount > 0 && s.animalsEverVaccinated != null) {
-                        "${s.animalsEverVaccinated} of ${s.activeAnimalCount} active animals have a vaccination record"
+                        "${s.animalsEverVaccinated} of ${s.activeAnimalCount} active animals have an individual vaccination record"
                     } else {
                         "No active animals on this farm"
                     }
                 Text(coverage)
-                Text("${s.dueCandidateCount} review candidate(s)")
+                Text("${s.dueCandidateCount} individual record(s) to review")
                 Text("${s.recentVaccinationCount} recent vaccination record(s) shown below")
             }
         }

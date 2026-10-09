@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.farmos.feature.goat"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig { minSdk = 26 }
     buildFeatures { compose = true }
     testOptions {

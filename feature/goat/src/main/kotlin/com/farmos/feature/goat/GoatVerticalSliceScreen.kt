@@ -10,12 +10,9 @@ import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.GoatStatus
 
 /**
- * Compatibility entrypoint for the proven goat architecture slice.
+ * Adapts the existing goat command/state boundary to canonical atomic FOS-GOAT surfaces.
  *
- * The original proving mega-screen has been decomposed into the canonical Farm OS goat
- * experience without changing the command/state boundary consumed by FarmSessionContent.
- * Visual surfaces now map to atomic FOS-GOAT Screen IDs while writes still flow through
- * the existing Room/outbox/RPC/reconciliation architecture.
+ * Local Room repositories and the replication journal own writes.
  */
 @Composable
 fun GoatVerticalSliceScreen(
@@ -120,14 +117,3 @@ fun GoatVerticalSliceScreen(
         pedigreeParentLabels = pedigreeParentLabels,
     )
 }
-
-private fun GoatEntryPage.toGoatPage(): GoatPage =
-    when (this) {
-        GoatEntryPage.DASHBOARD -> GoatPage.DASHBOARD
-        GoatEntryPage.WEIGHT -> GoatPage.WEIGHT
-        GoatEntryPage.SEARCH -> GoatPage.SEARCH
-        GoatEntryPage.SCAN -> GoatPage.SCAN
-        GoatEntryPage.SYNC -> GoatPage.SYNC
-        GoatEntryPage.KIDDING -> GoatPage.KIDDING
-        GoatEntryPage.REPRODUCTION -> GoatPage.REPRODUCTION
-    }

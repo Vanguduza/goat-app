@@ -445,7 +445,7 @@ internal fun FinanceReportScreen(database: FarmOsDatabase, farmId: String, onBac
         FarmOperationalSection("Recent records", "Most recent 50 of ${report.records.size}.") {
             report.records.takeLast(50).reversed().forEach { record ->
                 val amount = BigDecimal.valueOf(record.amountMinor, FarmCurrency.minorDigits(record.currency)).toPlainString()
-                Text("${epochDayText(record.occurredEpochDay)} · ${record.kind} · ${record.categoryCode} · $amount ${record.currency}${record.note.takeIf { it.isNotBlank() }?.let { " · $it" } ?: ""}")
+                Text("${epochDayText(record.occurredEpochDay)} · ${record.kind} · ${record.categoryCode} · $amount ${record.currency}${record.note?.takeIf { it.isNotBlank() }?.let { " · $it" } ?: ""}")
             }
         }
     }

@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.AnimalEntity
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
@@ -62,7 +63,7 @@ fun GeneticsModuleHost(
     var page by remember(farmId) { mutableStateOf(GeneticsPage.DASHBOARD) }
     val scope = rememberCoroutineScope()
     var summary by remember(farmId) { mutableStateOf<GeneticsSummary?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember(farmId) { mutableStateOf<String?>(null) }
     val pedigree = remember(farmId) { PedigreeQueries(database, farmId) }
 
     suspend fun countAnimals(): Int {
@@ -91,9 +92,7 @@ fun GeneticsModuleHost(
         runSuspendCatching { refreshSummary() }.onFailure { error = it.message }
     }
 
-    suspend fun resolveAnimalId(tag: String) =
-        database.animals().search(farmId, null, null, "%${escapeLike(tag.trim())}%", 50, 0)
-            .firstOrNull { it.tag.equals(tag.trim(), ignoreCase = true) }?.id
+    suspend fun resolveAnimalId(tag: String) = resolveGeneticsAnimal(database, farmId, tag).id
 
     fun recordParentage(animalTag: String, parentTag: String, relationType: String, done: (String) -> Unit) {
         scope.launch {
@@ -170,9 +169,7 @@ private fun PedigreeExplorer(pedigree: PedigreeQueries, database: FarmOsDatabase
             scope.launch {
                 busy = true
                 lines = runSuspendCatching {
-                    val animal = database.animals().search(farmId, null, null, "%${escapeLike(tag.trim())}%", 50, 0)
-                        .firstOrNull { it.tag.equals(tag.trim(), ignoreCase = true) }
-                        ?: error("Animal '${tag.trim()}' not found on this farm")
+                    val animal = resolveGeneticsAnimal(database, farmId, tag)
                     val graph = pedigree.graph(listOf(animal.id))
                     if (graph.parents.isEmpty()) return@runSuspendCatching listOf("No recorded parentage for ${animal.tag}.")
                     suspend fun label(id: String): String =
@@ -251,9 +248,7 @@ private fun RelationshipExplorer(pedigree: PedigreeQueries, database: FarmOsData
     var second by remember { mutableStateOf("") }
     var lines by remember { mutableStateOf(listOf("Enter two animal tags to find their common recorded ancestors.")) }
     var busy by remember { mutableStateOf(false) }
-    suspend fun resolve(tag: String) =
-        database.animals().search(farmId, null, null, "%${escapeLike(tag.trim())}%", 50, 0)
-            .firstOrNull { it.tag.equals(tag.trim(), ignoreCase = true) }
+    suspend fun resolve(tag: String) = resolveGeneticsAnimal(database, farmId, tag)
     FarmOperationalSection("Relationship explorer") {
         OutlinedTextField(value = first, onValueChange = { first = it }, label = { Text("First animal tag") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = second, onValueChange = { second = it }, label = { Text("Second animal tag") }, modifier = Modifier.fillMaxWidth())
@@ -263,7 +258,9 @@ private fun RelationshipExplorer(pedigree: PedigreeQueries, database: FarmOsData
                 lines = runSuspendCatching {
                     val a = requireNotNull(resolve(first)) { "Animal '${first.trim()}' not found" }
                     val b = requireNotNull(resolve(second)) { "Animal '${second.trim()}' not found" }
-                    val common = ancestorsOf(pedigree.graph(listOf(a.id)).parents) intersect ancestorsOf(pedigree.graph(listOf(b.id)).parents)
+                    require(a.id != b.id) { "Select two different animals" }
+                    val common = (ancestorsOf(pedigree.graph(listOf(a.id)).parents) + a.id) intersect
+                        (ancestorsOf(pedigree.graph(listOf(b.id)).parents) + b.id)
                     if (common.isEmpty()) listOf("${a.tag} and ${b.tag} share no recorded common ancestors.")
                     else {
                         val out = mutableListOf("Common recorded ancestors of ${a.tag} and ${b.tag}:")
@@ -281,36 +278,50 @@ private fun RelationshipExplorer(pedigree: PedigreeQueries, database: FarmOsData
     FarmOperationalRows(lines, "No comparison yet", null)
 }
 
+/** Exact tags are resolved across the complete farm result, never a presentation page. */
+private suspend fun resolveGeneticsAnimal(database: FarmOsDatabase, farmId: String, tag: String): AnimalEntity {
+    val exact = tag.trim()
+    require(exact.isNotEmpty()) { "Enter an animal tag" }
+    val matches = database.animals().search(farmId, null, null, escapeLike(exact), -1, 0)
+        .filter { it.tag.equals(exact, ignoreCase = true) }
+    require(matches.size == 1) {
+        if (matches.isEmpty()) "Animal '" + exact + "' not found on this farm" else "Animal tag is ambiguous on this farm"
+    }
+    return matches.single()
+}
+
 @Composable
 private fun CandidateRanking(pedigree: PedigreeQueries, database: FarmOsDatabase, farmId: String) {
     val scope = rememberCoroutineScope()
-    var damTag by remember { mutableStateOf("") }
-    var lines by remember { mutableStateOf(listOf("Enter a dam tag to rank active sires by offspring inbreeding coefficient (lowest first).")) }
-    var busy by remember { mutableStateOf(false) }
-    FarmOperationalSection("Candidate ranking") {
+    var damTag by remember(farmId) { mutableStateOf("") }
+    var lines by remember(farmId) { mutableStateOf(listOf("Enter a dam tag to compare active sires by recorded offspring inbreeding coefficient.")) }
+    var busy by remember(farmId) { mutableStateOf(false) }
+    FarmOperationalSection("Candidate ranking", "Recorded COI is a lower bound. Incomplete parentage does not establish that animals are unrelated.") {
         OutlinedTextField(value = damTag, onValueChange = { damTag = it }, label = { Text("Dam tag") }, modifier = Modifier.fillMaxWidth())
         Button(onClick = {
             scope.launch {
                 busy = true
-                lines = runCatching {
-                    val dam = database.animals().search(farmId, null, "female", "%${escapeLike(damTag.trim())}%", 50, 0)
-                        .firstOrNull { it.tag.equals(damTag.trim(), ignoreCase = true) }
-                        ?: error("Dam '${damTag.trim()}' not found")
-                    val sires = database.animals().search(farmId, dam.speciesCode, "male", null, 200, 0)
-                        .filter { it.status == "active" }
-                    if (sires.isEmpty()) return@runSuspendCatching listOf("No active sires of ${dam.speciesCode} on this farm.")
-                    val ranked = sires.map { sire ->
-                        val analysis = pedigree.mating(sire.id, dam.id)
-                        Triple(sire, analysis.inbreeding.coefficient, analysis.inbreeding.generationsKnown)
-                    }.sortedBy { it.second }
-                    val out = mutableListOf("Sire candidates for ${dam.tag} (offspring COI, lowest first):")
-                    ranked.take(20).forEach { (sire, coi, gens) ->
-                        val label = "${sire.tag}${sire.name?.let { " ($it)" } ?: ""}"
-                        out += "$label — COI ${"%.4f".format(coi)} over $gens generations"
+                lines = runSuspendCatching {
+                    val dam = resolveGeneticsAnimal(database, farmId, damTag)
+                    require(dam.sex.equals("FEMALE", ignoreCase = true) && dam.status == "active") { "Select an active female" }
+                    val sires = database.animals().search(farmId, dam.speciesCode, null, null, -1, 0)
+                        .filter { it.status == "active" && it.sex.equals("MALE", ignoreCase = true) }
+                    if (sires.isEmpty()) return@runSuspendCatching listOf("No active sires of " + dam.speciesCode + " on this farm.")
+                    val ranked = sires.map { sire -> sire to pedigree.mating(sire.id, dam.id) }
+                        .sortedWith(compareBy({ it.second.inbreeding.coefficient }, { it.first.tag }, { it.first.id }))
+                    val out = mutableListOf("Sire candidates for " + dam.tag + " (recorded offspring COI, lowest first):")
+                    ranked.take(20).forEach { (sire, analysis) ->
+                        val label = sire.tag + (sire.name?.let { " (" + it + ")" } ?: "")
+                        val result = analysis.inbreeding
+                        out += label + " — recorded COI " + "%.4f".format(result.coefficient) +
+                            " over " + result.generationsKnown + " complete generations"
+                        if (analysis.conflictingParentage.isNotEmpty()) {
+                            out += "Parentage conflicts left unknown: " + analysis.conflictingParentage.size + "; review before selecting this candidate."
+                        }
                     }
-                    if (ranked.size > 20) out += "…and ${ranked.size - 20} more."
+                    if (ranked.size > 20) out += "Showing the first 20 of " + ranked.size + " candidates assessed."
                     out
-                }.getOrElse { listOf("Could not rank: ${it.message}") }
+                }.getOrElse { listOf("Could not rank: " + it.message) }
                 busy = false
             }
         }, enabled = !busy) { Text(if (busy) "Ranking…" else "Rank sires") }
@@ -323,7 +334,7 @@ private fun GeneticWarnings(summary: GeneticsSummary?, database: FarmOsDatabase,
     var lines by remember(summary) { mutableStateOf<List<String>?>(null) }
     LaunchedEffect(summary) {
         if (summary == null) return@LaunchedEffect
-        lines = runCatching {
+        lines = runSuspendCatching {
             val out = mutableListOf<String>()
             if (summary.conflictingIds.isEmpty()) out += "No conflicting parentage records."
             else {
