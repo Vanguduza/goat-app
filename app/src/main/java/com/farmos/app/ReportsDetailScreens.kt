@@ -44,6 +44,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -672,8 +673,16 @@ internal fun buildFarmSummaryText(metrics: List<MetricResult>, generatedOn: Loca
 
 /** FOS-REPORT-014 — Share or Print: share the farm summary through the system share sheet. */
 @Composable
-internal fun ShareReportScreen(database: FarmOsDatabase, farmId: String, canShare: () -> Boolean, onBack: () -> Unit) {
+internal fun ShareReportScreen(
+    database: FarmOsDatabase,
+    farmId: String,
+    canShare: () -> Boolean,
+    exportAuthority: LocalSessionAuthority?,
+    onBack: () -> Unit,
+) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var sharing by remember { mutableStateOf(false) }
     var summary by remember { mutableStateOf<String?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(farmId) {
@@ -694,15 +703,32 @@ internal fun ShareReportScreen(database: FarmOsDatabase, farmId: String, canShar
             }
             Button(
                 onClick = {
-                    if (!canShare()) return@Button
-                    val send = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_SUBJECT, "Farm summary")
-                        putExtra(Intent.EXTRA_TEXT, text)
+                    if (!canShare() || sharing) return@Button
+                    sharing = true
+                    failure = null
+                    scope.launch {
+                        try {
+                            withReportDisclosure(farmId, exportAuthority) {
+                                withContext(Dispatchers.Main.immediate) {
+                                    check(canShare()) { "Exports are made by farm management." }
+                                    val send = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_SUBJECT, "Farm summary")
+                                        putExtra(Intent.EXTRA_TEXT, text)
+                                    }
+                                    context.startActivity(Intent.createChooser(send, "Share farm summary"))
+                                }
+                            }
+                        } catch (cancelled: CancellationException) {
+                            throw cancelled
+                        } catch (e: Exception) {
+                            failure = "Share failed: ${e.message ?: "the summary could not be shared"}"
+                        } finally {
+                            sharing = false
+                        }
                     }
-                    context.startActivity(Intent.createChooser(send, "Share farm summary"))
                 },
-                enabled = canShare(),
+                enabled = canShare() && !sharing,
                 modifier = Modifier.fillMaxWidth().testTag("report-share"),
             ) {
                 Text("Share")

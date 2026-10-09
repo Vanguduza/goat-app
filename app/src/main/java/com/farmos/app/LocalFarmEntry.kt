@@ -1,6 +1,5 @@
 package com.farmos.app
 
-import java.io.File
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -83,12 +82,13 @@ internal fun LocalFarmEntry(
     /** Present when this device can look for farms on the local network and join one. */
     discovery: FarmPeerDiscovery? = null,
     joiner: FarmJoiner? = null,
+    initialMessage: String? = null,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var step by remember { mutableStateOf<EntryStep>(EntryStep.Loading) }
     var busy by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf(initialMessage) }
 
     LaunchedEffect(directory) {
         val farms = withContext(io) { directory.farms() }
@@ -207,6 +207,13 @@ internal fun LocalFarmEntry(
             }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium) }
+    }
+}
+
+@Composable
+internal fun LocalSessionCheckingScreen() {
+    EntryShell("FOS-GLOBAL-002") {
+        Text("Checking your farm access", color = AnimalFarmTheme.colors.mutedInk)
     }
 }
 
@@ -501,51 +508,3 @@ private fun ColumnScope.EntryButton(label: String, enabled: Boolean, onClick: ()
 
 private fun clockTime(epochMillis: Long): String =
     DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(epochMillis))
-
-/**
- * The server-free session: local entry until someone signs in, then the farm under that local account.
- * Every record the session writes is attributed to the signed-in local account.
- */
-@Composable
-internal fun LocalFarmSession(app: FarmOsApplication) {
-    val directory = remember(app) { LocalFarmDirectory(app.database, app.deviceId, initialKeys = app.keyVault) }
-    var signedIn by remember { mutableStateOf<Pair<LocalAccount, String>?>(null) }
-    val current = signedIn
-    if (current == null) {
-        LocalFarmEntry(
-            directory,
-            onSignedIn = { account, farmName -> signedIn = account to farmName },
-            discovery = app.peerDiscovery,
-            joiner = remember { FarmJoiner(app.database, app.keyVault, app.deviceId, android.os.Build.MODEL ?: "Farm device") },
-        )
-        return
-    }
-    val (account, farmName) = current
-    val membership = account.membership()
-    DisposableEffect(account.farmId) {
-        val attachmentStore = FileAttachmentStore(File(app.filesDir, "attachments"))
-        val runtime = FarmLanRuntime(app.database, app.keyVault, app.peerDiscovery, account.farmId, farmName, app.deviceId, attachments = attachmentStore).start()
-        app.farmLan = runtime
-        val drive = FarmDriveRuntime(app, app.database, app.keyVault, account.farmId, app.deviceId, attachmentStore).start()
-        app.farmDrive = drive
-        DriveBackgroundWork.request(app, account.farmId)
-        onDispose {
-            app.farmLan = null
-            runtime.close()
-            app.farmDrive = null
-            drive.close()
-        }
-    }
-    FarmSessionContent(
-        app = app,
-        membership = membership,
-        farmName = farmName,
-        memberships = listOf(membership),
-        farmNames = mapOf(membership.farmId to farmName),
-        onSwitchFarm = {},
-        onRequireReauth = { signedIn = null },
-        onRequireFarmReselection = { _, _ -> signedIn = null },
-        onSignOut = { signedIn = null },
-        actorId = account.accountId,
-    )
-}

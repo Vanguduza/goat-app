@@ -3,9 +3,13 @@ package com.farmos.app
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -27,9 +31,11 @@ import com.farmos.core.database.MoneyRecordEntity
 import com.farmos.core.database.TaskEntity
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
+import com.farmos.domain.access.LocalRole
 import java.io.File
 import java.time.LocalDate
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -55,10 +61,20 @@ class ReportRuntimeNavigationTest {
     private val day = LocalDate.of(2026, 10, 1).toEpochDay()
     private val context get() = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var database: FarmOsDatabase
+    private lateinit var exportAuthorities: Map<String, LocalSessionAuthority>
 
     @Before
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(context, FarmOsDatabase::class.java).build()
+        val deviceId = "report-device"
+        val directory = LocalFarmDirectory(database, deviceId)
+        exportAuthorities = listOf(farm, otherFarm).associateWith { id ->
+            val actorId = "report-manager-$id"
+            seedCommandAuthority(database, id, actorId, deviceId, LocalRole.MANAGER)
+            runBlocking(Dispatchers.IO) {
+                LocalSessionAuthority(database, directory, requireNotNull(directory.account(id, actorId)), deviceId)
+            }
+        }
         runBlocking {
             database.animals().insert(animal("goat-a", farm, "G-101", "Mango"))
             database.animals().insert(animal("goat-b", farm, "G-102", "Bramble"))
@@ -92,10 +108,10 @@ class ReportRuntimeNavigationTest {
         render()
         open("FOS-REPORT-002")
         compose.onNodeWithTag("animal-report-search").performScrollTo().performTextInput("G-101")
-        compose.onNodeWithTag("animal-report-search-go").performScrollTo().performClick()
+        clickTag("animal-report-search-go")
         awaitTag("animal-report-pick:goat-a")
         compose.onNodeWithTag("animal-report-pick:goat-x").assertDoesNotExist()
-        compose.onNodeWithTag("animal-report-pick:goat-a").performScrollTo().performClick()
+        clickTag("animal-report-pick:goat-a")
         awaitText("45.5 kg")
         compose.onNodeWithText("G-101 · Mango").assertExists()
         compose.onNodeWithText("99.0 kg").assertDoesNotExist()
@@ -166,14 +182,14 @@ class ReportRuntimeNavigationTest {
         open("FOS-REPORT-012")
         awaitTag("report-document:first")
         compose.onNodeWithTag("report-document:foreign").assertDoesNotExist()
-        compose.onNodeWithTag("report-document:first").performScrollTo().performClick()
+        clickTag("report-document:first")
         awaitText("Suggested filename: first.csv")
         compose.onNodeWithTag("farm-screen:FOS-REPORT-013").assertExists()
         compose.onNodeWithText("Records: 2").assertExists()
         compose.onNodeWithText("Suggested filename: second.csv").assertDoesNotExist()
         click("Reports")
         awaitTag("farm-screen:FOS-REPORT-012")
-        compose.onNodeWithTag("report-document:second").performScrollTo().performClick()
+        clickTag("report-document:second")
         awaitText("Suggested filename: second.csv")
         compose.onNodeWithText("Records: 52").assertExists()
         click("Reports")
@@ -185,8 +201,17 @@ class ReportRuntimeNavigationTest {
         render()
         open("FOS-REPORT-014")
         awaitTag("report-share")
-        compose.onNodeWithTag("report-share").performScrollTo().performClick()
-        val chooser = shadowOf(context as android.app.Application).nextStartedActivity
+        clickTag("report-share")
+        var launchedChooser: Intent? = null
+        compose.waitUntil(10_000) {
+            // Room admission resumes on Android's main queue; the Compose clock alone does not
+            // drain that queue in Robolectric. Observe the real chooser after main-thread idling.
+            compose.runOnIdle {
+                launchedChooser = launchedChooser ?: shadowOf(context as android.app.Application).nextStartedActivity
+            }
+            launchedChooser != null
+        }
+        val chooser = requireNotNull(launchedChooser)
         assertEquals(Intent.ACTION_CHOOSER, chooser.action)
         @Suppress("DEPRECATION")
         val send = requireNotNull(chooser.getParcelableExtra<Intent>(Intent.EXTRA_INTENT))
@@ -218,7 +243,7 @@ class ReportRuntimeNavigationTest {
         val allowed = mutableStateOf(true)
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                ReportsModuleHost(database, farm, allowed.value, onBack = {})
+                ReportsModuleHost(database, farm, allowed.value, onBack = {}, exportAuthority = exportAuthorities.getValue(farm))
             }
         }
         open("FOS-REPORT-014")
@@ -242,7 +267,7 @@ class ReportRuntimeNavigationTest {
                 )
             }
         }
-        compose.onNodeWithTag("report-open-export").performScrollTo().performClick()
+        clickTag("report-open-export")
         compose.onNodeWithTag("farm-screen:FOS-REPORT-011").assertExists()
         compose.runOnIdle { allowed.value = false }
         awaitTag("farm-screen:FOS-REPORT-001")
@@ -258,14 +283,14 @@ class ReportRuntimeNavigationTest {
         val selectedFarm = mutableStateOf(farm)
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                ReportsModuleHost(database, selectedFarm.value, canExport = true, onBack = {})
+                ReportsModuleHost(database, selectedFarm.value, canExport = true, onBack = {}, exportAuthority = exportAuthorities.getValue(selectedFarm.value))
             }
         }
         open("FOS-REPORT-002")
         compose.onNodeWithTag("animal-report-search").performScrollTo().performTextInput("G-101")
-        compose.onNodeWithTag("animal-report-search-go").performScrollTo().performClick()
+        clickTag("animal-report-search-go")
         awaitTag("animal-report-pick:goat-a")
-        compose.onNodeWithTag("animal-report-pick:goat-a").performScrollTo().performClick()
+        clickTag("animal-report-pick:goat-a")
         awaitText("45.5 kg")
         compose.runOnIdle { selectedFarm.value = otherFarm }
         awaitTag("farm-screen:FOS-REPORT-001")
@@ -274,10 +299,10 @@ class ReportRuntimeNavigationTest {
         compose.onNodeWithTag("animal-report-pick:goat-a").assertDoesNotExist()
         compose.onNodeWithText("45.5 kg").assertDoesNotExist()
         compose.onNodeWithTag("animal-report-search").performScrollTo().performTextInput("G-101")
-        compose.onNodeWithTag("animal-report-search-go").performScrollTo().performClick()
+        clickTag("animal-report-search-go")
         awaitTag("animal-report-pick:goat-x")
         compose.onNodeWithTag("animal-report-pick:goat-a").assertDoesNotExist()
-        compose.onNodeWithTag("animal-report-pick:goat-x").performScrollTo().performClick()
+        clickTag("animal-report-pick:goat-x")
         awaitText("99.0 kg")
         backToHub("FOS-REPORT-002")
     }
@@ -285,14 +310,16 @@ class ReportRuntimeNavigationTest {
     private fun render(canExport: Boolean = true) {
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                ReportsModuleHost(database, farm, canExport, onBack = {})
+                ReportsModuleHost(database, farm, canExport, onBack = {}, exportAuthority = exportAuthorities.getValue(farm))
             }
         }
         awaitTag("farm-screen:FOS-REPORT-001")
     }
 
     private fun open(screenId: String) {
-        compose.onNodeWithTag("report-open:$screenId").performScrollTo().performClick()
+        // A mounted hub is not yet a stable navigation layout while its summary loads from Room.
+        awaitTag("report-metric:active-goat")
+        clickTag("report-open:$screenId")
         awaitTag("farm-screen:$screenId")
     }
 
@@ -303,7 +330,19 @@ class ReportRuntimeNavigationTest {
         compose.onNodeWithTag("report-open:$screenId").assertExists()
     }
 
-    private fun click(text: String) = compose.onNode(hasClickAction() and hasText(text)).performScrollTo().performClick()
+    private fun click(text: String) {
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(hasClickAction() and hasText(text) and isEnabled()).fetchSemanticsNodes().size == 1
+        }
+        compose.onNode(hasClickAction() and hasText(text)).performScrollTo().assertIsDisplayed().assertIsEnabled().performClick()
+    }
+    private fun clickTag(tag: String) {
+        // Returning to a list mounts its screen before the asynchronous entries are available.
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(hasTestTag(tag) and hasClickAction() and isEnabled()).fetchSemanticsNodes().size == 1
+        }
+        compose.onNodeWithTag(tag).performScrollTo().assertIsDisplayed().assertIsEnabled().performClick()
+    }
     private fun awaitTag(tag: String) = compose.waitUntil(10_000) { compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }
     private fun awaitText(text: String) = compose.waitUntil(10_000) { compose.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty() }
     private fun animal(id: String, farmId: String, tag: String, name: String) =

@@ -22,7 +22,7 @@ import com.farmos.core.sync.SyncWorker
 import java.util.UUID
 
 @Composable
-fun FarmSessionContent(
+internal fun FarmSessionContent(
     app: FarmOsApplication,
     membership: FarmMembership,
     farmName: String?,
@@ -34,6 +34,7 @@ fun FarmSessionContent(
     onSignOut: () -> Unit,
     /** The local GOAT account signed in on this device; server-era sessions leave it null. */
     actorId: String? = null,
+    localAuthority: LocalSessionAuthority? = null,
 ) {
     var destination by remember(membership.farmId) { mutableStateOf<FarmDestination>(FarmDestination.Home) }
     var returnToSearch by remember(membership.farmId) { mutableStateOf(false) }
@@ -85,7 +86,7 @@ fun FarmSessionContent(
         returnToSearch = false
     }
     // Repeating and assigned tasks (D-020); Assigned to me needs a signed-in local account.
-    val taskPlanning = remember(membership.farmId, actorId) { TaskPlanning(app.database, membership.farmId, canPlanFarmWork(membership.role), actorId) }
+    val taskPlanning = remember(membership.farmId, actorId, membership.role) { TaskPlanning(app.database, membership.farmId, canPlanFarmWork(membership.role), actorId) }
     val runtimeRoute = destination.runtimeRouteContract()
     FarmBackHandler(if (destination == FarmDestination.Home) null else backFromDestination)
     Box(Modifier.testTag(runtimeRoute.testTag)) {
@@ -326,6 +327,7 @@ fun FarmSessionContent(
                 database = app.database,
                 farmId = membership.farmId,
                 canExport = rolePermits(membership.role, Permission.EXPORT_FARM_DATA),
+                exportAuthority = localAuthority,
                 onBack = backFromDestination,
             )
             FarmModule.GENETICS -> GeneticsModuleHost(

@@ -40,6 +40,7 @@ import com.farmos.core.database.MoneyTotalRow
 import com.farmos.domain.ops.FarmCurrency
 import java.math.BigDecimal
 import java.time.LocalDate
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -173,13 +174,25 @@ internal suspend fun farmMetrics(database: FarmOsDatabase, farmId: String, today
 
 /** Reports (FOS-REPORT-001) and the export sheet (FOS-REPORT-011) for one farm. */
 @Composable
-internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExport: Boolean, onBack: () -> Unit) {
-    // A different farm starts a new report session; no selected record, draft or callback crosses it.
-    key(farmId) { FarmReportsSession(database, farmId, canExport, onBack) }
+internal fun ReportsModuleHost(
+    database: FarmOsDatabase,
+    farmId: String,
+    canExport: Boolean,
+    onBack: () -> Unit,
+    exportAuthority: LocalSessionAuthority? = null,
+) {
+    // A different farm or sign-in starts a new owner; no selected record or chooser callback crosses it.
+    key(farmId, exportAuthority) { FarmReportsSession(database, farmId, canExport, exportAuthority, onBack) }
 }
 
 @Composable
-private fun FarmReportsSession(database: FarmOsDatabase, farmId: String, canExport: Boolean, onBack: () -> Unit) {
+private fun FarmReportsSession(
+    database: FarmOsDatabase,
+    farmId: String,
+    canExport: Boolean,
+    exportAuthority: LocalSessionAuthority?,
+    onBack: () -> Unit,
+) {
     val scope = rememberCoroutineScope()
     val exportAllowed by rememberUpdatedState(canExport)
     val context = LocalContext.current
@@ -199,58 +212,69 @@ private fun FarmReportsSession(database: FarmOsDatabase, farmId: String, canExpo
             failure = e.message ?: "Records could not be read"
         }
     }
-    val onChosen: (Uri?) -> Unit = { uri ->
+    val onChosen: (Uri?) -> Unit = chosen@{ uri ->
+        if (exporting) return@chosen
         if (!exportAllowed) {
             exportMessage = "Exports are made by farm management."
         } else if (uri == null) {
             exportMessage = "Export cancelled; nothing was written."
         } else {
+            exporting = true
+            val chosenReport = pending
             scope.launch {
-                exporting = true
-                exportMessage = try {
-                    val outcome = when (pending) {
-                        REPORT_MONEY -> {
-                            val records = database.reports().moneyRecords(farmId)
-                            ExportOutcome(
-                                writer = { it.write(moneyRecordsCsv(records).toByteArray(Charsets.UTF_8)) },
-                                message = "Money records exported: ${records.size} record(s).",
-                                kind = "money-records", filename = "money-records-${LocalDate.now()}.csv", count = records.size,
-                            )
+                try {
+                    exportMessage = try {
+                        val outcome = when (chosenReport) {
+                            REPORT_MONEY -> {
+                                val records = database.reports().moneyRecords(farmId)
+                                ExportOutcome(
+                                    writer = { it.write(moneyRecordsCsv(records).toByteArray(Charsets.UTF_8)) },
+                                    message = "Money records exported: ${records.size} record(s).",
+                                    kind = "money-records", filename = "money-records-${LocalDate.now()}.csv", count = records.size,
+                                )
+                            }
+                            REPORT_SUMMARY -> {
+                                val today = LocalDate.now()
+                                val summary = farmMetrics(database, farmId, today)
+                                ExportOutcome(
+                                    writer = { writeFarmSummaryPdf(context, summary, today, it) },
+                                    message = "Farm summary exported: ${summary.size} figure(s).",
+                                    kind = "farm-summary", filename = "farm-summary-$today.pdf", count = summary.size,
+                                )
+                            }
+                            else -> {
+                                val register = database.reports().herdRegister(farmId)
+                                ExportOutcome(
+                                    writer = { it.write(herdRegisterCsv(register).toByteArray(Charsets.UTF_8)) },
+                                    message = "Herd register exported: ${register.size} animal(s).",
+                                    kind = "herd-register", filename = "herd-register-${LocalDate.now()}.csv", count = register.size,
+                                )
+                            }
                         }
-                        REPORT_SUMMARY -> {
-                            val today = LocalDate.now()
-                            val summary = farmMetrics(database, farmId, today)
-                            ExportOutcome(
-                                writer = { writeFarmSummaryPdf(context, summary, today, it) },
-                                message = "Farm summary exported: ${summary.size} figure(s).",
-                                kind = "farm-summary", filename = "farm-summary-$today.pdf", count = summary.size,
+                        withContext(Dispatchers.IO) {
+                            check(exportAllowed) { "Exports are made by farm management." }
+                            writeAuthorizedReport(
+                                farmId, exportAuthority,
+                                open = { requireNotNull(context.contentResolver.openOutputStream(uri)) { "The chosen location cannot be written" } },
+                                write = outcome.writer,
                             )
+                            // The export already succeeded; a log failure must not rewrite its message.
+                            runCatching {
+                                appendExportLog(
+                                    context, farmId,
+                                    ExportLogEntry(System.currentTimeMillis().toString(), outcome.kind, outcome.filename, System.currentTimeMillis(), outcome.count),
+                                )
+                            }
                         }
-                        else -> {
-                            val register = database.reports().herdRegister(farmId)
-                            ExportOutcome(
-                                writer = { it.write(herdRegisterCsv(register).toByteArray(Charsets.UTF_8)) },
-                                message = "Herd register exported: ${register.size} animal(s).",
-                                kind = "herd-register", filename = "herd-register-${LocalDate.now()}.csv", count = register.size,
-                            )
-                        }
+                        outcome.message
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (e: Exception) {
+                        "Export failed: ${e.message ?: "the file could not be written"}"
                     }
-                    withContext(Dispatchers.IO) {
-                        check(exportAllowed) { "Exports are made by farm management." }
-                        requireNotNull(context.contentResolver.openOutputStream(uri)) { "The chosen location cannot be written" }.use(outcome.writer)
-                        // The export already succeeded; a log failure must not rewrite its message.
-                        runCatching {
-                            appendExportLog(
-                                context, farmId,
-                                ExportLogEntry(System.currentTimeMillis().toString(), outcome.kind, outcome.filename, System.currentTimeMillis(), outcome.count),
-                            )
-                        }
-                    }
-                    outcome.message
-                } catch (e: Exception) {
-                    "Export failed: ${e.message ?: "the file could not be written"}"
+                } finally {
+                    exporting = false
                 }
-                exporting = false
             }
         }
     }
@@ -285,7 +309,7 @@ private fun FarmReportsSession(database: FarmOsDatabase, farmId: String, canExpo
         ReportDetail.Operations -> OperationsReportScreen(database, farmId, onBack = backToHub)
         ReportDetail.Documents -> GeneratedDocumentsScreen(farmId, onOpenDocument = { id -> detail = ReportDetail.Document(id) }, onBack = backToHub)
         is ReportDetail.Document -> ExportDocumentScreen(farmId, entryId = current.entryId, onBack = { detail = ReportDetail.Documents })
-        ReportDetail.Share -> ShareReportScreen(database, farmId, canShare = { exportAllowed }, onBack = backToHub)
+        ReportDetail.Share -> ShareReportScreen(database, farmId, canShare = { exportAllowed }, exportAuthority = exportAuthority, onBack = backToHub)
         ReportDetail.Movements -> MovementCertificatesScreen(database, farmId, onBack = backToHub)
     }
 }
