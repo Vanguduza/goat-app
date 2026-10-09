@@ -21,6 +21,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "development"))
 from source_evidence import source_fingerprint as fingerprint_source_tree
+from runtime_navigation_cases import verify_case_ledger
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml"
@@ -54,6 +55,7 @@ def payloads() -> tuple[dict, dict]:
         raise SystemExit(f"unsupported runtime evidence state: {ci_status}")
     if runtime.get("source_fingerprint") != current_fingerprint:
         raise SystemExit("runtime route evidence source fingerprint is stale")
+    verify_case_ledger(ROOT, runtime)
     certified = ci_status == "PASS_EXACT_HEAD_CI"
 
     proof_sources: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))

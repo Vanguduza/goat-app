@@ -8,11 +8,15 @@ import json
 import re
 import subprocess
 import sys
+import unittest
 from pathlib import Path
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "development"))
 from source_evidence import source_fingerprint as fingerprint_source_tree
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from runtime_navigation_cases import load_case_map, source_claims, case_ledger, verify_case_ledger
+from runtime_case_junit import verify_junit_cases
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml"
@@ -110,11 +114,24 @@ def git_head() -> str:
 def source_fingerprint() -> str:
     return fingerprint_source_tree(ROOT)
 
-def build(status: str, run_id: int | None) -> dict:
+def build(status: str, run_id: int | None, *, case_evidence_root: Path | None = None, case_test_log: Path | None = None) -> dict:
+    if status not in {"CI_PENDING", "PASS_EXACT_HEAD_CI"}:
+        raise ValueError("unsupported runtime evidence status")
+    if status == "CI_PENDING" and any(value is not None for value in (run_id, case_evidence_root, case_test_log)):
+        raise ValueError("CI_PENDING cannot carry a run or execution inputs")
     entry_sources = ids_in(ENTRY_ACTION_TESTS)
     traversal_sources = ids_in(RENDERED_TRAVERSAL_TESTS)
     rendered_owner_sources = ids_in(RENDERED_OWNER_TESTS)
     contract_sources = ids_in(ROUTE_CONTRACT_TESTS)
+    additional = load_case_map(ROOT)
+    additional_sources = source_claims(additional)
+    traversal_sources.update(additional_sources["rendered_destination_traversal"])
+    rendered_owner_sources.update(additional_sources["rendered_surface_owner"])
+    execution = None
+    if status == "PASS_EXACT_HEAD_CI":
+        if case_evidence_root is None or case_test_log is None:
+            raise ValueError("additional cases require actual retained JUnit, checkout identity and timestamped CI task log")
+        execution = verify_junit_cases(additional, ROOT, case_evidence_root, case_test_log, run_id)
     entry_ids = sorted({x for values in entry_sources.values() for x in values})
     traversal_ids = sorted({x for values in traversal_sources.values() for x in values})
     rendered_owner_ids = sorted({x for values in rendered_owner_sources.values() for x in values})
@@ -131,6 +148,7 @@ def build(status: str, run_id: int | None) -> dict:
         "source_fingerprint": source_fingerprint(),
         "ci_status": status,
         "foundation_run_id": run_id,
+        "additional_case_evidence": case_ledger(additional, execution),
         "test_sources": {
             "entry_action_emission": entry_sources,
             "rendered_destination_traversal": traversal_sources,
@@ -182,12 +200,16 @@ def main() -> int:
     parser.add_argument("--status", choices=("CI_PENDING", "PASS_EXACT_HEAD_CI"), default="CI_PENDING")
     parser.add_argument("--run-id", type=int)
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--case-evidence-root", type=Path, help="Extracted first-party native-test artifact with JUnit and test-evidence identity")
+    parser.add_argument("--case-test-log", type=Path, help="Retained timestamped first-party CI job log; independently verify its origin/run")
     args = parser.parse_args()
 
     if args.status == "PASS_EXACT_HEAD_CI" and args.run_id is None:
         parser.error("--run-id is required for PASS_EXACT_HEAD_CI")
 
-    payload = build(args.status, args.run_id)
+    if args.status == "CI_PENDING" and any(value is not None for value in (args.run_id, args.case_evidence_root, args.case_test_log)):
+        parser.error("CI_PENDING cannot carry a run or execution inputs")
+    payload = build(args.status, args.run_id, case_evidence_root=args.case_evidence_root, case_test_log=args.case_test_log)
     if payload["coverage"]["missing_registry_ids"]:
         raise SystemExit(f"unregistered screen ids in runtime evidence: {payload['coverage']['missing_registry_ids']}")
     if payload["coverage"]["rendered_traversal_screen_count"] < 70:
@@ -199,7 +221,11 @@ def main() -> int:
     if payload["coverage"]["route_contract_screen_count"] < 30:
         raise SystemExit("runtime route-contract evidence unexpectedly below 30 Screen IDs")
 
+    verify_case_ledger(ROOT, payload)
     if args.self_test:
+        suite = unittest.defaultTestLoader.discover(str(ROOT / "scripts/design/tests"), pattern="test_runtime_navigation_cases.py")
+        if not unittest.TextTestRunner(verbosity=1).run(suite).wasSuccessful():
+            return 1
         print(
             "PASS runtime navigation evidence self-test: "
             f"{payload['coverage']['rendered_traversal_screen_count']} rendered-traversed / "
