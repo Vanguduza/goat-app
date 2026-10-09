@@ -39,9 +39,28 @@ class VaccinationQueryTest {
 
         assertEquals(3, vaccinations.count(farmA))
         assertEquals(1, vaccinations.count(farmB))
-        assertEquals(listOf("v2", "v1"), vaccinations.forAnimal(farmA, "goat-1").map { it.id })
+        assertEquals(listOf("v1", "v2"), vaccinations.forAnimal(farmA, "goat-1").map { it.id })
         assertEquals(listOf("v3"), vaccinations.forGroup(farmA, "group-1").map { it.id })
         assertEquals(emptyList<String>(), vaccinations.forAnimal(farmB, "goat-9").map { it.id })
-        assertEquals(listOf("v3", "v2", "v1"), vaccinations.recent(farmA, 10).map { it.id })
+        assertEquals(listOf("v1", "v3", "v2"), vaccinations.recent(farmA, 10).map { it.id })
+    }
+
+    @Test
+    fun equalEventTimesUseIdOrderBeforeTheFarmScopedLimit(): Unit = runBlocking {
+        val vaccinations = database.vaccinations()
+        fun event(id: String, farmId: String, occurredAt: Long) = HealthVaccinationEntity(
+            id, farmId, "goat-1", null, "goat", "form-1", null, null, occurredAt,
+        )
+        vaccinations.insert(event("b-tied", farmA, 2_000))
+        vaccinations.insert(event("a-tied", farmA, 2_000))
+        vaccinations.insert(event("z-newest", farmA, 3_000))
+        vaccinations.insert(event("foreign-newest", farmB, 4_000))
+
+        assertEquals(
+            listOf("z-newest", "a-tied", "b-tied"),
+            vaccinations.forAnimal(farmA, "goat-1").map { it.id },
+        )
+        assertEquals(listOf("z-newest", "a-tied"), vaccinations.recent(farmA, 2).map { it.id })
+        assertEquals(listOf("foreign-newest"), vaccinations.recent(farmB, 1).map { it.id })
     }
 }
