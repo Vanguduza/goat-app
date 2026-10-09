@@ -1,14 +1,31 @@
 # Artemis integration and release qualification — 9 October 2026
 
-## Current merge gate after fixture lifetime correction
+## Corrected candidate C3 — full CI verified
 
-**PR111 remains unmerged. The corrected candidate requires fresh canonical CI; product release remains blocked.** Candidate C2, `04a1f94e1302dd79786a5baed1fda0e643807bd8`, failed [Foundation run 37966997043](https://github.com/Vanguduza/goat-app/actions/runs/37966997043): 788 native cases in 165 suites executed, with 787 passing and one failure, zero errors/skips. All seven corrected report-disclosure cases passed. Visual and connected jobs were skipped after the Android job failed; they supply no current execution evidence.
+**C3 has passed its complete canonical workflow and all ten PR checks. PR111 remains unmerged while its evidence descendant is validated; product release remains blocked.** [Foundation run 37969611312](https://github.com/Vanguduza/goat-app/actions/runs/37969611312), attempt 1, belongs to candidate `8846676126d1baa7efa1216b2c4823c9856f4b17`, tree `bade7d22c223c229ec1c8fe22b86c465b917cf6d`. Its actual Actions checkout is `09b70ac214efd3c11500369d534873f33c7c384b`, which independently resolves to the same tree. Canonical source fingerprint is `sha256:0a65545a83e6694540bbdbbe2f06efd118fd812e47c1a15a168984e8929d1c23`.
+
+The parent independently fetched terminal run/job/check and artifact metadata, verified original artifact sizes/digests, inspected actual checkout identity, parsed every JUnit suite and fresh Test-task marker, verified timestamps, and bound all seven reviewed source classes/42 cases. The resulting private verification receipt is `ci-pr111-candidate3/root-independent-candidate3-verification.json`, SHA-256 `6cd162f33ac89b4f45d67d91ee6a3d8174fff99bf34e1e4cb93b12c830dfe2cd`.
+
+| C3 evidence | Verified execution and boundary |
+| --- | --- |
+| Native unit/Compose | **788 cases in 165 suites; zero failures, errors or skips.** All nine Test tasks executed freshly. Every JUnit timestamp is within the actual Gradle invocation. GlobalSearch six, SpeciesSearch six and ReportDisclosure seven all passed. The prepared local twelve-case driver remained unexecuted because this fresh canonical execution already covers those exact cases. |
+| Connected Android | **51 database + 9 app = 60 cases in two XML reports; zero failures/errors/skips.** Both connected tasks executed on the CI Google APIs API36 x86_64 target. The actual Activity/recovery/loopback cases retain their existing scope; this does not qualify the separate local Artemis target or physical power-loss/all-device-loss restoration. |
+| Visual test/capture workflow | **594 fresh cases in 137 suites**, plus **270 raw captures and 270 annotated companions**, across the existing ten-family × three-theme × three-width × three-font matrix. Captures remain **UNAPPROVED**. The visual artifact has no separate post-test commit/tree/status files; its source binding uses its own checkout log, exact Git tree/workflow and fresh task/timestamp evidence. |
+| Source and protected scope | Native and connected originals both retain the exact checkout/tree and empty worktree status. All 42 additional case identities and claim objects are preserved; reviewed source bytes match their pinned commits. Full 156-feature, 29-module and 545-screen scope is unchanged, with zero green promotions. |
+
+Original native artifact `11635017360` is **30,934,485 bytes**, SHA-256 `92d3100d1cfbd380439b324ca30a3eccd838e4371c356110ae41042f807f3ba3`; native log SHA-256 `bf365932d3afb8678c9f3d22d5cdcd415cace6af59a9653268f933908397301e`. Connected artifact `11635482505` is **34,801,043 bytes**, SHA-256 `bb53dc73820f74b078ccd6de56e2f67b386760efdaefa9d14205e81c446e60d7`. Visual artifact `11634699160` is **32,567,899 bytes**, SHA-256 `01583c4080353d109047a9ed0fb34e8e11e76b09bceb23a035b9ae3131a11eb9`. Originals are preserved unchanged.
+
+The parent has admitted the bounded `PASS_EXACT_HEAD_CI` runtime ledger for **C3/run 37969611312**. Its 330 combined IDs, 225 rendered traversals, 111 rendered owners, 27 entry actions and 72 typed route contracts retain their distinct overlapping meanings; 215 Screen IDs and 51 features still lack this combined route evidence. The historical C ledger is unchanged. This documentation/evidence descendant must pass its own complete CI before merge; no future E/main result is claimed here.
+
+## Failed C2 checkpoint and fixture lifetime correction
+
+**Historical C2 failure, before the passing C3 run above.** Candidate C2, `04a1f94e1302dd79786a5baed1fda0e643807bd8`, failed [Foundation run 37966997043](https://github.com/Vanguduza/goat-app/actions/runs/37966997043): 788 native cases in 165 suites executed, with 787 passing and one failure, zero errors/skips. All seven corrected report-disclosure cases passed. Visual and connected jobs were skipped after the Android job failed; they supply no current execution evidence.
 
 The failing case was `GlobalSearchRuntimeNavigationTest.switchingFarmsClearsSearchAndLoadsOnlyTheNewFarmsSubject`. The selected profile became visible while its composition-owned refresh was still reading `unsharedLocalOperations`. The fixture's `@After` then closed Room before the Compose rule's teardown, leaving `ReplicationPeerMarkDao.highestHeld` using a closed connection pool. The original native artifact `11633977880` is retained unchanged with SHA-256 `b498d266b9ab034c44a9b94de88ea6ff5196943a65656eaeaa69f3899f9e0d52`; the failed job log has SHA-256 `010fb158fd2ad69967dc403ca1c8756340879903330100b9e3acf1620f3e31b7`. Actual checkout `fedc9916f84e8935de78d6b7422678b7df4d49ec` has C2's exact tree.
 
-The independently reviewed source correction is `69b3eb244d5e99983bcb2db4301560315f49c671`. In both GlobalSearch and SpeciesSearch fixtures, one `RuleChain` places a database `ExternalResource` outside the Compose rule. Room closes after the inner rule returns. The twelve existing test methods, helpers, assertions and setup remain byte-identical; no production code, sleep, catch, permission or timeout changed. This fixes the observed composition-owned lifetime; it does not claim to join unrelated application-owned background work. A fresh two-suite, twelve-case local execution and full canonical CI remain required.
+The independently reviewed source correction is `69b3eb244d5e99983bcb2db4301560315f49c671`. In both GlobalSearch and SpeciesSearch fixtures, one `RuleChain` places a database `ExternalResource` outside the Compose rule. Room closes after the inner rule returns. The twelve existing test methods, helpers, assertions and setup remain byte-identical; no production code, sleep, catch, permission or timeout changed. This fixes the observed composition-owned lifetime; it does not claim to join unrelated application-owned background work. The later C3 full canonical run executed and passed these exact twelve cases; its results are recorded above.
 
-Current generated route inventories are `CI_PENDING`. The prior passing C ledger is archived byte-for-byte with its original source/run pins and SHA-256 `484678892b093934f161d6867ba7edab8ddb069f85e50a7948d9cd3ff92818b1`. Its historical results below do not certify the changed fixture source. The reviewed map preserves all method/claim objects and changes only the two fixture source hashes and reviewed source commit.
+Before C3 verification, generated route inventories were `CI_PENDING`. The prior passing C ledger is archived byte-for-byte with its original source/run pins and SHA-256 `484678892b093934f161d6867ba7edab8ddb069f85e50a7948d9cd3ff92818b1`. Its historical results below do not certify the changed fixture source. The reviewed map preserves all method/claim objects and changes only the two fixture source hashes and reviewed source commit.
 
 ### Earlier report-fixture correction and retained failed E
 
@@ -20,7 +37,7 @@ At clean C2, the focused report run executed **7/7 passing cases** from **17:34:
 
 ## Status and authority
 
-The original candidate C, `46cfc8ca57d54a10a62edda5b8858b23eebf30b6`, passed all seven Foundation jobs and all ten PR checks in run `37961965633`, with 788 fresh native and 60 connected cases. That is retained historical evidence. The intervening E and C2 failures above remain failed; a new source candidate, its evidence descendant, merge/main verification, reusable Artemis controller/provider readiness, live Google delivery and owner/physical/visual qualification are pending.
+The original candidate C, `46cfc8ca57d54a10a62edda5b8858b23eebf30b6`, passed all seven Foundation jobs and all ten PR checks in run `37961965633`, with 788 fresh native and 60 connected cases. That is retained historical evidence. The intervening E and C2 failures above remain failed; C3 has subsequently passed and its evidence descendant, merge/main verification, reusable Artemis controller/provider readiness, live Google delivery and owner/physical/visual qualification remain pending.
 
 The branch remains `chatgpt/goat-artemis-qualified-changes-20261009` and PR111. Inherited main is PR110 merge `349d40339923e6860f7ee7e74e5f149afab11f47`; its earlier qualification and testing-package evidence remains in [the Google test qualification record](2026-10-09-google-test-qualification.md). Changed source requires its own execution and CI evidence.
 
@@ -28,7 +45,7 @@ The branch remains `chatgpt/goat-artemis-qualified-changes-20261009` and PR111. 
 
 The full mandatory scope remains **156 features, 29 modules and 545 registered Screen IDs**. Generated completion state has **0 feature greens, 0 module greens and 0 visual-green screens**, with `release_blocked=true`. No flag or protected reference was changed.
 
-Historical C's admitted ledger covered **330/545 IDs with some bounded route evidence**, leaving **215 without**; **105/156 features** had some route evidence and **51 did not**. Its overlapping categories were **225 rendered traversal, 111 rendered owner, 27 entry-action and 72 typed route-contract IDs**. These are not fully qualified screens and must not be summed. The current ledger is pending; it issues no replacement execution claim until fresh CI is verified.
+Historical C's admitted ledger covered **330/545 IDs with some bounded route evidence**, leaving **215 without**; **105/156 features** had some route evidence and **51 did not**. Its overlapping categories were **225 rendered traversal, 111 rendered owner, 27 entry-action and 72 typed route-contract IDs**. These are not fully qualified screens and must not be summed. The current C3 ledger has now been admitted against its independently verified execution; it preserves these bounded categories without product certification.
 
 ## What each kind of evidence establishes
 
@@ -215,8 +232,8 @@ The public CLI help is retained as `google-cli-login-help-20261009T154757Z.txt`,
 | Gate | Current boundary and concrete closure evidence |
 | --- | --- |
 | Complete feature/module scope | Finish each applicable Feature Implementation Contract: commands/queries/events, permissions, species/tenant constraints, offline/retry/conflict/recovery, reconciliation, search, safety, UI states and NFR/field evidence. A route or passing infrastructure slice cannot set a feature green. All 156 features, 29 modules and 545 screens remain mandatory. |
-| Current integrated build and tests | **New candidate CI pending.** Historical C passed all seven Foundation jobs, all ten PR checks, 788 native and 60 connected cases. E and C2 subsequently failed different fixture issues and remain failed. Both corrections are recorded above; require fresh full validation, evidence preservation and merge/main checks. |
-| Honest per-case route evidence | Current ledger **CI_PENDING**. Historical C's archived, bounded PASS covers 330 combined IDs and leaves 215 unresolved. Preserve distinct evidence classes, exact source/case pins and zero green claims when admitting any new passing run. |
+| Current integrated build and tests | **C3 passed** all seven Foundation jobs, all ten PR checks, 788 native and 60 connected cases. E and C2 remain failed histories. The C3 evidence descendant and merge/main verification are pending. |
+| Honest per-case route evidence | Current bounded C3 PASS ledger binds run 37969611312 and preserves 330 combined IDs, with 215 unresolved. Source/case pins and categories remain distinct, with zero green claims. Historical C is archived unchanged. |
 | Artemis functional target | Obtain current successful controller/screenshot/hierarchy observations and configured provider readiness, then run source/APK-bound scenarios through admitted MCP and inspect sealed terminal receipts. Boot/admission alone does not close this gate. |
 | Live Google/Drive | AI Studio test-project creation is UI-observed, but API credentials/secure installation and Drive OAuth configuration remain pending, with Cloud Console still unavailable. Obtain the required supported access and a compatible Google-enabled target, then execute actual app consent, folder/configuration, approved background delivery, another-device catch-up and restoration/revocation cases under the existing local-first contract. |
 | Recovery and multi-device acceptance | The named Android durability, Activity and replica cases passed on one C CI emulator. Physical restart, two physical devices, all-device-loss escrow and a complete disaster-recovery procedure remain unproven; preserve the actual database-reopen, Keystore-alias and loopback boundaries. |
@@ -225,21 +242,20 @@ The public CLI help is retained as `google-cli-login-help-20261009T154757Z.txt`,
 
 The prior ten-surface, 270-capture reference matrix is a foundation sample, not all-screen visual acceptance. Neither the reusable testing target nor the four Artemis scenarios reduces the product scope.
 
-## Final integration record — pending parent completion
+## Final integration record — corrected candidate passed
 
-Source and evidence history remains ordered: C passed; its evidence descendant E failed report readiness; C2 corrected report readiness but failed the navigation fixture database lifetime; the reviewed lifetime correction is now integrated at `69b3eb244d5e99983bcb2db4301560315f49c671`. The pending replacement candidate must pass its own full Foundation workflow. Earlier failures are retained and no downstream skipped job is accepted as execution.
+The source/evidence sequence remains explicit: original C passed; E failed report readiness; C2 fixed report readiness but failed navigation database lifetime; C3 includes both reviewed corrections and now passes all full checks. The original failure logs and artifacts remain unchanged. This evidence descendant contains documentation/generated evidence only and must pass its own checks before merge.
 
 | Required final field | Status |
 | --- | --- |
 | Consolidated branch and PR | `chatgpt/goat-artemis-qualified-changes-20261009`, PR111; not merged. |
-| Current corrected source | Navigation lifetime correction `69b3eb244d5e99983bcb2db4301560315f49c671`, tree `3f7380ea2f4207cea78a75c063c9e252c6cecb9d`; replacement candidate source/map reconciliation follows. |
-| Focused report correction | PASS, seven fresh cases at C2, independently checked; all seven also pass in C2 canonical CI. |
-| Focused navigation correction | PENDING fresh execution of the two preserved six-case suites. |
-| Full corrected Foundation/native/connected validation | PENDING; E and C2 are failed histories. Historical C passed 788 native and 60 connected cases at its own source. |
-| Per-case source map and active ledger | All 42 additional cases and their claims preserved; two reviewed source hashes updated. Current ledger CI_PENDING; original C PASS archived unchanged. |
-| Local reusable emulator | API34 Google APIs revision14 installed and image verified; service prepared disabled, boot/controller/provider qualification pending. |
-| Final merged APK/certificate/provenance and installation | PENDING. Preserve existing PR110 draft testing package. |
-| Google testing configuration | Dedicated project and inactive named gcloud configuration prepared; no key, authenticated CLI, ADC, Drive OAuth client or actual app consent/delivery. |
+| Corrected tested candidate | C3 `8846676126d1baa7efa1216b2c4823c9856f4b17`, tree `bade7d22c223c229ec1c8fe22b86c465b917cf6d`, actual checkout `09b70ac214efd3c11500369d534873f33c7c384b`. |
+| Corrected report and navigation fixtures | PASS in C3: seven disclosure cases plus six GlobalSearch and six SpeciesSearch cases. The earlier local report seven-case PASS remains source-bound to C2; no redundant local navigation rerun was executed. |
+| Full Foundation/native/connected validation | PASS at C3, run 37969611312 attempt1: all seven jobs/all ten checks; 788 native and 60 connected cases. |
+| Per-case source map and current ledger | All seven classes/42 additional cases independently bound. C3 bounded PASS admitted; historical C PASS archived unchanged. |
+| Local reusable emulator | API34 Google APIs revision14 installed/image verified; service prepared disabled. Boot/controller/provider qualification pending. |
+| Final merged APK/certificate/provenance and installation | PENDING. Existing PR110 draft testing package preserved. |
+| Google testing configuration | Dedicated project and inactive named CLI configuration prepared; no key, authenticated CLI, ADC, Android OAuth client or actual app consent/delivery. |
 | Evidence descendant, merge/main checks and revised draft package | PENDING. |
 | Visual, physical, restoration and whole-product acceptance | BLOCKED; no feature/module/visual/MVP green promotion. |
 
