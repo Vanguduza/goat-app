@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -400,6 +402,7 @@ fun AnimalFarmQuickAction(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AnimalFarmHomeBottomBar(
     onHome: () -> Unit,
@@ -420,14 +423,15 @@ fun AnimalFarmHomeBottomBar(
             val largeTextNarrow = maxWidth < 420.dp && fontScale >= 1.5f
             if (largeTextNarrow) {
                 Column {
-                    Row(
+                    // Equal-width slots can clip longer labels at the user's chosen font scale.
+                    FlowRow(
                         Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        HomeNavItem("Home", onHome, Modifier.weight(1f))
-                        HomeNavItem("Animals", onAnimals, Modifier.weight(1f))
-                        HomeNavItem("Tasks", onTasks, Modifier.weight(1f))
-                        HomeNavItem("More", onMore, Modifier.weight(1f))
+                        HomeNavItem("Home", onHome)
+                        HomeNavItem("Animals", onAnimals)
+                        HomeNavItem("Tasks", onTasks)
+                        HomeNavItem("More", onMore)
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         HomeThemeButton()
@@ -458,7 +462,7 @@ private fun HomeNavItem(
     val minTouch = AnimalFarmTheme.minimumTouchDp.dp
     TextButton(
         onClick = onClick,
-        modifier = modifier.heightIn(min = minTouch),
+        modifier = modifier.sizeIn(minWidth = minTouch, minHeight = minTouch),
         contentPadding = PaddingValues(horizontal = 2.dp, vertical = 0.dp),
     ) {
         Text(label, maxLines = 1, softWrap = false, style = MaterialThemeLocal.label())

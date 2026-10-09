@@ -56,7 +56,7 @@ Separately, checks VS-21–VS-24 in [`VERTICAL_SLICE_GATE.json`](../realisation/
 
 ## Google and Android acceptance
 
-At work opening, the connected Google account was verified privately. The Cloud console was unavailable in the browser used for the initial inspection, the VM Cloud CLI had no signed-in account, and no ADB test device was attached. These are initial access observations, not permanent platform limitations. Actual configuration and device acceptance must be recorded when performed. Account email addresses, credentials and private signing or farm keys remain outside the public repository.
+At work opening, the connected Google account was verified privately. The Cloud console was unavailable in the browser used for the initial inspection, the VM Cloud CLI had no signed-in account, and no ADB test device was attached. A recheck at 12:15 UTC on 9 October again found the Cloud clients page unavailable after reload, zero CLI accounts and zero attached ADB devices. These are access observations, not permanent platform limitations. Actual configuration and device acceptance must be recorded when performed. Account email addresses, credentials and private signing or farm keys remain outside the public repository.
 
 ### Stable build and cloud configuration
 
@@ -122,7 +122,24 @@ Local validation before the final CI candidate established:
 
 The first full implementation run, [37923471779](https://github.com/Vanguduza/goat-app/actions/runs/37923471779), executed 469 app tests and exposed two remaining fixture failures: the reference sign-in assertion did not await its Room-backed callback, and the health navigation test still used the former formulary action label. Both fixtures were corrected while preserving the sign-in identity and route/return assertions. The four backend jobs passed, but native and instrumentation jobs were skipped because Android failed; this run supplies no native artifact or verified CI APK.
 
-The first retained APK assembled successfully, but the operator refused SDK 37's changed public output labels. The corrected parser accepts the verified scheme label and minimum-SDK field from the actual SDK output, retains the single-signer and matching-certificate checks, and rejects ambiguous SDK metadata. Its five regression methods now cover both tool formats. A fresh clean-source preparation is required to issue final provenance; diagnostic parsing of the earlier retained bytes does not qualify that failed preparation.
+The first retained APK assembled successfully, but the operator refused SDK 37's changed public output labels. The corrected parser accepts the verified scheme label and minimum-SDK field from the actual SDK output, retains the single-signer and matching-certificate checks, and rejects ambiguous SDK metadata. Its five regression methods now cover both tool formats. A fresh clean-source preparation subsequently succeeded for the intermediate candidate below; diagnostic parsing of the earlier retained bytes does not qualify that failed preparation.
+
+### Verified intermediate candidate and accessibility correction
+
+[Foundation run 37924773279](https://github.com/Vanguduza/goat-app/actions/runs/37924773279) completed all seven jobs successfully for `b3346c9e4a4056fbbcc69c2a6515c7c06961765b`. The Android, native-reference and device logs record synthetic checkout `d4ed3b1d3138cfd0dfc4b10204cd1b7539fa7753`; GitHub commit metadata resolves both that checkout and the candidate to source tree `b17e31fd07206270536730d4916e061114f9d0d8`. This is evidence for that exact intermediate source, not for subsequent edits.
+
+| Evidence | Verified intermediate result |
+| --- | --- |
+| Device instrumentation | 51 database and 5 app tests completed successfully on one API 36 emulator. The multi-device scenario still uses separate Room databases and loopback sockets. |
+| Native references | All 270 combinations passed the raw/annotated/UI-tree completeness, bounds and touch-target checks. |
+| Native-job JUnit reports | 469 app tests and 52 feature/goat tests, zero failures, errors or skips. These counts come from the native job's retained XML; the separate Android job log does not report an aggregate count. |
+| Native artifact | [11614475302](https://github.com/Vanguduza/goat-app/actions/runs/37924773279/artifacts/11614475302), 32,360,553 bytes; the retained ZIP independently matched SHA-256 `8772a75d75c01fcfbe45d5912262fa7ac7b009aaec76579af665febbf8841514`. Still unapproved. |
+| CI debug APK | SHA-256 `13f245a3c940ee3b22bb40d1a5fbc2404c901c87dd5f0f954889dab26229c015`, a separate CI build/signing identity. |
+| Retained Google test APK | The corrected operator completed a fresh preparation for the same candidate. The 30,899,471-byte APK has SHA-256 `4a2c9453533a8c40e6050a2fb0944bf6b2a1a55255528839d6484bb05d948dbe`. Its public certificate, SDK signature/manifest inspections and provenance were retained; no key was generated or changed. |
+
+Independent inspection of the actual intermediate management and worker captures at outdoor/360dp/200% found that the final character of **Animals** was clipped. The controls did not overlap, so the existing automated bounds check did not detect this internal text-layout defect.
+
+The corrective implementation lets the existing narrow-screen, large-text navigation buttons take their content widths and wrap as whole buttons when required. It preserves full labels, typography, font scaling, navigation order and callbacks, the governed minimum target dimensions, and the separate bottom-right Theme row. The new `HomeNavigationLayoutTest` checks complete visible lines, every character's bounds inside the actual text area, target bounds and callbacks at 360dp/200%, and whole-button wrapping at 240dp/200%. Local recording of both existing home matrices completed 54 combinations, and an independent inspection confirmed the complete Animals label in both corrected outdoor/360dp/200% captures. The first test oracle exposed a Compose semantics reconstruction mismatch: a naturally measured 71px Home label and 93px Animals label were compared with an unused 340px paragraph extent. The corrected oracle measures visible character bounds and parent containment instead of that generic paragraph-width flag; it keeps the full-label and scaling requirements. Both focused rendering regressions then passed, with zero failures, errors or skips. The corrected candidate still requires its own full CI and exact native artifact. No golden or visual approval is issued by the fix.
 
 The PR records the final immutable head, exact CI runs and results; retained test-build provenance records its actual source and installed identity. No live Google OAuth, physical two-device, independent visual or full-product acceptance is claimed by this implementation section.
 
