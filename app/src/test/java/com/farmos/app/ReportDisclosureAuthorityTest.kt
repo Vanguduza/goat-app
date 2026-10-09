@@ -16,7 +16,13 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -133,10 +139,11 @@ class ReportDisclosureAuthorityTest {
     @Test
     fun aRetainedShareActionChecksTheCurrentRoomRoleBeforeStartingAnyActivity() {
         render()
-        compose.onNodeWithTag("report-open:FOS-REPORT-014").performScrollTo().performClick()
+        clickTag("report-open:FOS-REPORT-014")
+        awaitTag("farm-screen:FOS-REPORT-014")
         awaitTag("report-share")
         fixture.changeRoleRemotely(LocalRole.WORKER)
-        compose.onNodeWithTag("report-share").performScrollTo().performClick()
+        clickTag("report-share")
         awaitText("Share failed: Your active farm account does not have permission for this action.")
         assertEquals(null, shadowOf(context as Application).nextStartedActivity)
         assertNoOutput()
@@ -190,14 +197,39 @@ class ReportDisclosureAuthorityTest {
             }
         }
         awaitTag("farm-screen:FOS-REPORT-001")
+        // The hub exists before the Room projection inserts metric sections above its actions.
+        // Exited is present even for an empty farm, so both authority fixtures wait for final data.
+        awaitTag("report-metric:exited")
+        compose.onNodeWithTag("report-metric:exited").assertTextEquals("0 animals")
+        if (farmId == fixture.farmId) {
+            compose.onNodeWithTag("report-metric:active-goat").assertTextEquals("1 animals")
+        } else {
+            compose.onNodeWithTag("report-metric:active-goat").assertDoesNotExist()
+        }
     }
 
     private fun choose(action: String, farmId: String = fixture.farmId) {
         render(farmId)
-        compose.onNodeWithTag("report-open-export").performScrollTo().performClick()
-        compose.onNodeWithTag(action).performScrollTo().performClick()
-        assertEquals(1, documents.launches)
-        assertEquals(0, provider.opens.get())
+        clickTag("report-open-export")
+        awaitTag("farm-screen:FOS-REPORT-011")
+        compose.onNodeWithTag("farm-screen:FOS-REPORT-001").assertDoesNotExist()
+        clickTag(action)
+        compose.runOnIdle {
+            assertEquals(1, documents.launches)
+            assertEquals(0, provider.opens.get())
+        }
+    }
+
+    private fun clickTag(tag: String) {
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(hasTestTag(tag) and hasClickAction() and isEnabled())
+                .fetchSemanticsNodes().size == 1
+        }
+        compose.onNodeWithTag(tag)
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .performClick()
     }
 
     private fun deliver() = compose.runOnIdle { documents.deliver(uri) }
