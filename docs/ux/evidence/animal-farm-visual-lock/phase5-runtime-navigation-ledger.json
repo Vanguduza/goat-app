@@ -2,14 +2,14 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "f7ab02b443e07f6903f75821c78885f8369953ab",
-  "source_fingerprint": "sha256:ee5306253b8c13166c8ce79e3af8bf52ede370ff63ca071c2418b1accef84b35",
+  "tested_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
+  "source_fingerprint": "sha256:0a65545a83e6694540bbdbbe2f06efd118fd812e47c1a15a168984e8929d1c23",
   "ci_status": "CI_PENDING",
   "foundation_run_id": null,
   "additional_case_evidence": {
     "schema_version": 1,
     "mapping_path": "docs/ux/runtime-navigation-cases.json",
-    "mapping_sha256": "fc99e9dd1c76f115531d826cbc2756ca6c64bf089222ab70ce64ebecc2d0ecfd",
+    "mapping_sha256": "bdad010b5bec7003681110f7d9636ba0a04c5758f9418ee8679b3dab8559cb37",
     "sources": [
       {
         "path": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
@@ -25,14 +25,14 @@
       },
       {
         "path": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
-        "sha256": "2987462984a4843e93ca43af3045c517d2c28cae0497350e139d2b05fc0fef49",
-        "reviewed_source_commit": "4a556f3b5a8fe20cce89e954d52288b3545270eb",
+        "sha256": "9a66a528058d1025c0a3a1141c7ae2d5b86ab4e272b69adb5b9b8a7ae9a1954f",
+        "reviewed_source_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
         "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest"
       },
       {
         "path": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
-        "sha256": "b346b96137f62e20d82fa7df175f67fc49a4134c3d7a2de58a9b500b5ec8f215",
-        "reviewed_source_commit": "4da815809efad7259c61fd7900bd01e38b07aaea",
+        "sha256": "a2b445b852d0f3514730177839115b73b466d92b7bd3ca1213119e3baccf650f",
+        "reviewed_source_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
         "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest"
       },
       {
