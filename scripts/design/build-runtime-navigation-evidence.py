@@ -4,12 +4,15 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "development"))
+from source_evidence import source_fingerprint as fingerprint_source_tree
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml"
@@ -105,18 +108,7 @@ def git_head() -> str:
 
 
 def source_fingerprint() -> str:
-    digest = hashlib.sha256()
-    inputs = [REGISTRY, IMPL_MAP]
-    for base in ("app", "core", "data", "domain", "feature"):
-        inputs.extend(sorted((ROOT / base).rglob("*.kt"), key=lambda path: path.relative_to(ROOT).as_posix()))
-    for path in inputs:
-        digest.update(path.relative_to(ROOT).as_posix().encode())
-        digest.update(b"\0")
-        canonical = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-        digest.update(canonical)
-        digest.update(b"\0")
-    return "sha256:" + digest.hexdigest()
-
+    return fingerprint_source_tree(ROOT)
 
 def build(status: str, run_id: int | None) -> dict:
     entry_sources = ids_in(ENTRY_ACTION_TESTS)

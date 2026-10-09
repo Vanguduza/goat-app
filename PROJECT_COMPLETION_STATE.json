@@ -2,7 +2,7 @@
   "schema_version": 1,
   "repository": "Vanguduza/goat-app",
   "canonical_branch": "main",
-  "source_fingerprint": "sha256:b00601f98a3f92871bfdf4a91e6830cbe89d4488dc0315f231671243e1697f26",
+  "source_fingerprint": "sha256:3d784a6dd8d710f960aa50fd0704fe96f7c1aceeec723ba0b7a7788a04ca9e6e",
   "programme_status": "ACTIVE_DETERMINISTIC_COMPLETION",
   "release_blocked": true,
   "authority": {
@@ -41,8 +41,8 @@
     "modules_green": 0,
     "visual_green_screens": 0,
     "qdu_states": {
-      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 306,
-      "PLANNED_NOT_IMPLEMENTED": 239
+      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 519,
+      "PLANNED_NOT_IMPLEMENTED": 26
     }
   },
   "module_plan": {

@@ -78,9 +78,7 @@ def role_dispatch_ids():
     return {f'FOS-HOME-012-{letter}' for letter in 'ABCDEFGH'}
 
 
-def route_evidence(screen_id, mapped, code, role_ids, route_kinds):
-    if route_kinds.get(screen_id) in ('STATE', 'COMPONENT'):
-        return 'NON_ROUTE_BY_DESIGN'
+def route_evidence(screen_id, mapped, code, role_ids):
     if screen_id in role_ids:
         return 'STATIC_ROLE_DISPATCH_PRESENT'
     if screen_id == 'FOS-GLOBAL-001':
@@ -139,7 +137,6 @@ def main():
 
     registry = yaml.safe_load(REGISTRY.read_text())
     screens = registry['screens']
-    route_kinds = {s['screen_id']: s.get('route_kind') for s in screens}
     mapped = mapped_ids()
     code = kotlin_ids()
     role_ids = role_dispatch_ids()
@@ -151,7 +148,7 @@ def main():
     rows = []
     for screen in screens:
         sid = screen['screen_id']
-        evidence = route_evidence(sid, mapped, code, role_ids, route_kinds)
+        evidence = route_evidence(sid, mapped, code, role_ids)
         rendered = sid in runtime['rendered']
         rendered_owner = sid in runtime['rendered_owner']
         entry = sid in runtime['entry']
@@ -164,8 +161,6 @@ def main():
             note = 'Entry action emitted the exact typed destination in CI; rendered target traversal remains unexecuted.'
         elif contract:
             note = 'Typed route ownership contract passed CI; rendered target traversal remains unexecuted.'
-        elif evidence == 'NON_ROUTE_BY_DESIGN':
-            note = 'Registry row is a UI state or component, not a navigable route; no route evidence is expected.'
         elif evidence != 'NO_ROUTE_EVIDENCE':
             note = 'Static evidence only; execute route/interaction tests before treating as reachable.'
         else:

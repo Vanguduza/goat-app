@@ -62,18 +62,16 @@ const mappedIds = new Set([...mapText.matchAll(/FOS-[A-Z]+-[0-9]+(?:-[A-Z])?/g)]
 const registrySet = new Set(registryIds);
 const mappedRegistered = [...mappedIds].filter((id) => registrySet.has(id));
 
-const allKt = [];
-for (const base of ['app', 'feature', 'core']) {
-  const stack = [path.join(root, base)];
-  while (stack.length) {
-    const current = stack.pop();
-    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
-      const p = path.join(current, entry.name);
-      if (entry.isDirectory()) stack.push(p);
-      else if (entry.isFile() && p.endsWith('.kt')) allKt.push(p);
-    }
-  }
-}
+// Inventory source files consistently before and after Gradle/KSP execution.
+const kotlinPaths = cp.execFileSync(
+  'git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z', '--', '*.kt'],
+  { cwd: root, encoding: 'utf8' },
+).split('\0');
+const allKt = [...new Set(kotlinPaths)]
+  .filter((name) => /^(app|feature|core)\//.test(name))
+  .map((name) => path.join(root, name))
+  .filter((name) => fs.existsSync(name))
+  .sort();
 const codeText = allKt.map((p) => fs.readFileSync(p, 'utf8')).join('\n');
 const codeIds = new Set([...codeText.matchAll(/FOS-[A-Z]+-[0-9]+(?:-[A-Z])?/g)].map((m) => m[0]));
 const codeRegistered = [...codeIds].filter((id) => registrySet.has(id));
@@ -182,7 +180,15 @@ if (args.includes('--self-test')) {
   const assert = (ok, msg) => { if (!ok) throw new Error(msg); };
   assert(report.registry.exact_entries === 545, `expected 545 registry entries, got ${report.registry.exact_entries}`);
   assert(report.registry.unique_entries === 545, 'registry IDs must be unique');
-  assert(farmModules.length === 20, `expected 20 FarmModule values, got ${farmModules.length}`);
+  const expectedFarmModules = [
+    'HOME', 'GOAT', 'RABBIT', 'SHEEP', 'CATTLE', 'POULTRY', 'TASKS', 'HEALTH', 'MONEY', 'INVENTORY',
+    'GROUPS', 'PASTURE', 'LABOUR', 'ASSETS', 'FEED', 'WATER', 'SALES', 'PROCUREMENT', 'WAITLIST', 'REPORTS',
+    'GENETICS', 'CAPACITY', 'ANALYTICS', 'SIMULATION', 'AI',
+  ];
+  assert(
+    farmModules.length === expectedFarmModules.length && expectedFarmModules.every((name) => farmModules.includes(name)),
+    `FarmModule identities changed: expected ${expectedFarmModules.join(', ')}, got ${farmModules.join(', ')}`,
+  );
   assert(personas.length === 9, `expected 9 role personas, got ${personas.length}`);
   assert(!renderOnly.includes('RabbitPage.NESTS'), 'RabbitPage.NESTS must have a dashboard transition');
   assert(preemptedModules.length === 0, 'dedicated module hosts must not remain duplicated in OperatingModuleHost');

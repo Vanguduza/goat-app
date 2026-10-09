@@ -2,8 +2,8 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "e1d72de5731b791f604409026dd23d8949ecb87c",
-  "source_fingerprint": "sha256:b00601f98a3f92871bfdf4a91e6830cbe89d4488dc0315f231671243e1697f26",
+  "tested_commit": "e7fd6678fcc24d83b5f7d853f305d50643ead721",
+  "source_fingerprint": "sha256:3d784a6dd8d710f960aa50fd0704fe96f7c1aceeec723ba0b7a7788a04ca9e6e",
   "ci_status": "CI_PENDING",
   "foundation_run_id": null,
   "test_sources": {
@@ -474,10 +474,14 @@
     "route_contract": {
       "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt": [
         "FOS-ADMIN-001",
+        "FOS-AI-001",
+        "FOS-AN-001",
         "FOS-ASSET-001",
+        "FOS-CAP-001",
         "FOS-CATTLE-001",
         "FOS-FEED-001",
         "FOS-FIN-001",
+        "FOS-GEN-001",
         "FOS-GOAT-001",
         "FOS-GOAT-006",
         "FOS-GOAT-007",
@@ -510,6 +514,7 @@
         "FOS-REPORT-001",
         "FOS-SALES-001",
         "FOS-SHEEP-001",
+        "FOS-SIM-001",
         "FOS-SYNC-002",
         "FOS-SYNC-004",
         "FOS-SYNC-005",
@@ -547,8 +552,8 @@
     "entry_action_screen_count": 27,
     "rendered_traversal_screen_count": 201,
     "rendered_owner_screen_count": 100,
-    "route_contract_screen_count": 62,
-    "combined_screen_count": 305,
+    "route_contract_screen_count": 67,
+    "combined_screen_count": 310,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -885,10 +890,14 @@
     ],
     "route_contract_screen_ids": [
       "FOS-ADMIN-001",
+      "FOS-AI-001",
+      "FOS-AN-001",
       "FOS-ASSET-001",
+      "FOS-CAP-001",
       "FOS-CATTLE-001",
       "FOS-FEED-001",
       "FOS-FIN-001",
+      "FOS-GEN-001",
       "FOS-GLOBAL-002",
       "FOS-GLOBAL-005",
       "FOS-GLOBAL-006",
@@ -936,6 +945,7 @@
       "FOS-REPORT-001",
       "FOS-SALES-001",
       "FOS-SHEEP-001",
+      "FOS-SIM-001",
       "FOS-SYNC-002",
       "FOS-SYNC-004",
       "FOS-SYNC-005",
@@ -948,6 +958,10 @@
       "FOS-WATER-001"
     ],
     "route_contract_only_screen_ids": [
+      "FOS-AI-001",
+      "FOS-AN-001",
+      "FOS-CAP-001",
+      "FOS-GEN-001",
       "FOS-GLOBAL-005",
       "FOS-GLOBAL-016",
       "FOS-GLOBAL-017",
@@ -962,6 +976,7 @@
       "FOS-HOME-012-F",
       "FOS-HOME-012-G",
       "FOS-HOME-012-H",
+      "FOS-SIM-001",
       "FOS-TASK-003"
     ],
     "missing_registry_ids": []
