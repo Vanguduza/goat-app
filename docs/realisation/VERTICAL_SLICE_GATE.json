@@ -3,7 +3,7 @@
   "name": "Register Goat + Record Weight Offline + Sync + Search",
   "updated_at": "2026-10-02",
   "certificate": "VERTICAL_SLICE_GREEN",
-  "architecture_lock_note": "Gates VS-01–VS-20 remain the 3 September 2026 pre-lock Supabase/Meilisearch proof. Gates VS-21–VS-24 are the locked local-first slice (Room + LAN/Drive contract + local search). FEATURE_GREEN remains false. Re-pin certificate_commit only after canonical CI on the local-first tests succeeds on main.",
+  "architecture_lock_note": "Gates VS-01-VS-20 remain the 3 September 2026 pre-lock Supabase/Meilisearch proof. Gates VS-21-VS-24 are the locked local-first slice, proven on main 9bc3001258f291fd8baa60e30026d55f10847171 GitHub Actions run 37028681388. FEATURE_GREEN remains false.",
   "feature_green": false,
   "module_green": false,
   "mvp_green": false,
@@ -35,7 +35,9 @@
       "requirement": "Goat registration is locally durable before success UI",
       "state": "PROVEN",
       "evidence_type": "android_instrumentation + repository transaction",
-      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "tests": [
+        "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"
+      ],
       "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -44,7 +46,9 @@
       "requirement": "Weight capture is locally durable before success UI",
       "state": "PROVEN",
       "evidence_type": "android_instrumentation + repository transaction",
-      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "tests": [
+        "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"
+      ],
       "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -53,7 +57,9 @@
       "requirement": "Local durability survives process/device restart",
       "state": "PROVEN_DB_REOPEN",
       "evidence_type": "connected android instrumentation",
-      "tests": ["core/database/src/androidTest/kotlin/com/farmos/core/database/FarmOsDatabasePersistenceTest.kt"],
+      "tests": [
+        "core/database/src/androidTest/kotlin/com/farmos/core/database/FarmOsDatabasePersistenceTest.kt"
+      ],
       "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
       "remaining_limitation": "File-backed Room close/reopen is proven. A full physical device reboot was not executed."
     },
@@ -62,7 +68,9 @@
       "requirement": "Outbox retry state machine is deterministic",
       "state": "PROVEN",
       "evidence_type": "unit",
-      "tests": ["core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt"],
+      "tests": [
+        "core/sync/src/test/kotlin/com/farmos/core/sync/SyncEngineTest.kt"
+      ],
       "latest_passing_evidence": "android job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -71,7 +79,9 @@
       "requirement": "Duplicate mutation has one authoritative effect",
       "state": "PROVEN",
       "evidence_type": "pgTAP",
-      "tests": ["supabase/tests/database/foundation_vertical_slice_behavior_test.sql"],
+      "tests": [
+        "supabase/tests/database/foundation_vertical_slice_behavior_test.sql"
+      ],
       "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -92,7 +102,9 @@
       "requirement": "RLS attack from another farm fails",
       "state": "PROVEN",
       "evidence_type": "pgTAP",
-      "tests": ["supabase/tests/database/foundation_vertical_slice_behavior_test.sql"],
+      "tests": [
+        "supabase/tests/database/foundation_vertical_slice_behavior_test.sql"
+      ],
       "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -101,7 +113,9 @@
       "requirement": "Cross-farm FK attack fails",
       "state": "PROVEN",
       "evidence_type": "pgTAP",
-      "tests": ["supabase/tests/database/foundation_vertical_slice_behavior_test.sql"],
+      "tests": [
+        "supabase/tests/database/foundation_vertical_slice_behavior_test.sql"
+      ],
       "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -122,7 +136,9 @@
       "requirement": "Monotonic pull cursor reconciles device state",
       "state": "PROVEN",
       "evidence_type": "android_instrumentation",
-      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "tests": [
+        "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"
+      ],
       "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -131,7 +147,9 @@
       "requirement": "Second-device visibility is proven",
       "state": "PROVEN",
       "evidence_type": "android_instrumentation with isolated Room databases",
-      "tests": ["app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"],
+      "tests": [
+        "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"
+      ],
       "latest_passing_evidence": "android-device-e2e on 6c7c79a / run 33801257315",
       "remaining_limitation": "Two isolated Room databases on one emulator. Same authenticated farm member on both stores."
     },
@@ -140,7 +158,9 @@
       "requirement": "Search indexing is eventually updated",
       "state": "PROVEN",
       "evidence_type": "live search pipeline",
-      "tests": ["scripts/ci/verify-search-pipeline.sh"],
+      "tests": [
+        "scripts/ci/verify-search-pipeline.sh"
+      ],
       "latest_passing_evidence": "search-pipeline job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -161,7 +181,9 @@
       "requirement": "Meilisearch outage cannot block authoritative capture",
       "state": "PROVEN",
       "evidence_type": "live search pipeline outage/retry",
-      "tests": ["scripts/ci/verify-search-pipeline.sh"],
+      "tests": [
+        "scripts/ci/verify-search-pipeline.sh"
+      ],
       "latest_passing_evidence": "search-pipeline job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -170,7 +192,9 @@
       "requirement": "Meilisearch rebuild is demonstrated",
       "state": "PROVEN",
       "evidence_type": "live search pipeline rebuild",
-      "tests": ["scripts/ci/verify-search-pipeline.sh"],
+      "tests": [
+        "scripts/ci/verify-search-pipeline.sh"
+      ],
       "latest_passing_evidence": "search-pipeline job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -179,7 +203,9 @@
       "requirement": "Device clock drift is handled",
       "state": "PROVEN",
       "evidence_type": "pgTAP",
-      "tests": ["supabase/tests/database/clock_drift_behavior_test.sql"],
+      "tests": [
+        "supabase/tests/database/clock_drift_behavior_test.sql"
+      ],
       "latest_passing_evidence": "supabase job on 6c7c79a / run 33801257315",
       "remaining_limitation": null
     },
@@ -227,61 +253,67 @@
       "requirement": "Android + database CI pass canonical tests",
       "state": "PROVEN",
       "evidence_type": "canonical GitHub Actions",
-      "tests": [".github/workflows/foundation-ci.yml"],
+      "tests": [
+        ".github/workflows/foundation-ci.yml"
+      ],
       "latest_passing_evidence": "run 33801257315 on 6c7c79a: android, android-device-e2e, supabase, edge-functions, meilisearch-contract, search-pipeline all success",
       "remaining_limitation": null
     },
     {
       "id": "VS-21",
       "requirement": "Goat registration and weight are locally durable and visible on a second Room device over farm LAN, then local search",
-      "state": "IMPLEMENTED_AWAITING_CANONICAL_CI",
+      "state": "PROVEN",
       "evidence_type": "robolectric + connected android instrumentation",
       "tests": [
         "app/src/test/java/com/farmos/app/LocalFirstVerticalSliceTest.kt",
         "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"
       ],
-      "latest_passing_evidence": null,
-      "remaining_limitation": "Second-device proof uses two Room databases (unit: in-memory; e2e: file-backed) and loopback LAN, not two physical handsets. Flip to PROVEN only after canonical CI on main."
+      "latest_passing_evidence": "android and android-device-e2e on 9bc3001 / run 37028681388",
+      "remaining_limitation": "Second-device proof uses two Room databases (unit: in-memory; e2e: file-backed) and loopback LAN, not two physical handsets."
     },
     {
       "id": "VS-22",
       "requirement": "A down LAN transport cannot roll back an accepted local goat save; Drive journal catch-up applies the same operations",
-      "state": "IMPLEMENTED_AWAITING_CANONICAL_CI",
+      "state": "PROVEN",
       "evidence_type": "robolectric",
-      "tests": ["app/src/test/java/com/farmos/app/LocalFirstVerticalSliceTest.kt"],
-      "latest_passing_evidence": null,
-      "remaining_limitation": "Drive uses the in-process journal contract, not Google Drive REST. Flip to PROVEN only after canonical CI on main."
+      "tests": [
+        "app/src/test/java/com/farmos/app/LocalFirstVerticalSliceTest.kt"
+      ],
+      "latest_passing_evidence": "android and android-device-e2e on 9bc3001 / run 37028681388",
+      "remaining_limitation": "Drive uses the in-process journal contract, not Google Drive REST."
     },
     {
       "id": "VS-23",
       "requirement": "Another farm cannot ingest the goat journal; a lost device cannot synchronise; duplicate bundles apply once",
-      "state": "IMPLEMENTED_AWAITING_CANONICAL_CI",
+      "state": "PROVEN",
       "evidence_type": "robolectric + connected android instrumentation",
       "tests": [
         "app/src/test/java/com/farmos/app/LocalFirstVerticalSliceTest.kt",
         "app/src/androidTest/kotlin/com/farmos/app/RevokedMembershipClientTest.kt"
       ],
-      "latest_passing_evidence": null,
-      "remaining_limitation": "Flip to PROVEN only after canonical CI on main."
+      "latest_passing_evidence": "android and android-device-e2e on 9bc3001 / run 37028681388",
+      "remaining_limitation": "Tests cover presented revoked identities and duplicate bundles. They do not prove per-origin operation signatures or resistance to a formerly trusted device impersonating another origin with retained farm keys."
     },
     {
       "id": "VS-24",
       "requirement": "File-backed Room close/reopen keeps goat registration and weight before LAN transfer",
-      "state": "IMPLEMENTED_AWAITING_CANONICAL_CI",
+      "state": "PROVEN",
       "evidence_type": "connected android instrumentation",
       "tests": [
         "core/database/src/androidTest/kotlin/com/farmos/core/database/FarmOsDatabasePersistenceTest.kt",
         "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt"
       ],
-      "latest_passing_evidence": null,
-      "remaining_limitation": "File-backed Room close/reopen is proven by the tests once CI runs. A full physical device reboot was not executed."
+      "latest_passing_evidence": "android and android-device-e2e on 9bc3001 / run 37028681388",
+      "remaining_limitation": "File-backed Room close/reopen is proven. A full physical device reboot was not executed."
     }
   ],
   "activation_blockers": [
-    "Re-pin VERTICAL_SLICE_GREEN certificate_commit after canonical CI proves VS-21–VS-24 on main.",
     "Google Drive REST gateway is not configured; Drive remains a transport contract.",
     "VISUAL_GREEN remains 0 until native goldens have independent owner approval. Inter is bundled.",
     "Goat health, reproduction, and other species/shared modules have an operating spine only; FEATURE_GREEN, MODULE_GREEN, and MVP_GREEN are not claimed.",
     "Do not convert a green architecture slice or this fan-out spine into FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN."
-  ]
+  ],
+  "local_first_evidence_commit": "9bc3001258f291fd8baa60e30026d55f10847171",
+  "local_first_evidence_run": "https://github.com/Vanguduza/goat-app/actions/runs/37028681388",
+  "local_first_evidence_scope": "Historical local-first slice evidence at the pinned commit and run. This is not certification of the subsequent Muse consolidation, production Google Drive REST, physical devices, or full feature/MVP completion."
 }
