@@ -115,7 +115,9 @@ dependencies {
     implementation(project(":feature:rabbit"))
     implementation(project(":feature:ops"))
 
-    implementation(platform("androidx.compose:compose-bom:2026.08.00"))
+    val composeBom = platform("androidx.compose:compose-bom:2026.08.00")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
     implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.foundation:foundation")

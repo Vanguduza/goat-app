@@ -24,7 +24,11 @@ The emulator, application installation and build must be isolated testing resour
 
 ## Evidence boundary
 
-Compilation and execution are pending. The final integrated candidate must include the independently reviewed local-session/key-bootstrap repairs before device execution; this test does not supply a runtime bypass for them.
+The first integrated build at `88de9dabf8e277bf0fb7a6ef4a21769041761aa4` ran from 2026-10-09T16:20:53.513147Z to 2026-10-09T16:34:15.576021Z. Its retained reports contain 788 unit-test cases and no recorded failed cases, but the combined build **failed** at `:app:processDebugAndroidTestManifest`: `debugAndroidTestRuntimeClasspath` could not resolve `androidx.compose.ui:ui-test-junit4` because no version constraint applied to that configuration. The instrumentation journey did not execute. The result record `combined-native-attempt1-result.json` has SHA-256 `589b9843003d84752a10bad44c51a7fc95047dafa22be1c9dc5ee9bebb1ab524`; its log `combined-native-attempt1-gradle.log` has SHA-256 `83dc0e09afccb952cfe2334f650d3fc26830972414e2ab8e0368426a87f3bf73`.
+
+The correction shares the existing Compose BOM `2026.08.00` between `implementation` and `androidTestImplementation`, following the [official Android BOM configuration](https://developer.android.com/develop/ui/compose/bom). It preserves the app\'s existing dependency version and changes no journey assertion. Targeted instrumentation packaging and device execution remain pending; this is not a full-CI or release pass.
+
+The final integrated candidate must include the independently reviewed local-session/key-bootstrap repairs before device execution; this test does not supply a runtime bypass for them.
 
 Activity recreation is not process death, a physical-device restart, filesystem power loss or a second device. The local-only build and unconfigured Drive account do not constitute radio/network isolation, live Google consent, Drive restoration, physical hardware evidence or owner field acceptance. Existing file-backed Room reopen and authenticated loopback replication tests provide separate evidence under their recorded scope.
 
