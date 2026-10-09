@@ -2,8 +2,8 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "e7fd6678fcc24d83b5f7d853f305d50643ead721",
-  "source_fingerprint": "sha256:3d784a6dd8d710f960aa50fd0704fe96f7c1aceeec723ba0b7a7788a04ca9e6e",
+  "tested_commit": "7ebe652003f24c8b7aa06e75450c24a37081fc9e",
+  "source_fingerprint": "sha256:ff324a100b081b0e4252cf1b7c0db1bf5227cc65cea7b4d67b25cc92f6c03bb3",
   "ci_status": "CI_PENDING",
   "foundation_run_id": null,
   "test_sources": {
@@ -68,6 +68,7 @@
         "FOS-CATTLE-029",
         "FOS-CATTLE-030",
         "FOS-CATTLE-032",
+        "FOS-FIN-001",
         "FOS-FIN-002",
         "FOS-FIN-004",
         "FOS-FIN-005",
@@ -306,7 +307,8 @@
       "app/src/test/java/com/farmos/app/GlobalSearchContractTest.kt": [
         "FOS-ATOM-031",
         "FOS-HOME-006",
-        "FOS-HOME-007"
+        "FOS-HOME-007",
+        "FOS-SEARCH-004"
       ],
       "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt": [
         "FOS-CATTLE-018",
@@ -325,7 +327,8 @@
         "FOS-ATOM-009",
         "FOS-ATOM-011",
         "FOS-ATOM-034",
-        "FOS-PROC-001"
+        "FOS-PROC-001",
+        "FOS-PROC-006"
       ],
       "app/src/test/java/com/farmos/app/AssetsCaptureOwnerTest.kt": [
         "FOS-ASSET-001",
@@ -364,9 +367,12 @@
         "FOS-INV-012"
       ],
       "app/src/test/java/com/farmos/app/LocalFarmEntryTest.kt": [
+        "FOS-ADMIN-013",
         "FOS-GLOBAL-002",
         "FOS-GLOBAL-004",
-        "FOS-GLOBAL-006"
+        "FOS-GLOBAL-006",
+        "FOS-GLOBAL-008",
+        "FOS-GLOBAL-014"
       ],
       "app/src/test/java/com/farmos/app/RabbitCaptureOwnerTest.kt": [
         "FOS-RABBIT-006",
@@ -387,7 +393,8 @@
       "app/src/test/java/com/farmos/app/FarmNetworkPairingUiTest.kt": [
         "FOS-ADMIN-021",
         "FOS-GLOBAL-002",
-        "FOS-GLOBAL-007"
+        "FOS-GLOBAL-007",
+        "FOS-GLOBAL-014"
       ],
       "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt": [
         "FOS-ATOM-026",
@@ -550,10 +557,10 @@
   "coverage": {
     "registered_screen_count": 545,
     "entry_action_screen_count": 27,
-    "rendered_traversal_screen_count": 201,
-    "rendered_owner_screen_count": 100,
+    "rendered_traversal_screen_count": 202,
+    "rendered_owner_screen_count": 105,
     "route_contract_screen_count": 67,
-    "combined_screen_count": 310,
+    "combined_screen_count": 315,
     "entry_action_screen_ids": [
       "FOS-ASSET-001",
       "FOS-CATTLE-001",
@@ -625,6 +632,7 @@
       "FOS-CATTLE-035",
       "FOS-FEED-003",
       "FOS-FEED-006",
+      "FOS-FIN-001",
       "FOS-FIN-002",
       "FOS-FIN-004",
       "FOS-FIN-005",
@@ -794,6 +802,7 @@
       "FOS-ADMIN-006",
       "FOS-ADMIN-007",
       "FOS-ADMIN-011",
+      "FOS-ADMIN-013",
       "FOS-ADMIN-021",
       "FOS-ADMIN-023",
       "FOS-ADMIN-024",
@@ -823,6 +832,8 @@
       "FOS-GLOBAL-004",
       "FOS-GLOBAL-006",
       "FOS-GLOBAL-007",
+      "FOS-GLOBAL-008",
+      "FOS-GLOBAL-014",
       "FOS-GLOBAL-020",
       "FOS-GOAT-001",
       "FOS-GOAT-002",
@@ -867,6 +878,7 @@
       "FOS-POULTRY-016",
       "FOS-POULTRY-020",
       "FOS-PROC-001",
+      "FOS-PROC-006",
       "FOS-RABBIT-002",
       "FOS-RABBIT-003",
       "FOS-RABBIT-004",
@@ -878,6 +890,7 @@
       "FOS-SALES-002",
       "FOS-SALES-003",
       "FOS-SALES-007",
+      "FOS-SEARCH-004",
       "FOS-SHEEP-010",
       "FOS-SHEEP-030",
       "FOS-SYNC-003",
