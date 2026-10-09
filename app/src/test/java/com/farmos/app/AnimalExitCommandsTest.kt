@@ -8,6 +8,7 @@ import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.data.herd.AnimalExitCommands
 import com.farmos.domain.ops.RecordAnimalExit
 import com.farmos.domain.ops.ReverseAnimalExit
@@ -34,10 +35,15 @@ class AnimalExitCommandsTest {
     private val day = 20_300L
     private var clock = day * 86_400_000L
 
-    private fun database() = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
+    private fun database(device: String = "A") = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
-        .also { databases += it }
+        .also { db ->
+            databases += db
+            runBlocking {
+                seedCommandAuthority(db, farm, "manager-1", device, LocalRole.MANAGER)
+            }
+        }
 
     @After
     fun tearDown() = databases.forEach { it.close() }
@@ -96,7 +102,7 @@ class AnimalExitCommandsTest {
     @Test
     fun exitsReplayAndAConflictingExitWaitsForReview(): Unit = runBlocking {
         val aDb = database()
-        val bDb = database()
+        val bDb = database("B")
         listOf(aDb, bDb).forEach { it.animal("g1") }
         val a = RoomReplicaEndpoint(aDb, farm, "A", replicationAppliers).apply { registerPairedDevice("B", "B") }
         val b = RoomReplicaEndpoint(bDb, farm, "B", replicationAppliers).apply { registerPairedDevice("A", "A") }

@@ -150,8 +150,13 @@ internal class FarmLanRuntime(
     private val attachments: FileAttachmentStore? = null,
 ) : Closeable {
     private val endpoint = RoomReplicaEndpoint(database, farmId, deviceId, farmAppliers(vault, deviceId))
-    private val keys = { vault.secretsForLocalFarm(farmId).keys }
-    private val identity = { farmIdentity(database, vault, farmId) }
+    private val keys = { readySecrets().keys }
+    private val identity = { readySecrets(); farmIdentity(database, vault, farmId) }
+
+    private fun readySecrets(): FarmSecrets {
+        runBlocking { database.reconcileFarmKeyRotations(farmId, deviceId, vault) }
+        return vault.secretsForLocalFarm(farmId)
+    }
     private val worker = Executors.newSingleThreadScheduledExecutor { runnable -> Thread(runnable, "goat-farm-lan").apply { isDaemon = true } }
     private val resources = mutableListOf<Closeable>()
     @Volatile private var syncPort: Int? = null
@@ -163,7 +168,7 @@ internal class FarmLanRuntime(
     fun start(intervalSeconds: Long = SYNC_INTERVAL_SECONDS): FarmLanRuntime {
         worker.execute {
             runCatching {
-                runBlocking { database.announceIdentity(farmId, deviceId, vault.secretsForLocalFarm(farmId).device, clock()) }
+                runBlocking { database.announceIdentity(farmId, deviceId, readySecrets().device, clock()) }
                 val server = LanSyncServer(endpoint, keys, identity = identity(), blobs = attachments?.source(farmId)).start(InetSocketAddress(0))
                 resources += server
                 syncPort = server.port
@@ -241,6 +246,15 @@ internal class FarmLanRuntime(
         }
 
     private fun syncNow() {
+        try {
+            syncPeers()
+        } catch (failure: Exception) {
+            mutableState.value = mutableState.value.copy(lastOutcomes = emptyList(), lastError = failure.message ?: "The farm network could not synchronise")
+        }
+    }
+
+    private fun syncPeers() {
+        readySecrets()
         val outcomes = mutableState.value.peers.map { peer ->
             LanPeerTransport(peer.host, peer.port, farmId, deviceId, keys, endpoint::maySynchronise, identity = identity()).use { transport ->
                 val outcome = runCatching { SyncSession.run(endpoint, transport) }

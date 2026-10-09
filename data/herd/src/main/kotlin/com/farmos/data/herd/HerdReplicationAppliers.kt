@@ -44,7 +44,10 @@ object HerdReplicationAppliers {
                 herd.setStatus(fields.text("animalId"), fields.text("status"), context(op))
             },
         )
-    }.toMap()
+    }.toMap() + mapOf(
+        "rabbit.record_weight.v1" to RabbitWeightReplication.legacy,
+        RabbitWeightReplication.GRAMS_V2 to RabbitWeightReplication.gramsV2,
+    )
 
     private fun JsonObject.text(key: String): String = getValue(key).jsonPrimitive.content
 

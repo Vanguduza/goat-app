@@ -9,6 +9,7 @@ import com.farmos.core.model.LocalCommandResult
 import com.farmos.domain.ops.CreateFarmWorker
 import com.farmos.domain.ops.UpdateFarmWorker
 import com.farmos.domain.ops.WorkerRules
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -25,7 +26,7 @@ class WorkerRegisterCommands(
 ) {
     suspend fun create(command: CreateFarmWorker, context: LocalCommandContext): LocalCommandResult {
         WorkerRules.name(command.name)?.let { error(it) }
-        journal(context, CREATE, command.workerId, json.encodeToString(command)) {
+        journal(context, CREATE, command.workerId, command) {
             if (database.workers().get(farmId, command.workerId) == null) {
                 database.workers().upsert(FarmWorkerEntity(command.workerId, farmId, command.name.trim(), true, context.occurredAtEpochMillis, context.actorId))
             }
@@ -35,8 +36,7 @@ class WorkerRegisterCommands(
 
     suspend fun update(command: UpdateFarmWorker, context: LocalCommandContext): LocalCommandResult {
         WorkerRules.update(command)?.let { error(it) }
-        requireNotNull(database.workers().get(farmId, command.workerId)) { "Worker not found" }
-        journal(context, UPDATE, command.workerId, json.encodeToString(command)) {
+        journal(context, UPDATE, command.workerId, command) {
             val current = requireNotNull(database.workers().get(farmId, command.workerId)) { "Worker not found" }
             // The later change by business time wins, whatever order changes arrive in.
             if (current.updatedAtEpochMillis <= context.occurredAtEpochMillis) {
@@ -53,11 +53,23 @@ class WorkerRegisterCommands(
         return LocalCommandResult(context.mutationId, command.workerId, true)
     }
 
-    private suspend fun journal(context: LocalCommandContext, commandName: String, workerId: String, payloadJson: String, localWrite: suspend () -> Unit) {
+    private suspend inline fun <reified C> journal(context: LocalCommandContext, commandName: String, workerId: String, command: C, noinline localWrite: suspend () -> Unit) {
         require(context.farmId == farmId) { "Farm context mismatch" }
-        if (replaying) return database.withTransaction { localWrite() }
         database.withTransaction {
+            val payloadJson = json.encodeToString(command)
+            val permission = OpsCommandPermissions.requiredFor(commandName, payloadJson)
+            if (!replaying) database.requireLocalCommandAuthority(context, permission)
+            val original = database.replication().operation(farmId, context.mutationId)
+            if (original != null) {
+                requireOriginalCommand(original, context, commandName, "farm_worker", workerId, {
+                    json.decodeFromString<C>(it) == command
+                })
+                if (database.commandAlreadyApplied(original, replaying)) return@withTransaction
+            } else {
+                require(!replaying) { "A received change must be journalled before it is applied" }
+            }
             localWrite()
+            if (replaying) return@withTransaction
             database.journalLocalOperation(
                 operationId = context.mutationId,
                 farmId = farmId,

@@ -10,6 +10,7 @@ import com.farmos.core.database.UnappliedOperation
 import com.farmos.core.database.journalLocalOperation
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.AnimalExitCommands
+import com.farmos.domain.access.Permission
 import com.farmos.domain.ops.ReverseAnimalExit
 import java.time.Instant
 import java.time.ZoneOffset
@@ -70,7 +71,7 @@ internal suspend fun FarmOsDatabase.loadConflictReview(farmId: String, limit: In
 /** Every field the received change recorded, as sent, for Conflict Detail. */
 internal suspend fun FarmOsDatabase.conflictDetail(farmId: String, item: ConflictItem): ConflictDetail {
     val payload = replication().operation(farmId, item.operationId)?.payloadJson?.let { runCatching { JSONObject(it) }.getOrNull() }
-    val fields = if (payload == null) emptyList() else payload.keys().asSequence().sorted().map { key -> key to payload.opt(key).toString() }.toList()
+    val fields = if (payload == null) emptyList() else payload.keys().asSequence().sorted().map { key -> key to (payload.opt(key)?.toString() ?: "null") }.toList()
     return ConflictDetail(item, fields, correctionFor(item.operationType))
 }
 
@@ -82,12 +83,13 @@ internal suspend fun FarmOsDatabase.conflictDetail(farmId: String, item: Conflic
 internal suspend fun FarmOsDatabase.setAsideReceivedOperation(farmId: String, operationId: String, reason: String, context: LocalCommandContext) {
     require(context.farmId == farmId) { "Farm context mismatch" }
     require(reason.isNotBlank()) { "Say why this change is set aside" }
-    val operation = requireNotNull(replication().operation(farmId, operationId)) { "Change not found on this device" }
-    val application = replicationApplications().get(farmId, operationId)
-    require(application != null && application.state != ApplicationState.APPLIED.name && application.state != ApplicationState.SET_ASIDE.name) {
-        "Only a received change waiting for review can be set aside"
-    }
     withTransaction {
+        requireLocalAppPermission(farmId, context.actorId, context.deviceId, Permission.RESOLVE_SYNC_CONFLICTS)
+        val operation = requireNotNull(replication().operation(farmId, operationId)) { "Change not found on this device" }
+        val application = replicationApplications().get(farmId, operationId)
+        require(application != null && application.state != ApplicationState.APPLIED.name && application.state != ApplicationState.SET_ASIDE.name) {
+            "Only a received change waiting for review can be set aside"
+        }
         if (operation.operationType == AnimalExitCommands.RECORD) {
             val exit = JSONObject(operation.payloadJson)
             val day = Instant.ofEpochMilli(context.occurredAtEpochMillis).atZone(ZoneOffset.UTC).toLocalDate().toEpochDay()

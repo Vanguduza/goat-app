@@ -14,7 +14,7 @@
     "status": "CANONICAL_LINEAGE_ESTABLISHED",
     "reconciled_at_utc": "2026-09-10T14:20:53.692959+00:00",
     "release_blocked": true,
-    "release_block_reason": "No certified build exists. FEATURE_GREEN/MODULE_GREEN/MVP_GREEN/VISUAL_GREEN are all unmet; 0 screens carry native visual evidence.",
+    "release_block_reason": "No fully qualified product release exists. FEATURE_GREEN/MODULE_GREEN/MVP_GREEN/VISUAL_GREEN remain unmet. Current-main CI provides engineering and unapproved native evidence; independent visual approval and full-product acceptance remain open.",
     "default_branch_at_bootstrap": "main",
     "canonical_branch": "main",
     "consolidation_merge": "46585520e1c1262b3e760199d7b98ac8324815b9",

@@ -62,6 +62,7 @@ class TwoDeviceAuthoritativeSyncTest {
         val firstWeightId = UUID.randomUUID().toString()
 
         val databaseA = openDatabase(deviceADatabaseName)
+        seedAndroidCommandWorker(databaseA, farmId, "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", tabletId)
         val goatsA = RoomGoatRepository(databaseA, farmId, localDeviceId = tabletId)
         goatsA.registerGoat(
             RegisterGoat(animalId, "GT-024", "Nala", GoatSex.FEMALE, dateOfBirthEpochDay = 20_150),

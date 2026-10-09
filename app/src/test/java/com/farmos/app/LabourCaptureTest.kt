@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.data.herd.WorkerRegisterCommands
 import com.farmos.domain.ops.CreateFarmWorker
@@ -29,10 +30,13 @@ class LabourCaptureTest {
     private val databases = mutableListOf<FarmOsDatabase>()
     private var clock = 1_790_000_000_000L
 
-    private fun database() = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
+    private fun database(device: String = "A") = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
-        .also { databases += it }
+        .also { db ->
+            databases += db
+            seedCommandAuthority(db, farm, "supervisor-1", device, LocalRole.SUPERVISOR)
+        }
 
     @After
     fun tearDown() = databases.forEach { it.close() }
@@ -52,7 +56,7 @@ class LabourCaptureTest {
     @Test
     fun registeredWorkersAreChosenAndTotalsSurviveARenameAndReplicate(): Unit = runBlocking {
         val aDb = database()
-        val bDb = database()
+        val bDb = database("B")
         val register = WorkerRegisterCommands(aDb, farm)
         register.create(CreateFarmWorker("w1", "Tendai"), context())
         register.create(CreateFarmWorker("w2", "Rudo"), context())

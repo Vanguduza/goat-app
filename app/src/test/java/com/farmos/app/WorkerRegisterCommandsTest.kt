@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.data.herd.TaskSeriesCommands
 import com.farmos.data.herd.WorkerRegisterCommands
 import com.farmos.domain.ops.CreateFarmWorker
@@ -31,10 +32,15 @@ class WorkerRegisterCommandsTest {
     private val farm = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
     private val databases = mutableListOf<FarmOsDatabase>()
 
-    private fun database() = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
+    private fun database(device: String = "A") = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
-        .also { databases += it }
+        .also { db ->
+            databases += db
+            runBlocking {
+                seedCommandAuthority(db, farm, "supervisor-1", device, LocalRole.SUPERVISOR)
+            }
+        }
 
     @After
     fun tearDown() = databases.forEach { it.close() }
@@ -80,7 +86,7 @@ class WorkerRegisterCommandsTest {
     @Test
     fun theLaterChangeWinsOnEveryDevice(): Unit = runBlocking {
         val aDb = database()
-        val bDb = database()
+        val bDb = database("B")
         WorkerRegisterCommands(aDb, farm).create(CreateFarmWorker("w1", "Tendai"), context("A", 1))
         val a = RoomReplicaEndpoint(aDb, farm, "A", replicationAppliers).apply { registerPairedDevice("B", "B") }
         val b = RoomReplicaEndpoint(bDb, farm, "B", replicationAppliers).apply { registerPairedDevice("A", "A") }

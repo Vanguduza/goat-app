@@ -8,6 +8,7 @@ import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.data.herd.AnimalExitCommands
 import com.farmos.data.herd.CustomerCommands
 import com.farmos.domain.ops.RecordAnimalExit
@@ -33,10 +34,13 @@ class AnimalSaleTest {
     private val day = 20_300L
     private var clock = day * 86_400_000L
 
-    private fun database() = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
+    private fun database(device: String = "A") = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
-        .also { databases += it }
+        .also { db ->
+            databases += db
+            seedCommandAuthority(db, farm, "manager-1", device, LocalRole.MANAGER)
+        }
 
     @After
     fun tearDown() = databases.forEach { it.close() }
@@ -80,7 +84,7 @@ class AnimalSaleTest {
     @Test
     fun theMoneyRecordedTwiceOnTwoDevicesWaitsForReviewInsteadOfPostingTwice(): Unit = runBlocking {
         val aDb = database()
-        val bDb = database()
+        val bDb = database("B")
         listOf(aDb, bDb).forEach { it.goat("g1") }
         val a = RoomReplicaEndpoint(aDb, farm, "A", replicationAppliers).apply { registerPairedDevice("B", "B") }
         val b = RoomReplicaEndpoint(bDb, farm, "B", replicationAppliers).apply { registerPairedDevice("A", "A") }
@@ -97,5 +101,28 @@ class AnimalSaleTest {
             assertEquals(1, db.money().recent(farm, 10).size)
             assertEquals(1L, db.replicationApplications().count(farm, ApplicationState.FAILED.name))
         }
+    }
+
+    @Test
+    fun anAcceptedSaleRetriesAfterItsExitIsReversedWithoutPostingAgain(): Unit = runBlocking {
+        val db = database()
+        db.goat("g1")
+        val exits = AnimalExitCommands(db, farm)
+        val exitId = UUID.randomUUID().toString()
+        exits.record(RecordAnimalExit(exitId, "g1", "SALE", day, buyer = "Moyo"), context())
+        val acceptedSale = sale(exitId, "g1")
+        val acceptedContext = context()
+        val sales = CustomerCommands(db, farm)
+        sales.recordExitSale(acceptedSale, acceptedContext)
+        exits.reverse(ReverseAnimalExit(UUID.randomUUID().toString(), "g1", exitId, "Wrong goat", day), context())
+        val before = db.replication().count(farm)
+
+        sales.recordExitSale(acceptedSale, acceptedContext)
+
+        assertEquals("active", db.animals().get(farm, "g1")?.status)
+        assertEquals(1, db.money().recent(farm, 10).size)
+        assertEquals(15_000L, db.money().recent(farm, 10).single().amountMinor)
+        assertEquals(before, db.replication().count(farm))
+        assertEquals(acceptedContext.mutationId, db.replication().operation(farm, acceptedContext.mutationId)?.operationId)
     }
 }

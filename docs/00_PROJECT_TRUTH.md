@@ -164,7 +164,11 @@ Register Goat
 
 The slice must additionally prove duplicate mutation handling, farm-scoping attacks, clock drift, revoked or lost devices, transport outage, local search completeness and observability.
 
-The issued `VERTICAL_SLICE_GREEN` certificate (`docs/realisation/VERTICAL_SLICE_GATE.json`) remains the 3 September 2026 pre-lock proof against Supabase/Meilisearch. It authorises fan-out only. It is not proof of this locked slice. A post-lock evidence run is required before the certificate may be treated as architecture evidence.
+The original `VERTICAL_SLICE_GREEN` certificate remains the 3 September 2026 pre-lock Supabase/Meilisearch proof at `6c7c79a93dc54c74134a70b3763549b442c22349`, [run 33801257315](https://github.com/Vanguduza/goat-app/actions/runs/33801257315). It authorises feature fan-out only; its historical provenance is unchanged.
+
+Post-lock Room/LAN execution evidence is recorded separately by VS-21–VS-24 in [`VERTICAL_SLICE_GATE.json`](realisation/VERTICAL_SLICE_GATE.json), against main `9bc3001258f291fd8baa60e30026d55f10847171`, [run 37028681388](https://github.com/Vanguduza/goat-app/actions/runs/37028681388). Its emulator/loopback scope does not establish live Drive or two-physical-device acceptance.
+
+Main `936a94ea4ad6e88e3965612b8075b1683a4b3895` passed [Foundation run 37909999633](https://github.com/Vanguduza/goat-app/actions/runs/37909999633), including the declared connected tests and an unapproved native reference set. This execution evidence belongs to that commit and does not reissue or expand the historical certificate. Live Google/Drive, physical-device and full-product qualification remain subject to their complete contracts; see the [Google test qualification record](reviews/2026-10-09-google-test-qualification.md).
 
 ## 11. Authority hierarchy
 

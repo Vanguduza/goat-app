@@ -8,11 +8,8 @@ import com.farmos.core.database.OutboxEntity
 import com.farmos.core.database.insertOutboxAndJournal
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.model.SyncState
-import com.farmos.domain.access.AccessDenied
-import com.farmos.domain.access.AccountStatus
-import com.farmos.domain.access.LocalRole
-import com.farmos.domain.access.Permission
-import com.farmos.domain.access.RolePermissions
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -36,30 +33,27 @@ internal class OpsCommandJournal(
         aggregateId: String,
         expectedStreamVersion: Long?,
         payloadJson: String,
+        matchesPayload: (String) -> Boolean,
         localWrite: suspend () -> Unit,
     ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         database.withTransaction {
+            val permission = OpsCommandPermissions.requiredFor(commandName, payloadJson)
             if (!replaying) {
-                permissionFor(commandName)?.let { requireLocalPermission(context, it) }
-                val known = database.replication().operation(farmId, context.mutationId)
-                if (known != null) {
-                    require(known.operationType == commandName && known.entityType == aggregateType &&
-                        known.entityId == aggregateId && known.payloadJson == payloadJson) {
-                        "Mutation id was already used for a different change"
-                    }
-                    return@withTransaction
-                }
+                database.requireLocalCommandAuthority(context, permission)
             }
-            val original = if (replaying) database.replication().operation(farmId, context.mutationId) else null
-            val legacyPreference = commandName == UNIT_PREFERENCE &&
+            val original = database.replication().operation(farmId, context.mutationId)
+            val legacyPreference = replaying && commandName == UNIT_PREFERENCE &&
                 original?.entityType == "farm" && original.entityId == farmId
-            if (replaying) {
-                require(original != null && (legacyPreference ||
-                    (original.entityType == aggregateType && original.entityId == aggregateId))) {
-                    "Received operation does not identify the record being changed"
-                }
+            if (original != null) {
+                requireOriginalCommand(
+                    original, context, commandName, aggregateType, aggregateId, matchesPayload, legacyPreference,
+                )
+                if (database.commandAlreadyApplied(original, replaying)) return@withTransaction
+            } else {
+                require(!replaying) { "A received change must be journalled before it is applied" }
             }
+            if (!replaying) OpsCommandPermissions.requireLocalVersion(commandName)
             if (commandName in VERSIONED_UPDATES) {
                 val expected = originalBaseVersion(context, requireNotNull(expectedStreamVersion))
                 val actual = if (legacyPreference) {
@@ -86,7 +80,7 @@ internal class OpsCommandJournal(
                     actorId = context.actorId,
                     deviceId = context.deviceId,
                     commandName = commandName,
-                    commandSchemaVersion = 1,
+                    commandSchemaVersion = OpsCommandPermissions.schemaVersionFor(commandName),
                     aggregateType = aggregateType,
                     aggregateId = aggregateId,
                     aggregateOrdinal = ordinal,
@@ -104,25 +98,6 @@ internal class OpsCommandJournal(
             )
         }
     }
-    /** Only the extracted command paths are governed here; historical receipts retain their original authority. */
-    private suspend fun requireLocalPermission(context: LocalCommandContext, permission: Permission) {
-        val account = database.localAccess().account(farmId, context.actorId)
-        val role = account?.role?.let { runCatching { LocalRole.valueOf(it) }.getOrNull() }
-        if (account?.status != AccountStatus.ACTIVE.name || role == null || !RolePermissions.allows(role, permission)) {
-            throw AccessDenied("This account may not record this change on this farm")
-        }
-        val device = database.replication().device(farmId, context.deviceId)
-        if (device == null || !device.isLocal || device.status != "ACTIVE" || device.revokedAfterSequence != null) {
-            throw AccessDenied("This device may not record changes on this farm")
-        }
-    }
-
-    private fun permissionFor(commandName: String): Permission? = when {
-        commandName == UNIT_PREFERENCE -> Permission.MANAGE_FARM_SETTINGS
-        commandName in WORK_COMMANDS -> Permission.RECORD_FARM_WORK
-        else -> null // Untouched legacy handlers keep their existing boundary.
-    }
-
     /** Failed/unapplied receipts remain history, not accepted configuration versions. */
     private suspend fun appliedOperations(aggregateType: String, aggregateId: String): List<ReplicationOperationEntity> =
         database.replication().operationsForEntity(farmId, aggregateType, aggregateId).filter {
@@ -159,19 +134,24 @@ internal class OpsCommandJournal(
 
     private companion object {
         const val UNIT_PREFERENCE = "farm.record_unit_preference.v1"
-        // Existing ordinary work capture contract; settings has its explicit management permission above.
-        val WORK_COMMANDS = setOf(
-            "finance.record_budget.v1", "finance.revise_budget.v1",
-            "group.create.v1", "group.amend.v1", "group.animal_move.v1", "group.census.v1",
-            "poultry.flock_place.v1", "poultry.flock_move.v1", "poultry.flock_close.v1",
-            "asset.create.v1", "maintenance.record.v1", "asset.meter_record.v1",
-            "feed.issue.v1", "feed.record_plan.v1",
-            "water.record.v1", "water.record_point.v1", "water.record_point_event.v1",
-            "supplier.create.v1", "purchase.record.v1", "paddock.create.v1", "grazing.start.v1", "grazing.end.v1",
-        )
         val VERSIONED_UPDATES = setOf(
             UNIT_PREFERENCE, "group.amend.v1", "group.animal_move.v1",
             "poultry.flock_move.v1", "poultry.flock_close.v1",
         )
     }
 }
+
+/** Typed equality accepts omitted legacy defaults but never a changed replay payload. */
+internal suspend inline fun <reified C> OpsCommandJournal.enqueueCommand(
+    json: Json,
+    context: LocalCommandContext,
+    commandName: String,
+    aggregateType: String,
+    aggregateId: String,
+    expectedStreamVersion: Long?,
+    command: C,
+    noinline localWrite: suspend () -> Unit,
+) = enqueue(
+    context, commandName, aggregateType, aggregateId, expectedStreamVersion, json.encodeToString(command),
+    { original -> json.decodeFromString<C>(original) == command }, localWrite,
+)

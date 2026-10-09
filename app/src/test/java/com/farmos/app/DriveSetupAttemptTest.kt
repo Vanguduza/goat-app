@@ -33,6 +33,15 @@ class DriveSetupAttemptTest {
     }
 
     @Test
+    fun `approval codec preserves the local approver and never upgrades a legacy config`() {
+        val approved = config().copy(approvedByAccountId = "owner-1", approvedDeviceId = "device-1")
+        assertEquals(approved, DriveGatewayConfigCodec.decode(DriveGatewayConfigCodec.encode(approved)))
+        val legacy = requireNotNull(DriveGatewayConfigCodec.decode(mapOf("account" to "a@b.c", "folder" to "f")))
+        assertNull(legacy.approvedByAccountId)
+        assertNull(legacy.approvedDeviceId)
+    }
+
+    @Test
     fun `config codec decode returns null when the account is missing`() {
         val values = DriveGatewayConfigCodec.encode(config()).toMutableMap()
         values.remove("account")

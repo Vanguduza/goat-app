@@ -8,6 +8,7 @@ import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
+import com.farmos.domain.access.LocalRole
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -24,7 +25,7 @@ class RabbitPedigreeTest {
     private val farm = "9a9a9a9a-9a9a-49a9-89a9-9a9a9a9a9a9a"
     private val database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
-        .build()
+        .build().also { seedCommandAuthority(it, farm, "manager-1", "A", LocalRole.MANAGER) }
 
     @After
     fun tearDown() = database.close()

@@ -40,13 +40,14 @@ internal class KeystoreSealer(private val alias: String = "goat_farm_vault_v1") 
         val iv = ByteArray(buffer.int.also { require(it in 12..32) { "Invalid vault payload" } }).also(buffer::get)
         val ciphertext = ByteArray(buffer.remaining()).also(buffer::get)
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, iv))
+        cipher.init(Cipher.DECRYPT_MODE, key(createIfMissing = false), GCMParameterSpec(128, iv))
         return cipher.doFinal(ciphertext)
     }
 
-    private fun key(): SecretKey {
+    private fun key(createIfMissing: Boolean = true): SecretKey {
         val store = KeyStore.getInstance(ANDROID_KEY_STORE).apply { load(null) }
         (store.getKey(alias, null) as? SecretKey)?.let { return it }
+        check(createIfMissing) { "This device's farm vault key is unavailable" }
         return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEY_STORE).apply {
             init(
                 KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
@@ -72,6 +73,7 @@ internal class FarmSecrets(
     val device: KeyPair,
     /** Business time of the rotation that made the current key current; a later rotation always wins. */
     val currentSinceEpochMillis: Long = 0,
+    val pendingRotations: List<PendingFarmKeyRotation> = emptyList(),
 )
 
 /**
@@ -81,7 +83,15 @@ internal class FarmSecrets(
  */
 internal class FarmKeyVault(private val directory: File, private val sealer: DeviceSealer) {
     @Synchronized
-    fun secrets(farmId: String): FarmSecrets? {
+    fun secrets(farmId: String): FarmSecrets? = readSecrets(farmId)?.also {
+        if (it.pendingRotations.isNotEmpty()) throw FarmKeyRotationPendingException()
+    }
+
+    /** Explicit recovery read: never used by a carrier and never provisions missing keys. */
+    @Synchronized
+    fun rotationState(farmId: String): FarmSecrets? = readSecrets(farmId)
+
+    private fun readSecrets(farmId: String): FarmSecrets? {
         val file = file(farmId).takeIf { it.exists() } ?: return null
         val json = JSONObject(String(sealer.open(file.readBytes()), Charsets.UTF_8))
         val keys = json.getJSONArray("keys")
@@ -93,14 +103,32 @@ internal class FarmKeyVault(private val directory: File, private val sealer: Dev
             ring,
             DeviceKeys.keyPair(decode(json.getString("devicePublic")), decode(json.getString("devicePrivate"))),
             json.optLong("currentSince", 0),
+            json.optJSONArray("pendingRotations")?.let { pending ->
+                List(pending.length()) { index ->
+                    pending.getJSONObject(index).let {
+                        PendingFarmKeyRotation(it.getString("operationId"), it.getString("keyId"),
+                            it.getString("actorId"), it.getString("deviceId"), it.getLong("at"), it.getString("payloadSha256"))
+                    }
+                }
+            }.orEmpty(),
         )
     }
 
     /** Reads, changes and saves one farm's secrets atomically with respect to other vault calls. */
     @Synchronized
     fun update(farmId: String, change: (FarmSecrets) -> FarmSecrets?) {
-        val current = secrets(farmId) ?: return
-        change(current)?.let { save(farmId, it) }
+        val current = readSecrets(farmId) ?: return
+        change(current)?.let {
+            save(farmId, FarmSecrets(it.keys, it.device, it.currentSinceEpochMillis,
+                (current.pendingRotations + it.pendingRotations).distinctBy { pending -> pending.operationId }))
+        }
+    }
+
+    /** Only the Room-bound rotation/reconciliation path may add or resolve a pending marker. */
+    @Synchronized
+    fun updateRotationState(farmId: String, change: (FarmSecrets) -> FarmSecrets) {
+        val current = requireNotNull(readSecrets(farmId)) { "This device's farm keys are unavailable" }
+        save(farmId, change(current))
     }
 
     @Synchronized
@@ -111,6 +139,11 @@ internal class FarmKeyVault(private val directory: File, private val sealer: Dev
             .put("devicePublic", encode(DeviceKeys.encode(secrets.device.public)))
             .put("devicePrivate", encode(DeviceKeys.encodePrivate(secrets.device.private)))
             .put("currentSince", secrets.currentSinceEpochMillis)
+            .put("pendingRotations", JSONArray(secrets.pendingRotations.map {
+                JSONObject().put("operationId", it.operationId).put("keyId", it.keyId)
+                    .put("actorId", it.actorId).put("deviceId", it.deviceId)
+                    .put("at", it.businessTimeEpochMillis).put("payloadSha256", it.payloadSha256)
+            }))
         directory.mkdirs()
         val target = file(farmId)
         val temporary = File(directory, "${target.name}.tmp")

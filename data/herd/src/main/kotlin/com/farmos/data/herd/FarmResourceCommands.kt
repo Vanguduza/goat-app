@@ -32,7 +32,6 @@ import com.farmos.domain.ops.RecordAssetMeter
 import com.farmos.domain.ops.RecordPurchase
 import com.farmos.domain.ops.RecordWater
 import com.farmos.domain.ops.StartGrazing
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 /** Command handlers extracted from the operations facade; validation and writes share one transaction. */
@@ -44,14 +43,14 @@ internal class FarmResourceCommands(
 ) {
     suspend fun createAsset(command: CreateFarmAsset, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         OpsValidator.asset(command)?.let { error(it) }
-        journal.enqueue(context, "asset.create.v1", "farm_asset", command.assetId, 0, json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "asset.create.v1", "farm_asset", command.assetId, 0, command) {
             database.assets().insert(FarmAssetEntity(command.assetId, farmId, command.code.trim(), command.name.trim(), command.kind))
         }
         LocalCommandResult(context.mutationId, command.assetId, true)
     }
 
     suspend fun recordMaintenance(command: RecordMaintenance, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
-        journal.enqueue(context, "maintenance.record.v1", "farm_asset", command.assetId, journal.observedVersion("farm_asset", command.assetId), json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "maintenance.record.v1", "farm_asset", command.assetId, journal.observedVersion("farm_asset", command.assetId), command) {
             database.maintenance().insert(MaintenanceEventEntity(command.eventId, farmId, command.assetId, command.title.trim(), command.occurredEpochDay, command.note))
         }
         LocalCommandResult(context.mutationId, command.eventId, true)
@@ -59,7 +58,7 @@ internal class FarmResourceCommands(
 
     suspend fun recordAssetMeter(command: RecordAssetMeter, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         OpsValidator.assetMeter(command)?.let { error(it) }
-        journal.enqueue(context, "asset.meter_record.v1", "farm_asset", command.assetId, 0, json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "asset.meter_record.v1", "farm_asset", command.assetId, 0, command) {
             database.assetMeters().insert(
                 AssetMeterReadingEntity(
                     command.readingId, farmId, command.assetId, command.readingValue,
@@ -71,9 +70,9 @@ internal class FarmResourceCommands(
     }
 
     suspend fun issueFeed(command: IssueFeed, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
-        val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
-        OpsValidator.feed(command, item.quantityMilli)?.let { error(it) }
-        journal.enqueue(context, "feed.issue.v1", "inventory_item", command.itemId, journal.observedVersion("inventory_item", command.itemId), json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "feed.issue.v1", "inventory_item", command.itemId, journal.observedVersion("inventory_item", command.itemId), command) {
+            val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
+            OpsValidator.feed(command, item.quantityMilli)?.let { error(it) }
             database.feedIssues().insert(FeedIssueEntity(command.issueId, farmId, command.itemId, command.groupId, command.quantityMilli, command.occurredEpochDay))
             database.inventory().insertMovement(
                 InventoryMovementEntity(command.issueId, farmId, command.itemId, "issue", command.quantityMilli, context.occurredAtEpochMillis),
@@ -85,7 +84,7 @@ internal class FarmResourceCommands(
 
     suspend fun recordFeedPlan(command: RecordFeedPlan, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         OpsValidator.feedPlan(command)?.let { error(it) }
-        journal.enqueue(context, "feed.record_plan.v1", "feed_plan", command.planId, 0, json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "feed.record_plan.v1", "feed_plan", command.planId, 0, command) {
             database.feedPlans().insert(
                 FeedPlanEntity(
                     command.planId, farmId, command.name.trim(), command.speciesCode.trim(),
@@ -99,7 +98,7 @@ internal class FarmResourceCommands(
 
     suspend fun recordWater(command: RecordWater, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         OpsValidator.water(command)?.let { error(it) }
-        journal.enqueue(context, "water.record.v1", "water_record", command.recordId, 0, json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "water.record.v1", "water_record", command.recordId, 0, command) {
             database.water().insert(WaterRecordEntity(command.recordId, farmId, command.source.trim(), command.litresMilli, command.occurredEpochDay))
         }
         LocalCommandResult(context.mutationId, command.recordId, true)
@@ -107,7 +106,7 @@ internal class FarmResourceCommands(
 
     suspend fun recordWaterPoint(command: RecordWaterPoint, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         OpsValidator.waterPoint(command)?.let { error(it) }
-        journal.enqueue(context, "water.record_point.v1", "water_point", command.pointId, 0, json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "water.record_point.v1", "water_point", command.pointId, 0, command) {
             database.waterPoints().insert(
                 WaterPointEntity(
                     command.pointId, farmId, command.code.trim(),
@@ -120,8 +119,8 @@ internal class FarmResourceCommands(
 
     suspend fun recordWaterPointEvent(command: RecordWaterPointEvent, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         OpsValidator.waterPointEvent(command)?.let { error(it) }
-        val point = requireNotNull(database.waterPoints().get(farmId, command.pointId)) { "Water point not found" }
-        journal.enqueue(context, "water.record_point_event.v1", "water_point_event", command.eventId, 0, json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "water.record_point_event.v1", "water_point_event", command.eventId, 0, command) {
+            val point = requireNotNull(database.waterPoints().get(farmId, command.pointId)) { "Water point not found" }
             database.waterPointEvents().insert(
                 WaterPointEventEntity(
                     command.eventId, farmId, point.id, command.kind.trim(),
@@ -138,7 +137,7 @@ internal class FarmResourceCommands(
 
     suspend fun createSupplier(command: CreateSupplier, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         OpsValidator.supplier(command)?.let { error(it) }
-        journal.enqueue(context, "supplier.create.v1", "supplier", command.supplierId, 0, json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "supplier.create.v1", "supplier", command.supplierId, 0, command) {
             database.lifecycle().insertSupplier(SupplierEntity(command.supplierId, farmId, command.name.trim(), command.leadTimeDays))
         }
         LocalCommandResult(context.mutationId, command.supplierId, true)
@@ -146,9 +145,9 @@ internal class FarmResourceCommands(
 
     suspend fun recordPurchase(command: RecordPurchase, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         OpsValidator.purchase(command)?.let { error(it) }
-        requireNotNull(database.lifecycle().suppliers(farmId).firstOrNull { it.id == command.supplierId }) { "Supplier not found" }
-        val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
-        journal.enqueue(context, "purchase.record.v1", "inventory_item", command.itemId, journal.observedVersion("inventory_item", command.itemId), json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "purchase.record.v1", "inventory_item", command.itemId, journal.observedVersion("inventory_item", command.itemId), command) {
+            requireNotNull(database.lifecycle().suppliers(farmId).firstOrNull { it.id == command.supplierId }) { "Supplier not found" }
+            val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
             database.lifecycle().insertPurchase(
                 PurchaseEntity(command.purchaseId, farmId, command.supplierId, command.itemId, command.quantityMilli, command.amountMinor, command.currency, command.occurredEpochDay),
             )
@@ -165,7 +164,7 @@ internal class FarmResourceCommands(
 
     suspend fun createPaddock(command: CreatePaddock, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         OpsValidator.paddock(command)?.let { error(it) }
-        journal.enqueue(context, "paddock.create.v1", "paddock", command.paddockId, 0, json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "paddock.create.v1", "paddock", command.paddockId, 0, command) {
             database.paddocks().insert(
                 PaddockEntity(command.paddockId, farmId, command.code.trim(), command.displayName.trim(), command.areaM2, command.waterSource, command.shade, true),
             )
@@ -174,9 +173,9 @@ internal class FarmResourceCommands(
     }
 
     suspend fun startGrazing(command: StartGrazing, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
-        if (database.grazing().hasOpen(farmId, command.paddockId)) error("This paddock already has an open grazing session")
-        val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Group not found" }
-        journal.enqueue(context, "grazing.start.v1", "grazing_session", command.sessionId, 0, json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "grazing.start.v1", "grazing_session", command.sessionId, 0, command) {
+            if (database.grazing().hasOpen(farmId, command.paddockId)) error("This paddock already has an open grazing session")
+            val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Group not found" }
             database.grazing().insert(
                 GrazingSessionEntity(command.sessionId, farmId, command.paddockId, command.groupId, group.speciesCode, command.enteredEpochDay, null, command.headCount),
             )
@@ -185,7 +184,7 @@ internal class FarmResourceCommands(
     }
 
     suspend fun endGrazing(command: EndGrazing, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
-        journal.enqueue(context, "grazing.end.v1", "grazing_session", command.sessionId, journal.observedVersion("grazing_session", command.sessionId), json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "grazing.end.v1", "grazing_session", command.sessionId, journal.observedVersion("grazing_session", command.sessionId), command) {
             database.grazing().end(farmId, command.sessionId, command.exitedEpochDay)
         }
         LocalCommandResult(context.mutationId, command.sessionId, true)

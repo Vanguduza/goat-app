@@ -19,6 +19,7 @@ import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
+import com.farmos.domain.access.LocalRole
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -49,6 +50,7 @@ class InventoryCaptureOwnerTest {
     @Before
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java).build()
+        seedCommandAuthority(database, farm, "user-1", "device-1", LocalRole.WORKER)
         runBlocking {
             database.inventory().insertItem(InventoryItemEntity("item-mash", farm, "MASH-20", "Layer mash", "kg", 12_500, 0L))
             database.inventory().insertItem(InventoryItemEntity("item-other", otherFarm, "OTHER-1", "Other farm feed", "kg", 1_000, 0L))
@@ -79,6 +81,7 @@ class InventoryCaptureOwnerTest {
 
     @Test
     fun reorderRuleTakesItsItemFromThisFarmsItemSelector() {
+        seedCommandAuthority(database, farm, "user-1", "device-1", LocalRole.MANAGER)
         var syncRequests = 0
         render { syncRequests++ }
         compose.onNode(hasClickAction() and hasText("Set reorder point")).performScrollTo().performClick()

@@ -15,6 +15,7 @@ import com.farmos.domain.ops.StartStockCount
 import com.farmos.domain.ops.StockCountRules
 import com.farmos.domain.ops.StockCountStatus
 import com.farmos.domain.ops.SubmitStockCount
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -32,7 +33,7 @@ class StockCountCommands(
     private val json: Json = Json { encodeDefaults = true },
 ) {
     suspend fun start(command: StartStockCount, context: LocalCommandContext): LocalCommandResult {
-        journal(context, START, command.countId, json.encodeToString(command)) {
+        journal(context, START, command.countId, command) {
             if (database.stockCounts().get(farmId, command.countId) == null) {
                 database.stockCounts().upsert(
                     StockCountEntity(command.countId, farmId, StockCountStatus.COUNTING.name, context.actorId, context.occurredAtEpochMillis, null, null, null, null, null),
@@ -44,11 +45,11 @@ class StockCountCommands(
 
     suspend fun recordLine(command: RecordStockCountLine, context: LocalCommandContext): LocalCommandResult {
         StockCountRules.lineError(command.countedMilli)?.let { error(it) }
-        val count = count(command.countId)
-        require(count.status == StockCountStatus.COUNTING.name) { "This count is no longer open for counting" }
-        requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
         val lineId = StockCountRules.lineId(command.countId, command.itemId)
-        journal(context, LINE, command.countId, json.encodeToString(command)) {
+        journal(context, LINE, command.countId, command) {
+            val count = count(command.countId)
+            require(count.status == StockCountStatus.COUNTING.name) { "This count is no longer open for counting" }
+            requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
             val existing = database.stockCounts().line(farmId, lineId)
             // Across devices the later count of an item wins, whatever order the records arrive in.
             if (existing == null || existing.countedAtEpochMillis <= context.occurredAtEpochMillis) {
@@ -61,10 +62,9 @@ class StockCountCommands(
     }
 
     suspend fun submit(command: SubmitStockCount, context: LocalCommandContext): LocalCommandResult {
-        val count = count(command.countId)
-        move(count, StockCountStatus.SUBMITTED)
-        journal(context, SUBMIT, command.countId, json.encodeToString(command)) {
+        journal(context, SUBMIT, command.countId, command) {
             val current = count(command.countId)
+            move(current, StockCountStatus.SUBMITTED)
             if (current.status == StockCountStatus.COUNTING.name) {
                 database.stockCounts().upsert(current.copy(status = StockCountStatus.SUBMITTED.name, submittedByActorId = context.actorId, submittedAtEpochMillis = context.occurredAtEpochMillis))
             }
@@ -73,10 +73,9 @@ class StockCountCommands(
     }
 
     suspend fun post(command: PostStockCount, context: LocalCommandContext): LocalCommandResult {
-        val count = count(command.countId)
-        move(count, StockCountStatus.POSTED)
         require(command.adjustments.none { it.varianceMilli == 0L }) { "Only non-zero variances are posted" }
-        journal(context, POST, command.countId, json.encodeToString(command)) {
+        journal(context, POST, command.countId, command) {
+            move(count(command.countId), StockCountStatus.POSTED)
             command.adjustments.forEach { adjustment ->
                 val item = requireNotNull(database.inventory().item(farmId, adjustment.itemId)) { "Inventory item not found" }
                 val inserted = database.inventory().insertMovement(
@@ -104,10 +103,9 @@ class StockCountCommands(
 
     suspend fun reject(command: RejectStockCount, context: LocalCommandContext): LocalCommandResult {
         require(command.reason.isNotBlank()) { "Say why the count is rejected" }
-        val count = count(command.countId)
-        move(count, StockCountStatus.REJECTED)
-        journal(context, REJECT, command.countId, json.encodeToString(command)) {
+        journal(context, REJECT, command.countId, command) {
             val current = count(command.countId)
+            move(current, StockCountStatus.REJECTED)
             if (current.status != StockCountStatus.REJECTED.name) {
                 database.stockCounts().upsert(
                     current.copy(status = StockCountStatus.REJECTED.name, decidedByActorId = context.actorId, decidedAtEpochMillis = context.occurredAtEpochMillis, rejectionReason = command.reason.trim()),
@@ -127,11 +125,23 @@ class StockCountCommands(
         require(StockCountRules.canMove(status, next)) { "A ${status.name.lowercase()} count cannot be ${next.name.lowercase()}" }
     }
 
-    private suspend fun journal(context: LocalCommandContext, commandName: String, countId: String, payloadJson: String, localWrite: suspend () -> Unit) {
+    private suspend inline fun <reified C> journal(context: LocalCommandContext, commandName: String, countId: String, command: C, noinline localWrite: suspend () -> Unit) {
         require(context.farmId == farmId) { "Farm context mismatch" }
-        if (replaying) return database.withTransaction { localWrite() }
         database.withTransaction {
+            val payloadJson = json.encodeToString(command)
+            val permission = OpsCommandPermissions.requiredFor(commandName, payloadJson)
+            if (!replaying) database.requireLocalCommandAuthority(context, permission)
+            val original = database.replication().operation(farmId, context.mutationId)
+            if (original != null) {
+                requireOriginalCommand(original, context, commandName, "stock_count", countId, {
+                    json.decodeFromString<C>(it) == command
+                })
+                if (database.commandAlreadyApplied(original, replaying)) return@withTransaction
+            } else {
+                require(!replaying) { "A received change must be journalled before it is applied" }
+            }
             localWrite()
+            if (replaying) return@withTransaction
             database.journalLocalOperation(
                 operationId = context.mutationId,
                 farmId = farmId,

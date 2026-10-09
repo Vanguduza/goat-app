@@ -963,10 +963,17 @@ object OpsValidator {
         return null
     }
 
-    fun formulary(command: CreateFormularyItem): String? {
+    /** Validate catalogue entry without implying veterinary attestation. */
+    fun formularyDraft(command: CreateFormularyItem): String? =
         if (command.productName.isBlank() || command.speciesCode.isBlank() || command.vetClass.isBlank()) {
-            return "Formulary item needs a product, species, and vet class"
+            "Formulary item needs a product, species, and vet class"
+        } else {
+            null
         }
+
+    /** Historical approved-item contract; new product entry uses [formularyDraft]. */
+    fun formulary(command: CreateFormularyItem): String? {
+        formularyDraft(command)?.let { return it }
         if (!command.vetApproved) return "Formulary items must be marked vet-approved before they can be used"
         return null
     }

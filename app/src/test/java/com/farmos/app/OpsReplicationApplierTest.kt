@@ -6,10 +6,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
-import com.farmos.core.database.LocalAccountEntity
-import com.farmos.core.database.ReplicationDeviceEntity
 import com.farmos.core.database.toEnvelope
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
+import com.farmos.data.herd.AnimalExitCommands
 import com.farmos.data.goat.GoatReplicationAppliers
 import com.farmos.data.goat.RoomGoatRepository
 import com.farmos.data.herd.HerdReplicationAppliers
@@ -22,6 +22,7 @@ import com.farmos.domain.goat.RegisterGoat
 import com.farmos.domain.ops.CreateInventoryItem
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.RecordSale
+import com.farmos.domain.ops.RecordAnimalExit
 import com.farmos.domain.ops.RecordWater
 import com.farmos.domain.replication.LocalPeerTransport
 import com.farmos.domain.replication.OperationBundle
@@ -54,20 +55,13 @@ class OpsReplicationApplierTest {
         .also { databases += it }
 
     private fun endpoint(db: FarmOsDatabase, device: String, vararg peers: String): RoomReplicaEndpoint {
-        db.localAccess().upsertAccount(LocalAccountEntity(
-            accountId = "worker-" + device, farmId = farm, username = "worker-" + device,
-            displayName = "Worker " + device, role = "WORKER", status = "ACTIVE",
-            credentialKind = "PIN", credentialHash = "test-credential-hash", failedAttempts = 0,
-            lockedUntilEpochMillis = null, workerId = null, createdAtEpochMillis = 1_790_000_000_000L,
-        ))
-        db.replicationBlocking().upsertDevice(ReplicationDeviceEntity(
-            farmId = farm, deviceId = device, name = device, status = "ACTIVE",
-            lastReportedOwnSequence = 0L, revokedAfterSequence = null, isLocal = true,
-        ))
+        seedCommandAuthority(db, farm, "worker-" + device, device, LocalRole.WORKER)
+        seedCommandAuthority(db, farm, "manager-" + device, device, LocalRole.MANAGER)
         return RoomReplicaEndpoint(db, farm, device, replicationAppliers).apply { peers.forEach { registerPairedDevice(it, it) } }
     }
 
-    private fun context(device: String, at: Long) = LocalCommandContext(farm, "worker-$device", device, UUID.randomUUID().toString(), at)
+    private fun context(device: String, at: Long, manager: Boolean = false) =
+        LocalCommandContext(farm, if (manager) "manager-$device" else "worker-$device", device, UUID.randomUUID().toString(), at)
 
     @Before
     fun setUp() {
@@ -87,10 +81,10 @@ class OpsReplicationApplierTest {
         val phone = endpoint(phoneDb, "phone", "tablet")
         val ops = RoomOpsRepository(tabletDb, farm)
         ops.recordWater(RecordWater("water-1", "Borehole", 250_000, 20_700), context("tablet", 1_790_000_100_000))
-        ops.createItem(CreateInventoryItem("item-mash", "MASH-20", "Layer mash"), context("tablet", 1_790_000_200_000))
+        ops.createItem(CreateInventoryItem("item-mash", "MASH-20", "Layer mash"), context("tablet", 1_790_000_200_000, manager = true))
         ops.move(MoveInventory("move-1", "item-mash", "receive", 12_500, 1_790_000_300_000), context("tablet", 1_790_000_300_000))
         ops.move(MoveInventory("move-2", "item-mash", "issue", 2_500, 1_790_000_400_000), context("tablet", 1_790_000_400_000))
-        ops.recordSale(RecordSale("sale-1", "live_goat", 1_000, 9_500, "USD", 20_701), context("tablet", 1_790_000_500_000))
+        ops.recordSale(RecordSale("sale-1", "live_goat", 1_000, 9_500, "USD", 20_701), context("tablet", 1_790_000_500_000, manager = true))
 
         SyncSession.run(phone, LocalPeerTransport(tablet), remoteDeviceId = "tablet")
 
@@ -111,7 +105,7 @@ class OpsReplicationApplierTest {
         val a = endpoint(aDb, "A", "B", "C")
         val b = endpoint(bDb, "B", "A", "C")
         val c = endpoint(cDb, "C", "A", "B")
-        RoomOpsRepository(aDb, farm).createItem(CreateInventoryItem("item-mash", "MASH-20", "Layer mash"), context("A", 1_790_000_100_000))
+        RoomOpsRepository(aDb, farm).createItem(CreateInventoryItem("item-mash", "MASH-20", "Layer mash"), context("A", 1_790_000_100_000, manager = true))
         SyncSession.run(b, LocalPeerTransport(a), remoteDeviceId = "A")
         RoomOpsRepository(bDb, farm).move(MoveInventory("move-1", "item-mash", "receive", 4_000, 1_790_000_200_000), context("B", 1_790_000_200_000))
 
@@ -131,7 +125,7 @@ class OpsReplicationApplierTest {
     fun everyCommandTheOpsRepositoryJournalsHasAnApplier() {
         fun source(name: String) = java.io.File("../data/herd/src/main/kotlin/com/farmos/data/herd/$name").takeIf { it.exists() }
             ?: java.io.File("data/herd/src/main/kotlin/com/farmos/data/herd/$name")
-        val text = listOf("RoomOpsRepository.kt", "FarmConfigurationCommands.kt", "AnimalGroupCommands.kt", "FarmResourceCommands.kt", "OpsCommandJournal.kt", "BreedingDueCommands.kt", "TaskSeriesCommands.kt", "StockCountCommands.kt", "WorkerRegisterCommands.kt", "AnimalExitCommands.kt", "LabourCommands.kt", "CustomerCommands.kt", "AttachmentCommands.kt").joinToString("\n") { source(it).readText() }
+        val text = listOf("RoomOpsRepository.kt", "FarmConfigurationCommands.kt", "AnimalGroupCommands.kt", "FarmResourceCommands.kt", "OpsCommandJournal.kt", "BreedingDueCommands.kt", "TaskSeriesCommands.kt", "StockCountCommands.kt", "WorkerRegisterCommands.kt", "AnimalExitCommands.kt", "LabourCommands.kt", "CustomerCommands.kt", "AttachmentCommands.kt", "FormularyCommands.kt", "ReorderAlertCommands.kt").joinToString("\n") { source(it).readText() }
         val journalled = Regex("\"([a-z_]+\\.[a-z_]+\\.v\\d)\"").findAll(text).map { it.groupValues[1] }.toSet()
         assertTrue(journalled.size > 80)
         assertEquals(journalled, journalled.intersect(OpsReplicationAppliers.all.keys))
@@ -149,13 +143,17 @@ class OpsReplicationApplierTest {
         val sheep = RoomHerdRepository(tabletDb, farm, "sheep")
         sheep.register("sheep-1", "S-001", null, "FEMALE", null, context("tablet", 1_790_000_200_000))
         sheep.recordWeight("sheep-1", "w-2", 48_000, 1_790_000_250_000, context("tablet", 1_790_000_250_000))
-        sheep.setStatus("sheep-1", "sold", context("tablet", 1_790_000_300_000))
+        AnimalExitCommands(tabletDb, farm).record(
+            RecordAnimalExit("sheep-exit-1", "sheep-1", "SALE", 1_790_000_300_000L / 86_400_000L, buyer = "Test buyer"),
+            context("tablet", 1_790_000_300_000),
+        )
 
         SyncSession.run(phone, LocalPeerTransport(tablet), remoteDeviceId = "tablet")
 
         assertEquals(tabletDb.animals().get(farm, "goat-1"), phoneDb.animals().get(farm, "goat-1"))
         assertEquals(31_500L, phoneDb.measurements().latest(farm, "goat-1", "weight")?.valueLong)
         assertEquals("sold", phoneDb.animals().get(farm, "sheep-1")?.status)
+        assertEquals("Test buyer", phoneDb.animalExits().forAnimal(farm, "sheep-1").single().buyer)
         assertEquals(48_000L, phoneDb.measurements().latest(farm, "sheep-1", "weight")?.valueLong)
         assertEquals(5L, phoneDb.replicationApplications().count(farm, ApplicationState.APPLIED.name))
         assertEquals(0L, phoneDb.outbox().countUnacknowledgedForFarm(farm))

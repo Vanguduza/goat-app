@@ -9,6 +9,7 @@ import com.farmos.core.database.AnimalGroupEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.SheepScanEntity
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.GestationPeriod
 import com.farmos.domain.ops.GestationSpecies
@@ -35,12 +36,18 @@ class SheepLambingDueQueryTest {
     private val database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
+        .also {
+            seedCommandAuthority(it, farm, "worker-1", "device-a", LocalRole.WORKER)
+            seedCommandAuthority(it, farm, "manager-1", "device-a", LocalRole.MANAGER)
+            seedCommandAuthority(it, farm, "owner-1", "device-a", LocalRole.OWNER)
+        }
     private val ops = RoomOpsRepository(database, farm)
 
     @After
     fun tearDown() = database.close()
 
-    private fun context() = LocalCommandContext(farm, "worker-1", "device-a", UUID.randomUUID().toString(), 1_790_000_000_000)
+    private fun context(manager: Boolean = false) =
+        LocalCommandContext(farm, if (manager) "manager-1" else "worker-1", "device-a", UUID.randomUUID().toString(), 1_790_000_000_000)
 
     private fun id() = UUID.randomUUID().toString()
 
@@ -48,7 +55,7 @@ class SheepLambingDueQueryTest {
         database.animals().insert(AnimalEntity(id = id, farmId = farmId, tag = "S-$id", name = null, speciesCode = "sheep", sex = "FEMALE", status = "active", dateOfBirthEpochDay = null, updatedAtEpochMillis = 1L))
 
     private suspend fun join(groupId: String, day: Long) =
-        ops.recordJoining(RecordSheepJoining(id(), groupId, day, id(), id(), id(), id()), context())
+        ops.recordJoining(RecordSheepJoining(id(), groupId, day, id(), id(), id(), id()), context(manager = true))
 
     private suspend fun scan(eweId: String, result: String, day: Long) = ops.recordScan(RecordSheepScan(id(), eweId, result, day), context())
 

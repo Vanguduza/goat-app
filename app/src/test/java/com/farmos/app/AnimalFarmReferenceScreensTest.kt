@@ -1,5 +1,7 @@
 package com.farmos.app
 
+import android.content.Context
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.AnimalFarmThemeSelectionPanel
@@ -34,18 +37,12 @@ class AnimalFarmReferenceScreensTest {
     private val fixedDate = LocalDate.of(2026, 9, 24)
 
     @Test
-    fun loginReferenceMatrix() = captureMatrix(screenId("GLOBAL", "002")) {
-        FoundationAuthScreen(
-            backendConfigured = true,
-            busy = false,
-            error = null,
-            sessionPresent = false,
-            memberships = emptyList(),
-            onSignIn = { _, _ -> },
-            onSelectFarm = {},
-            onCreateFarm = {},
-            onSignOut = {},
-        )
+    fun loginReferenceMatrix() {
+        LocalFarmEntryReferenceFixture(ApplicationProvider.getApplicationContext<Context>()).use { fixture ->
+            captureMatrix(screenId("GLOBAL", "002")) {
+                fixture.Content()
+            }
+        }
     }
 
     @Test

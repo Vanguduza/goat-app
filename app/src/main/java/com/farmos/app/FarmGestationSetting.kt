@@ -6,6 +6,7 @@ import com.farmos.core.database.FarmGestationEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.OperationApplier
 import com.farmos.core.database.journalLocalOperation
+import com.farmos.domain.access.Permission
 import com.farmos.domain.ops.GestationDefaults
 import com.farmos.domain.ops.GestationPeriod
 import com.farmos.domain.ops.GestationSpecies
@@ -33,6 +34,7 @@ internal suspend fun FarmOsDatabase.setFarmGestation(
     deviceId: String,
     nowEpochMillis: Long = System.currentTimeMillis(),
 ) = withTransaction {
+    requireLocalAppPermission(farmId, actorId, deviceId, Permission.MANAGE_FARM_SETTINGS)
     farmGestation().upsert(FarmGestationEntity(farmId, species.code, period.earliestDays, period.typicalDays, period.latestDays, nowEpochMillis, actorId))
     journalLocalOperation(
         operationId = UUID.randomUUID().toString(),

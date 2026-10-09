@@ -12,6 +12,9 @@ import com.farmos.data.goat.GoatReplicationAppliers
 import com.farmos.data.herd.HerdReplicationAppliers
 import com.farmos.data.herd.OpsReplicationAppliers
 import com.farmos.core.database.journalLocalOperation
+import com.farmos.domain.access.AccessDenied
+import com.farmos.domain.access.LocalRole
+import com.farmos.domain.access.Permission
 import com.farmos.domain.ops.FarmCurrency
 import java.util.UUID
 import org.json.JSONObject
@@ -36,6 +39,8 @@ internal suspend fun FarmOsDatabase.setFarmCurrency(
 ) {
     require(FarmCurrency.isRecordable(currencyCode)) { "Currency must be an ISO 4217 code" }
     withTransaction {
+        val role = requireLocalAppPermission(farmId, actorId, deviceId, Permission.MANAGE_FARM_SETTINGS)
+        if (role != LocalRole.OWNER) throw AccessDenied("Only the farm Owner can change the recording currency.")
         farmSettings().upsert(FarmSettingsEntity(farmId, currencyCode, nowEpochMillis, actorId))
         journalLocalOperation(
             operationId = UUID.randomUUID().toString(),

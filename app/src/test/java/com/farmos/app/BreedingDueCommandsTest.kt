@@ -8,6 +8,7 @@ import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.AnimalGroupEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.data.herd.BreedingDueCommands
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.GestationPeriod
@@ -36,17 +37,23 @@ class BreedingDueCommandsTest {
     private val farm = "77777777-7777-4777-8777-777777777777"
     private val databases = mutableListOf<FarmOsDatabase>()
 
-    private fun database() = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
+    private fun database(device: String = "A") = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
-        .also { databases += it }
+        .also { db ->
+            databases += db
+            runBlocking {
+                seedCommandAuthority(db, farm, "manager-$device", device, LocalRole.MANAGER)
+                seedCommandAuthority(db, farm, "owner-1", device, LocalRole.OWNER)
+            }
+        }
 
     @After
     fun tearDown() = databases.forEach { it.close() }
 
     private fun id() = UUID.randomUUID().toString()
 
-    private fun context(device: String) = LocalCommandContext(farm, "worker-$device", device, id(), 1_790_000_000_000)
+    private fun context(device: String) = LocalCommandContext(farm, "manager-$device", device, id(), 1_790_000_000_000)
 
     private fun endpoint(db: FarmOsDatabase, device: String, peer: String) =
         RoomReplicaEndpoint(db, farm, device, replicationAppliers).apply { registerPairedDevice(peer, peer) }
@@ -61,7 +68,7 @@ class BreedingDueCommandsTest {
     @Test
     fun theCarriedDayDrivesTheWorkAndReplaysUnchangedOnAnotherDevice(): Unit = runBlocking {
         val aDb = database().apply { fixtures() }
-        val bDb = database().apply { fixtures() }
+        val bDb = database("B").apply { fixtures() }
         aDb.setFarmGestation(farm, GestationSpecies.CATTLE, GestationPeriod(278, 285, 292), "owner-1", "A")
         aDb.setFarmGestation(farm, GestationSpecies.SHEEP, GestationPeriod(145, 150, 155), "owner-1", "A")
         // Device B holds a different cattle period of its own before it hears from A.

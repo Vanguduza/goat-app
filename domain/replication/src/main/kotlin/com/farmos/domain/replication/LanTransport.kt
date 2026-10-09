@@ -29,7 +29,13 @@ import javax.crypto.spec.SecretKeySpec
 class LanIdentity(val own: KeyPair, val peerKey: (deviceId: String) -> PublicKey?)
 
 /** The peer could not prove it belongs to this farm, or is not an authorised farm device. */
-class LanPeerRefused(message: String) : IOException(message)
+class LanPeerRefused(
+    message: String,
+    internal val mayRetryHistoricalKey: Boolean = false,
+) : IOException(message)
+
+/** Existing wire refusal retained for protocol-compatible key negotiation. */
+private const val FARM_KEY_CHANGED_REASON = "The farm key has changed; pair this device again"
 
 /**
  * An encrypted, mutually authenticated farm-LAN channel. The handshake exchanges ephemeral P-256 keys
@@ -81,6 +87,8 @@ class LanSecureChannel internal constructor(
             authorised: (deviceId: String) -> Boolean,
             random: SecureRandom = SecureRandom(),
             identity: LanIdentity? = null,
+            /** A retained-key retry must authenticate a known server, never just shared-key possession. */
+            requireKnownPeerIdentity: Boolean = false,
         ): LanSecureChannel {
             val din = DataInputStream(input)
             val dout = DataOutputStream(output)
@@ -95,7 +103,10 @@ class LanSecureChannel internal constructor(
             dout.writeBytesField(clientNonce)
             dout.flush()
 
-            if (!din.readBoolean()) throw LanPeerRefused(din.readUTF())
+            if (!din.readBoolean()) {
+                val reason = din.readUTF()
+                throw LanPeerRefused(reason, mayRetryHistoricalKey = reason == FARM_KEY_CHANGED_REASON)
+            }
             val serverDeviceId = din.readUTF()
             val serverEphemeral = din.readBytesField()
             val serverNonce = din.readBytesField()
@@ -105,8 +116,12 @@ class LanSecureChannel internal constructor(
             if (!MessageDigest.isEqual(serverProof, proof(key, SERVER_ROLE, transcript))) throw LanPeerRefused("The peer could not prove it belongs to this farm")
             if (!authorised(serverDeviceId)) throw LanPeerRefused("The peer is not an active device of this farm")
             // When this device knows the server's identity key, the server must prove it holds the private half.
-            identity?.peerKey?.invoke(serverDeviceId)?.let { serverStatic ->
-                val expected = identityProof(ephemeral.private, serverStatic, SERVER_ROLE, transcript)
+            val serverStatic = identity?.peerKey?.invoke(serverDeviceId)
+            if (requireKnownPeerIdentity && serverStatic == null) {
+                throw LanPeerRefused("A previous farm key requires a known peer device identity")
+            }
+            serverStatic?.let {
+                val expected = identityProof(ephemeral.private, it, SERVER_ROLE, transcript)
                 if (!MessageDigest.isEqual(serverIdentityProof, expected)) throw LanPeerRefused("The peer could not prove it is $serverDeviceId")
             }
             dout.writeBytesField(proof(key, CLIENT_ROLE, transcript))
@@ -147,8 +162,8 @@ class LanSecureChannel internal constructor(
             val refusal = when {
                 peerFarm != farmId -> "This device serves another farm"
                 !authorised(peerDevice) -> "This device is not an active device of the farm"
-                key == null -> "The farm key has changed; pair this device again"
-                keyId != keys.currentKeyId && clientStatic == null -> "The farm key has changed; pair this device again"
+                key == null -> FARM_KEY_CHANGED_REASON
+                keyId != keys.currentKeyId && clientStatic == null -> FARM_KEY_CHANGED_REASON
                 else -> null
             }
             if (refusal != null) refuse(dout, refusal)
@@ -557,17 +572,43 @@ class LanPeerTransport(
 
     private fun open(): LanSecureChannel {
         channel?.let { return it }
-        // Resolved outside the Socket scope: inside it, `port` would mean the unconnected socket's own port.
-        val address = InetSocketAddress(host, port)
+        val available = keys()
+        val candidates = listOf(available.currentKeyId) + if (identity == null) emptyList() else
+            available.keyIds.filter { it != available.currentKeyId }.sorted()
+        var keyRefusal: LanPeerRefused? = null
+        for (keyId in candidates) {
+            try {
+                return openWithKey(
+                    FarmKeyRing(available.all(), keyId),
+                    requireKnownPeerIdentity = keyId != available.currentKeyId,
+                )
+            } catch (refused: LanPeerRefused) {
+                // Only the first, explicit key-negotiation refusal allows a new handshake. Timeouts,
+                // bad identity proofs, revocation and every later refusal propagate without fallback.
+                if (!refused.mayRetryHistoricalKey) throw refused
+                keyRefusal = refused
+            }
+        }
+        throw requireNotNull(keyRefusal)
+    }
+
+    private fun openWithKey(ring: FarmKeyRing, requireKnownPeerIdentity: Boolean): LanSecureChannel {
         val connected = Socket()
-        connected.connect(address, connectTimeoutMillis)
-        connected.soTimeout = connectTimeoutMillis * 6
         socket = connected
-        return LanSecureChannel.connect(
-            BufferedInputStream(connected.getInputStream()),
-            BufferedOutputStream(connected.getOutputStream()),
-            farmId, deviceId, keys(), authorised, random, identity,
-        ).also { channel = it }
+        try {
+            connected.connect(InetSocketAddress(host, port), connectTimeoutMillis)
+            connected.soTimeout = connectTimeoutMillis * 6
+            return LanSecureChannel.connect(
+                BufferedInputStream(connected.getInputStream()),
+                BufferedOutputStream(connected.getOutputStream()),
+                farmId, deviceId, ring, authorised, random, identity, requireKnownPeerIdentity,
+            ).also { channel = it }
+        } catch (failure: Throwable) {
+            // Every key attempt has fresh nonces, ephemeral keys and a new socket.
+            runCatching { connected.close() }
+            socket = null
+            throw failure
+        }
     }
 
     override fun close() {

@@ -23,6 +23,8 @@ jobs:
         run: bash scripts/ci/verify-kotlin-architecture.sh
       - name: Enforce Animal Farm visual authority guardrails
         run: bash scripts/ci/verify-visual-authority.sh
+      - name: Verify Google test build provenance guards
+        run: python3 scripts/testing/test_google_test_build.py
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin

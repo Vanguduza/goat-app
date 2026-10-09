@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.CustomerCommands
+import com.farmos.domain.access.LocalRole
 import com.farmos.domain.ops.CreateFarmCustomer
 import com.farmos.domain.ops.RecordCustomerSale
 import com.farmos.domain.ops.UpdateFarmCustomer
@@ -30,15 +31,18 @@ class CustomerCommandsTest {
     private val databases = mutableListOf<FarmOsDatabase>()
     private var clock = 1_790_000_000_000L
 
-    private fun database() = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
+    private fun database(device: String = "A") = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
-        .also { databases += it }
+        .also {
+            databases += it
+            seedCommandAuthority(it, farm, "manager-1", device, LocalRole.MANAGER)
+        }
 
     @After
     fun tearDown() = databases.forEach { it.close() }
 
-    private fun context(device: String = "A", at: Long = clock++) = LocalCommandContext(farm, "worker-1", device, UUID.randomUUID().toString(), at)
+    private fun context(device: String = "A", at: Long = clock++) = LocalCommandContext(farm, "manager-1", device, UUID.randomUUID().toString(), at)
 
     private fun sale(customerId: String, name: String, amount: Long = 12_000) =
         RecordCustomerSale(UUID.randomUUID().toString(), customerId, name, "live_goat", 1_000, amount, "USD", 20_300)
@@ -73,7 +77,7 @@ class CustomerCommandsTest {
     @Test
     fun aSaleToACustomerPostsIncomeAndReplicates(): Unit = runBlocking {
         val aDb = database()
-        val bDb = database()
+        val bDb = database("B")
         val customers = CustomerCommands(aDb, farm)
         customers.create(CreateFarmCustomer("c1", "Moyo Butchery"), context())
         customers.create(CreateFarmCustomer("c2", "Closed Buyer"), context())

@@ -10,11 +10,7 @@ import com.farmos.core.database.insertOutboxAndJournal
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.model.LocalCommandResult
 import com.farmos.core.model.SyncState
-import com.farmos.domain.access.AccessDenied
-import com.farmos.domain.access.AccountStatus
-import com.farmos.domain.access.LocalRole
 import com.farmos.domain.access.Permission
-import com.farmos.domain.access.RolePermissions
 import com.farmos.domain.goat.AmendGoatIdentity
 import com.farmos.domain.goat.GoatValidationResult
 import com.farmos.domain.goat.GoatValidator
@@ -40,7 +36,7 @@ internal class GoatIdentityCommands(
         // cannot both overwrite the version they observed.
         val locallyObserved = if (replaying) null else observedVersion(command.animalId, context.mutationId)
         database.withTransaction {
-            if (!replaying) requireLocalPermission(context)
+            if (!replaying) database.requireGoatCommandAuthority(context, Permission.RECORD_FARM_WORK)
             val known = database.replication().operation(farmId, context.mutationId)
             if (known != null) {
                 requireSameOperation(known, command, context)
@@ -117,21 +113,6 @@ internal class GoatIdentityCommands(
             }
         }
         return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
-    }
-
-    /** Read current authority in the same transaction as the change, never a remembered screen role. */
-    private suspend fun requireLocalPermission(context: LocalCommandContext) {
-        val account = database.localAccess().account(farmId, context.actorId)
-        val role = account?.role?.let { runCatching { LocalRole.valueOf(it) }.getOrNull() }
-        if (account?.status != AccountStatus.ACTIVE.name || role == null ||
-            !RolePermissions.allows(role, Permission.RECORD_FARM_WORK)
-        ) {
-            throw AccessDenied("This account may not amend animal identity on this farm")
-        }
-        val device = database.replication().device(farmId, context.deviceId)
-        if (device == null || !device.isLocal || device.status != "ACTIVE" || device.revokedAfterSequence != null) {
-            throw AccessDenied("This device may not record identity changes on this farm")
-        }
     }
 
     private fun requireSameOperation(

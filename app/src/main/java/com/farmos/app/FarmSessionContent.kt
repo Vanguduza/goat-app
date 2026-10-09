@@ -51,6 +51,7 @@ fun FarmSessionContent(
         // Without a server there is nothing to upload: share the change with the farm's devices instead.
         if (!app.backendConfigured) {
             app.farmLan?.requestSync()
+            DriveBackgroundWork.request(app, membership.farmId)
             return
         }
         val request = OneTimeWorkRequestBuilder<SyncWorker>()

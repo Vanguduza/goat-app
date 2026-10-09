@@ -8,60 +8,68 @@ import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.model.LocalCommandResult
 import com.farmos.domain.ops.AttachFile
 import com.farmos.domain.ops.AttachmentRules
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 /**
  * Attachment metadata (owner decision D-015), journalled for farm replication. An attachment is a new fact
- * and is never overwritten; the bytes are stored by the caller before the metadata is committed, so a record
- * on this device never names a file this device does not hold.
+ * and is never overwritten; the caller stores bytes before local metadata commits. Received metadata may
+ * precede its bytes and remains an admitted historical operation.
  */
 class AttachmentCommands(
     private val database: FarmOsDatabase,
     private val farmId: String,
-    /** Replays an operation received from another device: domain writes only, it is already journalled. */
+    /** Replay must match an immutable operation already admitted to this farm's journal. */
     private val replaying: Boolean = false,
     private val json: Json = Json { encodeDefaults = true },
 ) {
     suspend fun attach(command: AttachFile, context: LocalCommandContext): LocalCommandResult {
         AttachmentRules.attach(command)?.let { error(it) }
         require(context.farmId == farmId) { "Farm context mismatch" }
-        if (!replaying) when (command.ownerType) {
-            "animal" -> requireNotNull(database.animals().get(farmId, command.ownerId)) { "Animal not found on this farm" }
-            "task" -> {
-                // P1 fix (independent review 2026-10-08): the "only open tasks accept new
-                // files" rule lived only in the UI gate. It belongs at the governed command
-                // boundary. Deliberately not enforced on replay: a legitimately-sent
-                // attachment arriving after task completion is history, not a violation.
-                val task = requireNotNull(database.tasks().get(farmId, command.ownerId)) { "Task not found on this farm" }
-                require(task.status == "open") { "Only open tasks accept new files" }
+        database.withTransaction {
+            val payloadJson = json.encodeToString(command)
+            val permission = OpsCommandPermissions.requiredFor(ATTACH, payloadJson)
+            if (!replaying) database.requireLocalCommandAuthority(context, permission)
+            val original = database.replication().operation(farmId, context.mutationId)
+            if (original != null) {
+                requireOriginalCommand(original, context, ATTACH, "attachment", command.attachmentId, {
+                    json.decodeFromString<AttachFile>(it) == command
+                })
+                if (database.commandAlreadyApplied(original, replaying)) return@withTransaction
+            } else {
+                require(!replaying) { "A received change must be journalled before it is applied" }
             }
-            else -> error("Attachments can be added to animal and task records only")
-        }
-        val row = AttachmentEntity(
-            command.attachmentId, farmId, command.ownerType, command.ownerId, command.contentSha256, command.byteSize,
-            command.mediaType, command.displayName.trim(), context.occurredAtEpochMillis, context.actorId,
-        )
-        if (replaying) {
-            database.attachments().insert(row)
-        } else {
-            database.withTransaction {
-                database.attachments().insert(row)
-                database.journalLocalOperation(
-                    operationId = context.mutationId,
-                    farmId = farmId,
-                    entityType = "attachment",
-                    entityId = command.attachmentId,
-                    actorId = context.actorId,
-                    deviceId = context.deviceId,
-                    businessTimeEpochMillis = context.occurredAtEpochMillis,
-                    createdAtEpochMillis = System.currentTimeMillis(),
-                    baseVersion = null,
-                    operationType = ATTACH,
-                    payloadJson = json.encodeToString(command),
-                    schemaVersion = 1,
-                )
+            if (!replaying) when (command.ownerType) {
+                "animal" -> requireNotNull(database.animals().get(farmId, command.ownerId)) { "Animal not found on this farm" }
+                "task" -> {
+                    // A legitimately admitted attachment may arrive after its task was completed.
+                    val task = requireNotNull(database.tasks().get(farmId, command.ownerId)) { "Task not found on this farm" }
+                    require(task.status == "open") { "Only open tasks accept new files" }
+                }
+                else -> error("Attachments can be added to animal and task records only")
             }
+            database.attachments().insert(
+                AttachmentEntity(
+                    command.attachmentId, farmId, command.ownerType, command.ownerId, command.contentSha256, command.byteSize,
+                    command.mediaType, command.displayName.trim(), context.occurredAtEpochMillis, context.actorId,
+                ),
+            )
+            if (replaying) return@withTransaction
+            database.journalLocalOperation(
+                operationId = context.mutationId,
+                farmId = farmId,
+                entityType = "attachment",
+                entityId = command.attachmentId,
+                actorId = context.actorId,
+                deviceId = context.deviceId,
+                businessTimeEpochMillis = context.occurredAtEpochMillis,
+                createdAtEpochMillis = System.currentTimeMillis(),
+                baseVersion = null,
+                operationType = ATTACH,
+                payloadJson = payloadJson,
+                schemaVersion = 1,
+            )
         }
         return LocalCommandResult(context.mutationId, command.attachmentId, true)
     }

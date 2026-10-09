@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.goat.RoomGoatRepository
+import com.farmos.domain.access.LocalRole
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.RecordGoatKidding
 import com.farmos.domain.goat.RecordGoatMating
@@ -17,6 +18,7 @@ import com.farmos.domain.ops.GestationSpecies
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Before
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -37,10 +39,16 @@ class GoatKiddingDueQueryTest {
         .build()
     private val goats = RoomGoatRepository(database, farm)
 
+    @Before
+    fun setUp() {
+        seedCommandAuthority(database, farm, "manager-1", "device-a", LocalRole.MANAGER)
+        seedCommandAuthority(database, farm, "owner-1", "device-a", LocalRole.OWNER)
+    }
+
     @After
     fun tearDown() = database.close()
 
-    private fun context() = LocalCommandContext(farm, "worker-1", "device-a", UUID.randomUUID().toString(), 1_790_000_000_000)
+    private fun context() = LocalCommandContext(farm, "manager-1", "device-a", UUID.randomUUID().toString(), 1_790_000_000_000)
 
     private suspend fun doe(id: String) = goats.registerGoat(RegisterGoat(id, "T-$id", "Doe $id", GoatSex.FEMALE), context())
 

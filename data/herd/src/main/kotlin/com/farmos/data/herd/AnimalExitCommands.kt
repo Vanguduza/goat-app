@@ -2,10 +2,12 @@ package com.farmos.data.herd
 
 import androidx.room.withTransaction
 import com.farmos.core.database.AnimalExitEntity
+import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.journalLocalOperation
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.model.LocalCommandResult
+import com.farmos.domain.access.Permission
 import com.farmos.domain.ops.AnimalExitEvent
 import com.farmos.domain.ops.AnimalExitKind
 import com.farmos.domain.ops.AnimalExitRules
@@ -14,6 +16,7 @@ import com.farmos.domain.ops.RecordAnimalExit
 import com.farmos.domain.ops.ReverseAnimalExit
 import java.time.Instant
 import java.time.ZoneOffset
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -37,9 +40,9 @@ class AnimalExitCommands(
         AnimalExitRules.exitError(kind, command.occurredEpochDay, today, command.deathCause, command.reason, command.buyer, command.priceMinor)?.let { error(it) }
         val currency = command.currency
         if (command.priceMinor != null) require(currency != null && FarmCurrency.isRecordable(currency)) { "A price needs the farm currency" }
-        val animal = requireNotNull(database.animals().get(farmId, command.animalId)) { "Animal not found" }
-        require(animal.status == "active") { "Only an animal still on the farm can leave it" }
-        journal(context, RECORD, command.animalId, json.encodeToString(command)) {
+        journal(context, RECORD, command.animalId, command) {
+            val animal = requireNotNull(database.animals().get(farmId, command.animalId)) { "Animal not found" }
+            require(animal.status == "active") { "Only an animal still on the farm can leave it" }
             database.animalExits().insert(
                 AnimalExitEntity(
                     command.exitId, farmId, command.animalId, kind.name, command.occurredEpochDay, command.deathCause,
@@ -58,11 +61,15 @@ class AnimalExitCommands(
      */
     suspend fun reverse(command: ReverseAnimalExit, context: LocalCommandContext, ofUnappliedExit: Boolean = false): LocalCommandResult {
         AnimalExitRules.reversalError(command.reason)?.let { error(it) }
-        val events = events(command.animalId)
-        if (events.any { it.exitId == command.exitId } || !(replaying || ofUnappliedExit)) {
-            require(AnimalExitRules.standing(events)?.exitId == command.exitId) { "Only the animal's current exit can be reversed" }
-        }
-        journal(context, REVERSE, command.animalId, json.encodeToString(command)) {
+        journal(context, REVERSE, command.animalId, command) {
+            if (!replaying && ofUnappliedExit) {
+                database.requireLocalCommandAuthority(context, Permission.RESOLVE_SYNC_CONFLICTS)
+                requireWaitingExit(command)
+            }
+            val events = events(command.animalId)
+            if (events.any { it.exitId == command.exitId } || !(replaying || ofUnappliedExit)) {
+                require(AnimalExitRules.standing(events)?.exitId == command.exitId) { "Only the animal's current exit can be reversed" }
+            }
             database.animalExits().insert(
                 AnimalExitEntity(
                     command.reversalId, farmId, command.animalId, REVERSAL, command.occurredEpochDay, null,
@@ -74,6 +81,22 @@ class AnimalExitCommands(
         return LocalCommandResult(context.mutationId, command.reversalId, true)
     }
 
+    /** A local correction shortcut is only for a real received exit awaiting conflict review. */
+    private suspend fun requireWaitingExit(command: ReverseAnimalExit) {
+        val original = database.replication().operationsForEntity(farmId, "animal", command.animalId)
+            .firstOrNull { operation ->
+                operation.operationType == RECORD && runCatching {
+                    val exit = json.decodeFromString<RecordAnimalExit>(operation.payloadJson)
+                    exit.exitId == command.exitId && exit.animalId == command.animalId
+                }.getOrDefault(false)
+            }
+        requireNotNull(original) { "Only a received exit waiting for review can be corrected" }
+        val application = database.replicationApplications().get(farmId, original.operationId)
+        require(application != null && application.state != ApplicationState.APPLIED.name && application.state != ApplicationState.SET_ASIDE.name) {
+            "Only a received exit waiting for review can be corrected"
+        }
+    }
+
     private suspend fun events(animalId: String): List<AnimalExitEvent> = database.animalExits().forAnimal(farmId, animalId).map {
         AnimalExitEvent(it.id, AnimalExitKind.entries.firstOrNull { kind -> kind.name == it.kind }, it.occurredEpochDay, it.recordedAtEpochMillis, it.reversesExitId)
     }
@@ -83,11 +106,23 @@ class AnimalExitCommands(
         database.animals().updateStatus(farmId, animalId, AnimalExitRules.status(events(animalId)), at)
     }
 
-    private suspend fun journal(context: LocalCommandContext, commandName: String, animalId: String, payloadJson: String, localWrite: suspend () -> Unit) {
+    private suspend inline fun <reified C> journal(context: LocalCommandContext, commandName: String, animalId: String, command: C, noinline localWrite: suspend () -> Unit) {
         require(context.farmId == farmId) { "Farm context mismatch" }
-        if (replaying) return database.withTransaction { localWrite() }
         database.withTransaction {
+            val payloadJson = json.encodeToString(command)
+            val permission = OpsCommandPermissions.requiredFor(commandName, payloadJson)
+            if (!replaying) database.requireLocalCommandAuthority(context, permission)
+            val original = database.replication().operation(farmId, context.mutationId)
+            if (original != null) {
+                requireOriginalCommand(original, context, commandName, "animal", animalId, {
+                    json.decodeFromString<C>(it) == command
+                })
+                if (database.commandAlreadyApplied(original, replaying)) return@withTransaction
+            } else {
+                require(!replaying) { "A received change must be journalled before it is applied" }
+            }
             localWrite()
+            if (replaying) return@withTransaction
             database.journalLocalOperation(
                 operationId = context.mutationId,
                 farmId = farmId,

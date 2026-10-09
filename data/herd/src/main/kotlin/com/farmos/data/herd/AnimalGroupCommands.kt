@@ -17,7 +17,6 @@ import com.farmos.domain.ops.OpsValidator
 import com.farmos.domain.ops.PlacePoultryFlock
 import com.farmos.domain.ops.MovePoultryFlock
 import com.farmos.domain.ops.ClosePoultryFlock
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 /** Command handlers extracted from the operations facade; validation and writes share one transaction. */
@@ -29,7 +28,7 @@ internal class AnimalGroupCommands(
 ) {
     suspend fun createGroup(command: CreateAnimalGroup, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         OpsValidator.group(command)?.let { error(it) }
-        journal.enqueue(context, "group.create.v1", "animal_group", command.groupId, 0, json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "group.create.v1", "animal_group", command.groupId, 0, command) {
             database.groups().insert(AnimalGroupEntity(command.groupId, farmId, command.speciesCode, command.name.trim(), command.headCount))
         }
         LocalCommandResult(context.mutationId, command.groupId, true)
@@ -44,7 +43,7 @@ internal class AnimalGroupCommands(
                 database.lifecycle().placementsForGroup(farmId, command.groupId).isEmpty())) {
             "A populated group cannot change species"
         }
-        journal.enqueue(context, "group.amend.v1", "animal_group", command.groupId, journal.observedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "group.amend.v1", "animal_group", command.groupId, journal.observedVersion("animal_group", command.groupId), command) {
             database.groups().updateDetails(farmId, command.groupId, command.name.trim(), command.speciesCode)
         }
         LocalCommandResult(context.mutationId, command.groupId, true)
@@ -76,7 +75,7 @@ internal class AnimalGroupCommands(
                 "Group move needs $label to be a member of ${fromGroup.name}; it is in $currentName"
             }
         }
-        journal.enqueue(context, "group.animal_move.v1", "animal_group", command.fromGroupId, journal.observedVersion("animal_group", command.fromGroupId), json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "group.animal_move.v1", "animal_group", command.fromGroupId, journal.observedVersion("animal_group", command.fromGroupId), command) {
             val live = database.groupMemberships().getMany(farmId, command.animalIds).associateBy { it.animalId }
             var fromDelta = 0
             var toDelta = 0
@@ -105,7 +104,7 @@ internal class AnimalGroupCommands(
         OpsValidator.census(command)?.let { error(it) }
         journal.requireOpenFlock(command.groupId)
         requireNotNull(database.groups().get(farmId, command.groupId)) { "Census needs a group on this farm" }
-        journal.enqueue(context, "group.census.v1", "animal_group", command.groupId, journal.observedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "group.census.v1", "animal_group", command.groupId, journal.observedVersion("animal_group", command.groupId), command) {
             database.lifecycle().insertCensus(
                 GroupCensusEntity(command.censusId, farmId, command.groupId, command.headCount, command.occurredEpochDay),
             )
@@ -117,7 +116,7 @@ internal class AnimalGroupCommands(
     suspend fun placeFlock(command: PlacePoultryFlock, context: LocalCommandContext): LocalCommandResult = database.withTransaction {
         journal.requireOpenFlock(command.groupId)
         OpsValidator.flockPlace(command)?.let { error(it) }
-        journal.enqueue(context, "poultry.flock_place.v1", "animal_group", command.groupId, journal.observedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "poultry.flock_place.v1", "animal_group", command.groupId, journal.observedVersion("animal_group", command.groupId), command) {
             database.lifecycle().insertPlacement(
                 PoultryPlacementEntity(command.placementId, farmId, command.groupId, command.houseId, command.poultryKindCode, command.headCount, command.occurredEpochDay),
             )
@@ -137,7 +136,7 @@ internal class AnimalGroupCommands(
             ?: error("Flock move needs a placed flock")
         require(latest.houseId == command.fromHouseId) { "Flock is not in the selected house" }
         val kind = latest.poultryKindCode
-        journal.enqueue(context, "poultry.flock_move.v1", "animal_group", command.groupId, journal.observedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "poultry.flock_move.v1", "animal_group", command.groupId, journal.observedVersion("animal_group", command.groupId), command) {
             database.lifecycle().insertPlacement(
                 PoultryPlacementEntity(command.moveId, farmId, command.groupId, command.toHouseId, kind, command.headCount, command.occurredEpochDay),
             )
@@ -150,7 +149,7 @@ internal class AnimalGroupCommands(
         journal.requireOpenFlock(command.groupId)
         val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Flock close-out needs a flock" }
         require(group.speciesCode == "poultry") { "Flock close-out is for poultry groups" }
-        journal.enqueue(context, "poultry.flock_close.v1", "animal_group", command.groupId, journal.observedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        journal.enqueueCommand(json, context, "poultry.flock_close.v1", "animal_group", command.groupId, journal.observedVersion("animal_group", command.groupId), command) {
             database.groups().setHeadCount(farmId, command.groupId, 0)
         }
         LocalCommandResult(context.mutationId, command.closeoutId, true)

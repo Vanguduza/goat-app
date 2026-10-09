@@ -5,7 +5,6 @@ import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.CattleCalvingEntity
 import com.farmos.core.database.CattlePdEntity
 import com.farmos.core.database.FamachaScoreEntity
-import com.farmos.core.database.FormularyItemEntity
 import com.farmos.core.database.HealthObservationEntity
 import com.farmos.core.database.HealthPackEntity
 import com.farmos.core.database.HealthTreatmentEntity
@@ -33,7 +32,6 @@ import com.farmos.core.database.InventoryLotEntity
 import com.farmos.core.database.LabResultEntity
 import com.farmos.core.database.OfficialMovementEntity
 import com.farmos.core.database.PedigreeRelationEntity
-import com.farmos.core.database.ReorderAlertEntity
 import com.farmos.core.database.PoultryBiosecurityEntity
 import com.farmos.core.database.PoultryVaccinationEntity
 import com.farmos.core.database.RabbitGiStasisEntity
@@ -175,7 +173,6 @@ import com.farmos.domain.rabbit.RecordRabbitWeight
 import com.farmos.domain.rabbit.RegisterRabbitKit
 import com.farmos.domain.rabbit.SetRabbitNestBoxStatus
 import com.farmos.domain.rabbit.KudbatSemiIntensiveExcel
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class RoomOpsRepository(
@@ -189,10 +186,12 @@ class RoomOpsRepository(
     private val configurationCommands = FarmConfigurationCommands(database, farmId, json, journal)
     private val groupCommands = AnimalGroupCommands(database, farmId, json, journal)
     private val resourceCommands = FarmResourceCommands(database, farmId, json, journal)
+    private val formularyCommands = FormularyCommands(database, farmId, json, journal)
+    private val reorderAlertCommands = ReorderAlertCommands(database, farmId, json, journal, replaying)
 
     suspend fun createTask(command: CreateFarmTask, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.task(command)?.let { error(it) }
-        enqueue(context, "task.create.v1", "task", command.taskId, 0, json.encodeToString(command)) {
+        enqueue(context, "task.create.v1", "task", command.taskId, 0, command) {
             database.tasks().insert(command.toEntity(farmId, context.occurredAtEpochMillis, "open"))
         }
         return LocalCommandResult(context.mutationId, command.taskId, true)
@@ -205,7 +204,7 @@ class RoomOpsRepository(
             "task",
             command.taskId,
             expectedVersion("task", command.taskId),
-            json.encodeToString(command),
+            command,
         ) {
             database.tasks().updateStatus(farmId, command.taskId, "done", context.occurredAtEpochMillis)
         }
@@ -218,7 +217,7 @@ class RoomOpsRepository(
 
     suspend fun createCage(command: CreateRabbitCage, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.cage(command)?.let { error(it) }
-        enqueue(context, "rabbit.cage_create.v1", "rabbit_cage", command.cageId, 0, json.encodeToString(command)) {
+        enqueue(context, "rabbit.cage_create.v1", "rabbit_cage", command.cageId, 0, command) {
             database.rabbitProgramme().insertCage(
                 RabbitCageEntity(command.cageId, farmId, command.code.trim(), command.doeCapacity),
             )
@@ -228,7 +227,7 @@ class RoomOpsRepository(
 
     suspend fun createNestBox(command: CreateRabbitNestBox, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.nestBox(command)?.let { error(it) }
-        enqueue(context, "rabbit.nest_box_create.v1", "rabbit_nest_box", command.nestBoxId, 0, json.encodeToString(command)) {
+        enqueue(context, "rabbit.nest_box_create.v1", "rabbit_nest_box", command.nestBoxId, 0, command) {
             database.rabbitProgramme().insertBox(
                 RabbitNestBoxEntity(command.nestBoxId, farmId, command.cageId, command.code.trim(), "available"),
             )
@@ -240,7 +239,7 @@ class RoomOpsRepository(
         val boxes = database.rabbitProgramme().availableBoxes(farmId, command.cageId)
         RabbitProgrammeValidator.wave(command, boxes)?.let { error(it) }
         val dates = KudbatSemiIntensiveExcel.schedule(command.matingEpochDay)
-        enqueue(context, "rabbit.wave_create.v1", "rabbit_wave", command.waveId, 0, json.encodeToString(command)) {
+        enqueue(context, "rabbit.wave_create.v1", "rabbit_wave", command.waveId, 0, command) {
             database.rabbitProgramme().insertWave(
                 RabbitWaveEntity(
                     id = command.waveId,
@@ -296,7 +295,7 @@ class RoomOpsRepository(
         if (!nestTransitionAllowed(box.status, command.status)) {
             error("Nest box status change is not allowed")
         }
-        enqueue(context, "rabbit.nest_box_set_status.v1", "rabbit_nest_box", command.nestBoxId, expectedVersion("rabbit_nest_box", command.nestBoxId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.nest_box_set_status.v1", "rabbit_nest_box", command.nestBoxId, expectedVersion("rabbit_nest_box", command.nestBoxId), command) {
             database.rabbitProgramme().updateBoxStatus(farmId, command.nestBoxId, command.status)
         }
         return LocalCommandResult(context.mutationId, command.nestBoxId, true)
@@ -304,7 +303,7 @@ class RoomOpsRepository(
 
     suspend fun recordWean(command: RecordRabbitWean, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.wean(command)?.let { error(it) }
-        enqueue(context, "rabbit.record_wean.v1", "rabbit_wave", command.waveId, expectedVersion("rabbit_wave", command.waveId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.record_wean.v1", "rabbit_wave", command.waveId, expectedVersion("rabbit_wave", command.waveId), command) {
             database.lifecycle().insertWean(RabbitWeanEntity(command.weanId, farmId, command.waveId, command.weanedCount, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.weanId, true)
@@ -315,7 +314,7 @@ class RoomOpsRepository(
         RabbitProgrammeValidator.weight(command, context.occurredAtEpochMillis)?.let { error(it) }
         val rabbit = requireNotNull(database.animals().get(farmId, command.animalId)) { "Rabbit weight needs a rabbit" }
         require(rabbit.speciesCode == "rabbit") { "Rabbit weight needs a rabbit" }
-        enqueue(context, "rabbit.record_weight.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.record_weight.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertRabbitWeight(
                 RabbitWeightEntity(
                     id = command.weightId,
@@ -336,7 +335,7 @@ class RoomOpsRepository(
         OpsValidator.marking(command)?.let { error(it) }
         val aggregateType = if (command.animalId.isNullOrBlank()) "animal_group" else "animal"
         val aggregateId = command.animalId ?: command.groupId!!
-        enqueue(context, "sheep.record_marking.v1", aggregateType, aggregateId, expectedVersion(aggregateType, aggregateId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_marking.v1", aggregateType, aggregateId, expectedVersion(aggregateType, aggregateId), command) {
             database.lifecycle().insertMarking(SheepMarkingEntity(command.markingId, farmId, command.groupId, command.animalId, command.markedCount, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.markingId, true)
@@ -346,7 +345,7 @@ class RoomOpsRepository(
         OpsValidator.sheepWeaning(command)?.let { error(it) }
         val aggregateType = if (command.animalId.isNullOrBlank()) "animal_group" else "animal"
         val aggregateId = command.animalId ?: command.groupId!!
-        enqueue(context, "sheep.record_weaning.v1", aggregateType, aggregateId, expectedVersion(aggregateType, aggregateId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_weaning.v1", aggregateType, aggregateId, expectedVersion(aggregateType, aggregateId), command) {
             database.lifecycle().insertWeaning(SheepWeaningEntity(command.weaningId, farmId, command.groupId, command.animalId, command.weanedCount, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.weaningId, true)
@@ -354,7 +353,7 @@ class RoomOpsRepository(
 
     suspend fun recordCattleBcs(command: RecordCattleBcs, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.cattleBcs(command)?.let { error(it) }
-        enqueue(context, "cattle.record_bcs.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_bcs.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertBcs(CattleBcsEntity(command.scoreId, farmId, command.animalId, command.scale, command.scoreTenths, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.scoreId, true)
@@ -363,7 +362,7 @@ class RoomOpsRepository(
     /** FOS-SHEEP-008 — sheep BCS; reuses the shared BCS table, no schema change. */
     suspend fun recordSheepBcs(command: RecordSheepBcs, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.sheepBcs(command)?.let { error(it) }
-        enqueue(context, "sheep.record_bcs.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_bcs.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertBcs(CattleBcsEntity(command.scoreId, farmId, command.animalId, command.scale, command.scoreTenths, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.scoreId, true)
@@ -373,7 +372,7 @@ class RoomOpsRepository(
         OpsValidator.wool(command)?.let { error(it) }
         val aggregateType = if (command.animalId.isNullOrBlank()) "animal_group" else "animal"
         val aggregateId = command.animalId ?: command.groupId!!
-        enqueue(context, "sheep.record_wool.v1", aggregateType, aggregateId, expectedVersion(aggregateType, aggregateId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_wool.v1", aggregateType, aggregateId, expectedVersion(aggregateType, aggregateId), command) {
             database.lifecycle().insertWool(SheepWoolEntity(command.clipId, farmId, command.animalId, command.groupId, command.greasyGrams, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.clipId, true)
@@ -383,7 +382,7 @@ class RoomOpsRepository(
         OpsValidator.cattleMilk(command)?.let { error(it) }
         val cow = requireNotNull(database.animals().get(farmId, command.animalId)) { "Active cow not found" }
         require(cow.speciesCode == "cattle" && cow.sex == "FEMALE" && cow.status == "active") { "Active cow not found" }
-        enqueue(context, "cattle.record_milk.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_milk.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertCattleMilk(CattleMilkEntity(command.milkId, farmId, command.animalId, command.litresMilli, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.milkId, true)
@@ -394,7 +393,7 @@ class RoomOpsRepository(
         OpsValidator.cattleHeat(command)?.let { error(it) }
         val cow = requireNotNull(database.animals().get(farmId, command.animalId)) { "Active cow not found" }
         require(cow.speciesCode == "cattle" && cow.status == "active") { "Heat records are for active cattle" }
-        enqueue(context, "cattle.record_heat.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_heat.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertCattleHeat(
                 CattleHeatEntity(
                     command.heatId, farmId, command.animalId, command.occurredEpochDay,
@@ -420,7 +419,7 @@ class RoomOpsRepository(
 
     suspend fun recordDag(command: RecordSheepDag, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.dag(command)?.let { error(it) }
-        enqueue(context, "sheep.record_dag.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_dag.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertDag(SheepDagEntity(command.scoreId, farmId, command.animalId, command.score, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.scoreId, true)
@@ -428,7 +427,7 @@ class RoomOpsRepository(
 
     suspend fun recordFootrot(command: RecordSheepFootrot, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.footrot(command)?.let { error(it) }
-        enqueue(context, "sheep.record_footrot.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_footrot.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertFootrot(SheepFootrotEntity(command.scoreId, farmId, command.animalId, command.score, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.scoreId, true)
@@ -436,7 +435,7 @@ class RoomOpsRepository(
 
     suspend fun registerKit(command: RegisterRabbitKit, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.kit(command)?.let { error(it) }
-        enqueue(context, "rabbit.kit_register.v1", "rabbit_wave", command.waveId, expectedVersion("rabbit_wave", command.waveId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.kit_register.v1", "rabbit_wave", command.waveId, expectedVersion("rabbit_wave", command.waveId), command) {
             database.lifecycle().insertKit(
                 RabbitKitEntity(command.kitId, farmId, command.waveId, null, command.tempLabel.trim(), command.sex, "alive", "undecided", null),
             )
@@ -449,7 +448,7 @@ class RoomOpsRepository(
         val kit = requireNotNull(database.lifecycle().kit(farmId, command.kitId)) { "Alive unpromoted kit not found" }
         require(kit.status == "alive" && kit.animalId == null) { "Alive unpromoted kit not found" }
         val sex = command.sex ?: if (kit.sex == "female") "FEMALE" else if (kit.sex == "male") "MALE" else error("Promote needs doe or buck sex")
-        enqueue(context, "rabbit.kit_promote.v1", "animal", command.animalId, 0, json.encodeToString(command)) {
+        enqueue(context, "rabbit.kit_promote.v1", "animal", command.animalId, 0, command) {
             database.animals().insert(
                 AnimalEntity(command.animalId, farmId, command.tag.trim(), null, "rabbit", sex, "active", null, null, context.occurredAtEpochMillis),
             )
@@ -461,7 +460,7 @@ class RoomOpsRepository(
     suspend fun decideRetention(command: DecideRabbitRetention, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.retention(command)?.let { error(it) }
         val kit = requireNotNull(database.lifecycle().kit(farmId, command.kitId)) { "Kit not found" }
-        enqueue(context, "rabbit.retention_decide.v1", "rabbit_kit", command.kitId, expectedVersion("rabbit_kit", command.kitId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.retention_decide.v1", "rabbit_kit", command.kitId, expectedVersion("rabbit_kit", command.kitId), command) {
             database.lifecycle().insertRetention(
                 RabbitRetentionEntity(command.decisionId, farmId, command.kitId, command.decision, command.occurredEpochDay),
             )
@@ -472,7 +471,7 @@ class RoomOpsRepository(
 
     suspend fun enqueueWaitlist(command: EnqueueRabbitWaitlist, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.waitlist(command)?.let { error(it) }
-        enqueue(context, "rabbit.waitlist_enqueue.v1", "rabbit_waitlist", command.waitlistId, 0, json.encodeToString(command)) {
+        enqueue(context, "rabbit.waitlist_enqueue.v1", "rabbit_waitlist", command.waitlistId, 0, command) {
             database.lifecycle().insertWaitlist(
                 RabbitWaitlistEntity(command.waitlistId, farmId, command.contactName.trim(), command.desiredSex, command.qty, "open", null),
             )
@@ -486,7 +485,7 @@ class RoomOpsRepository(
         }
         val kit = requireNotNull(database.lifecycle().kit(farmId, command.kitId)) { "Waitlist match needs a living kit marked sale_pet" }
         require(kit.status == "alive" && kit.retention == "sale_pet") { "Waitlist match needs a living kit marked sale_pet" }
-        enqueue(context, "rabbit.waitlist_fulfill.v1", "rabbit_waitlist", command.waitlistId, expectedVersion("rabbit_waitlist", command.waitlistId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.waitlist_fulfill.v1", "rabbit_waitlist", command.waitlistId, expectedVersion("rabbit_waitlist", command.waitlistId), command) {
             database.lifecycle().upsertWaitlist(row.copy(status = "fulfilled", matchedKitId = command.kitId))
         }
         return LocalCommandResult(context.mutationId, command.waitlistId, true)
@@ -494,7 +493,7 @@ class RoomOpsRepository(
 
     suspend fun agreeContract(command: AgreeRabbitContract, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.contract(command)?.let { error(it) }
-        enqueue(context, "rabbit.contract_agree.v1", "rabbit_contract", command.contractId, 0, json.encodeToString(command)) {
+        enqueue(context, "rabbit.contract_agree.v1", "rabbit_contract", command.contractId, 0, command) {
             database.lifecycle().insertContract(
                 RabbitContractEntity(command.contractId, farmId, command.waitlistId, command.buyerName.trim(), command.animalId, command.amountMinor, command.currency, "agreed", command.occurredEpochDay),
             )
@@ -506,7 +505,7 @@ class RoomOpsRepository(
 
     suspend fun recordPlan(command: RecordRabbitMarketPlan, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.plan(command)?.let { error(it) }
-        enqueue(context, "rabbit.market_plan.v1", "rabbit_market_plan", command.planId, 0, json.encodeToString(command)) {
+        enqueue(context, "rabbit.market_plan.v1", "rabbit_market_plan", command.planId, 0, command) {
             database.lifecycle().insertPlan(
                 RabbitMarketPlanEntity(command.planId, farmId, command.kitId, command.waveId, command.targetWeightGrams, command.targetEpochDay, command.purpose, "active"),
             )
@@ -516,7 +515,7 @@ class RoomOpsRepository(
 
     suspend fun recordLocomotion(command: RecordCattleLocomotion, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.locomotion(command)?.let { error(it) }
-        enqueue(context, "cattle.record_locomotion.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_locomotion.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertLocomotion(CattleLocomotionEntity(command.scoreId, farmId, command.animalId, command.score, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.scoreId, true)
@@ -524,7 +523,7 @@ class RoomOpsRepository(
 
     suspend fun recordScc(command: RecordCattleScc, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.scc(command)?.let { error(it) }
-        enqueue(context, "cattle.record_scc.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_scc.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertScc(CattleSccEntity(command.recordId, farmId, command.animalId, command.cellsPerMl, command.dimDays, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.recordId, true)
@@ -534,7 +533,7 @@ class RoomOpsRepository(
         OpsValidator.shearing(command)?.let { error(it) }
         val aggregateType = if (command.animalId.isNullOrBlank()) "animal_group" else "animal"
         val aggregateId = command.animalId ?: command.groupId!!
-        enqueue(context, "sheep.record_shearing.v1", aggregateType, aggregateId, expectedVersion(aggregateType, aggregateId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_shearing.v1", aggregateType, aggregateId, expectedVersion(aggregateType, aggregateId), command) {
             database.lifecycle().insertShearing(
                 SheepShearingEntity(command.eventId, farmId, command.animalId, command.groupId, command.kind, command.greasyGrams, command.occurredEpochDay),
             )
@@ -544,7 +543,7 @@ class RoomOpsRepository(
 
     suspend fun createHouse(command: CreatePoultryHouse, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.house(command)?.let { error(it) }
-        enqueue(context, "poultry.house_create.v1", "poultry_house", command.houseId, 0, json.encodeToString(command)) {
+        enqueue(context, "poultry.house_create.v1", "poultry_house", command.houseId, 0, command) {
             database.lifecycle().insertHouse(
                 PoultryHouseEntity(command.houseId, farmId, command.code.trim(), command.kind, command.poultryKindCode),
             )
@@ -555,7 +554,7 @@ class RoomOpsRepository(
     suspend fun setHatch(command: SetPoultryHatch, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.hatchSet(command)?.let { error(it) }
         val days = requireNotNull(PoultryKindIncubation.days(command.poultryKindCode, command.incubationDays))
-        enqueue(context, "poultry.hatch_set.v1", "poultry_hatch", command.hatchId, 0, json.encodeToString(command)) {
+        enqueue(context, "poultry.hatch_set.v1", "poultry_hatch", command.hatchId, 0, command) {
             database.lifecycle().insertHatch(
                 PoultryHatchEntity(
                     command.hatchId, farmId, command.poultryKindCode, command.houseId, command.groupId,
@@ -576,7 +575,7 @@ class RoomOpsRepository(
         val hatch = requireNotNull(database.lifecycle().hatch(farmId, command.hatchId)) { "Candling needs a set hatch" }
         require(hatch.status == "set") { "Candling needs a set hatch" }
         require(command.fertile + command.infertile + command.midDead == hatch.eggsSet) { "Candling counts must add up to eggs set" }
-        enqueue(context, "poultry.hatch_candle.v1", "poultry_hatch", command.hatchId, expectedVersion("poultry_hatch", command.hatchId), json.encodeToString(command)) {
+        enqueue(context, "poultry.hatch_candle.v1", "poultry_hatch", command.hatchId, expectedVersion("poultry_hatch", command.hatchId), command) {
             database.lifecycle().upsertHatch(
                 hatch.copy(status = "candled", fertile = command.fertile, infertile = command.infertile, midDead = command.midDead),
             )
@@ -589,7 +588,7 @@ class RoomOpsRepository(
         val hatch = requireNotNull(database.lifecycle().hatch(farmId, command.hatchId)) { "Hatch record needs a candled hatch" }
         require(hatch.status == "candled") { "Hatch record needs a candled hatch" }
         require(command.hatched + command.culls <= (hatch.fertile ?: hatch.eggsSet)) { "Hatched and cull counts cannot exceed fertile eggs" }
-        enqueue(context, "poultry.hatch_record.v1", "poultry_hatch", command.hatchId, expectedVersion("poultry_hatch", command.hatchId), json.encodeToString(command)) {
+        enqueue(context, "poultry.hatch_record.v1", "poultry_hatch", command.hatchId, expectedVersion("poultry_hatch", command.hatchId), command) {
             database.lifecycle().upsertHatch(
                 hatch.copy(status = "hatched", hatched = command.hatched, culls = command.culls, placementGroupId = command.placementGroupId),
             )
@@ -599,7 +598,7 @@ class RoomOpsRepository(
 
     suspend fun recordFlystrike(command: RecordSheepFlystrike, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.flystrike(command)?.let { error(it) }
-        enqueue(context, "sheep.record_flystrike.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_flystrike.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertFlystrike(
                 SheepFlystrikeEntity(command.scoreId, farmId, command.animalId, command.score, command.region, command.occurredEpochDay),
             )
@@ -609,7 +608,7 @@ class RoomOpsRepository(
 
     suspend fun recordMatingOutcome(command: RecordRabbitMatingOutcome, context: LocalCommandContext): LocalCommandResult {
         RabbitProgrammeValidator.matingOutcome(command)?.let { error(it) }
-        enqueue(context, "rabbit.record_mating_outcome.v1", "rabbit_wave", command.waveId, expectedVersion("rabbit_wave", command.waveId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.record_mating_outcome.v1", "rabbit_wave", command.waveId, expectedVersion("rabbit_wave", command.waveId), command) {
             database.lifecycle().insertMatingOutcome(
                 RabbitMatingOutcomeEntity(command.outcomeId, farmId, command.waveId, command.outcome, command.occurredEpochDay),
             )
@@ -627,7 +626,7 @@ class RoomOpsRepository(
         if (!feedItemId.isNullOrBlank()) {
             requireNotNull(database.inventory().item(farmId, feedItemId)) { "Feed item not found on this farm" }
         }
-        enqueue(context, "rabbit.bedding_bind.v1", "farm", farmId, expectedVersion("farm", farmId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.bedding_bind.v1", "farm", farmId, expectedVersion("farm", farmId), command) {
             database.lifecycle().upsertInventoryLink(
                 RabbitInventoryLinkEntity(farmId, command.beddingItemId, command.beddingQtyMilli, command.feedItemId, true),
             )
@@ -637,13 +636,13 @@ class RoomOpsRepository(
 
     suspend fun recordVaccination(command: RecordPoultryVaccination, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.vaccination(command)?.let { error(it) }
-        val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) {
-            "Vaccination needs a vet-approved poultry formulary item"
-        }
-        require(formulary.vetApproved && formulary.speciesCode == "poultry") {
-            "Vaccination needs a vet-approved poultry formulary item"
-        }
-        enqueue(context, "poultry.record_vaccination.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        enqueue(context, "poultry.record_vaccination.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), command) {
+            val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) {
+                "Vaccination needs a vet-approved poultry formulary item"
+            }
+            require(formulary.vetApproved && formulary.speciesCode == "poultry") {
+                "Vaccination needs a vet-approved poultry formulary item"
+            }
             database.lifecycle().insertVaccination(
                 PoultryVaccinationEntity(command.vaccinationId, farmId, command.groupId, command.poultryKindCode, command.formularyItemId, command.occurredEpochDay),
             )
@@ -653,7 +652,7 @@ class RoomOpsRepository(
 
     suspend fun recordDryOff(command: RecordCattleDryOff, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.dryOff(command)?.let { error(it) }
-        enqueue(context, "cattle.record_dryoff.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_dryoff.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertDryOff(
                 CattleDryOffEntity(command.dryOffId, farmId, command.animalId, command.occurredEpochDay, command.expectedCalvingEpochDay),
             )
@@ -678,7 +677,7 @@ class RoomOpsRepository(
     suspend fun recordBiosecurity(command: RecordPoultryBiosecurity, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.biosecurity(command)?.let { error(it) }
         val aggregateId = command.houseId ?: command.groupId!!
-        enqueue(context, "poultry.record_biosecurity.v1", "poultry_house", aggregateId, expectedVersion("poultry_house", aggregateId), json.encodeToString(command)) {
+        enqueue(context, "poultry.record_biosecurity.v1", "poultry_house", aggregateId, expectedVersion("poultry_house", aggregateId), command) {
             database.lifecycle().insertBiosecurity(
                 PoultryBiosecurityEntity(command.walkId, farmId, command.houseId, command.groupId, command.findings.trim(), command.mixedSpecies, command.occurredEpochDay),
             )
@@ -690,7 +689,7 @@ class RoomOpsRepository(
         OpsValidator.sheepFamacha(command)?.let { error(it) }
         val sheep = requireNotNull(database.animals().get(farmId, command.animalId)) { "FAMACHA needs a sheep" }
         require(sheep.speciesCode == "sheep") { "FAMACHA needs a sheep" }
-        enqueue(context, "sheep.record_famacha.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_famacha.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.famacha().insert(FamachaScoreEntity(command.scoreId, farmId, command.animalId, command.score, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.scoreId, true)
@@ -704,7 +703,7 @@ class RoomOpsRepository(
         // re-assignment and journal replay of its own identifiers stay convergent.
         val otherActiveValues = database.lifecycle().activeIdentifierValuesExcept(farmId, command.animalId)
         OpsValidator.identifierUnique(command, otherActiveValues)?.let { error(it) }
-        enqueue(context, "animal.identifier_assign.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "animal.identifier_assign.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertIdentifier(
                 AnimalIdentifierEntity(command.identifierId, farmId, command.animalId, command.type, command.value.trim(), true, command.occurredEpochDay),
             )
@@ -716,7 +715,7 @@ class RoomOpsRepository(
         OpsValidator.movement(command)?.let { error(it) }
         val animal = requireNotNull(database.animals().get(farmId, command.animalId)) { "Official movement needs a cattle or sheep record" }
         require(animal.speciesCode == "cattle" || animal.speciesCode == "sheep") { "Official movement needs a cattle or sheep record" }
-        enqueue(context, "official.record_movement.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "official.record_movement.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertMovement(
                 OfficialMovementEntity(command.movementId, farmId, command.animalId, animal.speciesCode, command.direction, command.fromPlace, command.toPlace, command.occurredEpochDay),
             )
@@ -726,8 +725,8 @@ class RoomOpsRepository(
 
     suspend fun receiveLot(command: ReceiveInventoryLot, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.lotReceive(command)?.let { error(it) }
-        val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
-        enqueue(context, "inventory.lot_receive.v1", "inventory_item", command.itemId, expectedVersion("inventory_item", command.itemId), json.encodeToString(command)) {
+        enqueue(context, "inventory.lot_receive.v1", "inventory_item", command.itemId, expectedVersion("inventory_item", command.itemId), command) {
+            val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
             database.lifecycle().insertLot(
                 InventoryLotEntity(command.lotId, farmId, command.itemId, command.lotCode.trim(), command.expiresEpochDay, command.quantityMilli),
             )
@@ -738,7 +737,7 @@ class RoomOpsRepository(
 
     suspend fun issueLot(command: IssueInventoryLot, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.lotIssue(command)?.let { error(it) }
-        enqueue(context, "inventory.lot_issue.v1", "inventory_item", command.itemId, expectedVersion("inventory_item", command.itemId), json.encodeToString(command)) {
+        enqueue(context, "inventory.lot_issue.v1", "inventory_item", command.itemId, expectedVersion("inventory_item", command.itemId), command) {
             val inserted = database.inventory().insertMovement(
                 InventoryMovementEntity(command.issueId, farmId, command.itemId, "issue", command.quantityMilli, context.occurredAtEpochMillis),
             )
@@ -750,7 +749,7 @@ class RoomOpsRepository(
 
     suspend fun recordVetVisit(command: RecordVetVisit, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.vetVisit(command)?.let { error(it) }
-        enqueue(context, "health.record_vet_visit.v1", "vet_visit", command.visitId, 0, json.encodeToString(command)) {
+        enqueue(context, "health.record_vet_visit.v1", "vet_visit", command.visitId, 0, command) {
             database.lifecycle().insertVetVisit(
                 VetVisitEntity(command.visitId, farmId, command.speciesCode, command.animalId, command.groupId, command.reason.trim(), command.attendingVet.trim(), command.occurredEpochDay),
             )
@@ -760,7 +759,7 @@ class RoomOpsRepository(
 
     suspend fun recordLab(command: RecordLabResult, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.lab(command)?.let { error(it) }
-        enqueue(context, "health.record_lab.v1", "lab_result", command.resultId, 0, json.encodeToString(command)) {
+        enqueue(context, "health.record_lab.v1", "lab_result", command.resultId, 0, command) {
             database.lifecycle().insertLab(
                 LabResultEntity(command.resultId, farmId, command.animalId, command.groupId, command.testName.trim(), command.resultText.trim(), command.cellsPerMl, command.occurredEpochDay),
             )
@@ -776,7 +775,7 @@ class RoomOpsRepository(
             val calf = requireNotNull(database.animals().get(farmId, animalId)) { "Cattle weaning needs a calf" }
             require(calf.speciesCode == "cattle") { "Cattle weaning needs a calf" }
         }
-        enqueue(context, "cattle.record_weaning.v1", "animal", aggregateId, expectedVersion("animal", aggregateId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_weaning.v1", "animal", aggregateId, expectedVersion("animal", aggregateId), command) {
             database.lifecycle().insertCattleWeaning(
                 CattleWeaningEntity(command.weaningId, farmId, command.animalId, command.groupId, command.weightGrams, command.occurredEpochDay),
             )
@@ -787,7 +786,7 @@ class RoomOpsRepository(
     suspend fun recordMicron(command: RecordSheepMicron, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.micron(command)?.let { error(it) }
         val aggregateId = command.animalId ?: command.groupId!!
-        enqueue(context, "sheep.record_micron.v1", "animal", aggregateId, expectedVersion("animal", aggregateId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_micron.v1", "animal", aggregateId, expectedVersion("animal", aggregateId), command) {
             database.lifecycle().insertMicron(
                 SheepMicronEntity(command.testId, farmId, command.animalId, command.groupId, command.micronTenths, command.occurredEpochDay),
             )
@@ -797,7 +796,7 @@ class RoomOpsRepository(
 
     suspend fun enablePoultryKind(command: EnablePoultryKind, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.enableKind(command)?.let { error(it) }
-        enqueue(context, "poultry.kind_enable.v1", "farm", farmId, expectedVersion("farm", farmId), json.encodeToString(command)) {
+        enqueue(context, "poultry.kind_enable.v1", "farm", farmId, expectedVersion("farm", farmId), command) {
             database.lifecycle().upsertEnabledKind(EnabledPoultryKindEntity(farmId, command.poultryKindCode))
         }
         return LocalCommandResult(context.mutationId, command.poultryKindCode, true)
@@ -807,7 +806,7 @@ class RoomOpsRepository(
         RabbitProgrammeValidator.giStasis(command)?.let { error(it) }
         val rabbit = requireNotNull(database.animals().get(farmId, command.animalId)) { "GI stasis flag needs a rabbit" }
         require(rabbit.speciesCode == "rabbit") { "GI stasis flag needs a rabbit" }
-        enqueue(context, "rabbit.record_gi_stasis.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.record_gi_stasis.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertGiStasis(
                 RabbitGiStasisEntity(command.flagId, farmId, command.animalId, command.signs.trim(), command.occurredEpochDay),
             )
@@ -835,7 +834,7 @@ class RoomOpsRepository(
         val child = requireNotNull(database.animals().get(farmId, command.animalId)) { "Pedigree link needs two animals of the same species on this farm" }
         val parent = requireNotNull(database.animals().get(farmId, command.parentId)) { "Pedigree link needs two animals of the same species on this farm" }
         require(child.speciesCode == parent.speciesCode) { "Pedigree link needs two animals of the same species on this farm" }
-        enqueue(context, "pedigree.link.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "pedigree.link.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertPedigree(
                 PedigreeRelationEntity(command.linkId, farmId, command.animalId, command.parentId, command.relationType),
             )
@@ -850,7 +849,7 @@ class RoomOpsRepository(
 
     suspend fun recordObservation(command: RecordHealthObservation, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.observation(command)?.let { error(it) }
-        enqueue(context, "health.record_observation.v1", "health_observation", command.observationId, 0, json.encodeToString(command)) {
+        enqueue(context, "health.record_observation.v1", "health_observation", command.observationId, 0, command) {
             database.healthObservations().insert(
                 HealthObservationEntity(
                     id = command.observationId,
@@ -871,7 +870,7 @@ class RoomOpsRepository(
 
     suspend fun recordMoney(command: RecordMoney, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.money(command)?.let { error(it) }
-        enqueue(context, "money.record.v1", "money_record", command.recordId, 0, json.encodeToString(command)) {
+        enqueue(context, "money.record.v1", "money_record", command.recordId, 0, command) {
             database.money().insert(
                 MoneyRecordEntity(
                     id = command.recordId,
@@ -900,7 +899,7 @@ class RoomOpsRepository(
 
     suspend fun createItem(command: CreateInventoryItem, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.inventoryItem(command)?.let { error(it) }
-        enqueue(context, "inventory.item_create.v1", "inventory_item", command.itemId, 0, json.encodeToString(command)) {
+        enqueue(context, "inventory.item_create.v1", "inventory_item", command.itemId, 0, command) {
             database.inventory().insertItem(
                 InventoryItemEntity(
                     id = command.itemId,
@@ -917,16 +916,16 @@ class RoomOpsRepository(
     }
 
     suspend fun move(command: MoveInventory, context: LocalCommandContext): LocalCommandResult {
-        val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
-        OpsValidator.inventoryMove(command, item.quantityMilli)?.let { error(it) }
         enqueue(
             context,
             "inventory.move.v1",
             "inventory_item",
             command.itemId,
             expectedVersion("inventory_item", command.itemId),
-            json.encodeToString(command),
+            command,
         ) {
+            val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
+            OpsValidator.inventoryMove(command, item.quantityMilli)?.let { error(it) }
             database.inventory().insertMovement(
                 InventoryMovementEntity(
                     id = command.movementId,
@@ -990,7 +989,7 @@ class RoomOpsRepository(
 
     suspend fun recordLabour(command: RecordLabour, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.labour(command)?.let { error(it) }
-        enqueue(context, "labour.record.v1", "labour_entry", command.entryId, 0, json.encodeToString(command)) {
+        enqueue(context, "labour.record.v1", "labour_entry", command.entryId, 0, command) {
             database.labour().insert(LabourEntryEntity(command.entryId, farmId, command.workerName.trim(), command.taskCode.trim(), command.minutes, command.occurredEpochDay, command.note))
         }
         return LocalCommandResult(context.mutationId, command.entryId, true)
@@ -1054,7 +1053,7 @@ class RoomOpsRepository(
 
     suspend fun recordSale(command: RecordSale, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.sale(command)?.let { error(it) }
-        enqueue(context, "sale.record.v1", "sale_record", command.saleId, 0, json.encodeToString(command)) {
+        enqueue(context, "sale.record.v1", "sale_record", command.saleId, 0, command) {
             database.sales().insert(SaleRecordEntity(command.saleId, farmId, command.itemKind.trim(), command.quantityMilli, command.amountMinor, command.currency, command.occurredEpochDay))
             database.money().insert(MoneyRecordEntity(command.saleId, farmId, "income", "sales", command.amountMinor, command.currency, command.occurredEpochDay, command.itemKind.trim()))
         }
@@ -1063,23 +1062,17 @@ class RoomOpsRepository(
 
     suspend fun recentSales() = database.sales().recent(farmId, 50)
 
-    suspend fun createFormulary(command: CreateFormularyItem, context: LocalCommandContext): LocalCommandResult {
-        OpsValidator.formulary(command)?.let { error(it) }
-        enqueue(context, "formulary.item_create.v1", "formulary_item", command.itemId, 0, json.encodeToString(command)) {
-            database.formulary().insert(
-                FormularyItemEntity(command.itemId, farmId, command.productName.trim(), command.speciesCode, command.vetClass, command.meatWithdrawalDays, command.milkWithdrawalDays, command.eggWithdrawalDays, true),
-            )
-        }
-        return LocalCommandResult(context.mutationId, command.itemId, true)
-    }
+    suspend fun createFormulary(command: CreateFormularyItem, context: LocalCommandContext): LocalCommandResult =
+        formularyCommands.create(command, context)
 
     suspend fun approvedFormulary() = database.formulary().approved(farmId)
+    suspend fun formularyItems() = database.formulary().forFarm(farmId)
 
     suspend fun recordTreatment(command: RecordHealthTreatment, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.treatment(command)?.let { error(it) }
-        val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) { "Vet-approved formulary item not found" }
-        require(formulary.vetApproved) { "Treatment needs a vet-approved formulary item" }
-        enqueue(context, "health.record_treatment.v1", "health_treatment", command.treatmentId, 0, json.encodeToString(command)) {
+        enqueue(context, "health.record_treatment.v1", "health_treatment", command.treatmentId, 0, command) {
+            val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) { "Vet-approved formulary item not found" }
+            require(formulary.vetApproved) { "Treatment needs a vet-approved formulary item" }
             database.treatments().insert(
                 HealthTreatmentEntity(
                     command.treatmentId, farmId, command.animalId, command.speciesCode, command.formularyItemId, command.reason.trim(),
@@ -1106,29 +1099,29 @@ class RoomOpsRepository(
 
     suspend fun recordVaccination(command: RecordHealthVaccination, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.vaccination(command)?.let { error(it) }
-        val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) {
-            "Vaccination needs a vet-approved formulary item"
-        }
-        // Restored from owner commit 474e8ef (merge 30eba5a): the formulary item
-        // must be vet-approved AND species-matched; the target animal/group must
-        // exist and match the command species. The local port had dropped these.
-        require(formulary.vetApproved && formulary.speciesCode == command.speciesCode) {
-            "Vaccination needs a vet-approved formulary item for " + command.speciesCode
-        }
-
-        val animalId = command.animalId?.trim()?.takeIf { it.isNotEmpty() }
-        val groupId = command.groupId?.trim()?.takeIf { it.isNotEmpty() }
-        if (animalId != null) {
-            val animal = requireNotNull(database.animals().get(farmId, animalId)) { "Vaccination animal not found" }
-            require(animal.status == "active" && animal.speciesCode == command.speciesCode) {
-                "Vaccination needs an active " + command.speciesCode + " animal"
+        enqueue(context, "health.record_vaccination.v1", "health_vaccination", command.vaccinationId, 0, command) {
+            val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) {
+                "Vaccination needs a vet-approved formulary item"
             }
-        }
-        if (groupId != null) {
-            val group = requireNotNull(database.groups().get(farmId, groupId)) { "Vaccination group not found" }
-            require(group.speciesCode == command.speciesCode) { "Vaccination group species mismatch" }
-        }
-        enqueue(context, "health.record_vaccination.v1", "health_vaccination", command.vaccinationId, 0, json.encodeToString(command)) {
+            // Restored from owner commit 474e8ef (merge 30eba5a): the formulary item
+            // must be vet-approved AND species-matched; the target animal/group must
+            // exist and match the command species. The local port had dropped these.
+            require(formulary.vetApproved && formulary.speciesCode == command.speciesCode) {
+                "Vaccination needs a vet-approved formulary item for " + command.speciesCode
+            }
+
+            val animalId = command.animalId?.trim()?.takeIf { it.isNotEmpty() }
+            val groupId = command.groupId?.trim()?.takeIf { it.isNotEmpty() }
+            if (animalId != null) {
+                val animal = requireNotNull(database.animals().get(farmId, animalId)) { "Vaccination animal not found" }
+                require(animal.status == "active" && animal.speciesCode == command.speciesCode) {
+                    "Vaccination needs an active " + command.speciesCode + " animal"
+                }
+            }
+            if (groupId != null) {
+                val group = requireNotNull(database.groups().get(farmId, groupId)) { "Vaccination group not found" }
+                require(group.speciesCode == command.speciesCode) { "Vaccination group species mismatch" }
+            }
             database.vaccinations().insert(
                 HealthVaccinationEntity(
                     command.vaccinationId, farmId, animalId, groupId, command.speciesCode,
@@ -1146,7 +1139,7 @@ class RoomOpsRepository(
 
     suspend fun recordFlockDay(command: RecordPoultryFlockDay, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.flockDay(command)?.let { error(it) }
-        enqueue(context, "poultry.flock_day.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        enqueue(context, "poultry.flock_day.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), command) {
             database.poultryFlockDays().insert(
                 PoultryFlockDayEntity(command.dayId, farmId, command.groupId, command.eggs, command.dead, command.culls, command.feedGrams, command.occurredEpochDay),
             )
@@ -1160,7 +1153,7 @@ class RoomOpsRepository(
         OpsValidator.joining(command)?.let { error(it) }
         val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Joining needs a sheep mob" }
         require(group.speciesCode == "sheep") { "Joining needs a sheep mob" }
-        enqueue(context, "sheep.record_joining.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_joining.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), command) {
             // v1 kept its fixed lambing day; new joinings use sheep.record_joining.v2 (BreedingDueCommands).
             database.writeSheepJoining(
                 farmId, command.joiningId, command.groupId, command.startedEpochDay, command.startedEpochDay + BreedingDueSchedule.V1_SHEEP_LAMBING_DAYS,
@@ -1174,7 +1167,7 @@ class RoomOpsRepository(
         OpsValidator.scan(command)?.let { error(it) }
         val ewe = requireNotNull(database.animals().get(farmId, command.animalId)) { "Ewe not found" }
         require(ewe.speciesCode == "sheep") { "Ewe not found" }
-        enqueue(context, "sheep.record_scan.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_scan.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertScan(SheepScanEntity(command.scanId, farmId, command.animalId, command.result, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.scanId, true)
@@ -1184,7 +1177,7 @@ class RoomOpsRepository(
         OpsValidator.lambing(command)?.let { error(it) }
         val ewe = requireNotNull(database.animals().get(farmId, command.damAnimalId)) { "Active ewe not found" }
         require(ewe.speciesCode == "sheep" && ewe.sex == "FEMALE" && ewe.status == "active") { "Active ewe not found" }
-        enqueue(context, "sheep.record_lambing.v1", "animal", command.damAnimalId, expectedVersion("animal", command.damAnimalId), json.encodeToString(command)) {
+        enqueue(context, "sheep.record_lambing.v1", "animal", command.damAnimalId, expectedVersion("animal", command.damAnimalId), command) {
             database.lifecycle().insertLambing(SheepLambingEntity(command.lambingId, farmId, command.damAnimalId, command.bornCount, command.liveCount, command.deadCount, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.lambingId, true)
@@ -1194,7 +1187,7 @@ class RoomOpsRepository(
         OpsValidator.cattleService(command)?.let { error(it) }
         val cow = requireNotNull(database.animals().get(farmId, command.animalId)) { "Active cow not found" }
         require(cow.speciesCode == "cattle" && cow.status == "active") { "Active cow not found" }
-        enqueue(context, "cattle.record_service.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_service.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             // v1 kept its fixed calving day; new services use cattle.record_service.v2 (BreedingDueCommands).
             database.writeCattleService(
                 farmId, command.serviceId, command.animalId, command.method, command.occurredEpochDay, command.occurredEpochDay + BreedingDueSchedule.V1_CATTLE_CALVING_DAYS,
@@ -1208,7 +1201,7 @@ class RoomOpsRepository(
         OpsValidator.cattlePd(command)?.let { error(it) }
         val cow = requireNotNull(database.animals().get(farmId, command.animalId)) { "Cow not found" }
         require(cow.speciesCode == "cattle") { "Cow not found" }
-        enqueue(context, "cattle.record_pd.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_pd.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
             database.lifecycle().insertPd(CattlePdEntity(command.pdId, farmId, command.animalId, command.result, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.pdId, true)
@@ -1218,7 +1211,7 @@ class RoomOpsRepository(
         OpsValidator.calving(command)?.let { error(it) }
         val cow = requireNotNull(database.animals().get(farmId, command.damAnimalId)) { "Active cow not found" }
         require(cow.speciesCode == "cattle" && cow.sex == "FEMALE" && cow.status == "active") { "Active cow not found" }
-        enqueue(context, "cattle.record_calving.v1", "animal", command.damAnimalId, expectedVersion("animal", command.damAnimalId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_calving.v1", "animal", command.damAnimalId, expectedVersion("animal", command.damAnimalId), command) {
             database.lifecycle().insertCalving(CattleCalvingEntity(command.calvingId, farmId, command.damAnimalId, command.bornCount, command.liveCount, command.deadCount, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.calvingId, true)
@@ -1226,7 +1219,7 @@ class RoomOpsRepository(
 
     suspend fun recordPalpation(command: RecordRabbitPalpation, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.palpation(command)?.let { error(it) }
-        enqueue(context, "rabbit.record_palpation.v1", "rabbit_wave", command.waveId, expectedVersion("rabbit_wave", command.waveId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.record_palpation.v1", "rabbit_wave", command.waveId, expectedVersion("rabbit_wave", command.waveId), command) {
             database.lifecycle().insertPalpation(RabbitPalpationEntity(command.palpationId, farmId, command.waveId, command.result, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.palpationId, true)
@@ -1234,7 +1227,7 @@ class RoomOpsRepository(
 
     suspend fun recordKindling(command: RecordRabbitKindling, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.kindling(command)?.let { error(it) }
-        enqueue(context, "rabbit.record_kindling.v1", "rabbit_wave", command.waveId, expectedVersion("rabbit_wave", command.waveId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.record_kindling.v1", "rabbit_wave", command.waveId, expectedVersion("rabbit_wave", command.waveId), command) {
             database.lifecycle().insertKindling(RabbitKindlingEntity(command.kindlingId, farmId, command.waveId, command.liveCount, command.deadCount, command.occurredEpochDay))
         }
         return LocalCommandResult(context.mutationId, command.kindlingId, true)
@@ -1249,7 +1242,7 @@ class RoomOpsRepository(
         if (!within && !command.ackOutsideWindow) {
             error("Foster after 3 days from kindling needs an explicit acknowledgement")
         }
-        enqueue(context, "rabbit.record_foster.v1", "rabbit_wave", command.toWaveId, expectedVersion("rabbit_wave", command.toWaveId), json.encodeToString(command)) {
+        enqueue(context, "rabbit.record_foster.v1", "rabbit_wave", command.toWaveId, expectedVersion("rabbit_wave", command.toWaveId), command) {
             database.lifecycle().insertFoster(
                 RabbitFosterEntity(command.fosterId, farmId, command.fromWaveId, command.toWaveId, command.kitCount, within, command.occurredEpochDay),
             )
@@ -1263,7 +1256,7 @@ class RoomOpsRepository(
 
     suspend fun acceptPack(command: AcceptHealthPack, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.pack(command)?.let { error(it) }
-        enqueue(context, "health.pack_accept.v1", "health_protocol_pack", command.packId, 0, json.encodeToString(command)) {
+        enqueue(context, "health.pack_accept.v1", "health_protocol_pack", command.packId, 0, command) {
             database.lifecycle().insertPack(
                 HealthPackEntity(command.packId, farmId, command.speciesCode.trim(), command.name.trim(), "vet_accepted", command.acceptedByVet.trim()),
             )
@@ -1275,7 +1268,7 @@ class RoomOpsRepository(
         OpsValidator.packSlot(command)?.let { error(it) }
         val pack = requireNotNull(database.lifecycle().packs(farmId).firstOrNull { it.id == command.packId }) { "Slot needs a vet-accepted protocol pack" }
         require(pack.status == "vet_accepted") { "Slot needs a vet-accepted protocol pack" }
-        enqueue(context, "health.pack_slot_add.v1", "health_protocol_pack", command.packId, expectedVersion("health_protocol_pack", command.packId), json.encodeToString(command)) {
+        enqueue(context, "health.pack_slot_add.v1", "health_protocol_pack", command.packId, expectedVersion("health_protocol_pack", command.packId), command) {
             database.lifecycle().insertPackSlot(
                 HealthPackSlotEntity(command.slotId, farmId, command.packId, command.slotCode.trim(), command.title.trim(), command.offsetDays, command.fromEvent, command.isCore),
             )
@@ -1289,7 +1282,7 @@ class RoomOpsRepository(
         require(pack.status == "vet_accepted") { "Pack apply needs a vet-accepted protocol pack" }
         val slots = database.lifecycle().coreSlots(farmId, command.packId)
         require(slots.isNotEmpty()) { "Pack apply needs at least one core slot" }
-        enqueue(context, "health.pack_apply.v1", "health_protocol_pack", command.packId, expectedVersion("health_protocol_pack", command.packId), json.encodeToString(command)) {
+        enqueue(context, "health.pack_apply.v1", "health_protocol_pack", command.packId, expectedVersion("health_protocol_pack", command.packId), command) {
             database.lifecycle().insertPackApply(
                 HealthPackApplyEntity(command.applyId, farmId, command.packId, command.animalId, command.groupId, command.anchorEpochDay),
             )
@@ -1309,7 +1302,7 @@ class RoomOpsRepository(
         OpsValidator.lotPlace(command)?.let { error(it) }
         val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Lot place needs a cattle lot" }
         require(group.speciesCode == "cattle") { "Lot place needs a cattle lot" }
-        enqueue(context, "cattle.lot_place.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        enqueue(context, "cattle.lot_place.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), command) {
             database.lifecycle().insertLotPlace(
                 CattleLotPlacementEntity(command.placementId, farmId, command.groupId, command.headCount, command.placedEpochDay),
             )
@@ -1321,7 +1314,7 @@ class RoomOpsRepository(
         OpsValidator.daysOnFeed(command)?.let { error(it) }
         val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Days on feed needs a cattle lot" }
         require(group.speciesCode == "cattle") { "Days on feed needs a cattle lot" }
-        enqueue(context, "cattle.record_dof.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        enqueue(context, "cattle.record_dof.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), command) {
             database.lifecycle().insertDof(
                 CattleDofEntity(command.recordId, farmId, command.groupId, command.daysOnFeed, command.occurredEpochDay),
             )
@@ -1333,7 +1326,7 @@ class RoomOpsRepository(
         OpsValidator.lotClose(command)?.let { error(it) }
         val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Lot close-out needs a cattle lot" }
         require(group.speciesCode == "cattle") { "Lot close-out needs a cattle lot" }
-        enqueue(context, "cattle.lot_close.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
+        enqueue(context, "cattle.lot_close.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), command) {
             database.lifecycle().insertLotClose(
                 CattleLotCloseEntity(command.closeoutId, farmId, command.groupId, command.headOut, command.weightGrams, command.daysOnFeed, command.occurredEpochDay),
             )
@@ -1344,23 +1337,14 @@ class RoomOpsRepository(
     suspend fun setReorder(command: SetInventoryReorder, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.setReorder(command)?.let { error(it) }
         requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
-        enqueue(context, "inventory.set_reorder.v1", "inventory_item", command.itemId, expectedVersion("inventory_item", command.itemId), json.encodeToString(command)) {
+        enqueue(context, "inventory.set_reorder.v1", "inventory_item", command.itemId, expectedVersion("inventory_item", command.itemId), command) {
             database.inventory().setReorder(farmId, command.itemId, command.reorderMilli, context.occurredAtEpochMillis)
         }
         return LocalCommandResult(context.mutationId, command.itemId, true)
     }
 
-    suspend fun recordReorderAlert(command: RecordReorderAlert, context: LocalCommandContext): LocalCommandResult {
-        OpsValidator.reorderAlert(command)?.let { error(it) }
-        val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
-        require(item.reorderMilli > 0 && item.quantityMilli <= item.reorderMilli) { "Reorder alert needs on-hand at or below the reorder point" }
-        enqueue(context, "inventory.record_reorder.v1", "inventory_item", command.itemId, expectedVersion("inventory_item", command.itemId), json.encodeToString(command)) {
-            database.lifecycle().insertReorderAlert(
-                ReorderAlertEntity(command.alertId, farmId, command.itemId, item.quantityMilli, item.reorderMilli, command.occurredEpochDay),
-            )
-        }
-        return LocalCommandResult(context.mutationId, command.alertId, true)
-    }
+    suspend fun recordReorderAlert(command: RecordReorderAlert, context: LocalCommandContext): LocalCommandResult =
+        reorderAlertCommands.record(command, context)
 
     suspend fun recordCensus(command: RecordGroupCensus, context: LocalCommandContext): LocalCommandResult = groupCommands.recordCensus(command, context)
 
@@ -1385,9 +1369,9 @@ class RoomOpsRepository(
     private suspend fun expectedVersion(aggregateType: String, aggregateId: String): Long =
         journal.expectedVersion(aggregateType, aggregateId)
 
-    private suspend fun enqueue(
+    private suspend inline fun <reified C> enqueue(
         context: LocalCommandContext, commandName: String, aggregateType: String, aggregateId: String,
-        expectedStreamVersion: Long?, payloadJson: String, localWrite: suspend () -> Unit,
-    ) = journal.enqueue(context, commandName, aggregateType, aggregateId, expectedStreamVersion, payloadJson, localWrite)
+        expectedStreamVersion: Long?, command: C, noinline localWrite: suspend () -> Unit,
+    ) = journal.enqueueCommand(json, context, commandName, aggregateType, aggregateId, expectedStreamVersion, command, localWrite)
 
 }
