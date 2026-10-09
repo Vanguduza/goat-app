@@ -24,6 +24,7 @@ import com.farmos.core.design.AnimalFarmHomeMetrics
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmQuickAction
 import com.farmos.core.design.AnimalFarmSummaryTile
+import com.farmos.core.design.FarmBackHandler
 import com.farmos.feature.ops.TaskEntryPage
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -132,6 +133,7 @@ internal fun FarmMoreScreen(
     onSignOut: () -> Unit,
     onSettings: (() -> Unit)? = null,
 ) {
+    FarmBackHandler(onBack)
     var showSignOutConfirmation by remember { mutableStateOf(false) }
     val cards = listOf(
         HomeModuleCard(FarmModule.INVENTORY, "Inventory", "Stock, lots, FEFO and reorder"),

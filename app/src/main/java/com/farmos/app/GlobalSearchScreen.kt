@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmModuleHeader
+import com.farmos.core.design.FarmBackHandler
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmSearchEmptyState
 import com.farmos.core.design.runSuspendCatching
@@ -137,6 +138,7 @@ internal fun GlobalSearchScreen(
     onRfidValueChange: (String) -> Unit = {},
     onBack: () -> Unit,
 ) {
+    FarmBackHandler(onBack)
     var query by remember { mutableStateOf("") }
     var speciesFilter by remember { mutableStateOf<String?>(null) }
     var statusFilter by remember { mutableStateOf<String?>(null) }

@@ -15,6 +15,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.farmos.core.database.unsharedLocalOperations
+import com.farmos.core.design.FarmBackHandler
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.network.FarmMembership
 import com.farmos.core.sync.SyncWorker
@@ -81,6 +82,7 @@ fun FarmSessionContent(
     // Repeating and assigned tasks (D-020); Assigned to me needs a signed-in local account.
     val taskPlanning = remember(membership.farmId, actorId) { TaskPlanning(app.database, membership.farmId, canPlanFarmWork(membership.role), actorId) }
     val runtimeRoute = destination.runtimeRouteContract()
+    FarmBackHandler(if (destination == FarmDestination.Home) null else backHome)
     Box(Modifier.testTag(runtimeRoute.testTag)) {
         when (val dest = destination) {
         FarmDestination.Home -> FarmHomeHost(

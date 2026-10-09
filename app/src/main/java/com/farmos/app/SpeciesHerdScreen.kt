@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmModuleHeader
+import com.farmos.core.design.FarmBackHandler
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
@@ -174,6 +175,7 @@ private fun SpeciesDashboard(
     onOpen: (SpeciesPage) -> Unit,
     onBack: () -> Unit,
 ) {
+    FarmBackHandler(onBack)
     AnimalFarmCanvas {
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),

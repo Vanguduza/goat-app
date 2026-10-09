@@ -38,6 +38,7 @@ fun FarmOperationalPage(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     key(screenId) {
+        FarmBackHandler(onBack)
         Surface(modifier = modifier.fillMaxSize().testTag("farm-screen:$screenId"), color = AnimalFarmTheme.colors.background) {
             Column(
                 Modifier

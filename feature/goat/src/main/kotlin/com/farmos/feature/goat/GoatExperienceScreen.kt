@@ -31,6 +31,7 @@ import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmTheme
+import com.farmos.core.design.FarmBackHandler
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FosDimens
@@ -283,6 +284,7 @@ private fun GoatDashboardScreen(
     modifier: Modifier,
     today: LocalDate,
 ) {
+    FarmBackHandler(onBackToFarm)
     val active = state.herd.filter { it.status == GoatStatus.ACTIVE }
     val does = active.count { it.sex == GoatSex.FEMALE }
     val bucks = active.count { it.sex == GoatSex.MALE }
@@ -660,6 +662,7 @@ internal fun IllustratedGoatPage(
     safety: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    FarmBackHandler(onBack)
     val canonicalScreenId = screenId.substringBefore(" ").takeIf { it.startsWith("FOS-") && "/" !in it }
     AnimalFarmCanvas(
         canonicalScreenId?.let { Modifier.testTag("farm-screen:$it") } ?: Modifier,
