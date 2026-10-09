@@ -1,5 +1,15 @@
 # Artemis integration and release qualification — 9 October 2026
 
+## Current merge gate after report-fixture correction
+
+The first final-evidence commit `5991d242096f9478d2a53db6a2dcf4ea8e0a1337` did not pass [Foundation run 37964751640](https://github.com/Vanguduza/goat-app/actions/runs/37964751640). Its freshly executed native suite recorded 788 cases: 787 passed and one failed, with no errors or skips. The failure was `ReportDisclosureAuthorityTest.aDelayedChooserCannotUseTheOldAuthenticatedCredentialAfterAReset`, before the credential reset: the export-sheet control was absent when the fixture attempted its click. The four backend jobs and Project Truth, handover and smoke checks passed; visual and connected jobs were skipped and supply no execution evidence for that run.
+
+The failed job log and original native artifact are retained unchanged. The log SHA-256 is `4e506e097b927ff771c75f331f6e0086f462e78465763df08df925e57e695dd9`. Artifact `11633280867` has SHA-256 `5ea3dd703494df210aa566863ab98342b7fce3f95dcd8341d05908bfda21e53c`; its clean actual checkout `16540e3508e2ea2de0edf68fc138408f7eed7134` resolves to that evidence commit's tree.
+
+The reviewed test-only correction is recorded in `f7ab02b443e07f6903f75821c78885f8369953ab`. Reports loads its Room metric projection asynchronously, inserting sections above the action controls. The fixture now waits for the completed projection, asserts the expected farm contents, performs one displayed and enabled entry click, verifies the actual destination, and waits for exactly one enabled/clickable requested action. The same helper governs the retained Share case. All seven security and cancellation cases, exact single chooser launch, denial messages, zero provider opens/files/export receipts, retained farm data, and existing 10-second bounds remain. No production code, dependency, timeout or permission rule changed.
+
+**The corrected source requires fresh canonical CI before merge.** Current generated route inventories have been reset to `CI_PENDING`. The passing candidate `46cfc8ca57d54a10a62edda5b8858b23eebf30b6` ledger is archived byte-for-byte with its original run and source pins. Its results below remain historical evidence for that source, not a passing claim for the changed test source. Full product release remains blocked.
+
 ## Status and authority
 
 **Current status: candidate C's full Foundation workflow and connected instrumentation have passed; product release remains blocked.** Foundation run `37961965633` completed successfully at 17:01:51 UTC with all seven jobs successful, and the parent independently verified all ten PR checks as successful. C has 788 fresh native unit cases and 60 connected cases (51 database, 9 app), all passing. The evidence-only E commit/CI, merge, reusable local Artemis UI/provider readiness, live Google delivery and owner/physical/visual qualification remain open. This record preserves earlier failed and pending observations as history; it does not issue a feature, module, visual, physical-device or MVP certificate.
