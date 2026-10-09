@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -70,11 +71,36 @@ fun GoatModuleHost(
     onSignOut: () -> Unit,
     onBack: () -> Unit,
     entryPage: GoatEntryPage = GoatEntryPage.DASHBOARD,
+    entryAnimalId: String? = null,
+) {
+    require(entryAnimalId == null || entryAnimalId.isNotBlank()) { "Goat entry requires a non-blank animal id" }
+    require(entryPage != GoatEntryPage.PROFILE || entryAnimalId != null) { "Goat profile requires an animal id" }
+    key(membership.farmId, entryPage, entryAnimalId) {
+        GoatModuleSession(
+            app, membership, farmName, newContext, enqueueSync, onRequireReauth,
+            onRequireFarmReselection, onSignOut, onBack, entryPage, entryAnimalId,
+        )
+    }
+}
+
+@Composable
+private fun GoatModuleSession(
+    app: FarmOsApplication,
+    membership: FarmMembership,
+    farmName: String?,
+    newContext: () -> LocalCommandContext,
+    enqueueSync: () -> Unit,
+    onRequireReauth: (String?) -> Unit,
+    onRequireFarmReselection: (String, List<FarmMembership>) -> Unit,
+    onSignOut: () -> Unit,
+    onBack: () -> Unit,
+    entryPage: GoatEntryPage,
+    entryAnimalId: String?,
 ) {
     val scope = rememberCoroutineScope()
     val repository = remember(membership.farmId) { app.goatRepository(membership.farmId) }
     var herd by remember { mutableStateOf<List<GoatSnapshot>>(emptyList()) }
-    var selectedGoatId by remember { mutableStateOf<String?>(null) }
+    var selectedGoatId by remember { mutableStateOf(entryAnimalId) }
     var selected by remember { mutableStateOf<GoatSnapshot?>(null) }
     var standingExit by remember { mutableStateOf<GoatExitView?>(null) }
     val exits = remember(membership.farmId) { AnimalExitCommands(app.database, membership.farmId) }
@@ -169,17 +195,12 @@ fun GoatModuleHost(
     suspend fun refreshGoatState() {
         herdState = LoadableSurfaceState.LOADING
         runSuspendCatching {
-            val loaded = repository.listGoats(500)
-            val autoSelect =
-                entryPage != GoatEntryPage.WEIGHT &&
-                    entryPage != GoatEntryPage.SEARCH &&
-                    entryPage != GoatEntryPage.SCAN &&
-                    entryPage != GoatEntryPage.SYNC &&
-                    entryPage != GoatEntryPage.KIDDING &&
-                    entryPage != GoatEntryPage.REPRODUCTION
-            val effectiveId = selectedGoatId ?: loaded.firstOrNull()?.animalId?.takeIf { autoSelect }
+            // A focused profile loads its exact subject without building 500 unrelated snapshots.
+            val loaded = if (entryPage == GoatEntryPage.PROFILE) emptyList() else repository.listGoats(500)
+            val effectiveId = selectedGoatId ?: loaded.firstOrNull()?.animalId?.takeIf { entryPage == GoatEntryPage.DASHBOARD }
             val chosen = effectiveId?.let { repository.getGoat(it) }
-            Triple(loaded, effectiveId, chosen)
+            if (entryPage == GoatEntryPage.PROFILE) requireNotNull(chosen) { "The selected goat is not available on this farm." }
+            Triple(if (entryPage == GoatEntryPage.PROFILE) listOfNotNull(chosen) else loaded, effectiveId, chosen)
         }.onSuccess { (loaded, effectiveId, chosen) ->
             herd = loaded
             selectedGoatId = effectiveId
@@ -191,6 +212,7 @@ fun GoatModuleHost(
             }
             herdState = if (loaded.isEmpty()) LoadableSurfaceState.EMPTY else LoadableSurfaceState.IDLE
         }.onFailure { failure ->
+            if (entryPage == GoatEntryPage.PROFILE) selected = null
             error = failure.message
             herdState = LoadableSurfaceState.ERROR
         }

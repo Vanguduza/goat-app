@@ -4,6 +4,7 @@ package com.farmos.feature.goat
 internal fun GoatEntryPage.toGoatPage(): GoatPage =
     when (this) {
         GoatEntryPage.DASHBOARD -> GoatPage.DASHBOARD
+        GoatEntryPage.PROFILE -> GoatPage.PROFILE
         GoatEntryPage.WEIGHT -> GoatPage.WEIGHT
         GoatEntryPage.SEARCH -> GoatPage.SEARCH
         GoatEntryPage.SCAN -> GoatPage.SCAN

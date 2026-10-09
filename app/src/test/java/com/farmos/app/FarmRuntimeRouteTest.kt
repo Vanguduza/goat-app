@@ -52,6 +52,7 @@ class FarmRuntimeRouteTest {
     fun typedGoatEntriesResolveToExactOwners() {
         val expected = mapOf(
             GoatEntryPage.DASHBOARD to "FOS-GOAT-001",
+            GoatEntryPage.PROFILE to "FOS-GOAT-003",
             GoatEntryPage.WEIGHT to "FOS-GOAT-011",
             GoatEntryPage.SEARCH to "FOS-GOAT-006",
             GoatEntryPage.SCAN to "FOS-GOAT-007",
@@ -59,9 +60,21 @@ class FarmRuntimeRouteTest {
             GoatEntryPage.KIDDING to "FOS-GOAT-037",
             GoatEntryPage.REPRODUCTION to "FOS-GOAT-032",
         )
+        assertEquals(GoatEntryPage.entries.toSet(), expected.keys)
         expected.forEach { (entry, screenId) ->
-            assertEquals(screenId, FarmDestination.Goat(entry).runtimeRouteContract().screenId)
+            val animalId = if (entry == GoatEntryPage.PROFILE) "selected-goat" else null
+            assertEquals(screenId, FarmDestination.Goat(entry, animalId).runtimeRouteContract().screenId)
         }
+    }
+
+    @Test
+    fun aGoatProfilePreservesItsSubjectAndRefusesMissingIdentity() {
+        val route = FarmDestination.Goat(GoatEntryPage.PROFILE, "selected-goat").runtimeRouteContract()
+        assertEquals("goat.profile", route.routeKey)
+        assertEquals("FOS-GOAT-003", route.screenId)
+        assertEquals("animalId=selected-goat", route.scopedParameter)
+        assertFailsWith<IllegalArgumentException> { FarmDestination.Goat(GoatEntryPage.PROFILE).runtimeRouteContract() }
+        assertFailsWith<IllegalArgumentException> { FarmDestination.Goat(GoatEntryPage.PROFILE, " ").runtimeRouteContract() }
     }
 
     @Test

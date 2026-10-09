@@ -46,6 +46,7 @@ enum class LoadableSurfaceState { IDLE, LOADING, EMPTY, ERROR, DISABLED }
 /** Deep-entry contract for canonical goat operating pages. */
 enum class GoatEntryPage {
     DASHBOARD,
+    PROFILE,
     WEIGHT,
     SEARCH,
     SCAN,

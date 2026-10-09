@@ -25,6 +25,8 @@ sealed class FarmDestination {
 
     data class Goat(
         val entry: GoatEntryPage = GoatEntryPage.DASHBOARD,
+        /** Exact farm-local subject for a profile or focused capture; never a herd-list position. */
+        val animalId: String? = null,
     ) : FarmDestination()
 
     data class Health(

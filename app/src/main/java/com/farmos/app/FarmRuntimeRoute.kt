@@ -26,7 +26,11 @@ fun FarmDestination.runtimeRouteContract(): FarmRuntimeRoute =
         FarmDestination.Settings -> FarmRuntimeRoute("settings", "FOS-ADMIN-001")
         is FarmDestination.HomePanel -> surface.runtimeRouteContract()
         is FarmDestination.Module -> module.runtimeRouteContract()
-        is FarmDestination.Goat -> entry.runtimeRouteContract()
+        is FarmDestination.Goat -> {
+            require(animalId == null || animalId.isNotBlank()) { "Goat destination requires a non-blank animal id" }
+            require(entry != GoatEntryPage.PROFILE || animalId != null) { "Goat profile requires an animal id" }
+            entry.runtimeRouteContract().copy(scopedParameter = animalId?.let { "animalId=$it" })
+        }
         is FarmDestination.Health -> entry.runtimeRouteContract()
         is FarmDestination.Task -> {
             require(taskId.isNotBlank()) { "Task destination requires a non-blank task id" }
@@ -86,6 +90,7 @@ private fun GoatEntryPage.runtimeRouteContract(): FarmRuntimeRoute =
         routeKey = "goat.${name.lowercase()}",
         screenId = when (this) {
             GoatEntryPage.DASHBOARD -> "FOS-GOAT-001"
+            GoatEntryPage.PROFILE -> "FOS-GOAT-003"
             GoatEntryPage.WEIGHT -> "FOS-GOAT-011"
             GoatEntryPage.SEARCH -> "FOS-GOAT-006"
             GoatEntryPage.SCAN -> "FOS-GOAT-007"
