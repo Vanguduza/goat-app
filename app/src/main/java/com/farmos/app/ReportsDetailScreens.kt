@@ -483,8 +483,8 @@ internal fun InventoryReportScreen(database: FarmOsDatabase, farmId: String, onB
                 report.items.forEach { item ->
                     val low = item.reorderMilli > 0 && item.quantityMilli <= item.reorderMilli
                     Text(
-                        "${item.name} (${item.sku}): ${item.quantityMilli / 1000} ${item.unit}" +
-                            if (item.reorderMilli > 0) " · reorder at ${item.reorderMilli / 1000} ${item.unit}${if (low) " · at or below reorder" else ""}" else "",
+                        "${item.name} (${item.sku}): ${BigDecimal.valueOf(item.quantityMilli, 3).stripTrailingZeros().toPlainString()} ${item.unit}" +
+                            if (item.reorderMilli > 0) " · reorder at ${BigDecimal.valueOf(item.reorderMilli, 3).stripTrailingZeros().toPlainString()} ${item.unit}${if (low) " · at or below reorder" else ""}" else "",
                         color = if (low) AnimalFarmTheme.colors.critical else AnimalFarmTheme.colors.ink,
                     )
                 }
@@ -666,12 +666,13 @@ internal fun buildFarmSummaryText(metrics: List<MetricResult>, generatedOn: Loca
         appendLine("${result.definition.name}: ${metricValueText(result)}")
         appendLine("How: ${result.definition.formula}")
         appendLine("Period: ${result.definition.period} · Scope: ${result.definition.scope}")
+        appendLine("Completeness: ${result.completeness}")
     }
 }
 
 /** FOS-REPORT-014 — Share or Print: share the farm summary through the system share sheet. */
 @Composable
-internal fun ShareReportScreen(database: FarmOsDatabase, farmId: String, onBack: () -> Unit) {
+internal fun ShareReportScreen(database: FarmOsDatabase, farmId: String, canShare: () -> Boolean, onBack: () -> Unit) {
     val context = LocalContext.current
     var summary by remember { mutableStateOf<String?>(null) }
     var failure by remember { mutableStateOf<String?>(null) }
@@ -693,6 +694,7 @@ internal fun ShareReportScreen(database: FarmOsDatabase, farmId: String, onBack:
             }
             Button(
                 onClick = {
+                    if (!canShare()) return@Button
                     val send = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_SUBJECT, "Farm summary")
@@ -700,6 +702,7 @@ internal fun ShareReportScreen(database: FarmOsDatabase, farmId: String, onBack:
                     }
                     context.startActivity(Intent.createChooser(send, "Share farm summary"))
                 },
+                enabled = canShare(),
                 modifier = Modifier.fillMaxWidth().testTag("report-share"),
             ) {
                 Text("Share")

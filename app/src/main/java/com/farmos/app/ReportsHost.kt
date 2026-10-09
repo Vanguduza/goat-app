@@ -12,6 +12,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -172,7 +174,14 @@ internal suspend fun farmMetrics(database: FarmOsDatabase, farmId: String, today
 /** Reports (FOS-REPORT-001) and the export sheet (FOS-REPORT-011) for one farm. */
 @Composable
 internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExport: Boolean, onBack: () -> Unit) {
+    // A different farm starts a new report session; no selected record, draft or callback crosses it.
+    key(farmId) { FarmReportsSession(database, farmId, canExport, onBack) }
+}
+
+@Composable
+private fun FarmReportsSession(database: FarmOsDatabase, farmId: String, canExport: Boolean, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
+    val exportAllowed by rememberUpdatedState(canExport)
     val context = LocalContext.current
     var metrics by remember(farmId) { mutableStateOf<List<MetricResult>?>(null) }
     var pending by remember { mutableStateOf(REPORT_HERD) }
@@ -180,6 +189,9 @@ internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExpo
     var exportMessage by remember { mutableStateOf<String?>(null) }
     var exporting by remember { mutableStateOf(false) }
     var detail by remember { mutableStateOf<ReportDetail?>(null) }
+    LaunchedEffect(canExport) {
+        if (!canExport && detail == ReportDetail.Share) detail = null
+    }
     LaunchedEffect(farmId) {
         try {
             metrics = farmMetrics(database, farmId, LocalDate.now())
@@ -188,7 +200,9 @@ internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExpo
         }
     }
     val onChosen: (Uri?) -> Unit = { uri ->
-        if (uri == null) {
+        if (!exportAllowed) {
+            exportMessage = "Exports are made by farm management."
+        } else if (uri == null) {
             exportMessage = "Export cancelled; nothing was written."
         } else {
             scope.launch {
@@ -222,6 +236,7 @@ internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExpo
                         }
                     }
                     withContext(Dispatchers.IO) {
+                        check(exportAllowed) { "Exports are made by farm management." }
                         requireNotNull(context.contentResolver.openOutputStream(uri)) { "The chosen location cannot be written" }.use(outcome.writer)
                         // The export already succeeded; a log failure must not rewrite its message.
                         runCatching {
@@ -242,7 +257,9 @@ internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExpo
     val csvLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv"), onChosen)
     val pdfLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf"), onChosen)
     val backToHub: () -> Unit = { detail = null }
-    when (val current = detail) {
+    // Do not render a stale share action during the frame in which permission changes.
+    val permittedDetail = detail.takeUnless { it == ReportDetail.Share && !canExport }
+    when (val current = permittedDetail) {
         null -> ReportsScreen(
             metrics = metrics,
             failure = failure,
@@ -252,7 +269,9 @@ internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExpo
             onExportHerdRegister = { pending = REPORT_HERD; csvLauncher.launch("herd-register-${LocalDate.now()}.csv") },
             onExportMoney = { pending = REPORT_MONEY; csvLauncher.launch("money-records-${LocalDate.now()}.csv") },
             onExportSummary = { pending = REPORT_SUMMARY; pdfLauncher.launch("farm-summary-${LocalDate.now()}.pdf") },
-            onOpenDetail = { detail = it },
+            onOpenDetail = { target ->
+                if (target != ReportDetail.Share || exportAllowed) detail = target
+            },
             onBack = onBack,
         )
         ReportDetail.Animal -> AnimalReportScreen(database, farmId, onBack = backToHub)
@@ -266,7 +285,7 @@ internal fun ReportsModuleHost(database: FarmOsDatabase, farmId: String, canExpo
         ReportDetail.Operations -> OperationsReportScreen(database, farmId, onBack = backToHub)
         ReportDetail.Documents -> GeneratedDocumentsScreen(farmId, onOpenDocument = { id -> detail = ReportDetail.Document(id) }, onBack = backToHub)
         is ReportDetail.Document -> ExportDocumentScreen(farmId, entryId = current.entryId, onBack = { detail = ReportDetail.Documents })
-        ReportDetail.Share -> ShareReportScreen(database, farmId, onBack = backToHub)
+        ReportDetail.Share -> ShareReportScreen(database, farmId, canShare = { exportAllowed }, onBack = backToHub)
         ReportDetail.Movements -> MovementCertificatesScreen(database, farmId, onBack = backToHub)
     }
 }
@@ -285,7 +304,8 @@ internal fun ReportsScreen(
     onBack: () -> Unit,
 ) {
     var exportSheet by remember { mutableStateOf(false) }
-    if (exportSheet) {
+    LaunchedEffect(canExport) { if (!canExport) exportSheet = false }
+    if (exportSheet && canExport) {
         FarmOperationalPage("FOS-REPORT-011", "Export", "Files are written to a location you choose on this device.", FarmVisualClass.I3, { exportSheet = false }, backLabel = "Reports") {
             FarmOperationalSection("Herd register (CSV)") {
                 Text("Every animal on this farm, one row each: species, tag, name, sex, status, date of birth, latest weight and poultry kind.")
@@ -324,7 +344,7 @@ internal fun ReportsScreen(
             }
         }
         FarmOperationalSection("Report types", "One screen per report. Every figure is read from the records on this device.") {
-            reportDetailEntries.forEach { entry ->
+            reportDetailEntries.filter { canExport || it.detail != ReportDetail.Share }.forEach { entry ->
                 TextButton(onClick = { onOpenDetail(entry.detail) }, modifier = Modifier.fillMaxWidth().testTag("report-open:${entry.screenId}")) {
                     Text(entry.label)
                 }
