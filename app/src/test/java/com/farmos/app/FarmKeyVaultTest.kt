@@ -42,7 +42,7 @@ class FarmKeyVaultTest {
         }
     }
 
-    private val vault = FarmKeyVault(directory, SoftwareSealer())
+    private val vault = testFarmKeyVault(directory, SoftwareSealer())
 
     @After
     fun tearDown() {
@@ -66,7 +66,7 @@ class FarmKeyVaultTest {
         val material = provisioned.keys.current.materialForVault()
         assertFalse(stored.toList().windowed(material.size).any { it == material.toList() })
         assertThrows(IllegalStateException::class.java) { vault.provisionNewFarm(farmId) }
-        assertArrayEquals(material, vault.secretsForLocalFarm(farmId).keys.current.materialForVault())
+        assertArrayEquals(material, vault.requireSecrets(farmId).keys.current.materialForVault())
     }
 
     @Test

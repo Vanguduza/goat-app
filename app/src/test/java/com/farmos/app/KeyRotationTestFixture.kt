@@ -30,7 +30,7 @@ internal class KeyRotationTestFixture(
     val directory = Files.createTempDirectory("rotation-test").toFile()
     val vaultDirectory = File(directory, "vault")
     val sealer = RotationFaultSealer()
-    val vault = FarmKeyVault(vaultDirectory, sealer)
+    val vault = testFarmKeyVault(vaultDirectory, sealer)
 
     init {
         seedCommandAuthority(database, farm, "owner", device, LocalRole.OWNER)

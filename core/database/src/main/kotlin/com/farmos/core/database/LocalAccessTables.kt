@@ -78,6 +78,10 @@ interface LocalAccessDao {
     @Query("SELECT * FROM local_accounts WHERE farmId = :farmId AND accountId = :accountId LIMIT 1")
     fun account(farmId: String, accountId: String): LocalAccountEntity?
 
+    /** Account IDs are global primary keys; tenant checks must precede every authoritative upsert. */
+    @Query("SELECT farmId FROM local_accounts WHERE accountId = :accountId LIMIT 1")
+    fun accountFarmId(accountId: String): String?
+
     @Upsert
     fun upsertAccount(account: LocalAccountEntity)
 
@@ -97,6 +101,9 @@ interface LocalAccessDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertAuditIfAbsent(event: AccessAuditEntity)
 
+    @Query("SELECT * FROM access_audit WHERE eventId = :eventId LIMIT 1")
+    fun auditEvent(eventId: String): AccessAuditEntity?
+
     @Query("SELECT * FROM farm_recovery WHERE farmId = :farmId LIMIT 1")
     fun recovery(farmId: String): FarmRecoveryEntity?
 
@@ -105,4 +112,26 @@ interface LocalAccessDao {
 
     @Query("SELECT COUNT(*) FROM access_audit WHERE farmId = :farmId")
     fun auditCount(farmId: String): Long
+
+    /**
+     * Only effects that already belong to this device's records may contribute to a later access fold.
+     * Local writes have no application row: their journal and projection commit together. Received
+     * writes need APPLIED; another pending or SET_ASIDE receipt is never an implicit dependency.
+     */
+    @Query("""
+        SELECT o.* FROM replication_operations o
+        LEFT JOIN replication_applications a ON a.operationId = o.operationId
+        WHERE o.farmId = :farmId AND o.entityType = :entityType AND o.entityId = :entityId
+          AND (
+              (a.farmId = o.farmId AND a.state = 'APPLIED')
+              OR (
+                  a.operationId IS NULL
+                  AND EXISTS (
+                      SELECT 1 FROM replication_devices d
+                      WHERE d.farmId = o.farmId AND d.deviceId = o.deviceId AND d.isLocal = 1
+                  )
+              )
+          )
+    """)
+    fun appliedAccessHistory(farmId: String, entityType: String, entityId: String): List<ReplicationOperationEntity>
 }

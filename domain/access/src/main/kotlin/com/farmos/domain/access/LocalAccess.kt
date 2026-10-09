@@ -53,9 +53,9 @@ enum class AccessAction {
 interface LocalAccessStore {
     fun accounts(farmId: String): List<LocalAccount>
     fun account(farmId: String, accountId: String): LocalAccount?
-    fun save(account: LocalAccount)
+    fun save(account: LocalAccount, actorAccountId: String)
     fun recoveryHash(farmId: String): String?
-    fun saveRecoveryHash(farmId: String, hash: String)
+    fun saveRecoveryHash(farmId: String, hash: String, actorAccountId: String)
     fun record(event: AccessAuditEvent)
 }
 
@@ -95,9 +95,9 @@ class LocalAccessService(
     fun setUpFarm(farmId: String, username: String, displayName: String, credential: Credential): FarmSetupResult {
         check(store.accounts(farmId).isEmpty()) { "This farm already has accounts" }
         val owner = newAccount(farmId, username, displayName, LocalRole.OWNER, credential, workerId = null)
-        store.save(owner)
+        store.save(owner, owner.accountId)
         val code = RecoveryCode.generate(random)
-        store.saveRecoveryHash(farmId, hasher.hash(RecoveryCode.normalise(code)))
+        store.saveRecoveryHash(farmId, hasher.hash(RecoveryCode.normalise(code)), owner.accountId)
         audit(farmId, owner.accountId, owner.accountId, AccessAction.FARM_SET_UP, "Owner account created")
         return FarmSetupResult(owner, code)
     }
@@ -120,12 +120,12 @@ class LocalAccessService(
         if (!hasher.verify(secret, account.credentialHash)) {
             val failures = account.failedAttempts + 1
             val lockedUntil = if (failures >= LOCKOUT_THRESHOLD) now + lockoutMillis(failures) else null
-            store.save(account.copy(failedAttempts = failures, lockedUntilEpochMillis = lockedUntil))
+            store.save(account.copy(failedAttempts = failures, lockedUntilEpochMillis = lockedUntil), account.accountId)
             audit(farmId, account.accountId, account.accountId, AccessAction.SIGN_IN_FAILED, "Wrong credential ($failures)")
             return lockedUntil?.let { SignInResult.Locked(it) } ?: SignInResult.InvalidCredentials
         }
         val cleared = account.copy(failedAttempts = 0, lockedUntilEpochMillis = null)
-        store.save(cleared)
+        store.save(cleared, account.accountId)
         audit(farmId, account.accountId, account.accountId, AccessAction.SIGNED_IN, "Signed in")
         return SignInResult.SignedIn(cleared)
     }
@@ -141,7 +141,7 @@ class LocalAccessService(
         authorise(actor, Permission.MANAGE_ACCOUNTS)
         if (role == LocalRole.OWNER) authorise(actor, Permission.MANAGE_OWNERS)
         val account = newAccount(actor.farmId, username, displayName, role, credential, workerId)
-        store.save(account)
+        store.save(account, actor.accountId)
         audit(actor.farmId, actor.accountId, account.accountId, AccessAction.ACCOUNT_CREATED, "Created as ${role.name}")
         return account
     }
@@ -152,7 +152,7 @@ class LocalAccessService(
         if (role == LocalRole.OWNER || subject.role == LocalRole.OWNER) authorise(actor, Permission.MANAGE_OWNERS)
         if (subject.role == LocalRole.OWNER && role != LocalRole.OWNER) requireAnotherActiveOwner(subject)
         val updated = subject.copy(role = role)
-        store.save(updated)
+        store.save(updated, actor.accountId)
         audit(actor.farmId, actor.accountId, accountId, AccessAction.ROLE_CHANGED, "${subject.role.name} to ${role.name}")
         return updated
     }
@@ -163,7 +163,7 @@ class LocalAccessService(
         if (subject.role == LocalRole.OWNER) authorise(actor, Permission.MANAGE_OWNERS)
         if (status == AccountStatus.DISABLED && subject.role == LocalRole.OWNER) requireAnotherActiveOwner(subject)
         val updated = subject.copy(status = status, failedAttempts = 0, lockedUntilEpochMillis = null)
-        store.save(updated)
+        store.save(updated, actor.accountId)
         val action = if (status == AccountStatus.ACTIVE) AccessAction.ACCOUNT_ENABLED else AccessAction.ACCOUNT_DISABLED
         audit(actor.farmId, actor.accountId, accountId, action, status.name)
         return updated
@@ -180,7 +180,7 @@ class LocalAccessService(
             failedAttempts = 0,
             lockedUntilEpochMillis = null,
         )
-        store.save(updated)
+        store.save(updated, actor.accountId)
         audit(actor.farmId, actor.accountId, accountId, AccessAction.CREDENTIAL_RESET, credential.kind.name)
         return updated
     }
@@ -188,7 +188,7 @@ class LocalAccessService(
     fun linkWorker(actor: LocalAccount, accountId: String, workerId: String): LocalAccount {
         authorise(actor, Permission.MANAGE_WORKERS)
         val updated = subject(actor, accountId).copy(workerId = workerId)
-        store.save(updated)
+        store.save(updated, actor.accountId)
         audit(actor.farmId, actor.accountId, accountId, AccessAction.WORKER_LINKED, "Linked to worker $workerId")
         return updated
     }
@@ -211,9 +211,9 @@ class LocalAccessService(
             failedAttempts = 0,
             lockedUntilEpochMillis = null,
         )
-        store.save(recovered)
+        store.save(recovered, ownerAccountId)
         val next = RecoveryCode.generate(random)
-        store.saveRecoveryHash(farmId, hasher.hash(RecoveryCode.normalise(next)))
+        store.saveRecoveryHash(farmId, hasher.hash(RecoveryCode.normalise(next)), ownerAccountId)
         audit(farmId, ownerAccountId, ownerAccountId, AccessAction.OWNER_RECOVERED, "Owner credential replaced; recovery code rotated")
         return RecoveryResult.Recovered(recovered, next)
     }

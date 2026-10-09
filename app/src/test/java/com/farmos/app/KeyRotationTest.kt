@@ -51,7 +51,7 @@ class KeyRotationTest {
         .build()
         .also { databases += it }
 
-    private fun vault() = FarmKeyVault(Files.createTempDirectory("vault").toFile().also { folders += it }, TestSoftwareSealer())
+    private fun vault() = testFarmKeyVault(Files.createTempDirectory("vault").toFile().also { folders += it }, TestSoftwareSealer())
 
     @After
     fun tearDown() {

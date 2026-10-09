@@ -23,6 +23,7 @@ internal class LocalFarmEntryReferenceFixture(context: Context) : Closeable {
         "reference-device",
         CredentialHasher(iterations = 1_000),
         clock = { Instant.parse("2026-09-24T00:00:00Z").toEpochMilli() },
+        initialKeys = localAccessTestVault(),
     )
 
     val farmName = "Premier Farm"

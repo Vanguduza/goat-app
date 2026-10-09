@@ -114,27 +114,40 @@ class RoomReplicaEndpoint(
             progressed = false
             for (row in applications.unapplied(farmId)) {
                 val op = row.toEnvelope()
-                val previous = applications.get(farmId, op.operationId)
-                val applier = appliers[op.operationType]
-                if (applier == null) {
-                    if (previous?.state != ApplicationState.AWAITING_APPLIER.name) {
-                        applications.upsert(ReplicationApplicationEntity(op.operationId, farmId, ApplicationState.AWAITING_APPLIER.name, null, previous?.attempts ?: 0, clock()))
-                    }
-                    continue
-                }
-                val attempts = (previous?.attempts ?: 0) + 1
-                val failure = runCatching {
+                var attempts = 0
+                val outcome = runCatching {
                     database.withTransaction {
+                        // The pending list is only a snapshot. A preceding decision or another
+                        // endpoint may have applied/set aside this receipt before our transaction.
+                        val previous = applications.get(farmId, op.operationId) ?: return@withTransaction false
+                        if (!previous.isRetryable()) return@withTransaction false
+                        val applier = appliers[op.operationType]
+                        if (applier == null) {
+                            if (previous.state != ApplicationState.AWAITING_APPLIER.name) {
+                                applications.upsert(previous.copy(state = ApplicationState.AWAITING_APPLIER.name, reason = null, updatedAtEpochMillis = clock()))
+                            }
+                            return@withTransaction false
+                        }
+                        attempts = previous.attempts + 1
                         applier.apply(database, op)
                         applications.upsert(ReplicationApplicationEntity(op.operationId, farmId, ApplicationState.APPLIED.name, null, attempts, clock()))
+                        true
                     }
-                }.exceptionOrNull()
-                if (failure == null) {
-                    progressed = true
-                } else {
-                    applications.upsert(
-                        ReplicationApplicationEntity(op.operationId, farmId, ApplicationState.FAILED.name, failure.message ?: failure.javaClass.simpleName, attempts, clock()),
-                    )
+                }
+                if (outcome.getOrNull() == true) progressed = true
+                outcome.exceptionOrNull()?.let { failure ->
+                    database.withTransaction {
+                        val current = applications.get(farmId, op.operationId)
+                        // Recording a failed attempt must not undo a terminal decision committed
+                        // after the failed application transaction released the Room lock.
+                        if (current != null && current.isRetryable()) {
+                            applications.upsert(
+                                current.copy(state = ApplicationState.FAILED.name,
+                                    reason = failure.message ?: failure.javaClass.simpleName,
+                                    attempts = maxOf(current.attempts, attempts), updatedAtEpochMillis = clock()),
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -158,3 +171,6 @@ class RoomReplicaEndpoint(
 }
 
 private const val NOT_YET_APPLIED = "Not applied yet"
+
+private fun ReplicationApplicationEntity?.isRetryable(): Boolean =
+    this?.state == ApplicationState.FAILED.name || this?.state == ApplicationState.AWAITING_APPLIER.name

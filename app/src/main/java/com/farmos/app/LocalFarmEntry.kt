@@ -508,7 +508,7 @@ private fun clockTime(epochMillis: Long): String =
  */
 @Composable
 internal fun LocalFarmSession(app: FarmOsApplication) {
-    val directory = remember { LocalFarmDirectory(app.database, app.deviceId) }
+    val directory = remember(app) { LocalFarmDirectory(app.database, app.deviceId, initialKeys = app.keyVault) }
     var signedIn by remember { mutableStateOf<Pair<LocalAccount, String>?>(null) }
     val current = signedIn
     if (current == null) {

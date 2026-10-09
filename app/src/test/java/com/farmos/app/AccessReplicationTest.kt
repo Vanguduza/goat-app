@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.ReplicationDeviceEntity
 import com.farmos.domain.access.AccountStatus
 import com.farmos.domain.access.Credential
 import com.farmos.domain.access.CredentialHasher
@@ -38,7 +39,7 @@ class AccessReplicationTest {
         .build()
         .also { databases += it }
 
-    private fun directory(db: FarmOsDatabase, device: String) = LocalFarmDirectory(db, device, CredentialHasher(iterations = 1_000), clock = { now })
+    private fun directory(db: FarmOsDatabase, device: String) = LocalFarmDirectory(db, device, CredentialHasher(iterations = 1_000), clock = { now }, initialKeys = localAccessTestVault())
 
     @After
     fun tearDown() = databases.forEach { it.close() }
@@ -47,6 +48,8 @@ class AccessReplicationTest {
 
     private fun device(id: String, farmId: String, vararg peers: String): Device {
         val db = database()
+        // Authenticated pairing installs this local row before the received accounts can sign in.
+        db.replicationBlocking().upsertDevice(ReplicationDeviceEntity(farmId, id, id, "ACTIVE", 0L, null, true))
         return Device(db, directory(db, id), RoomReplicaEndpoint(db, farmId, id, replicationAppliers).apply { peers.forEach { registerPairedDevice(it, it) } })
     }
 

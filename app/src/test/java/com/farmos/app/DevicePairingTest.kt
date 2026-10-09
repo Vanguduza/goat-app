@@ -74,7 +74,7 @@ class DevicePairingTest {
         .build()
         .also { databases += it }
 
-    private fun vault() = FarmKeyVault(Files.createTempDirectory("vault").toFile().also { folders += it }, SoftwareSealer())
+    private fun vault() = testFarmKeyVault(Files.createTempDirectory("vault").toFile().also { folders += it }, SoftwareSealer())
 
     @After
     fun tearDown() {
@@ -88,13 +88,13 @@ class DevicePairingTest {
         // The owner's tablet created the farm and a worker account.
         val tabletDb = database()
         val tabletVault = vault()
-        val tabletDirectory = LocalFarmDirectory(tabletDb, "tablet", CredentialHasher(iterations = 1_000))
+        val tabletDirectory = LocalFarmDirectory(tabletDb, "tablet", CredentialHasher(iterations = 1_000), initialKeys = tabletVault)
         lateinit var owner: LocalAccount
         val farmId = tabletDirectory.createFarm("Premier Farm") { id ->
             owner = tabletDirectory.access.setUpFarm(id, "tendai", "Tendai Moyo", Credential(CredentialKind.PIN, "482913")).owner
         }.farmId
         tabletDirectory.transact { it.createAccount(owner, "rudo", "Rudo Chari", LocalRole.WORKER, Credential(CredentialKind.PIN, "730418")) }
-        val tabletKeys = tabletVault.secretsForLocalFarm(farmId).keys
+        val tabletKeys = tabletVault.requireSecrets(farmId).keys
 
         // The phone asks to join, showing a code; the owner types it on the tablet.
         val phoneDb = database()
