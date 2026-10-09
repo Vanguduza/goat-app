@@ -20,7 +20,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  * 1. Add `AnimalGroupMembershipEntity::class` to the `@Database entities` list.
  * 2. Bump `version = 36` to `version = 37`.
  * 3. Add `abstract fun groupMemberships(): AnimalGroupMembershipDao`.
- * 4. Add `MigrationGroupMove36To37` to `ALL_MIGRATIONS`.
+ * 4. Cover `MigrationGroupMove36To37` in the merged `MIGRATION_36_37` in `ALL_MIGRATIONS`
+ *    (never register it as a second Migration(36, 37) — Room keeps only one object per (start, end) key).
  */
 @Entity(
     tableName = "animal_group_memberships",
@@ -64,15 +65,13 @@ interface AnimalGroupMembershipDao {
 }
 
 /**
- * FOS-GROUP-007 + FOS-RABBIT-032 — schema 36 to 37: creates the per-animal group membership
- * link table AND the `rabbit_weights` table in a single migration.
+ * FOS-GROUP-007 — schema 36 to 37: creates the per-animal group membership link table.
+ * The CREATE TABLE column order mirrors the entity field order, matching Room's generated schema.
  *
- * P0 fix (independent review 2026-10-08): Room's MigrationContainer keys migrations by
- * (startVersion, endVersion), so two `Migration(36, 37)` objects cannot coexist — the second
- * silently overrides the first and its tables are never created. Both CREATE TABLEs (and both
- * indexes) therefore live in this one migration.
- *
- * The CREATE TABLE column orders mirror the entity field orders, matching Room's generated schema.
+ * This object owns ONLY the SQL body. It is invoked by the merged MIGRATION_36_37 in FarmOsDatabase.kt
+ * and must NOT be registered in ALL_MIGRATIONS itself: Room keys migrations by (startVersion, endVersion)
+ * and silently keeps only the last object registered for a duplicate key, so a second Migration(36, 37)
+ * would drop one table from the chain.
  */
 object MigrationGroupMove36To37 : Migration(36, 37) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -81,11 +80,5 @@ object MigrationGroupMove36To37 : Migration(36, 37) {
                 "`groupId` TEXT NOT NULL, `movedAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`farmId`, `animalId`))",
         )
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_animal_group_memberships_farmId_groupId` ON `animal_group_memberships` (`farmId`, `groupId`)")
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS `rabbit_weights` (`id` TEXT NOT NULL, `farmId` TEXT NOT NULL, `animalId` TEXT NOT NULL, " +
-                "`weighedAtEpochMillis` INTEGER NOT NULL, `weightKg` REAL NOT NULL, `notes` TEXT, " +
-                "`recordedByActorId` TEXT, `createdAtEpochMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
-        )
-        db.execSQL("CREATE INDEX IF NOT EXISTS `index_rabbit_weights_farmId_animalId` ON `rabbit_weights` (`farmId`, `animalId`)")
     }
 }

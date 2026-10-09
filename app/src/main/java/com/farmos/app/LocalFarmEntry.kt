@@ -30,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,6 +61,8 @@ private sealed interface EntryStep {
     data object OfflineIntro : EntryStep
     data object Setup : EntryStep
     data class SpeciesSetup(val screenId: String, val code: String, val account: LocalAccount, val farmName: String) : EntryStep
+    /** FOS-ADMIN-013 — first-run Drive backup setup, shown once after species setup. */
+    data class DriveSetup(val account: LocalAccount, val farmName: String) : EntryStep
     data class SignIn(val farms: List<LocalFarmEntity>) : EntryStep
     data class Recover(val farms: List<LocalFarmEntity>) : EntryStep
     data class ShowRecoveryCode(val screenId: String, val code: String, val account: LocalAccount, val farmName: String) : EntryStep
@@ -105,6 +108,9 @@ internal fun LocalFarmEntry(
         EntryStep.OfflineIntro -> "FOS-GLOBAL-014"
         EntryStep.Setup -> "FOS-GLOBAL-006"
         is EntryStep.SpeciesSetup -> "FOS-GLOBAL-008"
+        // The Drive gateway content is covered by FOS-ADMIN-013 (same precedent as SettingsHost's
+        // DriveGatewaySection: no separate route exists by design).
+        is EntryStep.DriveSetup -> "FOS-ADMIN-013"
         is EntryStep.Recover -> "FOS-GLOBAL-004"
         is EntryStep.ShowRecoveryCode -> current.screenId
         is EntryStep.Join, is EntryStep.JoinWaiting -> "FOS-GLOBAL-007"
@@ -115,7 +121,15 @@ internal fun LocalFarmEntry(
         when (val current = step) {
             EntryStep.Loading -> Text("Opening this device's farm records", color = AnimalFarmTheme.colors.mutedInk)
             EntryStep.OfflineIntro -> OfflineIntroScreen(onContinue = { step = EntryStep.Setup })
-            is EntryStep.SpeciesSetup -> SpeciesSetupScreen(onDone = { onSignedIn(current.account, current.farmName) })
+            is EntryStep.SpeciesSetup -> SpeciesSetupScreen(onDone = { step = EntryStep.DriveSetup(current.account, current.farmName) })
+            is EntryStep.DriveSetup -> DriveSetupScreen(current.account, onSkip = {
+                DriveSetupFlags(LocalContext.current).setDismissed(current.account.farmId, true)
+                onSignedIn(current.account, current.farmName)
+            }) { config ->
+                DriveConfigStore(LocalContext.current).save(current.account.farmId, config)
+                DriveSetupFlags(LocalContext.current).setDismissed(current.account.farmId, false)
+                onSignedIn(current.account, current.farmName)
+            }
             EntryStep.Setup -> SetupForm(busy) { farmName, displayName, username, pin ->
                 launchEntry {
                     var result: FarmSetupResult? = null
@@ -345,6 +359,82 @@ private fun ColumnScope.SpeciesSetupScreen(onDone: () -> Unit) {
         color = AnimalFarmTheme.colors.mutedInk,
     )
     EntryButton("Open my farm", true, onDone)
+}
+
+/**
+ * FOS-ADMIN-013 — first-run Drive setup: what the gateway backs up, the owner's folder name, and an
+ * honest connect/skip choice. The only wired [DriveAuthorizer] is [NoDriveAuthorizer], so Connect
+ * reports that Google sign-in is not available in this build instead of faking it. Skipping is
+ * explicit and durable via [DriveSetupFlags]; the owner can connect later from Offline and sync.
+ */
+private fun ColumnScope.DriveSetupScreen(
+    account: LocalAccount,
+    onSkip: () -> Unit,
+    onConnected: (DriveGatewayConfig) -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var folderName by remember { mutableStateOf("Farm OS") }
+    var accountEmail by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var outcome by remember { mutableStateOf<DriveSetupOutcome?>(null) }
+
+    fun attempt() {
+        scope.launch {
+            busy = true
+            outcome = null
+            // No Drive folder id can be known without the future OAuth adapter; the attempt returns
+            // AuthUnavailable before the id is used. A future Keystore-backed adapter replaces
+            // NoDriveAuthorizer here without changing this call site (see DriveSetupAttempt).
+            val result = DriveSetupAttempt.connect(
+                farmId = account.farmId,
+                accountEmail = accountEmail.trim(),
+                folderName = folderName.trim(),
+                folderId = "",
+                authorizer = NoDriveAuthorizer,
+                // Repo business-clock convention: the caller stamps business time with the system
+                // clock (as LocalCommandContext does); the helper takes it as an injected value.
+                nowEpochMillis = System.currentTimeMillis(),
+            )
+            busy = false
+            when (result) {
+                is DriveSetupOutcome.Connected -> onConnected(result.config)
+                else -> outcome = result
+            }
+        }
+    }
+
+    Text("Back up to Google Drive", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+    Text(
+        "Farm OS can copy this farm's operation journal — the record of every change — into a folder " +
+            "in your Google Drive as each operation is recorded. Your whole database file is never " +
+            "copied or synchronised to Drive; only journal operations and attachment bytes travel.",
+        color = AnimalFarmTheme.colors.mutedInk,
+    )
+    EntryField("Backup folder name", folderName, busy) { folderName = it }
+    EntryField("Google account email", accountEmail, busy) { accountEmail = it }
+    when (val failed = outcome) {
+        is DriveSetupOutcome.AuthUnavailable -> Text(
+            "Google sign-in is not available in this build, so the Drive backup stays off. Nothing on " +
+                "this farm changes, and you can connect it later from Settings.",
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.testTag("drive-setup-state"),
+        )
+        is DriveSetupOutcome.Failed -> Text(
+            failed.reason,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.testTag("drive-setup-state"),
+        )
+        else -> Unit
+    }
+    if (outcome == null) {
+        EntryButton(
+            if (busy) "Connecting" else "Connect Google Drive",
+            !busy && folderName.isNotBlank() && accountEmail.isNotBlank(),
+        ) { attempt() }
+    } else {
+        EntryButton("Try again", !busy) { attempt() }
+    }
+    TextButton(onClick = onSkip, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Skip for now") }
 }
 
 @Composable
