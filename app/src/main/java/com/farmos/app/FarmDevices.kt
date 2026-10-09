@@ -7,6 +7,7 @@ import com.farmos.core.database.OperationApplier
 import com.farmos.core.database.ReplicationDeviceEntity
 import com.farmos.core.database.journalLocalOperation
 import com.farmos.core.database.replicationVector
+import com.farmos.domain.access.Permission
 import com.farmos.domain.replication.DeviceGrant
 import com.farmos.domain.replication.DeviceKeys
 import com.farmos.domain.replication.DeviceStatus
@@ -41,10 +42,13 @@ internal suspend fun FarmOsDatabase.enrolPairedDevice(
     thisDeviceId: String,
     nowEpochMillis: Long = System.currentTimeMillis(),
 ) = withTransaction {
+    requireLocalAppPermission(grant.farmId, grant.approvedByAccountId, thisDeviceId, Permission.APPROVE_DEVICE_PAIRING)
+    require(grant.deviceId != thisDeviceId) { "This device cannot enrol itself through pairing" }
+    DeviceKeys.decode(devicePublicKey)
     val publicKey = Base64.getEncoder().encodeToString(devicePublicKey)
-    if (replication().device(grant.farmId, grant.deviceId) == null) {
-        replication().upsertDevice(ReplicationDeviceEntity(grant.farmId, grant.deviceId, grant.deviceName, DeviceStatus.ACTIVE.name, 0, null, isLocal = false, publicKey = publicKey))
-    }
+    val existing = replication().device(grant.farmId, grant.deviceId)
+    require(existing == null) { "This device is already enrolled or was removed from the farm" }
+    replication().upsertDevice(ReplicationDeviceEntity(grant.farmId, grant.deviceId, grant.deviceName, DeviceStatus.ACTIVE.name, 0, null, isLocal = false, publicKey = publicKey))
     journalLocalOperation(
         operationId = UUID.randomUUID().toString(),
         farmId = grant.farmId,
@@ -73,11 +77,16 @@ internal suspend fun FarmOsDatabase.setDeviceStatus(
     thisDeviceId: String,
     nowEpochMillis: Long = System.currentTimeMillis(),
 ) = withTransaction {
+    requireLocalAppPermission(farmId, actorId, thisDeviceId, Permission.MANAGE_DEVICES)
     require(status == DeviceStatus.RETIRED || status == DeviceStatus.LOST_REVOKED) { "Only retiring or revoking a device is recorded" }
     require(deviceId != thisDeviceId) { "This device cannot revoke itself" }
     val existing = requireNotNull(replication().device(farmId, deviceId)) { "Unknown device" }
-    val cutoff = replicationVector(farmId).watermark(deviceId)
-    replication().upsertDevice(existing.copy(status = status.name, revokedAfterSequence = minOf(existing.revokedAfterSequence ?: cutoff, cutoff)))
+    val current = DeviceStatus.valueOf(existing.status)
+    val effectiveStatus = if (SEVERITY.indexOf(status) > SEVERITY.indexOf(current)) status else current
+    val held = replicationVector(farmId).watermark(deviceId)
+    val cutoff = minOf(existing.revokedAfterSequence ?: held, held)
+    if (effectiveStatus == current && existing.revokedAfterSequence == cutoff) return@withTransaction
+    replication().upsertDevice(existing.copy(status = effectiveStatus.name, revokedAfterSequence = cutoff))
     journalLocalOperation(
         operationId = UUID.randomUUID().toString(),
         farmId = farmId,
@@ -89,7 +98,7 @@ internal suspend fun FarmOsDatabase.setDeviceStatus(
         createdAtEpochMillis = nowEpochMillis,
         baseVersion = null,
         operationType = DEVICE_STATUS_COMMAND,
-        payloadJson = JSONObject().put("deviceId", deviceId).put("status", status.name).put("revokedAfterSequence", cutoff).toString(),
+        payloadJson = JSONObject().put("deviceId", deviceId).put("status", effectiveStatus.name).put("revokedAfterSequence", cutoff).toString(),
         schemaVersion = 1,
     )
 }
@@ -194,62 +203,28 @@ internal suspend fun FarmOsDatabase.announceIdentity(farmId: String, thisDeviceI
     }
 
 /**
- * Rotates the farm key after a device is revoked: the new key becomes current here and is journalled
- * wrapped to every remaining active device whose identity key is known, so the revoked device can read
- * nothing sealed afterwards. It is saved in this device's vault before it is journalled, so this device
- * never announces a key it does not hold.
- */
-internal suspend fun FarmOsDatabase.rotateFarmKey(farmId: String, thisDeviceId: String, actorId: String, vault: FarmKeyVault, nowEpochMillis: Long = System.currentTimeMillis()) {
-    val secrets = vault.secretsForLocalFarm(farmId)
-    val keyId = generateSequence(0) { it + 1 }.map { if (it == 0) "k$nowEpochMillis" else "k$nowEpochMillis-$it" }.first { secrets.keys.key(it) == null }
-    val rotated = secrets.keys.rotate(keyId)
-    val recipients = replication().devices(farmId).filter {
-        it.deviceId != thisDeviceId && it.publicKey != null &&
-            (it.status == DeviceStatus.ACTIVE.name || it.status == DeviceStatus.TEMPORARILY_OFFLINE.name)
-    }
-    val wrapped = JSONObject()
-    recipients.forEach { device ->
-        val key = FarmKeyWrap.wrap(rotated.current, DeviceKeys.decode(Base64.getDecoder().decode(device.publicKey)), farmId, device.deviceId)
-        wrapped.put(device.deviceId, JSONObject().put("epk", b64(key.ephemeralPublicKey)).put("nonce", b64(key.nonce)).put("ct", b64(key.ciphertext)))
-    }
-    vault.save(farmId, FarmSecrets(rotated, secrets.device, nowEpochMillis))
-    withTransaction {
-        journalLocalOperation(
-            operationId = UUID.randomUUID().toString(),
-            farmId = farmId,
-            entityType = "farm_key",
-            entityId = keyId,
-            actorId = actorId,
-            deviceId = thisDeviceId,
-            businessTimeEpochMillis = nowEpochMillis,
-            createdAtEpochMillis = nowEpochMillis,
-            baseVersion = null,
-            operationType = KEY_ROTATED_COMMAND,
-            payloadJson = JSONObject().put("keyId", keyId).put("wrapped", wrapped).toString(),
-            schemaVersion = 1,
-        )
-    }
-}
-
-/**
  * Installs a rotated farm key received from another device, when one was wrapped to this device. The
  * latest rotation by business time becomes current; an older one arriving late only joins the ring.
  */
 internal fun keyRotationApplier(vault: FarmKeyVault, thisDeviceId: String) = OperationApplier { _, op ->
     val payload = JSONObject(op.payload.getValue(COMMAND_PAYLOAD_KEY))
     val keyId = payload.getString("keyId")
+    require(op.entityType == "farm_key" && op.entityId == keyId) { "Rotated key does not match its journal identity" }
     val mine = payload.getJSONObject("wrapped").optJSONObject(thisDeviceId) ?: return@OperationApplier
     vault.update(op.farmId) { secrets ->
-        if (secrets.keys.key(keyId) != null) return@update null
         val key = FarmKeyWrap.unwrap(
             WrappedFarmKey(keyId, unb64(mine.getString("epk")), unb64(mine.getString("nonce")), unb64(mine.getString("ct"))),
             secrets.device, op.farmId, thisDeviceId,
         )
-        val newer = op.businessTimeEpochMillis > secrets.currentSinceEpochMillis
+        val existing = secrets.keys.key(keyId)
+        require(existing == null || existing.materialForVault().contentEquals(key.materialForVault())) { "A farm key identity was reused with different material" }
+        val newer = keyRotationWins(op.businessTimeEpochMillis, keyId, secrets.currentSinceEpochMillis, secrets.keys.currentKeyId)
+        if (existing != null && !newer) return@update null
         FarmSecrets(
-            FarmKeyRing(secrets.keys.all() + key, if (newer) keyId else secrets.keys.currentKeyId),
+            FarmKeyRing(if (existing == null) secrets.keys.all() + key else secrets.keys.all(), if (newer) keyId else secrets.keys.currentKeyId),
             secrets.device,
             if (newer) op.businessTimeEpochMillis else secrets.currentSinceEpochMillis,
+            secrets.pendingRotations,
         )
     }
 }

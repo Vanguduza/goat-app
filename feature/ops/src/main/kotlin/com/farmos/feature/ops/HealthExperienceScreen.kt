@@ -350,7 +350,7 @@ private fun HealthDashboard(
             "Clinical records",
             "Treatment capture requires a vet-approved formulary item. Farm OS does not prescribe a dose.",
         ) {
-            TextButton(onClick = { onOpen(HealthPage.FORMULARY) }) { Text("Vet-approved formulary") }
+            TextButton(onClick = { onOpen(HealthPage.FORMULARY) }) { Text("Formulary") }
             TextButton(onClick = { onOpen(HealthPage.TREATMENT) }) { Text("Record treatment") }
             TextButton(onClick = { onOpen(HealthPage.WITHDRAWALS) }) { Text("Withdrawal windows") }
             TextButton(onClick = { onOpen(HealthPage.VET_VISIT) }) { Text("Record vet visit") }
@@ -560,9 +560,9 @@ private fun FormularyScreen(
     var species by remember { mutableStateOf("goat") }
     var vetClass by remember { mutableStateOf("vaccine") }
     var meatDays by remember { mutableStateOf("") }
-    FarmOperationalPage("FOS-HEALTH-013", "Formulary", "Only vet-approved products can be used by treatment records.", onBack = onBack) {
-        FarmOperationalRows(formulary, "No approved formulary items", "Add an approved product before recording treatment.")
-        FarmOperationalSection("Add approved item") {
+    FarmOperationalPage("FOS-HEALTH-013", "Formulary", "New entries are unapproved drafts and cannot be used for treatment.", onBack = onBack) {
+        FarmOperationalRows(formulary, "No formulary items", "Record a draft product; veterinary approval is separate.")
+        FarmOperationalSection("New draft item") {
             OutlinedTextField(product, {
                 product = it
             }, label = { Text("Product") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -580,7 +580,7 @@ private fun FormularyScreen(
                 enabled =
                     !busy && product.isNotBlank() && species.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Add approved item") }
+            ) { Text("Save draft item") }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
@@ -606,7 +606,7 @@ private fun TreatmentScreen(
         FarmVisualClass.I4,
         onBack,
     ) {
-        FarmOperationalRows(formulary, "No approved formulary items", "Treatment cannot be recorded without an approved formulary item.")
+        FarmOperationalRows(formulary, "No formulary items", "Only vet-approved entries can be selected for treatment.")
         FarmOperationalSection("Treatment record") {
             OutlinedTextField(species, {
                 species = it
@@ -1006,7 +1006,7 @@ private fun VaccinationCaptureScreen(
                 options = formularyOptions,
                 selectedId = formularyId.ifBlank { null },
                 onSelect = { formularyId = it },
-                emptyText = "No approved formulary items. Add one first.",
+                emptyText = "No vet-approved vaccine is available. Draft entries cannot be selected.",
                 enabled = !busy,
             )
             OutlinedTextField(dose, { dose = it }, label = { Text("Dose (optional)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)

@@ -19,6 +19,7 @@ import com.farmos.core.design.FarmOsTheme
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomHerdRepository
 import com.farmos.data.herd.RoomOpsRepository
+import com.farmos.domain.access.LocalRole
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -49,6 +50,7 @@ class RabbitCaptureOwnerTest {
     @Before
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java).build()
+        seedCommandAuthority(database, farm, "user-1", "device-1", LocalRole.WORKER)
         runBlocking {
             database.rabbitProgramme().insertWave(wave("wave-sept", farm, 20_700))
             database.rabbitProgramme().insertWave(wave("wave-other", otherFarm, 20_690))

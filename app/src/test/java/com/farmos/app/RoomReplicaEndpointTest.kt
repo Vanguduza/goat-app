@@ -152,6 +152,21 @@ class RoomReplicaEndpointTest {
     }
 
     @Test
+    fun aCutoffRefusesSessionsEvenWithAnActiveStatusButKeepsPermittedHistory(): Unit = runBlocking {
+        recordWaterOnTablet(2)
+        val row = requireNotNull(phoneDb.replication().device(farm, tabletId))
+        for (status in listOf(DeviceStatus.ACTIVE, DeviceStatus.TEMPORARILY_OFFLINE)) {
+            phoneDb.replication().upsertDevice(row.copy(status = status.name, revokedAfterSequence = 1))
+            assertEquals(false, phone.maySynchronise(tabletId))
+        }
+        val operations = tabletDb.replication().operationsInRange(farm, tabletId, 1, 2).map { it.toEnvelope() }
+        assertEquals(false, phone.ingest(OperationBundle.seal(farm, tabletId, listOf(operations.first()))).rejected)
+        assertEquals(true, phone.ingest(OperationBundle.seal(farm, tabletId, listOf(operations.last()))).rejected)
+        assertEquals(1L, phoneDb.replication().count(farm))
+        assertEquals(1L, phone.vector().watermark(tabletId))
+    }
+
+    @Test
     fun aCurrencyChangeTakesEffectOnTheReceivingDeviceAndAnOlderChangeNeverOverridesANewerOne() = runBlocking {
         tabletDb.setFarmCurrency(farm, "ZAR", actorId = "owner-1", deviceId = tabletId, nowEpochMillis = 1_790_000_500_000)
         phoneDb.setFarmCurrency(farm, "KES", actorId = "owner-1", deviceId = phoneId, nowEpochMillis = 1_790_000_900_000)

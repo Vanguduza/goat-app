@@ -27,7 +27,10 @@ internal suspend fun loadHealthModuleResources(ops: RoomOpsRepository): HealthMo
         val catalog = diseaseRows.map { row -> "${row.speciesCode} · ${row.displayName} · ${row.firstAid}" }
         val referenceDetails = diseaseRows.map(::healthReferenceDetail)
         val approved = ops.approvedFormulary()
-        val formulary = approved.map { row -> "${row.id} · ${row.productName} · ${row.speciesCode} · ${row.vetClass}" }
+        val formulary = ops.formularyItems().map { row ->
+            val approval = if (row.vetApproved) "Vet approved" else "Draft · not vet approved"
+            "${row.id} · ${row.productName} · ${row.speciesCode} · $approval"
+        }
         val formularyOptions = approved.map { row -> FarmSelectorOption(row.id, row.productName, "${row.speciesCode} · ${row.vetClass}") }
         val treatments = ops.recentTreatments().map { row ->
             "${row.speciesCode} · ${row.reason} · formulary ${row.formularyItemId}"

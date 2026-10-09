@@ -12,6 +12,7 @@ import com.farmos.core.database.replicationVector
 import com.farmos.core.database.toEnvelope
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
+import com.farmos.domain.access.LocalRole
 import com.farmos.domain.ops.CreateInventoryItem
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.RecordWater
@@ -61,6 +62,7 @@ class ReplicationJournalOwnerTest {
                 farmId = scopeFarm, deviceId = device, name = "Tablet", status = DeviceStatus.ACTIVE.name,
                 lastReportedOwnSequence = 0L, revokedAfterSequence = null, isLocal = true,
             ))
+            seedCommandAuthority(database, scopeFarm, "manager-" + scopeFarm, device, LocalRole.MANAGER)
         }
     }
 
@@ -69,13 +71,13 @@ class ReplicationJournalOwnerTest {
         database.close()
     }
 
-    private fun context(farmId: String, at: Long) = LocalCommandContext(farmId, "worker-" + farmId, device, UUID.randomUUID().toString(), at)
+    private fun context(farmId: String, at: Long, actor: String = "worker") = LocalCommandContext(farmId, actor + "-" + farmId, device, UUID.randomUUID().toString(), at)
 
     @Test
     fun eachLocalCommandJournalsOneSealedOperationInDeviceSequence() = runBlocking {
         val ops = RoomOpsRepository(database, farm)
         val water = context(farm, 1_790_000_100_000)
-        val item = context(farm, 1_790_000_200_000)
+        val item = context(farm, 1_790_000_200_000, "manager")
         val receipt = context(farm, 1_790_000_300_000)
         ops.recordWater(RecordWater("water-1", "Borehole", 250_000, 20_700), water)
         ops.createItem(CreateInventoryItem("item-mash", "MASH-20", "Layer mash"), item)
@@ -101,7 +103,7 @@ class ReplicationJournalOwnerTest {
     @Test
     fun aRejectedCommandLeavesNoJournalEntryAndSequencesStayPerFarm() = runBlocking {
         val ops = RoomOpsRepository(database, farm)
-        ops.createItem(CreateInventoryItem("item-mash", "MASH-20", "Layer mash"), context(farm, 1_790_000_000_000))
+        ops.createItem(CreateInventoryItem("item-mash", "MASH-20", "Layer mash"), context(farm, 1_790_000_000_000, "manager"))
         // Issuing more than is on hand is refused before anything is written.
         runCatching { ops.move(MoveInventory("move-x", "item-mash", "issue", 99_000, 1_790_000_100_000), context(farm, 1_790_000_100_000)) }
         assertEquals(1L, database.replication().count(farm))

@@ -8,6 +8,7 @@ import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.data.herd.AnimalExitCommands
 import com.farmos.domain.ops.RecordAnimalExit
 import com.farmos.domain.replication.LocalPeerTransport
@@ -34,10 +35,13 @@ class ConflictResolutionTest {
     private val day = 20_300L
     private var clock = day * 86_400_000L
 
-    private fun database() = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
+    private fun database(device: String = "A") = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
-        .also { databases += it }
+        .also { db ->
+            databases += db
+            seedCommandAuthority(db, farm, "manager-1", device, LocalRole.MANAGER)
+        }
 
     @After
     fun tearDown() = databases.forEach { it.close() }
@@ -57,8 +61,8 @@ class ConflictResolutionTest {
     @Test
     fun settingAConflictingExitAsideReversesItWhereItStoodAndEveryDeviceConverges(): Unit = runBlocking {
         val aDb = database()
-        val bDb = database()
-        val cDb = database()
+        val bDb = database("B")
+        val cDb = database("C")
         listOf(aDb, bDb, cDb).forEach { it.goat("g1") }
         val a = endpoint(aDb, "A", "B", "C")
         val b = endpoint(bDb, "B", "A", "C")

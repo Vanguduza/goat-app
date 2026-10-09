@@ -2,10 +2,10 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "af055d794bbe133964328753e6aa9af8226280b9",
-  "source_fingerprint": "sha256:fa31a5de55fba51618132e5870e1fe7d5b19d8bde2313c0dba8d2e10887f0bd8",
-  "ci_status": "CI_PENDING",
-  "foundation_run_id": null,
+  "tested_commit": "ee514f2f98d6872dcf941ad18d6e9dde69f09457",
+  "source_fingerprint": "sha256:b2f8a67ff80e996c23ea1362f6b43f004f0bac8d09c0a76b3f634d388cd21ea6",
+  "ci_status": "PASS_EXACT_HEAD_CI",
+  "foundation_run_id": 37928955372,
   "test_sources": {
     "entry_action_emission": {
       "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
@@ -358,6 +358,7 @@
         "FOS-ATOM-004",
         "FOS-HEALTH-004",
         "FOS-HEALTH-007",
+        "FOS-HEALTH-013",
         "FOS-HEALTH-019",
         "FOS-HEALTH-024"
       ],
@@ -558,7 +559,7 @@
     "registered_screen_count": 545,
     "entry_action_screen_count": 27,
     "rendered_traversal_screen_count": 202,
-    "rendered_owner_screen_count": 105,
+    "rendered_owner_screen_count": 106,
     "route_contract_screen_count": 67,
     "combined_screen_count": 315,
     "entry_action_screen_ids": [
@@ -859,6 +860,7 @@
       "FOS-GROUP-001",
       "FOS-HEALTH-004",
       "FOS-HEALTH-007",
+      "FOS-HEALTH-013",
       "FOS-HEALTH-019",
       "FOS-HEALTH-024",
       "FOS-HOME-002",
@@ -995,12 +997,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 0,
-    "entry_action_emission_executed": 0,
-    "rendered_surface_owners_executed": 0,
-    "route_contracts_executed": 0,
-    "parameter_scope_executed": false,
-    "return_restoration_executed": 0,
+    "runtime_reachability_executed": 202,
+    "entry_action_emission_executed": 27,
+    "rendered_surface_owners_executed": 106,
+    "route_contracts_executed": 67,
+    "parameter_scope_executed": true,
+    "return_restoration_executed": 202,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {

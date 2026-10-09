@@ -172,6 +172,7 @@ class FarmOsApplication : Application(), SyncEngineOwner {
         if (lastMembershipForCurrentSession() != null) {
             scheduleBackgroundSync()
         }
+        DriveBackgroundWork.restore(this)
     }
 
     override suspend fun pullAuthoritativeChanges(): AuthoritativePullOutcome {

@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.LocalAccountEntity
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.data.herd.TaskSeriesCommands
 import com.farmos.data.herd.TaskSeriesQueries
 import com.farmos.domain.ops.CompleteTaskOccurrence
@@ -39,10 +40,15 @@ class TaskSeriesCommandsTest {
     private val farm = "88888888-8888-4888-8888-888888888888"
     private val databases = mutableListOf<FarmOsDatabase>()
 
-    private fun database() = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
+    private fun database(device: String = "A") = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
-        .also { databases += it }
+        .also { db ->
+            databases += db
+            runBlocking {
+                seedCommandAuthority(db, farm, "manager-1", device, LocalRole.MANAGER)
+            }
+        }
 
     @After
     fun tearDown() = databases.forEach { it.close() }
@@ -135,7 +141,7 @@ class TaskSeriesCommandsTest {
     @Test
     fun assignmentIsCheckedAndCompletionConvergesAcrossDevices(): Unit = runBlocking {
         val aDb = database()
-        val bDb = database()
+        val bDb = database("B")
         assertThrows(IllegalArgumentException::class.java) {
             runBlocking { TaskSeriesCommands(aDb, farm).create(CreateTaskSeries("s", "ops", "C", "Title", "DAILY", startEpochDay = 1, assignee = TaskAssignee(accountId = "nobody")), context()) }
         }

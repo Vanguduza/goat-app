@@ -21,6 +21,8 @@ class RoomHerdRepository(
     /** Replays an operation received from another device: domain writes only, it is already journalled. */
     private val replaying: Boolean = false,
 ) {
+    init { require(species in HerdReplicationAppliers.SPECIES) { "Unsupported species repository" } }
+
     suspend fun register(
         animalId: String,
         tag: String,
@@ -44,7 +46,9 @@ class RoomHerdRepository(
             put("sex", sex)
             if (species == "poultry") put("poultryKindCode", poultryKindCode!!.trim())
         }
-        database.withTransaction {
+        enqueue(
+            context, "$species.register.v1", animalId, 0, json.encodeToString(payload),
+        ) {
             database.animals().insert(
                 AnimalEntity(
                     id = animalId,
@@ -57,29 +61,6 @@ class RoomHerdRepository(
                     dateOfBirthEpochDay = null,
                     poultryKindCode = poultryKindCode?.trim()?.takeIf { species == "poultry" },
                     updatedAtEpochMillis = context.occurredAtEpochMillis,
-                ),
-            )
-            journal(
-                OutboxEntity(
-                    mutationId = context.mutationId,
-                    farmId = farmId,
-                    actorId = context.actorId,
-                    deviceId = context.deviceId,
-                    commandName = "$species.register.v1",
-                    commandSchemaVersion = 1,
-                    aggregateType = "animal",
-                    aggregateId = animalId,
-                    aggregateOrdinal = database.outbox().nextAggregateOrdinal(farmId, "animal", animalId),
-                    expectedStreamVersion = 0,
-                    payloadJson = json.encodeToString(payload),
-                    occurredAtEpochMillis = context.occurredAtEpochMillis,
-                    createdAtEpochMillis = System.currentTimeMillis(),
-                    state = SyncState.PENDING.name,
-                    attemptCount = 0,
-                    nextAttemptAtEpochMillis = null,
-                    lastErrorCode = null,
-                    serverEventId = null,
-                    serverStreamVersion = null,
                 ),
             )
         }
@@ -95,23 +76,29 @@ class RoomHerdRepository(
     ): LocalCommandResult {
         require(context.farmId == farmId)
         if (weightGrams <= 0L) error("Weight must be greater than zero")
-        val animal = requireNotNull(database.animals().get(farmId, animalId)) { "Animal not found" }
-        require(animal.speciesCode == species && animal.status == "active") {
-            "Only an active $species record can take a new weight"
-        }
         val payload = buildJsonObject {
             put("animalId", animalId)
             put("measurementId", measurementId)
             put("weightGrams", weightGrams)
             put("measuredAtEpochMillis", measuredAtEpochMillis)
         }
+        // Keep an exact historical grams receipt replayable; new rabbit measurements have a
+        // distinct version from the rabbit module's kg-based v1 command.
+        val previous = if (species == "rabbit") database.replication().operation(farmId, context.mutationId) else null
+        val weightCommand = if (species == "rabbit" && previous?.operationType != "rabbit.record_weight.v1") {
+            RabbitWeightReplication.GRAMS_V2
+        } else "$species.record_weight.v1"
         enqueue(
             context = context,
-            commandName = "$species.record_weight.v1",
+            commandName = weightCommand,
             aggregateId = animalId,
             expectedStreamVersion = nextExpectedStreamVersion(animalId),
             payloadJson = json.encodeToString(payload),
         ) {
+            val animal = requireNotNull(database.animals().get(farmId, animalId)) { "Animal not found" }
+            require(animal.speciesCode == species && animal.status == "active") {
+                "Only an active $species record can take a new weight"
+            }
             database.measurements().insert(
                 com.farmos.core.database.MeasurementEntity(
                     id = measurementId,
@@ -134,10 +121,6 @@ class RoomHerdRepository(
     ): LocalCommandResult {
         require(context.farmId == farmId)
         if (status !in setOf("sold", "dead", "culled")) error("Status must be sold, dead, or culled")
-        val animal = requireNotNull(database.animals().get(farmId, animalId)) { "Animal not found" }
-        require(animal.speciesCode == species && animal.status == "active") {
-            "Only an active $species record can change lifecycle status"
-        }
         val payload = buildJsonObject {
             put("animalId", animalId)
             put("status", status)
@@ -149,6 +132,10 @@ class RoomHerdRepository(
             expectedStreamVersion = nextExpectedStreamVersion(animalId),
             payloadJson = json.encodeToString(payload),
         ) {
+            val animal = requireNotNull(database.animals().get(farmId, animalId)) { "Animal not found" }
+            require(animal.speciesCode == species && animal.status == "active") {
+                "Only an active $species record can change lifecycle status"
+            }
             database.animals().updateStatus(farmId, animalId, status, context.occurredAtEpochMillis)
         }
         return LocalCommandResult(context.mutationId, animalId, true)
@@ -180,7 +167,20 @@ class RoomHerdRepository(
         payloadJson: String,
         localWrite: suspend () -> Unit,
     ) {
+        require(context.farmId == farmId) { "Farm context mismatch" }
         database.withTransaction {
+            val permission = OpsCommandPermissions.requiredFor(commandName, payloadJson)
+            if (!replaying) database.requireLocalCommandAuthority(context, permission)
+            val original = database.replication().operation(farmId, context.mutationId)
+            if (original != null) {
+                requireOriginalCommand(original, context, commandName, "animal", aggregateId, {
+                    Json.parseToJsonElement(it) == Json.parseToJsonElement(payloadJson)
+                })
+                if (database.commandAlreadyApplied(original, replaying)) return@withTransaction
+            } else {
+                require(!replaying) { "A received animal change must be journalled before it is applied" }
+            }
+            if (!replaying) OpsCommandPermissions.requireLocalVersion(commandName)
             localWrite()
             journal(
                 OutboxEntity(
@@ -189,7 +189,7 @@ class RoomHerdRepository(
                     actorId = context.actorId,
                     deviceId = context.deviceId,
                     commandName = commandName,
-                    commandSchemaVersion = 1,
+                    commandSchemaVersion = OpsCommandPermissions.schemaVersionFor(commandName),
                     aggregateType = "animal",
                     aggregateId = aggregateId,
                     aggregateOrdinal = database.outbox().nextAggregateOrdinal(farmId, "animal", aggregateId),

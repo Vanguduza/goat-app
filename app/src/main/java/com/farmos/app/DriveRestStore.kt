@@ -209,7 +209,11 @@ private fun jsonEscape(value: String): String = buildString {
 internal class DriveRestStore(
     private val authorizer: DriveAuthorizer,
     private val folderId: () -> String,
-) : DriveObjectStore {
+    private val openConnection: (URL) -> HttpURLConnection,
+) : DriveObjectStore, DriveCheckedWriter {
+    constructor(authorizer: DriveAuthorizer, folderId: () -> String) :
+        this(authorizer, folderId, { it.openConnection() as HttpURLConnection })
+
     override suspend fun validateDestination(accountEmail: String) = withContext(Dispatchers.IO) {
         val token = authorizer.accessToken() ?: throw DriveAuthNeededException()
         val id = requireDriveFolderId(folderId())
@@ -242,7 +246,7 @@ internal class DriveRestStore(
             matches.firstOrNull()?.str("id")?.let { return@withContext requireDriveFolderId(it) }
             val metadata = "{\"name\":\"${jsonEscape(folderName)}\",\"mimeType\":\"application/vnd.google-apps.folder\"," +
                 "\"appProperties\":{\"goat_farm_id\":\"$farmId\"}}"
-            val connection = (URL("https://www.googleapis.com/drive/v3/files?fields=id").openConnection() as HttpURLConnection).apply {
+            val connection = openConnection(URL("https://www.googleapis.com/drive/v3/files?fields=id")).apply {
                 requestMethod = "POST"
                 doOutput = true
                 setRequestProperty("Authorization", authHeader(token))
@@ -312,22 +316,29 @@ internal class DriveRestStore(
     }
 
     override suspend fun putIfAbsent(path: String, bytes: ByteArray, sha256: String): Boolean =
-        withContext(Dispatchers.IO) {
-            requireDriveSafePayload(path, bytes)
-            require(sha256Hex(bytes) == sha256) { "Drive upload checksum does not match its bytes" }
-            val token = authorizer.accessToken() ?: throw DriveAuthNeededException()
-            val existing = findMeta(path, token)
-            if (existing != null) {
-                // Idempotent retry: the same content already there counts as success; anything else
-                // is refused — a published object is never rewritten.
-                val held = driveDownload("https://www.googleapis.com/drive/v3/files/${existing.id}?alt=media", token)
-                return@withContext held.contentEquals(bytes)
-            }
-            driveUploadMultipart(token, path, bytes, sha256)
-            // Drive names are not unique. Detect a competing create instead of silently trusting one.
-            val created = findMeta(path, token) ?: throw IOException("Drive did not confirm the uploaded object")
-            driveDownload("https://www.googleapis.com/drive/v3/files/${created.id}?alt=media", token).contentEquals(bytes)
+        putIfAbsentChecked(path, bytes, sha256) {}
+
+    override suspend fun putIfAbsentChecked(
+        path: String,
+        bytes: ByteArray,
+        sha256: String,
+        beforeWrite: suspend () -> Unit,
+    ): Boolean = withContext(Dispatchers.IO) {
+        requireDriveSafePayload(path, bytes)
+        require(sha256Hex(bytes) == sha256) { "Drive upload checksum does not match its bytes" }
+        val token = authorizer.accessToken() ?: throw DriveAuthNeededException()
+        val existing = findMeta(path, token)
+        if (existing != null) {
+            // Idempotent retry: the same content already there counts as success; anything else
+            // is refused — a published object is never rewritten.
+            val held = driveDownload("https://www.googleapis.com/drive/v3/files/${existing.id}?alt=media", token)
+            return@withContext held.contentEquals(bytes)
         }
+        driveUploadMultipart(token, path, bytes, sha256, beforeWrite)
+        // Drive names are not unique. Detect a competing create instead of silently trusting one.
+        val created = findMeta(path, token) ?: throw IOException("Drive did not confirm the uploaded object")
+        driveDownload("https://www.googleapis.com/drive/v3/files/${created.id}?alt=media", token).contentEquals(bytes)
+    }
 
     private data class FileMeta(val id: String, val sha256: String?)
 
@@ -355,7 +366,7 @@ internal class DriveRestStore(
     private fun authHeader(token: String) = "Bearer $token"
 
     private fun driveGet(url: String, token: String): String {
-        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
+        val connection = openConnection(URL(url)).apply {
             requestMethod = "GET"
             setRequestProperty("Authorization", authHeader(token))
             connectTimeout = 15_000
@@ -374,7 +385,7 @@ internal class DriveRestStore(
     }
 
     private fun driveDownload(url: String, token: String): ByteArray {
-        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
+        val connection = openConnection(URL(url)).apply {
             requestMethod = "GET"
             setRequestProperty("Authorization", authHeader(token))
             connectTimeout = 15_000
@@ -392,7 +403,13 @@ internal class DriveRestStore(
         } finally { connection.disconnect() }
     }
 
-    private fun driveUploadMultipart(token: String, path: String, bytes: ByteArray, sha256: String) {
+    private suspend fun driveUploadMultipart(
+        token: String,
+        path: String,
+        bytes: ByteArray,
+        sha256: String,
+        beforeWrite: suspend () -> Unit,
+    ) {
         val boundary = "farm_os_${System.currentTimeMillis()}"
         val metadata =
             "{\"name\":\"${jsonEscape(path)}\"," +
@@ -406,7 +423,9 @@ internal class DriveRestStore(
             out.write(bytes)
             out.write("\r\n--$boundary--\r\n".toByteArray(Charsets.UTF_8))
         }.toByteArray()
-        val connection = (URL("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart").openConnection() as HttpURLConnection).apply {
+        // The earlier metadata lookup may have overlapped a local revocation. No POST starts before this check.
+        beforeWrite()
+        val connection = openConnection(URL("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart")).apply {
             requestMethod = "POST"
             doOutput = true
             setRequestProperty("Authorization", authHeader(token))
@@ -415,17 +434,16 @@ internal class DriveRestStore(
             readTimeout = 120_000
             setFixedLengthStreamingMode(body.size)
         }
-        connection.outputStream.use { it.write(body) }
-        val code = connection.responseCode
-        if (code == 401) {
+        try {
+            connection.outputStream.use { it.write(body) }
+            val code = connection.responseCode
+            if (code == 401) {
+                authorizer.invalidateToken(token)
+                throw DriveAuthNeededException()
+            }
+            if (code !in 200..299) throw IOException("Drive upload failed: HTTP $code")
+        } finally {
             connection.disconnect()
-            runBlocking { authorizer.invalidateToken(token) }
-            throw DriveAuthNeededException()
         }
-        if (code !in 200..299) {
-            connection.disconnect()
-            throw IOException("Drive upload failed: HTTP $code")
-        }
-        connection.disconnect()
     }
 }

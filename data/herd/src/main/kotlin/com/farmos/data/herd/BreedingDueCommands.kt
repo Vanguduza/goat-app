@@ -11,6 +11,7 @@ import com.farmos.core.model.LocalCommandResult
 import com.farmos.domain.ops.BreedingDueSchedule
 import com.farmos.domain.ops.RecordCattleServiceV2
 import com.farmos.domain.ops.RecordSheepJoiningV2
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -71,9 +72,9 @@ class BreedingDueCommands(
 ) {
     suspend fun recordCattleService(command: RecordCattleServiceV2, context: LocalCommandContext): LocalCommandResult {
         BreedingDueSchedule.cattleService(command)?.let { error(it) }
-        val cow = requireNotNull(database.animals().get(farmId, command.animalId)) { "Active cow not found" }
-        require(cow.speciesCode == "cattle" && cow.status == "active") { "Active cow not found" }
-        journal(context, CATTLE_SERVICE_V2, "animal", command.animalId, json.encodeToString(command)) {
+        journal(context, CATTLE_SERVICE_V2, "animal", command.animalId, command) {
+            val cow = requireNotNull(database.animals().get(farmId, command.animalId)) { "Active cow not found" }
+            require(cow.speciesCode == "cattle" && cow.status == "active") { "Active cow not found" }
             database.writeCattleService(
                 farmId, command.serviceId, command.animalId, command.method, command.occurredEpochDay, command.expectedCalvingEpochDay,
                 command.pdTaskId, command.paddockTaskId, command.calvingTaskId, context.occurredAtEpochMillis,
@@ -84,9 +85,9 @@ class BreedingDueCommands(
 
     suspend fun recordJoining(command: RecordSheepJoiningV2, context: LocalCommandContext): LocalCommandResult {
         BreedingDueSchedule.joining(command)?.let { error(it) }
-        val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Joining needs a sheep mob" }
-        require(group.speciesCode == "sheep") { "Joining needs a sheep mob" }
-        journal(context, SHEEP_JOINING_V2, "animal_group", command.groupId, json.encodeToString(command)) {
+        journal(context, SHEEP_JOINING_V2, "animal_group", command.groupId, command) {
+            val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Joining needs a sheep mob" }
+            require(group.speciesCode == "sheep") { "Joining needs a sheep mob" }
             database.writeSheepJoining(
                 farmId, command.joiningId, command.groupId, command.startedEpochDay, command.expectedLambingEpochDay,
                 command.scanTaskId, command.preLambTaskId, command.paddockTaskId, command.lambingTaskId, context.occurredAtEpochMillis,
@@ -95,18 +96,30 @@ class BreedingDueCommands(
         return LocalCommandResult(context.mutationId, command.joiningId, true)
     }
 
-    private suspend fun journal(
+    private suspend inline fun <reified C> journal(
         context: LocalCommandContext,
         commandName: String,
         entityType: String,
         entityId: String,
-        payloadJson: String,
-        localWrite: suspend () -> Unit,
+        command: C,
+        noinline localWrite: suspend () -> Unit,
     ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
-        if (replaying) return database.withTransaction { localWrite() }
         database.withTransaction {
+            val payloadJson = json.encodeToString(command)
+            val permission = OpsCommandPermissions.requiredFor(commandName, payloadJson)
+            if (!replaying) database.requireLocalCommandAuthority(context, permission)
+            val original = database.replication().operation(farmId, context.mutationId)
+            if (original != null) {
+                requireOriginalCommand(original, context, commandName, entityType, entityId, {
+                    json.decodeFromString<C>(it) == command
+                })
+                if (database.commandAlreadyApplied(original, replaying)) return@withTransaction
+            } else {
+                require(!replaying) { "A received change must be journalled before it is applied" }
+            }
             localWrite()
+            if (replaying) return@withTransaction
             database.journalLocalOperation(
                 operationId = context.mutationId,
                 farmId = farmId,

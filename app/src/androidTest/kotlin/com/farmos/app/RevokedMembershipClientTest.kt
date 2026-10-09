@@ -52,11 +52,12 @@ class RevokedMembershipClientTest {
         val tabletDb = open(tabletDbName)
         val phoneDb = open(phoneDbName)
         try {
+            seedAndroidCommandWorker(tabletDb, farmId, "worker-1", "tablet")
             val goats = RoomGoatRepository(tabletDb, farmId, localDeviceId = "tablet")
             val animalId = UUID.randomUUID().toString()
             goats.registerGoat(
                 RegisterGoat(animalId, "REV-E2E-01", "Nala", GoatSex.FEMALE, dateOfBirthEpochDay = 20_150),
-                LocalCommandContext(farmId, "owner-1", "tablet", UUID.randomUUID().toString(), 1_700_000_000_000L),
+                LocalCommandContext(farmId, "worker-1", "tablet", UUID.randomUUID().toString(), 1_700_000_000_000L),
             )
             val tablet = RoomReplicaEndpoint(tabletDb, farmId, "tablet", replicationAppliers).apply {
                 registerPairedDevice("phone", "Phone")

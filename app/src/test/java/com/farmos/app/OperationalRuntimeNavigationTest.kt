@@ -122,7 +122,7 @@ class OperationalRuntimeNavigationTest {
                 "Observation list" to "FOS-HEALTH-003",
                 "Record observation" to "FOS-HEALTH-004",
                 "Reference library" to "FOS-HEALTH-026",
-                "Vet-approved formulary" to "FOS-HEALTH-013",
+                "Formulary" to "FOS-HEALTH-013",
                 "Record treatment" to "FOS-HEALTH-007",
                 "Withdrawal windows" to "FOS-HEALTH-009",
                 "Record vet visit" to "FOS-HEALTH-021",

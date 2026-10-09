@@ -91,6 +91,20 @@ internal class LocalFarmDirectory(
 
     fun accounts(farmId: String): List<LocalAccount> = store.accounts(farmId)
 
+    /** Approval stays on this device; neither Google identity nor a replicated setting grants it. */
+    suspend fun approveDriveGateway(
+        context: android.content.Context,
+        farmId: String,
+        accountId: String,
+        config: DriveGatewayConfig,
+    ): DriveGatewayConfig = DriveFarmCoordinator.shared.withFarm(farmId) {
+        val approved = DriveGatewayAuthority(database, deviceId).approve(farmId, accountId, config, DriveConfigStore(context))
+        val state = DriveGatewayState(config = approved, deliveryStatus = DriveDeliveryStatus.READY)
+        DriveDeliveryStateStore(context).save(farmId, approved, state)
+        DriveFarmCoordinator.shared.state(farmId) { state }.value = state
+        approved
+    }
+
     fun account(farmId: String, accountId: String): LocalAccount? = store.account(farmId, accountId)
 
     /** The farm's Owner with [username], used by recovery; null never reveals which part did not match. */

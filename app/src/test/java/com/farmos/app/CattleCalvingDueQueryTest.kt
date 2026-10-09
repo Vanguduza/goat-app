@@ -8,6 +8,7 @@ import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.CattleServiceEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.GestationPeriod
 import com.farmos.domain.ops.GestationSpecies
@@ -37,19 +38,25 @@ class CattleCalvingDueQueryTest {
     private val database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
+        .also {
+            seedCommandAuthority(it, farm, "worker-1", "device-a", LocalRole.WORKER)
+            seedCommandAuthority(it, farm, "manager-1", "device-a", LocalRole.MANAGER)
+            seedCommandAuthority(it, farm, "owner-1", "device-a", LocalRole.OWNER)
+        }
     private val ops = RoomOpsRepository(database, farm)
 
     @After
     fun tearDown() = database.close()
 
-    private fun context() = LocalCommandContext(farm, "worker-1", "device-a", UUID.randomUUID().toString(), 1_790_000_000_000)
+    private fun context(manager: Boolean = false) =
+        LocalCommandContext(farm, if (manager) "manager-1" else "worker-1", "device-a", UUID.randomUUID().toString(), 1_790_000_000_000)
 
     private suspend fun cow(id: String, farmId: String = farm, status: String = "active") =
         database.animals().insert(AnimalEntity(id = id, farmId = farmId, tag = "C-$id", name = null, speciesCode = "cattle", sex = "FEMALE", status = status, dateOfBirthEpochDay = null, updatedAtEpochMillis = 1L))
 
     private suspend fun serve(id: String, day: Long) = ops.recordCattleService(
         RecordCattleService(UUID.randomUUID().toString(), id, "ai", day, UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString()),
-        context(),
+        context(manager = true),
     )
 
     private fun id() = UUID.randomUUID().toString()

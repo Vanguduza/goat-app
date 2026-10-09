@@ -8,12 +8,14 @@ import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.recordPeerHolds
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.goat.RoomGoatRepository
+import com.farmos.domain.access.LocalRole
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.RecordGoatWeight
 import com.farmos.domain.goat.RegisterGoat
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Before
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -34,6 +36,9 @@ class GoatLocalSyncPendingTest {
         .build()
     private val local = RoomGoatRepository(database, farm, localDeviceId = device)
     private val serverEra = RoomGoatRepository(database, farm)
+
+    @Before
+    fun setUp() = seedCommandAuthority(database, farm, "worker-1", device, LocalRole.WORKER)
 
     @After
     fun tearDown() = database.close()

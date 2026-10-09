@@ -520,9 +520,10 @@ internal fun SettingsHost(
                 }
             }
             FarmOperationalSection("Google Drive") {
-                val canManage = current.actor?.let { RolePermissions.allows(it.role, Permission.MANAGE_FARM_SETTINGS) } == true
+                val canManage = current.actor?.let { RolePermissions.allows(it.role, Permission.MANAGE_STORAGE_AND_BACKUP) } == true
                 DriveGatewaySection(
                     drive = drive,
+                    actorId = current.actor?.accountId,
                     canManage = canManage,
                     busy = busy,
                     onBusyChange = { busy = it },
@@ -967,6 +968,7 @@ private fun LanStatus(lan: FarmLanRuntime, pairedDevices: Int) {
 @Composable
 private fun DriveGatewaySection(
     drive: FarmDriveRuntime?,
+    actorId: String?,
     canManage: Boolean,
     busy: Boolean,
     onBusyChange: (Boolean) -> Unit,
@@ -998,7 +1000,7 @@ private fun DriveGatewaySection(
         val email = account.ifBlank { config?.accountEmail.orEmpty() }
         val destination = folderId.ifBlank { config?.folderId.orEmpty() }
         runDrive(onDone = { connecting = false }) {
-            when (val result = drive.connect(email, destination, config?.folderName?.ifBlank { "Farm OS" } ?: "Farm OS")) {
+            when (val result = drive.connect(requireNotNull(actorId), email, destination, config?.folderName?.ifBlank { "Farm OS" } ?: "Farm OS")) {
                 is DriveSetupOutcome.Connected -> Unit
                 DriveSetupOutcome.AuthUnavailable -> error("Google Drive permission is required before connecting")
                 is DriveSetupOutcome.Failed -> error(result.reason)
@@ -1039,6 +1041,9 @@ private fun DriveGatewaySection(
     }
     Text("Backup folder configured for ${config.accountEmail}.", modifier = Modifier.testTag("settings-drive-state"))
     if (config.folderName.isNotBlank()) Text("Folder: ${config.folderName}", color = AnimalFarmTheme.colors.mutedInk)
+    if (state.deliveryStatus == DriveDeliveryStatus.APPROVAL_REQUIRED) {
+        SettingsButton("Approve this device for backup", canManage && !busy) { connectWithConsent(config.accountEmail) }
+    }
     if (state.authNeeded) {
         SettingsButton("Authorise Google Drive", canManage && !busy) { connectWithConsent(config.accountEmail) }
         Text(
@@ -1065,7 +1070,7 @@ private fun DriveGatewaySection(
         runDrive { drive.requestSync() }
     }
     SettingsButton("Disconnect", canManage && !busy) {
-        runDrive { drive.disconnect() }
+        runDrive { drive.disconnect(requireNotNull(actorId)) }
     }
     Text(
         "Disconnecting Google Drive never deletes farm records on this device.",
@@ -1316,6 +1321,10 @@ private fun roleLabel(role: LocalRole): String = role.name.lowercase().replaceFi
 private fun permissionLabel(permission: Permission): String = when (permission) {
     Permission.VIEW_FARM -> "View farm records"
     Permission.RECORD_FARM_WORK -> "Record farm work"
+    Permission.RECORD_MONEY -> "Record money transactions"
+    Permission.MANAGE_BREEDING -> "Manage breeding records"
+    Permission.RECORD_TREATMENT -> "Record approved treatments"
+    Permission.MANAGE_HEALTH_PROTOCOLS -> "Manage health protocols"
     Permission.CAPTURE_STOCK_COUNT -> "Count stock"
     Permission.REVIEW_WORK -> "Review recorded work"
     Permission.MANAGE_WORKERS -> "Manage worker records"

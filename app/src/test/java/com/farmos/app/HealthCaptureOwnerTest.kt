@@ -23,6 +23,7 @@ import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
+import com.farmos.domain.access.LocalRole
 import com.farmos.feature.ops.HealthEntryPage
 import java.util.UUID
 import kotlinx.coroutines.runBlocking
@@ -54,6 +55,7 @@ class HealthCaptureOwnerTest {
     @Before
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java).build()
+        seedCommandAuthority(database, farm, "user-1", "device-1", LocalRole.OWNER)
         runBlocking {
             database.formulary().insert(FormularyItemEntity("form-ivo", farm, "Ivermectin 1%", "goat", "prescription", 35, 40, null, true))
             database.formulary().insert(FormularyItemEntity("form-draft", farm, "Unapproved drench", "goat", "prescription", 14, 14, null, false))
@@ -66,6 +68,26 @@ class HealthCaptureOwnerTest {
     @After
     fun tearDown() {
         database.close()
+    }
+
+    @Test
+    fun ownerFormularyEntrySavesAnExplicitUnapprovedDraft() {
+        var syncRequests = 0
+        render(HealthEntryPage.FORMULARY) { syncRequests++ }
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-013").assertExists()
+        compose.onNode(hasSetTextAction() and hasText("Product")).performScrollTo().performTextInput("Draft vaccine")
+        compose.onNode(hasClickAction() and hasText("Save draft item")).performScrollTo().performClick()
+        compose.waitUntil(10_000) {
+            runBlocking { database.formulary().forFarm(farm) }.any { it.productName == "Draft vaccine" }
+        }
+        val item = runBlocking { database.formulary().forFarm(farm) }.single { it.productName == "Draft vaccine" }
+        assertEquals(false, item.vetApproved)
+        compose.waitUntil(10_000) { syncRequests == 1 }
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(hasText("Draft vaccine", substring = true) and hasText("Draft · not vet approved", substring = true))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNode(hasText("Add approved item")).assertDoesNotExist()
     }
 
     @Test

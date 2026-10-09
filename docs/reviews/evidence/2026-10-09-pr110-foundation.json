@@ -1,0 +1,457 @@
+{
+  "schema_version": 1,
+  "evidence_class": "VERIFIED_FOUNDATION_EXECUTION_WITH_BOUNDED_RUNTIME_RECONCILIATION",
+  "repository": "Vanguduza/goat-app",
+  "pull_request": 110,
+  "observed_at": "2026-10-09T12:29:57.901843+00:00",
+  "workflow_run": {
+    "id": 37928955372,
+    "name": "Farm OS foundation CI",
+    "html_url": "https://github.com/Vanguduza/goat-app/actions/runs/37928955372",
+    "head_sha": "ee514f2f98d6872dcf941ad18d6e9dde69f09457",
+    "head_branch": "chatgpt/goat-google-test-qualification-20261009",
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-09T12:16:28Z",
+    "updated_at": "2026-10-09T12:28:05Z",
+    "run_attempt": 1
+  },
+  "source_execution": {
+    "candidate_head_sha": "ee514f2f98d6872dcf941ad18d6e9dde69f09457",
+    "candidate_tree_sha": "be1cdecc8c12363a9411df1de889179dbdf277fc",
+    "candidate_git_commit_api_url": "https://api.github.com/repos/Vanguduza/goat-app/git/commits/ee514f2f98d6872dcf941ad18d6e9dde69f09457",
+    "source_fingerprint_recorded_at_candidate": "sha256:b2f8a67ff80e996c23ea1362f6b43f004f0bac8d09c0a76b3f634d388cd21ea6",
+    "actual_checkout": {
+      "sha": "3e3c768d12a1cfa1ac20929f0f396530b14f9a5d",
+      "tree_sha": "be1cdecc8c12363a9411df1de889179dbdf277fc",
+      "commit_url": "https://github.com/Vanguduza/goat-app/commit/3e3c768d12a1cfa1ac20929f0f396530b14f9a5d",
+      "git_commit_api_url": "https://api.github.com/repos/Vanguduza/goat-app/git/commits/3e3c768d12a1cfa1ac20929f0f396530b14f9a5d",
+      "parents": [
+        "936a94ea4ad6e88e3965612b8075b1683a4b3895",
+        "ee514f2f98d6872dcf941ad18d6e9dde69f09457"
+      ]
+    },
+    "tree_matches_candidate": true,
+    "same_actual_checkout_in_jobs": [
+      "supabase",
+      "android",
+      "edge-functions",
+      "meilisearch-contract",
+      "search-pipeline",
+      "visual-reference-evidence",
+      "android-device-e2e"
+    ],
+    "basis": "Actual checkout SHA read independently from every retained job log; GitHub git-commit metadata resolves the candidate and checkout to the same tree."
+  },
+  "jobs": [
+    {
+      "id": 113814638439,
+      "name": "supabase",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-09T12:16:30Z",
+      "completed_at": "2026-10-09T12:18:20Z",
+      "html_url": "https://github.com/Vanguduza/goat-app/actions/runs/37928955372/job/113814638439"
+    },
+    {
+      "id": 113814638618,
+      "name": "android",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-09T12:16:30Z",
+      "completed_at": "2026-10-09T12:21:39Z",
+      "html_url": "https://github.com/Vanguduza/goat-app/actions/runs/37928955372/job/113814638618"
+    },
+    {
+      "id": 113814638767,
+      "name": "edge-functions",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-09T12:16:30Z",
+      "completed_at": "2026-10-09T12:16:39Z",
+      "html_url": "https://github.com/Vanguduza/goat-app/actions/runs/37928955372/job/113814638767"
+    },
+    {
+      "id": 113814638769,
+      "name": "meilisearch-contract",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-09T12:16:30Z",
+      "completed_at": "2026-10-09T12:16:46Z",
+      "html_url": "https://github.com/Vanguduza/goat-app/actions/runs/37928955372/job/113814638769"
+    },
+    {
+      "id": 113814638843,
+      "name": "search-pipeline",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-09T12:16:31Z",
+      "completed_at": "2026-10-09T12:19:03Z",
+      "html_url": "https://github.com/Vanguduza/goat-app/actions/runs/37928955372/job/113814638843"
+    },
+    {
+      "id": 113816474444,
+      "name": "visual-reference-evidence",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-09T12:21:41Z",
+      "completed_at": "2026-10-09T12:26:24Z",
+      "html_url": "https://github.com/Vanguduza/goat-app/actions/runs/37928955372/job/113816474444"
+    },
+    {
+      "id": 113816474501,
+      "name": "android-device-e2e",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-09T12:21:41Z",
+      "completed_at": "2026-10-09T12:28:04Z",
+      "html_url": "https://github.com/Vanguduza/goat-app/actions/runs/37928955372/job/113816474501"
+    }
+  ],
+  "android_apk": {
+    "job_id": 113814638618,
+    "sha256": "87711da0e71411ebae57237dde77b71b2552c9cae5b1b32fb889027ce4152816",
+    "runner_path": "app/build/outputs/apk/debug/app-debug.apk",
+    "verification_log_line": 762,
+    "verification_log_text": "2026-10-09T12:21:36.3859474Z 87711da0e71411ebae57237dde77b71b2552c9cae5b1b32fb889027ce4152816  app/build/outputs/apk/debug/app-debug.apk",
+    "note": "CI-built debug APK hash, distinct from the separately prepared retained-signing-key Google test APK.",
+    "android_job_unit_test_count": null,
+    "count_note": "Successful Android job log records BUILD SUCCESSFUL but no aggregate unit-test count."
+  },
+  "instrumentation": {
+    "job_id": 113816474501,
+    "counts": [
+      {
+        "phase": "database",
+        "finished_tests": 51,
+        "device": "emulator-5554",
+        "log_line": 840,
+        "log_text": "2026-10-09T12:26:38.5390437Z Finished 51 tests on emulator-5554 - 16"
+      },
+      {
+        "phase": "app",
+        "finished_tests": 5,
+        "device": "emulator-5554",
+        "log_line": 1188,
+        "log_text": "2026-10-09T12:27:59.0877177Z Finished 5 tests on emulator-5554 - 16"
+      }
+    ],
+    "phase_markers": [
+      {
+        "phase": "database",
+        "line": 752,
+        "text": "2026-10-09T12:24:53.0758336Z Proving Room restart durability"
+      },
+      {
+        "phase": "app",
+        "line": 847,
+        "text": "2026-10-09T12:26:39.5377150Z Proving goat register, weight, file reopen, farm-LAN second device, local search, and lost-device isolation"
+      }
+    ],
+    "build_successes": [
+      {
+        "line": 844,
+        "text": "2026-10-09T12:26:39.1386021Z BUILD SUCCESSFUL in 1m 45s"
+      },
+      {
+        "line": 1192,
+        "text": "2026-10-09T12:27:59.1585055Z BUILD SUCCESSFUL in 1m 19s"
+      }
+    ],
+    "emulator": {
+      "count": 1,
+      "device_id": "emulator-5554",
+      "api_level": 36,
+      "target": "google_apis",
+      "architecture": "x86_64"
+    },
+    "boundary": "Separate Room databases and loopback LAN sockets execute inside one emulator. This does not prove physical two-device, NSD/router, live Google or reboot/handset acceptance.",
+    "two_device_source": "app/src/androidTest/kotlin/com/farmos/app/TwoDeviceAuthoritativeSyncTest.kt",
+    "two_device_source_lines": {
+      "test": 60,
+      "loopback_address": 94,
+      "first_server": 95,
+      "second_server": 124
+    },
+    "workflow_path": ".github/workflows/foundation-ci.yml",
+    "script_path": "scripts/ci/run-two-device-e2e.sh",
+    "excluded_server_era_test": "com.farmos.app.AuthRefreshAndReauthTest"
+  },
+  "native_reference": {
+    "job_id": 113816474444,
+    "matrix_verifier": {
+      "line": 612,
+      "text": "2026-10-09T12:26:18.6024730Z PASS native reference evidence: 10 surfaces x 3 themes x 3 widths x 3 font scales = 270 deterministic combinations; raw/annotated/UI-tree matrices complete; bounds valid; touch-target law satisfied."
+    },
+    "capture_inventory": {
+      "plain_pngs": 270,
+      "annotated_pngs": 270,
+      "combination_count": 270,
+      "reference_ids": [
+        "FOS-ATOM-THEME",
+        "FOS-GLOBAL-002",
+        "FOS-GOAT-001",
+        "FOS-GOAT-002",
+        "FOS-GOAT-003",
+        "FOS-GOAT-011",
+        "FOS-GOAT-051",
+        "FOS-HOME-002",
+        "FOS-HOME-012-A",
+        "FOS-HOME-012-D"
+      ],
+      "themes": [
+        "dark",
+        "light",
+        "outdoor"
+      ],
+      "width_dp": [
+        360,
+        411,
+        780
+      ],
+      "font_scale_percent": [
+        100,
+        130,
+        200
+      ],
+      "plain_matrix_exact": true,
+      "annotated_matrix_exact": true,
+      "missing_plain": [],
+      "missing_annotated": [],
+      "unexpected_plain": [],
+      "unexpected_annotated": []
+    },
+    "artifact": {
+      "id": 11615612708,
+      "name": "animal-farm-native-reference-unapproved",
+      "size_bytes": 32504704,
+      "digest": "sha256:24c0ed6fd9f01448254574076b08176bfb731eb42c746fc9ebaba4ec3d6fb25f",
+      "created_at": "2026-10-09T12:26:21Z",
+      "expires_at": "2026-10-23T12:26:18Z",
+      "expired_at_observation": false,
+      "url": "https://github.com/Vanguduza/goat-app/actions/runs/37928955372/artifacts/11615612708"
+    },
+    "archive_sha256": "24c0ed6fd9f01448254574076b08176bfb731eb42c746fc9ebaba4ec3d6fb25f",
+    "archive_digest_verified": true,
+    "archive_entry_count": 1223,
+    "uncompressed_bytes": 44168290,
+    "native_job_junit_totals": {
+      "app": {
+        "report_files": 115,
+        "tests": 471,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "feature/goat": {
+        "report_files": 10,
+        "tests": 52,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "junit_count_scope": "JUnit XML retained by the visual-reference-evidence job; these counts are not attributed to the separate Android job.",
+    "bounded_ui_capture_sha256": {
+      "animals": "46f5945d568fb705dee1625512bc45d30a686f03413fc84d5642b436e59152c0",
+      "animals_annotated": "be7db96ef715d0adc9424c7fca0789de8809d82c36ba2a79a74924173007c48c",
+      "home": "626b2d064d903a7a05d4210279e51d82364cf751906c0667b9ef30330be415bf",
+      "drawer": "770c5dcda3ea039356e629ce937f41f2ffbc7fa0312c51b7b4e6522116a52903"
+    },
+    "approval_status": "UNAPPROVED artifact; deterministic captures and bounds checks do not grant full independent visual certification.",
+    "bounded_capture_review": {
+      "reviewed_artifact_paths": [
+        "app/build/outputs/roborazzi/FOS-HOME-012-A_outdoor_w360_f200.png",
+        "app/build/outputs/roborazzi/FOS-HOME-012-D_outdoor_w360_f200.png"
+      ],
+      "result": "The independent code reviewer visually confirmed complete Home, Animals, Tasks and More labels without clipping or overlap, with Theme on its separate bottom-right row.",
+      "scope": "Closes the reported navigation-label defect only. No owner, approved-golden, outdoor-field, full independent visual or product certification is granted."
+    }
+  },
+  "phase5_named_class_execution": {
+    "proof_file": {
+      "path": "docs/reviews/evidence/2026-10-09-pr110-runtime-tests.json",
+      "sha256": "70f0e06720a1518102ffb40d8ec70c684bbf445dc3c9d685272497f9107c9d3c",
+      "size_bytes": 94809
+    },
+    "source_class_count": 59,
+    "executed_test_count": 244,
+    "evidence_class_totals": {
+      "entry_action_emission": {
+        "required_classes": 1,
+        "matched_reports": 1,
+        "screen_count": 27,
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "rendered_destination_traversal": {
+        "required_classes": 26,
+        "matched_reports": 26,
+        "screen_count": 202,
+        "tests": 106,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "rendered_surface_owner": {
+        "required_classes": 29,
+        "matched_reports": 29,
+        "screen_count": 106,
+        "tests": 120,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "route_contract": {
+        "required_classes": 3,
+        "matched_reports": 3,
+        "screen_count": 67,
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "checks": {
+      "exact_59_inventory_classes": true,
+      "all_59_reports_present": true,
+      "all_classes_have_executed_tests_and_match_junit_names": true,
+      "no_failed_classes": true,
+      "no_errored_classes": true,
+      "no_skipped_classes": true,
+      "requested_244_test_subset_matches": true,
+      "candidate_tree_matches_actual_checkout": true,
+      "artifact_run_and_candidate_match": true,
+      "archive_digest_verified": true
+    },
+    "coverage_complete": true,
+    "report_path_scope": "The companion uses artifact-relative report paths and immutable Git source paths, with exact fully qualified class names, report/source hashes and testcase names."
+  },
+  "runtime_reconciliation": {
+    "status": "BOUNDED_RUNTIME_EVIDENCE_RECONCILED",
+    "ledger": "docs/ux/evidence/animal-farm-visual-lock/phase5-runtime-navigation-ledger.json",
+    "tested_commit": "ee514f2f98d6872dcf941ad18d6e9dde69f09457",
+    "foundation_run_id": 37928955372,
+    "ci_status": "PASS_EXACT_HEAD_CI",
+    "source_fingerprint": "sha256:b2f8a67ff80e996c23ea1362f6b43f004f0bac8d09c0a76b3f634d388cd21ea6",
+    "coverage_counts": {
+      "registered_screen_count": 545,
+      "entry_action_screen_count": 27,
+      "rendered_traversal_screen_count": 202,
+      "rendered_owner_screen_count": 106,
+      "route_contract_screen_count": 67,
+      "combined_screen_count": 315
+    },
+    "navigation_state": {
+      "status": "IN_PROGRESS",
+      "route_export": "docs/ux/evidence/animal-farm-visual-lock/runtime-route-export.json",
+      "feature_route_coverage": "docs/realisation/FEATURE_ROUTE_COVERAGE.json",
+      "route_screen_count": 315,
+      "unresolved_screen_count": 230,
+      "features_with_route_evidence": 101,
+      "features_without_route_evidence": 55,
+      "explicit_headless_contracts": 0,
+      "route_gate_ready": false,
+      "next_action": "PHASE_5_REALISE_UNRESOLVED_ROUTES_AND_FEATURE_ROUTE_CONTRACTS_WITHOUT_INVENTING_HEADLESS_COVERAGE"
+    },
+    "green_claims": {
+      "visual_green_screens": 0,
+      "feature_green": 0,
+      "module_green": 0,
+      "mvp_green": false
+    },
+    "release_blocked": true,
+    "law": "This ledger records executed code candidate C and run R. A later evidence-only commit and its merge are separate provenance events. Preserve C/R pins and require unchanged source plus normal required CI; do not relabel the actual tested checkout. Evidence classes overlap and do not substitute for one another or grant complete screen, feature, module, visual or product qualification."
+  },
+  "retained_job_logs": [
+    {
+      "job_id": 113814638439,
+      "job_name": "supabase",
+      "sha256": "2f2b8a041d1d721231061faa76c2f9c85280c226ddc528ce2c5af25c8b445078",
+      "size_bytes": 64950,
+      "line_count": 856,
+      "checkout_value_line": 124,
+      "filename": "supabase-113814638439.log"
+    },
+    {
+      "job_id": 113814638618,
+      "job_name": "android",
+      "sha256": "797c606990dc5156f8e473ba1088308820291c53d11c5670501af5c6f820a02e",
+      "size_bytes": 68618,
+      "line_count": 787,
+      "checkout_value_line": 123,
+      "filename": "android-113814638618.log"
+    },
+    {
+      "job_id": 113814638767,
+      "job_name": "edge-functions",
+      "sha256": "d4dd28b10a3a20eed27ee05cac846420afb35d2f48f21e67b24615b1352c952f",
+      "size_bytes": 14849,
+      "line_count": 177,
+      "checkout_value_line": 122,
+      "filename": "edge-functions-113814638767.log"
+    },
+    {
+      "job_id": 113814638769,
+      "job_name": "meilisearch-contract",
+      "sha256": "633f10982f11b79c768240af93b6bb049f1269644b3dcda56dbcf4532cee2d44",
+      "size_bytes": 16143,
+      "line_count": 207,
+      "checkout_value_line": 126,
+      "filename": "meilisearch-contract-113814638769.log"
+    },
+    {
+      "job_id": 113814638843,
+      "job_name": "search-pipeline",
+      "sha256": "8dffce86b2460886961f7c3049e8665a6b97cda33f3941a5908b431885979e0b",
+      "size_bytes": 56280,
+      "line_count": 806,
+      "checkout_value_line": 125,
+      "filename": "search-pipeline-113814638843.log"
+    },
+    {
+      "job_id": 113816474444,
+      "job_name": "visual-reference-evidence",
+      "sha256": "a1ef16397eb20dee87964d6da2e83421ca08d291c3591951ba60e269f92d2ddc",
+      "size_bytes": 57382,
+      "line_count": 684,
+      "checkout_value_line": 124,
+      "filename": "visual-reference-evidence-113816474444.log"
+    },
+    {
+      "job_id": 113816474501,
+      "job_name": "android-device-e2e",
+      "sha256": "61e99737d1c44e908faa8273ca4c8236f52ea615e8ba208437825e0c0c5278b5",
+      "size_bytes": 107329,
+      "line_count": 1258,
+      "checkout_value_line": 127,
+      "filename": "android-device-e2e-113816474501.log"
+    }
+  ],
+  "qualification_limits": {
+    "source_ci_execution_succeeded": true,
+    "product_release_qualification_granted": false,
+    "full_independent_visual_approval_granted": false,
+    "live_google_acceptance_proved": false,
+    "physical_device_acceptance_proved": false,
+    "all_device_loss_recovery_proved": false
+  },
+  "retained_collection_record": {
+    "filename": "ci-evidence.json",
+    "size_bytes": 17234,
+    "sha256": "a5cfdf9a2effbfc6b69e526eeecfeda27fcbc5e813092757a81fe22e31f69c92"
+  },
+  "preserved_prior_runs": [
+    {
+      "run_id": 37924773279,
+      "candidate_head_sha": "b3346c9e4a4056fbbcc69c2a6515c7c06961765b"
+    },
+    {
+      "run_id": 37923471779,
+      "candidate_head_sha": "a9c7027ba0e27b82d649a79711d1035f2d084597"
+    }
+  ]
+}

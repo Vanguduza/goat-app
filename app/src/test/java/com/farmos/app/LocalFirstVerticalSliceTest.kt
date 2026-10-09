@@ -8,6 +8,7 @@ import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.toEnvelope
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.goat.RoomGoatRepository
+import com.farmos.domain.access.LocalRole
 import com.farmos.domain.goat.GoatSex
 import com.farmos.domain.goat.RecordGoatWeight
 import com.farmos.domain.goat.RegisterGoat
@@ -65,6 +66,7 @@ class LocalFirstVerticalSliceTest {
         LocalCommandContext(farm, "worker-$device", device, mutationId, at)
 
     private fun registerNala(db: FarmOsDatabase, device: String) = runBlocking {
+        seedCommandAuthority(db, farm, "worker-$device", device, LocalRole.WORKER)
         val goats = RoomGoatRepository(db, farm, localDeviceId = device)
         goats.registerGoat(
             RegisterGoat(nalaId, "GT-024", "Nala", GoatSex.FEMALE, dateOfBirthEpochDay = 20_150),

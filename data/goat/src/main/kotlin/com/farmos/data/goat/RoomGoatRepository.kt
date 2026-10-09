@@ -67,7 +67,14 @@ class RoomGoatRepository(
      */
     private val localDeviceId: String? = null,
 ) : GoatRepository {
-    override suspend fun registerGoat(command: RegisterGoat, context: LocalCommandContext): LocalCommandResult {
+    private val commands = GoatCommandJournal(database, farmId, replaying)
+
+    override suspend fun registerGoat(
+        command: RegisterGoat,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.register.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.register(command)
         require(validation is GoatValidationResult.Valid) {
@@ -104,17 +111,22 @@ class RoomGoatRepository(
                 ),
             )
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
-    override suspend fun recordWeight(command: RecordGoatWeight, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun recordWeight(
+        command: RecordGoatWeight,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.record_weight.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.weight(command)
         require(validation is GoatValidationResult.Valid) {
             (validation as GoatValidationResult.Invalid).message
         }
         val animal = requireNotNull(database.animals().get(farmId, command.animalId)) { "Goat not found" }
-        require(animal.status == GoatStatus.ACTIVE.wireValue()) {
+        require(animal.speciesCode == "goat" && animal.status == GoatStatus.ACTIVE.wireValue()) {
             "Only an active goat can take a new weight"
         }
 
@@ -148,17 +160,22 @@ class RoomGoatRepository(
                 ),
             )
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
-    override suspend fun setStatus(command: SetGoatStatus, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun setStatus(
+        command: SetGoatStatus,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.set_status.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.status(command)
         require(validation is GoatValidationResult.Valid) {
             (validation as GoatValidationResult.Invalid).message
         }
         val animal = requireNotNull(database.animals().get(farmId, command.animalId)) { "Goat not found" }
-        require(animal.status == GoatStatus.ACTIVE.wireValue()) {
+        require(animal.speciesCode == "goat" && animal.status == GoatStatus.ACTIVE.wireValue()) {
             "Only an active goat can change lifecycle status"
         }
 
@@ -185,10 +202,15 @@ class RoomGoatRepository(
                 ),
             )
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
-    override suspend fun recordKidding(command: RecordGoatKidding, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun recordKidding(
+        command: RecordGoatKidding,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.record_kidding.v1", command.damAnimalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.kidding(command)
         require(validation is GoatValidationResult.Valid) {
@@ -227,10 +249,15 @@ class RoomGoatRepository(
                 ),
             )
         }
-        return LocalCommandResult(context.mutationId, command.damAnimalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.damAnimalId, locallyDurable = true)
     }
 
-    override suspend fun recordFamacha(command: RecordGoatFamacha, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun recordFamacha(
+        command: RecordGoatFamacha,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.record_famacha.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.famacha(command)
         require(validation is GoatValidationResult.Valid) {
@@ -266,10 +293,15 @@ class RoomGoatRepository(
                 ),
             )
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
-    override suspend fun recordMilk(command: RecordGoatMilk, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun recordMilk(
+        command: RecordGoatMilk,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.record_milk.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.milk(command)
         require(validation is GoatValidationResult.Valid) {
@@ -305,10 +337,15 @@ class RoomGoatRepository(
                 ),
             )
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
-    override suspend fun recordBcs(command: RecordGoatBcs, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun recordBcs(
+        command: RecordGoatBcs,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.record_bcs.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.bcs(command)
         require(validation is GoatValidationResult.Valid) {
@@ -338,10 +375,15 @@ class RoomGoatRepository(
                 ),
             )
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
-    override suspend fun recordScc(command: RecordGoatScc, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun recordScc(
+        command: RecordGoatScc,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.record_scc.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.scc(command)
         require(validation is GoatValidationResult.Valid) {
@@ -371,10 +413,15 @@ class RoomGoatRepository(
                 ),
             )
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
-    override suspend fun recordHeat(command: RecordGoatHeat, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun recordHeat(
+        command: RecordGoatHeat,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.record_heat.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.heat(command)
         require(validation is GoatValidationResult.Valid) { (validation as GoatValidationResult.Invalid).message }
@@ -385,38 +432,58 @@ class RoomGoatRepository(
             database.lifecycle().insertHeat(com.farmos.core.database.GoatHeatEntity(command.heatId, farmId, command.animalId, command.occurredEpochDay))
             journal(outbox(context, "goat.record_heat.v1", command.animalId, aggregateOrdinal, nextExpectedStreamVersion(command.animalId), json.encodeToString(command)))
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
-    override suspend fun recordMating(command: RecordGoatMating, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun recordMating(
+        command: RecordGoatMating,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.record_mating.v1", command.damId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.mating(command)
         require(validation is GoatValidationResult.Valid) { (validation as GoatValidationResult.Invalid).message }
         val doe = requireNotNull(database.animals().get(farmId, command.damId)) { "Mating needs a doe" }
         require(doe.speciesCode == "goat" && doe.sex == "FEMALE") { "Mating needs a doe" }
+        command.sireId?.let { sireId ->
+            val sire = requireNotNull(database.animals().get(farmId, sireId)) { "Mating needs a buck on this farm" }
+            require(sire.speciesCode == "goat" && sire.sex == "MALE") { "Mating needs a buck on this farm" }
+        }
         database.withTransaction {
             val aggregateOrdinal = database.outbox().nextAggregateOrdinal(farmId, ANIMAL_AGGREGATE, command.damId)
             database.lifecycle().insertMating(com.farmos.core.database.GoatMatingEntity(command.matingId, farmId, command.damId, command.sireId, command.method, command.occurredEpochDay))
             database.tasks().insert(com.farmos.core.database.TaskEntity(command.pregCheckTaskId, farmId, "goat", "PREG_CHECK", "Pregnancy check", command.occurredEpochDay + 45, "open", command.damId, null, null, context.occurredAtEpochMillis))
             journal(outbox(context, "goat.record_mating.v1", command.damId, aggregateOrdinal, nextExpectedStreamVersion(command.damId), json.encodeToString(command)))
         }
-        return LocalCommandResult(context.mutationId, command.damId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.damId, locallyDurable = true)
     }
 
-    override suspend fun recordPregnancy(command: RecordGoatPregnancy, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun recordPregnancy(
+        command: RecordGoatPregnancy,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.record_pregnancy.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.pregnancy(command)
         require(validation is GoatValidationResult.Valid) { (validation as GoatValidationResult.Invalid).message }
-        requireNotNull(database.animals().get(farmId, command.animalId)) { "Pregnancy check needs a goat" }
+        val doe = requireNotNull(database.animals().get(farmId, command.animalId)) { "Pregnancy check needs a doe" }
+        require(doe.speciesCode == "goat" && doe.sex == "FEMALE") { "Pregnancy check needs a doe on this farm" }
         database.withTransaction {
             val aggregateOrdinal = database.outbox().nextAggregateOrdinal(farmId, ANIMAL_AGGREGATE, command.animalId)
             database.lifecycle().insertPregnancy(com.farmos.core.database.GoatPregnancyEntity(command.checkId, farmId, command.animalId, command.result, command.occurredEpochDay))
             journal(outbox(context, "goat.record_pregnancy.v1", command.animalId, aggregateOrdinal, nextExpectedStreamVersion(command.animalId), json.encodeToString(command)))
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
-    override suspend fun planLactation(command: PlanGoatLactation, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun planLactation(
+        command: PlanGoatLactation,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.plan_lactation.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.lactation(command)
         require(validation is GoatValidationResult.Valid) { (validation as GoatValidationResult.Invalid).message }
@@ -435,10 +502,15 @@ class RoomGoatRepository(
             )
             journal(outbox(context, "goat.plan_lactation.v1", command.animalId, aggregateOrdinal, nextExpectedStreamVersion(command.animalId), json.encodeToString(command)))
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
-    override suspend fun registerKid(command: RegisterGoatKid, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun registerKid(
+        command: RegisterGoatKid,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.register_kid.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.kid(command)
         require(validation is GoatValidationResult.Valid) { (validation as GoatValidationResult.Invalid).message }
@@ -469,13 +541,18 @@ class RoomGoatRepository(
             )
             journal(outbox(context, "goat.register_kid.v1", command.animalId, aggregateOrdinal, 0, json.encodeToString(command)))
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
     override suspend fun amendIdentity(command: AmendGoatIdentity, context: LocalCommandContext): LocalCommandResult =
         GoatIdentityCommands(database, farmId, json, replaying).amend(command, context)
 
-    override suspend fun recordWeaning(command: RecordGoatWeaning, context: LocalCommandContext): LocalCommandResult {
+    override suspend fun recordWeaning(
+        command: RecordGoatWeaning,
+        context: LocalCommandContext,
+    ): LocalCommandResult = commands.runCommand(
+        json, "goat.record_weaning.v1", command.animalId, command, context,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
         val validation = GoatValidator.weaning(command)
         require(validation is GoatValidationResult.Valid) { (validation as GoatValidationResult.Invalid).message }
@@ -506,7 +583,7 @@ class RoomGoatRepository(
                 ),
             )
         }
-        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+        LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }
 
     override suspend fun getGoat(animalId: String): GoatSnapshot? {

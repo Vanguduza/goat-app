@@ -41,6 +41,8 @@ class RoomReplicaEndpoint(
     override val deviceId: String,
     private val appliers: Map<String, OperationApplier> = emptyMap(),
     private val clock: () -> Long = System::currentTimeMillis,
+    /** Carrier-specific admission, checked atomically before any fresh operation occupies its position. */
+    private val admission: (suspend (OperationBundle) -> String?)? = null,
 ) : ReplicaEndpoint {
     private val journal get() = database.replication()
     private val applications get() = database.replicationApplications()
@@ -82,6 +84,7 @@ class RoomReplicaEndpoint(
                     else -> fresh += op
                 }
             }
+            admission?.invoke(bundle)?.let { return@withTransaction IngestResult(rejectedReason = it) }
             fresh.forEach {
                 journal.insertOperation(it.toEntity())
                 // A conflict-review decision to set it aside may have arrived first; it stands.
@@ -140,7 +143,8 @@ class RoomReplicaEndpoint(
     override fun maySynchronise(deviceId: String): Boolean = runBlocking {
         // This device before its first local write has no row yet, and is not revoked.
         val device = journal.device(farmId, deviceId) ?: return@runBlocking deviceId == this@RoomReplicaEndpoint.deviceId
-        device.status == DeviceStatus.ACTIVE.name || device.status == DeviceStatus.TEMPORARILY_OFFLINE.name
+        device.revokedAfterSequence == null &&
+            (device.status == DeviceStatus.ACTIVE.name || device.status == DeviceStatus.TEMPORARILY_OFFLINE.name)
     }
 
     /** Records a device approved through pairing so its operations and sessions are accepted. */

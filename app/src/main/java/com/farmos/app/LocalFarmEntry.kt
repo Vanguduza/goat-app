@@ -127,9 +127,14 @@ internal fun LocalFarmEntry(
                 DriveSetupFlags(context).setDismissed(current.account.farmId, true)
                 onSignedIn(current.account, current.farmName)
             }) { config ->
-                DriveConfigStore(context).save(current.account.farmId, config)
-                DriveSetupFlags(context).setDismissed(current.account.farmId, false)
-                onSignedIn(current.account, current.farmName)
+                launchEntry {
+                    withContext(io) {
+                        directory.approveDriveGateway(context, current.account.farmId, current.account.accountId, config)
+                    }
+                    DriveSetupFlags(context).setDismissed(current.account.farmId, false)
+                    DriveBackgroundWork.request(context, current.account.farmId)
+                    onSignedIn(current.account, current.farmName)
+                }
             }
             EntryStep.Setup -> SetupForm(busy) { farmName, displayName, username, pin ->
                 launchEntry {
@@ -523,6 +528,7 @@ internal fun LocalFarmSession(app: FarmOsApplication) {
         app.farmLan = runtime
         val drive = FarmDriveRuntime(app, app.database, app.keyVault, account.farmId, app.deviceId, attachmentStore).start()
         app.farmDrive = drive
+        DriveBackgroundWork.request(app, account.farmId)
         onDispose {
             app.farmLan = null
             runtime.close()

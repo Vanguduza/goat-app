@@ -15,6 +15,7 @@ import com.farmos.domain.ops.RecordCustomerSale
 import com.farmos.domain.ops.RecordExitSale
 import com.farmos.domain.ops.RecordSale
 import com.farmos.domain.ops.UpdateFarmCustomer
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -31,7 +32,7 @@ class CustomerCommands(
 ) {
     suspend fun create(command: CreateFarmCustomer, context: LocalCommandContext): LocalCommandResult {
         CustomerRules.create(command)?.let { error(it) }
-        journal(context, CREATE, "farm_customer", command.customerId, json.encodeToString(command)) {
+        journal(context, CREATE, "farm_customer", command.customerId, command) {
             if (database.customers().get(farmId, command.customerId) == null) {
                 database.customers().upsert(
                     FarmCustomerEntity(command.customerId, farmId, command.name.trim(), command.phone?.trim()?.ifBlank { null }, true, context.occurredAtEpochMillis, context.actorId),
@@ -43,8 +44,7 @@ class CustomerCommands(
 
     suspend fun update(command: UpdateFarmCustomer, context: LocalCommandContext): LocalCommandResult {
         CustomerRules.update(command)?.let { error(it) }
-        requireNotNull(database.customers().get(farmId, command.customerId)) { "Customer not found" }
-        journal(context, UPDATE, "farm_customer", command.customerId, json.encodeToString(command)) {
+        journal(context, UPDATE, "farm_customer", command.customerId, command) {
             val current = requireNotNull(database.customers().get(farmId, command.customerId)) { "Customer not found" }
             // A null phone keeps the number; an empty one clears it.
             val phone = command.phone
@@ -67,11 +67,11 @@ class CustomerCommands(
     /** A sale to an active customer, posting its income like any sale. */
     suspend fun recordSale(command: RecordCustomerSale, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.sale(RecordSale(command.saleId, command.itemKind, command.quantityMilli, command.amountMinor, command.currency, command.occurredEpochDay))?.let { error(it) }
-        if (!replaying) {
-            val customer = database.customers().get(farmId, command.customerId)
-            require(customer != null && customer.active) { "Choose an active customer on this farm" }
-        }
-        journal(context, SALE, "sale_record", command.saleId, json.encodeToString(command)) {
+        journal(context, SALE, "sale_record", command.saleId, command) {
+            if (!replaying) {
+                val customer = database.customers().get(farmId, command.customerId)
+                require(customer != null && customer.active) { "Choose an active customer on this farm" }
+            }
             val item = command.itemKind.trim()
             database.sales().insert(SaleRecordEntity(command.saleId, farmId, item, command.quantityMilli, command.amountMinor, command.currency, command.occurredEpochDay, command.customerId))
             database.money().insert(MoneyRecordEntity(command.saleId, farmId, "income", "sales", command.amountMinor, command.currency, command.occurredEpochDay, "$item · ${command.customerName.trim()}"))
@@ -82,29 +82,48 @@ class CustomerCommands(
     /** The money for an animal sold through a sale exit; one sale per exit, and never for a reversed exit. */
     suspend fun recordExitSale(command: RecordExitSale, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.sale(RecordSale(command.saleId, "animal", 1_000, command.amountMinor, command.currency, command.occurredEpochDay))?.let { error(it) }
-        val exit = requireNotNull(database.animalExits().get(farmId, command.exitId)) { "Sale exit not found on this farm" }
-        require(exit.kind == "SALE" && exit.animalId == command.animalId) { "Only a sale exit can be settled by a sale" }
-        require(database.sales().forExit(farmId, command.exitId) == null) { "The money for this sale is already recorded" }
-        val customerId = command.customerId
-        if (!replaying) {
-            require(database.animalExits().forAnimal(farmId, command.animalId).none { it.reversesExitId == command.exitId }) { "This sale exit was reversed" }
-            if (customerId != null) {
-                val customer = database.customers().get(farmId, customerId)
-                require(customer != null && customer.active) { "Choose an active customer on this farm" }
+        journal(context, EXIT_SALE, "sale_record", command.saleId, command) {
+            val exit = requireNotNull(database.animalExits().get(farmId, command.exitId)) { "Sale exit not found on this farm" }
+            require(exit.kind == "SALE" && exit.animalId == command.animalId) { "Only a sale exit can be settled by a sale" }
+            require(database.sales().forExit(farmId, command.exitId) == null) { "The money for this sale is already recorded" }
+            val customerId = command.customerId
+            if (!replaying) {
+                require(database.animalExits().forAnimal(farmId, command.animalId).none { it.reversesExitId == command.exitId }) { "This sale exit was reversed" }
+                if (customerId != null) {
+                    val customer = database.customers().get(farmId, customerId)
+                    require(customer != null && customer.active) { "Choose an active customer on this farm" }
+                }
             }
-        }
-        journal(context, EXIT_SALE, "sale_record", command.saleId, json.encodeToString(command)) {
             database.sales().insert(SaleRecordEntity(command.saleId, farmId, "animal", 1_000, command.amountMinor, command.currency, command.occurredEpochDay, customerId, command.exitId))
             database.money().insert(MoneyRecordEntity(command.saleId, farmId, "income", "sales", command.amountMinor, command.currency, command.occurredEpochDay, "Sale of ${command.animalLabel.trim()}"))
         }
         return LocalCommandResult(context.mutationId, command.saleId, true)
     }
 
-    private suspend fun journal(context: LocalCommandContext, commandName: String, entityType: String, entityId: String, payloadJson: String, localWrite: suspend () -> Unit) {
+    private suspend inline fun <reified C> journal(
+        context: LocalCommandContext,
+        commandName: String,
+        entityType: String,
+        entityId: String,
+        command: C,
+        noinline localWrite: suspend () -> Unit,
+    ) {
         require(context.farmId == farmId) { "Farm context mismatch" }
-        if (replaying) return database.withTransaction { localWrite() }
         database.withTransaction {
+            val payloadJson = json.encodeToString(command)
+            val permission = OpsCommandPermissions.requiredFor(commandName, payloadJson)
+            if (!replaying) database.requireLocalCommandAuthority(context, permission)
+            val original = database.replication().operation(farmId, context.mutationId)
+            if (original != null) {
+                requireOriginalCommand(original, context, commandName, entityType, entityId, {
+                    json.decodeFromString<C>(it) == command
+                })
+                if (database.commandAlreadyApplied(original, replaying)) return@withTransaction
+            } else {
+                require(!replaying) { "A received change must be journalled before it is applied" }
+            }
             localWrite()
+            if (replaying) return@withTransaction
             database.journalLocalOperation(
                 operationId = context.mutationId,
                 farmId = farmId,

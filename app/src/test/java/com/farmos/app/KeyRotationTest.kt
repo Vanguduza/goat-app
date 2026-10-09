@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.ReplicationDeviceEntity
+import com.farmos.domain.access.LocalRole
 import com.farmos.domain.replication.DeviceKeys
 import com.farmos.domain.replication.DeviceStatus
 import com.farmos.domain.replication.FarmCipher
@@ -69,6 +70,8 @@ class KeyRotationTest {
         // Three paired devices sharing the first farm key, each with its own identity.
         val tabletDb = database()
         val laptopDb = database()
+        seedCommandAuthority(tabletDb, farm, "owner-1", "tablet", LocalRole.OWNER)
+        seedCommandAuthority(laptopDb, farm, "owner-1", "laptop", LocalRole.OWNER)
         val tabletVault = vault()
         val laptopVault = vault()
         val phoneVault = vault()

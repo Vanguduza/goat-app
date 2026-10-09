@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.LocalAccountEntity
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.feature.ops.TaskAssigneeChange
 import com.farmos.feature.ops.TaskEditDraft
 import com.farmos.feature.ops.TaskEditScope
@@ -33,6 +34,7 @@ class TaskPlanningTest {
     private val database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
+        .also { seedCommandAuthority(it, farm, "manager-1", "A", LocalRole.MANAGER) }
 
     @After
     fun tearDown() = database.close()
@@ -70,7 +72,7 @@ class TaskPlanningTest {
         planning.create(draft(TaskRepeat.NONE, LocalDate.of(2026, 10, 3), assignee = "farai").copy(title = "Fix gate"), context())
 
         com.farmos.data.herd.WorkerRegisterCommands(database, farm).create(com.farmos.domain.ops.CreateFarmWorker("w1", "Tendai"), context())
-        assertEquals(listOf("farai" to "Farai", "worker:w1" to "Tendai · worker"), planning.loadAssignees().map { it.key to it.label })
+        assertEquals(listOf("farai" to "Farai", "manager-1" to "manager-1", "worker:w1" to "Tendai · worker"), planning.loadAssignees().map { it.key to it.label })
         val occurrences = planning.openOccurrences(today)
         // Daily from today through the 30-day horizon, plus the one-off assigned task.
         assertEquals(31 + 1, occurrences.size)

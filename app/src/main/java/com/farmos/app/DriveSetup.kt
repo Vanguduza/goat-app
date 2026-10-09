@@ -29,6 +29,8 @@ internal object DriveGatewayConfigCodec {
         "folder" to config.folderId,
         "folder_name" to config.folderName,
         "connected_at" to config.connectedAtEpochMillis.toString(),
+        "approved_by" to config.approvedByAccountId.orEmpty(),
+        "approved_device" to config.approvedDeviceId.orEmpty(),
     )
 
     /** Null when the account or folder is absent — a missing row means Drive is not connected. */
@@ -40,6 +42,8 @@ internal object DriveGatewayConfigCodec {
             folderId = folder,
             folderName = values["folder_name"] ?: "",
             connectedAtEpochMillis = values["connected_at"]?.toLongOrNull() ?: 0,
+            approvedByAccountId = values["approved_by"]?.takeIf { it.isNotBlank() },
+            approvedDeviceId = values["approved_device"]?.takeIf { it.isNotBlank() },
         )
     }
 }

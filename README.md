@@ -45,7 +45,9 @@ Register Goat
 
 A successful slice earns only `VERTICAL_SLICE_GREEN`. It does **not** make the goat feature, goat module, or MVP complete.
 
-Current architecture-slice certificate: `VERTICAL_SLICE_GREEN` on `6c7c79a93dc54c74134a70b3763549b442c22349` from [canonical run 33801257315](https://github.com/Vanguduza/goat-app/actions/runs/33801257315). That run proved the **pre-lock** Supabase/Meilisearch slice. Fan-out of further feature work remains authorized. The certificate is **not** proof of the locked LAN/Drive architecture; a post-lock evidence run is still required. `FEATURE_GREEN`, `MODULE_GREEN`, and `MVP_GREEN` remain false. See [`docs/realisation/VERTICAL_SLICE_GATE.json`](docs/realisation/VERTICAL_SLICE_GATE.json).
+Historical architecture-slice certificate: `VERTICAL_SLICE_GREEN` on `6c7c79a93dc54c74134a70b3763549b442c22349` from [canonical run 33801257315](https://github.com/Vanguduza/goat-app/actions/runs/33801257315). That run proved the **pre-lock** Supabase/Meilisearch slice and authorizes feature fan-out only. Its original provenance remains unchanged.
+
+Post-lock Room/LAN evidence is recorded separately in VS-21–VS-24 of [`docs/realisation/VERTICAL_SLICE_GATE.json`](docs/realisation/VERTICAL_SLICE_GATE.json), against main `9bc3001258f291fd8baa60e30026d55f10847171` and [run 37028681388](https://github.com/Vanguduza/goat-app/actions/runs/37028681388), with its emulator/loopback limitations. Main `936a94ea4ad6e88e3965612b8075b1683a4b3895` also passed [Foundation run 37909999633](https://github.com/Vanguduza/goat-app/actions/runs/37909999633), including the declared connected tests and unapproved native reference capture. These runs do not establish live Drive acceptance or complete product qualification. `FEATURE_GREEN`, `MODULE_GREEN`, `MVP_GREEN` and `VISUAL_GREEN` remain false; exact evidence and remaining acceptance are recorded in the [Google test qualification review](docs/reviews/2026-10-09-google-test-qualification.md).
 
 Post-certificate fan-out remains intentionally uncertified at feature/module/MVP level. Canonical CI currently still executes server-era provenance jobs (pgTAP, Meilisearch, search-pipeline) alongside Android/domain tests. Passing those jobs does not restore server authority and does not promote any feature, module, visual surface or the MVP to green.
 
@@ -56,7 +58,7 @@ Canonical CI (`.github/workflows/foundation-ci.yml`) runs:
 - Domain tests (`goat`, `rabbit`, `ops`, `replication`, `access`) plus session/sync/app unit tests
 - `assembleDebug` and a SHA-256 of the APK; instrumentation sources compile
 - Connected emulator proofs for Room migration/reopen durability and representative offline durability
-- Visual-lock token guards and Kotlin orchestration no-growth ceilings
+- Deterministic unapproved native reference captures, matrix/bounds checks, visual-lock token guards and Kotlin orchestration no-growth ceilings
 - **Provenance (superseded, do not extend):** local Supabase pgTAP, Edge Function checks, Meilisearch contract, search-pipeline
 
 Use JDK 21 (Temurin, as in CI), Android compile SDK 37, and Gradle 9.3.1. Local secrets and production credentials are never committed.

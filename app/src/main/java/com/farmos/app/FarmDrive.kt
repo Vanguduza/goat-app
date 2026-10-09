@@ -14,20 +14,10 @@ import com.farmos.domain.replication.SyncSession
 import com.farmos.domain.replication.SyncVector
 import com.farmos.domain.replication.TransportKind
 import java.io.ByteArrayOutputStream
-import java.io.Closeable
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 /**
  * Google Drive replication gateway boundary for one farm on this device (FOS-ADMIN-013, FOS-ADMIN-015).
@@ -61,13 +51,15 @@ internal data class DriveGatewayConfig(
     val folderId: String,
     val folderName: String,
     val connectedAtEpochMillis: Long,
+    val approvedByAccountId: String? = null,
+    val approvedDeviceId: String? = null,
 )
 
 /**
  * Owner-configured Drive account and folder, farm-scoped. A missing row means Drive is not connected.
  *
- * This stores configuration only — account email and folder identity. OAuth tokens are privileged
- * credentials and live in Keystore-backed storage via the [DriveAuthorizer] adapter, never here.
+ * Stores account/folder identity and an explicit local approver/device binding. Google Play services
+ * owns its credential cache; tokens, PINs and recovery secrets never enter these preferences.
  */
 internal class DriveConfigStore(context: Context) {
     private val prefs = context.getSharedPreferences(DRIVE_PREFS, Context.MODE_PRIVATE)
@@ -78,6 +70,8 @@ internal class DriveConfigStore(context: Context) {
             "folder" to prefs.getString(DriveConfigKeys.configKey(farmId, "folder"), null),
             "folder_name" to prefs.getString(DriveConfigKeys.configKey(farmId, "folder_name"), null),
             "connected_at" to prefs.getLong(DriveConfigKeys.configKey(farmId, "connected_at"), 0).toString(),
+            "approved_by" to prefs.getString(DriveConfigKeys.configKey(farmId, "approved_by"), null),
+            "approved_device" to prefs.getString(DriveConfigKeys.configKey(farmId, "approved_device"), null),
         ),
     )
 
@@ -88,6 +82,8 @@ internal class DriveConfigStore(context: Context) {
             .putString(DriveConfigKeys.configKey(farmId, "folder"), encoded.getValue("folder"))
             .putString(DriveConfigKeys.configKey(farmId, "folder_name"), encoded.getValue("folder_name"))
             .putLong(DriveConfigKeys.configKey(farmId, "connected_at"), encoded.getValue("connected_at").toLongOrNull() ?: 0)
+            .putString(DriveConfigKeys.configKey(farmId, "approved_by"), encoded["approved_by"])
+            .putString(DriveConfigKeys.configKey(farmId, "approved_device"), encoded["approved_device"])
             .commit().also { check(it) { "Drive configuration could not be saved" } }
     }
 
@@ -97,6 +93,8 @@ internal class DriveConfigStore(context: Context) {
             .remove(DriveConfigKeys.configKey(farmId, "folder"))
             .remove(DriveConfigKeys.configKey(farmId, "folder_name"))
             .remove(DriveConfigKeys.configKey(farmId, "connected_at"))
+            .remove(DriveConfigKeys.configKey(farmId, "approved_by"))
+            .remove(DriveConfigKeys.configKey(farmId, "approved_device"))
             .commit().also { check(it) { "Drive configuration could not be cleared" } }
     }
 
@@ -163,11 +161,11 @@ private val SQLITE_MAGIC = "SQLite format 3\u0000".toByteArray(Charsets.US_ASCII
 
 /**
  * Hard invariant: the Drive gateway moves operation bundles and content-addressed attachment bytes
- * only. Any path outside the journal layout, or any payload with SQLite magic bytes, is refused —
+ * plus signed singleton rotation/device-enrolment prerequisites only. Any other path or SQLite magic bytes is refused —
  * the gateway can never be used to copy or synchronise whole database files.
  */
 internal fun requireDriveSafePayload(path: String, bytes: ByteArray) {
-    require(BUNDLE_PATH.matches(path) || ATTACHMENT_PATH.matches(path)) {
+    require(BUNDLE_PATH.matches(path) || ATTACHMENT_PATH.matches(path) || DRIVE_ROTATION_BOOTSTRAP_PATH.matches(path)) {
         "Drive gateway refuses path outside the journal layout: $path"
     }
     var matches = bytes.size >= SQLITE_MAGIC.size
@@ -448,15 +446,7 @@ internal class DriveReplicationTransport(
     /** Object names are hints only. Only authenticated, decoded, matching bytes advance a vector. */
     private suspend fun validatedBundles(): List<OperationBundle> {
         val prefix = "GOAT/farms/$farmId/sync/"
-        return store.list(prefix).map { obj ->
-            require(obj.path.startsWith(prefix) && BUNDLE_PATH.matches(obj.path)) { "Invalid Drive journal path" }
-            require(obj.sizeBytes in 0..MAX_DRIVE_OBJECT_BYTES.toLong()) { "Drive bundle exceeds the permitted size" }
-            val bytes = store.read(obj.path) ?: throw IOException("A listed Drive bundle is missing")
-            val bundle = DriveBundleCodec.decode(bytes)
-            require(bundle.verify(farmId) == BundleVerdict.Valid) { "Drive bundle is invalid or belongs to another farm" }
-            require(DriveJournalLayout.bundlePath(farmId, bundle) == obj.path) { "Drive bundle does not match its journal path" }
-            bundle
-        }
+        return store.list(prefix).map { readDriveJournalBundle(store, farmId, it) }
     }
 
     private fun vectorFor(bundles: List<OperationBundle>): SyncVector {
@@ -476,6 +466,22 @@ internal class DriveReplicationTransport(
     }
 }
 
+/** Shared by the strict vector reader and dependency-aware key bootstrap; names never prove content. */
+internal suspend fun readDriveJournalBundle(
+    store: DriveObjectStore,
+    farmId: String,
+    obj: DriveObjectStore.DriveObject,
+): OperationBundle {
+    val prefix = "GOAT/farms/$farmId/sync/"
+    require(obj.path.startsWith(prefix) && BUNDLE_PATH.matches(obj.path)) { "Invalid Drive journal path" }
+    require(obj.sizeBytes in 0..MAX_DRIVE_OBJECT_BYTES.toLong()) { "Drive bundle exceeds the permitted size" }
+    val bytes = store.read(obj.path) ?: throw IOException("A listed Drive bundle is missing")
+    val bundle = DriveBundleCodec.decode(bytes)
+    require(bundle.verify(farmId) == BundleVerdict.Valid) { "Drive bundle is invalid or belongs to another farm" }
+    require(DriveJournalLayout.bundlePath(farmId, bundle) == obj.path) { "Drive bundle does not match its journal path" }
+    return bundle
+}
+
 internal data class DriveOpCounts(
     val localOnly: Long = 0,
     val synced: Long = 0,
@@ -485,6 +491,7 @@ internal data class DriveOpCounts(
 
 internal data class DriveGatewayState(
     val config: DriveGatewayConfig? = null,
+    val deliveryStatus: DriveDeliveryStatus = DriveDeliveryStatus.READY,
     val authNeeded: Boolean = false,
     val syncing: Boolean = false,
     val lastSyncEpochMillis: Long? = null,
@@ -493,221 +500,3 @@ internal data class DriveGatewayState(
     val nextAttemptEpochMillis: Long? = null,
     val counts: DriveOpCounts? = null,
 )
-
-/**
- * The Drive gateway runtime for one farm on this device: owns the owner-configured connection,
- * runs the journal sync loop with durable retry, keeps the per-operation replication cursor, and
- * moves attachment bytes by content hash. It needs no Internet to keep the farm running — without
- * a connection, without sign-in, or while backing off, local work continues untouched.
- */
-internal class FarmDriveRuntime(
-    private val context: Context,
-    private val database: FarmOsDatabase,
-    private val vault: FarmKeyVault,
-    private val farmId: String,
-    private val deviceId: String,
-    private val attachments: FileAttachmentStore,
-    private val authorizer: DriveAuthorizer = GoogleDriveAuthorizer(context) { DriveConfigStore(context).get(farmId)?.accountEmail },
-    private val clock: () -> Long = System::currentTimeMillis,
-) : Closeable {
-    private val connectionMutex = Mutex()
-    private val configStore = DriveConfigStore(context)
-    private val cursorStore = DriveCursorStore(context)
-    private val worker = Executors.newSingleThreadScheduledExecutor { runnable ->
-        Thread(runnable, "goat-farm-drive").apply { isDaemon = true }
-    }
-    private val mutableState = MutableStateFlow(DriveGatewayState(config = configStore.get(farmId)))
-    val state: StateFlow<DriveGatewayState> = mutableState.asStateFlow()
-    val googleAuthorizer: GoogleDriveAuthorizer? get() = authorizer as? GoogleDriveAuthorizer
-
-    /** Starts the periodic Drive sync loop; synchronises every [intervalSeconds] when connected. */
-    fun start(intervalSeconds: Long = DRIVE_SYNC_INTERVAL_SECONDS): FarmDriveRuntime {
-        worker.scheduleWithFixedDelay({ syncGuarded() }, intervalSeconds, intervalSeconds, TimeUnit.SECONDS)
-        return this
-    }
-
-    /** Persist a connection only after consent and destination validation have completed. */
-    suspend fun connect(accountEmail: String, folderId: String, folderName: String): DriveSetupOutcome =
-        withContext(Dispatchers.IO) {
-            val outcome = connectionMutex.withLock {
-                val result = DriveSetupAttempt.connect(
-                    farmId, accountEmail, folderName, folderId, googleAuthorizer?.forAccount(accountEmail) ?: authorizer, clock(),
-                )
-                if (result is DriveSetupOutcome.Connected) {
-                    configStore.save(farmId, result.config)
-                    DriveSetupFlags(context).setDismissed(farmId, false)
-                    mutableState.value = DriveGatewayState(config = result.config)
-                }
-                result
-            }
-            if (outcome is DriveSetupOutcome.Connected) requestSync()
-            outcome
-        }
-
-    /** Disconnecting removes only the transport configuration, never the farm's local data. */
-    fun disconnect() {
-        if (!worker.isShutdown) worker.execute {
-            runBlocking {
-                connectionMutex.withLock {
-                    configStore.clear(farmId)
-                    mutableState.value = DriveGatewayState()
-                }
-            }
-        }
-    }
-
-    /** Synchronises with Drive now when connected and not backing off. */
-    fun requestSync() {
-        if (!worker.isShutdown) {
-            runCatching { worker.execute { syncGuarded() } }
-        }
-    }
-
-    override fun close() {
-        worker.shutdownNow()
-    }
-
-    private fun syncGuarded() {
-        if (worker.isShutdown) return
-        try {
-            runBlocking { connectionMutex.withLock { syncNow() } }
-        } catch (failure: Exception) {
-            mutableState.value = mutableState.value.copy(
-                syncing = false,
-                lastError = failure.message ?: "Drive synchronisation failed",
-            )
-        }
-    }
-
-    private fun syncNow() {
-        val config = configStore.get(farmId) ?: return
-        var cursor = cursorStore.load(farmId, config)
-        if (clock() < cursor.nextAttemptAtEpochMillis) {
-            mutableState.value = mutableState.value.copy(nextAttemptEpochMillis = cursor.nextAttemptAtEpochMillis)
-            return
-        }
-        mutableState.value = mutableState.value.copy(syncing = true, authNeeded = false, lastError = null)
-        val store = EncryptedDriveStore(DriveRestStore(authorizer) { config.folderId }, farmId) {
-            vault.secretsForLocalFarm(farmId).keys
-        }
-        val transport = DriveReplicationTransport(store, farmId, onPublished = { bundle ->
-            cursor = cursor.copy(uploadedThrough = cursor.uploadedThrough +
-                (bundle.deviceId to maxOf(cursor.uploadedThrough[bundle.deviceId] ?: 0, bundle.toSequence)))
-            cursorStore.save(farmId, config, cursor)
-        })
-        val endpoint = RoomReplicaEndpoint(database, farmId, deviceId, farmAppliers(vault, deviceId))
-        var offer = emptyList<SequenceRange>()
-        try {
-            offer = SyncVector().missingFrom(endpoint.vector())
-            val before = transport.remoteVector(farmId)
-            // This is an authenticated observation. Deleted objects cannot retain old backup marks.
-            cursor = confirmedDriveCursor(before)
-            cursorStore.save(farmId, config, cursor)
-            offer = before.missingFrom(endpoint.vector())
-            val outcome = SyncSession.run(endpoint, transport)
-            if (outcome.status != com.farmos.domain.replication.SyncSessionStatus.COMPLETED || outcome.rejectedReasons.isNotEmpty()) {
-                throw IOException(outcome.rejectedReasons.firstOrNull() ?: "This device is not authorised to synchronise")
-            }
-            // A second download verifies the bytes after publishing, independently of the upload ACK.
-            cursor = confirmedDriveCursor(transport.remoteVector(farmId))
-            cursorStore.save(farmId, config, cursor)
-            syncAttachments(store)
-            mutableState.value = mutableState.value.copy(
-                syncing = false, lastSyncEpochMillis = clock(), lastOutcome = outcome,
-                lastError = null, nextAttemptEpochMillis = null,
-                counts = runBlocking { stateCounts(config) },
-            )
-        } catch (auth: DriveAuthNeededException) {
-            mutableState.value = mutableState.value.copy(syncing = false, authNeeded = true, lastError = null, counts = null)
-        } catch (failure: Exception) {
-            recordFailure(config, cursor, offer, failure)
-            throw failure
-        }
-    }
-
-    private fun recordFailure(
-        config: DriveGatewayConfig,
-        cursor: DriveCursor,
-        offer: List<SequenceRange>,
-        failure: Exception,
-    ) {
-        val failures = (cursor.consecutiveFailures + 1).coerceAtMost(30)
-        val delay = minOf(DRIVE_MAX_BACKOFF_MILLIS, DRIVE_BASE_BACKOFF_MILLIS * (1L shl minOf(failures, 10)))
-        val failed = cursor.failedThrough.toMutableMap()
-        for (range in offer) failed[range.deviceId] = maxOf(failed[range.deviceId] ?: 0, range.to)
-        val retryAt = clock() + delay
-        cursorStore.save(farmId, config, cursor.copy(
-            // A failed integrity observation cannot certify current Drive availability.
-            verifiedThrough = emptyMap(), failedThrough = failed, consecutiveFailures = failures,
-            nextAttemptAtEpochMillis = retryAt, lastError = failure.message ?: failure.javaClass.simpleName,
-        ))
-        mutableState.value = mutableState.value.copy(
-            syncing = false, lastError = failure.message ?: "Drive synchronisation failed",
-            nextAttemptEpochMillis = retryAt, counts = null,
-        )
-    }
-
-    /**
-     * Attachment bytes by content hash: uploads local bytes Drive lacks, then pulls the bytes this
-     * device lacks. Every byte is verified against its SHA-256 on the way in and on the way out.
-     */
-    private fun syncAttachments(store: DriveObjectStore) = runBlocking {
-        val prefix = "GOAT/farms/$farmId/attachments/"
-        val remote = store.list(prefix).map { it.path.removePrefix(prefix) }.toSet()
-        val local = database.attachments().contents(farmId)
-        var uploaded = 0
-        for (row in local) {
-            if (uploaded >= DRIVE_ATTACHMENTS_PER_SESSION) break
-            if (remote.contains(row.contentSha256)) continue
-            val bytes = attachments.read(farmId, row.contentSha256) ?: continue
-            require(bytes.size.toLong() == row.byteSize) { "Local attachment size does not match its metadata" }
-            if (!store.putIfAbsent(prefix + row.contentSha256, bytes, row.contentSha256)) {
-                throw IOException("Drive refused a conflicting attachment")
-            }
-            uploaded++
-        }
-        for (row in local.filterNot { attachments.has(farmId, it.contentSha256) }.take(DRIVE_ATTACHMENTS_PER_SESSION)) {
-            // No copy on Drive yet is normal; a listed but corrupt or missing copy is an explicit failure.
-            if (row.contentSha256 !in remote) continue
-            val bytes = store.read(prefix + row.contentSha256) ?: throw IOException("A listed Drive attachment is missing")
-            require(bytes.size.toLong() == row.byteSize && sha256Hex(bytes) == row.contentSha256) {
-                "Drive attachment does not match its metadata"
-            }
-            attachments.put(farmId, bytes)
-        }
-    }
-
-    /** Per-operation Drive states for every journalled operation of this farm, for settings UI. */
-    suspend fun stateCounts(): DriveOpCounts {
-        val config = configStore.get(farmId) ?: return DriveOpCounts()
-        return stateCounts(config)
-    }
-
-    private suspend fun stateCounts(config: DriveGatewayConfig): DriveOpCounts {
-        val cursor = cursorStore.load(farmId, config)
-        val journal = database.replication()
-        var localOnly = 0L
-        var synced = 0L
-        var backedUp = 0L
-        var failed = 0L
-        for (span in journal.sequenceSpans(farmId)) {
-            val ops = journal.operationsInRange(farmId, span.deviceId, 1, span.maxSequence)
-            for (op in ops) {
-                when (driveOpStateFor(op.deviceId, op.deviceSequence, cursor)) {
-                    DriveOpState.LOCAL_ONLY -> localOnly++
-                    DriveOpState.SYNCED -> synced++
-                    DriveOpState.BACKED_UP -> backedUp++
-                    DriveOpState.FAILED -> failed++
-                }
-            }
-        }
-        return DriveOpCounts(localOnly, synced, backedUp, failed)
-    }
-
-    private companion object {
-        const val DRIVE_SYNC_INTERVAL_SECONDS = 15 * 60L
-        const val DRIVE_BASE_BACKOFF_MILLIS = 30_000L
-        const val DRIVE_MAX_BACKOFF_MILLIS = 4 * 60 * 60 * 1000L
-        const val DRIVE_ATTACHMENTS_PER_SESSION = 25
-    }
-}

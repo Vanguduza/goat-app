@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
+import com.farmos.domain.access.LocalRole
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.data.herd.StockCountCommands
 import com.farmos.domain.ops.CreateInventoryItem
@@ -39,10 +40,16 @@ class StockCountCommandsTest {
     private val farm = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
     private val databases = mutableListOf<FarmOsDatabase>()
 
-    private fun database() = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
+    private fun database(device: String = "A") = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
         .allowMainThreadQueries()
         .build()
-        .also { databases += it }
+        .also { db ->
+            databases += db
+            runBlocking {
+                seedCommandAuthority(db, farm, "worker-1", device, LocalRole.WORKER)
+                seedCommandAuthority(db, farm, "manager-1", device, LocalRole.MANAGER)
+            }
+        }
 
     @After
     fun tearDown() = databases.forEach { it.close() }
@@ -54,7 +61,7 @@ class StockCountCommandsTest {
 
     private suspend fun FarmOsDatabase.stock(itemId: String, quantity: Long) {
         val ops = RoomOpsRepository(this, farm)
-        ops.createItem(CreateInventoryItem(itemId, itemId.uppercase(), itemId), context())
+        ops.createItem(CreateInventoryItem(itemId, itemId.uppercase(), itemId), context(actor = "manager-1"))
         ops.move(MoveInventory(UUID.randomUUID().toString(), itemId, "receive", quantity, clock), context())
     }
 
@@ -65,7 +72,7 @@ class StockCountCommandsTest {
     @Test
     fun postingAppliesEachVarianceOnceAndKeepsLaterMovements(): Unit = runBlocking {
         val aDb = database()
-        val bDb = database()
+        val bDb = database("B")
         aDb.stock("mash", 10_000)
         aDb.stock("salt", 4_000)
         aDb.stock("wire", 7_000)
