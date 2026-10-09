@@ -46,10 +46,10 @@
         "An operator has already opened the synthetic farm named 'GOAT Artemis Qualification' as its local owner/manager. Its management farm home is visible. Stop if that exact test farm or role cannot be established; do not log into another farm."
       ],
       "steps": [
-        "Inspect the management home and its Home, Animals, Tasks and Records controls.",
+        "Inspect the management home and its Home, Animals, Tasks and More controls.",
         "Open Animals, verify the species chooser, and return to the same farm home.",
-        "Open Tasks, then return to the same farm home. Open Records, then return to the same farm home.",
-        "Inspect the Theme control's separate lower-right placement without changing any farm or theme setting."
+        "Open Tasks, then return to the same farm home. Open More, inspect Farm records and tools, then return to the same farm home.",
+        "Inspect the Theme control at the right edge of home navigation without changing a setting. Its separate lower-right row is used for the narrow, large-text layout; other layouts keep it at the right end of the navigation row."
       ],
       "assertions": [
         {
@@ -58,7 +58,7 @@
         },
         {
           "id": "HOME-02",
-          "description": "Home, Animals, Tasks and Records labels are complete, readable, separate and reachable at the current device size and font scale."
+          "description": "Home, Animals, Tasks and More labels are complete, readable, separate and reachable at the current device size and font scale."
         },
         {
           "id": "HOME-03",
@@ -66,11 +66,11 @@
         },
         {
           "id": "HOME-04",
-          "description": "Tasks and Records each open their corresponding rendered content, with a working return to the same farm home and no duplicate action."
+          "description": "Tasks opens its rendered board and More opens Farm records and tools, including Inventory, Sales and Procurement entries. Each has a working return to the same farm home; no record action or sign-out is submitted."
         },
         {
           "id": "HOME-05",
-          "description": "Theme remains a separate lower-right control on the farm home; no credentials, farm records or settings were changed."
+          "description": "Theme remains reachable at the right edge of farm-home navigation, without label overlap: on its separate lower-right row in the narrow large-text layout, or at the right end of the navigation row otherwise. No credentials, farm records or settings were changed."
         }
       ]
     },

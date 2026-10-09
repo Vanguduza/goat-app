@@ -209,6 +209,13 @@ The task journey uses the board's inline Add task form; its screen list does not
 separate `FOS-TASK-004` entry route. Screen IDs in this manifest describe intended surfaces,
 not accepted route evidence.
 
+Management navigation follows the actual Home / Animals / Tasks / More labels in
+[`AnimalFarmHomeComponents.kt`](../../core/design/src/main/kotlin/com/farmos/core/design/AnimalFarmHomeComponents.kt)
+and the More page's Farm records and tools. Theme stays at the right edge: a separate
+lower row is expected only in the narrow large-text layout; other configurations keep
+it in the navigation row. The species chooser explicitly presents all five families.
+These assertions inspect the current configuration, not the complete native matrix.
+
 For write journeys, form dismissal is insufficient: inspect the actual record and any
 write/refresh error before continuing. A saved-but-refresh-failed message must not trigger
 a duplicate submission. Reopening a module exercises visible local readback; the scenarios
