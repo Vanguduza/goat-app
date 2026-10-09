@@ -36,6 +36,7 @@ import com.farmos.domain.ops.ReverseAnimalExit
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** An exit being recorded for a sheep or cattle animal; text fields are converted on save. */
 internal data class SpeciesExitDraft(val kind: AnimalExitKind, val day: LocalDate, val deathCause: String?, val reason: String?, val buyer: String?, val price: String?)
@@ -69,13 +70,13 @@ internal fun SpeciesExitHost(
     suspend fun reload() {
         standing = standingAnimalExit(database, farmId, animal.animalId)?.let { SpeciesStandingExit(it.id, exitSummary(it)) }
     }
-    LaunchedEffect(animal.animalId, animal.active) { runCatching { reload() } }
+    LaunchedEffect(animal.animalId, animal.active) { runSuspendCatching { reload() } }
 
     fun write(block: suspend () -> Unit) {
         scope.launch {
             busy = true
             error = null
-            runCatching { block(); reload() }.onSuccess { onRecorded() }.onFailure { error = it.message }
+            runSuspendCatching { block(); reload() }.onSuccess { onRecorded() }.onFailure { error = it.message }
             busy = false
         }
     }

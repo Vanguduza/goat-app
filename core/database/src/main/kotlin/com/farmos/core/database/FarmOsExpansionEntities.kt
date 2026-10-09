@@ -75,6 +75,32 @@ data class MaintenanceEventEntity(
     val note: String?,
 )
 
+@Entity(tableName = "asset_meter_readings", indices = [Index(value = ["farmId", "assetId"])])
+data class AssetMeterReadingEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val assetId: String,
+    val readingValue: Long,
+    val unit: String,
+    val occurredEpochDay: Long,
+    val note: String?,
+)
+
+@Dao
+interface AssetMeterDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(reading: AssetMeterReadingEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(reading: AssetMeterReadingEntity)
+
+    @Query("SELECT * FROM asset_meter_readings WHERE farmId = :farmId AND assetId = :assetId ORDER BY occurredEpochDay DESC, id")
+    suspend fun forAsset(farmId: String, assetId: String): List<AssetMeterReadingEntity>
+
+    @Query("SELECT * FROM asset_meter_readings WHERE farmId = :farmId ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun recent(farmId: String, limit: Int): List<AssetMeterReadingEntity>
+}
+
 @Entity(tableName = "feed_issues", indices = [Index(value = ["farmId", "occurredEpochDay"])])
 data class FeedIssueEntity(
     @PrimaryKey val id: String,
@@ -136,6 +162,19 @@ data class HealthTreatmentEntity(
     val occurredAtEpochMillis: Long,
 )
 
+@Entity(tableName = "health_vaccinations", indices = [Index(value = ["farmId", "occurredAtEpochMillis"])])
+data class HealthVaccinationEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val animalId: String?,
+    val groupId: String?,
+    val speciesCode: String,
+    val formularyItemId: String,
+    val dose: String?,
+    val method: String?,
+    val occurredAtEpochMillis: Long,
+)
+
 @Entity(tableName = "famacha_scores", indices = [Index(value = ["farmId", "animalId"])])
 data class FamachaScoreEntity(
     @PrimaryKey val id: String,
@@ -185,6 +224,9 @@ interface AnimalGroupDao {
 
     @Query("UPDATE animal_groups SET headCount = :headCount WHERE farmId = :farmId AND id = :groupId")
     suspend fun setHeadCount(farmId: String, groupId: String, headCount: Int)
+
+    @Query("UPDATE animal_groups SET name = :name, speciesCode = :speciesCode WHERE farmId = :farmId AND id = :groupId")
+    suspend fun updateDetails(farmId: String, groupId: String, name: String, speciesCode: String)
 }
 
 @Dao
@@ -375,6 +417,9 @@ interface WaterDao {
         """,
     )
     suspend fun totalsBySource(farmId: String): List<WaterSourceTotal>
+
+    @Query("SELECT * FROM water_records WHERE farmId = :farmId AND source = :source ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun forSource(farmId: String, source: String, limit: Int): List<WaterRecordEntity>
 }
 
 /** Exhaustive per-source water aggregate over every recorded row; not bounded by any list limit. */
@@ -452,6 +497,27 @@ interface TreatmentDao {
 }
 
 @Dao
+interface VaccinationDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(vaccination: HealthVaccinationEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(vaccination: HealthVaccinationEntity)
+
+    @Query("SELECT * FROM health_vaccinations WHERE farmId = :farmId ORDER BY occurredAtEpochMillis DESC, id LIMIT :limit")
+    suspend fun recent(farmId: String, limit: Int): List<HealthVaccinationEntity>
+
+    @Query("SELECT COUNT(*) FROM health_vaccinations WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+
+    @Query("SELECT * FROM health_vaccinations WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredAtEpochMillis DESC, id")
+    suspend fun forAnimal(farmId: String, animalId: String): List<HealthVaccinationEntity>
+
+    @Query("SELECT * FROM health_vaccinations WHERE farmId = :farmId AND groupId = :groupId ORDER BY occurredAtEpochMillis DESC, id")
+    suspend fun forGroup(farmId: String, groupId: String): List<HealthVaccinationEntity>
+}
+
+@Dao
 interface FamachaDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(score: FamachaScoreEntity)
@@ -485,4 +551,156 @@ interface DiseaseCatalogDao {
 
     @Query("SELECT * FROM disease_catalog ORDER BY speciesCode, displayName")
     suspend fun all(): List<DiseaseCatalogEntity>
+}
+
+@Entity(tableName = "water_points", indices = [Index(value = ["farmId", "code"], unique = true)])
+data class WaterPointEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val code: String,
+    val name: String,
+    val kind: String,
+    val active: Boolean,
+)
+
+@Dao
+interface WaterPointDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(point: WaterPointEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(point: WaterPointEntity)
+
+    @Query("SELECT * FROM water_points WHERE farmId = :farmId ORDER BY code")
+    suspend fun forFarm(farmId: String): List<WaterPointEntity>
+
+    @Query("SELECT * FROM water_points WHERE farmId = :farmId AND active = 1 ORDER BY code")
+    suspend fun active(farmId: String): List<WaterPointEntity>
+
+    @Query("SELECT * FROM water_points WHERE farmId = :farmId AND id = :pointId")
+    suspend fun get(farmId: String, pointId: String): WaterPointEntity?
+
+    @Query("SELECT COUNT(*) FROM water_points WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+}
+
+/**
+ * Dated events against a water point: inspections, quality results, issues and maintenance.
+ * One table with a validated kind keeps the four FOS-WATER-005..008 capture screens on a
+ * single journaled command (RecordWaterPointEvent) without four near-identical tables.
+ */
+@Entity(tableName = "water_point_events", indices = [Index(value = ["farmId", "pointId"])])
+data class WaterPointEventEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val pointId: String,
+    /** inspection | quality | issue | maintenance — validated by OpsValidator.waterPointEvent. */
+    val kind: String,
+    val occurredEpochDay: Long,
+    val resultText: String?,
+    val valueMilli: Long?,
+    val unit: String?,
+    val note: String?,
+)
+
+@Dao
+interface WaterPointEventDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(row: WaterPointEventEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(row: WaterPointEventEntity)
+
+    @Query("SELECT * FROM water_point_events WHERE farmId = :farmId AND pointId = :pointId ORDER BY occurredEpochDay DESC, id")
+    suspend fun forPoint(farmId: String, pointId: String): List<WaterPointEventEntity>
+
+    @Query("SELECT * FROM water_point_events WHERE farmId = :farmId AND kind = :kind ORDER BY occurredEpochDay DESC, id LIMIT :limit")
+    suspend fun recentByKind(farmId: String, kind: String, limit: Int): List<WaterPointEventEntity>
+
+    @Query("SELECT COUNT(*) FROM water_point_events WHERE farmId = :farmId AND kind = :kind")
+    suspend fun countByKind(farmId: String, kind: String): Int
+}
+
+@Entity(tableName = "feed_plans", indices = [Index(value = ["farmId", "startEpochDay"])])
+data class FeedPlanEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val name: String,
+    val speciesCode: String,
+    val rationGramsPerHeadPerDay: Long,
+    val headCount: Int,
+    val startEpochDay: Long,
+    val endEpochDay: Long,
+    val note: String?,
+)
+
+@Dao
+interface FeedPlanDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(plan: FeedPlanEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(plan: FeedPlanEntity)
+
+    @Query("SELECT * FROM feed_plans WHERE farmId = :farmId ORDER BY startEpochDay DESC, id")
+    suspend fun forFarm(farmId: String): List<FeedPlanEntity>
+
+    @Query("SELECT * FROM feed_plans WHERE farmId = :farmId AND id = :planId")
+    suspend fun get(farmId: String, planId: String): FeedPlanEntity?
+
+    @Query("SELECT COUNT(*) FROM feed_plans WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
+}
+
+/**
+ * FOS-FIN-010 — budget line revisions. One row per revision: revising a budget
+ * inserts a new row with version + 1 and marks prior rows superseded. Rows are
+ * never updated or deleted in place (audit trail). Amounts are integer minor
+ * units in a single currency per budgetKey.
+ */
+@Entity(
+    tableName = "budgets",
+    indices = [
+        Index(value = ["farmId", "budgetKey", "version"], unique = true),
+        Index(value = ["farmId", "superseded"]),
+    ],
+)
+data class BudgetEntity(
+    @PrimaryKey val id: String,
+    val farmId: String,
+    val budgetKey: String,
+    val version: Long,
+    val name: String,
+    val kind: String,
+    val categoryCode: String,
+    val periodStartYearMonth: String,
+    val periodEndYearMonth: String,
+    val amountMinor: Long,
+    val currency: String,
+    val superseded: Boolean,
+    val createdAtEpochMillis: Long,
+)
+
+@Dao
+interface BudgetDao {
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(budget: BudgetEntity)
+
+    @Upsert
+    suspend fun upsertFromServer(budget: BudgetEntity)
+
+    @Query("UPDATE budgets SET superseded = 1 WHERE farmId = :farmId AND budgetKey = :budgetKey AND superseded = 0")
+    suspend fun supersedePrior(farmId: String, budgetKey: String)
+
+    @Query("SELECT * FROM budgets WHERE farmId = :farmId AND superseded = 0 ORDER BY categoryCode, periodStartYearMonth, budgetKey")
+    suspend fun active(farmId: String): List<BudgetEntity>
+
+    @Query("SELECT * FROM budgets WHERE farmId = :farmId AND budgetKey = :budgetKey ORDER BY version DESC")
+    suspend fun revisions(farmId: String, budgetKey: String): List<BudgetEntity>
+
+    @Query("SELECT MAX(version) FROM budgets WHERE farmId = :farmId AND budgetKey = :budgetKey")
+    suspend fun maxVersion(farmId: String, budgetKey: String): Long?
+
+    @Query("SELECT COUNT(*) FROM budgets WHERE farmId = :farmId")
+    suspend fun count(farmId: String): Int
 }

@@ -77,6 +77,7 @@ fun TasksBoardScreen(
     onEndSeries: (seriesId: String) -> Unit = {},
     /** How far ahead repeating occurrences are listed; null when the board has no repeating tasks. */
     repeatHorizonDays: Long? = null,
+    extraActions: @Composable () -> Unit = {},
 ) {
     if (entryPage == TaskEntryPage.CREATE) {
         CreateTaskScreen(busy = busy, error = error, onCreate = onCreate, onBack = onBack, canPlanWork = canPlanWork, assignees = assignees, onCreateSeries = onCreateSeries)
@@ -106,6 +107,8 @@ fun TasksBoardScreen(
                 title = "Tasks",
                 subtitle = "${rows.count { it.status == "open" }} open task(s)",
             )
+
+            extraActions()
 
             TaskTab.entries.chunked(3).forEach { tabs ->
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {

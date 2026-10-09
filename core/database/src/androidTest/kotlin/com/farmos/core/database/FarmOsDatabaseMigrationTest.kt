@@ -30,8 +30,9 @@ class FarmOsDatabaseMigrationTest {
         context.deleteDatabase(databaseName)
     }
 
+    // Execute the full upgrade chain: a fresh database alone cannot prove migration compatibility.
     @Test
-    fun version1DatabaseMigratesThroughVersion29WithoutLosingFoundationData() = runBlocking {
+    fun version1DatabaseMigratesThroughVersion37WithoutLosingFoundationData() = runBlocking {
         val farmId = "11111111-1111-4111-8111-111111111111"
         val animalId = "33333333-3333-4333-8333-333333333333"
         val mutationId = "55555555-5555-4555-8555-555555555555"
@@ -41,7 +42,7 @@ class FarmOsDatabaseMigrationTest {
             .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS)
             .build()
 
-        // Force Room to execute the complete 1 -> 29 chain and validate the final schema.
+        // Force Room to execute the complete 1 -> 37 chain and validate the final schema.
         migrated.openHelper.writableDatabase
 
         val animal = migrated.animals().get(farmId, animalId)
@@ -91,8 +92,90 @@ class FarmOsDatabaseMigrationTest {
         assertEquals(0, migrated.animalExits().unsettledSaleExits(farmId).size)
         // Version 29 adds attachment metadata (D-015); the migrated animal carries none.
         assertEquals(0, migrated.attachments().forOwner(farmId, "animal", animalId).size)
+        // Version 30 adds general animal/group vaccinations (FTR-HEALTH-003); the migrated farm has none.
+        assertEquals(0, migrated.vaccinations().count(farmId))
+        // Version 31 adds water points and feed plans; the migrated farm has none.
+        assertEquals(0, migrated.waterPoints().count(farmId))
+        assertEquals(0, migrated.feedPlans().count(farmId))
+        // Version 32 adds goat weanings (FOS-GOAT-042); the migrated farm has none.
+        assertEquals(0, migrated.lifecycle().goatWeaningsFor(farmId, animalId).size)
+        // Version 33 adds water point events (FOS-WATER-005..008); the migrated farm has none.
+        assertEquals(0, migrated.waterPointEvents().countByKind(farmId, "inspection"))
+        // Version 34 adds asset meter readings (FOS-ASSET-005); the migrated farm has none.
+        assertEquals(0, migrated.assetMeters().forAsset(farmId, "no-such-asset").size)
+        // Version 35 adds budget lines (FOS-FIN-010); the migrated farm has none.
+        assertEquals(0, migrated.budgets().count(farmId))
+        assertEquals(0, migrated.budgets().active(farmId).size)
+        // Version 36 adds cattle heats (FOS-CATTLE-009) and unit preferences (FOS-ADMIN-010); the migrated farm has none.
+        assertEquals(0, migrated.lifecycle().cattleHeatsFor(farmId, animalId).size)
+        assertEquals(0, migrated.lifecycle().cattleHeatCount(farmId))
+        assertEquals(0, migrated.unitPreferences().all(farmId).size)
+        // Version 37 adds animal group memberships (FOS-GROUP-007); the migrated animal has no recorded group.
+        assertNull(migrated.groupMemberships().get(farmId, animalId))
+        assertEquals(0, migrated.groupMemberships().getMany(farmId, listOf(animalId)).size)
+        // Version 37 adds rabbit weights (FOS-RABBIT-032); the migrated farm has none.
+        assertNull(migrated.lifecycle().latestRabbitWeight(farmId, animalId))
+        assertEquals(0, migrated.lifecycle().rabbitWeightHistory(farmId, animalId).size)
+        assertEquals(0, migrated.lifecycle().rabbitWeights(farmId).size)
 
         migrated.close()
+    }
+
+
+    @Test
+    fun version29LocalFarmMigratesWithoutLosingAccountsSettingsOrAttachments() = runBlocking {
+        val farmId = "11111111-1111-4111-8111-111111111111"
+        val animalId = "33333333-3333-4333-8333-333333333333"
+        createVersion1Fixture(farmId, animalId, "55555555-5555-4555-8555-555555555555")
+        val helper = androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory().create(
+            androidx.sqlite.db.SupportSQLiteOpenHelper.Configuration.builder(context)
+                .name(databaseName)
+                .callback(object : androidx.sqlite.db.SupportSQLiteOpenHelper.Callback(29) {
+                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) = error("Expected a version-1 fixture")
+                    override fun onUpgrade(db: androidx.sqlite.db.SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+                        var version = oldVersion
+                        for (migration in FarmOsDatabase.ALL_MIGRATIONS.filter { it.endVersion <= newVersion }) {
+                            assertEquals(version, migration.startVersion)
+                            migration.migrate(db)
+                            version = migration.endVersion
+                        }
+                        assertEquals(newVersion, version)
+                    }
+                }).build(),
+        )
+        try {
+            val legacy = helper.writableDatabase
+            legacy.execSQL("INSERT INTO local_farms(farmId,name,createdAtEpochMillis) VALUES(?,?,?)", arrayOf(farmId, "Existing local farm", 1L))
+            legacy.execSQL(
+                "INSERT INTO local_accounts(accountId,farmId,username,displayName,role,status,credentialKind,credentialHash,failedAttempts,createdAtEpochMillis,updatedAtEpochMillis) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                arrayOf("account-1", farmId, "owner", "Farm Owner", "OWNER", "ACTIVE", "PIN", "fixture-hash-only", 0, 1L, 1L),
+            )
+            legacy.execSQL(
+                "INSERT INTO farm_settings(farmId,currencyCode,updatedAtEpochMillis,updatedByActorId) VALUES(?,?,?,?)",
+                arrayOf(farmId, "ZAR", 1L, "account-1"),
+            )
+            legacy.execSQL(
+                "INSERT INTO attachments(id,farmId,ownerType,ownerId,contentSha256,byteSize,mediaType,displayName,attachedAtEpochMillis,attachedByActorId) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                arrayOf("attachment-1", farmId, "animal", animalId, "a".repeat(64), 3L, "image/jpeg", "Existing photo", 1L, "account-1"),
+            )
+        } finally {
+            helper.close()
+        }
+        val migrated = Room.databaseBuilder(context, FarmOsDatabase::class.java, databaseName)
+            .addMigrations(*FarmOsDatabase.ALL_MIGRATIONS).build()
+        try {
+            migrated.openHelper.writableDatabase
+            assertEquals("Existing local farm", migrated.localAccess().farms().single().name)
+            assertEquals("owner", migrated.localAccess().accounts(farmId).single().username)
+            assertEquals("ZAR", migrated.farmSettings().get(farmId)?.currencyCode)
+            assertEquals("Existing photo", migrated.attachments().forOwner(farmId, "animal", animalId).single().displayName)
+            assertEquals("MIG-001", migrated.animals().get(farmId, animalId)?.tag)
+            assertEquals(0, migrated.lifecycle().goatWeaningsFor(farmId, animalId).size)
+            assertEquals(0, migrated.lifecycle().cattleHeatsFor(farmId, animalId).size)
+            assertEquals(0, migrated.lifecycle().rabbitWeights(farmId).size)
+        } finally {
+            migrated.close()
+        }
     }
 
     private fun createVersion1Fixture(farmId: String, animalId: String, mutationId: String) {

@@ -17,6 +17,8 @@ import com.farmos.domain.ops.CandlePoultryHatch
 import com.farmos.domain.ops.CloseCattleLot
 import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateAnimalGroup
+import com.farmos.domain.ops.AmendAnimalGroup
+import com.farmos.domain.ops.MoveAnimalGroup
 import com.farmos.domain.ops.CreateFarmAsset
 import com.farmos.domain.ops.CreateFarmTask
 import com.farmos.domain.ops.ReverseAnimalExit
@@ -46,8 +48,11 @@ import com.farmos.domain.ops.LinkPedigree
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.PlaceCattleLot
 import com.farmos.domain.ops.PlacePoultryFlock
+import com.farmos.domain.ops.MovePoultryFlock
+import com.farmos.domain.ops.ClosePoultryFlock
 import com.farmos.domain.ops.ReceiveInventoryLot
 import com.farmos.domain.ops.RecordCattleBcs
+import com.farmos.domain.ops.RecordSheepBcs
 import com.farmos.domain.ops.RecordCattleCalving
 import com.farmos.domain.ops.RecordCattleDaysOnFeed
 import com.farmos.domain.ops.RecordCattleDryOff
@@ -62,10 +67,19 @@ import com.farmos.domain.ops.RecordFamacha
 import com.farmos.domain.ops.RecordGroupCensus
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
+import com.farmos.domain.ops.RecordHealthVaccination
+import com.farmos.domain.ops.RecordWaterPoint
+import com.farmos.domain.ops.RecordWaterPointEvent
+import com.farmos.domain.ops.RecordFeedPlan
 import com.farmos.domain.ops.RecordLabResult
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
+import com.farmos.domain.ops.RecordAssetMeter
+import com.farmos.domain.ops.RecordBudget
+import com.farmos.domain.ops.RecordCattleHeat
 import com.farmos.domain.ops.RecordMoney
+import com.farmos.domain.ops.RecordUnitPreference
+import com.farmos.domain.ops.ReviseBudget
 import com.farmos.domain.ops.RecordOfficialMovement
 import com.farmos.domain.ops.RecordPoultryBiosecurity
 import com.farmos.domain.ops.RecordPoultryFlockDay
@@ -107,6 +121,7 @@ import com.farmos.domain.rabbit.RecordRabbitGiStasis
 import com.farmos.domain.rabbit.RecordRabbitMarketPlan
 import com.farmos.domain.rabbit.RecordRabbitMatingOutcome
 import com.farmos.domain.rabbit.RecordRabbitWean
+import com.farmos.domain.rabbit.RecordRabbitWeight
 import com.farmos.domain.rabbit.RegisterRabbitKit
 import com.farmos.domain.rabbit.SetRabbitNestBoxStatus
 import com.farmos.domain.replication.OperationEnvelope
@@ -141,17 +156,21 @@ object OpsReplicationAppliers {
         },
         "cattle.record_weaning.v1" to replay { ops, op -> ops.recordCattleWeaning(decode<RecordCattleWeaning>(op), context(op)) },
         "feed.issue.v1" to replay { ops, op -> ops.issueFeed(decode<IssueFeed>(op), context(op)) },
+        "feed.record_plan.v1" to replay { ops, op -> ops.recordFeedPlan(decode<RecordFeedPlan>(op), context(op)) },
         "formulary.item_create.v1" to replay { ops, op -> ops.createFormulary(decode<CreateFormularyItem>(op), context(op)) },
         "grazing.end.v1" to replay { ops, op -> ops.endGrazing(decode<EndGrazing>(op), context(op)) },
         "grazing.start.v1" to replay { ops, op -> ops.startGrazing(decode<StartGrazing>(op), context(op)) },
         "group.census.v1" to replay { ops, op -> ops.recordCensus(decode<RecordGroupCensus>(op), context(op)) },
         "group.create.v1" to replay { ops, op -> ops.createGroup(decode<CreateAnimalGroup>(op), context(op)) },
+        "group.amend.v1" to replay { ops, op -> ops.amendGroup(decode<AmendAnimalGroup>(op), context(op)) },
+        "group.animal_move.v1" to replay { ops, op -> ops.moveAnimalGroup(decode<MoveAnimalGroup>(op), context(op)) },
         "health.pack_accept.v1" to replay { ops, op -> ops.acceptPack(decode<AcceptHealthPack>(op), context(op)) },
         "health.pack_apply.v1" to replay { ops, op -> ops.applyPack(decode<ApplyHealthPack>(op), context(op)) },
         "health.pack_slot_add.v1" to replay { ops, op -> ops.addPackSlot(decode<AddHealthPackSlot>(op), context(op)) },
         "health.record_lab.v1" to replay { ops, op -> ops.recordLab(decode<RecordLabResult>(op), context(op)) },
         "health.record_observation.v1" to replay { ops, op -> ops.recordObservation(decode<RecordHealthObservation>(op), context(op)) },
         "health.record_treatment.v1" to replay { ops, op -> ops.recordTreatment(decode<RecordHealthTreatment>(op), context(op)) },
+        "health.record_vaccination.v1" to replay { ops, op -> ops.recordVaccination(decode<RecordHealthVaccination>(op), context(op)) },
         "health.record_vet_visit.v1" to replay { ops, op -> ops.recordVetVisit(decode<RecordVetVisit>(op), context(op)) },
         "inventory.item_create.v1" to replay { ops, op -> ops.createItem(decode<CreateInventoryItem>(op), context(op)) },
         "inventory.lot_issue.v1" to replay { ops, op -> ops.issueLot(decode<IssueInventoryLot>(op), context(op)) },
@@ -161,12 +180,19 @@ object OpsReplicationAppliers {
         "inventory.set_reorder.v1" to replay { ops, op -> ops.setReorder(decode<SetInventoryReorder>(op), context(op)) },
         "labour.record.v1" to replay { ops, op -> ops.recordLabour(decode<RecordLabour>(op), context(op)) },
         "maintenance.record.v1" to replay { ops, op -> ops.recordMaintenance(decode<RecordMaintenance>(op), context(op)) },
+        "asset.meter_record.v1" to replay { ops, op -> ops.recordAssetMeter(decode<RecordAssetMeter>(op), context(op)) },
         "money.record.v1" to replay { ops, op -> ops.recordMoney(decode<RecordMoney>(op), context(op)) },
+        "finance.record_budget.v1" to replay { ops, op -> ops.recordBudget(decode<RecordBudget>(op), context(op)) },
+        "finance.revise_budget.v1" to replay { ops, op -> ops.reviseBudget(decode<ReviseBudget>(op), context(op)) },
+        "cattle.record_heat.v1" to replay { ops, op -> ops.recordCattleHeat(decode<RecordCattleHeat>(op), context(op)) },
+        "farm.record_unit_preference.v1" to replay { ops, op -> ops.recordUnitPreference(decode<RecordUnitPreference>(op), context(op)) },
         "official.record_movement.v1" to replay { ops, op -> ops.recordOfficialMovement(decode<RecordOfficialMovement>(op), context(op)) },
         "paddock.create.v1" to replay { ops, op -> ops.createPaddock(decode<CreatePaddock>(op), context(op)) },
         "pedigree.link.v1" to replay { ops, op -> ops.linkPedigree(decode<LinkPedigree>(op), context(op)) },
         "poultry.flock_day.v1" to replay { ops, op -> ops.recordFlockDay(decode<RecordPoultryFlockDay>(op), context(op)) },
         "poultry.flock_place.v1" to replay { ops, op -> ops.placeFlock(decode<PlacePoultryFlock>(op), context(op)) },
+        "poultry.flock_move.v1" to replay { ops, op -> ops.moveFlock(decode<MovePoultryFlock>(op), context(op)) },
+        "poultry.flock_close.v1" to replay { ops, op -> ops.closeFlock(decode<ClosePoultryFlock>(op), context(op)) },
         "poultry.hatch_candle.v1" to replay { ops, op -> ops.candleHatch(decode<CandlePoultryHatch>(op), context(op)) },
         "poultry.hatch_record.v1" to replay { ops, op -> ops.recordHatch(decode<RecordPoultryHatch>(op), context(op)) },
         "poultry.hatch_set.v1" to replay { ops, op -> ops.setHatch(decode<SetPoultryHatch>(op), context(op)) },
@@ -189,12 +215,14 @@ object OpsReplicationAppliers {
         "rabbit.record_mating_outcome.v1" to replay { ops, op -> ops.recordMatingOutcome(decode<RecordRabbitMatingOutcome>(op), context(op)) },
         "rabbit.record_palpation.v1" to replay { ops, op -> ops.recordPalpation(decode<RecordRabbitPalpation>(op), context(op)) },
         "rabbit.record_wean.v1" to replay { ops, op -> ops.recordWean(decode<RecordRabbitWean>(op), context(op)) },
+        "rabbit.record_weight.v1" to replay { ops, op -> ops.recordRabbitWeight(decode<RecordRabbitWeight>(op), context(op)) },
         "rabbit.retention_decide.v1" to replay { ops, op -> ops.decideRetention(decode<DecideRabbitRetention>(op), context(op)) },
         "rabbit.waitlist_enqueue.v1" to replay { ops, op -> ops.enqueueWaitlist(decode<EnqueueRabbitWaitlist>(op), context(op)) },
         "rabbit.waitlist_fulfill.v1" to replay { ops, op -> ops.fulfillWaitlist(decode<FulfillRabbitWaitlist>(op), context(op)) },
         "rabbit.wave_create.v1" to replay { ops, op -> ops.createWave(decode<CreateRabbitWave>(op), context(op)) },
         "sale.record.v1" to replay { ops, op -> ops.recordSale(decode<RecordSale>(op), context(op)) },
         "sheep.record_dag.v1" to replay { ops, op -> ops.recordDag(decode<RecordSheepDag>(op), context(op)) },
+        "sheep.record_bcs.v1" to replay { ops, op -> ops.recordSheepBcs(decode<RecordSheepBcs>(op), context(op)) },
         "sheep.record_famacha.v1" to replay { ops, op -> ops.recordSheepFamacha(decode<RecordFamacha>(op), context(op)) },
         "sheep.record_flystrike.v1" to replay { ops, op -> ops.recordFlystrike(decode<RecordSheepFlystrike>(op), context(op)) },
         "sheep.record_footrot.v1" to replay { ops, op -> ops.recordFootrot(decode<RecordSheepFootrot>(op), context(op)) },
@@ -233,6 +261,8 @@ object OpsReplicationAppliers {
         TaskSeriesCommands.SERIES_END to series { commands, op -> commands.end(decode<EndTaskSeries>(op), context(op)) },
         TaskSeriesCommands.TASK_UPDATE to series { commands, op -> commands.update(decode<UpdateFarmTask>(op), context(op)) },
         "water.record.v1" to replay { ops, op -> ops.recordWater(decode<RecordWater>(op), context(op)) },
+        "water.record_point.v1" to replay { ops, op -> ops.recordWaterPoint(decode<RecordWaterPoint>(op), context(op)) },
+        "water.record_point_event.v1" to replay { ops, op -> ops.recordWaterPointEvent(decode<RecordWaterPointEvent>(op), context(op)) },
     )
 
     private inline fun <reified T> decode(op: OperationEnvelope): T = json.decodeFromString(op.payload.getValue(COMMAND_PAYLOAD_KEY))

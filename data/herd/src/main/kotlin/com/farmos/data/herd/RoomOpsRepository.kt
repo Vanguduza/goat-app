@@ -1,32 +1,25 @@
 package com.farmos.data.herd
 
-import androidx.room.withTransaction
 import com.farmos.core.database.AnimalEntity
-import com.farmos.core.database.AnimalGroupEntity
-import com.farmos.core.database.FarmAssetEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.CattleCalvingEntity
 import com.farmos.core.database.CattlePdEntity
 import com.farmos.core.database.FamachaScoreEntity
-import com.farmos.core.database.FeedIssueEntity
 import com.farmos.core.database.FormularyItemEntity
-import com.farmos.core.database.GoatMilkEntity
-import com.farmos.core.database.GrazingSessionEntity
 import com.farmos.core.database.HealthObservationEntity
 import com.farmos.core.database.HealthPackEntity
 import com.farmos.core.database.HealthTreatmentEntity
+import com.farmos.core.database.HealthVaccinationEntity
 import com.farmos.core.database.InventoryItemEntity
 import com.farmos.core.database.InventoryMovementEntity
 import com.farmos.core.database.LabourEntryEntity
-import com.farmos.core.database.MaintenanceEventEntity
-import com.farmos.core.database.PaddockEntity
 import com.farmos.core.database.PoultryFlockDayEntity
-import com.farmos.core.database.PurchaseEntity
 import com.farmos.core.database.CattleBcsEntity
 import com.farmos.core.database.CattleLocomotionEntity
+import com.farmos.core.database.CattleHeatEntity
 import com.farmos.core.database.CattleMilkEntity
 import com.farmos.core.database.CattleSccEntity
-import com.farmos.core.database.GoatBcsEntity
+import com.farmos.core.database.UnitPreferenceEntity
 import com.farmos.core.database.AnimalIdentifierEntity
 import com.farmos.core.database.CattleDofEntity
 import com.farmos.core.database.CattleDryOffEntity
@@ -34,12 +27,6 @@ import com.farmos.core.database.CattleLotCloseEntity
 import com.farmos.core.database.CattleLotPlacementEntity
 import com.farmos.core.database.CattleWeaningEntity
 import com.farmos.core.database.EnabledPoultryKindEntity
-import com.farmos.core.database.GoatHeatEntity
-import com.farmos.core.database.GoatLactationPlanEntity
-import com.farmos.core.database.GoatMatingEntity
-import com.farmos.core.database.GoatPregnancyEntity
-import com.farmos.core.database.GoatSccEntity
-import com.farmos.core.database.GroupCensusEntity
 import com.farmos.core.database.HealthPackApplyEntity
 import com.farmos.core.database.HealthPackSlotEntity
 import com.farmos.core.database.InventoryLotEntity
@@ -48,7 +35,6 @@ import com.farmos.core.database.OfficialMovementEntity
 import com.farmos.core.database.PedigreeRelationEntity
 import com.farmos.core.database.ReorderAlertEntity
 import com.farmos.core.database.PoultryBiosecurityEntity
-import com.farmos.core.database.PoultryPlacementEntity
 import com.farmos.core.database.PoultryVaccinationEntity
 import com.farmos.core.database.RabbitGiStasisEntity
 import com.farmos.core.database.SheepMicronEntity
@@ -70,39 +56,21 @@ import com.farmos.core.database.RabbitFosterEntity
 import com.farmos.core.database.RabbitKindlingEntity
 import com.farmos.core.database.RabbitPalpationEntity
 import com.farmos.core.database.RabbitWeanEntity
+import com.farmos.core.database.RabbitWeightEntity
 import com.farmos.core.database.SheepMarkingEntity
 import com.farmos.core.database.SheepWeaningEntity
 import com.farmos.core.database.SheepWoolEntity
 import com.farmos.core.database.SaleRecordEntity
 import com.farmos.core.database.SheepLambingEntity
 import com.farmos.core.database.SheepScanEntity
-import com.farmos.core.database.SupplierEntity
-import com.farmos.core.database.WaterRecordEntity
 import com.farmos.core.database.WithdrawalWindowEntity
-import com.farmos.core.database.KiddingEntity
-import com.farmos.core.database.MeasurementEntity
 import com.farmos.core.database.MoneyRecordEntity
-import com.farmos.core.database.OutboxEntity
 import com.farmos.core.database.RabbitCageEntity
 import com.farmos.core.database.RabbitNestBoxEntity
 import com.farmos.core.database.RabbitWaveEntity
-import com.farmos.core.database.SyncCursorEntity
 import com.farmos.core.database.TaskEntity
-import com.farmos.core.database.insertOutboxAndJournal
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.model.LocalCommandResult
-import com.farmos.core.model.SyncState
-import com.farmos.core.network.PulledDomainEvent
-import com.farmos.core.network.SupabasePullClient
-import com.farmos.core.network.UnsupportedServerEvent
-import com.farmos.domain.goat.RecordGoatFamacha
-import com.farmos.domain.goat.RecordGoatKidding
-import com.farmos.domain.goat.RecordGoatMilk
-import com.farmos.domain.goat.RecordGoatWeight
-import com.farmos.domain.goat.SetGoatStatus
-import com.farmos.domain.goat.RecordGoatHeat
-import com.farmos.domain.goat.RecordGoatMating
-import com.farmos.domain.goat.RecordGoatPregnancy
 import com.farmos.domain.ops.AcceptHealthPack
 import com.farmos.domain.ops.AddHealthPackSlot
 import com.farmos.domain.ops.ApplyHealthPack
@@ -116,6 +84,7 @@ import com.farmos.domain.ops.RecordReorderAlert
 import com.farmos.domain.ops.SetInventoryReorder
 import com.farmos.domain.ops.CompleteFarmTask
 import com.farmos.domain.ops.CreateAnimalGroup
+import com.farmos.domain.ops.AmendAnimalGroup
 import com.farmos.domain.ops.EnablePoultryKind
 import com.farmos.domain.ops.IssueInventoryLot
 import com.farmos.domain.ops.LinkPedigree
@@ -136,28 +105,39 @@ import com.farmos.domain.ops.CreatePoultryHouse
 import com.farmos.domain.ops.CreateSupplier
 import com.farmos.domain.ops.EndGrazing
 import com.farmos.domain.ops.IssueFeed
+import com.farmos.domain.ops.MoveAnimalGroup
 import com.farmos.domain.ops.MoveInventory
 import com.farmos.domain.ops.OpsValidator
 import com.farmos.domain.ops.RecordCattleBcs
+import com.farmos.domain.ops.RecordSheepBcs
 import com.farmos.domain.ops.RecordCattleLocomotion
+import com.farmos.domain.ops.RecordCattleHeat
 import com.farmos.domain.ops.RecordCattleMilk
 import com.farmos.domain.ops.RecordCattleScc
+import com.farmos.domain.ops.RecordUnitPreference
 import com.farmos.domain.ops.RecordSheepDag
 import com.farmos.domain.ops.RecordSheepFootrot
 import com.farmos.domain.ops.RecordSheepShearing
-import com.farmos.domain.goat.RecordGoatBcs
-import com.farmos.domain.goat.RecordGoatScc
 import com.farmos.domain.ops.RecordCattleCalving
 import com.farmos.domain.ops.RecordCattlePd
 import com.farmos.domain.ops.RecordCattleService
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
+import com.farmos.domain.ops.RecordHealthVaccination
+import com.farmos.domain.ops.RecordWaterPoint
+import com.farmos.domain.ops.RecordWaterPointEvent
+import com.farmos.domain.ops.RecordFeedPlan
 import com.farmos.domain.ops.RecordLabour
 import com.farmos.domain.ops.RecordMaintenance
+import com.farmos.domain.ops.RecordAssetMeter
+import com.farmos.domain.ops.RecordBudget
 import com.farmos.domain.ops.RecordMoney
+import com.farmos.domain.ops.ReviseBudget
 import com.farmos.domain.ops.PoultryKindIncubation
 import com.farmos.domain.ops.RecordPoultryFlockDay
 import com.farmos.domain.ops.PlacePoultryFlock
+import com.farmos.domain.ops.MovePoultryFlock
+import com.farmos.domain.ops.ClosePoultryFlock
 import com.farmos.domain.ops.RecordCattleDryOff
 import com.farmos.domain.ops.RecordPoultryBiosecurity
 import com.farmos.domain.ops.RecordPoultryHatch
@@ -191,17 +171,12 @@ import com.farmos.domain.rabbit.RecordRabbitMarketPlan
 import com.farmos.domain.rabbit.RecordRabbitGiStasis
 import com.farmos.domain.rabbit.RecordRabbitMatingOutcome
 import com.farmos.domain.rabbit.RecordRabbitWean
+import com.farmos.domain.rabbit.RecordRabbitWeight
 import com.farmos.domain.rabbit.RegisterRabbitKit
 import com.farmos.domain.rabbit.SetRabbitNestBoxStatus
 import com.farmos.domain.rabbit.KudbatSemiIntensiveExcel
-import java.time.Instant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 class RoomOpsRepository(
     private val database: FarmOsDatabase,
@@ -210,6 +185,11 @@ class RoomOpsRepository(
     /** Replays an operation received from another device: domain writes only, it is already journalled. */
     private val replaying: Boolean = false,
 ) {
+    private val journal = OpsCommandJournal(database, farmId, replaying)
+    private val configurationCommands = FarmConfigurationCommands(database, farmId, json, journal)
+    private val groupCommands = AnimalGroupCommands(database, farmId, json, journal)
+    private val resourceCommands = FarmResourceCommands(database, farmId, json, journal)
+
     suspend fun createTask(command: CreateFarmTask, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.task(command)?.let { error(it) }
         enqueue(context, "task.create.v1", "task", command.taskId, 0, json.encodeToString(command)) {
@@ -330,6 +310,28 @@ class RoomOpsRepository(
         return LocalCommandResult(context.mutationId, command.weanId, true)
     }
 
+    /** FOS-RABBIT-032 — governed rabbit weighing; persists locally and journals `rabbit.record_weight.v1`. */
+    suspend fun recordRabbitWeight(command: RecordRabbitWeight, context: LocalCommandContext): LocalCommandResult {
+        RabbitProgrammeValidator.weight(command, context.occurredAtEpochMillis)?.let { error(it) }
+        val rabbit = requireNotNull(database.animals().get(farmId, command.animalId)) { "Rabbit weight needs a rabbit" }
+        require(rabbit.speciesCode == "rabbit") { "Rabbit weight needs a rabbit" }
+        enqueue(context, "rabbit.record_weight.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+            database.lifecycle().insertRabbitWeight(
+                RabbitWeightEntity(
+                    id = command.weightId,
+                    farmId = farmId,
+                    animalId = command.animalId,
+                    weighedAtEpochMillis = command.weighedAtEpochMillis,
+                    weightKg = command.weightKg,
+                    notes = command.notes?.trim()?.ifBlank { null },
+                    recordedByActorId = context.actorId,
+                    createdAtEpochMillis = context.occurredAtEpochMillis,
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.weightId, true)
+    }
+
     suspend fun recordMarking(command: RecordSheepMarking, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.marking(command)?.let { error(it) }
         val aggregateType = if (command.animalId.isNullOrBlank()) "animal_group" else "animal"
@@ -358,6 +360,15 @@ class RoomOpsRepository(
         return LocalCommandResult(context.mutationId, command.scoreId, true)
     }
 
+    /** FOS-SHEEP-008 — sheep BCS; reuses the shared BCS table, no schema change. */
+    suspend fun recordSheepBcs(command: RecordSheepBcs, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.sheepBcs(command)?.let { error(it) }
+        enqueue(context, "sheep.record_bcs.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+            database.lifecycle().insertBcs(CattleBcsEntity(command.scoreId, farmId, command.animalId, command.scale, command.scoreTenths, command.occurredEpochDay))
+        }
+        return LocalCommandResult(context.mutationId, command.scoreId, true)
+    }
+
     suspend fun recordWool(command: RecordSheepWool, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.wool(command)?.let { error(it) }
         val aggregateType = if (command.animalId.isNullOrBlank()) "animal_group" else "animal"
@@ -377,6 +388,35 @@ class RoomOpsRepository(
         }
         return LocalCommandResult(context.mutationId, command.milkId, true)
     }
+
+    /** FOS-CATTLE-009 — cattle heat observation; own table, never goat_heats. */
+    suspend fun recordCattleHeat(command: RecordCattleHeat, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.cattleHeat(command)?.let { error(it) }
+        val cow = requireNotNull(database.animals().get(farmId, command.animalId)) { "Active cow not found" }
+        require(cow.speciesCode == "cattle" && cow.status == "active") { "Heat records are for active cattle" }
+        enqueue(context, "cattle.record_heat.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
+            database.lifecycle().insertCattleHeat(
+                CattleHeatEntity(
+                    command.heatId, farmId, command.animalId, command.occurredEpochDay,
+                    command.signs, command.note, context.actorId, context.occurredAtEpochMillis,
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.heatId, true)
+    }
+
+    suspend fun cattleHeatsFor(animalId: String): List<CattleHeatEntity> =
+        database.lifecycle().cattleHeatsFor(farmId, animalId)
+
+    suspend fun cattleHeatCount(): Int = database.lifecycle().cattleHeatCount(farmId)
+
+    /**
+     * FOS-ADMIN-010 — farm unit display preference. Canonical stored units never
+     * change; this only selects the display/input unit per quantity kind.
+     */
+    suspend fun recordUnitPreference(command: RecordUnitPreference, context: LocalCommandContext): LocalCommandResult = configurationCommands.recordUnitPreference(command, context)
+
+    suspend fun unitPreferences(): List<UnitPreferenceEntity> = database.unitPreferences().all(farmId)
 
     suspend fun recordDag(command: RecordSheepDag, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.dag(command)?.let { error(it) }
@@ -625,17 +665,15 @@ class RoomOpsRepository(
     suspend fun waitlist() = database.lifecycle().waitlist(farmId)
     suspend fun houses() = database.lifecycle().houses(farmId)
     suspend fun hatches() = database.lifecycle().hatches(farmId)
-    suspend fun placeFlock(command: PlacePoultryFlock, context: LocalCommandContext): LocalCommandResult {
-        OpsValidator.flockPlace(command)?.let { error(it) }
-        enqueue(context, "poultry.flock_place.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
-            database.lifecycle().insertPlacement(
-                PoultryPlacementEntity(command.placementId, farmId, command.groupId, command.houseId, command.poultryKindCode, command.headCount, command.occurredEpochDay),
-            )
-            database.tasks().insert(TaskEntity(command.inspectTaskId, farmId, "poultry", "BIOSECURITY", "Placement inspection / biosecurity", command.occurredEpochDay, "open", null, null, null, context.occurredAtEpochMillis))
-            database.tasks().insert(TaskEntity(command.vaxTaskId, farmId, "poultry", "FLOCK_VAX", "Kind vaccination pack", command.occurredEpochDay + 1, "open", null, null, null, context.occurredAtEpochMillis))
-        }
-        return LocalCommandResult(context.mutationId, command.placementId, true)
-    }
+    suspend fun placeFlock(command: PlacePoultryFlock, context: LocalCommandContext): LocalCommandResult = groupCommands.placeFlock(command, context)
+
+    /** FOS-POULTRY-023 — flock move: a new placement row for the same group; the latest
+     * placement per group is the flock's current house. */
+    suspend fun moveFlock(command: MovePoultryFlock, context: LocalCommandContext): LocalCommandResult = groupCommands.moveFlock(command, context)
+
+    /** FOS-POULTRY-024 — flock close-out: terminal journal operation; zeroes the group's
+     * head count. Close-out details stay durable in the operation payload. */
+    suspend fun closeFlock(command: ClosePoultryFlock, context: LocalCommandContext): LocalCommandResult = groupCommands.closeFlock(command, context)
 
     suspend fun recordBiosecurity(command: RecordPoultryBiosecurity, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.biosecurity(command)?.let { error(it) }
@@ -661,6 +699,11 @@ class RoomOpsRepository(
     suspend fun assignIdentifier(command: AssignAnimalIdentifier, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.identifier(command)?.let { error(it) }
         requireNotNull(database.animals().get(farmId, command.animalId)) { "Identifier needs an animal on this farm" }
+        // FOS-SHEEP-005 — farm-scoped uniqueness: a scanned or typed value must resolve to
+        // exactly one animal per farm. The animal's own active values are excluded so
+        // re-assignment and journal replay of its own identifiers stay convergent.
+        val otherActiveValues = database.lifecycle().activeIdentifierValuesExcept(farmId, command.animalId)
+        OpsValidator.identifierUnique(command, otherActiveValues)?.let { error(it) }
         enqueue(context, "animal.identifier_assign.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), json.encodeToString(command)) {
             database.lifecycle().insertIdentifier(
                 AnimalIdentifierEntity(command.identifierId, farmId, command.animalId, command.type, command.value.trim(), true, command.occurredEpochDay),
@@ -847,6 +890,14 @@ class RoomOpsRepository(
 
     suspend fun recentMoney() = database.money().recent(farmId, 50)
 
+    suspend fun recordBudget(command: RecordBudget, context: LocalCommandContext): LocalCommandResult = configurationCommands.recordBudget(command, context)
+
+    suspend fun reviseBudget(command: ReviseBudget, context: LocalCommandContext): LocalCommandResult = configurationCommands.reviseBudget(command, context)
+
+    suspend fun budgets() = database.budgets().active(farmId)
+
+    suspend fun budgetRevisions(budgetKey: String) = database.budgets().revisions(farmId, budgetKey)
+
     suspend fun createItem(command: CreateInventoryItem, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.inventoryItem(command)?.let { error(it) }
         enqueue(context, "inventory.item_create.v1", "inventory_item", command.itemId, 0, json.encodeToString(command)) {
@@ -898,47 +949,44 @@ class RoomOpsRepository(
 
     suspend fun items() = database.inventory().items(farmId)
 
-    suspend fun createGroup(command: CreateAnimalGroup, context: LocalCommandContext): LocalCommandResult {
-        OpsValidator.group(command)?.let { error(it) }
-        enqueue(context, "group.create.v1", "animal_group", command.groupId, 0, json.encodeToString(command)) {
-            database.groups().insert(AnimalGroupEntity(command.groupId, farmId, command.speciesCode, command.name.trim(), command.headCount))
-        }
-        return LocalCommandResult(context.mutationId, command.groupId, true)
-    }
+    suspend fun createGroup(command: CreateAnimalGroup, context: LocalCommandContext): LocalCommandResult = groupCommands.createGroup(command, context)
 
     suspend fun groups() = database.groups().forFarm(farmId)
 
-    suspend fun createPaddock(command: CreatePaddock, context: LocalCommandContext): LocalCommandResult {
-        OpsValidator.paddock(command)?.let { error(it) }
-        enqueue(context, "paddock.create.v1", "paddock", command.paddockId, 0, json.encodeToString(command)) {
-            database.paddocks().insert(
-                PaddockEntity(command.paddockId, farmId, command.code.trim(), command.displayName.trim(), command.areaM2, command.waterSource, command.shade, true),
-            )
-        }
-        return LocalCommandResult(context.mutationId, command.paddockId, true)
-    }
+    suspend fun group(groupId: String) = database.groups().get(farmId, groupId)
+
+    suspend fun amendGroup(command: AmendAnimalGroup, context: LocalCommandContext): LocalCommandResult = groupCommands.amendGroup(command, context)
+
+    /**
+     * FOS-GROUP-007 — move one or more animals between groups of the same species. The membership
+     * link is the authoritative per-animal record: every animal is re-linked to the target group and
+     * both groups' recorded head counts follow the animals that actually change membership. Animals
+     * with no recorded membership are treated as unassigned and may be claimed by the move as their
+     * first group assignment. On replay the same handler runs in replay mode; re-application of an
+     * already-applied animal is a no-op, and a move whose precondition no longer holds (a genuinely
+     * concurrent move) fails loudly so the Conflict Centre can reconcile it — never silently
+     * overwritten.
+     *
+     */
+    suspend fun moveAnimalGroup(command: MoveAnimalGroup, context: LocalCommandContext): LocalCommandResult = groupCommands.moveAnimalGroup(command, context)
+
+    /** Animals whose recorded membership is [groupId], for the FOS-GROUP-007 move screen. */
+    suspend fun animalsInGroup(groupId: String) = database.groupMemberships().animalsInGroup(farmId, groupId)
+
+    /** Animals of [speciesCode] with no recorded group membership, for first-assignment moves. */
+    suspend fun unassignedAnimals(speciesCode: String) = database.groupMemberships().unassignedAnimals(farmId, speciesCode)
+
+    suspend fun createPaddock(command: CreatePaddock, context: LocalCommandContext): LocalCommandResult = resourceCommands.createPaddock(command, context)
 
     suspend fun paddocks() = database.paddocks().active(farmId)
 
-    suspend fun startGrazing(command: StartGrazing, context: LocalCommandContext): LocalCommandResult {
-        if (database.grazing().hasOpen(farmId, command.paddockId)) error("This paddock already has an open grazing session")
-        val group = requireNotNull(database.groups().get(farmId, command.groupId)) { "Group not found" }
-        enqueue(context, "grazing.start.v1", "grazing_session", command.sessionId, 0, json.encodeToString(command)) {
-            database.grazing().insert(
-                GrazingSessionEntity(command.sessionId, farmId, command.paddockId, command.groupId, group.speciesCode, command.enteredEpochDay, null, command.headCount),
-            )
-        }
-        return LocalCommandResult(context.mutationId, command.sessionId, true)
-    }
+    suspend fun startGrazing(command: StartGrazing, context: LocalCommandContext): LocalCommandResult = resourceCommands.startGrazing(command, context)
 
-    suspend fun endGrazing(command: EndGrazing, context: LocalCommandContext): LocalCommandResult {
-        enqueue(context, "grazing.end.v1", "grazing_session", command.sessionId, expectedVersion("grazing_session", command.sessionId), json.encodeToString(command)) {
-            database.grazing().end(farmId, command.sessionId, command.exitedEpochDay)
-        }
-        return LocalCommandResult(context.mutationId, command.sessionId, true)
-    }
+    suspend fun endGrazing(command: EndGrazing, context: LocalCommandContext): LocalCommandResult = resourceCommands.endGrazing(command, context)
 
     suspend fun openGrazing() = database.grazing().open(farmId)
+
+    suspend fun grazingSummary() = database.grazing().summaryByPaddock(farmId)
 
     suspend fun recordLabour(command: RecordLabour, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.labour(command)?.let { error(it) }
@@ -949,50 +997,60 @@ class RoomOpsRepository(
     }
 
     suspend fun recentLabour() = database.labour().recent(farmId, 50)
+    suspend fun allLabour() = database.labour().recent(farmId, -1)
 
-    suspend fun createAsset(command: CreateFarmAsset, context: LocalCommandContext): LocalCommandResult {
-        OpsValidator.asset(command)?.let { error(it) }
-        enqueue(context, "asset.create.v1", "farm_asset", command.assetId, 0, json.encodeToString(command)) {
-            database.assets().insert(FarmAssetEntity(command.assetId, farmId, command.code.trim(), command.name.trim(), command.kind))
-        }
-        return LocalCommandResult(context.mutationId, command.assetId, true)
-    }
+    suspend fun createAsset(command: CreateFarmAsset, context: LocalCommandContext): LocalCommandResult = resourceCommands.createAsset(command, context)
 
     suspend fun assets() = database.assets().forFarm(farmId)
 
-    suspend fun recordMaintenance(command: RecordMaintenance, context: LocalCommandContext): LocalCommandResult {
-        enqueue(context, "maintenance.record.v1", "farm_asset", command.assetId, expectedVersion("farm_asset", command.assetId), json.encodeToString(command)) {
-            database.maintenance().insert(MaintenanceEventEntity(command.eventId, farmId, command.assetId, command.title.trim(), command.occurredEpochDay, command.note))
-        }
-        return LocalCommandResult(context.mutationId, command.eventId, true)
-    }
+    suspend fun recordMaintenance(command: RecordMaintenance, context: LocalCommandContext): LocalCommandResult = resourceCommands.recordMaintenance(command, context)
 
     suspend fun recentMaintenance() = database.maintenance().recent(farmId, 50)
+    suspend fun allMaintenance() = database.maintenance().recent(farmId, -1)
 
-    suspend fun issueFeed(command: IssueFeed, context: LocalCommandContext): LocalCommandResult {
-        val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
-        OpsValidator.feed(command, item.quantityMilli)?.let { error(it) }
-        enqueue(context, "feed.issue.v1", "inventory_item", command.itemId, expectedVersion("inventory_item", command.itemId), json.encodeToString(command)) {
-            database.feedIssues().insert(FeedIssueEntity(command.issueId, farmId, command.itemId, command.groupId, command.quantityMilli, command.occurredEpochDay))
-            database.inventory().insertMovement(
-                InventoryMovementEntity(command.issueId, farmId, command.itemId, "issue", command.quantityMilli, context.occurredAtEpochMillis),
-            )
-            database.inventory().setQuantity(farmId, command.itemId, item.quantityMilli - command.quantityMilli, context.occurredAtEpochMillis)
-        }
-        return LocalCommandResult(context.mutationId, command.issueId, true)
-    }
+    suspend fun recordAssetMeter(command: RecordAssetMeter, context: LocalCommandContext): LocalCommandResult = resourceCommands.recordAssetMeter(command, context)
+
+    suspend fun meterReadings(assetId: String) = database.assetMeters().forAsset(farmId, assetId)
+
+    suspend fun attachmentsForOwner(ownerType: String, ownerId: String) =
+        database.attachments().forOwner(farmId, ownerType, ownerId)
+
+    suspend fun issueFeed(command: IssueFeed, context: LocalCommandContext): LocalCommandResult = resourceCommands.issueFeed(command, context)
 
     suspend fun recentFeed() = database.feedIssues().recent(farmId, 50)
+    suspend fun feedIssueCount() = database.feedIssues().count(farmId)
+    suspend fun feedTotalsByItem() = database.feedIssues().totalsByItem(farmId)
 
-    suspend fun recordWater(command: RecordWater, context: LocalCommandContext): LocalCommandResult {
-        OpsValidator.water(command)?.let { error(it) }
-        enqueue(context, "water.record.v1", "water_record", command.recordId, 0, json.encodeToString(command)) {
-            database.water().insert(WaterRecordEntity(command.recordId, farmId, command.source.trim(), command.litresMilli, command.occurredEpochDay))
-        }
-        return LocalCommandResult(context.mutationId, command.recordId, true)
-    }
+    suspend fun recordFeedPlan(command: RecordFeedPlan, context: LocalCommandContext): LocalCommandResult = resourceCommands.recordFeedPlan(command, context)
+
+    suspend fun feedPlans() = database.feedPlans().forFarm(farmId)
+
+    suspend fun feedPlan(planId: String) = database.feedPlans().get(farmId, planId)
+
+    suspend fun recordWater(command: RecordWater, context: LocalCommandContext): LocalCommandResult = resourceCommands.recordWater(command, context)
 
     suspend fun recentWater() = database.water().recent(farmId, 50)
+    suspend fun waterRecordCount() = database.water().count(farmId)
+    suspend fun waterTotalsBySource() = database.water().totalsBySource(farmId)
+
+    suspend fun recordWaterPoint(command: RecordWaterPoint, context: LocalCommandContext): LocalCommandResult = resourceCommands.recordWaterPoint(command, context)
+
+    suspend fun waterPoints() = database.waterPoints().forFarm(farmId)
+
+    suspend fun activeWaterPoints() = database.waterPoints().active(farmId)
+
+    suspend fun waterPoint(pointId: String) = database.waterPoints().get(farmId, pointId)
+
+    suspend fun waterRecordsForSource(source: String) = database.water().forSource(farmId, source, 50)
+
+    suspend fun recordWaterPointEvent(command: RecordWaterPointEvent, context: LocalCommandContext): LocalCommandResult = resourceCommands.recordWaterPointEvent(command, context)
+
+    suspend fun waterPointEvents(pointId: String) = database.waterPointEvents().forPoint(farmId, pointId)
+
+    suspend fun recentWaterPointEvents(kind: String, limit: Int = 50) =
+        database.waterPointEvents().recentByKind(farmId, kind, limit)
+
+    suspend fun waterPointEventCount(kind: String) = database.waterPointEvents().countByKind(farmId, kind)
 
     suspend fun recordSale(command: RecordSale, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.sale(command)?.let { error(it) }
@@ -1045,6 +1103,46 @@ class RoomOpsRepository(
     }
 
     suspend fun recentTreatments() = database.treatments().recent(farmId, 50)
+
+    suspend fun recordVaccination(command: RecordHealthVaccination, context: LocalCommandContext): LocalCommandResult {
+        OpsValidator.vaccination(command)?.let { error(it) }
+        val formulary = requireNotNull(database.formulary().get(farmId, command.formularyItemId)) {
+            "Vaccination needs a vet-approved formulary item"
+        }
+        // Restored from owner commit 474e8ef (merge 30eba5a): the formulary item
+        // must be vet-approved AND species-matched; the target animal/group must
+        // exist and match the command species. The local port had dropped these.
+        require(formulary.vetApproved && formulary.speciesCode == command.speciesCode) {
+            "Vaccination needs a vet-approved formulary item for " + command.speciesCode
+        }
+
+        val animalId = command.animalId?.trim()?.takeIf { it.isNotEmpty() }
+        val groupId = command.groupId?.trim()?.takeIf { it.isNotEmpty() }
+        if (animalId != null) {
+            val animal = requireNotNull(database.animals().get(farmId, animalId)) { "Vaccination animal not found" }
+            require(animal.status == "active" && animal.speciesCode == command.speciesCode) {
+                "Vaccination needs an active " + command.speciesCode + " animal"
+            }
+        }
+        if (groupId != null) {
+            val group = requireNotNull(database.groups().get(farmId, groupId)) { "Vaccination group not found" }
+            require(group.speciesCode == command.speciesCode) { "Vaccination group species mismatch" }
+        }
+        enqueue(context, "health.record_vaccination.v1", "health_vaccination", command.vaccinationId, 0, json.encodeToString(command)) {
+            database.vaccinations().insert(
+                HealthVaccinationEntity(
+                    command.vaccinationId, farmId, animalId, groupId, command.speciesCode,
+                    command.formularyItemId, command.dose?.trim()?.takeIf { it.isNotBlank() },
+                    command.method?.trim()?.takeIf { it.isNotBlank() }, command.occurredAtEpochMillis,
+                ),
+            )
+        }
+        return LocalCommandResult(context.mutationId, command.vaccinationId, true)
+    }
+
+    suspend fun recentVaccinations() = database.vaccinations().recent(farmId, 50)
+
+    suspend fun vaccinationsForAnimal(animalId: String) = database.vaccinations().forAnimal(farmId, animalId)
 
     suspend fun recordFlockDay(command: RecordPoultryFlockDay, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.flockDay(command)?.let { error(it) }
@@ -1159,32 +1257,9 @@ class RoomOpsRepository(
         return LocalCommandResult(context.mutationId, command.fosterId, true)
     }
 
-    suspend fun createSupplier(command: CreateSupplier, context: LocalCommandContext): LocalCommandResult {
-        OpsValidator.supplier(command)?.let { error(it) }
-        enqueue(context, "supplier.create.v1", "supplier", command.supplierId, 0, json.encodeToString(command)) {
-            database.lifecycle().insertSupplier(SupplierEntity(command.supplierId, farmId, command.name.trim(), command.leadTimeDays))
-        }
-        return LocalCommandResult(context.mutationId, command.supplierId, true)
-    }
+    suspend fun createSupplier(command: CreateSupplier, context: LocalCommandContext): LocalCommandResult = resourceCommands.createSupplier(command, context)
 
-    suspend fun recordPurchase(command: RecordPurchase, context: LocalCommandContext): LocalCommandResult {
-        OpsValidator.purchase(command)?.let { error(it) }
-        requireNotNull(database.lifecycle().suppliers(farmId).firstOrNull { it.id == command.supplierId }) { "Supplier not found" }
-        val item = requireNotNull(database.inventory().item(farmId, command.itemId)) { "Inventory item not found" }
-        enqueue(context, "purchase.record.v1", "inventory_item", command.itemId, expectedVersion("inventory_item", command.itemId), json.encodeToString(command)) {
-            database.lifecycle().insertPurchase(
-                PurchaseEntity(command.purchaseId, farmId, command.supplierId, command.itemId, command.quantityMilli, command.amountMinor, command.currency, command.occurredEpochDay),
-            )
-            database.inventory().insertMovement(
-                InventoryMovementEntity(command.purchaseId, farmId, command.itemId, "receive", command.quantityMilli, context.occurredAtEpochMillis),
-            )
-            database.inventory().setQuantity(farmId, command.itemId, item.quantityMilli + command.quantityMilli, context.occurredAtEpochMillis)
-            database.money().insert(
-                MoneyRecordEntity(command.purchaseId, farmId, "expense", "purchase", command.amountMinor, command.currency, command.occurredEpochDay, "purchase"),
-            )
-        }
-        return LocalCommandResult(context.mutationId, command.purchaseId, true)
-    }
+    suspend fun recordPurchase(command: RecordPurchase, context: LocalCommandContext): LocalCommandResult = resourceCommands.recordPurchase(command, context)
 
     suspend fun acceptPack(command: AcceptHealthPack, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.pack(command)?.let { error(it) }
@@ -1287,20 +1362,12 @@ class RoomOpsRepository(
         return LocalCommandResult(context.mutationId, command.alertId, true)
     }
 
-    suspend fun recordCensus(command: RecordGroupCensus, context: LocalCommandContext): LocalCommandResult {
-        OpsValidator.census(command)?.let { error(it) }
-        requireNotNull(database.groups().get(farmId, command.groupId)) { "Census needs a group on this farm" }
-        enqueue(context, "group.census.v1", "animal_group", command.groupId, expectedVersion("animal_group", command.groupId), json.encodeToString(command)) {
-            database.lifecycle().insertCensus(
-                GroupCensusEntity(command.censusId, farmId, command.groupId, command.headCount, command.occurredEpochDay),
-            )
-            database.groups().setHeadCount(farmId, command.groupId, command.headCount)
-        }
-        return LocalCommandResult(context.mutationId, command.censusId, true)
-    }
+    suspend fun recordCensus(command: RecordGroupCensus, context: LocalCommandContext): LocalCommandResult = groupCommands.recordCensus(command, context)
 
     suspend fun suppliers() = database.lifecycle().suppliers(farmId)
     suspend fun purchases() = database.lifecycle().purchases(farmId, 50)
+    /** SQLite negative LIMIT reads the entire farm ledger, without a presentation cap. */
+    suspend fun allPurchases() = database.lifecycle().purchases(farmId, -1)
     suspend fun withdrawals() = database.lifecycle().withdrawals(farmId, 50)
     suspend fun packs() = database.lifecycle().packs(farmId)
 
@@ -1315,49 +1382,12 @@ class RoomOpsRepository(
         return database.diseaseCatalog().all()
     }
 
-    private suspend fun expectedVersion(aggregateType: String, aggregateId: String): Long {
-        val authoritative = database.aggregateVersions().getVersion(farmId, aggregateType, aggregateId) ?: 0L
-        val queued = database.outbox().countUnacknowledgedForAggregate(farmId, aggregateType, aggregateId)
-        return authoritative + queued
-    }
+    private suspend fun expectedVersion(aggregateType: String, aggregateId: String): Long =
+        journal.expectedVersion(aggregateType, aggregateId)
 
     private suspend fun enqueue(
-        context: LocalCommandContext,
-        commandName: String,
-        aggregateType: String,
-        aggregateId: String,
-        expectedStreamVersion: Long?,
-        payloadJson: String,
-        localWrite: suspend () -> Unit,
-    ) {
-        require(context.farmId == farmId) { "Farm context mismatch" }
-        if (replaying) return database.withTransaction { localWrite() }
-        database.withTransaction {
-            val ordinal = database.outbox().nextAggregateOrdinal(farmId, aggregateType, aggregateId)
-            localWrite()
-            database.insertOutboxAndJournal(
-                OutboxEntity(
-                    mutationId = context.mutationId,
-                    farmId = farmId,
-                    actorId = context.actorId,
-                    deviceId = context.deviceId,
-                    commandName = commandName,
-                    commandSchemaVersion = 1,
-                    aggregateType = aggregateType,
-                    aggregateId = aggregateId,
-                    aggregateOrdinal = ordinal,
-                    expectedStreamVersion = expectedStreamVersion,
-                    payloadJson = payloadJson,
-                    occurredAtEpochMillis = context.occurredAtEpochMillis,
-                    createdAtEpochMillis = System.currentTimeMillis(),
-                    state = SyncState.PENDING.name,
-                    attemptCount = 0,
-                    nextAttemptAtEpochMillis = null,
-                    lastErrorCode = null,
-                    serverEventId = null,
-                    serverStreamVersion = null,
-                ),
-            )
-        }
-    }
+        context: LocalCommandContext, commandName: String, aggregateType: String, aggregateId: String,
+        expectedStreamVersion: Long?, payloadJson: String, localWrite: suspend () -> Unit,
+    ) = journal.enqueue(context, commandName, aggregateType, aggregateId, expectedStreamVersion, payloadJson, localWrite)
+
 }

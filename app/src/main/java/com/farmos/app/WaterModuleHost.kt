@@ -13,9 +13,9 @@ import com.farmos.feature.ops.WaterRecordNavigator
 import com.farmos.feature.ops.WaterRecords
 import java.time.LocalDate
 import java.util.UUID
-import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
-/** Dedicated water-record orchestration preserving the existing command contract. */
+/** Water command orchestration and owning routes. FOS-WATER-001/004. */
 @Composable
 fun WaterModuleHost(
     farmId: String,
@@ -35,18 +35,27 @@ fun WaterModuleHost(
         rows.value = ops.recentWater().map { "${it.source} · ${it.litresMilli} ml" }
         records.value = loadRecords()
     }
-    LaunchedEffect(farmId) { runCatching { refresh() } }
-    fun run(block: suspend () -> Unit) {
-        scope.launch {
-            busy.value = true; error.value = null; saved.value = false
-            runCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }
-            busy.value = false
-        }
-    }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
+    fun run(block: suspend () -> Unit) = launchCommittedModuleWrite(
+        scope = scope,
+        write = block,
+        isBusy = { busy.value },
+        setBusy = { busy.value = it },
+        setError = { error.value = it },
+        enqueueSync = enqueueSync,
+        refresh = ::refresh,
+        onStarted = { saved.value = false },
+        onCommitted = { saved.value = true },
+    )
     val source = remember { mutableStateOf("trough") }
     val litres = remember { mutableStateOf("") }
     val day = remember { mutableStateOf("") }
-    WaterRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
+    val page = remember { mutableStateOf(WaterModulePage.HOME) }
+    val selectedPoint = remember { mutableStateOf<String?>(null) }
+    val eventKind = remember { mutableStateOf("inspection") }
+
+    when (page.value) {
+        WaterModulePage.HOME -> WaterRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-WATER-001", title = "Water",
         help = "Enter litres as a figure. The device stores milli-litres.",
         empty = "No water records on this device.", rows = rows.value,
@@ -59,6 +68,38 @@ fun WaterModuleHost(
         } },
         onBack = onBack,
         saved = saved.value,
-        extra = { recordActions() },
+        extra = {
+            recordActions()
+            androidx.compose.material3.TextButton(onClick = { page.value = WaterModulePage.POINTS }) { androidx.compose.material3.Text("Water points") }
+            androidx.compose.material3.TextButton(onClick = { page.value = WaterModulePage.REPORT }) { androidx.compose.material3.Text("Water report") }
+        },
     ) }
+        WaterModulePage.POINTS -> WaterPointListScreen(
+            ops = ops,
+            newContext = newContext,
+            enqueueSync = enqueueSync,
+            onSelect = { selectedPoint.value = it; page.value = WaterModulePage.POINT_DETAIL },
+            onBack = { page.value = WaterModulePage.HOME },
+        )
+        WaterModulePage.POINT_DETAIL -> WaterPointDetailScreen(
+            ops = ops,
+            pointId = selectedPoint.value.orEmpty(),
+            onRecordEvent = { kind -> eventKind.value = kind; page.value = WaterModulePage.EVENT },
+            onBack = { page.value = WaterModulePage.POINTS },
+        )
+        WaterModulePage.EVENT -> WaterPointEventCaptureScreen(
+            ops = ops,
+            newContext = newContext,
+            enqueueSync = enqueueSync,
+            pointId = selectedPoint.value,
+            kind = eventKind.value,
+            onBack = { page.value = if (selectedPoint.value.isNullOrBlank()) WaterModulePage.POINTS else WaterModulePage.POINT_DETAIL },
+        )
+        WaterModulePage.REPORT -> WaterReportScreen(
+            ops = ops,
+            onBack = { page.value = WaterModulePage.HOME },
+        )
+    }
 }
+
+private enum class WaterModulePage { HOME, POINTS, POINT_DETAIL, EVENT, REPORT }

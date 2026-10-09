@@ -5,6 +5,7 @@ import com.farmos.core.database.AnimalEntity
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.database.FamachaScoreEntity
 import com.farmos.core.database.GoatMilkEntity
+import com.farmos.core.database.GoatWeaningEntity
 import com.farmos.core.database.KiddingEntity
 import com.farmos.core.database.MeasurementEntity
 import com.farmos.core.database.OutboxEntity
@@ -45,7 +46,9 @@ import com.farmos.domain.goat.GoatWithdrawalSample
 import com.farmos.domain.goat.RecordGoatFamacha
 import com.farmos.domain.goat.RecordGoatKidding
 import com.farmos.domain.goat.RecordGoatMilk
+import com.farmos.domain.goat.RecordGoatWeaning
 import com.farmos.domain.goat.RecordGoatWeight
+import com.farmos.domain.goat.AmendGoatIdentity
 import com.farmos.domain.goat.RegisterGoat
 import com.farmos.domain.goat.SetGoatStatus
 import com.farmos.domain.goat.WeightSample
@@ -465,6 +468,43 @@ class RoomGoatRepository(
                 com.farmos.core.database.PedigreeRelationEntity(command.pedigreeLinkId, farmId, command.animalId, kidding.damId, "dam"),
             )
             journal(outbox(context, "goat.register_kid.v1", command.animalId, aggregateOrdinal, 0, json.encodeToString(command)))
+        }
+        return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
+    }
+
+    override suspend fun amendIdentity(command: AmendGoatIdentity, context: LocalCommandContext): LocalCommandResult =
+        GoatIdentityCommands(database, farmId, json, replaying).amend(command, context)
+
+    override suspend fun recordWeaning(command: RecordGoatWeaning, context: LocalCommandContext): LocalCommandResult {
+        require(context.farmId == farmId) { "Farm context mismatch" }
+        val validation = GoatValidator.weaning(command)
+        require(validation is GoatValidationResult.Valid) { (validation as GoatValidationResult.Invalid).message }
+        val animal = requireNotNull(database.animals().get(farmId, command.animalId)) { "Goat not found" }
+        require(animal.speciesCode == "goat" && animal.status == GoatStatus.ACTIVE.wireValue()) {
+            "Only an active goat can be weaned"
+        }
+
+        database.withTransaction {
+            val aggregateOrdinal = database.outbox().nextAggregateOrdinal(farmId, ANIMAL_AGGREGATE, command.animalId)
+            database.lifecycle().insertGoatWeaning(
+                GoatWeaningEntity(
+                    id = command.weaningId,
+                    farmId = farmId,
+                    animalId = command.animalId,
+                    weightGrams = command.weightGrams,
+                    occurredEpochDay = command.occurredEpochDay,
+                ),
+            )
+            journal(
+                outbox(
+                    context,
+                    "goat.record_weaning.v1",
+                    command.animalId,
+                    aggregateOrdinal,
+                    nextExpectedStreamVersion(command.animalId),
+                    json.encodeToString(command),
+                ),
+            )
         }
         return LocalCommandResult(context.mutationId, command.animalId, locallyDurable = true)
     }

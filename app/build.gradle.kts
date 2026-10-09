@@ -99,6 +99,8 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
 }
 
 dependencies {
+    implementation("com.google.android.gms:play-services-auth:22.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     implementation(project(":core:database"))
     implementation(project(":core:network"))
     implementation(project(":core:sync"))

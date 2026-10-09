@@ -158,6 +158,12 @@ class FarmNetworkPairingUiTest {
                 )
             }
         }
+        waitForTag("farm-screen:FOS-GLOBAL-014")
+        assertEquals(0, phoneDirectory.farms().size)
+        click("Join a farm on this network")
+        waitForTag("farm-screen:FOS-GLOBAL-007")
+        click("Back")
+        waitForTag("farm-screen:FOS-GLOBAL-014")
         click("Join a farm on this network")
         waitForTag("farm-screen:FOS-GLOBAL-007")
         waitForTag("join-farm:$farmId")

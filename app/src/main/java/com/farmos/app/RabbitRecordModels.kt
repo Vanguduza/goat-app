@@ -7,6 +7,7 @@ import com.farmos.feature.rabbit.RabbitNestBoxView
 import com.farmos.feature.rabbit.RabbitRecords
 import com.farmos.feature.rabbit.RabbitWaveEventView
 import com.farmos.feature.rabbit.RabbitWaveView
+import com.farmos.feature.rabbit.RabbitWeightView
 
 /**
  * Farm-scoped read model for the read-only rabbitry record pages. Nothing here writes. Wave events
@@ -44,6 +45,24 @@ internal suspend fun loadRabbitRecords(database: FarmOsDatabase, farmId: String)
     val kindledWaves = lifecycle.rabbitKindledWaveIds(farmId).toSet()
     val latestPalpations = latestPerWave(palpations.map { RabbitWaveFact(it.waveId, it.occurredEpochDay, it.id, it.result) })
     val latestOutcomes = latestPerWave(outcomes.map { RabbitWaveFact(it.waveId, it.occurredEpochDay, it.id, it.outcome) })
+    val weightRows = lifecycle.rabbitWeights(farmId)
+    val weightLabels = if (weightRows.isEmpty()) {
+        emptyMap()
+    } else {
+        database.animals().getMany(farmId, weightRows.map { it.animalId }.distinct()).associate {
+            it.id to listOfNotNull(it.tag, it.name).joinToString(" · ").ifBlank { it.id }
+        }
+    }
+    val weights = weightRows.map { row ->
+        RabbitWeightView(
+            id = row.id,
+            animalId = row.animalId,
+            animalLabel = weightLabels[row.animalId] ?: row.animalId,
+            weightKg = row.weightKg,
+            weighedAtEpochMillis = row.weighedAtEpochMillis,
+            notes = row.notes,
+        )
+    }
     return RabbitRecords(
         cages = cages.map { cage ->
             RabbitCageView(
@@ -72,6 +91,7 @@ internal suspend fun loadRabbitRecords(database: FarmOsDatabase, farmId: String)
             )
         },
         kits = lifecycle.kits(farmId).map { RabbitKitView(it.id, it.waveId, it.tempLabel, it.sex, it.status, it.retention, it.earTag) },
+        weights = weights,
     )
 }
 

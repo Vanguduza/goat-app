@@ -7,16 +7,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.design.runSuspendCatching
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.EndTaskSeries
-import com.farmos.feature.ops.EditTaskScreen
-import com.farmos.feature.ops.TaskDetailScreen
 import com.farmos.feature.ops.TaskEntryPage
-import com.farmos.feature.ops.TasksBoardScreen
 import java.time.LocalDate
-import kotlinx.coroutines.launch
 
+/** Loads the farm task board and owns command dispatch. Navigation and task evidence have separate surfaces. */
 @Composable
 fun TasksModuleHost(
     farmId: String,
@@ -27,90 +26,38 @@ fun TasksModuleHost(
     focusTaskId: String? = null,
     entryPage: TaskEntryPage = TaskEntryPage.BOARD,
     loadCompletedCount: suspend () -> Int? = { null },
-    /** Repeating and assigned tasks (D-020); null keeps the board to one-off tasks. */
     planning: TaskPlanning? = null,
+    database: FarmOsDatabase? = null,
 ) {
     val scope = rememberCoroutineScope()
     var board by remember(farmId) { mutableStateOf(TaskBoardData()) }
-    val rows = board.rows
     var completedCount by remember(farmId) { mutableStateOf<Int?>(null) }
-    var selectedId by remember(farmId, focusTaskId) { mutableStateOf(focusTaskId) }
-    var editingId by remember(farmId) { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    val deepEntry = focusTaskId != null
-
     suspend fun refresh() {
         board = loadTaskBoard(ops, planning, LocalDate.now().toEpochDay())
         completedCount = loadCompletedCount()
     }
-
-    fun runWrite(block: suspend () -> Unit) {
-        scope.launch {
-            busy = true
-            error = null
-            runCatching {
-                block()
-                refresh()
-            }.onSuccess {
-                enqueueSync()
-            }.onFailure { failure ->
-                error = failure.message
-            }
-            busy = false
-        }
-    }
-
-    LaunchedEffect(farmId) {
-        runCatching { refresh() }
-            .onFailure { error = it.message }
-    }
-
-    fun complete(taskId: String) = runWrite { completeTaskRow(rows.firstOrNull { it.id == taskId }, taskId, ops, planning, newContext()) }
-
-    val editing = editingId?.let { id -> rows.firstOrNull { it.id == id && it.status == "open" } }
-    if (editing != null && planning != null && planning.canPlanWork) {
-        EditTaskScreen(
-            task = editing,
-            assignees = board.assignees,
-            busy = busy,
-            error = error,
-            onSave = { draft -> runWrite { planning.edit(draft, newContext()).also { editingId = null } } },
-            onSaveOneOff = { draft -> runWrite { planning.update(draft, newContext()).also { editingId = null } } },
-            onBack = { editingId = null },
-        )
-        return
-    }
-
-    if (selectedId != null) {
-        TaskDetailScreen(
-            task = rows.firstOrNull { it.id == selectedId },
-            busy = busy,
-            error = error,
-            onComplete = ::complete,
-            onBack = { if (deepEntry) onBack() else selectedId = null },
-            canPlanWork = planning?.canPlanWork == true,
-            onEdit = { editingId = selectedId },
-        )
-        return
-    }
-
-    TasksBoardScreen(
-        rows = rows,
-        busy = busy,
-        error = error,
-        onCreate = { title, module, code, due -> runWrite { createOneOffTask(ops, title, module, code, due, newContext()) } },
-        onComplete = ::complete,
-        onOpenDetail = { selectedId = it },
-        completedCount = completedCount,
-        onBack = onBack,
-        entryPage = entryPage,
-        canPlanWork = planning?.canPlanWork == true,
-        currentAccountId = planning?.currentAccountId,
-        assignees = board.assignees,
-        series = board.series,
-        onCreateSeries = { draft -> planning?.let { runWrite { it.create(draft, newContext()) } } },
-        onEndSeries = { seriesId -> planning?.let { runWrite { it.commands.end(EndTaskSeries(seriesId, LocalDate.now().toEpochDay()), newContext()) } } },
-        repeatHorizonDays = planning?.let { TaskPlanning.HORIZON_DAYS },
+    fun runWrite(block: suspend () -> Unit) = launchCommittedModuleWrite(
+        scope = scope,
+        write = block,
+        isBusy = { busy },
+        setBusy = { busy = it },
+        setError = { error = it },
+        enqueueSync = enqueueSync,
+        refresh = ::refresh,
+    )
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() }.onFailure { error = it.message } }
+    val actions = TaskModuleActions(
+        create = { title, module, code, due -> runWrite { createOneOffTask(ops, title, module, code, due, newContext()) } },
+        complete = { id -> runWrite { completeTaskRow(board.rows.firstOrNull { it.id == id }, id, ops, planning, newContext()) } },
+        createSeries = { draft -> planning?.let { runWrite { it.create(draft, newContext()) } } },
+        endSeries = { id -> planning?.let { runWrite { it.commands.end(EndTaskSeries(id, LocalDate.now().toEpochDay()), newContext()) } } },
+        editSeries = { draft, done -> planning?.let { runWrite { it.edit(draft, newContext()); done() } } },
+        updateTask = { draft, done -> planning?.let { runWrite { it.update(draft, newContext()); done() } } },
+    )
+    TaskModuleNavigator(
+        farmId, board, completedCount, busy, error, focusTaskId, entryPage, planning,
+        database, newContext, actions, onBack,
     )
 }

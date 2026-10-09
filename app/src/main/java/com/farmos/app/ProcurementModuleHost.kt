@@ -1,29 +1,16 @@
 package com.farmos.app
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import com.farmos.core.design.FarmEntitySelector
-import com.farmos.core.design.FarmSelectionAtoms
-import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.RoomOpsRepository
-import com.farmos.domain.ops.CreateSupplier
 import com.farmos.domain.ops.FarmCurrency
-import com.farmos.domain.ops.RecordPurchase
-import com.farmos.feature.ops.ProcurementRecordNavigator
 import com.farmos.feature.ops.ProcurementRecords
-import com.farmos.feature.ops.SimpleCaptureScreen
-import java.math.BigDecimal
-import java.time.LocalDate
-import java.util.UUID
-import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
+import androidx.compose.runtime.SideEffect
 
-/** Dedicated procurement orchestration. Purchase recording preserves its inventory-and-expense transaction boundary. */
 @Composable
 fun ProcurementModuleHost(
     farmId: String,
@@ -35,46 +22,19 @@ fun ProcurementModuleHost(
     loadCurrency: suspend () -> String = { FarmCurrency.DEFAULT_CODE },
 ) {
     val scope = rememberCoroutineScope()
-    val currency by rememberFarmCurrency(farmId, loadCurrency)
-    val busy = remember { mutableStateOf(false) }
-    val saved = remember { mutableStateOf(false) }
-    val error = remember { mutableStateOf<String?>(null) }
-    val rows = remember { mutableStateOf(emptyList<String>()) }
-    val records = remember(farmId) { mutableStateOf(ProcurementRecords()) }
-    val supplierOptions = remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
-    val itemOptions = remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
-    suspend fun refresh() {
-        val supplierRows = ops.suppliers()
-        supplierOptions.value = supplierRows.map { FarmSelectorOption(it.id, it.name, "Lead time ${it.leadTimeDays} days") }
-        itemOptions.value = ops.items().map { FarmSelectorOption(it.id, "${it.name} · ${it.sku}", "${BigDecimal.valueOf(it.quantityMilli, 3).stripTrailingZeros().toPlainString()} ${it.unit} on hand") }
-        val suppliers = supplierRows.map { "${it.id} ${it.name} · lead ${it.leadTimeDays} d" }
-        val purchases = ops.purchases().map { "${it.id} item ${it.itemId} · ${it.quantityMilli} milli · ${it.amountMinor} ${it.currency}" }
-        rows.value = suppliers + purchases
-        records.value = loadRecords()
+    val currencyState = rememberFarmCurrency(farmId, loadCurrency)
+    val state = remember(farmId, ops) {
+        ProcurementModuleState(farmId, ops, newContext, enqueueSync, onBack, loadRecords, loadCurrency, scope, currencyState)
     }
-    LaunchedEffect(farmId) { runCatching { refresh() } }
-    fun run(block: suspend () -> Unit) {
-        scope.launch { busy.value = true; error.value = null; saved.value = false; runCatching { block(); refresh() }.onSuccess { saved.value = true; enqueueSync() }.onFailure { error.value = it.message }; busy.value = false }
+    SideEffect {
+        state.newContext = newContext
+        state.enqueueSync = enqueueSync
+        state.onBack = onBack
+        state.loadRecords = loadRecords
+        state.loadCurrency = loadCurrency
     }
-    val name = remember { mutableStateOf("") }; val lead = remember { mutableStateOf("0") }
-    val supplierId = remember { mutableStateOf("") }; val itemId = remember { mutableStateOf("") }
-    val qty = remember { mutableStateOf("") }; val amount = remember { mutableStateOf("") }; val day = remember { mutableStateOf("") }
-    ProcurementRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
-        screenId = "FOS-PROC-001", title = "Procurement",
-        help = "A purchase receives inventory and posts an expense in integer minor units of ${currency ?: "the farm currency"}.",
-        empty = "No suppliers on this device.", rows = rows.value, busy = busy.value, error = error.value,
-        fields = listOf("Supplier name" to name, "Lead time days" to lead), actionLabel = "Create supplier",
-        onSubmit = { run { ops.createSupplier(CreateSupplier(UUID.randomUUID().toString(), name.value, lead.value.toIntOrNull() ?: 0), newContext()) } },
-        onBack = onBack,
-        saved = saved.value,
-        extra = {
-            FarmEntitySelector(FarmSelectionAtoms.SUPPLIER_SELECTOR, "Supplier", supplierOptions.value, supplierId.value.ifBlank { null }, { supplierId.value = it }, "Create a supplier first.", enabled = !busy.value)
-            FarmEntitySelector(FarmSelectionAtoms.INVENTORY_ITEM_SELECTOR, "Inventory item", itemOptions.value, itemId.value.ifBlank { null }, { itemId.value = it }, "No inventory items on this device.", enabled = !busy.value)
-            androidx.compose.material3.OutlinedTextField(qty.value,{qty.value=it},label={androidx.compose.material3.Text("Quantity")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(amount.value,{amount.value=it},label={androidx.compose.material3.Text("Amount")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(day.value,{day.value=it},label={androidx.compose.material3.Text("Date")},placeholder={androidx.compose.material3.Text("YYYY-MM-DD")},modifier=androidx.compose.ui.Modifier.fillMaxWidth())
-            recordActions()
-            androidx.compose.material3.Button(onClick={run { val quantityMilli=qty.value.toScaledLongExact(3,"Quantity"); val code=checkNotNull(currency) { "The farm currency is still loading" }; val amountMinor=amount.value.toScaledLongExact(FarmCurrency.minorDigits(code),"Amount"); ops.recordPurchase(RecordPurchase(purchaseId = UUID.randomUUID().toString(), supplierId = supplierId.value, itemId = itemId.value, quantityMilli = quantityMilli, amountMinor = amountMinor, currency = code, occurredEpochDay = LocalDate.parse(day.value).toEpochDay()), newContext()) }},enabled=!busy.value&&supplierId.value.isNotBlank()&&itemId.value.isNotBlank()&&qty.value.isNotBlank()&&amount.value.isNotBlank()&&day.value.isNotBlank()){androidx.compose.material3.Text("Record purchase")}
-        },
-    ) }
+    LaunchedEffect(state) {
+        runSuspendCatching { state.refresh() }.onFailure { state.error.value = it.message }
+    }
+    ProcurementModuleContent(state)
 }

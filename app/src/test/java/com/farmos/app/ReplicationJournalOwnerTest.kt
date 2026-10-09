@@ -5,6 +5,9 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.LocalAccountEntity
+import com.farmos.core.database.LocalFarmEntity
+import com.farmos.core.database.ReplicationDeviceEntity
 import com.farmos.core.database.replicationVector
 import com.farmos.core.database.toEnvelope
 import com.farmos.core.model.LocalCommandContext
@@ -46,6 +49,19 @@ class ReplicationJournalOwnerTest {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
             .allowMainThreadQueries()
             .build()
+        for (scopeFarm in listOf(farm, otherFarm)) {
+            database.localAccess().insertFarmIfAbsent(LocalFarmEntity(scopeFarm, "Review farm", 1_790_000_000_000L))
+            database.localAccess().upsertAccount(LocalAccountEntity(
+                accountId = "worker-" + scopeFarm, farmId = scopeFarm, username = "worker",
+                displayName = "Worker", role = "WORKER", status = "ACTIVE",
+                credentialKind = "PIN", credentialHash = "test-credential-hash", failedAttempts = 0,
+                lockedUntilEpochMillis = null, workerId = null, createdAtEpochMillis = 1_790_000_000_000L,
+            ))
+            database.replicationBlocking().upsertDevice(ReplicationDeviceEntity(
+                farmId = scopeFarm, deviceId = device, name = "Tablet", status = DeviceStatus.ACTIVE.name,
+                lastReportedOwnSequence = 0L, revokedAfterSequence = null, isLocal = true,
+            ))
+        }
     }
 
     @After
@@ -53,7 +69,7 @@ class ReplicationJournalOwnerTest {
         database.close()
     }
 
-    private fun context(farmId: String, at: Long) = LocalCommandContext(farmId, "worker-1", device, UUID.randomUUID().toString(), at)
+    private fun context(farmId: String, at: Long) = LocalCommandContext(farmId, "worker-" + farmId, device, UUID.randomUUID().toString(), at)
 
     @Test
     fun eachLocalCommandJournalsOneSealedOperationInDeviceSequence() = runBlocking {

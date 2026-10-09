@@ -57,6 +57,7 @@ class PoultryCaptureOwnerTest {
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java).build()
         runBlocking {
+            database.seedCaptureOwner(farm)
             database.groups().insert(AnimalGroupEntity("grp-layers", farm, "poultry", "Layer flock A", 400))
             database.groups().insert(AnimalGroupEntity("grp-ewes", farm, "sheep", "Ewe flock", 120))
             database.groups().insert(AnimalGroupEntity("grp-other", otherFarm, "poultry", "Other farm layers", 300))
@@ -120,6 +121,7 @@ class PoultryCaptureOwnerTest {
         assertEquals("house-a", placement.houseId)
         assertEquals(400, placement.headCount)
         compose.waitUntil(10_000) { syncRequests == 1 }
+        runBlocking { database.assertLocalCaptureJournal(farm, "poultry.flock_place.v1") }
     }
 
     @Test

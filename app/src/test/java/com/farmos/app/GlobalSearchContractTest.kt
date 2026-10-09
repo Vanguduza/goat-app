@@ -75,6 +75,7 @@ class GlobalSearchContractTest {
             }
         }
         compose.onNodeWithTag("farm-screen:FOS-HOME-007").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("farm-screen:FOS-SEARCH-004").performScrollTo().assertIsDisplayed()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-031").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("No matching animal records.").assertExists()
     }

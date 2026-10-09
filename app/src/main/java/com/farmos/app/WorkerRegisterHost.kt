@@ -19,6 +19,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.farmos.core.design.runSuspendCatching
 
 /** Every worker on the farm, active first, with the local account linked to each, if any. */
 internal suspend fun loadWorkers(database: FarmOsDatabase, farmId: String): List<WorkerView> {
@@ -49,7 +50,7 @@ fun WorkerRegisterHost(
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 check(canManage) { "Only supervisors and farm management manage workers" }
                 block()
                 workers = loadWorkers(database, farmId)
@@ -58,7 +59,7 @@ fun WorkerRegisterHost(
         }
     }
 
-    LaunchedEffect(farmId) { runCatching { workers = loadWorkers(database, farmId) }.onFailure { error = it.message } }
+    LaunchedEffect(farmId) { runSuspendCatching { workers = loadWorkers(database, farmId) }.onFailure { error = it.message } }
 
     WorkerRegisterScreens(
         workers = workers,

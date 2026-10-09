@@ -96,11 +96,22 @@ data class RabbitCageView(val id: String, val code: String, val doeCapacity: Int
 
 data class RabbitKitView(val id: String, val waveId: String, val label: String, val sex: String, val status: String, val retention: String, val earTag: String?)
 
+/** FOS-RABBIT-032 — one governed rabbit weighing, read model for the weight record pages. */
+data class RabbitWeightView(
+    val id: String,
+    val animalId: String,
+    val animalLabel: String,
+    val weightKg: Double,
+    val weighedAtEpochMillis: Long,
+    val notes: String?,
+)
+
 /** Local, farm-scoped rabbitry records for the read-only record pages. Nothing here writes. */
 data class RabbitRecords(
     val cages: List<RabbitCageView> = emptyList(),
     val waves: List<RabbitWaveView> = emptyList(),
     val kits: List<RabbitKitView> = emptyList(),
+    val weights: List<RabbitWeightView> = emptyList(),
 )
 
 private val AVAILABLE_BOX_STATES = setOf("available", "sanitized")
@@ -231,6 +242,7 @@ internal fun RabbitKindlingDueScreen(records: RabbitRecords, today: LocalDate, o
 }
 
 /** FOS-RABBIT-018 — one wave's stored schedule, recorded events and kits. */
+/** FOS-RABBIT-035 — rabbit timeline: the recorded-events section is the wave's dated event timeline (root tag FOS-RABBIT-018). */
 @Composable
 internal fun RabbitLitterProfileScreen(records: RabbitRecords, onBack: () -> Unit) {
     var selectedId by rememberSaveable { mutableStateOf(records.waves.firstOrNull()?.id) }
@@ -277,6 +289,7 @@ internal fun RabbitLitterProfileScreen(records: RabbitRecords, onBack: () -> Uni
 }
 
 /** FOS-RABBIT-019 — individual kits recorded on this device, grouped by wave. */
+/** FOS-RABBIT-023 — individualise kits: this census is the individual-kit surface (root tag FOS-RABBIT-019). */
 @Composable
 internal fun RabbitKitCensusScreen(records: RabbitRecords, onBack: () -> Unit) {
     FarmOperationalPage("FOS-RABBIT-019", "Kit census", "Individual kits recorded on this device.", FarmVisualClass.I3, onBack) {

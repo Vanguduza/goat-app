@@ -6,6 +6,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.ApplicationState
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.LocalAccountEntity
+import com.farmos.core.database.ReplicationDeviceEntity
 import com.farmos.core.database.toEnvelope
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.goat.GoatReplicationAppliers
@@ -51,8 +53,19 @@ class OpsReplicationApplierTest {
         .build()
         .also { databases += it }
 
-    private fun endpoint(db: FarmOsDatabase, device: String, vararg peers: String) =
-        RoomReplicaEndpoint(db, farm, device, replicationAppliers).apply { peers.forEach { registerPairedDevice(it, it) } }
+    private fun endpoint(db: FarmOsDatabase, device: String, vararg peers: String): RoomReplicaEndpoint {
+        db.localAccess().upsertAccount(LocalAccountEntity(
+            accountId = "worker-" + device, farmId = farm, username = "worker-" + device,
+            displayName = "Worker " + device, role = "WORKER", status = "ACTIVE",
+            credentialKind = "PIN", credentialHash = "test-credential-hash", failedAttempts = 0,
+            lockedUntilEpochMillis = null, workerId = null, createdAtEpochMillis = 1_790_000_000_000L,
+        ))
+        db.replicationBlocking().upsertDevice(ReplicationDeviceEntity(
+            farmId = farm, deviceId = device, name = device, status = "ACTIVE",
+            lastReportedOwnSequence = 0L, revokedAfterSequence = null, isLocal = true,
+        ))
+        return RoomReplicaEndpoint(db, farm, device, replicationAppliers).apply { peers.forEach { registerPairedDevice(it, it) } }
+    }
 
     private fun context(device: String, at: Long) = LocalCommandContext(farm, "worker-$device", device, UUID.randomUUID().toString(), at)
 
@@ -118,7 +131,7 @@ class OpsReplicationApplierTest {
     fun everyCommandTheOpsRepositoryJournalsHasAnApplier() {
         fun source(name: String) = java.io.File("../data/herd/src/main/kotlin/com/farmos/data/herd/$name").takeIf { it.exists() }
             ?: java.io.File("data/herd/src/main/kotlin/com/farmos/data/herd/$name")
-        val text = listOf("RoomOpsRepository.kt", "BreedingDueCommands.kt", "TaskSeriesCommands.kt", "StockCountCommands.kt", "WorkerRegisterCommands.kt", "AnimalExitCommands.kt", "LabourCommands.kt", "CustomerCommands.kt", "AttachmentCommands.kt").joinToString("\n") { source(it).readText() }
+        val text = listOf("RoomOpsRepository.kt", "FarmConfigurationCommands.kt", "AnimalGroupCommands.kt", "FarmResourceCommands.kt", "OpsCommandJournal.kt", "BreedingDueCommands.kt", "TaskSeriesCommands.kt", "StockCountCommands.kt", "WorkerRegisterCommands.kt", "AnimalExitCommands.kt", "LabourCommands.kt", "CustomerCommands.kt", "AttachmentCommands.kt").joinToString("\n") { source(it).readText() }
         val journalled = Regex("\"([a-z_]+\\.[a-z_]+\\.v\\d)\"").findAll(text).map { it.groupValues[1] }.toSet()
         assertTrue(journalled.size > 80)
         assertEquals(journalled, journalled.intersect(OpsReplicationAppliers.all.keys))
@@ -150,10 +163,13 @@ class OpsReplicationApplierTest {
 
     @Test
     fun everyGoatCommandHasAnApplier() {
-        val source = java.io.File("../data/goat/src/main/kotlin/com/farmos/data/goat/RoomGoatRepository.kt").takeIf { it.exists() }
-            ?: java.io.File("data/goat/src/main/kotlin/com/farmos/data/goat/RoomGoatRepository.kt")
-        val journalled = Regex("\"(goat\\.[a-z_]+\\.v\\d)\"").findAll(source.readText()).map { it.groupValues[1] }.toSet()
-        assertEquals(13, journalled.size)
+        fun source(name: String): java.io.File =
+            java.io.File("../data/goat/src/main/kotlin/com/farmos/data/goat/$name").takeIf { it.exists() }
+                ?: java.io.File("data/goat/src/main/kotlin/com/farmos/data/goat/$name")
+        val sources = listOf("RoomGoatRepository.kt", "GoatIdentityCommands.kt")
+            .joinToString("\n") { source(it).readText() }
+        val journalled = Regex("\"(goat\\.[a-z_]+\\.v\\d)\"").findAll(sources).map { it.groupValues[1] }.toSet()
+        assertEquals(15, journalled.size)
         assertEquals(journalled, journalled.intersect(GoatReplicationAppliers.all.keys))
         HerdReplicationAppliers.SPECIES.forEach { species ->
             listOf("register", "record_weight", "set_status").forEach { assertTrue("$species.$it.v1" in HerdReplicationAppliers.all) }

@@ -8,6 +8,7 @@ Thumbs.db
 
 # Android / build
 .gradle/
+.kotlin/
 build/
 local.properties
 *.apk
@@ -30,7 +31,7 @@ captures/
 # Node (if any)
 node_modules/
 
-# Local project-truth evidence (authoritative ledger lives on project-truth-ledger)
+# Checkout-scoped project-truth evidence (canonical authority: main plus PR/CI)
 .project-truth/
 __pycache__/
 *.pyc

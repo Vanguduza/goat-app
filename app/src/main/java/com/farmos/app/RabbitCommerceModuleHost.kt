@@ -24,6 +24,7 @@ import com.farmos.feature.rabbit.RabbitCommerceRecords
 import java.time.LocalDate
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** Rabbit commerce/waitlist boundary kept separate from biological RabbitModuleHost to avoid another mega-host. */
 @Composable
@@ -50,11 +51,11 @@ fun RabbitCommerceModuleHost(
         beddingLineState.value = ops.inventoryLink()?.let { "Bedding ${it.nestBeddingItemId ?: "none"} · ${it.nestBeddingQtyMilli} milli" } ?: "No bedding item bound."
         recordsState.value = loadRecords()
     }
-    LaunchedEffect(farmId) { runCatching { refresh() } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busyState.value = true; errorState.value = null
-            runCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { errorState.value = it.message }
+            runSuspendCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { errorState.value = it.message }
             busyState.value = false
         }
     }

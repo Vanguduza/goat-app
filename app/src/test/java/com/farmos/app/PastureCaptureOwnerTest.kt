@@ -51,6 +51,7 @@ class PastureCaptureOwnerTest {
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java).build()
         runBlocking {
+            database.seedCaptureOwner(farm)
             database.paddocks().insert(PaddockEntity("pad-north", farm, "N1", "North camp", null, "trough", true, true))
             database.paddocks().insert(PaddockEntity("pad-other", otherFarm, "X9", "Other farm camp", null, "dam", false, true))
             database.groups().insert(AnimalGroupEntity("grp-ewes", farm, "sheep", "Ewe flock", 120))
@@ -96,5 +97,6 @@ class PastureCaptureOwnerTest {
         assertEquals("sheep", session.speciesCode)
         assertEquals(118, session.headCount)
         compose.waitUntil(10_000) { syncRequests == 1 }
+        runBlocking { database.assertLocalCaptureJournal(farm, "grazing.start.v1") }
     }
 }

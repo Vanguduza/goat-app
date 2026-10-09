@@ -18,9 +18,9 @@ import com.farmos.feature.ops.SimpleCaptureScreen
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
-import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
-/** Dedicated feed orchestration. Inventory is read for selection/context; feed owns the feed issue mutation. */
+/** Feed command orchestration and owning routes. FOS-FEED-001/002. */
 @Composable
 fun FeedModuleHost(
     farmId: String,
@@ -45,20 +45,25 @@ fun FeedModuleHost(
         itemOptions = items.map { FarmSelectorOption(it.id, "${it.name} · ${it.sku}", "${BigDecimal.valueOf(it.quantityMilli, 3).stripTrailingZeros().toPlainString()} ${it.unit} on hand") }
         records = loadRecords()
     }
-    LaunchedEffect(farmId) { runCatching { refresh() } }
-    fun run(block: suspend () -> Unit) {
-        scope.launch {
-            busy = true
-            error = null
-            runCatching { block(); refresh() }.onSuccess { enqueueSync() }.onFailure { error = it.message }
-            busy = false
-        }
-    }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() } }
+    fun run(block: suspend () -> Unit) = launchCommittedModuleWrite(
+        scope = scope,
+        write = block,
+        isBusy = { busy },
+        setBusy = { busy = it },
+        setError = { error = it },
+        enqueueSync = enqueueSync,
+        refresh = ::refresh,
+    )
 
     val itemId = androidx.compose.runtime.remember { mutableStateOf("") }
     val qty = androidx.compose.runtime.remember { mutableStateOf("") }
     val day = androidx.compose.runtime.remember { mutableStateOf("") }
-    FeedRecordNavigator(records) { recordActions -> SimpleCaptureScreen(
+    var page by androidx.compose.runtime.remember { mutableStateOf(FeedModulePage.HOME) }
+    var selectedPlan by androidx.compose.runtime.remember { mutableStateOf<String?>(null) }
+
+    when (page) {
+        FeedModulePage.HOME -> FeedRecordNavigator(records) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-FEED-001",
         title = "Feed",
         help = "Issuing feed deducts inventory in milli-units. Ration percentages stay advisory drafts.",
@@ -81,6 +86,39 @@ fun FeedModuleHost(
         extra = {
             FarmEntitySelector(FarmSelectionAtoms.INVENTORY_ITEM_SELECTOR, "Feed item", itemOptions, itemId.value.ifBlank { null }, { itemId.value = it }, "No inventory items on this device.", enabled = !busy)
             recordActions()
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.PLANS }) { androidx.compose.material3.Text("Feed plans") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.COST }) { androidx.compose.material3.Text("Feed cost") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.RATION_BUILDER }) { androidx.compose.material3.Text("Ration builder") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.RATION_ANALYSIS }) { androidx.compose.material3.Text("Ration analysis") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.RATION_COMPARE }) { androidx.compose.material3.Text("Compare rations") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.ALERTS }) { androidx.compose.material3.Text("Feed alerts") }
+            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.REPORT }) { androidx.compose.material3.Text("Feed report") }
         },
     ) }
+        FeedModulePage.PLANS -> FeedPlanListScreen(
+            ops = ops,
+            newContext = newContext,
+            enqueueSync = enqueueSync,
+            onSelect = { selectedPlan = it; page = FeedModulePage.PLAN_DETAIL },
+            onBack = { page = FeedModulePage.HOME },
+        )
+        FeedModulePage.PLAN_DETAIL -> FeedPlanDetailScreen(
+            ops = ops,
+            planId = selectedPlan.orEmpty(),
+            onBack = { page = FeedModulePage.PLANS },
+        )
+        FeedModulePage.COST -> FeedCostScreen(ops = ops, onBack = { page = FeedModulePage.HOME })
+        FeedModulePage.RATION_BUILDER -> RationBuilderScreen(
+            ops = ops,
+            newContext = newContext,
+            enqueueSync = enqueueSync,
+            onBack = { page = FeedModulePage.HOME },
+        )
+        FeedModulePage.RATION_ANALYSIS -> RationAnalysisScreen(ops = ops, onBack = { page = FeedModulePage.HOME })
+        FeedModulePage.RATION_COMPARE -> RationCompareScreen(ops = ops, onBack = { page = FeedModulePage.HOME })
+        FeedModulePage.ALERTS -> FeedAlertScreen(ops = ops, onBack = { page = FeedModulePage.HOME })
+        FeedModulePage.REPORT -> FeedReportScreen(ops = ops, onBack = { page = FeedModulePage.HOME })
+    }
 }
+
+private enum class FeedModulePage { HOME, PLANS, PLAN_DETAIL, COST, RATION_BUILDER, RATION_ANALYSIS, RATION_COMPARE, ALERTS, REPORT }

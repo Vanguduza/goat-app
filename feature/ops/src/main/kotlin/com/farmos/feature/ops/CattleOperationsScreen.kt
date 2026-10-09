@@ -1,6 +1,7 @@
 package com.farmos.feature.ops
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
@@ -9,11 +10,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.farmos.core.design.runSuspendCatching
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.design.FarmVisualClass
@@ -35,6 +39,10 @@ data class CattleOperationsActions(
     val onPlaceLot: (groupId: String, heads: String, day: String) -> Unit,
     val onDaysOnFeed: (groupId: String, days: String, day: String) -> Unit,
     val onCloseLot: (groupId: String, headOut: String, weightGrams: String, daysOnFeed: String, day: String) -> Unit,
+    /** FOS-CATTLE-016 — (damId, tag, sex, day); registers the newborn calf. */
+    val onCalfRegistration: (String, String, String, String) -> Unit = { _, _, _, _ -> },
+    /** FOS-CATTLE-009 — (animalId, signs, note, day); records an observed heat. */
+    val onHeat: (String, String, String, String) -> Unit = { _, _, _, _ -> },
 )
 
 private enum class CattleOpsPage {
@@ -65,6 +73,9 @@ private enum class CattleOpsPage {
     BEEF_DASHBOARD,
     LOT_DETAIL,
     CALVING_DUE,
+    CALF_REG,
+    CATTLE_REPORT,
+    HEAT_DETECTION,
 }
 
 @Composable
@@ -78,6 +89,8 @@ fun CattleOperationsScreen(
     today: LocalDate = LocalDate.now(),
     loadLots: suspend () -> List<CattleLotView> = { emptyList() },
     loadCalvingDue: suspend () -> CattleCalvingDue = { CattleCalvingDue(emptyList(), 283) },
+    /** FOS-CATTLE-036 — farm cattle aggregates. */
+    loadCattleReport: suspend () -> CattleHerdReport = { CattleHerdReport() },
 ) {
     var page by remember { mutableStateOf(CattleOpsPage.HOME) }
     val home = { page = CattleOpsPage.HOME }
@@ -168,6 +181,18 @@ fun CattleOperationsScreen(
         CattleOpsPage.BEEF_DASHBOARD -> CattleBeefDashboardScreen(loadLots, home)
         CattleOpsPage.LOT_DETAIL -> CattleLotDetailScreen(loadLots, home)
         CattleOpsPage.CALVING_DUE -> CattleCalvingDueScreen(loadCalvingDue, today, home)
+
+        CattleOpsPage.CALF_REG -> {
+            CattleCalfRegistrationScreen(selectedAnimalId, busy, error, actions.onCalfRegistration, home)
+        }
+
+        CattleOpsPage.CATTLE_REPORT -> {
+            CattleHerdReportScreen(loadCattleReport, home)
+        }
+
+        CattleOpsPage.HEAT_DETECTION -> {
+            CattleHeatScreen(selectedAnimalId, busy, error, actions.onHeat, loadRecords, home)
+        }
     }
 }
 
@@ -191,6 +216,8 @@ private fun CattleOpsHome(
             CattleNav("Pregnancy diagnosis") { onOpen(CattleOpsPage.PD) }
             CattleNav("Calving due") { onOpen(CattleOpsPage.CALVING_DUE) }
             CattleNav("Calving") { onOpen(CattleOpsPage.CALVING) }
+            CattleNav("Calf registration") { onOpen(CattleOpsPage.CALF_REG) }
+            CattleNav("Heat detection") { onOpen(CattleOpsPage.HEAT_DETECTION) }
             CattleNav("Weaning") { onOpen(CattleOpsPage.WEANING) }
         }
         FarmOperationalSection("Dairy & condition") {
@@ -201,6 +228,7 @@ private fun CattleOpsHome(
             CattleNav("Locomotion") { onOpen(CattleOpsPage.LOCOMOTION) }
         }
         FarmOperationalSection("Animal records") {
+            CattleNav("Cattle report") { onOpen(CattleOpsPage.CATTLE_REPORT) }
             CattleNav("Lactation history") { onOpen(CattleOpsPage.LACTATION_HISTORY) }
             CattleNav("SCC history") { onOpen(CattleOpsPage.SCC_HISTORY) }
             CattleNav("Health summary") { onOpen(CattleOpsPage.HEALTH_SUMMARY) }
@@ -234,6 +262,10 @@ private fun CattleNav(
     TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) { Text(label) }
 }
 
+/**
+ * FOS-CATTLE-010 — service record; FOS-CATTLE-011 — AI record and FOS-CATTLE-012 — ET record are
+ * captured through this form's Method field (ai, natural or et).
+ */
 @Composable
 private fun CattleServiceScreen(
     selectedId: String?,
@@ -254,7 +286,11 @@ private fun CattleServiceScreen(
         onBack,
     ) {
         OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
-        CattleField(method, { method = it }, "Method", busy)
+        Box(Modifier.testTag("farm-screen:FOS-CATTLE-011")) {
+            Box(Modifier.testTag("farm-screen:FOS-CATTLE-012")) {
+                CattleField(method, { method = it }, "Method", busy)
+            }
+        }
         CattleField(day, {
             day =
                 it
@@ -690,6 +726,39 @@ private fun CattleLotCloseScreen(
     }
 }
 
+/** FOS-CATTLE-016 — calf registration: register the newborn calf, linked to its dam. */
+@Composable
+private fun CattleCalfRegistrationScreen(
+    selectedId: String?,
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var damId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
+    var tag by remember { mutableStateOf("") }
+    var sex by remember { mutableStateOf("FEMALE") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    CattleFormPage(
+        "FOS-CATTLE-016",
+        "Calf registration",
+        "Register the newborn calf as a cattle animal on this farm.",
+        busy,
+        error,
+        onBack,
+    ) {
+        OpsAnimalPicker("Dam", damId, OpsAnimalFilter.FEMALE, busy) { damId = it }
+        CattleField(tag, { tag = it }, "Calf tag", busy)
+        CattleField(sex, { sex = it }, "Sex (FEMALE/MALE)", busy)
+        CattleField(day, { day = it }, "Birth date", busy)
+        Button(
+            onClick = { onRecord(damId, tag, sex, day) },
+            enabled = !busy && damId.isNotBlank() && tag.isNotBlank() && sex.isNotBlank() && cattleDate(day),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Register calf") }
+    }
+}
+
 @Composable
 private fun CattleFormPage(
     screenId: String,
@@ -730,3 +799,63 @@ private fun CattleCompactField(
 }
 
 private fun cattleDate(value: String): Boolean = runCatching { LocalDate.parse(value) }.isSuccess
+
+/**
+ * FOS-CATTLE-009 — Heat Detection.
+ *
+ * Records an observed heat for a cow through the governed RecordCattleHeat
+ * command (species-specific cattle_heats table; goat_heats is never reused).
+ * History below is read from the local farm-scoped table; heats also appear
+ * on the animal timeline and in the cattle report reproduction section.
+ */
+@Composable
+fun CattleHeatScreen(
+    selectedId: String?,
+    busy: Boolean,
+    error: String?,
+    onHeat: (animalId: String, signs: String, note: String, day: String) -> Unit,
+    loadRecords: suspend (String) -> CattleRecords,
+    onBack: () -> Unit,
+) {
+    var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
+    var signs by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    var heats by remember { mutableStateOf<List<CattleHeatRow>>(emptyList()) }
+    LaunchedEffect(animalId) {
+        heats = if (animalId.isBlank()) {
+            emptyList()
+        } else {
+            runSuspendCatching { loadRecords(animalId).heats }.getOrElse { emptyList() }
+        }
+    }
+    CattleFormPage(
+        "FOS-CATTLE-009",
+        "Heat detection",
+        "Record an observed heat for a cow. Heats inform breeding timing; this screen records observations only.",
+        busy,
+        error,
+        onBack,
+    ) {
+        OpsAnimalPicker("Cattle", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
+        CattleField(signs, { signs = it }, "Observed signs", busy)
+        CattleField(note, { note = it }, "Note (optional)", busy)
+        CattleField(day, { day = it }, "Date", busy)
+        Button(
+            onClick = { onHeat(animalId, signs, note, day) },
+            enabled = !busy && animalId.isNotBlank() && signs.isNotBlank() && cattleDate(day),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Record heat") }
+    }
+    if (heats.isNotEmpty()) {
+        FarmOperationalSection("Recorded heats") {
+            heats.forEach { heat ->
+                Text(
+                    "${LocalDate.ofEpochDay(heat.epochDay)} · ${heat.signs}" +
+                        (heat.note?.takeIf { it.isNotBlank() }?.let { " · $it" } ?: ""),
+                    modifier = Modifier.testTag("cattle-heat:${heat.id}"),
+                )
+            }
+        }
+    }
+}

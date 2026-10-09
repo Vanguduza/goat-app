@@ -7,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.design.FarmSelectorSearch
 import com.farmos.core.design.NoFarmSelectorSearch
 import com.farmos.core.model.LocalCommandContext
@@ -19,14 +18,16 @@ import com.farmos.domain.ops.CreateFormularyItem
 import com.farmos.domain.ops.FarmSpeciesCodes
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
+import com.farmos.domain.ops.RecordHealthVaccination
 import com.farmos.domain.ops.RecordLabResult
 import com.farmos.domain.ops.RecordVetVisit
 import com.farmos.feature.ops.HealthReadModel
 import com.farmos.feature.ops.HealthEntryPage
 import com.farmos.feature.ops.HealthObservationScreen
 import java.time.LocalDate
+import java.time.ZoneId
 import java.util.UUID
-import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 @Composable
 fun HealthModuleHost(
@@ -41,70 +42,43 @@ fun HealthModuleHost(
 ) {
     val scope = rememberCoroutineScope()
     var readModel by remember(farmId) { mutableStateOf(HealthReadModel()) }
-    var observations by remember(farmId) { mutableStateOf(emptyList<String>()) }
-    var catalog by remember(farmId) { mutableStateOf(emptyList<String>()) }
-    var treatments by remember(farmId) { mutableStateOf(emptyList<String>()) }
-    var formulary by remember(farmId) { mutableStateOf(emptyList<String>()) }
-    var formularyOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
-    var acceptedPacks by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
-    var packs by remember(farmId) { mutableStateOf(emptyList<String>()) }
-    var withdrawals by remember(farmId) { mutableStateOf(emptyList<String>()) }
+    var resources by remember(farmId) { mutableStateOf(HealthModuleResources()) }
+    var vaccinationData by remember(farmId) { mutableStateOf(HealthVaccinationRecords()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-
+    val zone = ZoneId.systemDefault()
     suspend fun refresh() {
-        observations = ops.recentObservations().map { row -> "${row.speciesCode} · ${row.signs}" }
-        catalog = ops.diseases().map { row -> "${row.speciesCode} · ${row.displayName} · ${row.firstAid}" }
-        val approved = ops.approvedFormulary()
-        formulary = approved.map { row -> "${row.id} · ${row.productName} · ${row.speciesCode} · ${row.vetClass}" }
-        formularyOptions = approved.map { row -> FarmSelectorOption(row.id, row.productName, "${row.speciesCode} · ${row.vetClass}") }
-        treatments = ops.recentTreatments().map { row ->
-            "${row.speciesCode} · ${row.reason} · formulary ${row.formularyItemId}"
-        }
-        val packRows = ops.packs()
-        packs = packRows.map { row ->
-            "${row.speciesCode} · ${row.name} · ${row.status} · ${row.acceptedByVet.orEmpty()}"
-        }
-        acceptedPacks = packRows.filter { it.status == "vet_accepted" }
-            .map { row -> FarmSelectorOption(row.id, row.name, "${row.speciesCode} · accepted by ${row.acceptedByVet.orEmpty()}") }
-        withdrawals = ops.withdrawals().map { row ->
-            "${row.windowKind} · ${row.product} ends day ${row.endsEpochDay}"
-        }
+        resources = loadHealthModuleResources(ops)
         readModel = loadReadModel()
+        vaccinationData = loadHealthVaccinations(ops, searchAnimals, readModel, zone)
     }
 
-    fun runWrite(block: suspend () -> Unit) {
-        scope.launch {
-            busy = true
-            error = null
-            runCatching {
-                block()
-                refresh()
-            }.onSuccess {
-                enqueueSync()
-            }.onFailure { failure ->
-                error = failure.message
-            }
-            busy = false
-        }
-    }
+    fun runWrite(block: suspend () -> Unit) = launchCommittedModuleWrite(
+        scope = scope,
+        write = block,
+        isBusy = { busy },
+        setBusy = { busy = it },
+        setError = { error = it },
+        enqueueSync = enqueueSync,
+        refresh = ::refresh,
+    )
 
     LaunchedEffect(farmId) {
-        runCatching { refresh() }
+        runSuspendCatching { refresh() }
             .onFailure { error = it.message }
     }
 
     HealthObservationScreen(
-        rows = observations,
-        catalog = catalog,
-        treatments = treatments,
-        formulary = formulary,
-        formularyOptions = formularyOptions,
+        rows = resources.observations,
+        catalog = resources.catalog,
+        treatments = resources.treatments,
+        formulary = resources.formulary,
+        formularyOptions = resources.formularyOptions,
         speciesCodes = FarmSpeciesCodes.ALL,
-        acceptedPacks = acceptedPacks,
+        acceptedPacks = resources.acceptedPacks,
         searchAnimals = searchAnimals,
-        packs = packs,
-        withdrawals = withdrawals,
+        packs = resources.packs,
+        withdrawals = resources.withdrawals,
         busy = busy,
         error = error,
         onRecord = { species, signs, firstAid, redFlag ->
@@ -146,6 +120,23 @@ fun HealthModuleHost(
                         formularyItemId = formularyItemId,
                         reason = reason,
                         occurredAtEpochMillis = System.currentTimeMillis(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onRecordVaccination = { species, animalId, groupId, formularyItemId, dose, method, day ->
+            runWrite {
+                ops.recordVaccination(
+                    RecordHealthVaccination(
+                        vaccinationId = UUID.randomUUID().toString(),
+                        speciesCode = species,
+                        formularyItemId = formularyItemId,
+                        animalId = animalId?.trim()?.ifBlank { null },
+                        groupId = groupId?.trim()?.ifBlank { null },
+                        dose = dose?.trim()?.ifBlank { null },
+                        method = method?.trim()?.ifBlank { null },
+                        occurredAtEpochMillis = LocalDate.parse(day).atStartOfDay(zone).toInstant().toEpochMilli(),
                     ),
                     newContext(),
                 )
@@ -219,5 +210,11 @@ fun HealthModuleHost(
         onBack = onBack,
         entryPage = entryPage,
         readModel = readModel,
+        vaccinations = vaccinationData.vaccinations,
+        dueCandidates = vaccinationData.reviewCandidates,
+        groupOptions = vaccinationData.groups,
+        reportStats = vaccinationData.stats,
+        referenceDetails = resources.referenceDetails,
+        redFlagObservations = resources.redFlagObservations,
     )
 }

@@ -18,6 +18,7 @@ dependencies {
     implementation(project(":domain:goat"))
     implementation(project(":domain:rabbit"))
     implementation(project(":domain:ops"))
+    implementation(project(":domain:access"))
     implementation("androidx.room:room-ktx:2.8.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 }

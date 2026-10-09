@@ -8,16 +8,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.farmos.core.design.EidReaderAdapter
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.design.FarmVisualClass
+import com.farmos.core.design.NoOpEidReaderAdapter
+import com.farmos.core.design.runSuspendCatching
 import java.time.LocalDate
+import kotlinx.coroutines.launch
 
 data class SheepOperationsActions(
     val onJoining: (groupId: String, day: String) -> Unit,
@@ -32,9 +39,21 @@ data class SheepOperationsActions(
     val onDag: (animalId: String, score: String, day: String) -> Unit,
     val onFootrot: (animalId: String, score: String, day: String) -> Unit,
     val onFlystrike: (animalId: String, score: String, day: String) -> Unit,
+    /** FOS-SHEEP-008 — (animalId, score tenths, day); scale is fixed to 1-5 for sheep. */
+    val onSheepBcs: (String, String, String) -> Unit = { _, _, _ -> },
     val onIdentifier: (animalId: String, type: String, value: String, day: String) -> Unit,
     val onMovement: (animalId: String, direction: String, from: String, to: String, day: String) -> Unit,
+    /** FOS-SHEEP-028 — (groupId, paddockId, day); starts a grazing session for the group. */
+    val onPaddockAssign: (String, String, String) -> Unit = { _, _, _ -> },
     val onPedigree: (animalId: String, parentId: String, relation: String) -> Unit,
+    /** FOS-SHEEP-005 — EID reader adapter; NoOp unless the host fits the reader path. */
+    val eidReaderAdapter: EidReaderAdapter = NoOpEidReaderAdapter,
+    /** Whether the user explicitly enabled the EID reader path. */
+    val isEidReaderEnabled: Boolean = false,
+    /** Explicit user opt-in for the EID reader path (host handles permission). */
+    val onToggleEidReader: (Boolean) -> Unit = {},
+    /** Assigns a scanned or typed EID value through the governed identifier command. */
+    val onAssignEid: (animalId: String, value: String, day: String) -> Unit = { _, _, _ -> },
 )
 
 private enum class SheepOpsPage {
@@ -51,8 +70,10 @@ private enum class SheepOpsPage {
     DAG,
     FOOTROT,
     FLYSTRIKE,
+    BCS,
     IDENTIFIER,
     MOVEMENT,
+    PADDOCK_ASSIGN,
     PEDIGREE,
     COI,
     MATE_COMPARE,
@@ -61,6 +82,9 @@ private enum class SheepOpsPage {
     WOOL_DASHBOARD,
     GROWTH_HISTORY,
     LAMBING_DUE,
+    LAMB_PROFILE,
+    SHEEP_REPORT,
+    EID_SCAN,
 }
 
 @Composable
@@ -74,6 +98,14 @@ fun SheepOperationsScreen(
     loadWool: suspend () -> SheepWoolRecords = { SheepWoolRecords() },
     today: LocalDate = LocalDate.now(),
     loadLambingDue: suspend () -> SheepLambingDue = { SheepLambingDue(emptyList(), emptyList(), 147) },
+    /** FOS-SHEEP-015 — lamb birth profile for the selected animal. */
+    loadLambProfile: suspend (String) -> SheepLambProfile = { SheepLambProfile() },
+    /** FOS-SHEEP-032 — farm sheep aggregates. */
+    loadSheepReport: suspend () -> SheepFlockReport = { SheepFlockReport() },
+    /** FOS-SHEEP-028 — (groupId, groupName) options for paddock assignment. */
+    loadSheepGroups: suspend () -> List<SheepGroupOption> = { emptyList() },
+    /** FOS-SHEEP-028 — (paddockId, paddockName) options for paddock assignment. */
+    loadPaddocks: suspend () -> List<SheepPaddockOption> = { emptyList() },
 ) {
     var page by remember { mutableStateOf(SheepOpsPage.HOME) }
     val home = { page = SheepOpsPage.HOME }
@@ -195,6 +227,22 @@ fun SheepOperationsScreen(
             SheepMovementScreen(selectedAnimalId, busy, error, actions.onMovement, home)
         }
 
+        SheepOpsPage.BCS -> {
+            SheepBcsScreen(selectedAnimalId, busy, error, actions.onSheepBcs, home)
+        }
+
+        SheepOpsPage.PADDOCK_ASSIGN -> {
+            SheepPaddockAssignScreen(busy, error, loadSheepGroups, loadPaddocks, actions.onPaddockAssign, home)
+        }
+
+        SheepOpsPage.LAMB_PROFILE -> {
+            SheepLambProfileScreen(selectedAnimalId, loadLambProfile, home)
+        }
+
+        SheepOpsPage.SHEEP_REPORT -> {
+            SheepFlockReportScreen(loadSheepReport, home)
+        }
+
         SheepOpsPage.PEDIGREE -> {
             SheepPedigreeScreen(selectedAnimalId, busy, error, actions.onPedigree, home)
         }
@@ -207,6 +255,15 @@ fun SheepOperationsScreen(
         SheepOpsPage.GROWTH_HISTORY -> SheepGrowthHistoryScreen(selectedAnimalId, loadRecords, home)
         SheepOpsPage.WOOL_DASHBOARD -> SheepWoolDashboardScreen(loadWool, home)
         SheepOpsPage.LAMBING_DUE -> SheepLambingDueScreen(loadLambingDue, today, home)
+        SheepOpsPage.EID_SCAN -> SheepEidScanScreen(
+            selectedAnimalId = selectedAnimalId,
+            adapter = actions.eidReaderAdapter,
+            adapterEnabled = actions.isEidReaderEnabled,
+            onToggleAdapter = actions.onToggleEidReader,
+            onAssignEid = actions.onAssignEid,
+            today = today,
+            onBack = home,
+        )
     }
 }
 
@@ -231,6 +288,7 @@ private fun SheepOpsHome(
             SheepNav("Lambing due") { onOpen(SheepOpsPage.LAMBING_DUE) }
             SheepNav("Record lambing") { onOpen(SheepOpsPage.LAMBING) }
             SheepNav("Lamb marking") { onOpen(SheepOpsPage.MARKING) }
+            SheepNav("EID scan") { onOpen(SheepOpsPage.EID_SCAN) }
             SheepNav("Weaning") { onOpen(SheepOpsPage.WEANING) }
         }
         FarmOperationalSection("Wool") {
@@ -240,15 +298,21 @@ private fun SheepOpsHome(
             SheepNav("Wool dashboard") { onOpen(SheepOpsPage.WOOL_DASHBOARD) }
         }
         FarmOperationalSection("Sheep records") {
+            SheepNav("Lamb profile") { onOpen(SheepOpsPage.LAMB_PROFILE) }
+            SheepNav("Sheep report") { onOpen(SheepOpsPage.SHEEP_REPORT) }
             SheepNav("Health summary") { onOpen(SheepOpsPage.HEALTH_SUMMARY) }
             SheepNav("Timeline") { onOpen(SheepOpsPage.TIMELINE) }
             SheepNav("Growth history") { onOpen(SheepOpsPage.GROWTH_HISTORY) }
         }
         FarmOperationalSection("Field health") {
             SheepNav("FAMACHA") { onOpen(SheepOpsPage.FAMACHA) }
+            SheepNav("Body condition score") { onOpen(SheepOpsPage.BCS) }
             SheepNav("Dag score") { onOpen(SheepOpsPage.DAG) }
             SheepNav("Footrot") { onOpen(SheepOpsPage.FOOTROT) }
             SheepNav("Flystrike") { onOpen(SheepOpsPage.FLYSTRIKE) }
+        }
+        FarmOperationalSection("Grazing") {
+            SheepNav("Paddock assignment") { onOpen(SheepOpsPage.PADDOCK_ASSIGN) }
         }
         FarmOperationalSection("Identity & traceability") {
             SheepNav("Official identifier") { onOpen(SheepOpsPage.IDENTIFIER) }
@@ -567,6 +631,85 @@ private fun SheepPedigreeScreen(
     }
 }
 
+/** FOS-SHEEP-008 — sheep body condition score on the fixed 1-5 scale, stored as tenths. */
+@Composable
+private fun SheepBcsScreen(
+    selectedId: String?,
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
+    var score by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    SheepFormPage(
+        "FOS-SHEEP-008",
+        "Body condition score",
+        "Sheep use the 1-5 scale; the score is stored as tenths (e.g. 3.0).",
+        busy,
+        error,
+        onBack,
+    ) {
+        OpsAnimalPicker("Sheep", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
+        Field(score, { score = it }, "Score (1.0-5.0)", busy)
+        Field(day, { day = it }, "Date", busy)
+        Button(
+            onClick = { onRecord(animalId, score, day) },
+            enabled = !busy && animalId.isNotBlank() && score.isNotBlank() && validDate(day),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Record BCS") }
+    }
+}
+
+/** FOS-SHEEP-028 — paddock assignment: start a grazing session for a sheep group in a paddock. */
+@Composable
+private fun SheepPaddockAssignScreen(
+    busy: Boolean,
+    error: String?,
+    loadGroups: suspend () -> List<SheepGroupOption>,
+    loadPaddocks: suspend () -> List<SheepPaddockOption>,
+    onAssign: (String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var groups by remember { mutableStateOf(emptyList<SheepGroupOption>()) }
+    var paddocks by remember { mutableStateOf(emptyList<SheepPaddockOption>()) }
+    var groupId by remember { mutableStateOf("") }
+    var paddockId by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    LaunchedEffect(Unit) {
+        runCatching {
+            groups = loadGroups()
+            paddocks = loadPaddocks()
+        }
+    }
+    SheepFormPage(
+        "FOS-SHEEP-028",
+        "Paddock assignment",
+        "Move a sheep group into a paddock by starting a grazing session.",
+        busy,
+        error,
+        onBack,
+    ) {
+        if (groups.isEmpty()) {
+            Text("No sheep groups on this device.", color = MaterialTheme.colorScheme.error)
+        } else {
+            Field(groupId, { groupId = it }, "Group ID", busy)
+        }
+        if (paddocks.isEmpty()) {
+            Text("No paddocks on this device.", color = MaterialTheme.colorScheme.error)
+        } else {
+            Field(paddockId, { paddockId = it }, "Paddock ID", busy)
+        }
+        Field(day, { day = it }, "Date", busy)
+        Button(
+            onClick = { onAssign(groupId, paddockId, day) },
+            enabled = !busy && groupId.isNotBlank() && paddockId.isNotBlank() && validDate(day),
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Assign to paddock") }
+    }
+}
+
 @Composable
 private fun SheepFormPage(
     screenId: String,
@@ -607,3 +750,100 @@ private fun CompactField(
 }
 
 private fun validDate(value: String): Boolean = runCatching { LocalDate.parse(value) }.isSuccess
+
+/**
+ * FOS-SHEEP-005 — EID Scan.
+ *
+ * GENUINE GAP — not implemented: there is no RFID/EID hardware adapter in this build (no tag
+ * reader discovery, scan, or EID-ingest path), so a scan UI would be a fake.
+ * Required piece: a Farm OS-owned RFID reader adapter behind the hardware boundary, with a
+ * governed EID-ingest command. This screen fails closed.
+ */
+/**
+ * FOS-SHEEP-005 — EID scan: optional bounded reader adapter.
+ *
+ * Manual identifier entry is the primary path and always works. The reader path is
+ * disabled by default and only runs after explicit user opt-in. A scanned tag is
+ * advisory: it fills the entry field and the user confirms it through the exact same
+ * governed assign-identifier command (with farm-scoped uniqueness validation) as a
+ * typed value. Hardware never has authority over domain truth.
+ */
+@Composable
+internal fun SheepEidScanScreen(
+    selectedAnimalId: String?,
+    adapter: EidReaderAdapter = NoOpEidReaderAdapter,
+    adapterEnabled: Boolean = false,
+    onToggleAdapter: (Boolean) -> Unit = {},
+    onAssignEid: (animalId: String, value: String, day: String) -> Unit = { _, _, _ -> },
+    today: LocalDate = LocalDate.now(),
+    onBack: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    var eidValue by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf<String?>(null) }
+    var reading by remember { mutableStateOf(false) }
+    FarmOperationalPage(
+        screenId = "FOS-SHEEP-005",
+        title = "EID scan",
+        subtitle = "Electronic identification, manual-first.",
+        onBack = onBack,
+        backLabel = "Sheep",
+    ) {
+        FarmOperationalSection("Manual EID entry (primary)") {
+            Text("Always available — no reader needed. The value is validated and checked for farm-wide uniqueness before it is recorded.")
+            OutlinedTextField(
+                value = eidValue,
+                onValueChange = { eidValue = it },
+                label = { Text("EID tag value") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Button(onClick = {
+                val animalId = selectedAnimalId
+                when {
+                    animalId == null -> note = "Select a sheep first: the EID records against the selected animal."
+                    eidValue.isBlank() -> note = "Enter an EID tag value first."
+                    else -> {
+                        note = null
+                        onAssignEid(animalId, eidValue.trim(), today.toString())
+                        eidValue = ""
+                    }
+                }
+            }) { Text("Assign EID") }
+            if (selectedAnimalId == null) {
+                Text("No individual selected — group workflows remain available elsewhere.")
+            }
+        }
+        FarmOperationalSection("EID reader (optional)") {
+            Text(
+                "Disabled by default. A scanned tag only fills the entry field above; " +
+                    "you review and confirm it exactly like a typed value. No tag is shown rather than a fabricated scan.",
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("Enable EID reader")
+                Switch(checked = adapterEnabled, onCheckedChange = onToggleAdapter)
+            }
+            if (adapterEnabled) {
+                note?.let { Text(it) }
+                Button(
+                    onClick = {
+                        reading = true
+                        note = null
+                        scope.launch {
+                            runSuspendCatching { adapter.readTag().getOrThrow() }
+                                .onSuccess { tag ->
+                                    eidValue = tag.rawValue
+                                    note = "Tag read (${tag.kind}). Review the value above, then Assign EID."
+                                }
+                                .onFailure { note = "Read failed: ${it.message}" }
+                            reading = false
+                        }
+                    },
+                    enabled = !reading,
+                ) { Text(if (reading) "Reading…" else "Read tag") }
+            }
+        }
+    }
+}

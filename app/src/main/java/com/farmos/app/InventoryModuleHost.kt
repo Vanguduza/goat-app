@@ -21,7 +21,7 @@ import com.farmos.feature.ops.InventoryScreen
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
-import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 @Composable
 fun InventoryModuleHost(
@@ -36,6 +36,7 @@ fun InventoryModuleHost(
 ) {
     var counting by remember { mutableStateOf(false) }
     if (counting && stockCount != null) return stockCount { counting = false }
+    var page by remember(farmId) { mutableStateOf(InventoryPage.HOME) }
     val scope = rememberCoroutineScope()
     var rows by remember(farmId) { mutableStateOf(emptyList<String>()) }
     var itemOptions by remember(farmId) { mutableStateOf(emptyList<FarmSelectorOption>()) }
@@ -58,29 +59,24 @@ fun InventoryModuleHost(
         .movePointRight(3)
         .longValueExact()
 
-    fun runWrite(block: suspend () -> Unit) {
-        scope.launch {
-            busy = true
-            error = null
-            runCatching {
-                block()
-                refresh()
-            }.onSuccess {
-                enqueueSync()
-            }.onFailure { failure ->
-                error = failure.message
-            }
-            busy = false
-        }
-    }
+    fun runWrite(block: suspend () -> Unit) = launchCommittedModuleWrite(
+        scope = scope,
+        write = block,
+        isBusy = { busy },
+        setBusy = { busy = it },
+        setError = { error = it },
+        enqueueSync = enqueueSync,
+        refresh = ::refresh,
+    )
 
     LaunchedEffect(farmId) {
-        runCatching { refresh() }
+        runSuspendCatching { refresh() }
             .onFailure { error = it.message }
     }
 
-    InventoryScreen(
-        rows = rows,
+    when (page) {
+        InventoryPage.HOME -> InventoryScreen(
+            rows = rows,
         itemOptions = itemOptions,
         busy = busy,
         error = error,
@@ -155,5 +151,18 @@ fun InventoryModuleHost(
         onBack = onBack,
         readModel = readModel,
         onOpenStockCount = stockCount?.let { { counting = true } },
-    )
+            extraActions = { InventoryAdditionalActions { page = it } },
+        )
+        InventoryPage.SUPPLIERS -> SupplierBindingPage(
+            items = itemOptions,
+            loadSuppliers = { ops.suppliers() },
+            loadPurchases = { ops.allPurchases() },
+            onBack = { page = InventoryPage.HOME },
+        )
+        InventoryPage.REPORT -> InventoryReportPage(
+            items = itemOptions,
+            readModel = readModel,
+            onBack = { page = InventoryPage.HOME },
+        )
+    }
 }

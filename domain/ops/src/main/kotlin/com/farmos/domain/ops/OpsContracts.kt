@@ -1,5 +1,6 @@
 package com.farmos.domain.ops
 
+import java.time.YearMonth
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -39,6 +40,38 @@ data class RecordMoney(
     val currency: String = "USD",
     val occurredEpochDay: Long,
     val note: String? = null,
+)
+
+/**
+ * FOS-FIN-010 — record a budget line. A budget is a plan scoped to exactly one
+ * (kind, categoryCode, currency, year-month period range). Amounts are integer
+ * minor units; currencies are never mixed within a budget line.
+ */
+@Serializable
+data class RecordBudget(
+    val budgetId: String,
+    val budgetKey: String,
+    val name: String,
+    val kind: String,
+    val categoryCode: String,
+    val periodStartYearMonth: String,
+    val periodEndYearMonth: String,
+    val amountMinor: Long,
+    val currency: String = "USD",
+)
+
+/**
+ * FOS-FIN-010 — revise a budget line. A revision is a NEW row (version + 1);
+ * prior revisions are marked superseded, never edited or deleted. The scope
+ * (kind, categoryCode, currency, period) is immutable per budgetKey: changing
+ * the scope means recording a new budget, not revising.
+ */
+@Serializable
+data class ReviseBudget(
+    val budgetId: String,
+    val budgetKey: String,
+    val name: String,
+    val amountMinor: Long,
 )
 
 @Serializable
@@ -110,6 +143,37 @@ data class RecordMaintenance(
 )
 
 @Serializable
+data class RecordAssetMeter(
+    val readingId: String,
+    val assetId: String,
+    val readingValue: Long,
+    val unit: String,
+    val occurredEpochDay: Long,
+    val note: String? = null,
+)
+
+@Serializable
+data class AmendAnimalGroup(
+    val groupId: String,
+    val name: String,
+    val speciesCode: String,
+)
+
+/**
+ * FOS-GROUP-007 — move one or more animals between groups of the same species. [animalIds] lists
+ * every animal to move; [fromGroupId] is the asserted current group. Animals with no recorded
+ * membership are treated as unassigned and may be claimed by the move as their first group
+ * assignment. Journalled as `group.animal_move.v1` and replayed through the same handler.
+ */
+@Serializable
+data class MoveAnimalGroup(
+    val moveId: String,
+    val animalIds: List<String>,
+    val fromGroupId: String,
+    val toGroupId: String,
+)
+
+@Serializable
 data class IssueFeed(
     val issueId: String,
     val itemId: String,
@@ -124,6 +188,49 @@ data class RecordWater(
     val source: String,
     val litresMilli: Long,
     val occurredEpochDay: Long,
+)
+
+@Serializable
+data class RecordWaterPoint(
+    val pointId: String,
+    val code: String,
+    val name: String,
+    val kind: String,
+    val active: Boolean,
+)
+
+/**
+ * One journaled event against a water point. The kind selects which capture screen owns the
+ * record: inspection (FOS-WATER-005), quality (FOS-WATER-006), issue (FOS-WATER-007) or
+ * maintenance (FOS-WATER-008). Optional valueMilli/unit carry a measured reading (e.g. litres
+ * or a quality metric); resultText carries a textual outcome.
+ */
+@Serializable
+data class RecordWaterPointEvent(
+    val eventId: String,
+    val pointId: String,
+    val kind: String,
+    val occurredEpochDay: Long,
+    val resultText: String? = null,
+    val valueMilli: Long? = null,
+    val unit: String? = null,
+    val note: String? = null,
+) {
+    companion object {
+        val KINDS = setOf("inspection", "quality", "issue", "maintenance")
+    }
+}
+
+@Serializable
+data class RecordFeedPlan(
+    val planId: String,
+    val name: String,
+    val speciesCode: String,
+    val rationGramsPerHeadPerDay: Long,
+    val headCount: Int,
+    val startEpochDay: Long,
+    val endEpochDay: Long,
+    val note: String? = null,
 )
 
 @Serializable
@@ -155,6 +262,18 @@ data class RecordHealthTreatment(
     val formularyItemId: String,
     val reason: String,
     val animalId: String? = null,
+    val occurredAtEpochMillis: Long,
+)
+
+@Serializable
+data class RecordHealthVaccination(
+    val vaccinationId: String,
+    val speciesCode: String,
+    val formularyItemId: String,
+    val animalId: String? = null,
+    val groupId: String? = null,
+    val dose: String? = null,
+    val method: String? = null,
     val occurredAtEpochMillis: Long,
 )
 
@@ -470,6 +589,16 @@ data class RecordCattleBcs(
     val occurredEpochDay: Long,
 )
 
+/** FOS-SHEEP-008 — sheep body condition score; stored in the shared BCS table. */
+@Serializable
+data class RecordSheepBcs(
+    val scoreId: String,
+    val animalId: String,
+    val scale: String,
+    val scoreTenths: Int,
+    val occurredEpochDay: Long,
+)
+
 @Serializable
 data class RecordSheepWool(
     val clipId: String,
@@ -485,6 +614,31 @@ data class RecordCattleMilk(
     val animalId: String,
     val litresMilli: Long,
     val occurredEpochDay: Long,
+)
+
+/**
+ * FOS-CATTLE-009 — record one observed heat for a cow. Stored in the
+ * species-specific cattle_heats table; goat_heats is never reused.
+ */
+@Serializable
+data class RecordCattleHeat(
+    val heatId: String,
+    val animalId: String,
+    val occurredEpochDay: Long,
+    val signs: String,
+    val note: String? = null,
+)
+
+/**
+ * FOS-ADMIN-010 — record a farm unit display preference. Canonical stored
+ * units never change; this only selects the display/input unit per quantity
+ * kind. Validated against [UnitSystems].
+ */
+@Serializable
+data class RecordUnitPreference(
+    val farmId: String,
+    val quantityKind: String,
+    val displayUnit: String,
 )
 
 @Serializable
@@ -591,6 +745,34 @@ data class PlacePoultryFlock(
     val vaxTaskId: String,
 )
 
+/**
+ * FOS-POULTRY-023 — move a flock between houses. Recorded as a new placement row for
+ * the same group; the latest placement per group is the flock's current house.
+ */
+@Serializable
+data class MovePoultryFlock(
+    val moveId: String,
+    val groupId: String,
+    val fromHouseId: String,
+    val toHouseId: String,
+    val headCount: Int,
+    val occurredEpochDay: Long,
+)
+
+/**
+ * FOS-POULTRY-024 — close out a flock's production cycle. The close-out is a terminal
+ * journal operation; the handler zeroes the group's head count and the close-out
+ * details (head out, reason, date) stay durable in the operation payload.
+ */
+@Serializable
+data class ClosePoultryFlock(
+    val closeoutId: String,
+    val groupId: String,
+    val headOut: Int,
+    val reason: String,
+    val occurredEpochDay: Long,
+)
+
 @Serializable
 data class RecordPoultryBiosecurity(
     val walkId: String,
@@ -672,6 +854,30 @@ object OpsValidator {
         return null
     }
 
+    private fun budgetScope(commandKind: String, categoryCode: String, currency: String, startYm: String, endYm: String): String? {
+        if (commandKind !in setOf("expense", "income")) return "Budget kind must be expense or income"
+        if (categoryCode.isBlank()) return "Budget needs exactly one category code"
+        if (!FarmCurrency.isRecordable(currency)) return "Budget currency must be an ISO 4217 code"
+        val start = runCatching { YearMonth.parse(startYm) }.getOrNull()
+            ?: return "Budget period start must be a valid year-month (YYYY-MM)"
+        val end = runCatching { YearMonth.parse(endYm) }.getOrNull()
+            ?: return "Budget period end must be a valid year-month (YYYY-MM)"
+        if (end.isBefore(start)) return "Budget period end must not be before period start"
+        return null
+    }
+
+    fun budget(command: RecordBudget): String? {
+        if (command.name.isBlank()) return "Budget needs a name"
+        if (command.amountMinor <= 0L) return "Budget amount must be greater than zero"
+        return budgetScope(command.kind, command.categoryCode, command.currency, command.periodStartYearMonth, command.periodEndYearMonth)
+    }
+
+    fun reviseBudget(command: ReviseBudget): String? {
+        if (command.name.isBlank()) return "Budget revision needs a name"
+        if (command.amountMinor <= 0L) return "Budget revision amount must be greater than zero"
+        return null
+    }
+
     fun inventoryItem(command: CreateInventoryItem): String? =
         if (command.sku.isBlank() || command.name.isBlank()) "Inventory sku and name are required" else null
 
@@ -695,6 +901,29 @@ object OpsValidator {
     fun asset(command: CreateFarmAsset): String? =
         if (command.code.isBlank() || command.name.isBlank()) "Asset needs a code and name" else null
 
+    fun assetMeter(command: RecordAssetMeter): String? {
+        if (command.readingValue < 0L) return "Meter reading cannot be negative"
+        if (command.unit.isBlank()) return "Meter reading needs a unit"
+        return null
+    }
+
+    fun amendGroup(command: AmendAnimalGroup): String? {
+        if (command.name.isBlank()) return "Group needs a name"
+        if (command.speciesCode !in FarmSpeciesCodes.ALL) return "Group needs a farm species"
+        return null
+    }
+
+    fun moveAnimalGroup(command: MoveAnimalGroup): String? {
+        if (command.moveId.isBlank()) return "Group move needs an id"
+        if (command.animalIds.isEmpty()) return "Group move needs at least one animal"
+        if (command.animalIds.any { it.isBlank() }) return "Group move animal ids must not be blank"
+        if (command.animalIds.size != command.animalIds.toSet().size) return "Group move lists an animal more than once"
+        if (command.fromGroupId.isBlank()) return "Group move needs a source group"
+        if (command.toGroupId.isBlank()) return "Group move needs a target group"
+        if (command.fromGroupId == command.toGroupId) return "Group move needs a target group different from the source"
+        return null
+    }
+
     fun feed(command: IssueFeed, onHandMilli: Long): String? {
         if (command.quantityMilli <= 0L) return "Feed quantity must be greater than zero"
         if (onHandMilli < command.quantityMilli) return "Not enough feed on this farm"
@@ -703,6 +932,28 @@ object OpsValidator {
 
     fun water(command: RecordWater): String? =
         if (command.source.isBlank() || command.litresMilli <= 0L) "Water record needs a source and litres" else null
+
+    fun waterPoint(command: RecordWaterPoint): String? {
+        if (command.code.isBlank()) return "Water point needs a code"
+        if (command.kind.isBlank()) return "Water point needs a kind"
+        return null
+    }
+
+    fun waterPointEvent(command: RecordWaterPointEvent): String? {
+        if (command.pointId.isBlank()) return "Water event needs a water point"
+        if (command.kind !in RecordWaterPointEvent.KINDS) return "Unknown water event kind"
+        if ((command.valueMilli ?: 0L) < 0L) return "Water event reading cannot be negative"
+        return null
+    }
+
+    fun feedPlan(command: RecordFeedPlan): String? {
+        if (command.name.isBlank()) return "Feed plan needs a name"
+        if (command.speciesCode.isBlank()) return "Feed plan needs a species"
+        if (command.rationGramsPerHeadPerDay <= 0L) return "Feed plan needs a positive ration per head per day"
+        if (command.headCount <= 0) return "Feed plan needs a positive head count"
+        if (command.startEpochDay > command.endEpochDay) return "Feed plan start must be on or before its end"
+        return null
+    }
 
     fun sale(command: RecordSale): String? {
         if (command.itemKind.isBlank() || command.quantityMilli <= 0L || command.amountMinor <= 0L) {
@@ -723,6 +974,23 @@ object OpsValidator {
     fun treatment(command: RecordHealthTreatment): String? {
         if (command.formularyItemId.isBlank() || command.reason.isBlank()) {
             return "Treatment needs a vet-approved formulary item and reason"
+        }
+        return null
+    }
+
+    fun vaccination(command: RecordHealthVaccination): String? {
+        if (command.formularyItemId.isBlank()) {
+            return "Vaccination needs a vet-approved formulary item"
+        }
+        // Restored from owner commit 474e8ef (merge 30eba5a): species is mandatory.
+        if (command.speciesCode.isBlank()) {
+            return "Vaccination needs a species"
+        }
+        if (command.animalId.isNullOrBlank() && command.groupId.isNullOrBlank()) {
+            return "Vaccination needs an animal or a group target"
+        }
+        if (!command.animalId.isNullOrBlank() && !command.groupId.isNullOrBlank()) {
+            return "Vaccination targets exactly one of animal or group"
         }
         return null
     }
@@ -812,8 +1080,33 @@ object OpsValidator {
         return if (ok) null else "BCS must use the 1-5 or 1-9 scale"
     }
 
+    fun sheepBcs(command: RecordSheepBcs): String? {
+        val ok = when (command.scale) {
+            "1_5" -> command.scoreTenths in 10..50
+            else -> false
+        }
+        return if (ok) null else "Sheep BCS must use the 1-5 scale"
+    }
+
     fun cattleMilk(command: RecordCattleMilk): String? =
         if (command.litresMilli <= 0L) "Milk record needs litres" else null
+
+    fun cattleHeat(command: RecordCattleHeat): String? {
+        if (command.heatId.isBlank()) return "Heat record needs an id"
+        if (command.animalId.isBlank()) return "Heat record needs an animal"
+        if (command.signs.isBlank()) return "Heat record needs observed signs"
+        if (command.occurredEpochDay <= 0L) return "Heat record needs a valid date"
+        return null
+    }
+
+    fun unitPreference(command: RecordUnitPreference): String? {
+        if (command.farmId.isBlank()) return "Unit preference needs a farm"
+        if (UnitSystems.kindOf(command.quantityKind) == null) return "Unknown quantity kind"
+        if (!UnitSystems.isValid(command.quantityKind, command.displayUnit)) {
+            return "Unit ${command.displayUnit} is not valid for ${command.quantityKind}"
+        }
+        return null
+    }
 
     fun dag(command: RecordSheepDag): String? =
         if (command.score !in 0..5) "Dag score must be 0 to 5" else null
@@ -887,6 +1180,28 @@ object OpsValidator {
             null
         }
 
+    fun flockMove(command: MovePoultryFlock): String? =
+        if (command.groupId.isBlank() || command.fromHouseId.isBlank() || command.toHouseId.isBlank()) {
+            "Flock move needs a flock and both houses"
+        } else if (command.fromHouseId == command.toHouseId) {
+            "Flock move needs a different destination house"
+        } else if (command.headCount <= 0) {
+            "Flock move needs a head count"
+        } else {
+            null
+        }
+
+    fun flockClose(command: ClosePoultryFlock): String? =
+        if (command.groupId.isBlank()) {
+            "Flock close-out needs a flock"
+        } else if (command.headOut < 0) {
+            "Flock close-out head count cannot be negative"
+        } else if (command.reason.isBlank()) {
+            "Flock close-out needs a reason"
+        } else {
+            null
+        }
+
     fun biosecurity(command: RecordPoultryBiosecurity): String? =
         if (command.findings.isBlank() || (command.houseId.isNullOrBlank() && command.groupId.isNullOrBlank())) {
             "Biosecurity walk needs findings and a house or flock"
@@ -900,6 +1215,22 @@ object OpsValidator {
         } else {
             null
         }
+
+    /**
+     * FOS-SHEEP-005 — farm-scoped identifier uniqueness. [otherActiveValuesOnFarm] carries
+     * the active identifier values of *other* animals on this farm (supplied by the
+     * repository; the validator itself stays pure). Comparison is case-insensitive on the
+     * trimmed value: a scanned EID/RFID tag must resolve to exactly one animal per farm.
+     * Hardware readers never decide this — the domain rule does.
+     */
+    fun identifierUnique(command: AssignAnimalIdentifier, otherActiveValuesOnFarm: Collection<String>): String? {
+        val trimmed = command.value.trim()
+        return if (otherActiveValuesOnFarm.any { it.equals(trimmed, ignoreCase = true) }) {
+            "Identifier '$trimmed' is already recorded on this farm"
+        } else {
+            null
+        }
+    }
 
     fun movement(command: RecordOfficialMovement): String? =
         if (command.direction !in setOf("on", "off", "transfer")) "Movement must be on, off, or transfer" else null

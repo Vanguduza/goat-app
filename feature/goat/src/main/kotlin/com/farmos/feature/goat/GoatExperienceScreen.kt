@@ -48,9 +48,15 @@ internal fun GoatExperienceScreen(
     modifier: Modifier = Modifier,
     initialPage: GoatPage = GoatPage.DASHBOARD,
     today: LocalDate = LocalDate.now(),
+    weanings: List<GoatWeaningView> = emptyList(),
+    movements: List<GoatMovementView> = emptyList(),
+    identifiers: List<GoatIdentifierView> = emptyList(),
+    goatGroups: List<GoatGroupView> = emptyList(),
+    pedigreeParentLabels: List<String> = emptyList(),
 ) {
     var page by remember { mutableStateOf(initialPage) }
     var selectedKiddingId by remember { mutableStateOf<String?>(null) }
+    var selectedGroupId by remember { mutableStateOf<String?>(null) }
     val selected = state.selected
 
     when (page) {
@@ -167,6 +173,90 @@ internal fun GoatExperienceScreen(
             },
             onBack = { page = GoatPage.DASHBOARD },
         )
+        GoatPage.IDENTITY_EDIT -> {
+            val goat = state.selected
+            if (goat == null) page = GoatPage.HERD else GoatIdentityEditScreen(
+                goat = goat,
+                identifiers = identifiers,
+                busy = state.busy,
+                error = state.error,
+                onSave = actions.onAmendIdentity,
+                onBack = { page = GoatPage.PROFILE },
+            )
+        }
+        GoatPage.WEANING -> {
+            val goat = state.selected
+            if (goat == null) page = GoatPage.HERD else GoatWeaningScreen(
+                goat = goat,
+                weanings = weanings,
+                busy = state.busy,
+                error = state.error,
+                onRecordWeaning = actions.onRecordWeaning,
+                onBack = { page = GoatPage.PROFILE },
+            )
+        }
+        GoatPage.MOVEMENT -> {
+            val goat = state.selected
+            if (goat == null) page = GoatPage.HERD else GoatMovementScreen(
+                goat = goat,
+                movements = movements,
+                busy = state.busy,
+                error = state.error,
+                onRecordMovement = actions.onRecordMovement,
+                onBack = { page = GoatPage.PROFILE },
+            )
+        }
+        GoatPage.IDENTIFIERS -> {
+            val goat = state.selected
+            if (goat == null) page = GoatPage.HERD else GoatIdentifiersScreen(
+                goat = goat,
+                identifiers = identifiers,
+                busy = state.busy,
+                error = state.error,
+                onAssignIdentifier = actions.onAssignIdentifier,
+                onBack = { page = GoatPage.PROFILE },
+            )
+        }
+        GoatPage.FAMACHA_REF -> FamachaReferenceScreen { page = GoatPage.DASHBOARD }
+        GoatPage.PARENTAGE_EDIT -> {
+            val goat = state.selected
+            if (goat == null) page = GoatPage.HERD else GoatParentageEditScreen(
+                goat = goat,
+                pedigreeParents = pedigreeParentLabels,
+                searchDams = actions.searchDams,
+                searchSires = actions.searchSires,
+                busy = state.busy,
+                error = state.error,
+                onLinkParentage = actions.onLinkParentage,
+                onBack = { page = GoatPage.PROFILE },
+            )
+        }
+        GoatPage.GOAT_GROUPS -> GoatGroupsScreen(
+            groups = goatGroups,
+            onOpenGroup = {
+                selectedGroupId = it
+                page = GoatPage.GROUP_MEMBERSHIP
+            },
+            onBack = { page = GoatPage.DASHBOARD },
+        )
+        GoatPage.GROUP_MEMBERSHIP -> GoatGroupMembershipScreen(
+            group = goatGroups.firstOrNull { it.groupId == selectedGroupId },
+            onBack = { page = GoatPage.GOAT_GROUPS },
+        )
+        GoatPage.GOAT_REPORT -> GoatReportScreen(
+            counts = state.herdCounts,
+            lactation = state.lactation,
+            kiddingDue = state.kiddingDue,
+            onBack = { page = GoatPage.DASHBOARD },
+        )
+        GoatPage.SCALE_PAIRING -> GoatScalePairingScreen(
+            adapter = actions.scaleAdapter,
+            adapterEnabled = actions.isScaleAdapterEnabled,
+            onToggleAdapter = actions.onToggleScaleAdapter,
+            selectedGoatLabel = selected?.let { "${it.tag}${it.name?.let { n -> " · $n" } ?: ""}" },
+            onRecordWeight = actions.onRecordWeight,
+            onBack = { page = GoatPage.DASHBOARD },
+        )
         in goatHistoryPages -> GoatHistoryPage(
             page = page,
             goat = state.selected,
@@ -261,6 +351,10 @@ private fun GoatDashboardScreen(
             GoatDashboardAction("Kidding due", "Does expected to kid, by window") { onOpen(GoatPage.KIDDING_DUE) }
             GoatDashboardAction("Lactation", "Milk recorded for every goat") { onOpen(GoatPage.LACTATION_DASHBOARD) }
             GoatDashboardAction("Kids", "Registered kids by kidding") { onOpen(GoatPage.KID_COHORT) }
+            GoatDashboardAction("Goat groups", "Groups on this farm") { onOpen(GoatPage.GOAT_GROUPS) }
+            GoatDashboardAction("FAMACHA chart", "Reference scoring chart") { onOpen(GoatPage.FAMACHA_REF) }
+            GoatDashboardAction("Goat report", "Herd, milk and kidding summary") { onOpen(GoatPage.GOAT_REPORT) }
+            GoatDashboardAction("Scale pairing", "BLE scale — not available") { onOpen(GoatPage.SCALE_PAIRING) }
             GoatDashboardAction("Search", state.searchMessage) { onOpen(GoatPage.SEARCH) }
             GoatDashboardAction("Scan tag", "RFID, EID or animal tag") { onOpen(GoatPage.SCAN) }
 
@@ -460,6 +554,11 @@ private fun GoatProfileActions(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
             add("Health" to GoatPage.HEALTH)
             if (goat.sex == GoatSex.FEMALE) add("Reproduction" to GoatPage.REPRODUCTION)
             if (goat.sex == GoatSex.FEMALE) add("Kidding" to GoatPage.KIDDING)
+            add("Weaning" to GoatPage.WEANING)
+            add("Edit identity" to GoatPage.IDENTITY_EDIT)
+            add("Identifiers" to GoatPage.IDENTIFIERS)
+            add("Movement" to GoatPage.MOVEMENT)
+            add("Parentage" to GoatPage.PARENTAGE_EDIT)
             add("Lifecycle" to GoatPage.STATUS_CHANGE)
         }
         BoxWithConstraints(Modifier.fillMaxWidth()) {

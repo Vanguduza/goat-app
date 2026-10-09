@@ -72,7 +72,15 @@ echo "Kotlin architecture stabilization checks passed"
 
 
 echo "Checking exact persisted decimal boundaries"
-for file in   app/src/main/java/com/farmos/app/SalesModuleHost.kt   app/src/main/java/com/farmos/app/ProcurementModuleHost.kt   app/src/main/java/com/farmos/app/RabbitCommerceModuleHost.kt   app/src/main/java/com/farmos/app/FeedModuleHost.kt   app/src/main/java/com/farmos/app/WaterModuleHost.kt   app/src/main/java/com/farmos/app/OperatingModuleHost.kt
+# Follow the capture code when a host is decomposed; the same decimal rule
+# applies to its state and content rather than only its small entry function.
+for file in \
+  app/src/main/java/com/farmos/app/SalesModule{Host,State,Content}.kt \
+  app/src/main/java/com/farmos/app/ProcurementModule{Host,State,Content}.kt \
+  app/src/main/java/com/farmos/app/RabbitCommerceModuleHost.kt \
+  app/src/main/java/com/farmos/app/FeedModuleHost.kt \
+  app/src/main/java/com/farmos/app/WaterModuleHost.kt \
+  app/src/main/java/com/farmos/app/OperatingModuleHost.kt
 do
   if grep -Fq 'toDoubleOrNull()' "$file"; then
     echo "ERROR: floating-point parsing remains on a persisted decimal boundary in $file" >&2

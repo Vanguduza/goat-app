@@ -68,6 +68,10 @@ class FarmOsApplication : Application(), SyncEngineOwner {
     @Volatile
     internal var farmLan: FarmLanRuntime? = null
 
+    /** Google Drive replication gateway for the farm open on this device, while a local session is signed in. */
+    @Volatile
+    internal var farmDrive: FarmDriveRuntime? = null
+
     @Volatile
     var authorizationListener: ((AuthorizationLoss) -> Unit)? = null
 

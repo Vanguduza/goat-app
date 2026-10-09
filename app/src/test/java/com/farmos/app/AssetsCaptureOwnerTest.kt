@@ -50,6 +50,7 @@ class AssetsCaptureOwnerTest {
     fun setUp() {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java).build()
         runBlocking {
+            database.seedCaptureOwner(farm)
             database.assets().insert(FarmAssetEntity("asset-pump", farm, "PUMP-1", "Borehole pump", "equipment"))
             database.assets().insert(FarmAssetEntity("asset-other", otherFarm, "TRAC-9", "Other farm tractor", "vehicle"))
         }
@@ -89,5 +90,6 @@ class AssetsCaptureOwnerTest {
         assertEquals("asset-pump", event.assetId)
         assertEquals("Replaced impeller", event.title)
         compose.waitUntil(10_000) { syncRequests == 1 }
+        runBlocking { database.assertLocalCaptureJournal(farm, "maintenance.record.v1") }
     }
 }

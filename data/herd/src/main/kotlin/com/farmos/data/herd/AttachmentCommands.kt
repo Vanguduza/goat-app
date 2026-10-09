@@ -26,7 +26,18 @@ class AttachmentCommands(
     suspend fun attach(command: AttachFile, context: LocalCommandContext): LocalCommandResult {
         AttachmentRules.attach(command)?.let { error(it) }
         require(context.farmId == farmId) { "Farm context mismatch" }
-        if (!replaying) requireNotNull(database.animals().get(farmId, command.ownerId)) { "Animal not found on this farm" }
+        if (!replaying) when (command.ownerType) {
+            "animal" -> requireNotNull(database.animals().get(farmId, command.ownerId)) { "Animal not found on this farm" }
+            "task" -> {
+                // P1 fix (independent review 2026-10-08): the "only open tasks accept new
+                // files" rule lived only in the UI gate. It belongs at the governed command
+                // boundary. Deliberately not enforced on replay: a legitimately-sent
+                // attachment arriving after task completion is history, not a violation.
+                val task = requireNotNull(database.tasks().get(farmId, command.ownerId)) { "Task not found on this farm" }
+                require(task.status == "open") { "Only open tasks accept new files" }
+            }
+            else -> error("Attachments can be added to animal and task records only")
+        }
         val row = AttachmentEntity(
             command.attachmentId, farmId, command.ownerType, command.ownerId, command.contentSha256, command.byteSize,
             command.mediaType, command.displayName.trim(), context.occurredAtEpochMillis, context.actorId,

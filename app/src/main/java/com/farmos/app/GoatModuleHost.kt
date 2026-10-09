@@ -1,5 +1,8 @@
 package com.farmos.app
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -7,6 +10,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import com.farmos.app.hardware.ScaleAdapters
+import com.farmos.app.hardware.blePermissionsNeeded
 import com.farmos.core.database.unsharedLocalOperations
 import com.farmos.domain.ops.GestationSpecies
 import com.farmos.core.model.LocalCommandContext
@@ -16,6 +24,11 @@ import com.farmos.core.network.AuthorizationLoss
 import com.farmos.core.network.FarmMembership
 import com.farmos.domain.goat.GoatSearchResult
 import com.farmos.domain.goat.GoatSnapshot
+import com.farmos.domain.goat.AmendGoatIdentity
+import com.farmos.domain.goat.RecordGoatWeaning
+import com.farmos.domain.ops.AssignAnimalIdentifier
+import com.farmos.domain.ops.LinkPedigree
+import com.farmos.domain.ops.RecordOfficialMovement
 import com.farmos.domain.goat.PlanGoatLactation
 import com.farmos.domain.goat.RecordGoatBcs
 import com.farmos.domain.goat.RecordGoatFamacha
@@ -43,6 +56,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.farmos.core.design.runSuspendCatching
 
 @Composable
 fun GoatModuleHost(
@@ -65,15 +79,87 @@ fun GoatModuleHost(
     var standingExit by remember { mutableStateOf<GoatExitView?>(null) }
     val exits = remember(membership.farmId) { AnimalExitCommands(app.database, membership.farmId) }
     val currency by rememberFarmCurrency(membership.farmId) { app.database.farmCurrency(membership.farmId) }
+    var weanings by remember { mutableStateOf(emptyList<com.farmos.feature.goat.GoatWeaningView>()) }
+    var movements by remember { mutableStateOf(emptyList<com.farmos.feature.goat.GoatMovementView>()) }
+    var identifiers by remember { mutableStateOf(emptyList<com.farmos.feature.goat.GoatIdentifierView>()) }
+    var goatGroups by remember { mutableStateOf(emptyList<com.farmos.feature.goat.GoatGroupView>()) }
+    var pedigreeParentLabels by remember { mutableStateOf(emptyList<String>()) }
     // The selected goat's standing exit (D-022), reloaded whenever the goat or its status changes.
     LaunchedEffect(selected?.animalId, selected?.status) {
-        standingExit = selected?.animalId?.let { runCatching { loadStandingGoatExit(app.database, membership.farmId, it) }.getOrNull() }
+        standingExit = selected?.animalId?.let { runSuspendCatching { loadStandingGoatExit(app.database, membership.farmId, it) }.getOrNull() }
+    }
+    // Per-goat management data for the FOS-GOAT-005/042/045/049/050 surfaces.
+    LaunchedEffect(selected?.animalId) {
+        val animalId = selected?.animalId
+        if (animalId == null) {
+            weanings = emptyList()
+            movements = emptyList()
+            identifiers = emptyList()
+            pedigreeParentLabels = emptyList()
+        } else {
+            weanings = runSuspendCatching {
+                app.database.lifecycle().goatWeaningsFor(membership.farmId, animalId).map {
+                    com.farmos.feature.goat.GoatWeaningView(it.id, it.occurredEpochDay, it.weightGrams)
+                }
+            }.getOrDefault(emptyList())
+            movements = runSuspendCatching {
+                app.database.lifecycle().movementsForAnimal(membership.farmId, animalId).map {
+                    com.farmos.feature.goat.GoatMovementView(it.id, it.direction, it.fromPlace, it.toPlace, it.occurredEpochDay)
+                }
+            }.getOrDefault(emptyList())
+            identifiers = runSuspendCatching {
+                app.database.lifecycle().identifiersForAnimal(membership.farmId, animalId).map {
+                    com.farmos.feature.goat.GoatIdentifierView(it.id, it.type, it.value, it.isActive, it.assignedEpochDay)
+                }
+            }.getOrDefault(emptyList())
+            pedigreeParentLabels = runSuspendCatching {
+                val parents = selected?.pedigree?.parents.orEmpty()
+                parents.map { link -> "${link.relationType}: ${link.label ?: link.relativeId}" }
+            }.getOrDefault(emptyList())
+        }
+    }
+    // Goat groups for FOS-GOAT-047/048, loaded with the farm.
+    LaunchedEffect(membership.farmId) {
+        goatGroups = runSuspendCatching {
+            app.database.groups().forFarm(membership.farmId)
+                .filter { it.speciesCode == "goat" }
+                .map { com.farmos.feature.goat.GoatGroupView(it.id, it.name, it.headCount) }
+        }.getOrDefault(emptyList())
     }
     var searchResults by remember { mutableStateOf<List<GoatSearchResult>>(emptyList()) }
     var syncMessage by remember { mutableStateOf("No local changes yet") }
     var searchMessage by remember { mutableStateOf("Local search is always available") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    // FOS-GOAT-012 — BLE scale adapter path: disabled by default; the permission request below
+    // only fires when the user explicitly enables the adapter on the scale pairing screen.
+    val context = LocalContext.current
+    var scaleAdapterEnabled by remember { mutableStateOf(ScaleAdapters.bleScaleEnabled) }
+    val blePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { grants ->
+        if (grants.values.all { it }) {
+            ScaleAdapters.bleScaleEnabled = true
+            scaleAdapterEnabled = true
+        } else {
+            error = "Bluetooth permission denied — the BLE scale adapter stays off; manual entry still works."
+        }
+    }
+    /** Explicit user opt-in for the BLE scale adapter path; permission-aware, host-owned. */
+    fun toggleScaleAdapter(wantEnabled: Boolean) {
+        if (!wantEnabled) {
+            ScaleAdapters.bleScaleEnabled = false
+            scaleAdapterEnabled = false
+            return
+        }
+        val missing = blePermissionsNeeded(context)
+        if (missing.isEmpty()) {
+            ScaleAdapters.bleScaleEnabled = true
+            scaleAdapterEnabled = true
+        } else {
+            blePermissionLauncher.launch(missing)
+        }
+    }
     var herdState by remember { mutableStateOf(LoadableSurfaceState.LOADING) }
     var pendingSyncCount by remember { mutableStateOf(0L) }
     var herdCounts by remember { mutableStateOf<com.farmos.domain.goat.GoatHerdCounts?>(null) }
@@ -82,7 +168,7 @@ fun GoatModuleHost(
 
     suspend fun refreshGoatState() {
         herdState = LoadableSurfaceState.LOADING
-        runCatching {
+        runSuspendCatching {
             val loaded = repository.listGoats(500)
             val autoSelect =
                 entryPage != GoatEntryPage.WEIGHT &&
@@ -109,10 +195,10 @@ fun GoatModuleHost(
             herdState = LoadableSurfaceState.ERROR
         }
         // Exhaustive counts; on failure the dashboard falls back to the bounded herd list.
-        herdCounts = runCatching { repository.herdCounts(java.time.LocalDate.now().toEpochDay()) }.getOrNull()
-        lactation = runCatching { repository.lactationSummaries() }
+        herdCounts = runSuspendCatching { repository.herdCounts(java.time.LocalDate.now().toEpochDay()) }.getOrNull()
+        lactation = runSuspendCatching { repository.lactationSummaries() }
             .fold({ GoatLactationState.Loaded(it) }, { GoatLactationState.Failed(it.message ?: "Lactation records could not be loaded") })
-        kiddingDue = runCatching {
+        kiddingDue = runSuspendCatching {
             // The farm's own goat gestation period (owner decision D-019), or the default.
             val period = app.database.gestationPeriod(membership.farmId, GestationSpecies.GOAT)
             GoatKiddingDueState.Loaded(repository.kiddingDue(period.earliestDays, period.typicalDays, period.latestDays), period.typicalDays)
@@ -132,17 +218,26 @@ fun GoatModuleHost(
     }
 
     fun runGoatWrite(block: suspend () -> Unit) {
+        if (busy) return
+        busy = true
+        error = null
         scope.launch {
-            busy = true
-            error = null
-            runCatching {
-                block()
-                refreshGoatState()
-            }.onSuccess {
-                syncMessage = "Saved on this device · waiting to sync"
-                enqueueSync()
-            }.onFailure(::handleFailure)
-            busy = false
+            try {
+                runSuspendCatching {
+                    completeModuleWrite(
+                        write = block,
+                        onCommitted = { syncMessage = "Saved on this device · waiting to sync" },
+                        enqueueSync = enqueueSync,
+                        refresh = {
+                            refreshGoatState()
+                            check(herdState != LoadableSurfaceState.ERROR) { error ?: "Goat records could not refresh" }
+                        },
+                    )
+                }.onSuccess { warning -> error = warning }
+                    .onFailure(::handleFailure)
+            } finally {
+                busy = false
+            }
         }
     }
 
@@ -169,8 +264,102 @@ fun GoatModuleHost(
         ),
         entryPage = entryPage,
         searchSires = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "goat", "MALE") },
+        searchDams = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "goat", "FEMALE") },
         mateAnalysis = remember(membership.farmId) { goatMateAnalysis(app.database, membership.farmId) },
-        profileAttachments = { animalId, active -> AnimalAttachmentsHost(app.database, membership.farmId, animalId, canAttach = active, newContext) },
+        onAmendIdentity = { tag, name, officialId ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                repository.amendIdentity(
+                    AmendGoatIdentity(
+                        animalId = animalId,
+                        name = name.takeIf { it.isNotBlank() },
+                        tag = tag.takeIf { it.isNotBlank() },
+                        officialId = officialId.takeIf { it.isNotBlank() },
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onRecordWeaning = { weightKgText, dayText ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                val grams = weightKgText.takeIf { it.isNotBlank() }?.let { (it.toBigDecimal() * 1000.toBigDecimal()).longValueExact() }
+                repository.recordWeaning(
+                    RecordGoatWeaning(
+                        weaningId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        weightGrams = grams,
+                        occurredEpochDay = LocalDate.parse(dayText).toEpochDay(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onRecordMovement = { direction, fromPlace, toPlace, dayText ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                app.opsRepository(membership.farmId).recordOfficialMovement(
+                    RecordOfficialMovement(
+                        movementId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        direction = direction,
+                        fromPlace = fromPlace.takeIf { it.isNotBlank() },
+                        toPlace = toPlace.takeIf { it.isNotBlank() },
+                        occurredEpochDay = LocalDate.parse(dayText).toEpochDay(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onAssignIdentifier = { type, value ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first"
+            else if (value.isBlank()) error = "Identifier value is required"
+            else runGoatWrite {
+                app.opsRepository(membership.farmId).assignIdentifier(
+                    AssignAnimalIdentifier(
+                        identifierId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        type = type,
+                        value = value.trim(),
+                        occurredEpochDay = LocalDate.now().toEpochDay(),
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        onLinkParentage = { parentId, relationType ->
+            val animalId = selectedGoatId
+            if (animalId == null) error = "Select a goat first" else runGoatWrite {
+                app.opsRepository(membership.farmId).linkPedigree(
+                    LinkPedigree(
+                        linkId = UUID.randomUUID().toString(),
+                        animalId = animalId,
+                        parentId = parentId,
+                        relationType = relationType,
+                    ),
+                    newContext(),
+                )
+            }
+        },
+        weanings = weanings,
+        movements = movements,
+        identifiers = identifiers,
+        goatGroups = goatGroups,
+        pedigreeParentLabels = pedigreeParentLabels,
+        // FOS-GOAT-012 — BLE scale adapter: NoOp until the user explicitly enables it.
+        scaleAdapter = remember(scaleAdapterEnabled) { ScaleAdapters.current(context) },
+        isScaleAdapterEnabled = scaleAdapterEnabled,
+        onToggleScaleAdapter = ::toggleScaleAdapter,
+        // FOS-GOAT-008 (photo gallery) and FOS-GOAT-010 (documents): the profile's
+        // attachment section renders photos and PDF documents in one shared surface.
+        profileAttachments = { animalId, active ->
+            Box(Modifier.testTag("farm-screen:FOS-GOAT-008")) {
+                Box(Modifier.testTag("farm-screen:FOS-GOAT-010")) {
+                    AnimalAttachmentsHost(app.database, membership.farmId, animalId, canAttach = active, newContext)
+                }
+            }
+        },
         onRegister = { tag, name, sex, dateText ->
             runGoatWrite {
                 val day = dateText.takeIf { it.isNotBlank() }?.let { LocalDate.parse(it).toEpochDay() }
@@ -400,7 +589,7 @@ fun GoatModuleHost(
         onSearch = { query ->
             scope.launch {
                 error = null
-                runCatching {
+                runSuspendCatching {
                     if (query.isBlank()) emptyList() else repository.searchGoats(query, 25)
                 }.onSuccess { local ->
                     searchResults = local
@@ -417,7 +606,7 @@ fun GoatModuleHost(
                 searchResults = emptyList()
                 searchMessage = "Looking up identifier"
 
-                val localOutcome = runCatching {
+                val localOutcome = runSuspendCatching {
                     val assigned = app.database.lifecycle().activeIdentifierByValue(membership.farmId, identifier)
                     val assignedAnimal = assigned?.let { app.database.animals().get(membership.farmId, it.animalId) }
                     when {

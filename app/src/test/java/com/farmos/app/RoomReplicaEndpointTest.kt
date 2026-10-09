@@ -5,6 +5,9 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.database.FarmOsDatabase
+import com.farmos.core.database.LocalAccountEntity
+import com.farmos.core.database.LocalFarmEntity
+import com.farmos.core.database.ReplicationDeviceEntity
 import com.farmos.core.database.recordPeerHolds
 import com.farmos.core.database.replicationVector
 import com.farmos.core.database.toEnvelope
@@ -58,8 +61,25 @@ class RoomReplicaEndpointTest {
     fun setUp() {
         tabletDb = database()
         phoneDb = database()
+        seedLocalAuthority(tabletDb, tabletId)
+        seedLocalAuthority(phoneDb, phoneId)
         tablet = RoomReplicaEndpoint(tabletDb, farm, tabletId).apply { registerPairedDevice(phoneId, "Phone") }
         phone = RoomReplicaEndpoint(phoneDb, farm, phoneId, replicationAppliers).apply { registerPairedDevice(tabletId, "Tablet") }
+    }
+
+    private fun seedLocalAuthority(db: FarmOsDatabase, device: String) {
+        db.localAccess().insertFarmIfAbsent(LocalFarmEntity(farm, "Review farm", 1_790_000_000_000L))
+        for ((actor, role) in listOf("worker-1" to "WORKER", "owner-1" to "OWNER")) {
+            db.localAccess().upsertAccount(LocalAccountEntity(
+                accountId = actor, farmId = farm, username = actor, displayName = actor,
+                role = role, status = "ACTIVE", credentialKind = "PIN", credentialHash = "test-credential-hash",
+                failedAttempts = 0, lockedUntilEpochMillis = null, workerId = null, createdAtEpochMillis = 1_790_000_000_000L,
+            ))
+        }
+        db.replicationBlocking().upsertDevice(ReplicationDeviceEntity(
+            farmId = farm, deviceId = device, name = device, status = DeviceStatus.ACTIVE.name,
+            lastReportedOwnSequence = 0L, revokedAfterSequence = null, isLocal = true,
+        ))
     }
 
     @After

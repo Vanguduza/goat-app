@@ -1,5 +1,7 @@
 package com.farmos.app
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,6 +10,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.farmos.app.hardware.EidReaderAdapters
+import com.farmos.app.hardware.blePermissionsNeeded
 import com.farmos.core.database.FarmOsDatabase
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.data.herd.BreedingDueCommands
@@ -25,12 +30,15 @@ import com.farmos.domain.ops.RecordCattleMilk
 import com.farmos.domain.ops.RecordCattlePd
 import com.farmos.domain.ops.RecordCattleServiceV2
 import com.farmos.domain.ops.RecordCattleDryOff
+import com.farmos.domain.ops.RecordCattleHeat
 import com.farmos.domain.ops.RecordCattleLocomotion
 import com.farmos.domain.ops.RecordCattleScc
 import com.farmos.domain.ops.RecordSheepDag
 import com.farmos.domain.ops.RecordSheepFlystrike
 import com.farmos.domain.ops.RecordSheepShearing
 import com.farmos.domain.ops.RecordSheepFootrot
+import com.farmos.domain.ops.RecordSheepBcs
+import com.farmos.domain.ops.StartGrazing
 import com.farmos.domain.ops.RecordHealthObservation
 import com.farmos.domain.ops.RecordHealthTreatment
 import com.farmos.domain.ops.RecordMoney
@@ -64,8 +72,12 @@ import com.farmos.feature.ops.HealthObservationScreen
 import com.farmos.feature.ops.InventoryScreen
 import com.farmos.feature.ops.MoneyCaptureScreen
 import com.farmos.feature.ops.SimpleCaptureScreen
+import com.farmos.feature.ops.SheepFlockReport
+import com.farmos.feature.ops.SheepGroupOption
+import com.farmos.feature.ops.SheepLambProfile
 import com.farmos.feature.ops.SheepOperationsActions
 import com.farmos.feature.ops.SheepOperationsScreen
+import com.farmos.feature.ops.SheepPaddockOption
 import com.farmos.feature.ops.TaskUiRow
 import com.farmos.feature.ops.TasksBoardScreen
 import java.time.LocalDate
@@ -75,6 +87,7 @@ import com.farmos.feature.ops.LocalOpsAnimalSearch
 import com.farmos.feature.ops.OpsAnimalSearch
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 @Composable
 fun OperatingModuleHost(
@@ -95,6 +108,35 @@ fun OperatingModuleHost(
     var inventoryRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesRows by remember { mutableStateOf(emptyList<SpeciesAnimalRow>()) }
     var speciesCounts by remember { mutableStateOf<SpeciesHerdCounts?>(null) }
+    // FOS-SHEEP-005 — EID reader path: disabled by default; the permission request below
+    // only fires when the user explicitly enables the reader on the EID scan screen.
+    val context = LocalContext.current
+    var eidReaderEnabled by remember { mutableStateOf(EidReaderAdapters.eidReaderEnabled) }
+    val blePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { grants ->
+        if (grants.values.all { it }) {
+            EidReaderAdapters.eidReaderEnabled = true
+            eidReaderEnabled = true
+        } else {
+            error = "Bluetooth permission denied — the EID reader stays off; manual entry still works."
+        }
+    }
+    /** Explicit user opt-in for the EID reader path; permission-aware, host-owned. */
+    fun toggleEidReader(wantEnabled: Boolean) {
+        if (!wantEnabled) {
+            EidReaderAdapters.eidReaderEnabled = false
+            eidReaderEnabled = false
+            return
+        }
+        val missing = blePermissionsNeeded(context)
+        if (missing.isEmpty()) {
+            EidReaderAdapters.eidReaderEnabled = true
+            eidReaderEnabled = true
+        } else {
+            blePermissionLauncher.launch(missing)
+        }
+    }
     var catalogRows by remember { mutableStateOf(emptyList<String>()) }
     var speciesGroups by remember { mutableStateOf(emptyList<FarmSelectorOption>()) }
     var treatmentRows by remember { mutableStateOf(emptyList<String>()) }
@@ -145,13 +187,13 @@ fun OperatingModuleHost(
         withdrawalRows = ops.withdrawals().map { "${it.windowKind} · ${it.product} ends day ${it.endsEpochDay}" }
     }
 
-    LaunchedEffect(module) { runCatching { refreshOps() } }
+    LaunchedEffect(module) { runSuspendCatching { refreshOps() } }
 
     fun run(block: suspend () -> Unit) {
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 block()
                 refreshOps()
             }.onSuccess {
@@ -324,6 +366,21 @@ fun OperatingModuleHost(
                                 onFlystrike = { animalId, score, day ->
                                     run { ops.recordFlystrike(RecordSheepFlystrike(UUID.randomUUID().toString(), animalId, score.toIntOrNull() ?: -1, occurredEpochDay = LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
+                                onSheepBcs = { animalId, score, day ->
+                                    run {
+                                        val tenths = (score.replace(',', '.').toBigDecimal() * 10.toBigDecimal()).intValueExact()
+                                        ops.recordSheepBcs(RecordSheepBcs(UUID.randomUUID().toString(), animalId, "1_5", tenths, LocalDate.parse(day).toEpochDay()), newContext())
+                                    }
+                                },
+                                onPaddockAssign = { groupId, paddockId, day ->
+                                    run {
+                                        val group = database.groups().get(farmId, groupId)
+                                        ops.startGrazing(
+                                            StartGrazing(UUID.randomUUID().toString(), paddockId, groupId, group?.headCount ?: 0, LocalDate.parse(day).toEpochDay()),
+                                            newContext(),
+                                        )
+                                    }
+                                },
                                 onIdentifier = { animalId, type, value, day ->
                                     run { ops.assignIdentifier(AssignAnimalIdentifier(UUID.randomUUID().toString(), animalId, type, value, LocalDate.parse(day).toEpochDay()), newContext()) }
                                 },
@@ -341,11 +398,33 @@ fun OperatingModuleHost(
                                 onPedigree = { animalId, parentId, relation ->
                                     run { ops.linkPedigree(LinkPedigree(UUID.randomUUID().toString(), animalId, parentId, relation), newContext()) }
                                 },
+                                // FOS-SHEEP-005 — EID reader: NoOp until the user explicitly enables it.
+                                eidReaderAdapter = remember(eidReaderEnabled) { EidReaderAdapters.current(context) },
+                                isEidReaderEnabled = eidReaderEnabled,
+                                onToggleEidReader = ::toggleEidReader,
+                                onAssignEid = { animalId, value, day ->
+                                    run {
+                                        ops.assignIdentifier(
+                                            AssignAnimalIdentifier(
+                                                UUID.randomUUID().toString(),
+                                                animalId,
+                                                "eid",
+                                                value,
+                                                LocalDate.parse(day).toEpochDay(),
+                                            ),
+                                            newContext(),
+                                        )
+                                    }
+                                },
                             ),
                             onBack = operationsBack,
                             loadRecords = { id -> loadSheepRecords(database, farmId, id) },
                             loadWool = { loadSheepWool(database, farmId) },
                             loadLambingDue = { loadSheepLambingDue(database, farmId) },
+                            loadLambProfile = { id -> loadSheepLambProfile(database, farmId, id) },
+                            loadSheepReport = { loadSheepFlockReport(database, farmId) },
+                            loadSheepGroups = { database.groups().forFarm(farmId).filter { it.speciesCode == "sheep" }.map { SheepGroupOption(it.id, it.name, it.headCount) } },
+                            loadPaddocks = { database.paddocks().forFarm(farmId).map { SheepPaddockOption(it.id, it.displayName, database.grazing().hasOpen(farmId, it.id)) } },
                         )
                         FarmModule.CATTLE -> CattleOperationsScreen(
                             selectedAnimalId = selected?.animalId,
@@ -382,6 +461,14 @@ fun OperatingModuleHost(
                                 },
                                 onBcs = { animalId, scale, score, day ->
                                     run { ops.recordCattleBcs(RecordCattleBcs(UUID.randomUUID().toString(), animalId, scale, score.toIntOrNull() ?: 0, LocalDate.parse(day).toEpochDay()), newContext()) }
+                                },
+                                onHeat = { animalId, signs, note, day ->
+                                    run {
+                                        ops.recordCattleHeat(
+                                            RecordCattleHeat(UUID.randomUUID().toString(), animalId, LocalDate.parse(day).toEpochDay(), signs, note.ifBlank { null }),
+                                            newContext(),
+                                        )
+                                    }
                                 },
                                 onMilk = { animalId, litres, day ->
                                     run {
@@ -443,17 +530,27 @@ fun OperatingModuleHost(
                                         )
                                     }
                                 },
+                                onCalfRegistration = { damId, tag, sex, day ->
+                                    run {
+                                        herd?.register(UUID.randomUUID().toString(), tag, null, sex.uppercase(), null, newContext())
+                                    }
+                                },
                             ),
                             onBack = operationsBack,
                             loadRecords = { id -> loadCattleRecords(database, farmId, id) },
                             loadLots = { loadCattleLots(database, farmId) },
                             loadCalvingDue = { loadCattleCalvingDue(database, farmId) },
+                            loadCattleReport = { loadCattleHerdReport(database, farmId) },
                         )
                         else -> error("Unsupported species operations module $module")
                     } }
                 },
             )
         }
-        else -> Unit
+        else -> ModuleUnavailableScreen(
+            module = module,
+            reason = "No host is implemented for this module yet.",
+            onBack = onBack,
+        )
     }
 }

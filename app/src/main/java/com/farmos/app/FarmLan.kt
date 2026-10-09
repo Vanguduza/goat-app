@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
+import com.farmos.core.design.runSuspendCatching
 
 /** A GOAT farm device found on the local network. */
 internal data class DiscoveredFarm(val descriptor: FarmDiscoveryDescriptor, val host: String, val port: Int, val serviceName: String)

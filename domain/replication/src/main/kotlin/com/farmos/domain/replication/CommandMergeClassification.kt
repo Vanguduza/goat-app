@@ -27,6 +27,12 @@ object CommandMergeClassification {
         "access.account_set.v1",
         "access.recovery_set.v1",
         "farm.set_currency.v1",
+        "farm.record_unit_preference.v1",
+        "finance.revise_budget.v1",
+        "group.amend.v1",
+        "group.animal_move.v1",
+        "poultry.flock_move.v1",
+        "goat.amend_identity.v1",
         "farm.set_gestation.v1",
         "health.pack_accept.v1",
         "inventory.set_reorder.v1",
@@ -37,7 +43,7 @@ object CommandMergeClassification {
         commandName in POSTINGS -> MergeClass.POSTING
         commandName in FIELD_UPDATES -> MergeClass.FIELD_UPDATE
         // Animal status (exit, death, cull, sale) cannot be undone from the field.
-        commandName.endsWith(".set_status.v1") -> MergeClass.IRREVERSIBLE_STATUS
+        commandName.endsWith(".set_status.v1") || commandName == "poultry.flock_close.v1" -> MergeClass.IRREVERSIBLE_STATUS
         else -> MergeClass.APPEND_ONLY_EVENT
     }
 }

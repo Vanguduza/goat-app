@@ -20,6 +20,7 @@ import com.farmos.feature.ops.CustomerScreens
 import com.farmos.feature.ops.CustomerView
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** Every customer on the farm, active first. */
 internal suspend fun loadCustomers(database: FarmOsDatabase, farmId: String): List<CustomerView> =
@@ -53,7 +54,7 @@ fun CustomerRegisterHost(
         scope.launch {
             busy = true
             error = null
-            runCatching {
+            runSuspendCatching {
                 check(canManage) { "Customers are kept by farm staff" }
                 block()
                 customers = loadCustomers(database, farmId)
@@ -62,7 +63,7 @@ fun CustomerRegisterHost(
         }
     }
 
-    LaunchedEffect(farmId) { runCatching { customers = loadCustomers(database, farmId) }.onFailure { error = it.message } }
+    LaunchedEffect(farmId) { runSuspendCatching { customers = loadCustomers(database, farmId) }.onFailure { error = it.message } }
 
     CustomerScreens(
         customers = customers,

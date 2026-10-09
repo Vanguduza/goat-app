@@ -54,6 +54,7 @@ private enum class RabbitPage {
     OUTCOME,
     NESTS,
     GI_STASIS,
+    WEIGHT,
     CAGE_OCCUPANCY,
     CAGE_DETAIL,
     KINDLING_DUE,
@@ -63,6 +64,9 @@ private enum class RabbitPage {
     PEDIGREE,
     COI,
     MATE_COMPARE,
+    REPLACEMENT_COMPARE,
+    SALE_ALLOCATION,
+    RABBIT_REPORT,
 }
 
 /** Rabbit biology is wave/cage/litter-first; this is not a Goat layout with rabbit labels. */
@@ -86,6 +90,10 @@ fun RabbitProgrammeScreen(
     onWean: (waveId: String, count: String, day: String) -> Unit = { _, _, _ -> },
     onRecordOutcome: (waveId: String, outcome: String, day: String) -> Unit = { _, _, _ -> },
     onRecordGiStasis: (animalId: String, signs: String, day: String) -> Unit = { _, _, _ -> },
+    /** FOS-RABBIT-032 — record a governed rabbit weight. */
+    onRecordWeight: (animalId: String, weightKg: String, day: String, notes: String) -> Unit = { _, _, _, _ -> },
+    onDecideRetention: (kitId: String, decision: String, day: String) -> Unit = { _, _, _ -> },
+    onAllocateSale: (kitId: String, targetWeightGrams: String, targetDay: String, purpose: String) -> Unit = { _, _, _, _ -> },
     onBack: () -> Unit,
     records: RabbitRecords = RabbitRecords(),
     today: LocalDate = LocalDate.now(),
@@ -194,11 +202,18 @@ fun RabbitProgrammeScreen(
             RabbitGiStasisScreen(searchRabbits, busy, error, onRecordGiStasis, home)
         }
 
+        RabbitPage.WEIGHT -> {
+            RabbitWeightScreen(searchRabbits, busy, error, onRecordWeight, home)
+        }
+
         RabbitPage.CAGE_OCCUPANCY -> RabbitCageOccupancyScreen(records, home)
         RabbitPage.CAGE_DETAIL -> RabbitCageDetailScreen(records, home)
         RabbitPage.KINDLING_DUE -> RabbitKindlingDueScreen(records, today, home)
         RabbitPage.LITTER_PROFILE -> RabbitLitterProfileScreen(records, home)
         RabbitPage.KIT_CENSUS -> RabbitKitCensusScreen(records, home)
+        RabbitPage.REPLACEMENT_COMPARE -> RabbitReplacementCompareScreen(records, busy, error, onDecideRetention, home)
+        RabbitPage.SALE_ALLOCATION -> RabbitSaleAllocationScreen(records, busy, error, onAllocateSale, home)
+        RabbitPage.RABBIT_REPORT -> RabbitReportScreen(records, home)
     }
 }
 
@@ -242,11 +257,15 @@ private fun RabbitDashboard(
             RabbitDashboardAction("Mating outcome", "Record false pregnancy or outcome", { onOpen(RabbitPage.OUTCOME) })
             RabbitDashboardAction("Nest-box schedule", "Placement, occupancy and removal windows", { onOpen(RabbitPage.NESTS) })
             RabbitDashboardAction("GI-stasis red flag", "Flag signs and create vet-call work", { onOpen(RabbitPage.GI_STASIS) })
+            RabbitDashboardAction("Record weight", "Weigh a rabbit with a governed record", { onOpen(RabbitPage.WEIGHT) })
             RabbitDashboardAction("Cage occupancy", "Recorded capacity, nest boxes and waves per cage", { onOpen(RabbitPage.CAGE_OCCUPANCY) })
             RabbitDashboardAction("Cage detail", "Nest boxes and waves for one cage", { onOpen(RabbitPage.CAGE_DETAIL) })
             RabbitDashboardAction("Kindling due", "Waves with no kindling recorded yet", { onOpen(RabbitPage.KINDLING_DUE) })
             RabbitDashboardAction("Litter profiles", "Schedule, events and kits per wave", { onOpen(RabbitPage.LITTER_PROFILE) })
             RabbitDashboardAction("Kit census", "Individual kits by wave", { onOpen(RabbitPage.KIT_CENSUS) })
+            RabbitDashboardAction("Replacement compare", "Compare young rabbits for replacement selection", { onOpen(RabbitPage.REPLACEMENT_COMPARE) })
+            RabbitDashboardAction("Sale allocation", "Allocate rabbits to a planned sale", { onOpen(RabbitPage.SALE_ALLOCATION) })
+            RabbitDashboardAction("Rabbit report", "Rabbitry totals for this farm", { onOpen(RabbitPage.RABBIT_REPORT) })
             if (showPedigree) {
                 RabbitDashboardAction("Rabbit pedigree", "Sire and dam of each rabbit", { onOpen(RabbitPage.PEDIGREE) })
                 RabbitDashboardAction("Inbreeding check", "Kits' inbreeding for a doe and buck", { onOpen(RabbitPage.COI) })
@@ -341,6 +360,8 @@ private fun RabbitRegisterScreen(
     }
 }
 
+/** FOS-RABBIT-014 — nest placement: add a nest box and assign it through the nest-box cycle (root tag FOS-RABBIT-006). */
+/** FOS-RABBIT-015 — nest removal: cycle a box in-cage → dirty → sanitized/available (root tag FOS-RABBIT-006). */
 @Composable
 private fun RabbitCagesScreen(
     cages: List<String>,
@@ -420,6 +441,7 @@ private fun RabbitCagesScreen(
     }
 }
 
+/** FOS-RABBIT-010 — mating: breeding waves are created with a mating date and doe count (root tag FOS-RABBIT-009). */
 @Composable
 private fun RabbitWaveScreen(
     waves: List<String>,
@@ -500,6 +522,7 @@ private fun RabbitPalpationScreen(
     }
 }
 
+/** FOS-RABBIT-021 — kit mortality: kindling records live and dead kit counts (root tag FOS-RABBIT-017). */
 @Composable
 private fun RabbitKindlingScreen(
     waveOptions: List<FarmSelectorOption>,
@@ -628,6 +651,7 @@ private fun RabbitOutcomeScreen(
     }
 }
 
+/** FOS-RABBIT-033 — rabbit health: records signs observed on a rabbit and creates vet-call work (root tag FOS-RABBIT-034). */
 @Composable
 private fun RabbitGiStasisScreen(
     searchRabbits: FarmSelectorSearch,
@@ -670,6 +694,61 @@ private fun RabbitGiStasisScreen(
             onRecord(animal?.id.orEmpty(), signs, day)
         }, enabled = !busy && animal != null && signs.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
             Text("Flag and create vet-call task")
+        }
+    }
+}
+
+/** FOS-RABBIT-032 — governed rabbit weighing: positive, sane and never in the future. */
+@Composable
+private fun RabbitWeightScreen(
+    searchRabbits: FarmSelectorSearch,
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String, String, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var animal by remember { mutableStateOf<FarmSelectorOption?>(null) }
+    var weightKg by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    var notes by remember { mutableStateOf("") }
+    RabbitEventPage(
+        "FOS-RABBIT-032",
+        "Record weight",
+        "Weigh a rabbit. The record is governed: the rabbit must be registered, the weight positive and sane, the weighing date never in the future.",
+        busy,
+        error,
+        onBack,
+    ) {
+        FarmSearchSelector(
+            atomTag = FarmSelectionAtoms.ANIMAL_SELECTOR,
+            title = "Rabbit",
+            search = searchRabbits,
+            selected = animal,
+            onSelect = { animal = it },
+            emptyText = "No rabbits match on this device",
+            enabled = !busy,
+        )
+        OutlinedTextField(
+            weightKg,
+            { weightKg = it },
+            label = { Text("Weight (kg)") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !busy,
+            singleLine = true,
+        )
+        OutlinedTextField(
+            day,
+            { day = it },
+            label = { Text("Weighing date") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !busy,
+            singleLine = true,
+        )
+        OutlinedTextField(notes, { notes = it }, label = { Text("Notes (optional)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy)
+        Button(onClick = {
+            onRecord(animal?.id.orEmpty(), weightKg, day, notes)
+        }, enabled = !busy && animal != null && weightKg.isNotBlank(), modifier = Modifier.fillMaxWidth()) {
+            Text("Record weight")
         }
     }
 }
@@ -717,3 +796,144 @@ private fun RabbitWaveSelector(
 data class RabbitNestBoxChoice(val id: String, val code: String, val status: String)
 
 private fun nestStatusLabel(status: String): String = status.replace('_', ' ').replaceFirstChar { it.uppercase() }
+
+/**
+ * FOS-RABBIT-025 — Replacement Candidate Compare: compare young rabbits side by side
+ * for replacement selection, then record keep/cull retention decisions via the
+ * governed DecideRabbitRetention command.
+ */
+@Composable
+private fun RabbitReplacementCompareScreen(
+    records: RabbitRecords,
+    busy: Boolean,
+    error: String?,
+    onDecideRetention: (kitId: String, decision: String, day: String) -> Unit,
+    onBack: () -> Unit,
+) {
+    val candidates = records.kits.filter { it.status == "active" && it.retention != "culled" }
+    var selected by remember { mutableStateOf(emptySet<String>()) }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    val compared = candidates.filter { it.id in selected }.take(4)
+    FarmOperationalPage("FOS-RABBIT-025", "Replacement compare", "Compare young rabbits for replacement selection.", onBack = onBack) {
+        FarmOperationalSection("Candidates") {
+            if (candidates.isEmpty()) Text("No active kits to compare.")
+            candidates.forEach { kit ->
+                val checked = kit.id in selected
+                TextButton(
+                    onClick = {
+                        selected = if (checked) selected - kit.id else (selected + kit.id).take(4).toSet()
+                    },
+                    enabled = !busy,
+                ) { Text("${if (checked) "[x]" else "[ ]"} ${kit.label} · ${kit.sex} · ${kit.status} · retention ${kit.retention}") }
+            }
+        }
+        if (compared.isNotEmpty()) {
+            FarmOperationalSection("Side by side") {
+                compared.forEach { kit ->
+                    Text("${kit.label}: sex ${kit.sex}, status ${kit.status}, retention ${kit.retention}, ear tag ${kit.earTag ?: "—"}")
+                }
+                OutlinedTextField(day, {
+                    day = it
+                }, label = { Text("Decision date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { compared.forEach { onDecideRetention(it.id, "keep", day) } },
+                        enabled = !busy,
+                        modifier = Modifier.weight(1f),
+                    ) { Text("Keep selected") }
+                    Button(
+                        onClick = { compared.forEach { onDecideRetention(it.id, "cull", day) } },
+                        enabled = !busy,
+                        modifier = Modifier.weight(1f),
+                    ) { Text("Cull selected") }
+                }
+            }
+        }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    }
+}
+
+/**
+ * FOS-RABBIT-030 — Sale Allocation: allocate rabbits to a planned sale via the
+ * governed RecordRabbitMarketPlan command (purpose "sale").
+ */
+@Composable
+private fun RabbitSaleAllocationScreen(
+    records: RabbitRecords,
+    busy: Boolean,
+    error: String?,
+    onAllocate: (kitId: String, targetWeightGrams: String, targetDay: String, purpose: String) -> Unit,
+    onBack: () -> Unit,
+) {
+    val candidates = records.kits.filter { it.status == "active" }
+    var selected by remember { mutableStateOf("") }
+    var targetWeight by remember { mutableStateOf("") }
+    var targetDay by remember { mutableStateOf(LocalDate.now().toString()) }
+    FarmOperationalPage("FOS-RABBIT-030", "Sale allocation", "Allocate rabbits to a planned sale.", onBack = onBack) {
+        FarmOperationalSection("Allocate") {
+            FarmEntitySelector(
+                atomTag = "rabbit-sale-kit-selector",
+                title = "Rabbit",
+                options = candidates.map { FarmSelectorOption(it.id, it.label, "${it.sex} · ${it.status}") },
+                selectedId = selected.ifBlank { null },
+                onSelect = { selected = it },
+                emptyText = "No active kits to allocate.",
+                enabled = !busy,
+            )
+            OutlinedTextField(targetWeight, {
+                targetWeight = it
+            }, label = { Text("Target weight (g)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(targetDay, {
+                targetDay = it
+            }, label = { Text("Target sale date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Button(
+                onClick = { onAllocate(selected, targetWeight, targetDay, "sale") },
+                enabled = !busy && selected.isNotBlank() && targetWeight.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Allocate to sale") }
+            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        }
+    }
+}
+
+/**
+ * FOS-RABBIT-036 — Rabbit Report: farm-scoped rabbitry totals computed from local
+ * records only.
+ *
+ * FOS-RABBIT-032 — Rabbit Weight is implemented: the `rabbit_weights` table, the
+ * RecordRabbitWeight command with validator, the repository handler journaling
+ * `rabbit.record_weight.v1`, and the replay applier all exist; the latest weighing per
+ * rabbit is shown below from the same read model.
+ */
+@Composable
+private fun RabbitReportScreen(
+    records: RabbitRecords,
+    onBack: () -> Unit,
+) {
+    val activeKits = records.kits.count { it.status == "active" }
+    FarmOperationalPage("FOS-RABBIT-036", "Rabbit report", "Rabbitry totals for this farm.", onBack = onBack) {
+        FarmOperationalSection("Totals") {
+            Text("Cages: ${records.cages.size}")
+            Text("Waves: ${records.waves.size}")
+            Text("Kits: ${records.kits.size} (${activeKits} active)")
+        }
+        FarmOperationalSection("Per wave") {
+            if (records.waves.isEmpty()) Text("No waves recorded yet.")
+            records.waves.forEach { wave ->
+                val kits = records.kits.count { it.waveId == wave.id }
+                Text("Wave ${wave.id}: $kits kits")
+            }
+        }
+        FarmOperationalSection("Latest weights · FOS-RABBIT-032") {
+            val latest = records.weights.distinctBy { it.animalId }
+            if (latest.isEmpty()) Text("No weights recorded yet.")
+            latest.forEach { weight ->
+                Text(
+                    "${weight.animalLabel}: ${weight.weightKg} kg · ${LocalDate.ofEpochDay(weight.weighedAtEpochMillis / 86_400_000L)}" +
+                        (weight.notes?.let { " · $it" } ?: ""),
+                    modifier = Modifier.testTag("rabbit-weight:${weight.id}"),
+                )
+            }
+        }
+    }
+}

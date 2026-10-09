@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "repository": "Vanguduza/goat-app",
-  "source_fingerprint": "sha256:b00601f98a3f92871bfdf4a91e6830cbe89d4488dc0315f231671243e1697f26",
+  "source_fingerprint": "sha256:fa31a5de55fba51618132e5870e1fe7d5b19d8bde2313c0dba8d2e10887f0bd8",
   "canonical_branch": "main",
   "release_state": "BLOCKED",
   "green_states": {
@@ -21,17 +21,17 @@
   "screen_coverage": {
     "registered": 545,
     "feature_bound": 545,
-    "kotlin_referenced": 306,
+    "kotlin_referenced": 519,
     "implementation_mapped": 128,
     "qdu_states": {
-      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 306,
-      "PLANNED_NOT_IMPLEMENTED": 239
+      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 519,
+      "PLANNED_NOT_IMPLEMENTED": 26
     }
   },
   "module_coverage": {
     "admin": {
       "registered": 25,
-      "kotlin_referenced": 10,
+      "kotlin_referenced": 25,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 10,
@@ -39,7 +39,7 @@
     },
     "ai": {
       "registered": 12,
-      "kotlin_referenced": 0,
+      "kotlin_referenced": 12,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 5,
@@ -47,7 +47,7 @@
     },
     "an": {
       "registered": 14,
-      "kotlin_referenced": 0,
+      "kotlin_referenced": 14,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 6,
@@ -55,7 +55,7 @@
     },
     "asset": {
       "registered": 12,
-      "kotlin_referenced": 4,
+      "kotlin_referenced": 12,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 4,
@@ -71,7 +71,7 @@
     },
     "cap": {
       "registered": 10,
-      "kotlin_referenced": 0,
+      "kotlin_referenced": 10,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 3,
@@ -79,7 +79,7 @@
     },
     "cattle": {
       "registered": 36,
-      "kotlin_referenced": 31,
+      "kotlin_referenced": 36,
       "implementation_mapped": 22,
       "visual_green": 0,
       "feature_count": 7,
@@ -87,7 +87,7 @@
     },
     "feed": {
       "registered": 12,
-      "kotlin_referenced": 3,
+      "kotlin_referenced": 11,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 5,
@@ -95,7 +95,7 @@
     },
     "fin": {
       "registered": 13,
-      "kotlin_referenced": 4,
+      "kotlin_referenced": 13,
       "implementation_mapped": 4,
       "visual_green": 0,
       "feature_count": 4,
@@ -103,7 +103,7 @@
     },
     "gen": {
       "registered": 10,
-      "kotlin_referenced": 2,
+      "kotlin_referenced": 10,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 4,
@@ -111,7 +111,7 @@
     },
     "global": {
       "registered": 20,
-      "kotlin_referenced": 10,
+      "kotlin_referenced": 20,
       "implementation_mapped": 8,
       "visual_green": 0,
       "feature_count": 5,
@@ -119,7 +119,7 @@
     },
     "goat": {
       "registered": 55,
-      "kotlin_referenced": 43,
+      "kotlin_referenced": 55,
       "implementation_mapped": 17,
       "visual_green": 0,
       "feature_count": 10,
@@ -127,7 +127,7 @@
     },
     "group": {
       "registered": 9,
-      "kotlin_referenced": 4,
+      "kotlin_referenced": 9,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 3,
@@ -135,7 +135,7 @@
     },
     "health": {
       "registered": 30,
-      "kotlin_referenced": 23,
+      "kotlin_referenced": 30,
       "implementation_mapped": 13,
       "visual_green": 0,
       "feature_count": 9,
@@ -151,7 +151,7 @@
     },
     "inv": {
       "registered": 19,
-      "kotlin_referenced": 17,
+      "kotlin_referenced": 19,
       "implementation_mapped": 9,
       "visual_green": 0,
       "feature_count": 6,
@@ -159,7 +159,7 @@
     },
     "labour": {
       "registered": 9,
-      "kotlin_referenced": 4,
+      "kotlin_referenced": 9,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 4,
@@ -167,7 +167,7 @@
     },
     "pasture": {
       "registered": 11,
-      "kotlin_referenced": 4,
+      "kotlin_referenced": 11,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 4,
@@ -175,7 +175,7 @@
     },
     "poultry": {
       "registered": 27,
-      "kotlin_referenced": 20,
+      "kotlin_referenced": 27,
       "implementation_mapped": 12,
       "visual_green": 0,
       "feature_count": 6,
@@ -183,7 +183,7 @@
     },
     "proc": {
       "registered": 10,
-      "kotlin_referenced": 5,
+      "kotlin_referenced": 10,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 4,
@@ -191,7 +191,7 @@
     },
     "rabbit": {
       "registered": 36,
-      "kotlin_referenced": 25,
+      "kotlin_referenced": 36,
       "implementation_mapped": 12,
       "visual_green": 0,
       "feature_count": 7,
@@ -199,7 +199,7 @@
     },
     "report": {
       "registered": 15,
-      "kotlin_referenced": 2,
+      "kotlin_referenced": 15,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 5,
@@ -207,7 +207,7 @@
     },
     "sales": {
       "registered": 12,
-      "kotlin_referenced": 6,
+      "kotlin_referenced": 12,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 4,
@@ -215,7 +215,7 @@
     },
     "search": {
       "registered": 9,
-      "kotlin_referenced": 0,
+      "kotlin_referenced": 9,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 4,
@@ -223,7 +223,7 @@
     },
     "sheep": {
       "registered": 32,
-      "kotlin_referenced": 27,
+      "kotlin_referenced": 32,
       "implementation_mapped": 22,
       "visual_green": 0,
       "feature_count": 7,
@@ -231,7 +231,7 @@
     },
     "sim": {
       "registered": 9,
-      "kotlin_referenced": 0,
+      "kotlin_referenced": 9,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 4,
@@ -247,7 +247,7 @@
     },
     "task": {
       "registered": 15,
-      "kotlin_referenced": 11,
+      "kotlin_referenced": 15,
       "implementation_mapped": 5,
       "visual_green": 0,
       "feature_count": 4,
@@ -255,7 +255,7 @@
     },
     "water": {
       "registered": 10,
-      "kotlin_referenced": 2,
+      "kotlin_referenced": 9,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 4,
@@ -266,7 +266,7 @@
   "blocking_completion_gaps": [
     "156 mandatory features remain not FEATURE_GREEN",
     "545 registered screens remain not VISUAL_GREEN until native evidence and independent approval exist",
-    "239 registered screens remain PLANNED_NOT_IMPLEMENTED at this implementation fingerprint",
+    "26 registered screens remain PLANNED_NOT_IMPLEMENTED at this implementation fingerprint",
     "whole-product MODULE_GREEN and MVP_GREEN certification remains outstanding"
   ],
   "status_law": "Feature binding is scope accounting only; it is not route reachability, FEATURE_GREEN, MODULE_GREEN, VISUAL_GREEN, or MVP_GREEN."

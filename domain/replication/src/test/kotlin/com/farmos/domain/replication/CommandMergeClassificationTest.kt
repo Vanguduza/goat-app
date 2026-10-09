@@ -21,4 +21,13 @@ class CommandMergeClassificationTest {
             "water.record.v1", "sheep.record_lambing.v1", "cattle.record_calving.v1",
         ).forEach { assertEquals(MergeClass.APPEND_ONLY_EVENT, CommandMergeClassification.forCommand(it)) }
     }
+    @Test
+    fun mutableRecoveredCommandsCannotMasqueradeAsAppendOnlyFacts() {
+        listOf(
+            "farm.record_unit_preference.v1", "finance.revise_budget.v1", "group.amend.v1",
+            "group.animal_move.v1", "poultry.flock_move.v1", "goat.amend_identity.v1",
+        ).forEach { assertEquals(MergeClass.FIELD_UPDATE, CommandMergeClassification.forCommand(it)) }
+        assertEquals(MergeClass.IRREVERSIBLE_STATUS, CommandMergeClassification.forCommand("poultry.flock_close.v1"))
+    }
+
 }

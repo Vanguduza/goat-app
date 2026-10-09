@@ -13,6 +13,7 @@ import yaml
 
 from feature_catalog import CATALOG_AUTHORITY, CATALOG_STATUS, SCOPE_LAW, catalog_features, feature_ids_for_screen, validate_screen_coverage
 from feature_dependencies import build_graph
+from source_evidence import kotlin_sources, source_fingerprint as fingerprint_source_tree
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "docs/ux/FARM_OS_SCREEN_REGISTRY.yaml"
@@ -29,18 +30,7 @@ SCREEN_RE = re.compile(r"FOS-[A-Z]+-[0-9]{3}(?:-[A-Z])?")
 
 
 def source_fingerprint() -> str:
-    digest = hashlib.sha256()
-    inputs = [REGISTRY, IMPL_MAP]
-    for base in ("app", "core", "data", "domain", "feature"):
-        inputs.extend(sorted((ROOT / base).rglob("*.kt"), key=lambda path: path.relative_to(ROOT).as_posix()))
-    for path in inputs:
-        digest.update(path.relative_to(ROOT).as_posix().encode())
-        digest.update(b"\0")
-        canonical = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
-        digest.update(canonical)
-        digest.update(b"\0")
-    return "sha256:" + digest.hexdigest()
-
+    return fingerprint_source_tree(ROOT)
 
 def kotlin_ids() -> set[str]:
     """Production Kotlin Screen-ID references only.
@@ -49,12 +39,11 @@ def kotlin_ids() -> set[str]:
     implementation themselves and must never inflate production coverage.
     """
     found: set[str] = set()
-    for base in ("app", "core", "data", "domain", "feature"):
-        for path in (ROOT / base).rglob("*.kt"):
-            relative = path.relative_to(ROOT).as_posix()
-            if "/src/main/" not in relative:
-                continue
-            found.update(SCREEN_RE.findall(path.read_text(errors="ignore")))
+    for path in kotlin_sources(ROOT):
+        relative = path.relative_to(ROOT).as_posix()
+        if "/src/main/" not in relative:
+            continue
+        found.update(SCREEN_RE.findall(path.read_text(errors="ignore")))
     return found
 
 

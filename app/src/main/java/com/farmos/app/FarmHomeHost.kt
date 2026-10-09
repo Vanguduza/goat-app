@@ -10,6 +10,7 @@ import com.farmos.core.network.FarmMembership
 import com.farmos.data.herd.RoomOpsRepository
 import com.farmos.domain.ops.projectWorkerTaskStage
 import java.time.LocalDate
+import com.farmos.core.design.runSuspendCatching
 
 data class HomeTaskRow(
     val id: String,
@@ -59,11 +60,11 @@ fun FarmHomeHost(
     var summary by remember(farmId) { mutableStateOf(FarmHomeSummary(loading = true)) }
     LaunchedEffect(ops, farmId) {
         val today = LocalDate.now().toEpochDay()
-        runCatching {
+        runSuspendCatching {
             val open = ops.openTasks()
             val done = ops.completedTasks()
             val withdrawals = ops.withdrawals()
-            val items = runCatching { ops.items() }.getOrDefault(emptyList())
+            val items = runSuspendCatching { ops.items() }.getOrDefault(emptyList())
             val rows = (open + done).map { row ->
                 HomeTaskRow(
                     id = row.id,

@@ -24,6 +24,7 @@ import com.farmos.core.design.FarmSearchSelector
 import com.farmos.core.design.FarmSelectionAtoms
 import com.farmos.core.design.FarmSelectorOption
 import com.farmos.core.design.FarmSelectorSearch
+import com.farmos.core.design.FosDimens
 import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.NoFarmSelectorSearch
 import java.time.LocalDate
@@ -53,7 +54,56 @@ private enum class HealthPage {
     FORMULARY_ITEM,
     PROTOCOL_PACK_DETAIL,
     TIMELINE,
+    VACCINATION_SCHEDULE,
+    VACCINATION_CAPTURE,
+    VACCINATION_DETAIL,
+    TODAY_ACTIONS,
+    HEALTH_REPORT,
+    REFERENCE_DETAIL,
+    EMERGENCY,
 }
+
+/** One disease reference entry for FOS-HEALTH-027. Read-only; from the local disease catalog. */
+data class HealthReferenceDetail(
+    val code: String,
+    val speciesCode: String,
+    val displayName: String,
+    val signs: String,
+    val firstAid: String,
+    val prevention: String,
+    val vetClass: String,
+    val redFlag: Boolean,
+)
+
+/** One recorded vaccination for the schedule, detail and report surfaces. Read-only view. */
+data class HealthVaccinationView(
+    val id: String,
+    val subjectLabel: String,
+    val speciesCode: String,
+    val formularyLabel: String,
+    val dose: String?,
+    val method: String?,
+    val occurredEpochDay: Long,
+)
+
+/** Individual vaccination record review; no next due date is inferred without an approved protocol. */
+data class VaccinationDueView(
+    val animalId: String,
+    val label: String,
+    val reason: String,
+    val daysSinceLast: Long?,
+)
+
+/** Farm health aggregates for FOS-HEALTH-030. Null counts render as a dash, never as zero. */
+data class HealthReportStats(
+    val activeAnimalCount: Int?,
+    val animalsEverVaccinated: Int?,
+    val dueCandidateCount: Int,
+    val recentVaccinationCount: Int,
+    val treatmentCount: Int?,
+    val observationCount: Int?,
+    val activeWithdrawalCount: Int?,
+)
 
 /** Governed Health family. Advisory/recording only; this surface does not prescribe dose or diagnose. */
 @Composable
@@ -87,6 +137,21 @@ fun HealthObservationScreen(
     acceptedPacks: List<FarmSelectorOption> = emptyList(),
     /** Whole-farm animal search across species for health subjects; never a capped presentation list. */
     searchAnimals: FarmSelectorSearch = NoFarmSelectorSearch,
+    /** Recorded vaccinations (latest first) for the schedule and report surfaces. */
+    vaccinations: List<HealthVaccinationView> = emptyList(),
+    /** Record-based vaccination review candidates for the schedule and today surfaces. */
+    dueCandidates: List<VaccinationDueView> = emptyList(),
+    /** Animal groups for the vaccination capture target picker. */
+    groupOptions: List<FarmSelectorOption> = emptyList(),
+    /** Aggregates for the health report; null until loaded. */
+    reportStats: HealthReportStats? = null,
+    /** Records a vaccination through the governed command handler; never a direct Room write. */
+    onRecordVaccination: (species: String, animalId: String?, groupId: String?, formularyItemId: String, dose: String?, method: String?, day: String) -> Unit =
+        { _, _, _, _, _, _, _ -> },
+    /** Structured disease reference entries for FOS-HEALTH-027; parallels the catalog strings. */
+    referenceDetails: List<HealthReferenceDetail> = emptyList(),
+    /** Red-flag observation summaries for FOS-HEALTH-028; empty when none are recorded. */
+    redFlagObservations: List<String> = emptyList(),
 ) {
     var page by remember { mutableStateOf(entryPage.toHealthPage()) }
     var backStack by remember { mutableStateOf(emptyList<HealthPage>()) }
@@ -162,7 +227,20 @@ fun HealthObservationScreen(
         }
 
         HealthPage.REFERENCES -> {
-            HealthRows("FOS-HEALTH-026", "Reference library", catalog, "No reference rows on this device", error, home)
+            HealthReferenceListScreen(
+                referenceDetails,
+                catalog,
+                { openRecord(HealthPage.REFERENCE_DETAIL, it) },
+                home,
+            )
+        }
+
+        HealthPage.REFERENCE_DETAIL -> {
+            HealthReferenceDetailScreen(referenceDetails, selectedRecordId, recordBack)
+        }
+
+        HealthPage.EMERGENCY -> {
+            HealthEmergencyScreen(redFlagObservations, home)
         }
 
         HealthPage.PROTOCOLS -> {
@@ -188,6 +266,38 @@ fun HealthObservationScreen(
         HealthPage.LAB_RESULT -> {
             LabResultScreen(searchAnimals, busy, error, onRecordLab, labResultBack)
         }
+
+        HealthPage.VACCINATION_SCHEDULE -> {
+            VaccinationScheduleScreen(
+                vaccinations,
+                dueCandidates,
+                { openRecord(HealthPage.VACCINATION_DETAIL, it) },
+                { openRecord(HealthPage.VACCINATION_CAPTURE) },
+                recordBack,
+            )
+        }
+
+        HealthPage.VACCINATION_CAPTURE -> {
+            VaccinationCaptureScreen(speciesCodes, formularyOptions, groupOptions, searchAnimals, busy, error, onRecordVaccination, home)
+        }
+
+        HealthPage.VACCINATION_DETAIL -> {
+            VaccinationDetailScreen(vaccinations, selectedRecordId, recordBack)
+        }
+
+        HealthPage.TODAY_ACTIONS -> {
+            TodayHealthActionsScreen(
+                dueCandidates,
+                readModel,
+                { openRecord(HealthPage.VACCINATION_SCHEDULE) },
+                { openRecord(HealthPage.VACCINATION_CAPTURE) },
+                home,
+            )
+        }
+
+        HealthPage.HEALTH_REPORT -> {
+            HealthReportScreen(reportStats, readModel, vaccinations, home)
+        }
     }
 }
 
@@ -202,6 +312,10 @@ private fun HealthEntryPage.toHealthPage(): HealthPage =
         HealthEntryPage.FORMULARY -> HealthPage.FORMULARY
     }
 
+/**
+ * FOS-HEALTH-001 — health dashboard. FOS-HEALTH-002 — today health actions: a dedicated page
+ * (HealthPage.TODAY_ACTIONS) plus the compact "Today health picture" summary section below.
+ */
 @Composable
 private fun HealthDashboard(
     counts: HealthReadModel,
@@ -229,6 +343,8 @@ private fun HealthDashboard(
             TextButton(onClick = { onOpen(HealthPage.OBSERVATIONS) }) { Text("Observation list") }
             Button(onClick = { onOpen(HealthPage.RECORD_OBSERVATION) }) { Text("Record observation") }
             TextButton(onClick = { onOpen(HealthPage.REFERENCES) }) { Text("Reference library") }
+            TextButton(onClick = { onOpen(HealthPage.EMERGENCY) }) { Text("Emergency / red flag") }
+            Button(onClick = { onOpen(HealthPage.TODAY_ACTIONS) }) { Text("Today health actions") }
         }
         FarmOperationalSection(
             "Clinical records",
@@ -242,11 +358,13 @@ private fun HealthDashboard(
         }
         FarmOperationalSection("Health records", "Recorded history on this device. Records only; no diagnosis or dosing.") {
             TextButton(onClick = { onOpen(HealthPage.TREATMENT_RECORDS) }) { Text("Treatment records") }
+            TextButton(onClick = { onOpen(HealthPage.VACCINATION_SCHEDULE) }) { Text("Vaccination schedule") }
             TextButton(onClick = { onOpen(HealthPage.VET_VISITS) }) { Text("Vet visits") }
             TextButton(onClick = { onOpen(HealthPage.LAB_RESULTS) }) { Text("Lab results") }
             TextButton(onClick = { onOpen(HealthPage.FORMULARY_ITEM) }) { Text("Formulary items") }
             TextButton(onClick = { onOpen(HealthPage.PROTOCOL_PACK_DETAIL) }) { Text("Protocol pack detail") }
             TextButton(onClick = { onOpen(HealthPage.TIMELINE) }) { Text("Health timeline") }
+            TextButton(onClick = { onOpen(HealthPage.HEALTH_REPORT) }) { Text("Health report") }
         }
         FarmOperationalSection("Protocol packs") {
             Text("${packs.size} protocol pack(s) on this device")
@@ -283,6 +401,111 @@ private fun HealthRows(
     FarmOperationalPage(screenId, title, "Recorded farm health information.", visualClass, onBack) {
         FarmOperationalRows(rows, empty, "Records captured on this device will appear here.")
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    }
+}
+
+/**
+ * FOS-HEALTH-026 — reference library list. Each row opens FOS-HEALTH-027 for the full entry.
+ */
+@Composable
+private fun HealthReferenceListScreen(
+    details: List<HealthReferenceDetail>,
+    fallbackRows: List<String>,
+    onOpenDetail: (String) -> Unit,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        "FOS-HEALTH-026",
+        "Reference library",
+        "Disease reference entries on this device.",
+        FarmVisualClass.I3,
+        onBack,
+    ) {
+        if (details.isEmpty()) {
+            FarmOperationalRows(fallbackRows, "No reference rows on this device", "Records captured on this device will appear here.")
+        } else {
+            details.forEach { detail ->
+                TextButton(
+                    onClick = { onOpenDetail(detail.code) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        detail.speciesCode.replaceFirstChar { it.uppercase() } + " · " + detail.displayName +
+                            if (detail.redFlag) " · red flag" else "",
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** FOS-HEALTH-027 — reference detail: the full catalog entry for one disease reference. */
+@Composable
+private fun HealthReferenceDetailScreen(
+    details: List<HealthReferenceDetail>,
+    code: String?,
+    onBack: () -> Unit,
+) {
+    val detail = details.firstOrNull { it.code == code }
+    FarmOperationalPage(
+        "FOS-HEALTH-027",
+        "Reference detail",
+        detail?.displayName ?: "Reference",
+        FarmVisualClass.I3,
+        onBack,
+    ) {
+        if (detail == null) {
+            Text("The reference entry is not on this device.")
+            return@FarmOperationalPage
+        }
+        FarmOperationalSection("Entry") {
+            Text(detail.speciesCode.replaceFirstChar { it.uppercase() } + " · " + detail.displayName)
+            Text("Vet class: ${detail.vetClass}")
+            if (detail.redFlag) Text("Red-flag condition: treat as urgent and call the vet.", color = MaterialTheme.colorScheme.error)
+        }
+        FarmOperationalSection("Signs") {
+            Text(detail.signs.ifBlank { "No signs recorded." })
+        }
+        FarmOperationalSection("First aid") {
+            Text(detail.firstAid.ifBlank { "No first aid recorded." })
+        }
+        FarmOperationalSection("Prevention") {
+            Text(detail.prevention.ifBlank { "No prevention recorded." })
+        }
+    }
+}
+
+/**
+ * FOS-HEALTH-028 — emergency / red flag: the farm's recorded red-flag observations with triage
+ * guidance. Advisory and recording only; this surface does not diagnose or prescribe.
+ */
+@Composable
+private fun HealthEmergencyScreen(
+    redFlagObservations: List<String>,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        "FOS-HEALTH-028",
+        "Emergency / red flag",
+        "Urgent health observations on this farm.",
+        FarmVisualClass.I3,
+        onBack,
+    ) {
+        FarmOperationalSection("What to do") {
+            Text(
+                "Isolate the animal if safe to do so, keep it calm and warm, and call the vet. " +
+                    "Record what you see; Farm OS does not diagnose.",
+            )
+        }
+        FarmOperationalSection("Recent red-flag observations") {
+            if (redFlagObservations.isEmpty()) {
+                Text("No red flags in the recent observations shown on this device.")
+            } else {
+                redFlagObservations.forEach { row ->
+                    Text(row, color = MaterialTheme.colorScheme.error)
+                }
+            }
+        }
     }
 }
 
@@ -668,6 +891,269 @@ private fun LabResultScreen(
 
 private const val HEALTH_FORMULARY_SELECTOR = "health-formulary-selector"
 private const val HEALTH_PACK_SELECTOR = "health-pack-selector"
+private const val HEALTH_GROUP_SELECTOR = "health-group-selector"
+
+/**
+ * FOS-HEALTH-011 — vaccination schedule: recorded vaccinations (latest first) and record-based
+ * review candidates. Tapping a recorded row opens the case detail; recording starts a new capture.
+ */
+@Composable
+private fun VaccinationScheduleScreen(
+    vaccinations: List<HealthVaccinationView>,
+    dueCandidates: List<VaccinationDueView>,
+    onOpenDetail: (String) -> Unit,
+    onCapture: () -> Unit,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        "FOS-HEALTH-011",
+        "Vaccination schedule",
+        "Recorded vaccinations and record-based review candidates on this device.",
+        FarmVisualClass.I3,
+        onBack,
+    ) {
+        FarmOperationalSection(
+            "Review candidates",
+            "Recorded dates only. A next vaccination date requires an approved protocol; no date is inferred here.",
+        ) {
+            if (dueCandidates.isEmpty()) {
+                Text("No review candidates on this device")
+            } else {
+                dueCandidates.forEach { candidate ->
+                    TextButton(onClick = onCapture, modifier = Modifier.fillMaxWidth()) {
+                        Text("${candidate.label} — ${candidate.reason}")
+                    }
+                }
+            }
+        }
+        FarmOperationalSection("Recorded vaccinations") {
+            Button(onClick = onCapture, modifier = Modifier.fillMaxWidth()) { Text("Record vaccination") }
+            if (vaccinations.isEmpty()) {
+                Text("No vaccinations recorded on this device")
+            } else {
+                vaccinations.forEach { record ->
+                    TextButton(onClick = { onOpenDetail(record.id) }, modifier = Modifier.fillMaxWidth()) {
+                        Text("${record.subjectLabel} · ${record.formularyLabel} · ${LocalDate.ofEpochDay(record.occurredEpochDay)}")
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * FOS-HEALTH-012 — vaccination capture: records a vaccination against a vet-approved formulary
+ * item for exactly one target — an individual animal or a group. Never a free-typed product.
+ */
+@Composable
+private fun VaccinationCaptureScreen(
+    speciesCodes: List<String>,
+    formularyOptions: List<FarmSelectorOption>,
+    groupOptions: List<FarmSelectorOption>,
+    searchAnimals: FarmSelectorSearch,
+    busy: Boolean,
+    error: String?,
+    onRecord: (String, String?, String?, String, String?, String?, String) -> Unit,
+    onBack: () -> Unit,
+) {
+    var species by remember { mutableStateOf(speciesCodes.firstOrNull().orEmpty()) }
+    var useGroup by remember { mutableStateOf(false) }
+    var animal by remember { mutableStateOf<FarmSelectorOption?>(null) }
+    var groupId by remember { mutableStateOf("") }
+    var formularyId by remember { mutableStateOf("") }
+    var dose by remember { mutableStateOf("") }
+    var method by remember { mutableStateOf("") }
+    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    val dayOk = runCatching { LocalDate.parse(day) }.isSuccess
+    val targetOk = if (useGroup) groupId.isNotBlank() else animal != null
+    FarmOperationalPage(
+        "FOS-HEALTH-012",
+        "Record vaccination",
+        "A vaccination references a vet-approved formulary item and exactly one target. Farm OS does not prescribe dose.",
+        FarmVisualClass.I4,
+        onBack,
+    ) {
+        FarmOperationalSection("Vaccination") {
+            FarmSpeciesSelector(speciesCodes, species, busy) { species = it; animal = null; groupId = ""; formularyId = "" }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(FosDimens.Grid)) {
+                TextButton(onClick = { useGroup = false }, enabled = !busy) { Text("Individual animal") }
+                TextButton(onClick = { useGroup = true }, enabled = !busy) { Text("Group") }
+            }
+            if (useGroup) {
+                FarmEntitySelector(
+                    atomTag = HEALTH_GROUP_SELECTOR,
+                    title = "Animal group",
+                    options = groupOptions,
+                    selectedId = groupId.ifBlank { null },
+                    onSelect = { groupId = it },
+                    emptyText = "No animal groups on this farm",
+                    enabled = !busy,
+                )
+            } else {
+                FarmSearchSelector(
+                    atomTag = FarmSelectionAtoms.ANIMAL_SELECTOR,
+                    title = "Animal",
+                    search = searchAnimals,
+                    selected = animal,
+                    onSelect = { animal = it },
+                    emptyText = "No animals match on this device",
+                    enabled = !busy,
+                )
+            }
+            FarmEntitySelector(
+                atomTag = HEALTH_FORMULARY_SELECTOR,
+                title = "Vaccine (vet-approved formulary item)",
+                options = formularyOptions,
+                selectedId = formularyId.ifBlank { null },
+                onSelect = { formularyId = it },
+                emptyText = "No approved formulary items. Add one first.",
+                enabled = !busy,
+            )
+            OutlinedTextField(dose, { dose = it }, label = { Text("Dose (optional)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(method, { method = it }, label = { Text("Method (optional)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            OutlinedTextField(day, { day = it }, label = { Text("Vaccination date") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
+            Button(
+                onClick = {
+                    onRecord(species, animal?.id.takeUnless { useGroup }, groupId.takeIf { useGroup && it.isNotBlank() }, formularyId, dose.ifBlank { null }, method.ifBlank { null }, day)
+                },
+                enabled = !busy && species.isNotBlank() && targetOk && formularyId.isNotBlank() && dayOk,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Record vaccination") }
+        }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    }
+}
+
+/**
+ * FOS-HEALTH-005 — health case detail: one recorded vaccination with subject, vaccine and date.
+ * Read-only recorded evidence. The record carries no recorder identity in the domain model.
+ */
+@Composable
+private fun VaccinationDetailScreen(
+    vaccinations: List<HealthVaccinationView>,
+    recordId: String?,
+    onBack: () -> Unit,
+) {
+    val record = vaccinations.firstOrNull { it.id == recordId }
+    FarmOperationalPage(
+        "FOS-HEALTH-005",
+        "Vaccination record",
+        "Recorded evidence; read-only.",
+        FarmVisualClass.I3,
+        onBack,
+    ) {
+        if (record == null) {
+            Text("Record not found on this device")
+        } else {
+            FarmOperationalSection("Case") {
+                Text("Subject: ${record.subjectLabel}")
+                Text("Species: ${record.speciesCode}")
+                Text("Vaccine: ${record.formularyLabel}")
+                Text("Date: ${LocalDate.ofEpochDay(record.occurredEpochDay)}")
+                record.dose?.let { Text("Dose: $it") }
+                record.method?.let { Text("Method: $it") }
+            }
+        }
+    }
+}
+
+/**
+ * FOS-HEALTH-002 — today health actions: record-based vaccination review candidates and pending
+ * health work (active withdrawals, recorded observations and treatments), one surface.
+ */
+@Composable
+private fun TodayHealthActionsScreen(
+    dueCandidates: List<VaccinationDueView>,
+    counts: HealthReadModel,
+    onOpenSchedule: () -> Unit,
+    onCapture: () -> Unit,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        "FOS-HEALTH-002",
+        "Today health actions",
+        "Individual vaccination records and farm health work.",
+        FarmVisualClass.I2,
+        onBack,
+    ) {
+        FarmOperationalSection("Vaccination review") {
+            if (dueCandidates.isEmpty()) {
+                Text("No active individual animals to review")
+            } else {
+                dueCandidates.take(20).forEach { candidate ->
+                    Text("${candidate.label} — ${candidate.reason}")
+                }
+                if (dueCandidates.size > 20) Text("…and ${dueCandidates.size - 20} more on the schedule")
+            }
+            TextButton(onClick = onOpenSchedule) { Text("Open vaccination schedule") }
+            Button(onClick = onCapture, modifier = Modifier.fillMaxWidth()) { Text("Record vaccination") }
+        }
+        FarmOperationalSection("Pending health work") {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                HealthMetric("Active withdrawals", counts.activeWithdrawalCount)
+                HealthMetric("Observations", counts.observationCount)
+                HealthMetric("Treatments", counts.treatmentCount)
+            }
+        }
+    }
+}
+
+/**
+ * FOS-HEALTH-030 — health report: farm health summary computed from records on this device only.
+ * Counts render as a dash until loaded; a bounded list is never presented as complete.
+ */
+@Composable
+private fun HealthReportScreen(
+    stats: HealthReportStats?,
+    counts: HealthReadModel,
+    vaccinations: List<HealthVaccinationView>,
+    onBack: () -> Unit,
+) {
+    FarmOperationalPage(
+        "FOS-HEALTH-030",
+        "Health report",
+        "Farm health summary from records on this device.",
+        FarmVisualClass.I2,
+        onBack,
+    ) {
+        FarmOperationalSection("Individual vaccination records") {
+            val s = stats
+            if (s == null) {
+                Text("Loading…")
+            } else {
+                val coverage =
+                    if (s.activeAnimalCount != null && s.activeAnimalCount > 0 && s.animalsEverVaccinated != null) {
+                        "${s.animalsEverVaccinated} of ${s.activeAnimalCount} active animals have an individual vaccination record"
+                    } else {
+                        "No active animals on this farm"
+                    }
+                Text(coverage)
+                Text("${s.dueCandidateCount} individual record(s) to review")
+                Text("${s.recentVaccinationCount} recent vaccination record(s) shown below")
+            }
+        }
+        FarmOperationalSection("Recent vaccinations") {
+            if (vaccinations.isEmpty()) {
+                Text("No vaccinations recorded on this device")
+            } else {
+                vaccinations.forEach { record ->
+                    Text("${record.subjectLabel} · ${record.formularyLabel} · ${LocalDate.ofEpochDay(record.occurredEpochDay)}")
+                }
+            }
+        }
+        FarmOperationalSection("Recorded activity") {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                HealthMetric("Observations", counts.observationCount)
+                HealthMetric("Treatments", counts.treatmentCount)
+                HealthMetric("Active withdrawals", counts.activeWithdrawalCount)
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                HealthMetric("Vet visits", counts.vetVisitCount)
+                HealthMetric("Lab results", counts.labResultCount)
+            }
+        }
+    }
+}
 
 /** FOS-ATOM-003 over the governed farm species, so a species-checked command never carries a typo. */
 @Composable

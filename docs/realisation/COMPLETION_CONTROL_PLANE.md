@@ -34,3 +34,61 @@ Phase 3 platform correctness is certified complete against canonical main commit
 The certified programme gates are exact decimal scaling, unique/atomic leased sync ownership, server-backed session revocation, the Gradle 9.3.1 reproducible wrapper, debug APK assembly and hashing, immutable GitHub Action pins, and bounded reconciliation source decomposition.
 
 This closes platform correctness only. It creates no FEATURE_GREEN, VISUAL_GREEN, MODULE_GREEN or MVP_GREEN claims. Phase 4 is the next programme phase and must establish the native Animal Farm reference set with deterministic visual/state/accessibility evidence and independent approval.
+
+
+## Refreshing candidate source evidence
+
+After implementation edits and builds have stopped changing the candidate sources, run:
+
+```sh
+python3 scripts/development/refresh_source_evidence.py --write
+```
+
+The helper generates **CI_PENDING** runtime evidence with a null CI run and zero executed
+certification. It then refreshes route ownership and feature coverage, the completion
+control-plane inventories, the static navigation audit, and the route/screen/feature gap
+inventory. Route export and control-plane generation run twice: the first pass updates
+the source fingerprint, and the second consumes the newly generated canonical feature
+catalogue. This resolves their dependency without skipping a gate or using stale feature
+bindings. All 545 Screen IDs and 156 mandatory features remain in scope.
+
+A prior passing Phase 5 ledger, if present, is copied byte for byte into
+`docs/ux/evidence/animal-farm-visual-lock/historical/phase5-runtime-navigation/`
+before the current ledger is replaced. The archive filename contains its original tested
+commit and the SHA-256 of the ledger bytes; its source fingerprint, CI run, certification,
+and limitations are unchanged. Existing historical files cannot be overwritten with
+different content. Archived ledgers are not read by current route-ownership gates.
+
+The helper preserves the canonical screen registry, implementation map, Phase 4 ledger,
+and vertical-slice gate as inputs. The Phase 3 and vertical-slice completion statements
+above remain historical assertions against their recorded commits and runs. The Phase 4
+summary retains its original tested main commit and artifact. None of these past proofs
+certifies the new candidate. In particular, the historical Supabase/Meilisearch slice
+does not prove the current local Room, LAN or Google Drive implementation.
+
+Run the repeatable static checks with:
+
+```sh
+python3 scripts/development/refresh_source_evidence.py --check
+python3 scripts/development/refresh_source_evidence.py --self-test
+```
+
+The first command runs the existing evidence and navigation checks and requires zero
+current runtime/feature/visual/module/MVP claims. It is deliberately for pending
+candidates; a later certified ledger should be checked by the canonical CI verifiers.
+The second tests the helper's rejection of unsupported certification and unsafe archive
+replacement using temporary files only. These static checks do not execute Android
+navigation, Google consent, replication, migrations, native captures or field scenarios.
+
+The helper has no CI-promotion flag, does not supply a passing run ID, and does not stage,
+commit, publish, update reference images, change goldens or issue approvals. A pending
+ledger's `tested_commit` is the Git checkout checkpoint from which its source inventory
+was generated; the source fingerprint binds the actual Kotlin and registry contents.
+Neither field is an execution result while `ci_status` is CI_PENDING. If source files
+or HEAD change during the refresh, it fails and must be rerun after the edits stop.
+
+Source fingerprinting is shared by the runtime, route-export and completion generators
+through `scripts/development/source_evidence.py`. It includes tracked Kotlin and new,
+non-ignored Kotlin files from app/core/data/domain/feature, including tests. It excludes
+ignored Gradle build and KSP cache output, so building the same checkout cannot change
+its source identity. Static navigation inventory uses the same Git source-file rule.

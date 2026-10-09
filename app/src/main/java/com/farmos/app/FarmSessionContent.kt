@@ -113,6 +113,7 @@ fun FarmSessionContent(
             deviceId = app.deviceId,
             onBack = backHome,
             lan = app.farmLan,
+            drive = app.farmDrive,
         )
         is FarmDestination.SyncQueue -> SyncQueueHost(
             view = dest.view,
@@ -157,6 +158,7 @@ fun FarmSessionContent(
             onBack = backHome,
             focusTaskId = dest.taskId,
             planning = taskPlanning,
+            database = app.database,
         )
         is FarmDestination.Tasks -> TasksModuleHost(
             farmId = membership.farmId,
@@ -167,6 +169,7 @@ fun FarmSessionContent(
             entryPage = dest.entry,
             loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
             planning = taskPlanning,
+            database = app.database,
         )
         is FarmDestination.Module -> when (dest.module) {
             FarmModule.TASKS -> TasksModuleHost(
@@ -177,6 +180,7 @@ fun FarmSessionContent(
                 onBack = backHome,
                 loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
                 planning = taskPlanning,
+                database = app.database,
             )
             FarmModule.MONEY -> MoneyModuleHost(
                 farmId = membership.farmId,
@@ -306,6 +310,37 @@ fun FarmSessionContent(
                 database = app.database,
                 farmId = membership.farmId,
                 canExport = rolePermits(membership.role, Permission.EXPORT_FARM_DATA),
+                onBack = backHome,
+            )
+            FarmModule.GENETICS -> GeneticsModuleHost(
+                database = app.database,
+                farmId = membership.farmId,
+                ops = ops,
+                newContext = ::context,
+                enqueueSync = ::enqueueSync,
+                onBack = backHome,
+            )
+            FarmModule.CAPACITY -> CapacityModuleHost(
+                database = app.database,
+                farmId = membership.farmId,
+                onBack = backHome,
+            )
+            FarmModule.ANALYTICS -> AnalyticsModuleHost(
+                database = app.database,
+                farmId = membership.farmId,
+                onBack = backHome,
+            )
+            FarmModule.SIMULATION -> SimulationModuleHost(
+                database = app.database,
+                farmId = membership.farmId,
+                filesDir = app.filesDir,
+                onBack = backHome,
+            )
+            FarmModule.AI -> AiBoundaryHost(
+                database = app.database,
+                farmId = membership.farmId,
+                filesDir = app.filesDir,
+                onOpenModule = { destination = FarmDestination.Module(it) },
                 onBack = backHome,
             )
             else -> OperatingModuleHost(

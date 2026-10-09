@@ -26,6 +26,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.util.UUID
 import kotlinx.coroutines.launch
+import com.farmos.core.design.runSuspendCatching
 
 /** Every stock count on this farm with its lines, newest first, and the items that can be counted. */
 internal suspend fun loadStockCounts(database: FarmOsDatabase, farmId: String): Pair<List<StockCountView>, List<StockCountItem>> {
@@ -82,14 +83,14 @@ fun StockCountHost(
         scope.launch {
             busy = true
             error = null
-            runCatching { block(); refresh() }
+            runSuspendCatching { block(); refresh() }
                 .onSuccess { enqueueSync() }
                 .onFailure { error = it.message }
             busy = false
         }
     }
 
-    LaunchedEffect(farmId) { runCatching { refresh() }.onFailure { error = it.message } }
+    LaunchedEffect(farmId) { runSuspendCatching { refresh() }.onFailure { error = it.message } }
 
     if (reviewing) {
         StockAdjustmentScreen(
