@@ -106,6 +106,27 @@ Its retained `recovery-tests-attempt4-result.json` SHA-256 is
 The evidence is 95 passing app cases in attempt 3 plus this targeted 19-case rerun after fixture repair;
 some cases overlap. It is not a new full 106-case run, full CI certification or device durability proof.
 
+## Verified integrated CI recovery execution
+
+[Foundation run 37961965633](https://github.com/Vanguduza/goat-app/actions/runs/37961965633), attempt 1,
+passed all seven jobs for candidate `46cfc8ca57d54a10a62edda5b8858b23eebf30b6`.
+The actual clean checkout `a2b0fd96cbcdb62efbc4b4a1821dae894627aa70` has the same tree
+`14ef784242b2fd9a12fa861b257267fda3ced044`. The native job freshly executed all 788 cases
+across nine modules, including the integrated recovery, authority, replay and vault regressions.
+
+The [connected job](https://github.com/Vanguduza/goat-app/actions/runs/37961965633/job/113929024408)
+completed at 2026-10-09T17:01:50Z with 51 database and nine app instrumentation cases, all passing.
+All three `LocalAccessRecoveryDurabilityTest` cases actually executed: recovered credential and
+one-time-code durability across Room reopen; complete recovery rollback after an actual SQLite
+journal failure; and refusal to recreate a missing test-owned Android Keystore alias or its vault.
+
+The original connected artifact `11632112359` has ZIP SHA-256
+`5159d6a002605963e4ded46222d34844ae75dd8d423092ec12b4cbb6942db14a`.
+Its retained connected evidence record has SHA-256
+`b59b850ed4b85008c2d0d4820d981cb80515e90a9d14314356ab1fcd911f4edf`.
+This is actual API 36 Android-emulator execution. It does not prove physical power-loss survival,
+all-device-loss escrow, live Google restoration, veterinary acceptance or whole-product release.
+
 ## Acceptance work still requiring its own implementation or observed evidence
 
 The [offline sync architecture](../architecture/GOAT_OFFLINE_MULTI_DEVICE_SYNC.md) and
