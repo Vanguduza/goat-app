@@ -18,6 +18,7 @@ RUNTIME_LEDGER = ROOT / 'docs/ux/evidence/animal-farm-visual-lock/phase5-runtime
 COMPLETION_STATE = ROOT / 'PROJECT_COMPLETION_STATE.json'
 sys.path.insert(0, str(ROOT / 'scripts' / 'development'))
 from feature_catalog import CATALOG_STATUS, feature_ids_for_screen
+from runtime_navigation_cases import verify_case_ledger
 
 
 def git_sha():
@@ -62,6 +63,7 @@ def runtime_evidence():
         return empty
     if ledger.get('source_fingerprint') != current_fingerprint:
         return empty
+    verify_case_ledger(ROOT, ledger)
     coverage = ledger.get('coverage', {})
     certification = ledger.get('certification', {})
     return {

@@ -74,7 +74,7 @@ class SettingsHostTest {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        directory = LocalFarmDirectory(database, "device-a", CredentialHasher(iterations = 1_000))
+        directory = LocalFarmDirectory(database, "device-a", CredentialHasher(iterations = 1_000), initialKeys = localAccessTestVault())
         runBlocking {
             farmId = directory.createFarm("Premier Farm") { id ->
                 owner = directory.access.setUpFarm(id, "tendai", "Tendai Moyo", Credential(CredentialKind.PIN, "482913")).owner
@@ -108,8 +108,9 @@ class SettingsHostTest {
     private fun waitForText(text: String) =
         compose.waitUntil(10_000) { compose.onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty() }
 
-    private fun worker(): LocalAccount =
-        directory.access.createAccount(owner, "rudo", "Rudo Chari", LocalRole.WORKER, Credential(CredentialKind.PIN, "730418"))
+    private fun worker(): LocalAccount = runBlocking {
+        directory.transact { it.createAccount(owner, "rudo", "Rudo Chari", LocalRole.WORKER, Credential(CredentialKind.PIN, "730418")) }
+    }
 
     @Test
     fun ownerAddsAWorkerAccountThatIsHashedAuditedAndCanSignIn() {
@@ -131,7 +132,7 @@ class SettingsHostTest {
         val created = database.localAccess().accounts(farmId).single { it.username == "rudo" }
         assertEquals(LocalRole.WORKER.name, created.role)
         assertFalse(created.credentialHash.contains("730418"))
-        assertTrue(directory.access.signIn(farmId, "rudo", "730418") is SignInResult.SignedIn)
+        assertTrue(runBlocking { directory.transact { it.signIn(farmId, "rudo", "730418") } } is SignInResult.SignedIn)
         assertTrue(AccessAction.ACCOUNT_CREATED.name in database.localAccess().audit(farmId, 20).map { it.action })
     }
 
@@ -168,7 +169,7 @@ class SettingsHostTest {
 
         waitForText("Worker · disabled")
         assertEquals(AccountStatus.DISABLED.name, database.localAccess().account(farmId, rudo.accountId)!!.status)
-        assertEquals(SignInResult.Disabled, directory.access.signIn(farmId, "rudo", "730418"))
+        assertEquals(SignInResult.Disabled, runBlocking { directory.transact { it.signIn(farmId, "rudo", "730418") } })
     }
 
     @Test

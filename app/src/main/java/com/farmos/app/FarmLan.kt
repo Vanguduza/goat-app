@@ -155,7 +155,7 @@ internal class FarmLanRuntime(
 
     private fun readySecrets(): FarmSecrets {
         runBlocking { database.reconcileFarmKeyRotations(farmId, deviceId, vault) }
-        return vault.secretsForLocalFarm(farmId)
+        return vault.requireSecrets(farmId)
     }
     private val worker = Executors.newSingleThreadScheduledExecutor { runnable -> Thread(runnable, "goat-farm-lan").apply { isDaemon = true } }
     private val resources = mutableListOf<Closeable>()
@@ -399,7 +399,7 @@ internal class FarmJoiner(
             is EnrolmentOutcome.Granted -> {
                 runBlocking { database.installGrant(outcome.grant, identity, deviceId, vault) }
                 val endpoint = RoomReplicaEndpoint(database, descriptor.farmId, deviceId, farmAppliers(vault, deviceId))
-                val keys = { vault.secretsForLocalFarm(descriptor.farmId).keys }
+                val keys = { vault.requireSecrets(descriptor.farmId).keys }
                 LanPeerTransport(farm.host, farm.port, descriptor.farmId, deviceId, keys, endpoint::maySynchronise, identity = farmIdentity(database, vault, descriptor.farmId)).use { transport ->
                     SyncSession.run(endpoint, transport)
                 }
@@ -426,6 +426,6 @@ internal fun farmAppliers(vault: FarmKeyVault, deviceId: String): Map<String, Op
     replicationAppliers + (KEY_ROTATED_COMMAND to keyRotationApplier(vault, deviceId))
 
 /** This device's identity and the identity keys the farm journal records for its devices. */
-internal fun farmIdentity(database: FarmOsDatabase, vault: FarmKeyVault, farmId: String) = LanIdentity(vault.secretsForLocalFarm(farmId).device) { peer ->
+internal fun farmIdentity(database: FarmOsDatabase, vault: FarmKeyVault, farmId: String) = LanIdentity(vault.requireSecrets(farmId).device) { peer ->
     runBlocking { database.replication().device(farmId, peer) }?.publicKey?.let { DeviceKeys.decode(java.util.Base64.getDecoder().decode(it)) }
 }

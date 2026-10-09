@@ -72,17 +72,18 @@ class FarmNetworkPairingUiTest {
         .build()
         .also { databases += it }
 
-    private fun vault() = FarmKeyVault(Files.createTempDirectory("vault").toFile().also { folders += it }, TestSoftwareSealer())
+    private fun vault() = testFarmKeyVault(Files.createTempDirectory("vault").toFile().also { folders += it }, TestSoftwareSealer())
 
     @Before
     fun setUp() = runBlocking {
         tabletDb = database()
-        tabletDirectory = LocalFarmDirectory(tabletDb, "tablet", CredentialHasher(iterations = 1_000))
+        val tabletVault = vault()
+        tabletDirectory = LocalFarmDirectory(tabletDb, "tablet", CredentialHasher(iterations = 1_000), initialKeys = tabletVault)
         farmId = tabletDirectory.createFarm("Premier Farm") { id ->
             owner = tabletDirectory.access.setUpFarm(id, "tendai", "Tendai Moyo", Credential(CredentialKind.PIN, "482913")).owner
         }.farmId
         tabletDirectory.transact { it.createAccount(owner, "rudo", "Rudo Chari", LocalRole.WORKER, Credential(CredentialKind.PIN, "730418")) }
-        runtime = FarmLanRuntime(tabletDb, vault(), network, farmId, "Premier Farm", "tablet").start(intervalSeconds = 3_600)
+        runtime = FarmLanRuntime(tabletDb, tabletVault, network, farmId, "Premier Farm", "tablet").start(intervalSeconds = 3_600)
         val deadline = System.currentTimeMillis() + 10_000
         while (!runtime.state.value.serving && System.currentTimeMillis() < deadline) Thread.sleep(20)
         check(runtime.state.value.serving) { "The farm network did not start" }
@@ -146,7 +147,8 @@ class FarmNetworkPairingUiTest {
     fun aNewDeviceJoinsTheFarmOnTheNetworkAndAWorkerSignsInThere() {
         val session = runtime.openPairing(owner)
         val phoneDb = database()
-        val phoneDirectory = LocalFarmDirectory(phoneDb, "phone", CredentialHasher(iterations = 1_000))
+        val phoneVault = vault()
+        val phoneDirectory = LocalFarmDirectory(phoneDb, "phone", CredentialHasher(iterations = 1_000), initialKeys = phoneVault)
         var signedIn: LocalAccount? = null
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
@@ -154,7 +156,7 @@ class FarmNetworkPairingUiTest {
                     phoneDirectory,
                     onSignedIn = { account, _ -> signedIn = account },
                     discovery = network,
-                    joiner = FarmJoiner(phoneDb, vault(), "phone", "Worker phone"),
+                    joiner = FarmJoiner(phoneDb, phoneVault, "phone", "Worker phone"),
                 )
             }
         }

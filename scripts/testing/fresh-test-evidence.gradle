@@ -1,0 +1,10 @@
+// Qualification evidence must come from this invocation. Compiled outputs may
+// still use the build cache; Test tasks must execute and emit fresh JUnit.
+gradle.projectsEvaluated {
+    allprojects {
+        tasks.withType(org.gradle.api.tasks.testing.Test).configureEach {
+            outputs.upToDateWhen { false }
+            outputs.cacheIf { false }
+        }
+    }
+}

@@ -60,7 +60,7 @@ class LocalFarmEntryTest {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), FarmOsDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        directory = LocalFarmDirectory(database, "device-a", CredentialHasher(iterations = 1_000))
+        directory = LocalFarmDirectory(database, "device-a", CredentialHasher(iterations = 1_000), initialKeys = localAccessTestVault())
     }
 
     @After
@@ -190,7 +190,7 @@ class LocalFarmEntryTest {
         assertEquals("Premier Farm", signedIn!!.second)
 
         val farmId = signedIn!!.first.farmId
-        assertTrue(directory.access.signIn(farmId, "tendai", "591047") is SignInResult.SignedIn)
-        assertEquals(SignInResult.InvalidCredentials, directory.access.signIn(farmId, "tendai", "482913"))
+        assertTrue(runBlocking { directory.transact { it.signIn(farmId, "tendai", "591047") } } is SignInResult.SignedIn)
+        assertEquals(SignInResult.InvalidCredentials, runBlocking { directory.transact { it.signIn(farmId, "tendai", "482913") } })
     }
 }

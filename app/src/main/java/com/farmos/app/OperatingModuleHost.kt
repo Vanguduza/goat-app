@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -98,9 +99,28 @@ fun OperatingModuleHost(
     newContext: () -> LocalCommandContext,
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
+    entryAnimalId: String? = null,
+) {
+    require(entryAnimalId == null || (entryAnimalId.isNotBlank() && module in setOf(FarmModule.SHEEP, FarmModule.CATTLE)))
+    key(database, farmId, module, entryAnimalId) {
+        OperatingModuleSession(module, farmId, database, ops, newContext, enqueueSync, onBack, entryAnimalId)
+    }
+}
+
+@Composable
+private fun OperatingModuleSession(
+    module: FarmModule,
+    farmId: String,
+    database: FarmOsDatabase,
+    ops: RoomOpsRepository,
+    newContext: () -> LocalCommandContext,
+    enqueueSync: () -> Unit,
+    onBack: () -> Unit,
+    entryAnimalId: String?,
 ) {
     val scope = rememberCoroutineScope()
     var busy by remember { mutableStateOf(false) }
+    var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var taskRows by remember { mutableStateOf(emptyList<TaskUiRow>()) }
     var healthRows by remember { mutableStateOf(emptyList<String>()) }
@@ -153,6 +173,13 @@ fun OperatingModuleHost(
     }
 
     suspend fun refreshOps() {
+        speciesGroups = speciesCode?.let { code -> database.groups().forFarm(farmId).filter { it.speciesCode == code }.map { FarmSelectorOption(it.id, it.name, "${it.headCount} head") } }.orEmpty()
+        if (entryAnimalId != null) {
+            val animal = requireNotNull(herd?.get(entryAnimalId)) { "The selected $speciesCode is not available on this farm." }
+            speciesRows = listOf(animal.toSpeciesAnimalRow())
+            speciesCounts = herd?.let { SpeciesHerdCounts(total = it.listedTotal(), active = it.activeCount()) }
+            return
+        }
         taskRows = (ops.openTasks() + ops.completedTasks()).map { row ->
             TaskUiRow(
                 id = row.id,
@@ -166,28 +193,21 @@ fun OperatingModuleHost(
         healthRows = ops.recentObservations().map { "${it.speciesCode} · ${it.signs}" }
         moneyRows = ops.recentMoney().map { "${it.kind} ${it.categoryCode} ${it.amountMinor} ${it.currency}" }
         inventoryRows = ops.items().map { "${it.id} ${it.sku} · ${it.name} · ${it.quantityMilli} ${it.unit}" }
-        speciesRows = herd?.list()?.map { animal ->
-            SpeciesAnimalRow(
-                animalId = animal.id,
-                label = buildString {
-                    append(animal.tag)
-                    animal.name?.let { append(" · ").append(it) }
-                    append(" · ").append(animal.sex.lowercase())
-                    append(" · ").append(animal.status)
-                    animal.poultryKindCode?.let { append(" · ").append(it) }
-                },
-                active = animal.status == "active",
-            )
-        }.orEmpty()
+        speciesRows = herd?.list()?.map { it.toSpeciesAnimalRow() }.orEmpty()
         speciesCounts = herd?.let { SpeciesHerdCounts(total = it.listedTotal(), active = it.activeCount()) }
-        speciesGroups = speciesCode?.let { code -> database.groups().forFarm(farmId).filter { it.speciesCode == code }.map { FarmSelectorOption(it.id, it.name, "${it.headCount} head") } }.orEmpty()
         catalogRows = ops.diseases().map { "${it.speciesCode} · ${it.displayName} · ${it.firstAid}" }
         treatmentRows = ops.recentTreatments().map { "${it.speciesCode} · ${it.reason} · formulary ${it.formularyItemId}" }
         packRows = ops.packs().map { "${it.speciesCode} · ${it.name} · ${it.status} · ${it.acceptedByVet.orEmpty()}" }
         withdrawalRows = ops.withdrawals().map { "${it.windowKind} · ${it.product} ends day ${it.endsEpochDay}" }
     }
 
-    LaunchedEffect(module) { runSuspendCatching { refreshOps() } }
+    LaunchedEffect(module, farmId, entryAnimalId) {
+        try {
+            runSuspendCatching { refreshOps() }.onFailure { error = it.message ?: "Local records could not be read." }
+        } finally {
+            loading = false
+        }
+    }
 
     fun run(block: suspend () -> Unit) {
         scope.launch {
@@ -230,6 +250,8 @@ fun OperatingModuleHost(
                 counts = speciesCounts,
                 busy = busy,
                 error = error,
+                entryAnimalId = entryAnimalId,
+                loading = loading,
                 onRegister = { tag, name, sex, kind ->
                     run {
                         herd?.register(UUID.randomUUID().toString(), tag, name, sex, kind, newContext())
@@ -251,7 +273,7 @@ fun OperatingModuleHost(
                     run { herd?.setStatus(animalId, status, newContext()) }
                 },
                 exitContent = { animal, screenId, statusBack ->
-                    SpeciesExitHost(database, farmId, animal, screenId, newContext, onRecorded = { run { } }, onBack = statusBack)
+                    SpeciesExitHost(database, farmId, animal, screenId, newContext, onRecorded = { run { } }, onBack = statusBack, backLabel = if (entryAnimalId != null) "Profile" else "Farm home")
                 },
                 attachmentContent = { animal -> AnimalAttachmentsHost(database, farmId, animal.animalId, canAttach = animal.active, newContext) },
                 onBack = onBack,
@@ -418,6 +440,7 @@ fun OperatingModuleHost(
                                 },
                             ),
                             onBack = operationsBack,
+                            backLabel = if (entryAnimalId != null) "Profile" else "Farm home",
                             loadRecords = { id -> loadSheepRecords(database, farmId, id) },
                             loadWool = { loadSheepWool(database, farmId) },
                             loadLambingDue = { loadSheepLambingDue(database, farmId) },
@@ -537,6 +560,7 @@ fun OperatingModuleHost(
                                 },
                             ),
                             onBack = operationsBack,
+                            backLabel = if (entryAnimalId != null) "Profile" else "Farm home",
                             loadRecords = { id -> loadCattleRecords(database, farmId, id) },
                             loadLots = { loadCattleLots(database, farmId) },
                             loadCalvingDue = { loadCattleCalvingDue(database, farmId) },
@@ -554,3 +578,15 @@ fun OperatingModuleHost(
         )
     }
 }
+
+private fun com.farmos.core.database.AnimalEntity.toSpeciesAnimalRow() = SpeciesAnimalRow(
+    animalId = id,
+    label = buildString {
+        append(tag)
+        name?.let { append(" · ").append(it) }
+        append(" · ").append(sex.lowercase())
+        append(" · ").append(status)
+        poultryKindCode?.let { append(" · ").append(it) }
+    },
+    active = status == "active",
+)

@@ -24,10 +24,10 @@ import kotlinx.coroutines.runBlocking
 internal class DriveDeliveryTestFixture(val context: Context) : Closeable {
     val database = Room.inMemoryDatabaseBuilder(context, FarmOsDatabase::class.java).allowMainThreadQueries().build()
     val deviceId = "gateway-device"
-    val directory = LocalFarmDirectory(database, deviceId, CredentialHasher(iterations = 1_000))
     val root: File = Files.createTempDirectory("drive-delivery").toFile()
     val vaultDirectory = File(root, "vault")
-    val vault = FarmKeyVault(vaultDirectory, TestDriveSealer())
+    val vault = testFarmKeyVault(vaultDirectory, TestDriveSealer())
+    val directory = LocalFarmDirectory(database, deviceId, CredentialHasher(iterations = 1_000), initialKeys = vault)
     val coordinator = DriveFarmCoordinator()
     val store = DriveConfigStore(context)
     val carrier = MemoryDriveCarrier()
@@ -46,7 +46,6 @@ internal class DriveDeliveryTestFixture(val context: Context) : Closeable {
             }
         }.farmId
         owner = requireNotNull(created)
-        vault.provisionNewFarm(farmId)
         runBlocking { approve() }
     }
 

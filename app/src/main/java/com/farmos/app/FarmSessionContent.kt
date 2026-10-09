@@ -15,13 +15,14 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.farmos.core.database.unsharedLocalOperations
+import com.farmos.core.design.FarmBackHandler
 import com.farmos.core.model.LocalCommandContext
 import com.farmos.core.network.FarmMembership
 import com.farmos.core.sync.SyncWorker
 import java.util.UUID
 
 @Composable
-fun FarmSessionContent(
+internal fun FarmSessionContent(
     app: FarmOsApplication,
     membership: FarmMembership,
     farmName: String?,
@@ -33,8 +34,11 @@ fun FarmSessionContent(
     onSignOut: () -> Unit,
     /** The local GOAT account signed in on this device; server-era sessions leave it null. */
     actorId: String? = null,
+    localAuthority: LocalSessionAuthority? = null,
 ) {
     var destination by remember(membership.farmId) { mutableStateOf<FarmDestination>(FarmDestination.Home) }
+    var returnToSearch by remember(membership.farmId) { mutableStateOf(false) }
+    val searchState = remember(membership.farmId) { GlobalSearchSessionState(membership.farmId) }
     val repository = remember(membership.farmId) { app.goatRepository(membership.farmId) }
     val ops = remember(membership.farmId) { app.opsRepository(membership.farmId) }
     fun context(): LocalCommandContext {
@@ -77,10 +81,14 @@ fun FarmSessionContent(
         } else {
             app.database.unsharedLocalOperations(membership.farmId, app.deviceId)
         }
-    val backHome = { destination = FarmDestination.Home }
+    val backFromDestination = {
+        destination = if (returnToSearch) FarmDestination.Search else FarmDestination.Home
+        returnToSearch = false
+    }
     // Repeating and assigned tasks (D-020); Assigned to me needs a signed-in local account.
-    val taskPlanning = remember(membership.farmId, actorId) { TaskPlanning(app.database, membership.farmId, canPlanFarmWork(membership.role), actorId) }
+    val taskPlanning = remember(membership.farmId, actorId, membership.role) { TaskPlanning(app.database, membership.farmId, canPlanFarmWork(membership.role), actorId) }
     val runtimeRoute = destination.runtimeRouteContract()
+    FarmBackHandler(if (destination == FarmDestination.Home) null else backFromDestination)
     Box(Modifier.testTag(runtimeRoute.testTag)) {
         when (val dest = destination) {
         FarmDestination.Home -> FarmHomeHost(
@@ -100,11 +108,14 @@ fun FarmSessionContent(
             onSwitchFarm = onSwitchFarm,
         )
         FarmDestination.Search -> GlobalSearchHost(
-            app = app,
+            database = app.database,
             farmId = membership.farmId,
-            onOpen = { destination = it },
-            onBack = backHome,
-            onRequireReauth = onRequireReauth,
+            state = searchState,
+            onOpen = {
+                returnToSearch = true
+                destination = it
+            },
+            onBack = backFromDestination,
         )
         FarmDestination.Settings -> SettingsHost(
             directory = remember(app) { LocalFarmDirectory(app.database, app.deviceId) },
@@ -112,7 +123,7 @@ fun FarmSessionContent(
             farmId = membership.farmId,
             actorId = actorId,
             deviceId = app.deviceId,
-            onBack = backHome,
+            onBack = backFromDestination,
             lan = app.farmLan,
             drive = app.farmDrive,
         )
@@ -121,7 +132,7 @@ fun FarmSessionContent(
             permitted = syncQueuesPermitted(membership.role),
             loadRows = { view -> app.database.outbox().listForFarmInState(membership.farmId, view.state.name, SYNC_QUEUE_LIMIT) },
             onSelectView = { destination = FarmDestination.SyncQueue(it) },
-            onBack = backHome,
+            onBack = backFromDestination,
             loadTotal = { view -> loadSyncQueueCounts()?.get(view) },
             traceOnServer = app.mutationTraceClient?.let { client ->
                 val trace: suspend (String) -> ServerMutationTrace = { client.trace(membership.farmId, it).toServerMutationTrace() }
@@ -129,6 +140,16 @@ fun FarmSessionContent(
             },
         )
         is FarmDestination.HomePanel -> error("Home panels are nested owners and must be intercepted by RoleAwareFarmHomeScreen")
+        is FarmDestination.AnimalProfile -> FarmSpeciesModuleHost(
+            module = dest.kind.module,
+            database = app.database,
+            farmId = membership.farmId,
+            ops = ops,
+            newContext = ::context,
+            enqueueSync = ::enqueueSync,
+            onBack = backFromDestination,
+            profile = dest,
+        )
         is FarmDestination.Goat -> GoatModuleHost(
             app = app,
             membership = membership,
@@ -138,15 +159,16 @@ fun FarmSessionContent(
             onRequireReauth = onRequireReauth,
             onRequireFarmReselection = onRequireFarmReselection,
             onSignOut = onSignOut,
-            onBack = backHome,
+            onBack = backFromDestination,
             entryPage = dest.entry,
+            entryAnimalId = dest.animalId,
         )
         is FarmDestination.Health -> HealthModuleHost(
             farmId = membership.farmId,
             ops = ops,
             newContext = ::context,
             enqueueSync = ::enqueueSync,
-            onBack = backHome,
+            onBack = backFromDestination,
             entryPage = dest.entry,
             loadReadModel = { loadHealthReadModel(app.database, membership.farmId) },
             searchAnimals = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, speciesCode = null) },
@@ -156,7 +178,7 @@ fun FarmSessionContent(
             ops = ops,
             newContext = ::context,
             enqueueSync = ::enqueueSync,
-            onBack = backHome,
+            onBack = backFromDestination,
             focusTaskId = dest.taskId,
             planning = taskPlanning,
             database = app.database,
@@ -166,7 +188,7 @@ fun FarmSessionContent(
             ops = ops,
             newContext = ::context,
             enqueueSync = ::enqueueSync,
-            onBack = backHome,
+            onBack = backFromDestination,
             entryPage = dest.entry,
             loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
             planning = taskPlanning,
@@ -178,7 +200,7 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
                 loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
                 planning = taskPlanning,
                 database = app.database,
@@ -188,7 +210,7 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
                 loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
             FarmModule.POULTRY -> PoultryModuleHost(
@@ -196,7 +218,7 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
                 loadRecords = { loadPoultryRecords(app.database, membership.farmId) },
                 loadFlock = { loadPoultryFlockRecords(app.database, membership.farmId, it) },
             )
@@ -205,7 +227,7 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
                 loadGroups = { loadGroupViews(app.database, membership.farmId) },
                 loadGroup = { loadGroupRecords(app.database, membership.farmId, it) },
             )
@@ -214,7 +236,7 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
                 loadRecords = { loadPastureRecords(app.database, membership.farmId) },
             )
             FarmModule.LABOUR -> LabourModuleHost(
@@ -222,7 +244,7 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
                 loadRecords = { loadLabourRecords(app.database, membership.farmId) },
                 workers = { back -> WorkerRegisterHost(app.database, membership.farmId, membership.role, ::context, ::enqueueSync, back) },
                 capture = remember(membership.farmId, ops) { LabourCapture(app.database, membership.farmId, ops) },
@@ -232,30 +254,24 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
                 loadRecords = { loadAssetRecords(app.database, membership.farmId) },
             )
-            FarmModule.RABBIT -> RabbitModuleHost(
+            FarmModule.RABBIT, FarmModule.SHEEP, FarmModule.CATTLE -> FarmSpeciesModuleHost(
+                module = dest.module,
+                database = app.database,
                 farmId = membership.farmId,
                 ops = ops,
-                rabbitHerd = com.farmos.data.herd.RoomHerdRepository(app.database, membership.farmId, "rabbit"),
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
-                loadRecords = { loadRabbitRecords(app.database, membership.farmId) },
-                searchRabbits = remember(membership.farmId) { animalSelectorSearch(app.database, membership.farmId, "rabbit") },
-                pedigree = remember(membership.farmId) { rabbitPedigreePorts(app.database, membership.farmId, ops, ::context, ::enqueueSync) },
-                exitFor = { rabbit, onRecorded ->
-                    SpeciesExitHost(app.database, membership.farmId, SpeciesAnimalRow(rabbit.animalId, rabbit.label, rabbit.active), null, ::context, onRecorded, onBack = {})
-                },
-                attachmentsFor = { rabbit -> AnimalAttachmentsHost(app.database, membership.farmId, rabbit.animalId, canAttach = rabbit.active, ::context) },
+                onBack = backFromDestination,
             )
             FarmModule.INVENTORY -> InventoryModuleHost(
                 farmId = membership.farmId,
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
                 loadReadModel = { loadInventoryReadModel(app.database, membership.farmId) },
                 stockCount = { back -> StockCountHost(app.database, membership.farmId, membership.role, ::context, ::enqueueSync, back) },
             )
@@ -277,7 +293,7 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
                 loadRecords = { loadFeedRecords(app.database, membership.farmId) },
             )
             FarmModule.WATER -> WaterModuleHost(
@@ -285,11 +301,11 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
                 loadRecords = { loadWaterRecords(app.database, membership.farmId) },
             )
             FarmModule.SALES -> SalesModuleHost(
-                farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
+                farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backFromDestination,
                 loadRecords = { loadSalesRecords(app.database, membership.farmId) },
                 loadCurrency = { app.database.farmCurrency(membership.farmId) },
                 customers = { back -> CustomerRegisterHost(app.database, membership.farmId, membership.role, ::context, ::enqueueSync, back) },
@@ -298,12 +314,12 @@ fun FarmSessionContent(
                 animalSale = { back -> AnimalSaleHost(app.database, membership.farmId, ::context, ::enqueueSync, back) },
             )
             FarmModule.PROCUREMENT -> ProcurementModuleHost(
-                farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
+                farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backFromDestination,
                 loadRecords = { loadProcurementRecords(app.database, membership.farmId) },
                 loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
             FarmModule.WAITLIST -> RabbitCommerceModuleHost(
-                farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backHome,
+                farmId = membership.farmId, ops = ops, newContext = ::context, enqueueSync = ::enqueueSync, onBack = backFromDestination,
                 loadRecords = { loadRabbitCommerceRecords(app.database, membership.farmId) },
                 loadCurrency = { app.database.farmCurrency(membership.farmId) },
             )
@@ -311,7 +327,8 @@ fun FarmSessionContent(
                 database = app.database,
                 farmId = membership.farmId,
                 canExport = rolePermits(membership.role, Permission.EXPORT_FARM_DATA),
-                onBack = backHome,
+                exportAuthority = localAuthority,
+                onBack = backFromDestination,
             )
             FarmModule.GENETICS -> GeneticsModuleHost(
                 database = app.database,
@@ -319,30 +336,30 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
             )
             FarmModule.CAPACITY -> CapacityModuleHost(
                 database = app.database,
                 farmId = membership.farmId,
-                onBack = backHome,
+                onBack = backFromDestination,
             )
             FarmModule.ANALYTICS -> AnalyticsModuleHost(
                 database = app.database,
                 farmId = membership.farmId,
-                onBack = backHome,
+                onBack = backFromDestination,
             )
             FarmModule.SIMULATION -> SimulationModuleHost(
                 database = app.database,
                 farmId = membership.farmId,
                 filesDir = app.filesDir,
-                onBack = backHome,
+                onBack = backFromDestination,
             )
             FarmModule.AI -> AiBoundaryHost(
                 database = app.database,
                 farmId = membership.farmId,
                 filesDir = app.filesDir,
                 onOpenModule = { destination = FarmDestination.Module(it) },
-                onBack = backHome,
+                onBack = backFromDestination,
             )
             else -> OperatingModuleHost(
                 module = dest.module,
@@ -351,7 +368,7 @@ fun FarmSessionContent(
                 ops = ops,
                 newContext = ::context,
                 enqueueSync = ::enqueueSync,
-                onBack = backHome,
+                onBack = backFromDestination,
             )
         }
         }

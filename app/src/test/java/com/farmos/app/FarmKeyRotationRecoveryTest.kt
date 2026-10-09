@@ -101,7 +101,7 @@ class FarmKeyRotationRecoveryTest {
         expectFailure<FarmKeyRotationPendingException> { f.vault.secrets(f.farm) }
 
         f.database.openHelper.writableDatabase.execSQL("DROP TRIGGER fail_rotation")
-        val restarted = FarmKeyVault(f.vaultDirectory, f.sealer)
+        val restarted = testFarmKeyVault(f.vaultDirectory, f.sealer)
         f.database.reconcileFarmKeyRotations(f.farm, f.device, restarted)
         val ready = requireNotNull(restarted.secrets(f.farm))
         assertEquals("k1", ready.keys.currentKeyId)
@@ -130,7 +130,7 @@ class FarmKeyRotationRecoveryTest {
         val journal = f.database.replication().count(f.farm)
         expectFailure<FarmKeyRotationPendingException> { f.vault.secrets(f.farm) }
         f.sealer.failSealAt = null
-        val restarted = FarmKeyVault(f.vaultDirectory, f.sealer)
+        val restarted = testFarmKeyVault(f.vaultDirectory, f.sealer)
         f.database.reconcileFarmKeyRotations(f.farm, f.device, restarted)
         val ready = requireNotNull(restarted.secrets(f.farm))
         assertEquals(pending.keyId, ready.keys.currentKeyId)

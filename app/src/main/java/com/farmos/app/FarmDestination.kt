@@ -23,8 +23,15 @@ sealed class FarmDestination {
         val module: FarmModule,
     ) : FarmDestination()
 
+    data class AnimalProfile(
+        val kind: AnimalProfileKind,
+        val animalId: String,
+    ) : FarmDestination()
+
     data class Goat(
         val entry: GoatEntryPage = GoatEntryPage.DASHBOARD,
+        /** Exact farm-local subject for a profile or focused capture; never a herd-list position. */
+        val animalId: String? = null,
     ) : FarmDestination()
 
     data class Health(
@@ -52,3 +59,11 @@ fun FarmModule.toDestination(): FarmDestination =
         FarmModule.TASKS -> FarmDestination.Tasks(TaskEntryPage.BOARD)
         else -> FarmDestination.Module(this)
     }
+
+/** Existing individual-animal profile owners; poultry's flock profile is a different subject. */
+enum class AnimalProfileKind(val module: FarmModule, val speciesCode: String, val screenId: String, val routeKey: String) {
+    SHEEP(FarmModule.SHEEP, "sheep", "FOS-SHEEP-003", "sheep.profile"),
+    CATTLE(FarmModule.CATTLE, "cattle", "FOS-CATTLE-003", "cattle.profile"),
+    RABBIT_DOE(FarmModule.RABBIT, "rabbit", "FOS-RABBIT-003", "rabbit.doe_profile"),
+    RABBIT_BUCK(FarmModule.RABBIT, "rabbit", "FOS-RABBIT-004", "rabbit.buck_profile"),
+}

@@ -52,6 +52,7 @@ class FarmRuntimeRouteTest {
     fun typedGoatEntriesResolveToExactOwners() {
         val expected = mapOf(
             GoatEntryPage.DASHBOARD to "FOS-GOAT-001",
+            GoatEntryPage.PROFILE to "FOS-GOAT-003",
             GoatEntryPage.WEIGHT to "FOS-GOAT-011",
             GoatEntryPage.SEARCH to "FOS-GOAT-006",
             GoatEntryPage.SCAN to "FOS-GOAT-007",
@@ -59,9 +60,21 @@ class FarmRuntimeRouteTest {
             GoatEntryPage.KIDDING to "FOS-GOAT-037",
             GoatEntryPage.REPRODUCTION to "FOS-GOAT-032",
         )
+        assertEquals(GoatEntryPage.entries.toSet(), expected.keys)
         expected.forEach { (entry, screenId) ->
-            assertEquals(screenId, FarmDestination.Goat(entry).runtimeRouteContract().screenId)
+            val animalId = if (entry == GoatEntryPage.PROFILE) "selected-goat" else null
+            assertEquals(screenId, FarmDestination.Goat(entry, animalId).runtimeRouteContract().screenId)
         }
+    }
+
+    @Test
+    fun aGoatProfilePreservesItsSubjectAndRefusesMissingIdentity() {
+        val route = FarmDestination.Goat(GoatEntryPage.PROFILE, "selected-goat").runtimeRouteContract()
+        assertEquals("goat.profile", route.routeKey)
+        assertEquals("FOS-GOAT-003", route.screenId)
+        assertEquals("animalId=selected-goat", route.scopedParameter)
+        assertFailsWith<IllegalArgumentException> { FarmDestination.Goat(GoatEntryPage.PROFILE).runtimeRouteContract() }
+        assertFailsWith<IllegalArgumentException> { FarmDestination.Goat(GoatEntryPage.PROFILE, " ").runtimeRouteContract() }
     }
 
     @Test
@@ -148,6 +161,26 @@ class FarmRuntimeRouteTest {
             assertEquals(screenId, route.screenId)
             assertEquals("sync.${view.name.lowercase()}", route.routeKey)
             assertEquals(null, route.scopedParameter)
+        }
+    }
+
+    @Test
+    fun exactSpeciesProfilesPreserveTheirCanonicalOwnerAndRequiredSubject() {
+        val expected = mapOf(
+            AnimalProfileKind.SHEEP to ("sheep.profile" to "FOS-SHEEP-003"),
+            AnimalProfileKind.CATTLE to ("cattle.profile" to "FOS-CATTLE-003"),
+            AnimalProfileKind.RABBIT_DOE to ("rabbit.doe_profile" to "FOS-RABBIT-003"),
+            AnimalProfileKind.RABBIT_BUCK to ("rabbit.buck_profile" to "FOS-RABBIT-004"),
+        )
+        assertEquals(AnimalProfileKind.entries.toSet(), expected.keys)
+        expected.forEach { (kind, owner) ->
+            val route = FarmDestination.AnimalProfile(kind, "exact-subject").runtimeRouteContract()
+            assertEquals(owner.first, route.routeKey)
+            assertEquals(owner.second, route.screenId)
+            assertEquals("animalId=exact-subject", route.scopedParameter)
+            assertFailsWith<IllegalArgumentException> {
+                FarmDestination.AnimalProfile(kind, " ").runtimeRouteContract()
+            }
         }
     }
 }

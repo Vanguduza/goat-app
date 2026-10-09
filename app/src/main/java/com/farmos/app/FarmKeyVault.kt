@@ -81,7 +81,11 @@ internal class FarmSecrets(
  * they are excluded from cloud backups and unreadable without this device's Keystore. Keys are never
  * written unsealed and never leave the device except wrapped to another paired device.
  */
-internal class FarmKeyVault(private val directory: File, private val sealer: DeviceSealer) {
+internal class FarmKeyVault(
+    private val directory: File,
+    private val sealer: DeviceSealer,
+    private val durability: VaultFileDurability = AndroidVaultFileDurability,
+) {
     @Synchronized
     fun secrets(farmId: String): FarmSecrets? = readSecrets(farmId)?.also {
         if (it.pendingRotations.isNotEmpty()) throw FarmKeyRotationPendingException()
@@ -144,11 +148,7 @@ internal class FarmKeyVault(private val directory: File, private val sealer: Dev
                     .put("actorId", it.actorId).put("deviceId", it.deviceId)
                     .put("at", it.businessTimeEpochMillis).put("payloadSha256", it.payloadSha256)
             }))
-        directory.mkdirs()
-        val target = file(farmId)
-        val temporary = File(directory, "${target.name}.tmp")
-        temporary.writeBytes(sealer.seal(json.toString().toByteArray(Charsets.UTF_8)))
-        check(temporary.renameTo(target)) { "The farm key vault could not be saved on this device" }
+        writeSealedVault(file(farmId), sealer.seal(json.toString().toByteArray(Charsets.UTF_8)), durability)
     }
 
     /** First keys for a farm created on this device: a fresh farm key and this device's identity. */
@@ -158,12 +158,10 @@ internal class FarmKeyVault(private val directory: File, private val sealer: Dev
         return FarmSecrets(FarmKeyRing(listOf(FarmDataKey.generate(FIRST_KEY_ID)), FIRST_KEY_ID), DeviceKeys.generate()).also { save(farmId, it) }
     }
 
-    /**
-     * Secrets for a farm on this device. A device that created the farm has no pairing grant, so it
-     * provisions the farm's first key when first needed; a device that joined saved its grant at pairing.
-     */
+    /** Carrier/identity lookup only: loss of a vault must never create a different farm key or identity. */
     @Synchronized
-    fun secretsForLocalFarm(farmId: String): FarmSecrets = secrets(farmId) ?: provisionNewFarm(farmId)
+    fun requireSecrets(farmId: String): FarmSecrets = secrets(farmId)
+        ?: error("This device's farm keys are unavailable. Ask a farm Owner to recover this device before enabling synchronisation.")
 
     /** This device's identity for a farm it is about to join, created before pairing so its key can be wrapped to. */
     @Synchronized

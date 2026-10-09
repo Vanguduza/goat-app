@@ -106,12 +106,13 @@ fun SheepOperationsScreen(
     loadSheepGroups: suspend () -> List<SheepGroupOption> = { emptyList() },
     /** FOS-SHEEP-028 — (paddockId, paddockName) options for paddock assignment. */
     loadPaddocks: suspend () -> List<SheepPaddockOption> = { emptyList() },
+    backLabel: String = "Farm home",
 ) {
     var page by remember { mutableStateOf(SheepOpsPage.HOME) }
     val home = { page = SheepOpsPage.HOME }
     when (page) {
         SheepOpsPage.HOME -> {
-            SheepOpsHome(selectedAnimalId, error, { page = it }, onBack)
+            SheepOpsHome(selectedAnimalId, error, { page = it }, onBack, backLabel)
         }
 
         SheepOpsPage.JOINING -> {
@@ -273,6 +274,7 @@ private fun SheepOpsHome(
     error: String?,
     onOpen: (SheepOpsPage) -> Unit,
     onBack: () -> Unit,
+    backLabel: String,
 ) {
     FarmOperationalPage(
         screenId = "FOS-SHEEP-010",
@@ -280,6 +282,7 @@ private fun SheepOpsHome(
         subtitle = "Breeding, lambing, wool and field health records.",
         visualClass = FarmVisualClass.I2,
         onBack = onBack,
+        backLabel = backLabel,
     ) {
         FarmOperationalSection("Selected sheep") { Text(selectedId ?: "No individual selected — group workflows remain available.") }
         FarmOperationalSection("Reproduction") {

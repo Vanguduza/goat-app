@@ -91,12 +91,13 @@ fun CattleOperationsScreen(
     loadCalvingDue: suspend () -> CattleCalvingDue = { CattleCalvingDue(emptyList(), 283) },
     /** FOS-CATTLE-036 — farm cattle aggregates. */
     loadCattleReport: suspend () -> CattleHerdReport = { CattleHerdReport() },
+    backLabel: String = "Farm home",
 ) {
     var page by remember { mutableStateOf(CattleOpsPage.HOME) }
     val home = { page = CattleOpsPage.HOME }
     when (page) {
         CattleOpsPage.HOME -> {
-            CattleOpsHome(selectedAnimalId, error, { page = it }, onBack)
+            CattleOpsHome(selectedAnimalId, error, { page = it }, onBack, backLabel)
         }
 
         CattleOpsPage.SERVICE -> {
@@ -202,6 +203,7 @@ private fun CattleOpsHome(
     error: String?,
     onOpen: (CattleOpsPage) -> Unit,
     onBack: () -> Unit,
+    backLabel: String,
 ) {
     FarmOperationalPage(
         screenId = "FOS-CATTLE-018",
@@ -209,6 +211,7 @@ private fun CattleOpsHome(
         subtitle = "Reproduction, milk, health, traceability and beef records.",
         visualClass = FarmVisualClass.I2,
         onBack = onBack,
+        backLabel = backLabel,
     ) {
         FarmOperationalSection("Selected cattle") { Text(selectedId ?: "No individual selected — lot workflows remain available.") }
         FarmOperationalSection("Reproduction") {

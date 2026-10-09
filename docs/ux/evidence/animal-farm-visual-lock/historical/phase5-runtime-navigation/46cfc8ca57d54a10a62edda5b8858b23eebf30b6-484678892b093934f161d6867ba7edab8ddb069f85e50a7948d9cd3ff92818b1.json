@@ -1,0 +1,2111 @@
+{
+  "schema_version": 1,
+  "phase": "phase_5_runtime_navigation_reachability",
+  "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
+  "tested_commit": "46cfc8ca57d54a10a62edda5b8858b23eebf30b6",
+  "source_fingerprint": "sha256:68d28645f508718cc2aa613f283662d2de5cd13767760368170b2f418c86eb15",
+  "ci_status": "PASS_EXACT_HEAD_CI",
+  "foundation_run_id": 37961965633,
+  "additional_case_evidence": {
+    "schema_version": 1,
+    "mapping_path": "docs/ux/runtime-navigation-cases.json",
+    "mapping_sha256": "db18eb50fdad755534cdaedaa19ab880f35883a10952038ef26860b74ee2b942",
+    "sources": [
+      {
+        "path": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+        "sha256": "fa0af15fbe071729c386d95fcb36c3cd757fad77b86863063d9efed869f6f591",
+        "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+        "class_name": "com.farmos.app.ReportRuntimeNavigationTest"
+      },
+      {
+        "path": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
+        "sha256": "13dae4f17a94377dd1f09f796bd16b26a36f1e2951db6e17242b3fcee7ab6ed5",
+        "reviewed_source_commit": "6e70319c13aa79a6731f53bd11d95a44d173a75c",
+        "class_name": "com.farmos.app.AndroidBackNavigationTest"
+      },
+      {
+        "path": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+        "sha256": "2987462984a4843e93ca43af3045c517d2c28cae0497350e139d2b05fc0fef49",
+        "reviewed_source_commit": "4a556f3b5a8fe20cce89e954d52288b3545270eb",
+        "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest"
+      },
+      {
+        "path": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
+        "sha256": "b346b96137f62e20d82fa7df175f67fc49a4134c3d7a2de58a9b500b5ec8f215",
+        "reviewed_source_commit": "4da815809efad7259c61fd7900bd01e38b07aaea",
+        "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest"
+      },
+      {
+        "path": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
+        "sha256": "f5dd7ff93d6ed6ad797881fbaa85e99199faaedad58be66f45648139f0982438",
+        "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+        "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest"
+      },
+      {
+        "path": "app/src/test/java/com/farmos/app/LocalSessionAuthorityTest.kt",
+        "sha256": "e40921f997ca4399aafa6e752e43fcfd7b3d4dc126d9163526ca52c3d67454e4",
+        "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+        "class_name": "com.farmos.app.LocalSessionAuthorityTest"
+      },
+      {
+        "path": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+        "sha256": "1b32d298939773f83aa58b91665a2868af50ba268e2db8af43cf20e886cb1316",
+        "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+        "class_name": "com.farmos.app.ReportDisclosureAuthorityTest"
+      }
+    ],
+    "expected_case_count": 42,
+    "cases": [
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+        "method": "animalSearchSelectsOnlyThisFarmsRecordAndBackRestoresTheReportHub",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-002"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-REPORT-001"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+        "method": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-003"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-004"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-005"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-006"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-007"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-008"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-009"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-010"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-015"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-REPORT-001"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+        "method": "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-012"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-013"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-REPORT-001"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+        "method": "sharingUsesThisFarmsActualSummaryAndRetainsMissingDataDisclosure",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-014"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-REPORT-001"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+        "method": "aRoleWithoutExportPermissionCanReadReportsButCannotOpenExportOrShare",
+        "execution_only_reason": "Permission refusal and allowed read assertions; no additional traversal is claimed from this negative authorization case.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+        "method": "revokingExportPermissionClosesAnAlreadyOpenShareRoute",
+        "execution_only_reason": "Retained-share authorization revocation; disappearing routes are not positive traversal evidence.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+        "method": "revokingExportPermissionClosesTheExportSheetAndDoesNotRestoreItOnRegrant",
+        "execution_only_reason": "Export revocation/regrant state; absent surfaces do not prove their traversal.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+        "method": "switchingFarmsDiscardsThePreviousAnimalsReportAndSearchSelection",
+        "execution_only_reason": "Farm and selected-subject isolation after re-keying; this security case is execution evidence only.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
+        "class_name": "com.farmos.app.AndroidBackNavigationTest",
+        "method": "exportSheetReturnsToReportsBeforeReturningToTheFarm",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-REPORT-011"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-REPORT-001"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
+        "class_name": "com.farmos.app.AndroidBackNavigationTest",
+        "method": "registerReturnDoesNotSaveOrSignOutAndDashboardReturnsToTheFarm",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-GOAT-004"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-GOAT-001"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
+        "class_name": "com.farmos.app.AndroidBackNavigationTest",
+        "method": "directWeightEntryReturnsToItsCallerWithoutCreatingAProfile",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-GOAT-011"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
+        "class_name": "com.farmos.app.AndroidBackNavigationTest",
+        "method": "animalsAndMoreReturnToTheSameOwnerHomeWithoutSigningOut",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-HOME-002"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-012-A"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
+        "class_name": "com.farmos.app.AndroidBackNavigationTest",
+        "method": "sheepProfileAndWeightKeepTheSelectedAnimalAndReturnThroughTheirOwner",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-SHEEP-002"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-SHEEP-003"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-SHEEP-006"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
+        "class_name": "com.farmos.app.AndroidBackNavigationTest",
+        "method": "theCurrentPageCallbackIsUsedAndANullReturnLeavesItsParentInControl",
+        "execution_only_reason": "Synthetic callback ownership verifies Android Back delegation; it does not traverse a production destination.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+        "method": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-GOAT-003"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-GOAT-011"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-HOME-006"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-012-A"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-007"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-SEARCH-005"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-SEARCH-002"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+        "method": "retainedStatusFilterCanBeClearedAfterAQueryWithADifferentStatus",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-GOAT-003"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-006"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-012-A"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-007"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-SEARCH-005"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-SEARCH-002"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+        "method": "switchingFarmsClearsSearchAndLoadsOnlyTheNewFarmsSubject",
+        "execution_only_reason": "Farm-switch and query isolation; no traversal claims are inferred from authority re-keying.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+        "method": "profileEntriesRejectAnotherSpeciesAndAnotherFarmWithoutSelectingTheFirstGoat",
+        "execution_only_reason": "Wrong-species and wrong-farm refusal; error-owner and absent-subject tags are not successful subject traversal.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+        "method": "aDatabaseFailureRemainsAnErrorAndDoesNotRenderTheNoResultsState",
+        "execution_only_reason": "Database error state and negative empty-state assertion; no destination claim.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+        "method": "exactIdentifiersPrecedePartialMatchesAndDuplicateIdentifiersDoNotDuplicateAnimals",
+        "execution_only_reason": "Room query ordering/deduplication only; no rendered journey.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+        "method": "sheepSearchBeyondTheHerdWindowKeepsTheWeightSubjectAndReturnsThroughItsProfile",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-SHEEP-003"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-SHEEP-006"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-SHEEP-030"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-SHEEP-010"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-HOME-006"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-007"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-012-A"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+        "method": "cattleSearchBeyondTheHerdWindowKeepsTheWeightSubjectAndReturnsThroughItsProfile",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-CATTLE-003"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-CATTLE-006"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-CATTLE-034"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-CATTLE-018"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-HOME-006"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-007"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-012-A"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+        "method": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+        "execution_only_reason": null,
+        "claims": [
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-RABBIT-003"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-RABBIT-004"
+          },
+          {
+            "kind": "rendered_destination_traversal",
+            "screen_id": "FOS-HOME-006"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-007"
+          },
+          {
+            "kind": "rendered_surface_owner",
+            "screen_id": "FOS-HOME-012-A"
+          }
+        ]
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+        "method": "wrongSpeciesForeignFarmAndWrongRabbitSexNeverSubstituteTheFirstAnimal",
+        "execution_only_reason": "Subject/farm/sex refusal guards; unavailable-profile rendering does not prove successful record traversal.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+        "method": "replacingOneValidProfileAndThenItsFarmDiscardsThePreviousSubject",
+        "execution_only_reason": "Retained selection and unfinished-form isolation under entry/farm replacement; execution only.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+        "method": "unsupportedIndividualProfilesRemainVisibleWithoutAnUnrelatedDestination",
+        "execution_only_reason": "Unsupported-profile disclosure and deliberately absent Rabbit/Poultry routes; no positive destination traversal.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
+        "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+        "method": "receivedRoleDowngradeRefreshesMembershipAndClearsTheNestedManagementRouteWithoutRestartingCarriers",
+        "execution_only_reason": "Current-role session admission and nested-route teardown using test carrier handles; no transport or navigation coverage is inferred.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
+        "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+        "method": "receivedCredentialResetEndsTheSessionAndOnlyTheNewPinCanOpenItAgain",
+        "execution_only_reason": "Credential rotation ends a retained session and permits only new credentials; authentication evidence only.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
+        "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+        "method": "receivedDeviceRevocationDisposesTheCarriersAndFarmContent",
+        "execution_only_reason": "Revoked-device session teardown with test carriers; no physical network delivery claim.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
+        "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+        "method": "disablingTheCurrentAccountEndsTheSignedInComposition",
+        "execution_only_reason": "Account-disable session teardown; no traversal claim from disappearing farm content.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
+        "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+        "method": "aSignInResultThatBecameDisabledBeforeAdmissionNeverStartsCarriersOrFarmContent",
+        "execution_only_reason": "Stale sign-in admission refusal; absent UI/carriers are negative authority evidence.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
+        "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+        "method": "unavailableCarrierKeysKeepLocalRecordsOpenAndCloseAnythingAlreadyStarted",
+        "execution_only_reason": "Partial carrier-start cleanup and continued local records using test handles; no live network or key-recovery completion claim.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/LocalSessionAuthorityTest.kt",
+        "class_name": "com.farmos.app.LocalSessionAuthorityTest",
+        "method": "inactiveNonlocalAndCutoffBearingDevicesCannotAdmitAStoredSignIn",
+        "execution_only_reason": "Room device-authority negatives, without a rendered destination.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/LocalSessionAuthorityTest.kt",
+        "class_name": "com.farmos.app.LocalSessionAuthorityTest",
+        "method": "aMissingAccountOrDeviceCannotAdmitAStoredSignIn",
+        "execution_only_reason": "Missing Room account/device admission refusal, without screen traversal.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/LocalSessionAuthorityTest.kt",
+        "class_name": "com.farmos.app.LocalSessionAuthorityTest",
+        "method": "endingASignInPermanentlyDisarmsRetainedCallbacksEvenWhenItsRowsStayActive",
+        "execution_only_reason": "Retained callback authority invalidation; no rendered journey.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+        "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+        "method": "aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
+        "execution_only_reason": "Authorized report write through a synthetic ContentProvider/registry; disclosure evidence, not live provider or full export qualification.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+        "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+        "method": "aDelayedCsvChooserCannotDiscloseAfterAnAcceptedRemoteDemotionEvenWithAStaleUiBoolean",
+        "execution_only_reason": "Delayed document callback rechecks accepted Room role; no destination traversal.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+        "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+        "method": "aDelayedPdfChooserCannotDiscloseAfterDeviceRevocation",
+        "execution_only_reason": "Delayed PDF destination callback refuses current device revocation; no live provider claim.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+        "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+        "method": "aDelayedChooserCannotUseTheOldAuthenticatedCredentialAfterAReset",
+        "execution_only_reason": "Delayed destination callback refuses the superseded authenticated credential.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+        "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+        "method": "aRetainedShareActionChecksTheCurrentRoomRoleBeforeStartingAnyActivity",
+        "execution_only_reason": "Retained share action authorization; no activity/route traversal is claimed.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+        "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+        "method": "anAuthorityFromAnotherFarmCannotWriteThisFarmsChosenReport",
+        "execution_only_reason": "Farm-bound disclosure rejection through a controlled provider.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+        "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+        "method": "cancellationInsideDestinationOpenClosesTheResourceBeforeAWriteOrSuccessCanRun",
+        "execution_only_reason": "Cancellation/resource ownership regression at output-open; no delivery or traversal claim.",
+        "claims": []
+      }
+    ],
+    "executed_case_count": 42,
+    "execution": {
+      "schema_version": 1,
+      "foundation_run_id": 37961965633,
+      "candidate_commit": "46cfc8ca57d54a10a62edda5b8858b23eebf30b6",
+      "candidate_tree": "14ef784242b2fd9a12fa861b257267fda3ced044",
+      "actual_checkout_commit": "a2b0fd96cbcdb62efbc4b4a1821dae894627aa70",
+      "actual_checkout_tree": "14ef784242b2fd9a12fa861b257267fda3ced044",
+      "test_task": ":app:testDebugUnitTest",
+      "task_outcome": "EXECUTED",
+      "task_log_sha256": "166432220e6354b507819aa70b4f5bc54456f1cb7598c1eeff63f74db6486fc7",
+      "execution_window_utc": {
+        "start": "2026-10-09T16:50:16.729310+00:00",
+        "finish": "2026-10-09T16:55:50.089985+00:00"
+      },
+      "reports": [
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
+          "sha256": "a7ec431a476837bee446295232378458d1599f521753c6e8073dc1e1afa1bef2",
+          "tests": 8,
+          "timestamp": "2026-10-09T16:55:33.766Z"
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
+          "sha256": "d666a094e92eaabbafb7e8e1c2008ebc7d9ec9720d35602629ee22e401a9cd96",
+          "tests": 6,
+          "timestamp": "2026-10-09T16:54:42.414Z"
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
+          "sha256": "45baff869ebe66bdda9ee241ad5713094bb700f3d9f293f063a232673d2e0f4b",
+          "tests": 6,
+          "timestamp": "2026-10-09T16:55:05.949Z"
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
+          "sha256": "afdd7ad1e7d1f6ac142f90e52ddece65beda46b4f3b93dfe18af8b1aa7d714da",
+          "tests": 6,
+          "timestamp": "2026-10-09T16:55:39.572Z"
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
+          "sha256": "d25c8961384e15728b4b3ec3cce2657cd8f9be1a2bf610493ea5a16f5a092c8e",
+          "tests": 6,
+          "timestamp": "2026-10-09T16:55:16.425Z"
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalSessionAuthorityTest.xml",
+          "sha256": "4e8d094599ac27fce0962c7162a7bae92590d058f2ab09f0abdd1c75c1ab69b7",
+          "tests": 3,
+          "timestamp": "2026-10-09T16:55:18.535Z"
+        },
+        {
+          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
+          "sha256": "2dc43e5e38fe2155f14ac222514e6494d69925688342286a26d1d4422155ae8c",
+          "tests": 7,
+          "timestamp": "2026-10-09T16:55:28.755Z"
+        }
+      ],
+      "cases": [
+        {
+          "class_name": "com.farmos.app.AndroidBackNavigationTest",
+          "method": "animalsAndMoreReturnToTheSameOwnerHomeWithoutSigningOut",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
+          "junit_sha256": "d666a094e92eaabbafb7e8e1c2008ebc7d9ec9720d35602629ee22e401a9cd96",
+          "suite_timestamp": "2026-10-09T16:54:42.414Z"
+        },
+        {
+          "class_name": "com.farmos.app.AndroidBackNavigationTest",
+          "method": "directWeightEntryReturnsToItsCallerWithoutCreatingAProfile",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
+          "junit_sha256": "d666a094e92eaabbafb7e8e1c2008ebc7d9ec9720d35602629ee22e401a9cd96",
+          "suite_timestamp": "2026-10-09T16:54:42.414Z"
+        },
+        {
+          "class_name": "com.farmos.app.AndroidBackNavigationTest",
+          "method": "exportSheetReturnsToReportsBeforeReturningToTheFarm",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
+          "junit_sha256": "d666a094e92eaabbafb7e8e1c2008ebc7d9ec9720d35602629ee22e401a9cd96",
+          "suite_timestamp": "2026-10-09T16:54:42.414Z"
+        },
+        {
+          "class_name": "com.farmos.app.AndroidBackNavigationTest",
+          "method": "registerReturnDoesNotSaveOrSignOutAndDashboardReturnsToTheFarm",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
+          "junit_sha256": "d666a094e92eaabbafb7e8e1c2008ebc7d9ec9720d35602629ee22e401a9cd96",
+          "suite_timestamp": "2026-10-09T16:54:42.414Z"
+        },
+        {
+          "class_name": "com.farmos.app.AndroidBackNavigationTest",
+          "method": "sheepProfileAndWeightKeepTheSelectedAnimalAndReturnThroughTheirOwner",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
+          "junit_sha256": "d666a094e92eaabbafb7e8e1c2008ebc7d9ec9720d35602629ee22e401a9cd96",
+          "suite_timestamp": "2026-10-09T16:54:42.414Z"
+        },
+        {
+          "class_name": "com.farmos.app.AndroidBackNavigationTest",
+          "method": "theCurrentPageCallbackIsUsedAndANullReturnLeavesItsParentInControl",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
+          "junit_sha256": "d666a094e92eaabbafb7e8e1c2008ebc7d9ec9720d35602629ee22e401a9cd96",
+          "suite_timestamp": "2026-10-09T16:54:42.414Z"
+        },
+        {
+          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+          "method": "aDatabaseFailureRemainsAnErrorAndDoesNotRenderTheNoResultsState",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "45baff869ebe66bdda9ee241ad5713094bb700f3d9f293f063a232673d2e0f4b",
+          "suite_timestamp": "2026-10-09T16:55:05.949Z"
+        },
+        {
+          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+          "method": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "45baff869ebe66bdda9ee241ad5713094bb700f3d9f293f063a232673d2e0f4b",
+          "suite_timestamp": "2026-10-09T16:55:05.949Z"
+        },
+        {
+          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+          "method": "exactIdentifiersPrecedePartialMatchesAndDuplicateIdentifiersDoNotDuplicateAnimals",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "45baff869ebe66bdda9ee241ad5713094bb700f3d9f293f063a232673d2e0f4b",
+          "suite_timestamp": "2026-10-09T16:55:05.949Z"
+        },
+        {
+          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+          "method": "profileEntriesRejectAnotherSpeciesAndAnotherFarmWithoutSelectingTheFirstGoat",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "45baff869ebe66bdda9ee241ad5713094bb700f3d9f293f063a232673d2e0f4b",
+          "suite_timestamp": "2026-10-09T16:55:05.949Z"
+        },
+        {
+          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+          "method": "retainedStatusFilterCanBeClearedAfterAQueryWithADifferentStatus",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "45baff869ebe66bdda9ee241ad5713094bb700f3d9f293f063a232673d2e0f4b",
+          "suite_timestamp": "2026-10-09T16:55:05.949Z"
+        },
+        {
+          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+          "method": "switchingFarmsClearsSearchAndLoadsOnlyTheNewFarmsSubject",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "45baff869ebe66bdda9ee241ad5713094bb700f3d9f293f063a232673d2e0f4b",
+          "suite_timestamp": "2026-10-09T16:55:05.949Z"
+        },
+        {
+          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+          "method": "aSignInResultThatBecameDisabledBeforeAdmissionNeverStartsCarriersOrFarmContent",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
+          "junit_sha256": "d25c8961384e15728b4b3ec3cce2657cd8f9be1a2bf610493ea5a16f5a092c8e",
+          "suite_timestamp": "2026-10-09T16:55:16.425Z"
+        },
+        {
+          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+          "method": "disablingTheCurrentAccountEndsTheSignedInComposition",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
+          "junit_sha256": "d25c8961384e15728b4b3ec3cce2657cd8f9be1a2bf610493ea5a16f5a092c8e",
+          "suite_timestamp": "2026-10-09T16:55:16.425Z"
+        },
+        {
+          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+          "method": "receivedCredentialResetEndsTheSessionAndOnlyTheNewPinCanOpenItAgain",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
+          "junit_sha256": "d25c8961384e15728b4b3ec3cce2657cd8f9be1a2bf610493ea5a16f5a092c8e",
+          "suite_timestamp": "2026-10-09T16:55:16.425Z"
+        },
+        {
+          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+          "method": "receivedDeviceRevocationDisposesTheCarriersAndFarmContent",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
+          "junit_sha256": "d25c8961384e15728b4b3ec3cce2657cd8f9be1a2bf610493ea5a16f5a092c8e",
+          "suite_timestamp": "2026-10-09T16:55:16.425Z"
+        },
+        {
+          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+          "method": "receivedRoleDowngradeRefreshesMembershipAndClearsTheNestedManagementRouteWithoutRestartingCarriers",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
+          "junit_sha256": "d25c8961384e15728b4b3ec3cce2657cd8f9be1a2bf610493ea5a16f5a092c8e",
+          "suite_timestamp": "2026-10-09T16:55:16.425Z"
+        },
+        {
+          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+          "method": "unavailableCarrierKeysKeepLocalRecordsOpenAndCloseAnythingAlreadyStarted",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
+          "junit_sha256": "d25c8961384e15728b4b3ec3cce2657cd8f9be1a2bf610493ea5a16f5a092c8e",
+          "suite_timestamp": "2026-10-09T16:55:16.425Z"
+        },
+        {
+          "class_name": "com.farmos.app.LocalSessionAuthorityTest",
+          "method": "aMissingAccountOrDeviceCannotAdmitAStoredSignIn",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalSessionAuthorityTest.xml",
+          "junit_sha256": "4e8d094599ac27fce0962c7162a7bae92590d058f2ab09f0abdd1c75c1ab69b7",
+          "suite_timestamp": "2026-10-09T16:55:18.535Z"
+        },
+        {
+          "class_name": "com.farmos.app.LocalSessionAuthorityTest",
+          "method": "endingASignInPermanentlyDisarmsRetainedCallbacksEvenWhenItsRowsStayActive",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalSessionAuthorityTest.xml",
+          "junit_sha256": "4e8d094599ac27fce0962c7162a7bae92590d058f2ab09f0abdd1c75c1ab69b7",
+          "suite_timestamp": "2026-10-09T16:55:18.535Z"
+        },
+        {
+          "class_name": "com.farmos.app.LocalSessionAuthorityTest",
+          "method": "inactiveNonlocalAndCutoffBearingDevicesCannotAdmitAStoredSignIn",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalSessionAuthorityTest.xml",
+          "junit_sha256": "4e8d094599ac27fce0962c7162a7bae92590d058f2ab09f0abdd1c75c1ab69b7",
+          "suite_timestamp": "2026-10-09T16:55:18.535Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+          "method": "aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
+          "junit_sha256": "2dc43e5e38fe2155f14ac222514e6494d69925688342286a26d1d4422155ae8c",
+          "suite_timestamp": "2026-10-09T16:55:28.755Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+          "method": "aDelayedChooserCannotUseTheOldAuthenticatedCredentialAfterAReset",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
+          "junit_sha256": "2dc43e5e38fe2155f14ac222514e6494d69925688342286a26d1d4422155ae8c",
+          "suite_timestamp": "2026-10-09T16:55:28.755Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+          "method": "aDelayedCsvChooserCannotDiscloseAfterAnAcceptedRemoteDemotionEvenWithAStaleUiBoolean",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
+          "junit_sha256": "2dc43e5e38fe2155f14ac222514e6494d69925688342286a26d1d4422155ae8c",
+          "suite_timestamp": "2026-10-09T16:55:28.755Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+          "method": "aDelayedPdfChooserCannotDiscloseAfterDeviceRevocation",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
+          "junit_sha256": "2dc43e5e38fe2155f14ac222514e6494d69925688342286a26d1d4422155ae8c",
+          "suite_timestamp": "2026-10-09T16:55:28.755Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+          "method": "aRetainedShareActionChecksTheCurrentRoomRoleBeforeStartingAnyActivity",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
+          "junit_sha256": "2dc43e5e38fe2155f14ac222514e6494d69925688342286a26d1d4422155ae8c",
+          "suite_timestamp": "2026-10-09T16:55:28.755Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+          "method": "anAuthorityFromAnotherFarmCannotWriteThisFarmsChosenReport",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
+          "junit_sha256": "2dc43e5e38fe2155f14ac222514e6494d69925688342286a26d1d4422155ae8c",
+          "suite_timestamp": "2026-10-09T16:55:28.755Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+          "method": "cancellationInsideDestinationOpenClosesTheResourceBeforeAWriteOrSuccessCanRun",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
+          "junit_sha256": "2dc43e5e38fe2155f14ac222514e6494d69925688342286a26d1d4422155ae8c",
+          "suite_timestamp": "2026-10-09T16:55:28.755Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+          "method": "aRoleWithoutExportPermissionCanReadReportsButCannotOpenExportOrShare",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
+          "junit_sha256": "a7ec431a476837bee446295232378458d1599f521753c6e8073dc1e1afa1bef2",
+          "suite_timestamp": "2026-10-09T16:55:33.766Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+          "method": "animalSearchSelectsOnlyThisFarmsRecordAndBackRestoresTheReportHub",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
+          "junit_sha256": "a7ec431a476837bee446295232378458d1599f521753c6e8073dc1e1afa1bef2",
+          "suite_timestamp": "2026-10-09T16:55:33.766Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+          "method": "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
+          "junit_sha256": "a7ec431a476837bee446295232378458d1599f521753c6e8073dc1e1afa1bef2",
+          "suite_timestamp": "2026-10-09T16:55:33.766Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+          "method": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
+          "junit_sha256": "a7ec431a476837bee446295232378458d1599f521753c6e8073dc1e1afa1bef2",
+          "suite_timestamp": "2026-10-09T16:55:33.766Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+          "method": "revokingExportPermissionClosesAnAlreadyOpenShareRoute",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
+          "junit_sha256": "a7ec431a476837bee446295232378458d1599f521753c6e8073dc1e1afa1bef2",
+          "suite_timestamp": "2026-10-09T16:55:33.766Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+          "method": "revokingExportPermissionClosesTheExportSheetAndDoesNotRestoreItOnRegrant",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
+          "junit_sha256": "a7ec431a476837bee446295232378458d1599f521753c6e8073dc1e1afa1bef2",
+          "suite_timestamp": "2026-10-09T16:55:33.766Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+          "method": "sharingUsesThisFarmsActualSummaryAndRetainsMissingDataDisclosure",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
+          "junit_sha256": "a7ec431a476837bee446295232378458d1599f521753c6e8073dc1e1afa1bef2",
+          "suite_timestamp": "2026-10-09T16:55:33.766Z"
+        },
+        {
+          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+          "method": "switchingFarmsDiscardsThePreviousAnimalsReportAndSearchSelection",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
+          "junit_sha256": "a7ec431a476837bee446295232378458d1599f521753c6e8073dc1e1afa1bef2",
+          "suite_timestamp": "2026-10-09T16:55:33.766Z"
+        },
+        {
+          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+          "method": "cattleSearchBeyondTheHerdWindowKeepsTheWeightSubjectAndReturnsThroughItsProfile",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "afdd7ad1e7d1f6ac142f90e52ddece65beda46b4f3b93dfe18af8b1aa7d714da",
+          "suite_timestamp": "2026-10-09T16:55:39.572Z"
+        },
+        {
+          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+          "method": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "afdd7ad1e7d1f6ac142f90e52ddece65beda46b4f3b93dfe18af8b1aa7d714da",
+          "suite_timestamp": "2026-10-09T16:55:39.572Z"
+        },
+        {
+          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+          "method": "replacingOneValidProfileAndThenItsFarmDiscardsThePreviousSubject",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "afdd7ad1e7d1f6ac142f90e52ddece65beda46b4f3b93dfe18af8b1aa7d714da",
+          "suite_timestamp": "2026-10-09T16:55:39.572Z"
+        },
+        {
+          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+          "method": "sheepSearchBeyondTheHerdWindowKeepsTheWeightSubjectAndReturnsThroughItsProfile",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "afdd7ad1e7d1f6ac142f90e52ddece65beda46b4f3b93dfe18af8b1aa7d714da",
+          "suite_timestamp": "2026-10-09T16:55:39.572Z"
+        },
+        {
+          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+          "method": "unsupportedIndividualProfilesRemainVisibleWithoutAnUnrelatedDestination",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "afdd7ad1e7d1f6ac142f90e52ddece65beda46b4f3b93dfe18af8b1aa7d714da",
+          "suite_timestamp": "2026-10-09T16:55:39.572Z"
+        },
+        {
+          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+          "method": "wrongSpeciesForeignFarmAndWrongRabbitSexNeverSubstituteTheFirstAnimal",
+          "status": "PASS",
+          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
+          "junit_sha256": "afdd7ad1e7d1f6ac142f90e52ddece65beda46b4f3b93dfe18af8b1aa7d714da",
+          "suite_timestamp": "2026-10-09T16:55:39.572Z"
+        }
+      ],
+      "origin_verification": "FIRST_PARTY_CI_ORIGIN_AND_RUN_ACCEPTANCE_REQUIRED_SEPARATELY",
+      "limits": "JVM/Room/Compose case evidence. No physical-device, live-provider, visual approval or full-product qualification."
+    },
+    "law": "Case/source/JUnit consistency only. First-party CI origin and run acceptance require independent verification. No visual, feature, module, MVP or approval claim."
+  },
+  "test_sources": {
+    "entry_action_emission": {
+      "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt": [
+        "FOS-ASSET-001",
+        "FOS-CATTLE-001",
+        "FOS-FEED-001",
+        "FOS-FIN-001",
+        "FOS-GOAT-001",
+        "FOS-GOAT-007",
+        "FOS-GROUP-001",
+        "FOS-HEALTH-001",
+        "FOS-HOME-006",
+        "FOS-INV-001",
+        "FOS-LABOUR-001",
+        "FOS-PASTURE-001",
+        "FOS-POULTRY-001",
+        "FOS-PROC-001",
+        "FOS-RABBIT-001",
+        "FOS-RABBIT-027",
+        "FOS-REPORT-001",
+        "FOS-SALES-001",
+        "FOS-SHEEP-001",
+        "FOS-SYNC-002",
+        "FOS-SYNC-004",
+        "FOS-SYNC-005",
+        "FOS-SYNC-006",
+        "FOS-SYNC-008",
+        "FOS-SYNC-009",
+        "FOS-TASK-001",
+        "FOS-WATER-001"
+      ]
+    },
+    "rendered_destination_traversal": {
+      "app/src/test/java/com/farmos/app/RabbitRuntimeNavigationTest.kt": [
+        "FOS-RABBIT-002",
+        "FOS-RABBIT-005",
+        "FOS-RABBIT-006",
+        "FOS-RABBIT-009",
+        "FOS-RABBIT-011",
+        "FOS-RABBIT-012",
+        "FOS-RABBIT-013",
+        "FOS-RABBIT-017",
+        "FOS-RABBIT-020",
+        "FOS-RABBIT-022",
+        "FOS-RABBIT-034"
+      ],
+      "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt": [
+        "FOS-CATTLE-005",
+        "FOS-CATTLE-008",
+        "FOS-CATTLE-010",
+        "FOS-CATTLE-013",
+        "FOS-CATTLE-015",
+        "FOS-CATTLE-017",
+        "FOS-CATTLE-019",
+        "FOS-CATTLE-021",
+        "FOS-CATTLE-023",
+        "FOS-CATTLE-024",
+        "FOS-CATTLE-026",
+        "FOS-CATTLE-028",
+        "FOS-CATTLE-029",
+        "FOS-CATTLE-030",
+        "FOS-CATTLE-032",
+        "FOS-FIN-001",
+        "FOS-FIN-002",
+        "FOS-FIN-004",
+        "FOS-FIN-005",
+        "FOS-GEN-006",
+        "FOS-GEN-007",
+        "FOS-HEALTH-003",
+        "FOS-HEALTH-004",
+        "FOS-HEALTH-007",
+        "FOS-HEALTH-009",
+        "FOS-HEALTH-013",
+        "FOS-HEALTH-015",
+        "FOS-HEALTH-017",
+        "FOS-HEALTH-018",
+        "FOS-HEALTH-019",
+        "FOS-HEALTH-021",
+        "FOS-HEALTH-024",
+        "FOS-HEALTH-026",
+        "FOS-INV-002",
+        "FOS-INV-004",
+        "FOS-INV-005",
+        "FOS-INV-006",
+        "FOS-INV-007",
+        "FOS-INV-008",
+        "FOS-INV-012",
+        "FOS-INV-013",
+        "FOS-POULTRY-002",
+        "FOS-POULTRY-004",
+        "FOS-POULTRY-006",
+        "FOS-POULTRY-008",
+        "FOS-POULTRY-009",
+        "FOS-POULTRY-014",
+        "FOS-POULTRY-016",
+        "FOS-POULTRY-017",
+        "FOS-POULTRY-018",
+        "FOS-POULTRY-020",
+        "FOS-POULTRY-021",
+        "FOS-SHEEP-009",
+        "FOS-SHEEP-011",
+        "FOS-SHEEP-012",
+        "FOS-SHEEP-014",
+        "FOS-SHEEP-016",
+        "FOS-SHEEP-017",
+        "FOS-SHEEP-019",
+        "FOS-SHEEP-020",
+        "FOS-SHEEP-021",
+        "FOS-SHEEP-022",
+        "FOS-SHEEP-023",
+        "FOS-SHEEP-024",
+        "FOS-SHEEP-026",
+        "FOS-SHEEP-027",
+        "FOS-SHEEP-029"
+      ],
+      "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt": [
+        "FOS-CATTLE-002",
+        "FOS-CATTLE-003",
+        "FOS-CATTLE-004",
+        "FOS-CATTLE-006",
+        "FOS-CATTLE-034",
+        "FOS-SHEEP-002",
+        "FOS-SHEEP-003",
+        "FOS-SHEEP-004",
+        "FOS-SHEEP-006",
+        "FOS-SHEEP-030"
+      ],
+      "app/src/test/java/com/farmos/app/TaskViewRuntimeNavigationTest.kt": [
+        "FOS-TASK-001",
+        "FOS-TASK-002",
+        "FOS-TASK-004",
+        "FOS-TASK-005",
+        "FOS-TASK-006",
+        "FOS-TASK-007",
+        "FOS-TASK-008",
+        "FOS-TASK-009",
+        "FOS-TASK-010",
+        "FOS-TASK-011"
+      ],
+      "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt": [
+        "FOS-ATOM-006",
+        "FOS-ATOM-035",
+        "FOS-HOME-003",
+        "FOS-HOME-004",
+        "FOS-HOME-005",
+        "FOS-HOME-008",
+        "FOS-HOME-010",
+        "FOS-HOME-011",
+        "FOS-HOME-012-A"
+      ],
+      "app/src/test/java/com/farmos/app/InventoryRecordRuntimeNavigationTest.kt": [
+        "FOS-INV-003",
+        "FOS-INV-009",
+        "FOS-INV-010",
+        "FOS-INV-011",
+        "FOS-INV-014",
+        "FOS-INV-017"
+      ],
+      "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt": [
+        "FOS-HEALTH-006",
+        "FOS-HEALTH-008",
+        "FOS-HEALTH-010",
+        "FOS-HEALTH-014",
+        "FOS-HEALTH-016",
+        "FOS-HEALTH-020",
+        "FOS-HEALTH-022",
+        "FOS-HEALTH-023",
+        "FOS-HEALTH-025",
+        "FOS-HEALTH-029"
+      ],
+      "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt": [
+        "FOS-ATOM-032",
+        "FOS-ATOM-033",
+        "FOS-CATTLE-007",
+        "FOS-CATTLE-014",
+        "FOS-CATTLE-020",
+        "FOS-CATTLE-022",
+        "FOS-CATTLE-025",
+        "FOS-CATTLE-027",
+        "FOS-CATTLE-031",
+        "FOS-CATTLE-033",
+        "FOS-CATTLE-035"
+      ],
+      "app/src/test/java/com/farmos/app/SheepRecordRuntimeNavigationTest.kt": [
+        "FOS-SHEEP-007",
+        "FOS-SHEEP-013",
+        "FOS-SHEEP-018",
+        "FOS-SHEEP-025",
+        "FOS-SHEEP-031"
+      ],
+      "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt": [
+        "FOS-POULTRY-005",
+        "FOS-POULTRY-007",
+        "FOS-POULTRY-010",
+        "FOS-POULTRY-012",
+        "FOS-POULTRY-015",
+        "FOS-POULTRY-019",
+        "FOS-POULTRY-025",
+        "FOS-POULTRY-026"
+      ],
+      "app/src/test/java/com/farmos/app/RabbitRecordRuntimeNavigationTest.kt": [
+        "FOS-RABBIT-007",
+        "FOS-RABBIT-008",
+        "FOS-RABBIT-016",
+        "FOS-RABBIT-018",
+        "FOS-RABBIT-019"
+      ],
+      "app/src/test/java/com/farmos/app/ProcurementRecordRuntimeNavigationTest.kt": [
+        "FOS-PROC-002",
+        "FOS-PROC-003",
+        "FOS-PROC-005",
+        "FOS-PROC-009"
+      ],
+      "app/src/test/java/com/farmos/app/AssetRecordRuntimeNavigationTest.kt": [
+        "FOS-ASSET-002",
+        "FOS-ASSET-003",
+        "FOS-ASSET-009"
+      ],
+      "app/src/test/java/com/farmos/app/SalesRecordRuntimeNavigationTest.kt": [
+        "FOS-SALES-005",
+        "FOS-SALES-011"
+      ],
+      "app/src/test/java/com/farmos/app/WaterRecordRuntimeNavigationTest.kt": [
+        "FOS-ATOM-034",
+        "FOS-WATER-009"
+      ],
+      "app/src/test/java/com/farmos/app/LabourRecordRuntimeNavigationTest.kt": [
+        "FOS-LABOUR-005"
+      ],
+      "app/src/test/java/com/farmos/app/PastureRecordRuntimeNavigationTest.kt": [
+        "FOS-PASTURE-002",
+        "FOS-PASTURE-003",
+        "FOS-PASTURE-009"
+      ],
+      "app/src/test/java/com/farmos/app/GroupRecordRuntimeNavigationTest.kt": [
+        "FOS-GROUP-002",
+        "FOS-GROUP-006",
+        "FOS-GROUP-009"
+      ],
+      "app/src/test/java/com/farmos/app/SyncMutationTraceRuntimeNavigationTest.kt": [
+        "FOS-SYNC-009",
+        "FOS-SYNC-018"
+      ],
+      "app/src/test/java/com/farmos/app/FeedRecordRuntimeNavigationTest.kt": [
+        "FOS-FEED-003",
+        "FOS-FEED-006"
+      ],
+      "app/src/test/java/com/farmos/app/RabbitCommerceRecordRuntimeNavigationTest.kt": [
+        "FOS-RABBIT-024",
+        "FOS-RABBIT-026",
+        "FOS-RABBIT-028",
+        "FOS-RABBIT-029"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt": [
+        "FOS-GOAT-009",
+        "FOS-GOAT-013",
+        "FOS-GOAT-014",
+        "FOS-GOAT-015",
+        "FOS-GOAT-019",
+        "FOS-GOAT-021",
+        "FOS-GOAT-024"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHealthRuntimeNavigationTest.kt": [
+        "FOS-GOAT-025",
+        "FOS-GOAT-026",
+        "FOS-GOAT-027",
+        "FOS-GOAT-028",
+        "FOS-GOAT-029"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt": [
+        "FOS-ATOM-001",
+        "FOS-ATOM-008",
+        "FOS-GOAT-030",
+        "FOS-GOAT-032",
+        "FOS-GOAT-033",
+        "FOS-GOAT-035",
+        "FOS-GOAT-044",
+        "FOS-GOAT-046"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKidRuntimeNavigationTest.kt": [
+        "FOS-GOAT-038",
+        "FOS-GOAT-040",
+        "FOS-GOAT-041"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatLactationRuntimeNavigationTest.kt": [
+        "FOS-GOAT-018",
+        "FOS-GOAT-035",
+        "FOS-GOAT-040"
+      ],
+      "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt": [
+        "FOS-GOAT-004",
+        "FOS-HOME-002",
+        "FOS-REPORT-011",
+        "FOS-SHEEP-006"
+      ],
+      "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt": [
+        "FOS-GOAT-003",
+        "FOS-GOAT-011",
+        "FOS-HOME-006"
+      ],
+      "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt": [
+        "FOS-REPORT-002",
+        "FOS-REPORT-003",
+        "FOS-REPORT-004",
+        "FOS-REPORT-005",
+        "FOS-REPORT-006",
+        "FOS-REPORT-007",
+        "FOS-REPORT-008",
+        "FOS-REPORT-009",
+        "FOS-REPORT-010",
+        "FOS-REPORT-012",
+        "FOS-REPORT-013",
+        "FOS-REPORT-014",
+        "FOS-REPORT-015"
+      ],
+      "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt": [
+        "FOS-CATTLE-003",
+        "FOS-CATTLE-006",
+        "FOS-CATTLE-018",
+        "FOS-CATTLE-034",
+        "FOS-HOME-006",
+        "FOS-RABBIT-003",
+        "FOS-RABBIT-004",
+        "FOS-SHEEP-003",
+        "FOS-SHEEP-006",
+        "FOS-SHEEP-010",
+        "FOS-SHEEP-030"
+      ]
+    },
+    "rendered_surface_owner": {
+      "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt": [
+        "FOS-GLOBAL-001",
+        "FOS-GLOBAL-002",
+        "FOS-GLOBAL-020",
+        "FOS-HOME-002",
+        "FOS-HOME-009"
+      ],
+      "app/src/test/java/com/farmos/app/GlobalSearchContractTest.kt": [
+        "FOS-ATOM-031",
+        "FOS-HOME-006",
+        "FOS-HOME-007",
+        "FOS-SEARCH-004"
+      ],
+      "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt": [
+        "FOS-CATTLE-018",
+        "FOS-SHEEP-010"
+      ],
+      "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt": [
+        "FOS-ATOM-028",
+        "FOS-ATOM-033",
+        "FOS-SYNC-004",
+        "FOS-SYNC-005",
+        "FOS-SYNC-006",
+        "FOS-SYNC-008",
+        "FOS-SYNC-009"
+      ],
+      "app/src/test/java/com/farmos/app/ProcurementCaptureOwnerTest.kt": [
+        "FOS-ATOM-009",
+        "FOS-ATOM-011",
+        "FOS-ATOM-034",
+        "FOS-PROC-001",
+        "FOS-PROC-006"
+      ],
+      "app/src/test/java/com/farmos/app/AssetsCaptureOwnerTest.kt": [
+        "FOS-ASSET-001",
+        "FOS-ATOM-014"
+      ],
+      "app/src/test/java/com/farmos/app/PastureCaptureOwnerTest.kt": [
+        "FOS-ATOM-005",
+        "FOS-ATOM-007",
+        "FOS-PASTURE-001"
+      ],
+      "app/src/test/java/com/farmos/app/GroupsCaptureOwnerTest.kt": [
+        "FOS-ATOM-003",
+        "FOS-ATOM-005",
+        "FOS-GROUP-001"
+      ],
+      "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt": [
+        "FOS-ATOM-005",
+        "FOS-ATOM-007",
+        "FOS-POULTRY-008",
+        "FOS-POULTRY-009",
+        "FOS-POULTRY-014",
+        "FOS-POULTRY-016",
+        "FOS-POULTRY-020"
+      ],
+      "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt": [
+        "FOS-ATOM-003",
+        "FOS-ATOM-004",
+        "FOS-HEALTH-004",
+        "FOS-HEALTH-007",
+        "FOS-HEALTH-013",
+        "FOS-HEALTH-019",
+        "FOS-HEALTH-024"
+      ],
+      "app/src/test/java/com/farmos/app/InventoryCaptureOwnerTest.kt": [
+        "FOS-ATOM-009",
+        "FOS-INV-005",
+        "FOS-INV-012"
+      ],
+      "app/src/test/java/com/farmos/app/LocalFarmEntryTest.kt": [
+        "FOS-ADMIN-013",
+        "FOS-GLOBAL-002",
+        "FOS-GLOBAL-004",
+        "FOS-GLOBAL-006",
+        "FOS-GLOBAL-008",
+        "FOS-GLOBAL-014"
+      ],
+      "app/src/test/java/com/farmos/app/RabbitCaptureOwnerTest.kt": [
+        "FOS-RABBIT-006",
+        "FOS-RABBIT-011"
+      ],
+      "app/src/test/java/com/farmos/app/SettingsHostTest.kt": [
+        "FOS-ADMIN-001",
+        "FOS-ADMIN-003",
+        "FOS-ADMIN-004",
+        "FOS-ADMIN-005",
+        "FOS-ADMIN-006",
+        "FOS-ADMIN-007",
+        "FOS-ADMIN-011",
+        "FOS-ADMIN-021",
+        "FOS-ADMIN-023",
+        "FOS-ADMIN-024"
+      ],
+      "app/src/test/java/com/farmos/app/FarmNetworkPairingUiTest.kt": [
+        "FOS-ADMIN-021",
+        "FOS-GLOBAL-002",
+        "FOS-GLOBAL-007",
+        "FOS-GLOBAL-014"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReferenceContractTest.kt": [
+        "FOS-ATOM-026",
+        "FOS-GOAT-001",
+        "FOS-GOAT-002",
+        "FOS-GOAT-003",
+        "FOS-GOAT-004",
+        "FOS-GOAT-007",
+        "FOS-GOAT-011",
+        "FOS-GOAT-016",
+        "FOS-GOAT-017",
+        "FOS-GOAT-020",
+        "FOS-GOAT-022",
+        "FOS-GOAT-031",
+        "FOS-GOAT-032",
+        "FOS-GOAT-034",
+        "FOS-GOAT-037",
+        "FOS-GOAT-039",
+        "FOS-GOAT-043",
+        "FOS-GOAT-051",
+        "FOS-GOAT-052",
+        "FOS-GOAT-053",
+        "FOS-GOAT-054",
+        "FOS-SYNC-003"
+      ],
+      "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKiddingDueTest.kt": [
+        "FOS-GOAT-036"
+      ],
+      "app/src/test/java/com/farmos/app/StockCountScreensTest.kt": [
+        "FOS-INV-015",
+        "FOS-INV-016"
+      ],
+      "app/src/test/java/com/farmos/app/WorkerRegisterScreensTest.kt": [
+        "FOS-LABOUR-002",
+        "FOS-LABOUR-003"
+      ],
+      "app/src/test/java/com/farmos/app/SpeciesExitScreensTest.kt": [
+        "FOS-CATTLE-034",
+        "FOS-SHEEP-030"
+      ],
+      "app/src/test/java/com/farmos/app/ReportsScreensTest.kt": [
+        "FOS-REPORT-001",
+        "FOS-REPORT-011"
+      ],
+      "app/src/test/java/com/farmos/app/CustomerScreensTest.kt": [
+        "FOS-SALES-002",
+        "FOS-SALES-003"
+      ],
+      "app/src/test/java/com/farmos/app/ConflictCentreScreensTest.kt": [
+        "FOS-ATOM-027",
+        "FOS-SYNC-006",
+        "FOS-SYNC-007"
+      ],
+      "app/src/test/java/com/farmos/app/RabbitProfileScreensTest.kt": [
+        "FOS-ATOM-016",
+        "FOS-RABBIT-002",
+        "FOS-RABBIT-003",
+        "FOS-RABBIT-004"
+      ],
+      "app/src/test/java/com/farmos/app/OpsAnimalPickerTest.kt": [
+        "FOS-ATOM-004",
+        "FOS-CATTLE-010"
+      ],
+      "app/src/test/java/com/farmos/app/OpsCoiAnalysisTest.kt": [
+        "FOS-ATOM-004",
+        "FOS-ATOM-008",
+        "FOS-GEN-006",
+        "FOS-GEN-007"
+      ],
+      "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt": [
+        "FOS-ATOM-004",
+        "FOS-ATOM-008",
+        "FOS-GEN-006",
+        "FOS-GEN-007",
+        "FOS-RABBIT-031"
+      ],
+      "app/src/test/java/com/farmos/app/AnimalSaleScreensTest.kt": [
+        "FOS-SALES-007"
+      ],
+      "app/src/test/java/com/farmos/app/AttachmentsScreensTest.kt": [
+        "FOS-ATOM-016"
+      ],
+      "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt": [
+        "FOS-GOAT-001",
+        "FOS-GOAT-011",
+        "FOS-HOME-012-A",
+        "FOS-REPORT-001",
+        "FOS-SHEEP-002",
+        "FOS-SHEEP-003"
+      ],
+      "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt": [
+        "FOS-HOME-006",
+        "FOS-HOME-007",
+        "FOS-HOME-012-A",
+        "FOS-SEARCH-002",
+        "FOS-SEARCH-005"
+      ],
+      "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt": [
+        "FOS-REPORT-001"
+      ],
+      "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt": [
+        "FOS-HOME-007",
+        "FOS-HOME-012-A"
+      ]
+    },
+    "route_contract": {
+      "app/src/test/java/com/farmos/app/FarmRuntimeRouteTest.kt": [
+        "FOS-ADMIN-001",
+        "FOS-AI-001",
+        "FOS-AN-001",
+        "FOS-ASSET-001",
+        "FOS-CAP-001",
+        "FOS-CATTLE-001",
+        "FOS-CATTLE-003",
+        "FOS-FEED-001",
+        "FOS-FIN-001",
+        "FOS-GEN-001",
+        "FOS-GOAT-001",
+        "FOS-GOAT-003",
+        "FOS-GOAT-006",
+        "FOS-GOAT-007",
+        "FOS-GOAT-011",
+        "FOS-GOAT-032",
+        "FOS-GOAT-037",
+        "FOS-GROUP-001",
+        "FOS-HEALTH-001",
+        "FOS-HEALTH-004",
+        "FOS-HEALTH-007",
+        "FOS-HEALTH-009",
+        "FOS-HEALTH-013",
+        "FOS-HEALTH-021",
+        "FOS-HEALTH-024",
+        "FOS-HOME-001",
+        "FOS-HOME-003",
+        "FOS-HOME-004",
+        "FOS-HOME-005",
+        "FOS-HOME-006",
+        "FOS-HOME-008",
+        "FOS-HOME-010",
+        "FOS-HOME-011",
+        "FOS-INV-001",
+        "FOS-LABOUR-001",
+        "FOS-PASTURE-001",
+        "FOS-POULTRY-001",
+        "FOS-PROC-001",
+        "FOS-RABBIT-001",
+        "FOS-RABBIT-003",
+        "FOS-RABBIT-004",
+        "FOS-RABBIT-027",
+        "FOS-REPORT-001",
+        "FOS-SALES-001",
+        "FOS-SHEEP-001",
+        "FOS-SHEEP-003",
+        "FOS-SIM-001",
+        "FOS-SYNC-002",
+        "FOS-SYNC-004",
+        "FOS-SYNC-005",
+        "FOS-SYNC-006",
+        "FOS-SYNC-008",
+        "FOS-SYNC-009",
+        "FOS-TASK-001",
+        "FOS-TASK-003",
+        "FOS-TASK-004",
+        "FOS-WATER-001"
+      ],
+      "app/src/test/java/com/farmos/app/FoundationAuthStateTest.kt": [
+        "FOS-GLOBAL-002",
+        "FOS-GLOBAL-005",
+        "FOS-GLOBAL-006",
+        "FOS-GLOBAL-016",
+        "FOS-GLOBAL-017",
+        "FOS-GLOBAL-018"
+      ],
+      "app/src/test/java/com/farmos/app/RoleHomeRouteContractTest.kt": [
+        "FOS-HOME-012",
+        "FOS-HOME-012-A",
+        "FOS-HOME-012-B",
+        "FOS-HOME-012-C",
+        "FOS-HOME-012-D",
+        "FOS-HOME-012-E",
+        "FOS-HOME-012-F",
+        "FOS-HOME-012-G",
+        "FOS-HOME-012-H"
+      ]
+    }
+  },
+  "coverage": {
+    "registered_screen_count": 545,
+    "entry_action_screen_count": 27,
+    "rendered_traversal_screen_count": 225,
+    "rendered_owner_screen_count": 111,
+    "route_contract_screen_count": 72,
+    "combined_screen_count": 330,
+    "entry_action_screen_ids": [
+      "FOS-ASSET-001",
+      "FOS-CATTLE-001",
+      "FOS-FEED-001",
+      "FOS-FIN-001",
+      "FOS-GOAT-001",
+      "FOS-GOAT-007",
+      "FOS-GROUP-001",
+      "FOS-HEALTH-001",
+      "FOS-HOME-006",
+      "FOS-INV-001",
+      "FOS-LABOUR-001",
+      "FOS-PASTURE-001",
+      "FOS-POULTRY-001",
+      "FOS-PROC-001",
+      "FOS-RABBIT-001",
+      "FOS-RABBIT-027",
+      "FOS-REPORT-001",
+      "FOS-SALES-001",
+      "FOS-SHEEP-001",
+      "FOS-SYNC-002",
+      "FOS-SYNC-004",
+      "FOS-SYNC-005",
+      "FOS-SYNC-006",
+      "FOS-SYNC-008",
+      "FOS-SYNC-009",
+      "FOS-TASK-001",
+      "FOS-WATER-001"
+    ],
+    "rendered_traversal_screen_ids": [
+      "FOS-ASSET-002",
+      "FOS-ASSET-003",
+      "FOS-ASSET-009",
+      "FOS-ATOM-001",
+      "FOS-ATOM-006",
+      "FOS-ATOM-008",
+      "FOS-ATOM-032",
+      "FOS-ATOM-033",
+      "FOS-ATOM-034",
+      "FOS-ATOM-035",
+      "FOS-CATTLE-002",
+      "FOS-CATTLE-003",
+      "FOS-CATTLE-004",
+      "FOS-CATTLE-005",
+      "FOS-CATTLE-006",
+      "FOS-CATTLE-007",
+      "FOS-CATTLE-008",
+      "FOS-CATTLE-010",
+      "FOS-CATTLE-013",
+      "FOS-CATTLE-014",
+      "FOS-CATTLE-015",
+      "FOS-CATTLE-017",
+      "FOS-CATTLE-018",
+      "FOS-CATTLE-019",
+      "FOS-CATTLE-020",
+      "FOS-CATTLE-021",
+      "FOS-CATTLE-022",
+      "FOS-CATTLE-023",
+      "FOS-CATTLE-024",
+      "FOS-CATTLE-025",
+      "FOS-CATTLE-026",
+      "FOS-CATTLE-027",
+      "FOS-CATTLE-028",
+      "FOS-CATTLE-029",
+      "FOS-CATTLE-030",
+      "FOS-CATTLE-031",
+      "FOS-CATTLE-032",
+      "FOS-CATTLE-033",
+      "FOS-CATTLE-034",
+      "FOS-CATTLE-035",
+      "FOS-FEED-003",
+      "FOS-FEED-006",
+      "FOS-FIN-001",
+      "FOS-FIN-002",
+      "FOS-FIN-004",
+      "FOS-FIN-005",
+      "FOS-GEN-006",
+      "FOS-GEN-007",
+      "FOS-GOAT-003",
+      "FOS-GOAT-004",
+      "FOS-GOAT-009",
+      "FOS-GOAT-011",
+      "FOS-GOAT-013",
+      "FOS-GOAT-014",
+      "FOS-GOAT-015",
+      "FOS-GOAT-018",
+      "FOS-GOAT-019",
+      "FOS-GOAT-021",
+      "FOS-GOAT-024",
+      "FOS-GOAT-025",
+      "FOS-GOAT-026",
+      "FOS-GOAT-027",
+      "FOS-GOAT-028",
+      "FOS-GOAT-029",
+      "FOS-GOAT-030",
+      "FOS-GOAT-032",
+      "FOS-GOAT-033",
+      "FOS-GOAT-035",
+      "FOS-GOAT-038",
+      "FOS-GOAT-040",
+      "FOS-GOAT-041",
+      "FOS-GOAT-044",
+      "FOS-GOAT-046",
+      "FOS-GROUP-002",
+      "FOS-GROUP-006",
+      "FOS-GROUP-009",
+      "FOS-HEALTH-003",
+      "FOS-HEALTH-004",
+      "FOS-HEALTH-006",
+      "FOS-HEALTH-007",
+      "FOS-HEALTH-008",
+      "FOS-HEALTH-009",
+      "FOS-HEALTH-010",
+      "FOS-HEALTH-013",
+      "FOS-HEALTH-014",
+      "FOS-HEALTH-015",
+      "FOS-HEALTH-016",
+      "FOS-HEALTH-017",
+      "FOS-HEALTH-018",
+      "FOS-HEALTH-019",
+      "FOS-HEALTH-020",
+      "FOS-HEALTH-021",
+      "FOS-HEALTH-022",
+      "FOS-HEALTH-023",
+      "FOS-HEALTH-024",
+      "FOS-HEALTH-025",
+      "FOS-HEALTH-026",
+      "FOS-HEALTH-029",
+      "FOS-HOME-002",
+      "FOS-HOME-003",
+      "FOS-HOME-004",
+      "FOS-HOME-005",
+      "FOS-HOME-006",
+      "FOS-HOME-008",
+      "FOS-HOME-010",
+      "FOS-HOME-011",
+      "FOS-HOME-012-A",
+      "FOS-INV-002",
+      "FOS-INV-003",
+      "FOS-INV-004",
+      "FOS-INV-005",
+      "FOS-INV-006",
+      "FOS-INV-007",
+      "FOS-INV-008",
+      "FOS-INV-009",
+      "FOS-INV-010",
+      "FOS-INV-011",
+      "FOS-INV-012",
+      "FOS-INV-013",
+      "FOS-INV-014",
+      "FOS-INV-017",
+      "FOS-LABOUR-005",
+      "FOS-PASTURE-002",
+      "FOS-PASTURE-003",
+      "FOS-PASTURE-009",
+      "FOS-POULTRY-002",
+      "FOS-POULTRY-004",
+      "FOS-POULTRY-005",
+      "FOS-POULTRY-006",
+      "FOS-POULTRY-007",
+      "FOS-POULTRY-008",
+      "FOS-POULTRY-009",
+      "FOS-POULTRY-010",
+      "FOS-POULTRY-012",
+      "FOS-POULTRY-014",
+      "FOS-POULTRY-015",
+      "FOS-POULTRY-016",
+      "FOS-POULTRY-017",
+      "FOS-POULTRY-018",
+      "FOS-POULTRY-019",
+      "FOS-POULTRY-020",
+      "FOS-POULTRY-021",
+      "FOS-POULTRY-025",
+      "FOS-POULTRY-026",
+      "FOS-PROC-002",
+      "FOS-PROC-003",
+      "FOS-PROC-005",
+      "FOS-PROC-009",
+      "FOS-RABBIT-002",
+      "FOS-RABBIT-003",
+      "FOS-RABBIT-004",
+      "FOS-RABBIT-005",
+      "FOS-RABBIT-006",
+      "FOS-RABBIT-007",
+      "FOS-RABBIT-008",
+      "FOS-RABBIT-009",
+      "FOS-RABBIT-011",
+      "FOS-RABBIT-012",
+      "FOS-RABBIT-013",
+      "FOS-RABBIT-016",
+      "FOS-RABBIT-017",
+      "FOS-RABBIT-018",
+      "FOS-RABBIT-019",
+      "FOS-RABBIT-020",
+      "FOS-RABBIT-022",
+      "FOS-RABBIT-024",
+      "FOS-RABBIT-026",
+      "FOS-RABBIT-028",
+      "FOS-RABBIT-029",
+      "FOS-RABBIT-034",
+      "FOS-REPORT-002",
+      "FOS-REPORT-003",
+      "FOS-REPORT-004",
+      "FOS-REPORT-005",
+      "FOS-REPORT-006",
+      "FOS-REPORT-007",
+      "FOS-REPORT-008",
+      "FOS-REPORT-009",
+      "FOS-REPORT-010",
+      "FOS-REPORT-011",
+      "FOS-REPORT-012",
+      "FOS-REPORT-013",
+      "FOS-REPORT-014",
+      "FOS-REPORT-015",
+      "FOS-SALES-005",
+      "FOS-SALES-011",
+      "FOS-SHEEP-002",
+      "FOS-SHEEP-003",
+      "FOS-SHEEP-004",
+      "FOS-SHEEP-006",
+      "FOS-SHEEP-007",
+      "FOS-SHEEP-009",
+      "FOS-SHEEP-010",
+      "FOS-SHEEP-011",
+      "FOS-SHEEP-012",
+      "FOS-SHEEP-013",
+      "FOS-SHEEP-014",
+      "FOS-SHEEP-016",
+      "FOS-SHEEP-017",
+      "FOS-SHEEP-018",
+      "FOS-SHEEP-019",
+      "FOS-SHEEP-020",
+      "FOS-SHEEP-021",
+      "FOS-SHEEP-022",
+      "FOS-SHEEP-023",
+      "FOS-SHEEP-024",
+      "FOS-SHEEP-025",
+      "FOS-SHEEP-026",
+      "FOS-SHEEP-027",
+      "FOS-SHEEP-029",
+      "FOS-SHEEP-030",
+      "FOS-SHEEP-031",
+      "FOS-SYNC-009",
+      "FOS-SYNC-018",
+      "FOS-TASK-001",
+      "FOS-TASK-002",
+      "FOS-TASK-004",
+      "FOS-TASK-005",
+      "FOS-TASK-006",
+      "FOS-TASK-007",
+      "FOS-TASK-008",
+      "FOS-TASK-009",
+      "FOS-TASK-010",
+      "FOS-TASK-011",
+      "FOS-WATER-009"
+    ],
+    "rendered_owner_screen_ids": [
+      "FOS-ADMIN-001",
+      "FOS-ADMIN-003",
+      "FOS-ADMIN-004",
+      "FOS-ADMIN-005",
+      "FOS-ADMIN-006",
+      "FOS-ADMIN-007",
+      "FOS-ADMIN-011",
+      "FOS-ADMIN-013",
+      "FOS-ADMIN-021",
+      "FOS-ADMIN-023",
+      "FOS-ADMIN-024",
+      "FOS-ASSET-001",
+      "FOS-ATOM-003",
+      "FOS-ATOM-004",
+      "FOS-ATOM-005",
+      "FOS-ATOM-007",
+      "FOS-ATOM-008",
+      "FOS-ATOM-009",
+      "FOS-ATOM-011",
+      "FOS-ATOM-014",
+      "FOS-ATOM-016",
+      "FOS-ATOM-026",
+      "FOS-ATOM-027",
+      "FOS-ATOM-028",
+      "FOS-ATOM-031",
+      "FOS-ATOM-033",
+      "FOS-ATOM-034",
+      "FOS-CATTLE-010",
+      "FOS-CATTLE-018",
+      "FOS-CATTLE-034",
+      "FOS-GEN-006",
+      "FOS-GEN-007",
+      "FOS-GLOBAL-001",
+      "FOS-GLOBAL-002",
+      "FOS-GLOBAL-004",
+      "FOS-GLOBAL-006",
+      "FOS-GLOBAL-007",
+      "FOS-GLOBAL-008",
+      "FOS-GLOBAL-014",
+      "FOS-GLOBAL-020",
+      "FOS-GOAT-001",
+      "FOS-GOAT-002",
+      "FOS-GOAT-003",
+      "FOS-GOAT-004",
+      "FOS-GOAT-007",
+      "FOS-GOAT-011",
+      "FOS-GOAT-016",
+      "FOS-GOAT-017",
+      "FOS-GOAT-020",
+      "FOS-GOAT-022",
+      "FOS-GOAT-031",
+      "FOS-GOAT-032",
+      "FOS-GOAT-034",
+      "FOS-GOAT-036",
+      "FOS-GOAT-037",
+      "FOS-GOAT-039",
+      "FOS-GOAT-043",
+      "FOS-GOAT-051",
+      "FOS-GOAT-052",
+      "FOS-GOAT-053",
+      "FOS-GOAT-054",
+      "FOS-GROUP-001",
+      "FOS-HEALTH-004",
+      "FOS-HEALTH-007",
+      "FOS-HEALTH-013",
+      "FOS-HEALTH-019",
+      "FOS-HEALTH-024",
+      "FOS-HOME-002",
+      "FOS-HOME-006",
+      "FOS-HOME-007",
+      "FOS-HOME-009",
+      "FOS-HOME-012-A",
+      "FOS-INV-005",
+      "FOS-INV-012",
+      "FOS-INV-015",
+      "FOS-INV-016",
+      "FOS-LABOUR-002",
+      "FOS-LABOUR-003",
+      "FOS-PASTURE-001",
+      "FOS-POULTRY-008",
+      "FOS-POULTRY-009",
+      "FOS-POULTRY-014",
+      "FOS-POULTRY-016",
+      "FOS-POULTRY-020",
+      "FOS-PROC-001",
+      "FOS-PROC-006",
+      "FOS-RABBIT-002",
+      "FOS-RABBIT-003",
+      "FOS-RABBIT-004",
+      "FOS-RABBIT-006",
+      "FOS-RABBIT-011",
+      "FOS-RABBIT-031",
+      "FOS-REPORT-001",
+      "FOS-REPORT-011",
+      "FOS-SALES-002",
+      "FOS-SALES-003",
+      "FOS-SALES-007",
+      "FOS-SEARCH-002",
+      "FOS-SEARCH-004",
+      "FOS-SEARCH-005",
+      "FOS-SHEEP-002",
+      "FOS-SHEEP-003",
+      "FOS-SHEEP-010",
+      "FOS-SHEEP-030",
+      "FOS-SYNC-003",
+      "FOS-SYNC-004",
+      "FOS-SYNC-005",
+      "FOS-SYNC-006",
+      "FOS-SYNC-007",
+      "FOS-SYNC-008",
+      "FOS-SYNC-009"
+    ],
+    "route_contract_screen_ids": [
+      "FOS-ADMIN-001",
+      "FOS-AI-001",
+      "FOS-AN-001",
+      "FOS-ASSET-001",
+      "FOS-CAP-001",
+      "FOS-CATTLE-001",
+      "FOS-CATTLE-003",
+      "FOS-FEED-001",
+      "FOS-FIN-001",
+      "FOS-GEN-001",
+      "FOS-GLOBAL-002",
+      "FOS-GLOBAL-005",
+      "FOS-GLOBAL-006",
+      "FOS-GLOBAL-016",
+      "FOS-GLOBAL-017",
+      "FOS-GLOBAL-018",
+      "FOS-GOAT-001",
+      "FOS-GOAT-003",
+      "FOS-GOAT-006",
+      "FOS-GOAT-007",
+      "FOS-GOAT-011",
+      "FOS-GOAT-032",
+      "FOS-GOAT-037",
+      "FOS-GROUP-001",
+      "FOS-HEALTH-001",
+      "FOS-HEALTH-004",
+      "FOS-HEALTH-007",
+      "FOS-HEALTH-009",
+      "FOS-HEALTH-013",
+      "FOS-HEALTH-021",
+      "FOS-HEALTH-024",
+      "FOS-HOME-001",
+      "FOS-HOME-003",
+      "FOS-HOME-004",
+      "FOS-HOME-005",
+      "FOS-HOME-006",
+      "FOS-HOME-008",
+      "FOS-HOME-010",
+      "FOS-HOME-011",
+      "FOS-HOME-012",
+      "FOS-HOME-012-A",
+      "FOS-HOME-012-B",
+      "FOS-HOME-012-C",
+      "FOS-HOME-012-D",
+      "FOS-HOME-012-E",
+      "FOS-HOME-012-F",
+      "FOS-HOME-012-G",
+      "FOS-HOME-012-H",
+      "FOS-INV-001",
+      "FOS-LABOUR-001",
+      "FOS-PASTURE-001",
+      "FOS-POULTRY-001",
+      "FOS-PROC-001",
+      "FOS-RABBIT-001",
+      "FOS-RABBIT-003",
+      "FOS-RABBIT-004",
+      "FOS-RABBIT-027",
+      "FOS-REPORT-001",
+      "FOS-SALES-001",
+      "FOS-SHEEP-001",
+      "FOS-SHEEP-003",
+      "FOS-SIM-001",
+      "FOS-SYNC-002",
+      "FOS-SYNC-004",
+      "FOS-SYNC-005",
+      "FOS-SYNC-006",
+      "FOS-SYNC-008",
+      "FOS-SYNC-009",
+      "FOS-TASK-001",
+      "FOS-TASK-003",
+      "FOS-TASK-004",
+      "FOS-WATER-001"
+    ],
+    "route_contract_only_screen_ids": [
+      "FOS-AI-001",
+      "FOS-AN-001",
+      "FOS-CAP-001",
+      "FOS-GEN-001",
+      "FOS-GLOBAL-005",
+      "FOS-GLOBAL-016",
+      "FOS-GLOBAL-017",
+      "FOS-GLOBAL-018",
+      "FOS-GOAT-006",
+      "FOS-HOME-001",
+      "FOS-HOME-012",
+      "FOS-HOME-012-B",
+      "FOS-HOME-012-C",
+      "FOS-HOME-012-D",
+      "FOS-HOME-012-E",
+      "FOS-HOME-012-F",
+      "FOS-HOME-012-G",
+      "FOS-HOME-012-H",
+      "FOS-SIM-001",
+      "FOS-TASK-003"
+    ],
+    "missing_registry_ids": []
+  },
+  "certification": {
+    "runtime_reachability_executed": 225,
+    "entry_action_emission_executed": 27,
+    "rendered_surface_owners_executed": 111,
+    "route_contracts_executed": 72,
+    "parameter_scope_executed": true,
+    "return_restoration_executed": 225,
+    "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
+  },
+  "green_claims": {
+    "visual_green_screens": 0,
+    "feature_green": 0,
+    "module_green": 0,
+    "mvp_green": false
+  },
+  "law": "Rendered destination traversal, rendered surface ownership, top-level entry-action emission, and typed route ownership are distinct evidence classes. Only traversal implies return/restoration. Every class requires an executable test naming the exact registered Screen ID under the recorded exact-head CI run. No class substitutes for another. This evidence makes no VISUAL_GREEN, FEATURE_GREEN, MODULE_GREEN, or MVP_GREEN claim."
+}

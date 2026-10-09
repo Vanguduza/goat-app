@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "package_name": "com.farmos.app",
+  "authority": "TEST_SCENARIOS_ONLY_NO_GATE_PROMOTION",
+  "scope_note": "These four bounded UI journeys cover entry/home inspection, one synthetic goat registration/weight/readback, and one synthetic task create/complete/readback on the governed emulator target. They are not all GOAT E2E tests or product qualification.",
+  "scenarios": [
+    {
+      "id": "local-entry-inspection",
+      "screen_ids": [
+        "FOS-GLOBAL-014",
+        "FOS-GLOBAL-006"
+      ],
+      "preconditions": [
+        "Use only the dedicated admitted test emulator. GOAT must have no existing local farm, with the first-run introduction visible. If a farm or sign-in form exists, stop; do not clear it."
+      ],
+      "steps": [
+        "Open the installed GOAT app and inspect its first-run introduction.",
+        "Tap Continue and inspect the setup form, scrolling as necessary. Leave all fields empty and do not submit Create farm."
+      ],
+      "assertions": [
+        {
+          "id": "ENTRY-01",
+          "description": "The actual introduction displays 'Your farm, on this device first' and a reachable Continue action."
+        },
+        {
+          "id": "ENTRY-02",
+          "description": "Continue opens 'Set up this farm', with Farm name, Your name, Owner username, Owner PIN (6 to 12 digits), and Confirm PIN fields."
+        },
+        {
+          "id": "ENTRY-03",
+          "description": "The setup form identifies on-device storage and does not demand a server email/password or Google sign-in before local setup."
+        },
+        {
+          "id": "ENTRY-04",
+          "description": "With the fields empty, Create farm is disabled; no farm is submitted during this inspection."
+        }
+      ]
+    },
+    {
+      "id": "management-home-navigation",
+      "screen_ids": [
+        "FOS-HOME-012-A",
+        "FOS-HOME-002"
+      ],
+      "preconditions": [
+        "An operator has already opened the synthetic farm named 'GOAT Artemis Qualification' as its local owner/manager. Its management farm home is visible. Stop if that exact test farm or role cannot be established; do not log into another farm."
+      ],
+      "steps": [
+        "Inspect the management home and its Home, Animals, Tasks and More controls.",
+        "Open Animals, verify the species chooser, and return to the same farm home.",
+        "Open Tasks, then return to the same farm home. Open More, inspect Farm records and tools, then return to the same farm home.",
+        "Inspect the Theme control at the right edge of home navigation without changing a setting. Its separate lower-right row is used for the narrow, large-text layout; other layouts keep it at the right end of the navigation row."
+      ],
+      "assertions": [
+        {
+          "id": "HOME-01",
+          "description": "The management home belongs to the exact synthetic farm GOAT Artemis Qualification."
+        },
+        {
+          "id": "HOME-02",
+          "description": "Home, Animals, Tasks and More labels are complete, readable, separate and reachable at the current device size and font scale."
+        },
+        {
+          "id": "HOME-03",
+          "description": "Animals opens the species chooser, including goat, rabbit, poultry, sheep and cattle, and navigation returns to the same farm home."
+        },
+        {
+          "id": "HOME-04",
+          "description": "Tasks opens its rendered board and More opens Farm records and tools, including Inventory, Sales and Procurement entries. Each has a working return to the same farm home; no record action or sign-out is submitted."
+        },
+        {
+          "id": "HOME-05",
+          "description": "Theme remains reachable at the right edge of farm-home navigation, without label overlap: on its separate lower-right row in the narrow large-text layout, or at the right end of the navigation row otherwise. No credentials, farm records or settings were changed."
+        }
+      ]
+    },
+    {
+      "id": "goat-register-weight-local",
+      "screen_ids": [
+        "FOS-HOME-012-A",
+        "FOS-HOME-002",
+        "FOS-GOAT-001",
+        "FOS-GOAT-004",
+        "FOS-GOAT-006",
+        "FOS-GOAT-003",
+        "FOS-GOAT-011"
+      ],
+      "preconditions": [
+        "Use only the dedicated admitted emulator. An operator has opened the synthetic farm named 'GOAT Artemis Qualification' as its active local owner/manager, with Goats enabled and its management home visible. Stop if the exact farm or authorized role cannot be established.",
+        "Use a fresh, nonsecret test marker beginning ARTEMIS- as the goat's full Tag and include that marker in the final report. The only permitted record mutations are registering that one new synthetic goat and recording its one test weight. Do not amend an existing goat, duplicate a submission, sign out, or change farm/network/settings."
+      ],
+      "steps": [
+        "Verify the exact synthetic farm on home. Open Animals, choose Goats, open Search and search for the full fresh marker. If a match exists, choose a new marker and verify it has no match before continuing; never reuse or modify the matching goat.",
+        "Return to the goat dashboard and open Register goat. Enter the fresh marker as Tag, 'Artemis test goat' as Name (optional), Female as sex, and 2025-01-01 as Date of birth. Tap Register goat once. Returning from the form is not proof of a save: inspect any dashboard error and search for the full marker before proceeding.",
+        "Open the exact search result and verify its profile identity, sex and birth date. Open Weight. Enter 0 first and verify Record weight is disabled, then replace the whole Weight field with 12.500 and tap Record weight once.",
+        "Observe the write result, return to the same goat profile and inspect its latest weight and weight history. Do not submit again if refresh fails or the outcome is unclear; retain the error and report the unmet assertion.",
+        "Return through the goat dashboard to Farm home. Reopen Animals, Goats and Search; search the exact marker and open its profile again. Record the marker, visible weight/history and local save/sync wording in the final report. This is module leave/reopen readback, not a claim of process restart or cloud delivery. After the readback, return to Farm home and verify the same farm name."
+      ],
+      "assertions": [
+        {
+          "id": "GOAT-01",
+          "description": "The journey starts and ends on the exact synthetic farm GOAT Artemis Qualification, using its authorized management session; only the fresh marker's test goat is changed."
+        },
+        {
+          "id": "GOAT-02",
+          "description": "The full-marker search has no match before registration and exactly one visible matching goat after the single registration submission."
+        },
+        {
+          "id": "GOAT-03",
+          "description": "The registered profile retains the exact marker, name Artemis test goat, female sex and birth date 2025-01-01."
+        },
+        {
+          "id": "GOAT-04",
+          "description": "In the selected goat's Weight form, value 0 leaves Record weight disabled; replacing the whole field with 12.500 enables the positive capture."
+        },
+        {
+          "id": "GOAT-05",
+          "description": "After the single weight submission, the exact goat displays a latest weight numerically equal to 12.5 kg and one test entry in weight history, without a factor-of-1000 scaling error."
+        },
+        {
+          "id": "GOAT-06",
+          "description": "After leaving the goat module for Farm home and reopening it, a fresh exact-marker search opens the same identity with the 12.5 kg latest weight and history still present."
+        },
+        {
+          "id": "GOAT-07",
+          "description": "The final report includes the exact marker and observed local-save/sync state and any error. It does not treat a form closing as a commit, a pending state as delivered, or module readback as process/physical-device/cloud durability."
+        }
+      ]
+    },
+    {
+      "id": "task-create-complete-local",
+      "screen_ids": [
+        "FOS-HOME-012-A",
+        "FOS-TASK-001",
+        "FOS-TASK-002",
+        "FOS-TASK-003",
+        "FOS-TASK-009",
+        "FOS-TASK-013"
+      ],
+      "preconditions": [
+        "Use only the dedicated admitted emulator. An operator has opened the synthetic farm named 'GOAT Artemis Qualification' as its active local owner/manager, with management home visible. Stop if the exact farm or authorized role cannot be established.",
+        "Use a fresh, nonsecret title beginning 'ARTEMIS task ' and include the complete title in the final report. The only permitted mutations are creating and completing that one synthetic unassigned one-off task. Do not change another task, repeating rules, assignments, attachments, credentials, or farm/network/settings."
+      ],
+      "steps": [
+        "Verify the exact synthetic farm and open Tasks. Open All and verify the fresh full title is not already present; choose a different title if necessary. Open Add task and inspect the real inline form.",
+        "With Title empty, verify Create task is disabled. Enter the fresh full title. Keep Module as goat, Task code as CHECK, no repeat and no assignee. Record the Due date already displayed by the form without appending or changing it. Tap Create task once.",
+        "Wait for the exact new task to appear on All, inspect any error and open that task's detail. A form closing alone is not a successful creation. Confirm the displayed title and goat / CHECK codes and that the task is open.",
+        "Tap Mark done once on that task's detail. Inspect its Completed state, then its Evidence tab and completion state. Do not add files or claim that missing attachments have been supplied.",
+        "Return to the board and select Completed; inspect the exact title's completed row. Return to Farm home, reopen Tasks, select Completed, and open that same task again. Confirm the readback and record the full title, due-date observation and completion evidence in the final report. After the readback, return to Farm home and verify the same farm name."
+      ],
+      "assertions": [
+        {
+          "id": "TASK-01",
+          "description": "The journey starts and ends on the exact synthetic farm GOAT Artemis Qualification; the trace identifies one fresh test title and changes no other task."
+        },
+        {
+          "id": "TASK-02",
+          "description": "Create task is disabled with Title empty and becomes enabled for the supplied title and valid unchanged default fields, with no repeat or assignee selected."
+        },
+        {
+          "id": "TASK-03",
+          "description": "After one create submission the exact title appears as an open task, and its detail retains that title with module goat and task code CHECK. The report records the form's actual Due date."
+        },
+        {
+          "id": "TASK-04",
+          "description": "One Mark done submission changes that task's detail to Completed; its Mark done action is no longer present."
+        },
+        {
+          "id": "TASK-05",
+          "description": "The same task's Evidence tab displays Completed and goat / CHECK. The trace reports the observed evidence-file state without creating or inventing attachments."
+        },
+        {
+          "id": "TASK-06",
+          "description": "The Completed board includes the exact title, and leaving for Farm home then reopening Tasks and its completed detail retains that state. This is local module readback, not a claim of restart, synchronization, recurring-task or multi-device qualification."
+        }
+      ]
+    }
+  ]
+}

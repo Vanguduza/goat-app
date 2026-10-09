@@ -15,11 +15,19 @@ class LocalAccessServiceTest {
         val accounts = LinkedHashMap<String, LocalAccount>()
         val recovery = HashMap<String, String>()
         val events = mutableListOf<AccessAuditEvent>()
+        val accountWrites = mutableListOf<Pair<String, String>>()
+        val recoveryActors = mutableListOf<String>()
         override fun accounts(farmId: String) = accounts.values.filter { it.farmId == farmId }
         override fun account(farmId: String, accountId: String) = accounts[accountId]?.takeIf { it.farmId == farmId }
-        override fun save(account: LocalAccount) { accounts[account.accountId] = account }
+        override fun save(account: LocalAccount, actorAccountId: String) {
+            accounts[account.accountId] = account
+            accountWrites += account.accountId to actorAccountId
+        }
         override fun recoveryHash(farmId: String) = recovery[farmId]
-        override fun saveRecoveryHash(farmId: String, hash: String) { recovery[farmId] = hash }
+        override fun saveRecoveryHash(farmId: String, hash: String, actorAccountId: String) {
+            recovery[farmId] = hash
+            recoveryActors += actorAccountId
+        }
         override fun record(event: AccessAuditEvent) { events += event }
     }
 
@@ -79,6 +87,21 @@ class LocalAccessServiceTest {
         // A disabled manager can no longer administer anything.
         service.setStatus(owner, manager.accountId, AccountStatus.DISABLED)
         assertFailsWith<AccessDenied> { service.setStatus(manager, worker.accountId, AccountStatus.ACTIVE) }
+    }
+
+    @Test
+    fun identityWritesKeepTheActingManagerAndRecoveryKeepsItsOwner() {
+        val setup = ownerSetup()
+        val manager = service.createAccount(setup.owner, "manager", "Manager", LocalRole.MANAGER, pin("573920"))
+        val worker = service.createAccount(manager, "worker", "Worker", LocalRole.WORKER, pin("681204"))
+        assertEquals(worker.accountId to manager.accountId, store.accountWrites.last())
+        service.resetCredential(manager, worker.accountId, pin("710396"))
+        assertEquals(worker.accountId to manager.accountId, store.accountWrites.last())
+        service.linkWorker(manager, worker.accountId, "worker-record")
+        assertEquals(worker.accountId to manager.accountId, store.accountWrites.last())
+        service.recoverOwner(farm, setup.owner.accountId, setup.recoveryCode, pin("591047"))
+        assertEquals(setup.owner.accountId to setup.owner.accountId, store.accountWrites.last())
+        assertEquals(listOf(setup.owner.accountId, setup.owner.accountId), store.recoveryActors)
     }
 
     @Test

@@ -31,6 +31,7 @@ import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.AnimalFarmTheme
+import com.farmos.core.design.FarmBackHandler
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmStorySurface
 import com.farmos.core.design.FosDimens
@@ -54,7 +55,7 @@ internal fun GoatExperienceScreen(
     goatGroups: List<GoatGroupView> = emptyList(),
     pedigreeParentLabels: List<String> = emptyList(),
 ) {
-    var page by remember { mutableStateOf(initialPage) }
+    var page by remember(initialPage) { mutableStateOf(initialPage) }
     var selectedKiddingId by remember { mutableStateOf<String?>(null) }
     var selectedGroupId by remember { mutableStateOf<String?>(null) }
     val selected = state.selected
@@ -80,7 +81,7 @@ internal fun GoatExperienceScreen(
         GoatPage.PROFILE -> GoatProfileScreen(
             state = state,
             onOpen = { page = it },
-            onBack = { page = GoatPage.DASHBOARD },
+            onBack = { if (initialPage == GoatPage.PROFILE) onBackToFarm() else page = GoatPage.DASHBOARD },
             attachments = actions.profileAttachments,
         )
         GoatPage.REGISTER -> GoatRegisterScreen(actions.onRegister) { page = GoatPage.DASHBOARD }
@@ -283,6 +284,7 @@ private fun GoatDashboardScreen(
     modifier: Modifier,
     today: LocalDate,
 ) {
+    FarmBackHandler(onBackToFarm)
     val active = state.herd.filter { it.status == GoatStatus.ACTIVE }
     val does = active.count { it.sex == GoatSex.FEMALE }
     val bucks = active.count { it.sex == GoatSex.MALE }
@@ -502,7 +504,11 @@ private fun GoatProfileScreen(
     val goat = state.selected
     IllustratedGoatPage("Goat profile", "FOS-GOAT-003", onBack) {
         if (goat == null) {
-            Text("Select a goat from the herd before opening its profile.")
+            when (state.herdState) {
+                LoadableSurfaceState.LOADING -> Text("Loading the selected goat")
+                LoadableSurfaceState.ERROR -> Text(state.error ?: "The selected goat could not be read.", color = MaterialTheme.colorScheme.error)
+                else -> Text("Select a goat from the herd before opening its profile.")
+            }
             return@IllustratedGoatPage
         }
         BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -660,6 +666,7 @@ internal fun IllustratedGoatPage(
     safety: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    FarmBackHandler(onBack)
     val canonicalScreenId = screenId.substringBefore(" ").takeIf { it.startsWith("FOS-") && "/" !in it }
     AnimalFarmCanvas(
         canonicalScreenId?.let { Modifier.testTag("farm-screen:$it") } ?: Modifier,

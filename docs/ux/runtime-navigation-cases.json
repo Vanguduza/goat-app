@@ -1,0 +1,1442 @@
+{
+  "schema_version": 1,
+  "purpose": "ADDITIONAL_PHASE5_CASE_INVENTORY_NOT_APPROVAL",
+  "sources": [
+    {
+      "path": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+      "sha256": "fa0af15fbe071729c386d95fcb36c3cd757fad77b86863063d9efed869f6f591",
+      "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+      "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
+      "cases": [
+        {
+          "method": "animalSearchSelectsOnlyThisFarmsRecordAndBackRestoresTheReportHub",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-002",
+              "entry": {
+                "within": "animalSearchSelectsOnlyThisFarmsRecordAndBackRestoresTheReportHub",
+                "expression": "open(\"FOS-REPORT-002\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "animalSearchSelectsOnlyThisFarmsRecordAndBackRestoresTheReportHub",
+                "expression": "backToHub(\"FOS-REPORT-002\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "animalSearchSelectsOnlyThisFarmsRecordAndBackRestoresTheReportHub",
+                "expression": "backToHub(\"FOS-REPORT-002\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-REPORT-001",
+              "entry": {
+                "within": "render",
+                "expression": "awaitTag(\"farm-screen:FOS-REPORT-001\")",
+                "via": [
+                  "render()"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-003",
+              "entry": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "open(\"FOS-REPORT-003\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-003\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-003\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-004",
+              "entry": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "open(\"FOS-REPORT-004\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-004\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-004\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-005",
+              "entry": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "open(\"FOS-REPORT-005\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-005\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-005\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-006",
+              "entry": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "open(\"FOS-REPORT-006\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-006\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-006\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-007",
+              "entry": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "open(\"FOS-REPORT-007\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-007\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-007\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-008",
+              "entry": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "open(\"FOS-REPORT-008\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-008\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-008\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-009",
+              "entry": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "open(\"FOS-REPORT-009\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-009\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-009\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-010",
+              "entry": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "open(\"FOS-REPORT-010\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-010\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-010\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-015",
+              "entry": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "open(\"FOS-REPORT-015\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-015\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+                "expression": "backToHub(\"FOS-REPORT-015\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-REPORT-001",
+              "entry": {
+                "within": "render",
+                "expression": "awaitTag(\"farm-screen:FOS-REPORT-001\")",
+                "via": [
+                  "render()"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-012",
+              "entry": {
+                "within": "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+                "expression": "open(\"FOS-REPORT-012\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+                "expression": "backToHub(\"FOS-REPORT-012\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+                "expression": "backToHub(\"FOS-REPORT-012\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-013",
+              "entry": {
+                "within": "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-REPORT-013\").assertExists()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+                "expression": "click(\"Reports\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+                "expression": "awaitTag(\"farm-screen:FOS-REPORT-012\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-REPORT-001",
+              "entry": {
+                "within": "render",
+                "expression": "awaitTag(\"farm-screen:FOS-REPORT-001\")",
+                "via": [
+                  "render()"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "sharingUsesThisFarmsActualSummaryAndRetainsMissingDataDisclosure",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-014",
+              "entry": {
+                "within": "sharingUsesThisFarmsActualSummaryAndRetainsMissingDataDisclosure",
+                "expression": "open(\"FOS-REPORT-014\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "sharingUsesThisFarmsActualSummaryAndRetainsMissingDataDisclosure",
+                "expression": "backToHub(\"FOS-REPORT-014\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "sharingUsesThisFarmsActualSummaryAndRetainsMissingDataDisclosure",
+                "expression": "backToHub(\"FOS-REPORT-014\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-REPORT-001",
+              "entry": {
+                "within": "render",
+                "expression": "awaitTag(\"farm-screen:FOS-REPORT-001\")",
+                "via": [
+                  "render()"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "aRoleWithoutExportPermissionCanReadReportsButCannotOpenExportOrShare",
+          "execution_only_reason": "Permission refusal and allowed read assertions; no additional traversal is claimed from this negative authorization case.",
+          "claims": []
+        },
+        {
+          "method": "revokingExportPermissionClosesAnAlreadyOpenShareRoute",
+          "execution_only_reason": "Retained-share authorization revocation; disappearing routes are not positive traversal evidence.",
+          "claims": []
+        },
+        {
+          "method": "revokingExportPermissionClosesTheExportSheetAndDoesNotRestoreItOnRegrant",
+          "execution_only_reason": "Export revocation/regrant state; absent surfaces do not prove their traversal.",
+          "claims": []
+        },
+        {
+          "method": "switchingFarmsDiscardsThePreviousAnimalsReportAndSearchSelection",
+          "execution_only_reason": "Farm and selected-subject isolation after re-keying; this security case is execution evidence only.",
+          "claims": []
+        }
+      ]
+    },
+    {
+      "path": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
+      "sha256": "13dae4f17a94377dd1f09f796bd16b26a36f1e2951db6e17242b3fcee7ab6ed5",
+      "reviewed_source_commit": "6e70319c13aa79a6731f53bd11d95a44d173a75c",
+      "class_name": "com.farmos.app.AndroidBackNavigationTest",
+      "cases": [
+        {
+          "method": "exportSheetReturnsToReportsBeforeReturningToTheFarm",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-REPORT-011",
+              "entry": {
+                "within": "exportSheetReturnsToReportsBeforeReturningToTheFarm",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-REPORT-011\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exportSheetReturnsToReportsBeforeReturningToTheFarm",
+                "expression": "back()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "exportSheetReturnsToReportsBeforeReturningToTheFarm",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-REPORT-001\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-REPORT-001",
+              "entry": {
+                "within": "exportSheetReturnsToReportsBeforeReturningToTheFarm",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-REPORT-001\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "registerReturnDoesNotSaveOrSignOutAndDashboardReturnsToTheFarm",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-GOAT-004",
+              "entry": {
+                "within": "registerReturnDoesNotSaveOrSignOutAndDashboardReturnsToTheFarm",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-GOAT-004\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "registerReturnDoesNotSaveOrSignOutAndDashboardReturnsToTheFarm",
+                "expression": "back()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "registerReturnDoesNotSaveOrSignOutAndDashboardReturnsToTheFarm",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-GOAT-001\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-GOAT-001",
+              "entry": {
+                "within": "registerReturnDoesNotSaveOrSignOutAndDashboardReturnsToTheFarm",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-GOAT-001\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "directWeightEntryReturnsToItsCallerWithoutCreatingAProfile",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-GOAT-011",
+              "entry": {
+                "within": "directWeightEntryReturnsToItsCallerWithoutCreatingAProfile",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-GOAT-011\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "animalsAndMoreReturnToTheSameOwnerHomeWithoutSigningOut",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-HOME-002",
+              "entry": {
+                "within": "animalsAndMoreReturnToTheSameOwnerHomeWithoutSigningOut",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-HOME-002\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "animalsAndMoreReturnToTheSameOwnerHomeWithoutSigningOut",
+                "expression": "back()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "animalsAndMoreReturnToTheSameOwnerHomeWithoutSigningOut",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-HOME-012-A\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 1
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-012-A",
+              "entry": {
+                "within": "animalsAndMoreReturnToTheSameOwnerHomeWithoutSigningOut",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-HOME-012-A\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "sheepProfileAndWeightKeepTheSelectedAnimalAndReturnThroughTheirOwner",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-SHEEP-002",
+              "entry": {
+                "within": "sheepProfileAndWeightKeepTheSelectedAnimalAndReturnThroughTheirOwner",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-SHEEP-002\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-SHEEP-003",
+              "entry": {
+                "within": "sheepProfileAndWeightKeepTheSelectedAnimalAndReturnThroughTheirOwner",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-SHEEP-003\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-SHEEP-006",
+              "entry": {
+                "within": "sheepProfileAndWeightKeepTheSelectedAnimalAndReturnThroughTheirOwner",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-SHEEP-006\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "sheepProfileAndWeightKeepTheSelectedAnimalAndReturnThroughTheirOwner",
+                "expression": "back()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "sheepProfileAndWeightKeepTheSelectedAnimalAndReturnThroughTheirOwner",
+                "expression": "compose.onNodeWithText(\"Individual sheep records on this device\").assertIsDisplayed()",
+                "via": [],
+                "occurrence": 0
+              }
+            }
+          ]
+        },
+        {
+          "method": "theCurrentPageCallbackIsUsedAndANullReturnLeavesItsParentInControl",
+          "execution_only_reason": "Synthetic callback ownership verifies Android Back delegation; it does not traverse a production destination.",
+          "claims": []
+        }
+      ]
+    },
+    {
+      "path": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+      "sha256": "9a66a528058d1025c0a3a1141c7ae2d5b86ab4e272b69adb5b9b8a7ae9a1954f",
+      "reviewed_source_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
+      "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+      "cases": [
+        {
+          "method": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-GOAT-003",
+              "entry": {
+                "within": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+                "expression": "awaitScreen(\"FOS-GOAT-003\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+                "expression": "back()",
+                "via": [],
+                "occurrence": 1
+              },
+              "return": {
+                "within": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-GOAT-011",
+              "entry": {
+                "within": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+                "expression": "awaitScreen(\"FOS-GOAT-011\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+                "expression": "back()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+                "expression": "awaitScreen(\"FOS-GOAT-003\")",
+                "via": [],
+                "occurrence": 1
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-HOME-006",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+                "expression": "back()",
+                "via": [],
+                "occurrence": 2
+              },
+              "return": {
+                "within": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
+                "expression": "awaitScreen(\"FOS-HOME-012-A\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-012-A",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-012-A\")",
+                "via": [
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-007",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-007\")",
+                "via": [
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-SEARCH-005",
+              "entry": {
+                "within": "search",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-SEARCH-005\").assertExists()",
+                "via": [
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-SEARCH-002",
+              "entry": {
+                "within": "search",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-SEARCH-002\").assertExists()",
+                "via": [
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "retainedStatusFilterCanBeClearedAfterAQueryWithADifferentStatus",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-GOAT-003",
+              "entry": {
+                "within": "retainedStatusFilterCanBeClearedAfterAQueryWithADifferentStatus",
+                "expression": "awaitScreen(\"FOS-GOAT-003\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "retainedStatusFilterCanBeClearedAfterAQueryWithADifferentStatus",
+                "expression": "back()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "retainedStatusFilterCanBeClearedAfterAQueryWithADifferentStatus",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-006",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-012-A",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-012-A\")",
+                "via": [
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-007",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-007\")",
+                "via": [
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-SEARCH-005",
+              "entry": {
+                "within": "search",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-SEARCH-005\").assertExists()",
+                "via": [
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-SEARCH-002",
+              "entry": {
+                "within": "search",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-SEARCH-002\").assertExists()",
+                "via": [
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "switchingFarmsClearsSearchAndLoadsOnlyTheNewFarmsSubject",
+          "execution_only_reason": "Farm-switch and query isolation; no traversal claims are inferred from authority re-keying.",
+          "claims": []
+        },
+        {
+          "method": "profileEntriesRejectAnotherSpeciesAndAnotherFarmWithoutSelectingTheFirstGoat",
+          "execution_only_reason": "Wrong-species and wrong-farm refusal; error-owner and absent-subject tags are not successful subject traversal.",
+          "claims": []
+        },
+        {
+          "method": "aDatabaseFailureRemainsAnErrorAndDoesNotRenderTheNoResultsState",
+          "execution_only_reason": "Database error state and negative empty-state assertion; no destination claim.",
+          "claims": []
+        },
+        {
+          "method": "exactIdentifiersPrecedePartialMatchesAndDuplicateIdentifiersDoNotDuplicateAnimals",
+          "execution_only_reason": "Room query ordering/deduplication only; no rendered journey.",
+          "claims": []
+        }
+      ]
+    },
+    {
+      "path": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
+      "sha256": "a2b445b852d0f3514730177839115b73b466d92b7bd3ca1213119e3baccf650f",
+      "reviewed_source_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
+      "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+      "cases": [
+        {
+          "method": "sheepSearchBeyondTheHerdWindowKeepsTheWeightSubjectAndReturnsThroughItsProfile",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-SHEEP-003",
+              "entry": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"$prefix-003\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exerciseWeightJourney",
+                "expression": "back()",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-SHEEP-006",
+              "entry": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"$prefix-006\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exerciseWeightJourney",
+                "expression": "click(\"Profile\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"$prefix-003\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 1
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-SHEEP-030",
+              "entry": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(if (kind == AnimalProfileKind.SHEEP) \"FOS-SHEEP-030\" else \"FOS-CATTLE-034\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exerciseWeightJourney",
+                "expression": "click(\"Profile\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 1
+              },
+              "return": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"$prefix-003\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 2
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-SHEEP-010",
+              "entry": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(if (kind == AnimalProfileKind.SHEEP) \"FOS-SHEEP-010\" else \"FOS-CATTLE-018\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exerciseWeightJourney",
+                "expression": "click(\"Profile\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 2
+              },
+              "return": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"$prefix-003\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 3
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-HOME-006",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)",
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exerciseWeightJourney",
+                "expression": "back()",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 1
+              },
+              "return": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"FOS-HOME-012-A\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
+                ],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-007",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-007\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)",
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-012-A",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-012-A\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)",
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "cattleSearchBeyondTheHerdWindowKeepsTheWeightSubjectAndReturnsThroughItsProfile",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-CATTLE-003",
+              "entry": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"$prefix-003\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exerciseWeightJourney",
+                "expression": "back()",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-CATTLE-006",
+              "entry": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"$prefix-006\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exerciseWeightJourney",
+                "expression": "click(\"Profile\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"$prefix-003\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 1
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-CATTLE-034",
+              "entry": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(if (kind == AnimalProfileKind.SHEEP) \"FOS-SHEEP-030\" else \"FOS-CATTLE-034\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exerciseWeightJourney",
+                "expression": "click(\"Profile\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 1
+              },
+              "return": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"$prefix-003\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 2
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-CATTLE-018",
+              "entry": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(if (kind == AnimalProfileKind.SHEEP) \"FOS-SHEEP-010\" else \"FOS-CATTLE-018\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exerciseWeightJourney",
+                "expression": "click(\"Profile\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 2
+              },
+              "return": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"$prefix-003\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 3
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-HOME-006",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)",
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "exerciseWeightJourney",
+                "expression": "back()",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 1
+              },
+              "return": {
+                "within": "exerciseWeightJourney",
+                "expression": "awaitScreen(\"FOS-HOME-012-A\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
+                ],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-007",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-007\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)",
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-012-A",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-012-A\")",
+                "via": [
+                  "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)",
+                  "search(\"ZZ-TARGET\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+          "execution_only_reason": null,
+          "claims": [
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-RABBIT-003",
+              "entry": {
+                "within": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+                "expression": "awaitScreen(\"FOS-RABBIT-003\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+                "expression": "back()",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-RABBIT-004",
+              "entry": {
+                "within": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+                "expression": "awaitScreen(\"FOS-RABBIT-004\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+                "expression": "click(\"Back\")",
+                "via": [],
+                "occurrence": 0
+              },
+              "return": {
+                "within": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [],
+                "occurrence": 1
+              }
+            },
+            {
+              "kind": "rendered_destination_traversal",
+              "screen_id": "FOS-HOME-006",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-006\")",
+                "via": [
+                  "search(\"ZZ-RABBIT\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": {
+                "within": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+                "expression": "back()",
+                "via": [],
+                "occurrence": 1
+              },
+              "return": {
+                "within": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
+                "expression": "awaitScreen(\"FOS-HOME-012-A\")",
+                "via": [],
+                "occurrence": 0
+              }
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-007",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-007\")",
+                "via": [
+                  "search(\"ZZ-RABBIT\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            },
+            {
+              "kind": "rendered_surface_owner",
+              "screen_id": "FOS-HOME-012-A",
+              "entry": {
+                "within": "search",
+                "expression": "awaitScreen(\"FOS-HOME-012-A\")",
+                "via": [
+                  "search(\"ZZ-RABBIT\")"
+                ],
+                "occurrence": 0
+              },
+              "return_action": null,
+              "return": null
+            }
+          ]
+        },
+        {
+          "method": "wrongSpeciesForeignFarmAndWrongRabbitSexNeverSubstituteTheFirstAnimal",
+          "execution_only_reason": "Subject/farm/sex refusal guards; unavailable-profile rendering does not prove successful record traversal.",
+          "claims": []
+        },
+        {
+          "method": "replacingOneValidProfileAndThenItsFarmDiscardsThePreviousSubject",
+          "execution_only_reason": "Retained selection and unfinished-form isolation under entry/farm replacement; execution only.",
+          "claims": []
+        },
+        {
+          "method": "unsupportedIndividualProfilesRemainVisibleWithoutAnUnrelatedDestination",
+          "execution_only_reason": "Unsupported-profile disclosure and deliberately absent Rabbit/Poultry routes; no positive destination traversal.",
+          "claims": []
+        }
+      ]
+    },
+    {
+      "path": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
+      "sha256": "f5dd7ff93d6ed6ad797881fbaa85e99199faaedad58be66f45648139f0982438",
+      "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+      "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+      "cases": [
+        {
+          "method": "receivedRoleDowngradeRefreshesMembershipAndClearsTheNestedManagementRouteWithoutRestartingCarriers",
+          "execution_only_reason": "Current-role session admission and nested-route teardown using test carrier handles; no transport or navigation coverage is inferred.",
+          "claims": []
+        },
+        {
+          "method": "receivedCredentialResetEndsTheSessionAndOnlyTheNewPinCanOpenItAgain",
+          "execution_only_reason": "Credential rotation ends a retained session and permits only new credentials; authentication evidence only.",
+          "claims": []
+        },
+        {
+          "method": "receivedDeviceRevocationDisposesTheCarriersAndFarmContent",
+          "execution_only_reason": "Revoked-device session teardown with test carriers; no physical network delivery claim.",
+          "claims": []
+        },
+        {
+          "method": "disablingTheCurrentAccountEndsTheSignedInComposition",
+          "execution_only_reason": "Account-disable session teardown; no traversal claim from disappearing farm content.",
+          "claims": []
+        },
+        {
+          "method": "aSignInResultThatBecameDisabledBeforeAdmissionNeverStartsCarriersOrFarmContent",
+          "execution_only_reason": "Stale sign-in admission refusal; absent UI/carriers are negative authority evidence.",
+          "claims": []
+        },
+        {
+          "method": "unavailableCarrierKeysKeepLocalRecordsOpenAndCloseAnythingAlreadyStarted",
+          "execution_only_reason": "Partial carrier-start cleanup and continued local records using test handles; no live network or key-recovery completion claim.",
+          "claims": []
+        }
+      ]
+    },
+    {
+      "path": "app/src/test/java/com/farmos/app/LocalSessionAuthorityTest.kt",
+      "sha256": "e40921f997ca4399aafa6e752e43fcfd7b3d4dc126d9163526ca52c3d67454e4",
+      "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+      "class_name": "com.farmos.app.LocalSessionAuthorityTest",
+      "cases": [
+        {
+          "method": "inactiveNonlocalAndCutoffBearingDevicesCannotAdmitAStoredSignIn",
+          "execution_only_reason": "Room device-authority negatives, without a rendered destination.",
+          "claims": []
+        },
+        {
+          "method": "aMissingAccountOrDeviceCannotAdmitAStoredSignIn",
+          "execution_only_reason": "Missing Room account/device admission refusal, without screen traversal.",
+          "claims": []
+        },
+        {
+          "method": "endingASignInPermanentlyDisarmsRetainedCallbacksEvenWhenItsRowsStayActive",
+          "execution_only_reason": "Retained callback authority invalidation; no rendered journey.",
+          "claims": []
+        }
+      ]
+    },
+    {
+      "path": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+      "sha256": "cd347a819475182615cd16f66846b4c7cfd213be800ac73d9b0a4002ff67c23e",
+      "reviewed_source_commit": "f7ab02b443e07f6903f75821c78885f8369953ab",
+      "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+      "cases": [
+        {
+          "method": "aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
+          "execution_only_reason": "Authorized report write through a synthetic ContentProvider/registry; disclosure evidence, not live provider or full export qualification.",
+          "claims": []
+        },
+        {
+          "method": "aDelayedCsvChooserCannotDiscloseAfterAnAcceptedRemoteDemotionEvenWithAStaleUiBoolean",
+          "execution_only_reason": "Delayed document callback rechecks accepted Room role; no destination traversal.",
+          "claims": []
+        },
+        {
+          "method": "aDelayedPdfChooserCannotDiscloseAfterDeviceRevocation",
+          "execution_only_reason": "Delayed PDF destination callback refuses current device revocation; no live provider claim.",
+          "claims": []
+        },
+        {
+          "method": "aDelayedChooserCannotUseTheOldAuthenticatedCredentialAfterAReset",
+          "execution_only_reason": "Delayed destination callback refuses the superseded authenticated credential.",
+          "claims": []
+        },
+        {
+          "method": "aRetainedShareActionChecksTheCurrentRoomRoleBeforeStartingAnyActivity",
+          "execution_only_reason": "Retained share action authorization; no activity/route traversal is claimed.",
+          "claims": []
+        },
+        {
+          "method": "anAuthorityFromAnotherFarmCannotWriteThisFarmsChosenReport",
+          "execution_only_reason": "Farm-bound disclosure rejection through a controlled provider.",
+          "claims": []
+        },
+        {
+          "method": "cancellationInsideDestinationOpenClosesTheResourceBeforeAWriteOrSuccessCanRun",
+          "execution_only_reason": "Cancellation/resource ownership regression at output-open; no delivery or traversal claim.",
+          "claims": []
+        }
+      ]
+    }
+  ]
+}

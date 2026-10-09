@@ -27,6 +27,12 @@ data class RabbitAnimalView(val animalId: String, val tag: String, val name: Str
     val active: Boolean get() = status == "active"
 }
 
+/** Exact profile identity supplied by a farm-local query; the host verifies sex against the row. */
+data class RabbitProfileEntry(val animalId: String, val isDoe: Boolean) {
+    init { require(animalId.isNotBlank()) { "A rabbit profile needs an id" } }
+    val screenId: String get() = if (isDoe) "FOS-RABBIT-003" else "FOS-RABBIT-004"
+}
+
 /** FOS-RABBIT-002 — breeding animals; each opens its doe or buck profile. */
 @Composable
 internal fun RabbitAnimalsScreen(rabbits: List<RabbitAnimalView>, rabbitCount: Int?, error: String?, onOpen: (RabbitAnimalView) -> Unit, onBack: () -> Unit) {
@@ -65,10 +71,11 @@ internal fun RabbitProfileScreen(
     onBack: () -> Unit,
     /** Photos and documents of this rabbit (D-015), when the host provides them. */
     attachments: @Composable (RabbitAnimalView) -> Unit = {},
+    backLabel: String = "Breeding animals",
 ) {
     val screenId = if (rabbit.isDoe) "FOS-RABBIT-003" else "FOS-RABBIT-004"
     val kind = if (rabbit.isDoe) "Doe" else "Buck"
-    FarmOperationalPage(screenId, rabbit.label, "$kind · ${rabbit.status}", FarmVisualClass.I3, onBack, backLabel = "Breeding animals") {
+    FarmOperationalPage(screenId, rabbit.label, "$kind · ${rabbit.status}", FarmVisualClass.I3, onBack, backLabel = backLabel) {
         FarmOperationalSection("Identity") {
             Text("Tag ${rabbit.tag}")
             Text(rabbit.name?.takeIf { it.isNotBlank() }?.let { "Name $it" } ?: "No name recorded.")

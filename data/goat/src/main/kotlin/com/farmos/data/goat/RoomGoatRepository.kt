@@ -588,6 +588,7 @@ class RoomGoatRepository(
 
     override suspend fun getGoat(animalId: String): GoatSnapshot? {
         val animal = database.animals().get(farmId, animalId) ?: return null
+        if (animal.speciesCode != "goat") return null
         val history = database.measurements().history(farmId, animalId, "weight").map { measurement ->
             WeightSample(
                 measurementId = measurement.id,

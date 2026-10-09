@@ -21,6 +21,7 @@ import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmFamilyLauncher
 import com.farmos.core.design.AnimalFarmHomeMetrics
 import com.farmos.core.design.AnimalFarmTheme
+import com.farmos.core.design.FarmBackHandler
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -32,6 +33,7 @@ fun SpeciesNavigatorScreen(
     onBack: () -> Unit,
     today: LocalDate = LocalDate.now(),
 ) {
+    FarmBackHandler(onBack)
     val families = listOf(
         Triple(AnimalFarmFamily.GOAT, FarmModule.GOAT, "Herd, growth, kidding"),
         Triple(AnimalFarmFamily.RABBIT, FarmModule.RABBIT, "Waves, cages, nests"),

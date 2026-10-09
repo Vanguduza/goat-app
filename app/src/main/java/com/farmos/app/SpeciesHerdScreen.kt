@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmModuleHeader
+import com.farmos.core.design.FarmBackHandler
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
@@ -80,6 +81,9 @@ fun SpeciesHerdScreen(
     counts: SpeciesHerdCounts? = null,
     exitContent: (@Composable (animal: SpeciesAnimalRow, screenId: String, onBack: () -> Unit) -> Unit)? = null,
     attachmentContent: (@Composable (animal: SpeciesAnimalRow) -> Unit)? = null,
+    /** An exact profile entry; the host loads this subject independently of the capped herd list. */
+    entryAnimalId: String? = null,
+    loading: Boolean = false,
 ) {
     require(module == FarmModule.SHEEP || module == FarmModule.CATTLE) {
         "SpeciesHerdScreen is reserved for individual-animal sheep/cattle UX"
@@ -120,10 +124,13 @@ fun SpeciesHerdScreen(
                 ),
             )
         }
-    var page by remember { mutableStateOf(SpeciesPage.DASHBOARD) }
-    var selectedId by remember { mutableStateOf<String?>(rows.firstOrNull()?.animalId) }
+    require(entryAnimalId == null || entryAnimalId.isNotBlank()) { "An animal profile needs an id" }
+    var page by remember(module, entryAnimalId) { mutableStateOf(if (entryAnimalId == null) SpeciesPage.DASHBOARD else SpeciesPage.PROFILE) }
+    var selectedId by remember(module, entryAnimalId) { mutableStateOf(entryAnimalId ?: rows.firstOrNull()?.animalId) }
     val selected = rows.firstOrNull { it.animalId == selectedId }
     val home = { page = SpeciesPage.DASHBOARD }
+    val profileBack: () -> Unit = if (entryAnimalId != null) onBack else home
+    val detailBack = { page = if (entryAnimalId != null) SpeciesPage.PROFILE else SpeciesPage.DASHBOARD }
     when (page) {
         SpeciesPage.DASHBOARD -> {
             SpeciesDashboard(config, rows, counts, selected, error, { page = it }, onBack)
@@ -137,7 +144,8 @@ fun SpeciesHerdScreen(
         }
 
         SpeciesPage.PROFILE -> {
-            SpeciesProfile(config, selected, { page = it }, home, exitsReversible = exitContent != null, attachmentContent = attachmentContent)
+            SpeciesProfile(config, selected, { page = it }, profileBack, exitsReversible = exitContent != null, attachmentContent = attachmentContent,
+                loading = loading, error = error, exactEntry = entryAnimalId != null)
         }
 
         SpeciesPage.REGISTER -> {
@@ -145,20 +153,20 @@ fun SpeciesHerdScreen(
         }
 
         SpeciesPage.WEIGHT -> {
-            SpeciesWeight(config, selected, busy, error, onRecordWeight, home)
+            SpeciesWeight(config, selected, busy, error, onRecordWeight, detailBack, backLabel = if (entryAnimalId != null) "Profile" else "Farm home")
         }
 
         SpeciesPage.OPERATIONS -> {
-            SpeciesOperations(selected, home, extra)
+            SpeciesOperations(selected, detailBack, extra)
         }
 
         SpeciesPage.STATUS -> {
             // Owner decision D-022: exits are recorded as reversible exit events when the host provides them.
             val animal = selected
             if (exitContent != null && animal != null) {
-                exitContent(animal, config.screenIds.status, home)
+                exitContent(animal, config.screenIds.status, detailBack)
             } else {
-                SpeciesStatus(config, selected, busy, error, onSetStatus, home)
+                SpeciesStatus(config, selected, busy, error, onSetStatus, detailBack)
             }
         }
     }
@@ -174,6 +182,7 @@ private fun SpeciesDashboard(
     onOpen: (SpeciesPage) -> Unit,
     onBack: () -> Unit,
 ) {
+    FarmBackHandler(onBack)
     AnimalFarmCanvas {
         Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
@@ -273,6 +282,9 @@ private fun SpeciesProfile(
     onBack: () -> Unit,
     exitsReversible: Boolean = false,
     attachmentContent: (@Composable (animal: SpeciesAnimalRow) -> Unit)? = null,
+    loading: Boolean = false,
+    error: String? = null,
+    exactEntry: Boolean = false,
 ) {
     FarmOperationalPage(
         config.screenIds.profile,
@@ -280,9 +292,19 @@ private fun SpeciesProfile(
         "Identity, current state and species-native actions.",
         FarmVisualClass.I2,
         onBack,
+        backLabel = if (exactEntry) "Back" else "Farm home",
     ) {
         if (selected == null) {
-            FarmOperationalRows(emptyList(), "No animal selected", "Choose an animal from the herd or flock first.")
+            FarmOperationalRows(
+                emptyList(),
+                when {
+                    loading -> "Loading the selected animal"
+                    error != null -> error
+                    exactEntry -> "The selected animal is not available on this farm."
+                    else -> "No animal selected"
+                },
+                if (exactEntry || loading || error != null) null else "Choose an animal from the herd or flock first.",
+            )
         } else {
             FarmOperationalSection("Identity") {
                 Text(selected.label, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -379,10 +401,11 @@ private fun SpeciesWeight(
     error: String?,
     onRecord: (String, String) -> Unit,
     onBack: () -> Unit,
+    backLabel: String = "Farm home",
 ) {
     var weight by remember { mutableStateOf("") }
     val id = config.screenIds.weight
-    FarmOperationalPage(id, "Record weight", "Capture live weight in kilograms.", onBack = onBack) {
+    FarmOperationalPage(id, "Record weight", "Capture live weight in kilograms.", onBack = onBack, backLabel = backLabel) {
         if (selected == null) {
             FarmOperationalRows(emptyList(), "No animal selected", null)
         } else {

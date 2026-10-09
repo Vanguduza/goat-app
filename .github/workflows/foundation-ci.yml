@@ -25,6 +25,8 @@ jobs:
         run: bash scripts/ci/verify-visual-authority.sh
       - name: Verify Google test build provenance guards
         run: python3 scripts/testing/test_google_test_build.py
+      - name: Verify governed Artemis request and receipt contracts
+        run: python3 scripts/testing/artemis_goat_test.py
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
@@ -43,7 +45,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
       - name: Domain, session, sync tests + reproducible APK assembly
         run: >-
-          ./gradlew
+          ./gradlew -I scripts/testing/fresh-test-evidence.gradle
           :domain:goat:test
           :domain:rabbit:test
           :domain:ops:test
@@ -62,6 +64,26 @@ jobs:
         run: |
           test -s app/build/outputs/apk/debug/app-debug.apk
           sha256sum app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Retain actual native-test source identity
+        if: always()
+        run: |
+          mkdir -p app/build/test-evidence
+          git rev-parse HEAD > app/build/test-evidence/commit.txt
+          git rev-parse 'HEAD^{tree}' > app/build/test-evidence/tree.txt
+          git status --porcelain=v1 > app/build/test-evidence/worktree-status.txt
+      - name: Upload native JUnit reports and tested debug APK
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: goat-native-test-evidence
+          path: |
+            app/build/test-evidence/**
+            **/build/test-results/**
+            **/build/reports/tests/**
+            app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
 
   visual-reference-evidence:
     needs: android
@@ -87,7 +109,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
       - name: Record deterministic native reference evidence
         run: >-
-          ./gradlew
+          ./gradlew -I scripts/testing/fresh-test-evidence.gradle
           :app:recordRoborazziDebug
           :feature:goat:recordRoborazziDebug
           -Proborazzi.dumpUiTree=true
@@ -133,9 +155,6 @@ jobs:
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
       - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
-      - uses: supabase/setup-cli@afb1b15109756ea5cf9d8985a359d9095235ca2b # v2
-        with:
-          version: 2.116.0
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -157,9 +176,26 @@ jobs:
           disable-animations: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-metrics -partition-size 2048
           script: bash scripts/ci/run-two-device-e2e.sh
-      - name: Stop local Supabase
+      - name: Retain actual connected-test source identity
         if: always()
-        run: supabase stop --no-backup || true
+        run: |
+          mkdir -p app/build/test-evidence
+          git rev-parse HEAD > app/build/test-evidence/commit.txt
+          git rev-parse 'HEAD^{tree}' > app/build/test-evidence/tree.txt
+          git status --porcelain=v1 > app/build/test-evidence/worktree-status.txt
+      - name: Upload connected JUnit reports and tested APKs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: goat-connected-test-evidence
+          path: |
+            app/build/test-evidence/**
+            **/build/outputs/androidTest-results/**
+            **/build/reports/androidTests/**
+            **/build/outputs/apk/androidTest/**
+            app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
 
   edge-functions:
     runs-on: ubuntu-latest
