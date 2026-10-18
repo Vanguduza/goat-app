@@ -298,13 +298,17 @@ private fun RabbitDashboard(
                 }
                 RabbitWorkflowOverview(records, today, { onOpen(RabbitPage.LITTER_PROFILE) }, { onOpen(RabbitPage.CAGE_OCCUPANCY) })
             }
-            androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                listOf("Breeding", "Housing", "Animals", "Records").forEach { name ->
-                    com.farmos.core.design.FarmFilterChip(name, name == section, { onSection(name) }, Modifier.testTag("rabbit-section:$name"))
+            // Reveal navigation after the initial projection so the overview cannot
+            // move an already active action under a user's tap.
+            if (!loading) {
+                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf("Breeding", "Housing", "Animals", "Records").forEach { name ->
+                        com.farmos.core.design.FarmFilterChip(name, name == section, { onSection(name) }, Modifier.testTag("rabbit-section:$name"))
+                    }
                 }
-            }
-            actions.forEach { (label, target) ->
-                com.farmos.core.design.AnimalFarmQuickAction(label, { onOpen(target) }, Modifier.testTag("rabbit-action:${target.name}"))
+                actions.forEach { (label, target) ->
+                    com.farmos.core.design.AnimalFarmQuickAction(label, { onOpen(target) }, Modifier.testTag("rabbit-action:${target.name}"))
+                }
             }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         }
