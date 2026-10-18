@@ -406,5 +406,45 @@
     "reason": "Legacy selectors still expected Sync on home, Open-prefixed Poultry links and ungrouped rabbit pedigree links. Tests now traverse the native menu/buttons while preserving destination, farm scope, command ownership and record-selection assertions.",
     "apk_source_commit": "036b83ee11263f3f83480fef4b112c65a1c61cda",
     "production_inputs_changed": false
+  },
+  "connected_navigation_correction": {
+    "source_commit": "59a12ad3d37d0903511cf3838636917ffcf62c7d",
+    "source": "app/src/androidTest/kotlin/com/farmos/app/LocalFarmActivityJourneyTest.kt",
+    "source_sha256": "84ac0968e4bf932256efc3b8b7762cdbe12aadbbd697eee466648c459f36afaa",
+    "source_fingerprint": "sha256:79e39e3c22450b80a0f4db3929bc0149b4eae6f815e06bbca3bf5a54bc366838",
+    "compile_receipt": {
+      "command": [
+        "./gradlew",
+        ":app:compileDebugAndroidTestKotlin",
+        "--no-daemon",
+        "--no-parallel",
+        "--max-workers=1",
+        "--console=plain",
+        "-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8",
+        "-Pkotlin.compiler.execution.strategy=in-process"
+      ],
+      "started_at": "2026-10-18T15:41:43.684850+00:00",
+      "finished_at": "2026-10-18T15:42:04.885348+00:00",
+      "exit_code": 0
+    },
+    "execution": "Connected runtime result is tracked separately in PR #112. No local emulator was started.",
+    "previous_ci_run": "https://github.com/Vanguduza/goat-app/actions/runs/39138335924",
+    "previous_ci_result": {
+      "android_junit": {
+        "tests": 811,
+        "passed": 809,
+        "skipped": 2,
+        "failures": 0,
+        "errors": 0
+      },
+      "native_reference_matrix": "PASS",
+      "connected_database_tests": 51,
+      "connected_app_tests": 9,
+      "connected_app_failures": 1,
+      "failed_case": "LocalFarmActivityJourneyTest.localOnboardingWeightAndRecreatedActivityUseTheSameFarmAndAnimal",
+      "failed_step": "Legacy home Search farm entry at line 147"
+    },
+    "change": "Enter More, open Search, type into Tag/name/ID, select canonical live result by animal ID, and retain all farm/owner/operation/weight/activity-recreation/Back assertions.",
+    "production_inputs_changed": false
   }
 }
