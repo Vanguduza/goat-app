@@ -1,5 +1,10 @@
 package com.farmos.app
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
+
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
@@ -27,6 +32,30 @@ import org.robolectric.annotation.GraphicsMode
 class FarmRuntimeNavigationTest {
     @get:Rule
     val compose = createComposeRule()
+
+    private fun openMore() {
+        compose.onNode(hasClickAction() and hasText("More")).performClick()
+        compose.onNodeWithTag("farm-menu").assertIsDisplayed()
+    }
+
+    private fun expandAllMenuGroups() {
+        val collapsed = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Collapsed")
+        listOf("Farm tools", "Farm operations", "Business", "Insights & planning").forEach { label ->
+            val nodes = compose.onAllNodesWithText(label).fetchSemanticsNodes()
+            if (nodes.isNotEmpty() && collapsed.matches(nodes.single())) {
+                compose.onNodeWithText(label).performScrollTo().performClick()
+            }
+        }
+    }
+
+    private fun openMenuAction(originalLabel: String, destination: FarmDestination) {
+        val tag = if (destination == FarmDestination.Goat(GoatEntryPage.SYNC)) {
+            "farm-screen:FOS-HOME-009"
+        } else {
+            "farm-menu-action:$originalLabel"
+        }
+        compose.onNodeWithTag(tag).performScrollTo().assertIsDisplayed().performClick()
+    }
 
     @Test
     fun generalHomeTraversesSpeciesUtilitiesAndRestoresHome() {
@@ -69,6 +98,8 @@ class FarmRuntimeNavigationTest {
             .performClick()
         compose.onNodeWithText("Farm home").assertIsDisplayed()
 
+        openMore()
+        expandAllMenuGroups()
         opened.set(null)
         compose.onNode(hasClickAction() and hasText("Search farm"))
             .performScrollTo()
@@ -89,24 +120,23 @@ class FarmRuntimeNavigationTest {
         assertEquals(homeUtilityActions() + general.map { it.first to it.second }, generalHomeActions())
         general.forEach { (label, expected, screenId) ->
             opened.set(null)
-            compose.onNode(hasClickAction() and hasText(label))
-                .performScrollTo()
-                .assertIsDisplayed()
-                .performClick()
+            openMenuAction(label, expected)
             compose.runOnIdle {
                 assertEquals(expected, opened.get())
                 assertEquals(screenId, opened.get()!!.runtimeRouteContract().screenId)
             }
         }
 
+        compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
+        compose.onNodeWithText("Farm home").assertIsDisplayed()
         opened.set(null)
         compose.onNode(hasClickAction() and hasText("Tasks")).performClick()
         compose.runOnIdle {
             assertEquals(FarmDestination.Tasks(TaskEntryPage.BOARD), opened.get())
             assertEquals("FOS-TASK-001", opened.get()!!.runtimeRouteContract().screenId)
         }
-        compose.onNode(hasClickAction() and hasText("More")).performClick()
-        compose.onNodeWithText("Farm records and tools").assertIsDisplayed()
+        openMore()
+        expandAllMenuGroups()
 
         val more = listOf(
             Triple("Inventory", FarmDestination.Module(FarmModule.INVENTORY), "FOS-INV-001"),
@@ -119,10 +149,7 @@ class FarmRuntimeNavigationTest {
         )
         more.forEach { (label, expected, screenId) ->
             opened.set(null)
-            compose.onNode(hasClickAction() and hasText(label))
-                .performScrollTo()
-                .assertIsDisplayed()
-                .performClick()
+            openMenuAction(label, expected)
             compose.runOnIdle {
                 assertEquals(expected, opened.get())
                 assertEquals(screenId, opened.get()!!.runtimeRouteContract().screenId)
@@ -165,18 +192,18 @@ class FarmRuntimeNavigationTest {
         val opened = AtomicReference<FarmDestination?>(null)
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                ManagementControlRoomScreen(
+                RoleAwareFarmHomeScreen(
+                    role = "owner",
                     farmName = "Premier Farm",
-                    ownerMode = true,
                     summary = FarmHomeSummary(),
                     onOpen = opened::set,
-                    onAnimals = {},
-                    onMore = {},
-                    today = LocalDate.of(2026, 9, 24),
+                    onSignOut = {},
                 )
             }
         }
 
+        openMore()
+        expandAllMenuGroups()
         val remaining = listOf(
             Triple("Open groups", FarmDestination.Module(FarmModule.GROUPS), "FOS-GROUP-001"),
             Triple("Open waitlist", FarmDestination.Module(FarmModule.WAITLIST), "FOS-RABBIT-027"),
@@ -185,10 +212,7 @@ class FarmRuntimeNavigationTest {
         )
         remaining.forEach { (label, expected, screenId) ->
             opened.set(null)
-            compose.onNode(hasClickAction() and hasText(label))
-                .performScrollTo()
-                .assertIsDisplayed()
-                .performClick()
+            openMenuAction(label, expected)
             compose.runOnIdle {
                 assertEquals(expected, opened.get())
                 assertEquals(screenId, opened.get()!!.runtimeRouteContract().screenId)

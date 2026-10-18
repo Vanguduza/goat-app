@@ -82,33 +82,33 @@ class HomeUtilityRuntimeNavigationTest {
             }
         }
 
-        open("Today summary")
+        openFromMenu("Today summary")
         compose.onNodeWithTag("farm-screen:FOS-HOME-003").assertExists()
         compose.onNode(hasClickAction() and hasText("Open tasks")).assertExists()
         restoreHome()
 
-        open("Farm alerts")
+        openFromMenu("Farm alerts")
         compose.onNodeWithTag("farm-screen:FOS-HOME-004").assertExists()
         compose.onNodeWithText("• 1 overdue task(s)").assertExists()
         restoreHome()
 
-        open("Farm activity")
+        openFromMenu("Farm activity")
         compose.onNodeWithTag("farm-screen:FOS-HOME-005").assertExists()
         compose.onNodeWithText("Review kid feed").assertExists()
         compose.onNodeWithText("Check Nala condition").assertExists()
         restoreHome()
 
-        open("Notifications")
+        openFromMenu("Notifications")
         compose.onNodeWithTag("farm-screen:FOS-HOME-011").assertExists()
         compose.onNodeWithText("• 2 local change(s) waiting to sync").assertExists()
         restoreHome()
 
-        open("Quick capture")
+        openFromMenu("Quick capture")
         compose.onNodeWithTag("farm-screen:FOS-HOME-008").assertExists()
         compose.onNodeWithText("Record goat weight").assertExists()
         restoreHome()
 
-        open("Switch farm")
+        openFromMenu("Switch farm")
         compose.onNodeWithTag("farm-screen:FOS-HOME-010").assertExists()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-006").assertExists()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-006:option:${premier.farmId}").assertIsSelected()
@@ -120,6 +120,12 @@ class HomeUtilityRuntimeNavigationTest {
             .performClick()
         compose.runOnIdle { assertEquals(irene, switched) }
         compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertExists()
+    }
+
+    private fun openFromMenu(label: String) {
+        compose.onNode(hasClickAction() and hasText("More")).performClick()
+        compose.onNodeWithTag("farm-menu").assertExists()
+        compose.onNodeWithTag("farm-menu-action:$label").performScrollTo().performClick()
     }
 
     private fun open(label: String) {

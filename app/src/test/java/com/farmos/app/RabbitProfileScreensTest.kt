@@ -48,7 +48,8 @@ class RabbitProfileScreensTest {
                 )
             }
         }
-        compose.onNode(hasClickAction() and hasText("Open Breeding animals")).performScrollTo().performClick()
+        compose.onNodeWithTag("rabbit-section:Animals").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Breeding animals")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-RABBIT-002").assertExists()
     }
 

@@ -6,6 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +21,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmCanvas
 import com.farmos.core.design.AnimalFarmCarouselControls
@@ -97,7 +101,9 @@ private fun ManagementAttention(
     today: Long,
     onOpen: (FarmDestination) -> Unit,
 ) {
-    val kind = rankHomeAttention(summary.activeWithdrawals, summary.overdueTasks, summary.pendingSync)
+    // Sync is a device concern in More; the home priority belongs to farm work.
+    val kind = rankHomeAttention(summary.activeWithdrawals, summary.overdueTasks, pendingSync = 0)
+    if (kind == HomeAttentionKind.NONE) return
     val family = summary.tasks.firstOrNull { projectWorkerTaskStage(it.status, it.dueEpochDay, today) == WorkerTaskStage.DUE_NOW }
         ?.let { animalFarmFamilyFromKey(inferTaskSpeciesFamily(it.moduleCode)) }
     Column(Modifier.padding(horizontal = AnimalFarmHomeMetrics.pageInset)) {
@@ -124,18 +130,7 @@ private fun ManagementAttention(
                     family = family,
                 )
             }
-            HomeAttentionKind.PENDING_SYNC -> {
-                val (label, dest) = managementAttentionAction(kind)!!
-                AnimalFarmHeroCard(
-                    category = "Sync",
-                    title = "Waiting to sync",
-                    context = "${summary.pendingSync} local change(s) stored on this device",
-                    actionLabel = label,
-                    onAction = { onOpen(dest) },
-                    modifier = syncStatusEntryModifier(label),
-                )
-            }
-            HomeAttentionKind.NONE -> AnimalFarmEmptyState("No attention items on this device")
+            HomeAttentionKind.PENDING_SYNC, HomeAttentionKind.NONE -> Unit
         }
     }
 }
@@ -146,7 +141,7 @@ private fun ManagementSummaries(
     onOpen: (FarmDestination) -> Unit,
 ) {
     BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = AnimalFarmHomeMetrics.pageInset)) {
-        val stacked = maxWidth < 360.dp
+        val stacked = maxWidth < 300.dp || LocalDensity.current.fontScale >= 1.5f
         val work: @Composable (Modifier) -> Unit = { modifier ->
             AnimalFarmSummaryTile(
                 title = "Work",
@@ -166,9 +161,9 @@ private fun ManagementSummaries(
                 resources(Modifier.fillMaxWidth())
             }
         } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) {
-                work(Modifier.weight(1f))
-                resources(Modifier.weight(1f))
+            Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) {
+                work(Modifier.weight(1f).fillMaxHeight())
+                resources(Modifier.weight(1f).fillMaxHeight())
             }
         }
     }
@@ -191,8 +186,9 @@ private fun ManagementFamilies(
         verticalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.moduleGap),
     ) {
         Text("Modules", color = AnimalFarmTheme.colors.ink)
-        families.chunked(3).forEach { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.moduleGap)) {
+        val columns = if (LocalDensity.current.fontScale >= 1.5f) 2 else 3
+        families.chunked(columns).forEach { row ->
+            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.moduleGap)) {
                 row.forEach { (family, dest) ->
                     val subtitle = if (family == AnimalFarmFamily.GOAT) {
                         if (goatCount == 0) "No goats" else "$goatCount on this device"
@@ -203,19 +199,11 @@ private fun ManagementFamilies(
                         family = family,
                         subtitle = subtitle,
                         onClick = { onOpen(dest) },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                 }
-                repeat(3 - row.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
+                repeat(columns - row.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
             }
-        }
-        AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
-        managementHomeActions().forEach { (label, dest) ->
-            AnimalFarmQuickAction(
-                label,
-                { onOpen(dest) },
-                modifier = syncStatusEntryModifier(label),
-            )
         }
     }
 }
@@ -310,13 +298,13 @@ internal fun WorkerWorkBoardScreen(
                         )
                     }
                     Text("Quick record", color = AnimalFarmTheme.colors.ink)
-                    workerHomeQuickActions().forEach { (label, dest) ->
+                    workerHomeQuickActions().filterNot { it.second is FarmDestination.HomePanel }.forEach { (label, dest) ->
                         AnimalFarmQuickAction(label, { onOpen(dest) })
                     }
                     Text("Guides and areas", color = AnimalFarmTheme.colors.ink)
                     AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
                     AnimalFarmQuickAction("Open animals", onAnimals)
-                    workerHomeAreaActions().forEach { (label, dest) ->
+                    workerHomeAreaActions().filterNot { it.second == FarmDestination.Goat(com.farmos.feature.goat.GoatEntryPage.SYNC) }.forEach { (label, dest) ->
                         AnimalFarmQuickAction(
                             label,
                             { onOpen(dest) },
@@ -364,12 +352,12 @@ internal fun SpecialistRoleShell(
                 AnimalFarmSummaryTile(
                     title = "Today",
                     value = "${summary.openTasks} open tasks",
-                    detail = "${summary.activeWithdrawals} withdrawal(s) · ${summary.pendingSync} waiting to sync",
+                    detail = "${summary.activeWithdrawals} withdrawal(s)",
                     onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
                     lime = true,
                 )
                 AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
-                actions.forEach { (label, dest) ->
+                actions.filterNot { it.second is FarmDestination.HomePanel || it.second == FarmDestination.Goat(com.farmos.feature.goat.GoatEntryPage.SYNC) }.forEach { (label, dest) ->
                     AnimalFarmQuickAction(
                         label,
                         { onOpen(dest) },

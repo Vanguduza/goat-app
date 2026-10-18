@@ -47,20 +47,26 @@ class RabbitRuntimeNavigationTest {
         }
 
         val routes = listOf(
-            "Open Breeding animals" to "FOS-RABBIT-002",
-            "Open Register rabbit" to "FOS-RABBIT-005",
-            "Open Cages & nest boxes" to "FOS-RABBIT-006",
-            "Open Breeding wave" to "FOS-RABBIT-009",
-            "Open Palpation" to "FOS-RABBIT-011",
-            "Open Kindling" to "FOS-RABBIT-017",
-            "Open Foster kits" to "FOS-RABBIT-020",
-            "Open Weaning" to "FOS-RABBIT-022",
-            "Open Mating outcome" to "FOS-RABBIT-012",
-            "Open Nest-box schedule" to "FOS-RABBIT-013",
-            "Open GI-stasis red flag" to "FOS-RABBIT-034",
+            "Breeding animals" to "FOS-RABBIT-002",
+            "Register rabbit" to "FOS-RABBIT-005",
+            "Cages & nest boxes" to "FOS-RABBIT-006",
+            "Breeding wave" to "FOS-RABBIT-009",
+            "Palpation" to "FOS-RABBIT-011",
+            "Kindling" to "FOS-RABBIT-017",
+            "Foster kits" to "FOS-RABBIT-020",
+            "Weaning" to "FOS-RABBIT-022",
+            "Mating outcome" to "FOS-RABBIT-012",
+            "Nest-box schedule" to "FOS-RABBIT-013",
+            "GI-stasis red flag" to "FOS-RABBIT-034",
         )
 
         routes.forEach { (action, screenId) ->
+            val section = when (action) {
+                "Breeding animals", "Register rabbit", "GI-stasis red flag" -> "Animals"
+                "Cages & nest boxes", "Nest-box schedule" -> "Housing"
+                else -> "Breeding"
+            }
+            compose.onNodeWithTag("rabbit-section:$section").performScrollTo().performClick()
             compose.onNode(hasClickAction() and hasText(action))
                 .performScrollTo()
                 .performClick()

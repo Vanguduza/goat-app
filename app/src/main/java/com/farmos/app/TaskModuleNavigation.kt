@@ -91,10 +91,10 @@ internal fun TaskModuleNavigator(
         onEndSeries = actions.endSeries, repeatHorizonDays = planning?.let { TaskPlanning.HORIZON_DAYS },
         extraActions = {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(FosDimens.Grid)) {
-                androidx.compose.material3.TextButton(onClick = { originPage = "protocol" }, modifier = Modifier.weight(1f)) {
+                com.farmos.core.design.FarmActionButton(onClick = { originPage = "protocol" }, modifier = Modifier.weight(1f)) {
                     androidx.compose.material3.Text("From protocols")
                 }
-                androidx.compose.material3.TextButton(onClick = { originPage = "lifecycle" }, modifier = Modifier.weight(1f)) {
+                com.farmos.core.design.FarmActionButton(onClick = { originPage = "lifecycle" }, modifier = Modifier.weight(1f)) {
                     androidx.compose.material3.Text("From lifecycle")
                 }
             }

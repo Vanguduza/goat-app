@@ -333,7 +333,7 @@ private fun SheepNav(
     label: String,
     onClick: () -> Unit,
 ) {
-    TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) { Text(label) }
+    com.farmos.core.design.FarmActionButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) { Text(label) }
 }
 
 @Composable

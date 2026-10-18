@@ -372,12 +372,12 @@ private fun GoatDashboardScreen(
             FarmIllustratedSectionSurface {
                 Text(state.syncMessage, style = MaterialTheme.typography.bodyMedium)
                 Text("${state.pendingSyncCount} local change(s) waiting", style = MaterialTheme.typography.labelMedium)
-                TextButton(onClick = { onOpen(GoatPage.SYNC) }, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Open sync status") }
+                com.farmos.core.design.FarmActionButton(onClick = { onOpen(GoatPage.SYNC) }, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Open sync status") }
             }
 
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = onBackToFarm, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Farm home") }
+                com.farmos.core.design.FarmActionButton(onClick = onBackToFarm, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Farm home") }
                 TextButton(onClick = onSignOut, modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)) { Text("Sign out") }
             }
         }
@@ -390,10 +390,11 @@ private fun GoatDashboardAction(
     subtitle: String,
     onClick: () -> Unit,
 ) {
-    FarmIllustratedSectionSurface(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
+    com.farmos.core.design.AnimalFarmQuickAction(
+        label = if (subtitle.contains("not available")) "$title · unavailable" else title,
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable

@@ -36,8 +36,6 @@ enum class FarmModule {
     GENETICS, CAPACITY, ANALYTICS, SIMULATION, AI,
 }
 
-private data class HomeModuleCard(val module: FarmModule, val title: String, val description: String)
-
 /** FOS-HOME-001 — general farm home fallback when role is unknown. */
 @Composable
 internal fun FarmHomeScreen(
@@ -57,6 +55,10 @@ internal fun FarmHomeScreen(
             onBack = { destination = "home" },
             onSignOut = onSignOut,
             onSettings = { onOpen(FarmDestination.Settings) },
+            onNavigate = onOpen,
+            summary = summary,
+            farmName = farmName,
+            onAnimals = { destination = "animals" },
         )
         return
     }
@@ -87,7 +89,7 @@ internal fun FarmHomeScreen(
                 AnimalFarmSummaryTile(
                     title = "Today",
                     value = "${summary.openTasks} open tasks",
-                    detail = "${summary.activeWithdrawals} withdrawal(s) · ${summary.pendingSync} waiting to sync",
+                    detail = "${summary.activeWithdrawals} withdrawal(s)",
                     onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
                     lime = true,
                 )
@@ -107,14 +109,6 @@ internal fun FarmHomeScreen(
                         if (pair.size == 1) androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
                     }
                 }
-                AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
-                generalHomeActions().forEach { (label, dest) ->
-                    AnimalFarmQuickAction(
-                        label,
-                        { onOpen(dest) },
-                        modifier = syncStatusEntryModifier(label),
-                    )
-                }
             }
         }
         AnimalFarmHomeBottomBar(
@@ -124,46 +118,4 @@ internal fun FarmHomeScreen(
             onMore = { destination = "more" },
         )
     }
-}
-
-@Composable
-internal fun FarmMoreScreen(
-    onOpen: (FarmModule) -> Unit,
-    onBack: () -> Unit,
-    onSignOut: () -> Unit,
-    onSettings: (() -> Unit)? = null,
-) {
-    FarmBackHandler(onBack)
-    var showSignOutConfirmation by remember { mutableStateOf(false) }
-    val cards = listOf(
-        HomeModuleCard(FarmModule.INVENTORY, "Inventory", "Stock, lots, FEFO and reorder"),
-        HomeModuleCard(FarmModule.SALES, "Sales", "Customers, animals, produce and orders"),
-        HomeModuleCard(FarmModule.PROCUREMENT, "Procurement", "Suppliers, purchases and receiving"),
-        HomeModuleCard(FarmModule.MONEY, "Finance", "Income and expenses on this device"),
-        HomeModuleCard(FarmModule.PASTURE, "Pasture", "Paddocks, rotations, condition and capacity"),
-        HomeModuleCard(FarmModule.LABOUR, "Labour", "People, assignments and coverage"),
-        HomeModuleCard(FarmModule.ASSETS, "Assets", "Equipment, maintenance and breakdowns"),
-    )
-    AnimalFarmCanvas {
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(AnimalFarmHomeMetrics.pageInset),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            AnimalFarmModuleHeader("More", "Farm records and tools")
-            cards.forEach { card ->
-                AnimalFarmQuickAction(card.title, { onOpen(card.module) })
-            }
-            onSettings?.let { AnimalFarmQuickAction("Farm settings", it) }
-            TextButton(onClick = onBack) { Text("Farm home") }
-            TextButton(onClick = { showSignOutConfirmation = true }) { Text("Sign out") }
-        }
-    }
-    SignOutConfirmationDialog(
-        visible = showSignOutConfirmation,
-        onDismiss = { showSignOutConfirmation = false },
-        onConfirm = {
-            showSignOutConfirmation = false
-            onSignOut()
-        },
-    )
 }

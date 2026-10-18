@@ -5,6 +5,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -67,7 +68,7 @@ class RabbitCaptureOwnerTest {
     fun palpationTakesItsWaveFromThisFarmsWaves() {
         var syncRequests = 0
         render { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Open Palpation")).performScrollTo().performClick()
+        compose.onNodeWithTag("rabbit-action:PALPATION").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-RABBIT-011").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-wave-selector:wave:option:wave-sept").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("rabbit-wave-selector:wave:option:wave-other").assertDoesNotExist()
@@ -86,7 +87,8 @@ class RabbitCaptureOwnerTest {
     fun nestBoxCycleOffersOnlyTheGovernedNextStatuses() {
         var syncRequests = 0
         render { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Open Cages & nest boxes")).performScrollTo().performClick()
+        compose.onNodeWithTag("rabbit-section:Housing").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Cages & nest boxes")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-RABBIT-006").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-nest-box-selector:option:box-7").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("rabbit-nest-status-selector").assertDoesNotExist()
@@ -116,6 +118,11 @@ class RabbitCaptureOwnerTest {
                     onBack = {},
                 )
             }
+        }
+        // Wait for the real initial projection before scrolling; the loaded overview
+        // changes the action positions while Room is still completing its first read.
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Ready nests").fetchSemanticsNodes().isNotEmpty()
         }
     }
 

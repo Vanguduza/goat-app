@@ -245,12 +245,13 @@ internal fun RoleAwareFarmHomeScreen(
             surface = surface,
             summary = summary,
             onOpen = openDestination,
-            onBack = { homeSurface = null },
+            onBack = { homeSurface = null; destination = "home" },
             memberships = memberships,
             farmNames = farmNames,
             currentFarmId = currentFarmId,
             onSwitchFarm = { selected ->
                 homeSurface = null
+                destination = "home"
                 onSwitchFarm(selected)
             },
         )
@@ -266,6 +267,11 @@ internal fun RoleAwareFarmHomeScreen(
             onBack = { destination = "home" },
             onSignOut = onSignOut,
             onSettings = { onOpen(FarmDestination.Settings) },
+            onNavigate = openDestination,
+            persona = resolveFarmHomePersona(role),
+            summary = summary,
+            farmName = farmName,
+            onAnimals = { destination = "animals" },
         )
         return
     }

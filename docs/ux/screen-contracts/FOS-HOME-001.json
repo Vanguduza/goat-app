@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-HOME-001",
+  "registry_name": "Farm Home",
+  "feature_ids": [
+    "FTR-HOME-001"
+  ],
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "user_job": "See current farm work and open a species module without scrolling past device-sync or a feature catalogue.",
+  "personas_and_grants": [
+    "Active local farm session; preserve each existing persona's destination and command grants"
+  ],
+  "scope": {
+    "farm_source": "Active authenticated local farm session",
+    "species_kind": "Existing route's explicit species/module; N/A for menu chrome",
+    "subject": "Existing selected record/route; menu never fabricates a subject",
+    "sensitive_fields": []
+  },
+  "navigation": {
+    "route": "Home; More is a secondary navigation state of this home",
+    "entry_points": [
+      "Existing home/module navigation"
+    ],
+    "arguments": [
+      "Unchanged existing FarmDestination/host arguments"
+    ],
+    "deep_link_authorization": "Unchanged native farm/record authorization; no new deep link or grant",
+    "back_and_draft_behavior": "Existing navigation callbacks; shared page back control is now visible before content; no business draft ownership moves",
+    "aliases": [
+      "FOS-HOME-012-A",
+      "FOS-HOME-012-B"
+    ]
+  },
+  "design": {
+    "recipe": "P02",
+    "reference_ids": [
+      "LOCK-MANAGEMENT-A"
+    ],
+    "native_golden_family": "CANDIDATE; protected references unchanged",
+    "token_version": "Existing AnimalFarmThemeTokens.kt and AnimalFarmHomeMetrics",
+    "ordered_sections": [
+      "Farm and date",
+      "Real health/work attention only when present",
+      "Work and resource summaries",
+      "Approved species launchers",
+      "Stable bottom navigation with Theme-only gear"
+    ],
+    "shared_components": [
+      "AnimalFarmCanvas",
+      "AnimalFarmContextHeader",
+      "AnimalFarmHeroCard",
+      "AnimalFarmSummaryTile",
+      "AnimalFarmFamilyLauncher",
+      "AnimalFarmHomeBottomBar",
+      "FarmMoreScreen"
+    ],
+    "illustration_use": "Original approved family assets only where already applicable",
+    "copy": {
+      "policy": "Concise action labels; preserve identity, units, safety and truthful receipt text"
+    },
+    "adaptive_layout": {
+      "phone": "Scrollable content within existing insets; compact controls use governed 48dp targets",
+      "tablet": "Existing responsive layout preserved; no separate data/command model",
+      "large_text": "Wrap labels and chips, retain user font scale; summaries stack at large text",
+      "outdoor": "Existing outdoor tokens and 64dp minimum controls"
+    }
+  },
+  "fields": [],
+  "queries": [
+    {
+      "name": "FarmHomeSummary loaded from the active farm's Room and operation journal",
+      "read_model": "FarmHomeSummary loaded from the active farm's Room and operation journal",
+      "loading_empty_error": "Retain existing loading/error/empty contract; sync unknown is not zero",
+      "freshness": "Local host projection; no invented remote freshness",
+      "offline_source": "Room/SQLite and immutable local operation journal"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Real attention opens its owning task/withdrawal route",
+      "intent": "Existing navigation or explicit user selection",
+      "permission": "Unchanged existing destination/command authorization",
+      "command_or_destination": "Real attention opens its owning task/withdrawal route",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Navigation or existing governed command only"
+      ],
+      "idempotency": "Navigation is read-only; writes retain their existing operation identity",
+      "success_receipt": "Existing owning screen's truthful local receipt",
+      "failure_and_recovery": "Retain existing error and retry route"
+    },
+    {
+      "label": "Animal families open existing species modules",
+      "intent": "Existing navigation or explicit user selection",
+      "permission": "Unchanged existing destination/command authorization",
+      "command_or_destination": "Animal families open existing species modules",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Navigation or existing governed command only"
+      ],
+      "idempotency": "Navigation is read-only; writes retain their existing operation identity",
+      "success_receipt": "Existing owning screen's truthful local receipt",
+      "failure_and_recovery": "Retain existing error and retry route"
+    },
+    {
+      "label": "More opens persona-derived grouped utilities, farm operations, business and insights",
+      "intent": "Existing navigation or explicit user selection",
+      "permission": "Unchanged existing destination/command authorization",
+      "command_or_destination": "More opens persona-derived grouped utilities, farm operations, business and insights",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Navigation or existing governed command only"
+      ],
+      "idempotency": "Navigation is read-only; writes retain their existing operation identity",
+      "success_receipt": "Existing owning screen's truthful local receipt",
+      "failure_and_recovery": "Retain existing error and retry route"
+    },
+    {
+      "label": "Theme gear opens Theme only",
+      "intent": "Existing navigation or explicit user selection",
+      "permission": "Unchanged existing destination/command authorization",
+      "command_or_destination": "Theme gear opens Theme only",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Navigation or existing governed command only"
+      ],
+      "idempotency": "Navigation is read-only; writes retain their existing operation identity",
+      "success_receipt": "Existing owning screen's truthful local receipt",
+      "failure_and_recovery": "Retain existing error and retry route"
+    }
+  ],
+  "state_matrix": [
+    {
+      "state": "empty",
+      "fixture": "No applicable farm records",
+      "expected_ui": "Truthful empty state with working relevant controls",
+      "test_id": "HomeMenuAndTaskUxTest"
+    },
+    {
+      "state": "content",
+      "fixture": "Explicit deterministic test records",
+      "expected_ui": "Data-backed content and exact destination callbacks",
+      "test_id": "HomeMenuAndTaskUxTest"
+    }
+  ],
+  "not_applicable_states": [
+    {
+      "state": "schema migration / new business mutation",
+      "reason": "This contract changes presentation/navigation; existing query and command authorities retained"
+    }
+  ],
+  "accessibility_tests": [
+    "HomeNavigationLayoutTest",
+    "Native light/dark/outdoor, narrow/large text capture review; acceptance remains pending until evidence recorded"
+  ],
+  "functional_tests": [
+    "HomeMenuAndTaskUxTest",
+    "FarmRuntimeNavigationTest",
+    "HomeNavigationLayoutTest",
+    "HomeUtilityRuntimeNavigationTest"
+  ],
+  "linked_routes": [],
+  "guide_and_resource_links": [
+    "docs/ux/animal-farm-visual-lock/PAGE-PATTERNS.md",
+    "docs/reviews/2026-10-18-ux-repair.md"
+  ],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": "docs/reviews/2026-10-18-ux-repair.md"
+}

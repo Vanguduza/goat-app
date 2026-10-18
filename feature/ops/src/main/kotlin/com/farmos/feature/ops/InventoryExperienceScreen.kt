@@ -7,7 +7,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -120,33 +120,33 @@ private fun InventoryDashboard(
     FarmOperationalPage("FOS-INV-001", "Inventory", "On-hand lots, dates and reorder points.", FarmVisualClass.I2, onBack) {
         FarmOperationalSection("Stock overview") {
             Text("${rows.size} inventory item(s)", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            TextButton(onClick = { onOpen(InventoryPage.ITEMS) }) { Text("Open inventory list") }
+            FarmActionButton(onClick = { onOpen(InventoryPage.ITEMS) }) { Text("Open inventory list") }
         }
         FarmOperationalSection("Stock movement") {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Button(onClick = { onOpen(InventoryPage.RECEIVE) }) { Text("Receive") }
                 Button(onClick = { onOpen(InventoryPage.ISSUE) }) { Text("Issue") }
             }
-            TextButton(onClick = { onOpen(InventoryPage.CREATE) }) { Text("Create inventory item") }
+            FarmActionButton(onClick = { onOpen(InventoryPage.CREATE) }) { Text("Create inventory item") }
         }
         FarmOperationalSection("Dated lots and FEFO") {
-            TextButton(onClick = { onOpen(InventoryPage.RECEIVE_LOT) }) { Text("Receive dated lot") }
-            TextButton(onClick = { onOpen(InventoryPage.FEFO_ISSUE) }) { Text("Issue oldest-expiry lot") }
+            FarmActionButton(onClick = { onOpen(InventoryPage.RECEIVE_LOT) }) { Text("Receive dated lot") }
+            FarmActionButton(onClick = { onOpen(InventoryPage.FEFO_ISSUE) }) { Text("Issue oldest-expiry lot") }
         }
         FarmOperationalSection("Stock records") {
-            TextButton(onClick = { onOpen(InventoryPage.SEARCH) }) { Text("Search inventory") }
-            TextButton(onClick = { onOpen(InventoryPage.LOW_STOCK) }) { Text("Low stock") }
-            TextButton(onClick = { onOpen(InventoryPage.EXPIRY_QUEUE) }) { Text("Expiry queue") }
-            TextButton(onClick = { onOpen(InventoryPage.MOVEMENTS) }) { Text("Movement history") }
+            FarmActionButton(onClick = { onOpen(InventoryPage.SEARCH) }) { Text("Search inventory") }
+            FarmActionButton(onClick = { onOpen(InventoryPage.LOW_STOCK) }) { Text("Low stock") }
+            FarmActionButton(onClick = { onOpen(InventoryPage.EXPIRY_QUEUE) }) { Text("Expiry queue") }
+            FarmActionButton(onClick = { onOpen(InventoryPage.MOVEMENTS) }) { Text("Movement history") }
         }
         onOpenStockCount?.let { open ->
             FarmOperationalSection("Stock count") {
-                TextButton(onClick = open) { Text("Count stock and review differences") }
+                FarmActionButton(onClick = open) { Text("Count stock and review differences") }
             }
         }
         FarmOperationalSection("Reorder") {
-            TextButton(onClick = { onOpen(InventoryPage.REORDER_RULE) }) { Text("Set reorder point") }
-            TextButton(onClick = { onOpen(InventoryPage.REORDER_ALERT) }) { Text("Record reorder alert") }
+            FarmActionButton(onClick = { onOpen(InventoryPage.REORDER_RULE) }) { Text("Set reorder point") }
+            FarmActionButton(onClick = { onOpen(InventoryPage.REORDER_ALERT) }) { Text("Record reorder alert") }
         }
         extraActions()
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }

@@ -45,9 +45,12 @@ class RabbitRecordRuntimeNavigationTest {
     fun rabbitRecordPagesTraverseFromTheDashboardAndRestoreIt() {
         render(records())
         traverse("Cage occupancy", "FOS-RABBIT-008") {
-            compose.onNodeWithText("Cage A1 · capacity 12 does").assertExists()
-            compose.onNodeWithText("1 of 2 nest boxes available · 2 waves · latest 10 does mated 2026-09-10").assertExists()
-            compose.onNodeWithTag("rabbit-cage:c2").assertExists()
+            compose.onNodeWithTag("rabbit-cage-tile:c1").assertExists()
+            compose.onNodeWithText("Capacity: 12 does").assertExists()
+            compose.onNodeWithTag("rabbit-wave-plan:w1").assertExists()
+            compose.onNodeWithTag("rabbit-wave-plan:w2").assertExists()
+            compose.onNodeWithTag("rabbit-cage-tile:c2").performScrollTo().performClick()
+            compose.onNodeWithText("No wave plans linked to this cage.").assertExists()
         }
         traverse("Cage detail", "FOS-RABBIT-007") {
             compose.onNodeWithTag("rabbit-cage-box:b2").assertExists()
@@ -65,6 +68,7 @@ class RabbitRecordRuntimeNavigationTest {
         }
         traverse("Litter profiles", "FOS-RABBIT-018") {
             compose.onNodeWithTag("rabbit-option:w0").performScrollTo().performClick()
+            compose.onNodeWithText("Stored dates").performScrollTo().performClick()
             compose.onNodeWithText("2026-07-31").assertExists()
             compose.onNodeWithText("8 live · 1 dead").assertExists()
             compose.onNodeWithTag("rabbit-litter-event:f1:out").assertExists()
@@ -115,7 +119,8 @@ class RabbitRecordRuntimeNavigationTest {
     fun rabbitCountIsExhaustiveAndTheListSaysWhenBounded() {
         render(RabbitRecords(), does = listOf("R-1 · doe · active"), rabbitCount = 240)
         compose.onNodeWithText("240").assertExists()
-        compose.onNode(hasClickAction() and hasText("Open Breeding animals")).performScrollTo().performClick()
+        compose.onNodeWithTag("rabbit-section:Animals").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Breeding animals")).performScrollTo().performClick()
         compose.onNodeWithText("Showing the first 1 of 240 rabbits by tag.").assertExists()
     }
 
@@ -123,7 +128,7 @@ class RabbitRecordRuntimeNavigationTest {
     fun emptyRecordsSayNothingIsRecorded() {
         render(RabbitRecords())
         traverse("Cage occupancy", "FOS-RABBIT-008") {
-            compose.onNodeWithText("No cages on this device.").assertExists()
+            compose.onNodeWithText("Add a cage to begin its rotation plan.").assertExists()
         }
         traverse("Kindling due", "FOS-RABBIT-016") {
             compose.onNodeWithText("No waves awaiting a kindling record on this device.").assertExists()
@@ -137,11 +142,17 @@ class RabbitRecordRuntimeNavigationTest {
     }
 
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText("Open $label")).performScrollTo().performClick()
+        val section = when (label) {
+            "Cage occupancy", "Cage detail" -> "Housing"
+            "Kit census" -> "Records"
+            else -> "Breeding"
+        }
+        compose.onNodeWithTag("rabbit-section:$section").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         assertions()
         compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
-        compose.onNode(hasClickAction() and hasText("Open $label")).assertExists()
+        compose.onNode(hasClickAction() and hasText(label)).assertExists()
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
 

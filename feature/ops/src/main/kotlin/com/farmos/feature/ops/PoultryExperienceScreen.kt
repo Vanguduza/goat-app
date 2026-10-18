@@ -202,11 +202,10 @@ private fun PoultryAction(
     subtitle: String,
     onClick: () -> Unit,
 ) {
-    FarmIllustratedSectionSurface(Modifier.fillMaxWidth()) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        TextButton(onClick = onClick) { Text("Open $title") }
-    }
+    com.farmos.core.design.AnimalFarmQuickAction(
+        label = title,
+        onClick = onClick,
+    )
 }
 
 @Composable

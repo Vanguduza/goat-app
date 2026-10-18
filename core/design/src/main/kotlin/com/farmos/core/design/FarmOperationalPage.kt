@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -43,14 +45,17 @@ fun FarmOperationalPage(
             Column(
                 Modifier
                     .fillMaxSize()
+                    .imePadding()
+                    .navigationBarsPadding()
                     .verticalScroll(rememberScrollState())
                     .padding(FosDimens.ScreenMargin),
                 verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
             ) {
+                onBack?.let { back -> FarmBackButton(backLabel, back) }
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text("Animal Farm", style = MaterialTheme.typography.labelMedium, color = AnimalFarmTheme.colors.mutedInk)
                     Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold)
-                    Text(
+                    if (subtitle.isNotBlank()) Text(
                         subtitle,
                         style = MaterialTheme.typography.bodyMedium,
                         color =
@@ -62,9 +67,6 @@ fun FarmOperationalPage(
                     )
                 }
                 content()
-                onBack?.let { back ->
-                    TextButton(onClick = back) { Text(backLabel) }
-                }
             }
         }
     }

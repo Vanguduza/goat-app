@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -340,38 +341,38 @@ private fun HealthDashboard(
             }
         }
         FarmOperationalSection("Observe and review") {
-            TextButton(onClick = { onOpen(HealthPage.OBSERVATIONS) }) { Text("Observation list") }
+            FarmActionButton(onClick = { onOpen(HealthPage.OBSERVATIONS) }) { Text("Observation list") }
             Button(onClick = { onOpen(HealthPage.RECORD_OBSERVATION) }) { Text("Record observation") }
-            TextButton(onClick = { onOpen(HealthPage.REFERENCES) }) { Text("Reference library") }
-            TextButton(onClick = { onOpen(HealthPage.EMERGENCY) }) { Text("Emergency / red flag") }
+            FarmActionButton(onClick = { onOpen(HealthPage.REFERENCES) }) { Text("Reference library") }
+            FarmActionButton(onClick = { onOpen(HealthPage.EMERGENCY) }) { Text("Emergency / red flag") }
             Button(onClick = { onOpen(HealthPage.TODAY_ACTIONS) }) { Text("Today health actions") }
         }
         FarmOperationalSection(
             "Clinical records",
             "Treatment capture requires a vet-approved formulary item. Farm OS does not prescribe a dose.",
         ) {
-            TextButton(onClick = { onOpen(HealthPage.FORMULARY) }) { Text("Formulary") }
-            TextButton(onClick = { onOpen(HealthPage.TREATMENT) }) { Text("Record treatment") }
-            TextButton(onClick = { onOpen(HealthPage.WITHDRAWALS) }) { Text("Withdrawal windows") }
-            TextButton(onClick = { onOpen(HealthPage.VET_VISIT) }) { Text("Record vet visit") }
-            TextButton(onClick = { onOpen(HealthPage.LAB_RESULT) }) { Text("Record lab result") }
+            FarmActionButton(onClick = { onOpen(HealthPage.FORMULARY) }) { Text("Formulary") }
+            FarmActionButton(onClick = { onOpen(HealthPage.TREATMENT) }) { Text("Record treatment") }
+            FarmActionButton(onClick = { onOpen(HealthPage.WITHDRAWALS) }) { Text("Withdrawal windows") }
+            FarmActionButton(onClick = { onOpen(HealthPage.VET_VISIT) }) { Text("Record vet visit") }
+            FarmActionButton(onClick = { onOpen(HealthPage.LAB_RESULT) }) { Text("Record lab result") }
         }
         FarmOperationalSection("Health records", "Recorded history on this device. Records only; no diagnosis or dosing.") {
-            TextButton(onClick = { onOpen(HealthPage.TREATMENT_RECORDS) }) { Text("Treatment records") }
-            TextButton(onClick = { onOpen(HealthPage.VACCINATION_SCHEDULE) }) { Text("Vaccination schedule") }
-            TextButton(onClick = { onOpen(HealthPage.VET_VISITS) }) { Text("Vet visits") }
-            TextButton(onClick = { onOpen(HealthPage.LAB_RESULTS) }) { Text("Lab results") }
-            TextButton(onClick = { onOpen(HealthPage.FORMULARY_ITEM) }) { Text("Formulary items") }
-            TextButton(onClick = { onOpen(HealthPage.PROTOCOL_PACK_DETAIL) }) { Text("Protocol pack detail") }
-            TextButton(onClick = { onOpen(HealthPage.TIMELINE) }) { Text("Health timeline") }
-            TextButton(onClick = { onOpen(HealthPage.HEALTH_REPORT) }) { Text("Health report") }
+            FarmActionButton(onClick = { onOpen(HealthPage.TREATMENT_RECORDS) }) { Text("Treatment records") }
+            FarmActionButton(onClick = { onOpen(HealthPage.VACCINATION_SCHEDULE) }) { Text("Vaccination schedule") }
+            FarmActionButton(onClick = { onOpen(HealthPage.VET_VISITS) }) { Text("Vet visits") }
+            FarmActionButton(onClick = { onOpen(HealthPage.LAB_RESULTS) }) { Text("Lab results") }
+            FarmActionButton(onClick = { onOpen(HealthPage.FORMULARY_ITEM) }) { Text("Formulary items") }
+            FarmActionButton(onClick = { onOpen(HealthPage.PROTOCOL_PACK_DETAIL) }) { Text("Protocol pack detail") }
+            FarmActionButton(onClick = { onOpen(HealthPage.TIMELINE) }) { Text("Health timeline") }
+            FarmActionButton(onClick = { onOpen(HealthPage.HEALTH_REPORT) }) { Text("Health report") }
         }
         FarmOperationalSection("Protocol packs") {
             Text("${packs.size} protocol pack(s) on this device")
-            TextButton(onClick = { onOpen(HealthPage.PROTOCOLS) }) { Text("View protocol packs") }
-            TextButton(onClick = { onOpen(HealthPage.ACCEPT_PROTOCOL) }) { Text("Accept protocol pack") }
-            TextButton(onClick = { onOpen(HealthPage.EDIT_PROTOCOL) }) { Text("Add protocol slot") }
-            TextButton(onClick = { onOpen(HealthPage.APPLY_PROTOCOL) }) { Text("Apply protocol pack") }
+            FarmActionButton(onClick = { onOpen(HealthPage.PROTOCOLS) }) { Text("View protocol packs") }
+            FarmActionButton(onClick = { onOpen(HealthPage.ACCEPT_PROTOCOL) }) { Text("Accept protocol pack") }
+            FarmActionButton(onClick = { onOpen(HealthPage.EDIT_PROTOCOL) }) { Text("Add protocol slot") }
+            FarmActionButton(onClick = { onOpen(HealthPage.APPLY_PROTOCOL) }) { Text("Apply protocol pack") }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
@@ -920,7 +921,7 @@ private fun VaccinationScheduleScreen(
                 Text("No review candidates on this device")
             } else {
                 dueCandidates.forEach { candidate ->
-                    TextButton(onClick = onCapture, modifier = Modifier.fillMaxWidth()) {
+                    FarmActionButton(onClick = onCapture, modifier = Modifier.fillMaxWidth()) {
                         Text("${candidate.label} — ${candidate.reason}")
                     }
                 }
@@ -932,7 +933,7 @@ private fun VaccinationScheduleScreen(
                 Text("No vaccinations recorded on this device")
             } else {
                 vaccinations.forEach { record ->
-                    TextButton(onClick = { onOpenDetail(record.id) }, modifier = Modifier.fillMaxWidth()) {
+                    FarmActionButton(onClick = { onOpenDetail(record.id) }, modifier = Modifier.fillMaxWidth()) {
                         Text("${record.subjectLabel} · ${record.formularyLabel} · ${LocalDate.ofEpochDay(record.occurredEpochDay)}")
                     }
                 }
@@ -1085,7 +1086,7 @@ private fun TodayHealthActionsScreen(
                 }
                 if (dueCandidates.size > 20) Text("…and ${dueCandidates.size - 20} more on the schedule")
             }
-            TextButton(onClick = onOpenSchedule) { Text("Open vaccination schedule") }
+            FarmActionButton(onClick = onOpenSchedule) { Text("Open vaccination schedule") }
             Button(onClick = onCapture, modifier = Modifier.fillMaxWidth()) { Text("Record vaccination") }
         }
         FarmOperationalSection("Pending health work") {

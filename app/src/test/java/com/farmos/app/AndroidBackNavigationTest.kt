@@ -128,10 +128,10 @@ class AndroidBackNavigationTest {
         compose.onNodeWithTag("farm-screen:FOS-HOME-002").assertDoesNotExist()
 
         compose.onNode(hasClickAction() and hasText("More")).performClick()
-        compose.onNodeWithText("Farm records and tools").assertIsDisplayed()
+        compose.onNodeWithTag("farm-menu").assertIsDisplayed()
         back()
         compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertIsDisplayed()
-        compose.onNodeWithText("Farm records and tools").assertDoesNotExist()
+        compose.onNodeWithTag("farm-menu").assertDoesNotExist()
         compose.runOnIdle {
             assertEquals(0, signOuts)
             assertEquals(0, opened)
