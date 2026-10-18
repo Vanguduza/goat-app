@@ -167,12 +167,12 @@ class PoultryRecordRuntimeNavigationTest {
     }
 
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText("Open $label")).performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         compose.waitForIdle()
         assertions()
         compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
-        compose.onNode(hasClickAction() and hasText("Open $label")).assertExists()
+        compose.onNode(hasClickAction() and hasText(label)).assertExists()
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
 

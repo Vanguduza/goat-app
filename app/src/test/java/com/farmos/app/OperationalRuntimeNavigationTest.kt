@@ -162,17 +162,17 @@ class OperationalRuntimeNavigationTest {
         }
         exercise(
             listOf(
-                "Open Enabled kinds" to "FOS-POULTRY-002",
-                "Open Houses" to "FOS-POULTRY-006",
-                "Open Flocks" to "FOS-POULTRY-004",
-                "Open Place flock" to "FOS-POULTRY-008",
-                "Open Daily flock record" to "FOS-POULTRY-009",
-                "Open Hatchery" to "FOS-POULTRY-017",
-                "Open Set eggs" to "FOS-POULTRY-018",
-                "Open Candling" to "FOS-POULTRY-020",
-                "Open Hatch result" to "FOS-POULTRY-021",
-                "Open Vaccination" to "FOS-POULTRY-014",
-                "Open Biosecurity" to "FOS-POULTRY-016",
+                "Enabled kinds" to "FOS-POULTRY-002",
+                "Houses" to "FOS-POULTRY-006",
+                "Flocks" to "FOS-POULTRY-004",
+                "Place flock" to "FOS-POULTRY-008",
+                "Daily flock record" to "FOS-POULTRY-009",
+                "Hatchery" to "FOS-POULTRY-017",
+                "Set eggs" to "FOS-POULTRY-018",
+                "Candling" to "FOS-POULTRY-020",
+                "Hatch result" to "FOS-POULTRY-021",
+                "Vaccination" to "FOS-POULTRY-014",
+                "Biosecurity" to "FOS-POULTRY-016",
             ),
         )
     }

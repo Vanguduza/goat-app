@@ -80,7 +80,7 @@ class PoultryCaptureOwnerTest {
     fun dailyFlockRecordTakesItsFlockFromThisFarmsPoultryGroups() {
         var syncRequests = 0
         render { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Open Daily flock record")).performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Daily flock record")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-POULTRY-009").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:grp-ewes").assertDoesNotExist()
@@ -104,7 +104,7 @@ class PoultryCaptureOwnerTest {
     fun placementTakesItsFlockAndHouseFromThisFarmsSelectors() {
         var syncRequests = 0
         render { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Open Place flock")).performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Place flock")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-POULTRY-008").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-007:option:house-a").fetchSemanticsNodes().isNotEmpty() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }
@@ -128,7 +128,7 @@ class PoultryCaptureOwnerTest {
     fun vaccinationOffersOnlyVetApprovedPoultryFormularyItems() {
         var syncRequests = 0
         render { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Open Vaccination")).performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Vaccination")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-POULTRY-014").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("poultry-formulary-selector:option:form-nd").fetchSemanticsNodes().isNotEmpty() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }
@@ -151,7 +151,7 @@ class PoultryCaptureOwnerTest {
     fun candlingOffersOnlyHatchesStillAtTheSetStage() {
         var syncRequests = 0
         render { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Open Candling")).performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Candling")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-POULTRY-020").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("poultry-hatch-selector:option:hatch-set").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("poultry-hatch-selector:option:hatch-candled").assertDoesNotExist()
@@ -172,7 +172,7 @@ class PoultryCaptureOwnerTest {
     fun biosecurityWalkCanNameAHouseWithoutAFlock() {
         var syncRequests = 0
         render { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Open Biosecurity")).performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Biosecurity")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-POULTRY-016").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-007:option:house-a").fetchSemanticsNodes().isNotEmpty() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }

@@ -67,10 +67,17 @@ class RabbitPedigreeScreensTest {
 
     private fun waitForOption(tag: String) = compose.waitUntil(10_000) { compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }
 
+    private fun openRecordsAction(label: String) {
+        waitForOption("rabbit-section:Records")
+        compose.onNodeWithTag("rabbit-section:Records").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+    }
+
+
     @Test
     fun aRabbitsSireIsLinkedFromTheWholeRabbitry() {
         render()
-        compose.onNode(hasClickAction() and hasText("Open Rabbit pedigree")).performScrollTo().performClick()
+        openRecordsAction("Rabbit pedigree")
         compose.onNodeWithTag("farm-screen:FOS-RABBIT-031").assertExists()
         waitForOption("farm-atom:FOS-ATOM-004:option:r1")
         compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:r1").performScrollTo().performClick()
@@ -86,7 +93,7 @@ class RabbitPedigreeScreensTest {
     @Test
     fun theKitsInbreedingShowsForADoeAndBuck() {
         render()
-        compose.onNode(hasClickAction() and hasText("Open Inbreeding check")).performScrollTo().performClick()
+        openRecordsAction("Inbreeding check")
         compose.onNodeWithTag("farm-screen:FOS-GEN-006").assertExists()
         compose.onNodeWithText("Choose a doe and a buck.").assertExists()
         waitForOption("farm-atom:FOS-ATOM-004:option:r1")
@@ -100,7 +107,7 @@ class RabbitPedigreeScreensTest {
     @Test
     fun bucksAreComparedSideBySideForADoeWithoutRanking() {
         render()
-        compose.onNode(hasClickAction() and hasText("Open Compare bucks")).performScrollTo().performClick()
+        openRecordsAction("Compare bucks")
         compose.onNodeWithTag("farm-screen:FOS-GEN-007").assertExists()
         compose.onNodeWithText("Choose a doe to compare bucks for.").assertExists()
         waitForOption("farm-atom:FOS-ATOM-004:option:r1")
