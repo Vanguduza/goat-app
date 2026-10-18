@@ -398,8 +398,8 @@
     },
     {
       "path": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
-      "sha256": "13dae4f17a94377dd1f09f796bd16b26a36f1e2951db6e17242b3fcee7ab6ed5",
-      "reviewed_source_commit": "6e70319c13aa79a6731f53bd11d95a44d173a75c",
+      "sha256": "fd0204f3c0a0915cdd0d9ad5621ba1a4a2e06a5ee76af8e4335f067c864ae00a",
+      "reviewed_source_commit": "555afc283cba673078a99b25230ee42258e42e06",
       "class_name": "com.farmos.app.AndroidBackNavigationTest",
       "cases": [
         {
@@ -601,8 +601,8 @@
     },
     {
       "path": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
-      "sha256": "9a66a528058d1025c0a3a1141c7ae2d5b86ab4e272b69adb5b9b8a7ae9a1954f",
-      "reviewed_source_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
+      "sha256": "f45edbc8044fd0b62fea50ad826bf9c2da613bb4a7166c898a73f8b2fbda3efc",
+      "reviewed_source_commit": "555afc283cba673078a99b25230ee42258e42e06",
       "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
       "cases": [
         {
@@ -852,13 +852,23 @@
           "method": "exactIdentifiersPrecedePartialMatchesAndDuplicateIdentifiersDoNotDuplicateAnimals",
           "execution_only_reason": "Room query ordering/deduplication only; no rendered journey.",
           "claims": []
+        },
+        {
+          "method": "speciesAndStatusFiltersFindEligibleTextAndIdentifiersBeyondTheFirstFifty",
+          "execution_only_reason": "Real Room eligibility, farm isolation and identifier matching beyond the display limit; execution only, no new route claim.",
+          "claims": []
+        },
+        {
+          "method": "manyMatchingAliasesCannotConsumeTheCanonicalAnimalResultWindow",
+          "execution_only_reason": "Real Room canonical-animal result window and alias deduplication; execution only, no new route claim.",
+          "claims": []
         }
       ]
     },
     {
       "path": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
-      "sha256": "a2b445b852d0f3514730177839115b73b466d92b7bd3ca1213119e3baccf650f",
-      "reviewed_source_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
+      "sha256": "8e91a464e8735977d5c07633893daef3fe63d1ca0a7df4a32ebe3c3bde8e443b",
+      "reviewed_source_commit": "555afc283cba673078a99b25230ee42258e42e06",
       "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
       "cases": [
         {

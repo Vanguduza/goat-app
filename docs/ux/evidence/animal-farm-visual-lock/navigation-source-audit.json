@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "8846676126d1baa7efa1216b2c4823c9856f4b17",
+  "tested_commit": "555afc283cba673078a99b25230ee42258e42e06",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
@@ -363,103 +363,103 @@
         {
           "value": "ANIMALS",
           "refs": 4,
-          "transition_refs": 3,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
           "value": "REGISTER",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "CAGES",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
           "value": "WAVE",
-          "refs": 2,
+          "refs": 3,
           "transition_refs": 1,
           "render_only_candidate": false
         },
         {
           "value": "PALPATION",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "KINDLING",
           "refs": 4,
-          "transition_refs": 2,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "FOSTER",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "WEAN",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "OUTCOME",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "NESTS",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "GI_STASIS",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "WEIGHT",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "CAGE_OCCUPANCY",
-          "refs": 2,
+          "refs": 3,
           "transition_refs": 1,
           "render_only_candidate": false
         },
         {
           "value": "CAGE_DETAIL",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "KINDLING_DUE",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "LITTER_PROFILE",
-          "refs": 2,
+          "refs": 3,
           "transition_refs": 1,
           "render_only_candidate": false
         },
         {
           "value": "KIT_CENSUS",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
@@ -471,37 +471,37 @@
         {
           "value": "PEDIGREE",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "COI",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "MATE_COMPARE",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "REPLACEMENT_COMPARE",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "SALE_ALLOCATION",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "RABBIT_REPORT",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         }
       ]
