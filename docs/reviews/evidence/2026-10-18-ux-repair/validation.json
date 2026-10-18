@@ -4,10 +4,10 @@
   "production_commit": "555afc283cba673078a99b25230ee42258e42e06",
   "source_fingerprint": "sha256:4a1333107e4cb3d8d39869366683489d03247a27923f6725f2467081c4611015",
   "test_summary": {
-    "app_tests": 53,
+    "app_tests": 83,
     "rabbit_helper_tests": 9,
     "failures": 0,
-    "note": "Latest passing result for each focused class. The final rabbit-only run rechecked the loading adjustment and recaptured all 26 images; other areas did not change after the broader run. This is local evidence, not exact-head CI certification.",
+    "note": "Latest passing result for each focused class: 53 original app checks plus 30 checks in the five broader-CI navigation classes, and 9 rabbit helpers. Native captures retain their original source identity. These are local results across named runs, not exact-head CI certification.",
     "classes": [
       {
         "class": "com.farmos.app.AndroidBackNavigationTest",
@@ -18,6 +18,16 @@
         "run": "focused-tests-3",
         "source": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
         "source_sha256": "fd0204f3c0a0915cdd0d9ad5621ba1a4a2e06a5ee76af8e4335f067c864ae00a"
+      },
+      {
+        "class": "com.farmos.app.AnimalFarmReferenceContractTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "ci-navigation-tests-6",
+        "source": "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt",
+        "source_sha256": "99909726c619bdc5e593afd102efcddd0859bab6a951366ea338f609933e51aa"
       },
       {
         "class": "com.farmos.app.FarmRuntimeNavigationTest",
@@ -100,6 +110,36 @@
         "source_sha256": "ebb795b63d4a0b82d9204b0931e2d5d0555af273c5542103fc87f597d40cb3f7"
       },
       {
+        "class": "com.farmos.app.OperationalRuntimeNavigationTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "ci-navigation-tests-6",
+        "source": "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt",
+        "source_sha256": "65a3da4c94c154f13fae1f29c7ebabb9ab39bf82904d7187681be1134431b767"
+      },
+      {
+        "class": "com.farmos.app.PoultryCaptureOwnerTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "ci-navigation-tests-6",
+        "source": "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt",
+        "source_sha256": "eca70648f1847f67e2be5c1f4730cb88bf936c5ed9093b635bda02fc341b829b"
+      },
+      {
+        "class": "com.farmos.app.PoultryRecordRuntimeNavigationTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "ci-navigation-tests-6",
+        "source": "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt",
+        "source_sha256": "364bc51e206ee3176292db382b041a5fce7113a2ffdd097501a847b53adc7ecf"
+      },
+      {
         "class": "com.farmos.app.RabbitCaptureOwnerTest",
         "tests": 2,
         "failures": 0,
@@ -108,6 +148,16 @@
         "run": "rabbit-final-tests-5",
         "source": "app/src/test/java/com/farmos/app/RabbitCaptureOwnerTest.kt",
         "source_sha256": "4d70262e6f36cd1867c10d50130453eed7903083f0b84f4019759530f198b99b"
+      },
+      {
+        "class": "com.farmos.app.RabbitPedigreeScreensTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "ci-navigation-tests-6",
+        "source": "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt",
+        "source_sha256": "e93b44c4f58fac5ca17942d142f7b035fc8d5d7a073abc77187c7694714d9ca9"
       },
       {
         "class": "com.farmos.app.RabbitProfileScreensTest",
@@ -316,5 +366,45 @@
     "git_diff_check": "PASS"
   },
   "physical_device": "No device attached to existing ADB endpoint; not installed or tested on S24",
-  "release_qualification": "NOT_GRANTED"
+  "release_qualification": "NOT_GRANTED",
+  "ci_navigation_correction": {
+    "source_commit": "f59bf6bfd1555cfb0b3d81d13f012918218404c8",
+    "source_fingerprint": "sha256:d131d909197f6dad1cb48acda9247781555c114adef30a86c9a16e385ee04a7d",
+    "run": {
+      "command": [
+        "./gradlew",
+        ":app:testDebugUnitTest",
+        "--tests",
+        "com.farmos.app.AnimalFarmReferenceContractTest",
+        "--tests",
+        "com.farmos.app.OperationalRuntimeNavigationTest",
+        "--tests",
+        "com.farmos.app.PoultryCaptureOwnerTest",
+        "--tests",
+        "com.farmos.app.PoultryRecordRuntimeNavigationTest",
+        "--tests",
+        "com.farmos.app.RabbitPedigreeScreensTest",
+        "--init-script",
+        "/home/ubuntu/work/goat-ux-evidence-20261018/ux-focused-tests-2.gradle",
+        "--no-daemon",
+        "--no-parallel",
+        "--max-workers=1",
+        "--console=plain",
+        "-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8",
+        "-Pkotlin.compiler.execution.strategy=in-process"
+      ],
+      "started_at": "2026-10-18T14:53:47.163416+00:00",
+      "finished_at": "2026-10-18T14:54:55.181287+00:00",
+      "exit_code": 0
+    },
+    "tests": 30,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "previous_ci_run": "https://github.com/Vanguduza/goat-app/actions/runs/39137044234",
+    "previous_failures": 16,
+    "reason": "Legacy selectors still expected Sync on home, Open-prefixed Poultry links and ungrouped rabbit pedigree links. Tests now traverse the native menu/buttons while preserving destination, farm scope, command ownership and record-selection assertions.",
+    "apk_source_commit": "036b83ee11263f3f83480fef4b112c65a1c61cda",
+    "production_inputs_changed": false
+  }
 }
