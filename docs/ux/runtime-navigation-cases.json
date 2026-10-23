@@ -5,7 +5,7 @@
     {
       "path": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
       "sha256": "3a8c22f9937a521a9c9c91a239dc519cc2778ec42ae77e98821311cbf0804dab",
-      "reviewed_source_commit": "fe868523355f435de01c3b7cbf81148f63e0e349",
+      "reviewed_source_commit": "a8ef9d7ad16abb83f06d633ebc98be90c491b588",
       "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
       "cases": [
         {
