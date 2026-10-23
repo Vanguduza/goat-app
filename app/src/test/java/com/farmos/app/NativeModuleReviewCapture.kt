@@ -25,7 +25,7 @@ import org.junit.runners.model.Statement
 import org.robolectric.RuntimeEnvironment
 
 /** Opt-in review candidates only; no reference image or acceptance gate is written. */
-internal class NativeModuleReviewRule : TestRule {
+class NativeModuleReviewRule : TestRule {
     override fun apply(base: Statement, description: Description): Statement = object : Statement() {
         override fun evaluate() {
             val output = System.getenv("GOAT_MODULE_REVIEW_DIR")
