@@ -62,11 +62,12 @@ fun FeedModuleHost(
     var page by androidx.compose.runtime.remember { mutableStateOf(FeedModulePage.HOME) }
     var selectedPlan by androidx.compose.runtime.remember { mutableStateOf<String?>(null) }
 
+    var workspace by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("Overview") }
     when (page) {
         FeedModulePage.HOME -> FeedRecordNavigator(records) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-FEED-001",
         title = "Feed",
-        help = "Issuing feed deducts inventory in milli-units. Ration percentages stay advisory drafts.",
+        help = "",
         empty = "No feed issues on this device.",
         rows = feedRows + inventoryRows,
         busy = busy,
@@ -85,15 +86,11 @@ fun FeedModuleHost(
         onBack = onBack,
         extra = {
             FarmEntitySelector(FarmSelectionAtoms.INVENTORY_ITEM_SELECTOR, "Feed item", itemOptions, itemId.value.ifBlank { null }, { itemId.value = it }, "No inventory items on this device.", enabled = !busy)
-            recordActions()
-            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.PLANS }) { androidx.compose.material3.Text("Feed plans") }
-            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.COST }) { androidx.compose.material3.Text("Feed cost") }
-            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.RATION_BUILDER }) { androidx.compose.material3.Text("Ration builder") }
-            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.RATION_ANALYSIS }) { androidx.compose.material3.Text("Ration analysis") }
-            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.RATION_COMPARE }) { androidx.compose.material3.Text("Compare rations") }
-            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.ALERTS }) { androidx.compose.material3.Text("Feed alerts") }
-            androidx.compose.material3.TextButton(onClick = { page = FeedModulePage.REPORT }) { androidx.compose.material3.Text("Feed report") }
         },
+        overview = { if (workspace == "Overview") FeedStockOverview(records) },
+        navigation = { FeedHomeNavigation(workspace, { workspace = it }, { page = it }, recordActions, records) },
+        captureVisible = workspace == "Issue feed",
+        recordsVisible = false,
     ) }
         FeedModulePage.PLANS -> FeedPlanListScreen(
             ops = ops,
@@ -121,4 +118,4 @@ fun FeedModuleHost(
     }
 }
 
-private enum class FeedModulePage { HOME, PLANS, PLAN_DETAIL, COST, RATION_BUILDER, RATION_ANALYSIS, RATION_COMPARE, ALERTS, REPORT }
+internal enum class FeedModulePage { HOME, PLANS, PLAN_DETAIL, COST, RATION_BUILDER, RATION_ANALYSIS, RATION_COMPARE, ALERTS, REPORT }

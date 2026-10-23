@@ -13,12 +13,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -432,9 +432,7 @@ private fun ColumnScope.DriveSetupScreen(
 
     Text("Back up to Google Drive", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
     Text(
-        "Farm OS can copy this farm's operation journal — the record of every change — into a folder " +
-            "in your Google Drive as each operation is recorded. Your whole database file is never " +
-            "copied or synchronised to Drive; only journal operations and attachment bytes travel.",
+        "Copy this farm's saved changes and attachments to a folder in your Google Drive. You can connect it later.",
         color = AnimalFarmTheme.colors.mutedInk,
     )
     EntryField("Backup folder name", folderName, busy) { folderName = it }

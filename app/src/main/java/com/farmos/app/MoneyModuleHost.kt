@@ -36,5 +36,5 @@ fun MoneyModuleHost(
     LaunchedEffect(state) {
         runSuspendCatching { state.refresh() }.onFailure { state.error = it.message }
     }
-    MoneyModuleContent(state)
+    androidx.compose.runtime.key(farmId) { MoneyModuleContent(state) }
 }

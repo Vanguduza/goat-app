@@ -53,15 +53,15 @@ fun WaterPointListScreen(
         onBack = onBack,
     ) {
         FarmOperationalSection("Register a water point") {
-            androidx.compose.material3.OutlinedTextField(code.value, { code.value = it }, label = { androidx.compose.material3.Text("Code") }, modifier = Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(name.value, { name.value = it }, label = { androidx.compose.material3.Text("Name") }, modifier = Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(kind.value, { kind.value = it }, label = { androidx.compose.material3.Text("Kind") }, modifier = Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(code.value, { code.value = it }, label = { androidx.compose.material3.Text("Code") }, modifier = Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(name.value, { name.value = it }, label = { androidx.compose.material3.Text("Name") }, modifier = Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(kind.value, { kind.value = it }, label = { androidx.compose.material3.Text("Kind") }, modifier = Modifier.fillMaxWidth())
             androidx.compose.foundation.layout.Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 androidx.compose.material3.Checkbox(active.value, { active.value = it }, enabled = !busy.value)
                 androidx.compose.material3.Text("Active")
             }
             error.value?.let { androidx.compose.material3.Text(it) }
-            androidx.compose.material3.Button(
+            com.farmos.core.design.FarmPrimaryButton(
                 onClick = {
                     run {
                         ops.recordWaterPoint(
@@ -78,7 +78,7 @@ fun WaterPointListScreen(
                 androidx.compose.material3.Text("No water points recorded on this device.")
             } else {
                 points.value.forEach { point ->
-                    androidx.compose.material3.TextButton(onClick = { onSelect(point.id) }) {
+                    com.farmos.core.design.FarmActionButton(onClick = { onSelect(point.id) }) {
                         androidx.compose.material3.Text("${point.code} · ${point.name} — ${point.kind} · ${if (point.active) "active" else "inactive"}")
                     }
                 }
@@ -123,12 +123,12 @@ fun WaterPointDetailScreen(
             }
             FarmOperationalSection("Record a point event") {
                 androidx.compose.foundation.layout.Row {
-                    androidx.compose.material3.TextButton(onClick = { onRecordEvent("inspection") }) { androidx.compose.material3.Text("Inspection") }
-                    androidx.compose.material3.TextButton(onClick = { onRecordEvent("quality") }) { androidx.compose.material3.Text("Quality result") }
+                    com.farmos.core.design.FarmActionButton(onClick = { onRecordEvent("inspection") }) { androidx.compose.material3.Text("Inspection") }
+                    com.farmos.core.design.FarmActionButton(onClick = { onRecordEvent("quality") }) { androidx.compose.material3.Text("Quality result") }
                 }
                 androidx.compose.foundation.layout.Row {
-                    androidx.compose.material3.TextButton(onClick = { onRecordEvent("issue") }) { androidx.compose.material3.Text("Report issue") }
-                    androidx.compose.material3.TextButton(onClick = { onRecordEvent("maintenance") }) { androidx.compose.material3.Text("Maintenance") }
+                    com.farmos.core.design.FarmActionButton(onClick = { onRecordEvent("issue") }) { androidx.compose.material3.Text("Report issue") }
+                    com.farmos.core.design.FarmActionButton(onClick = { onRecordEvent("maintenance") }) { androidx.compose.material3.Text("Maintenance") }
                 }
             }
             FarmOperationalSection("Water records for this source") {
