@@ -31,7 +31,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class WaterRecordRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private val homeTag = "farm-screen:" + "FOS-" + "WATER-" + "001"
@@ -66,17 +67,19 @@ class WaterRecordRuntimeNavigationTest {
     }
 
     private fun traverse(screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText("Open Water history")).performScrollTo().performClick()
+        compose.revealFarmTool("Open Water history").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
+        compose.showRecordedRows()
         assertions()
-        compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
+        compose.captureModuleReview(screenId)
+        compose.revealFarmTool("Farm home").performScrollTo().performClick()
         compose.onNodeWithTag(homeTag).assertExists()
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
 
     private fun render(records: WaterRecords) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 WaterRecordNavigator(records) { recordActions ->
                     SimpleCaptureScreen(
                         screenId = "FOS-" + "WATER-" + "001",
@@ -102,7 +105,7 @@ class WaterRecordRuntimeNavigationTest {
     fun savedCaptureShowsTheOfflineSaveReceiptOnlyAfterALocalSave() {
         val saved = mutableStateOf(false)
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SimpleCaptureScreen(
                     screenId = "FOS-" + "WATER-" + "001",
                     title = "Water",
@@ -120,7 +123,7 @@ class WaterRecordRuntimeNavigationTest {
             }
         }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-034").assertDoesNotExist()
-        compose.onNode(hasClickAction() and hasText("Record water")).performScrollTo().performClick()
+        compose.revealFarmTool("Record water").performScrollTo().performClick()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-034").assertExists()
         compose.onNodeWithText("Saved on this device · waiting to sync").assertExists()
     }

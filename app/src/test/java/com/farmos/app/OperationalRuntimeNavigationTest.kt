@@ -27,7 +27,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class OperationalRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private fun exercise(
@@ -36,22 +37,23 @@ class OperationalRuntimeNavigationTest {
         parentScreenId: String? = null,
     ) {
         routes.forEach { (action, screenId) ->
-            compose.onNode(hasClickAction() and hasText(action))
+            compose.revealFarmTool(action)
                 .performScrollTo()
                 .performClick()
             compose.onNodeWithTag("farm-screen:$screenId").assertExists()
-            compose.onNode(hasClickAction() and hasText(backLabel))
+            compose.captureModuleReview(screenId)
+            compose.revealFarmTool(if (screenId == "FOS-POULTRY-017") "Poultry" else backLabel)
                 .performScrollTo()
                 .performClick()
             parentScreenId?.let { compose.onNodeWithTag("farm-screen:$it").assertExists() }
-            compose.onNode(hasClickAction() and hasText(action)).assertExists()
+            compose.revealFarmTool(action).assertExists()
         }
     }
 
     @Test
     fun inventoryDashboardTraversesAllOwnedScreensAndReturns() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 InventoryScreen(
                     rows = emptyList(),
                     busy = false,
@@ -79,7 +81,7 @@ class OperationalRuntimeNavigationTest {
     @Test
     fun financeDashboardTraversesAllOwnedScreensAndReturns() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 MoneyCaptureScreen(
                     rows = emptyList(),
                     busy = false,
@@ -103,7 +105,7 @@ class OperationalRuntimeNavigationTest {
     @Test
     fun healthDashboardTraversesAllOwnedScreensAndReturns() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 HealthObservationScreen(
                     rows = emptyList(),
                     catalog = emptyList(),
@@ -137,7 +139,7 @@ class OperationalRuntimeNavigationTest {
     @Test
     fun poultryDashboardTraversesAllOwnedScreensAndReturns() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 PoultryExperienceScreen(
                     enabledKinds = emptyList(),
                     houses = emptyList(),
@@ -197,7 +199,7 @@ class OperationalRuntimeNavigationTest {
             onPedigree = { _, _, _ -> },
         )
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SheepOperationsScreen(
                     selectedAnimalId = "sheep-1",
                     busy = false,
@@ -250,7 +252,7 @@ class OperationalRuntimeNavigationTest {
             onCloseLot = { _, _, _, _, _ -> },
         )
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 CattleOperationsScreen(
                     selectedAnimalId = "cattle-1",
                     busy = false,

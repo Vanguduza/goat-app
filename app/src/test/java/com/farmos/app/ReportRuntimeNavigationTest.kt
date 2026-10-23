@@ -54,7 +54,9 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class ReportRuntimeNavigationTest {
-    @get:Rule val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
+    val compose = createComposeRule()
 
     private val farm = UUID.randomUUID().toString()
     private val otherFarm = UUID.randomUUID().toString()
@@ -242,7 +244,7 @@ class ReportRuntimeNavigationTest {
     fun revokingExportPermissionClosesAnAlreadyOpenShareRoute() {
         val allowed = mutableStateOf(true)
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ReportsModuleHost(database, farm, allowed.value, onBack = {}, exportAuthority = exportAuthorities.getValue(farm))
             }
         }
@@ -260,7 +262,7 @@ class ReportRuntimeNavigationTest {
         val allowed = mutableStateOf(true)
         var exports = 0
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ReportsScreen(
                     metrics = emptyList(), failure = null, canExport = allowed.value, exporting = false,
                     exportMessage = null, onExportHerdRegister = { exports++ }, onBack = {},
@@ -282,7 +284,7 @@ class ReportRuntimeNavigationTest {
     fun switchingFarmsDiscardsThePreviousAnimalsReportAndSearchSelection() {
         val selectedFarm = mutableStateOf(farm)
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ReportsModuleHost(database, selectedFarm.value, canExport = true, onBack = {}, exportAuthority = exportAuthorities.getValue(selectedFarm.value))
             }
         }
@@ -309,7 +311,7 @@ class ReportRuntimeNavigationTest {
 
     private fun render(canExport: Boolean = true) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ReportsModuleHost(database, farm, canExport, onBack = {}, exportAuthority = exportAuthorities.getValue(farm))
             }
         }
@@ -324,6 +326,7 @@ class ReportRuntimeNavigationTest {
     }
 
     private fun backToHub(screenId: String) {
+        compose.captureModuleReview(screenId)
         click("Reports")
         awaitTag("farm-screen:FOS-REPORT-001")
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()

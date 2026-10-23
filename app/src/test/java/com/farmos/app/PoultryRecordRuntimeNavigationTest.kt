@@ -37,7 +37,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class PoultryRecordRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private fun day(m: Int, d: Int) = LocalDate.of(2026, m, d).toEpochDay()
@@ -149,7 +150,7 @@ class PoultryRecordRuntimeNavigationTest {
     @Test
     fun dashboardFlockMetricIsUnknownUntilLoaded() {
         render(PoultryRecords())
-        compose.onNodeWithText("—").assertExists()
+        compose.onNode(hasText("Flocks") and hasText("—")).assertExists()
     }
 
     @Test
@@ -167,12 +168,14 @@ class PoultryRecordRuntimeNavigationTest {
     }
 
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+        compose.revealFarmTool(label).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         compose.waitForIdle()
+        compose.showRecordedRows()
         assertions()
-        compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
-        compose.onNode(hasClickAction() and hasText(label)).assertExists()
+        compose.captureModuleReview(screenId)
+        compose.revealFarmTool("Farm home").performScrollTo().performClick()
+        compose.revealFarmTool(label).assertExists()
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
 
@@ -209,7 +212,7 @@ class PoultryRecordRuntimeNavigationTest {
 
     private fun render(records: PoultryRecords, loadFlock: suspend (String) -> PoultryFlockRecords = { PoultryFlockRecords() }) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 PoultryExperienceScreen(
                     enabledKinds = emptyList(),
                     houses = emptyList(),
