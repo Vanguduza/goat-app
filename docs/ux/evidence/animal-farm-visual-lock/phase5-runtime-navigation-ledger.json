@@ -2,19 +2,19 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "59a12ad3d37d0903511cf3838636917ffcf62c7d",
-  "source_fingerprint": "sha256:79e39e3c22450b80a0f4db3929bc0149b4eae6f815e06bbca3bf5a54bc366838",
+  "tested_commit": "ea476279a495f025c00b4c6402a7cd6acf6a6e6f",
+  "source_fingerprint": "sha256:10c9335b96b0fae17b2e4121d32bc14b03aef81a621c8aa082c4fa193e6b9ab3",
   "ci_status": "CI_PENDING",
   "foundation_run_id": null,
   "additional_case_evidence": {
     "schema_version": 1,
     "mapping_path": "docs/ux/runtime-navigation-cases.json",
-    "mapping_sha256": "5bcc349c609dba679440cd274d4202ba884a1c49c039e9a9014cc041d2a7bdc3",
+    "mapping_sha256": "6738df36b84177c764b636897df3c0c9fb0d2e27b36c7777425804dc2014e243",
     "sources": [
       {
         "path": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
-        "sha256": "fa0af15fbe071729c386d95fcb36c3cd757fad77b86863063d9efed869f6f591",
-        "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+        "sha256": "3a8c22f9937a521a9c9c91a239dc519cc2778ec42ae77e98821311cbf0804dab",
+        "reviewed_source_commit": "a8ef9d7ad16abb83f06d633ebc98be90c491b588",
         "class_name": "com.farmos.app.ReportRuntimeNavigationTest"
       },
       {
