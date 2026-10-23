@@ -1,5 +1,11 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmToolAction
+
+import com.farmos.core.design.FarmToolGroup
+
+import com.farmos.core.design.FarmModuleTools
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,11 +93,9 @@ fun FeedRecordNavigator(records: FeedRecords, home: @Composable (recordActions: 
     val back = { page = null }
     when (page) {
         null -> home {
-            FarmOperationalSection("Records") {
-                FeedRecordPage.entries.forEach { target ->
-                    TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text("Open ${target.label}") }
-                }
-            }
+            FarmModuleTools(listOf(FarmToolGroup("Browse", FeedRecordPage.entries.map { target ->
+                FarmToolAction("Open ${target.label}", { page = target })
+            })), title = "Records")
         }
         FeedRecordPage.ITEM -> FeedItemScreen(records, back)
         FeedRecordPage.ISSUES -> FeedIssuesScreen(records, back)
@@ -149,11 +153,12 @@ internal fun FeedIssuesScreen(records: FeedRecords, onBack: () -> Unit) {
                 FeedRow(it.itemLabel, "${it.totalIssued} · ${issueCountLabel(it.issueCount)}", "feed-item:${it.itemId}")
             }
         }
-        FarmOperationalSection(recordListTitle("Issues", records.issues.size, records.issueCount)) {
+        FeedRecordedFlow(records, recordsContent = {
+            Text(recordListTitle("Issues", records.issues.size, records.issueCount), style = MaterialTheme.typography.titleMedium)
             records.issues.forEachIndexed { index, issue ->
                 if (index > 0) HorizontalDivider()
                 FeedRow("${LocalDate.ofEpochDay(issue.epochDay)} · ${issue.groupLabel}", "${issue.itemLabel} · ${issue.quantity}", "feed-issue:${issue.id}")
             }
-        }
+        })
     }
 }

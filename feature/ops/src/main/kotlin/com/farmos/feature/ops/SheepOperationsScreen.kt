@@ -1,13 +1,23 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmToolGroup
+
+import com.farmos.core.design.FarmToolAction
+
+import com.farmos.core.design.FarmModuleTools
+
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+
+import androidx.compose.runtime.saveable.rememberSaveable
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -108,8 +118,10 @@ fun SheepOperationsScreen(
     loadPaddocks: suspend () -> List<SheepPaddockOption> = { emptyList() },
     backLabel: String = "Farm home",
 ) {
-    var page by remember { mutableStateOf(SheepOpsPage.HOME) }
+    var page by rememberSaveable { mutableStateOf(SheepOpsPage.HOME) }
     val home = { page = SheepOpsPage.HOME }
+    val pageStateHolder = rememberSaveableStateHolder()
+    pageStateHolder.SaveableStateProvider(page.name) {
     when (page) {
         SheepOpsPage.HOME -> {
             SheepOpsHome(selectedAnimalId, error, { page = it }, onBack, backLabel)
@@ -266,6 +278,7 @@ fun SheepOperationsScreen(
             onBack = home,
         )
     }
+    }
 }
 
 @Composable
@@ -279,51 +292,56 @@ private fun SheepOpsHome(
     FarmOperationalPage(
         screenId = "FOS-SHEEP-010",
         title = "Joining & flock operations",
-        subtitle = "Breeding, lambing, wool and field health records.",
+        subtitle = "",
         visualClass = FarmVisualClass.I2,
         onBack = onBack,
         backLabel = backLabel,
     ) {
         FarmOperationalSection("Selected sheep") { Text(selectedId ?: "No individual selected — group workflows remain available.") }
-        FarmOperationalSection("Reproduction") {
-            SheepNav("Record joining") { onOpen(SheepOpsPage.JOINING) }
-            SheepNav("Pregnancy scan") { onOpen(SheepOpsPage.SCAN) }
-            SheepNav("Lambing due") { onOpen(SheepOpsPage.LAMBING_DUE) }
-            SheepNav("Record lambing") { onOpen(SheepOpsPage.LAMBING) }
-            SheepNav("Lamb marking") { onOpen(SheepOpsPage.MARKING) }
-            SheepNav("EID scan") { onOpen(SheepOpsPage.EID_SCAN) }
-            SheepNav("Weaning") { onOpen(SheepOpsPage.WEANING) }
-        }
-        FarmOperationalSection("Wool") {
-            SheepNav("Fleece record") { onOpen(SheepOpsPage.WOOL) }
-            SheepNav("Shearing") { onOpen(SheepOpsPage.SHEARING) }
-            SheepNav("Micron / fibre result") { onOpen(SheepOpsPage.MICRON) }
-            SheepNav("Wool dashboard") { onOpen(SheepOpsPage.WOOL_DASHBOARD) }
-        }
-        FarmOperationalSection("Sheep records") {
-            SheepNav("Lamb profile") { onOpen(SheepOpsPage.LAMB_PROFILE) }
-            SheepNav("Sheep report") { onOpen(SheepOpsPage.SHEEP_REPORT) }
-            SheepNav("Health summary") { onOpen(SheepOpsPage.HEALTH_SUMMARY) }
-            SheepNav("Timeline") { onOpen(SheepOpsPage.TIMELINE) }
-            SheepNav("Growth history") { onOpen(SheepOpsPage.GROWTH_HISTORY) }
-        }
-        FarmOperationalSection("Field health") {
-            SheepNav("FAMACHA") { onOpen(SheepOpsPage.FAMACHA) }
-            SheepNav("Body condition score") { onOpen(SheepOpsPage.BCS) }
-            SheepNav("Dag score") { onOpen(SheepOpsPage.DAG) }
-            SheepNav("Footrot") { onOpen(SheepOpsPage.FOOTROT) }
-            SheepNav("Flystrike") { onOpen(SheepOpsPage.FLYSTRIKE) }
-        }
-        FarmOperationalSection("Grazing") {
-            SheepNav("Paddock assignment") { onOpen(SheepOpsPage.PADDOCK_ASSIGN) }
-        }
-        FarmOperationalSection("Identity & traceability") {
-            SheepNav("Official identifier") { onOpen(SheepOpsPage.IDENTIFIER) }
-            SheepNav("Movement") { onOpen(SheepOpsPage.MOVEMENT) }
-            SheepNav("Pedigree link") { onOpen(SheepOpsPage.PEDIGREE) }
-            SheepNav("Inbreeding check") { onOpen(SheepOpsPage.COI) }
-            SheepNav("Compare rams") { onOpen(SheepOpsPage.MATE_COMPARE) }
-        }
+        FarmModuleTools(
+            groups = listOf(
+                FarmToolGroup("Reproduction", listOf(
+                    FarmToolAction("Record joining", { onOpen(SheepOpsPage.JOINING) }, tag = "sheep-action:JOINING"),
+                    FarmToolAction("Pregnancy scan", { onOpen(SheepOpsPage.SCAN) }, tag = "sheep-action:SCAN"),
+                    FarmToolAction("Lambing due", { onOpen(SheepOpsPage.LAMBING_DUE) }, tag = "sheep-action:LAMBING_DUE"),
+                    FarmToolAction("Record lambing", { onOpen(SheepOpsPage.LAMBING) }, tag = "sheep-action:LAMBING"),
+                    FarmToolAction("Lamb marking", { onOpen(SheepOpsPage.MARKING) }, tag = "sheep-action:MARKING"),
+                    FarmToolAction("EID scan", { onOpen(SheepOpsPage.EID_SCAN) }, tag = "sheep-action:EID_SCAN"),
+                    FarmToolAction("Weaning", { onOpen(SheepOpsPage.WEANING) }, tag = "sheep-action:WEANING"),
+                )),
+                FarmToolGroup("Wool", listOf(
+                    FarmToolAction("Fleece record", { onOpen(SheepOpsPage.WOOL) }, tag = "sheep-action:WOOL"),
+                    FarmToolAction("Shearing", { onOpen(SheepOpsPage.SHEARING) }, tag = "sheep-action:SHEARING"),
+                    FarmToolAction("Micron / fibre result", { onOpen(SheepOpsPage.MICRON) }, tag = "sheep-action:MICRON"),
+                    FarmToolAction("Wool dashboard", { onOpen(SheepOpsPage.WOOL_DASHBOARD) }, tag = "sheep-action:WOOL_DASHBOARD"),
+                )),
+                FarmToolGroup("Sheep records", listOf(
+                    FarmToolAction("Lamb profile", { onOpen(SheepOpsPage.LAMB_PROFILE) }, tag = "sheep-action:LAMB_PROFILE"),
+                    FarmToolAction("Sheep report", { onOpen(SheepOpsPage.SHEEP_REPORT) }, tag = "sheep-action:SHEEP_REPORT"),
+                    FarmToolAction("Health summary", { onOpen(SheepOpsPage.HEALTH_SUMMARY) }, tag = "sheep-action:HEALTH_SUMMARY"),
+                    FarmToolAction("Timeline", { onOpen(SheepOpsPage.TIMELINE) }, tag = "sheep-action:TIMELINE"),
+                    FarmToolAction("Growth history", { onOpen(SheepOpsPage.GROWTH_HISTORY) }, tag = "sheep-action:GROWTH_HISTORY"),
+                )),
+                FarmToolGroup("Field health", listOf(
+                    FarmToolAction("FAMACHA", { onOpen(SheepOpsPage.FAMACHA) }, tag = "sheep-action:FAMACHA"),
+                    FarmToolAction("Body condition score", { onOpen(SheepOpsPage.BCS) }, tag = "sheep-action:BCS"),
+                    FarmToolAction("Dag score", { onOpen(SheepOpsPage.DAG) }, tag = "sheep-action:DAG"),
+                    FarmToolAction("Footrot", { onOpen(SheepOpsPage.FOOTROT) }, tag = "sheep-action:FOOTROT"),
+                    FarmToolAction("Flystrike", { onOpen(SheepOpsPage.FLYSTRIKE) }, tag = "sheep-action:FLYSTRIKE"),
+                )),
+                FarmToolGroup("Grazing", listOf(
+                    FarmToolAction("Paddock assignment", { onOpen(SheepOpsPage.PADDOCK_ASSIGN) }, tag = "sheep-action:PADDOCK_ASSIGN"),
+                )),
+                FarmToolGroup("Identity & traceability", listOf(
+                    FarmToolAction("Official identifier", { onOpen(SheepOpsPage.IDENTIFIER) }, tag = "sheep-action:IDENTIFIER"),
+                    FarmToolAction("Movement", { onOpen(SheepOpsPage.MOVEMENT) }, tag = "sheep-action:MOVEMENT"),
+                    FarmToolAction("Pedigree link", { onOpen(SheepOpsPage.PEDIGREE) }, tag = "sheep-action:PEDIGREE"),
+                    FarmToolAction("Inbreeding check", { onOpen(SheepOpsPage.COI) }, tag = "sheep-action:COI"),
+                    FarmToolAction("Compare rams", { onOpen(SheepOpsPage.MATE_COMPARE) }, tag = "sheep-action:MATE_COMPARE"),
+                )),
+            ),
+            title = "Operations",
+        )
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }
@@ -343,7 +361,7 @@ private fun SheepJoiningScreen(
     onRecord: (String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var groupId by remember { mutableStateOf("") }
+    var groupId by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage(
         "FOS-SHEEP-011",
@@ -370,7 +388,7 @@ private fun SheepScanScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var result by remember { mutableStateOf("single") }
+    var result by rememberSaveable { mutableStateOf("single") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-012", "Pregnancy scan", "Result must be dry, single, twin or triplet.", busy, error, onBack) {
         OpsAnimalPicker("Ewe", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
@@ -391,9 +409,9 @@ private fun SheepLambingScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var born by remember { mutableStateOf("") }
-    var live by remember { mutableStateOf("") }
-    var dead by remember { mutableStateOf("0") }
+    var born by rememberSaveable { mutableStateOf("") }
+    var live by rememberSaveable { mutableStateOf("") }
+    var dead by rememberSaveable { mutableStateOf("0") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-014", "Record lambing", "Live plus dead must equal born.", busy, error, onBack, FarmVisualClass.I4) {
         OpsAnimalPicker("Ewe", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
@@ -423,9 +441,9 @@ private fun SheepGroupAnimalCountScreen(
     onRecord: (String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var groupId by remember { mutableStateOf("") }
+    var groupId by rememberSaveable { mutableStateOf("") }
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var count by remember { mutableStateOf("") }
+    var count by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage(screenId, title, "Use a mob or an individual sheep plus the recorded count.", busy, error, onBack) {
         Field(groupId, { groupId = it }, "Mob id (optional)", busy)
@@ -449,9 +467,9 @@ private fun SheepWoolScreen(
     onRecord: (String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var groupId by remember { mutableStateOf("") }
+    var groupId by rememberSaveable { mutableStateOf("") }
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var grams by remember { mutableStateOf("") }
+    var grams by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-020", "Fleece record", "Record greasy fleece weight in grams for a sheep or mob.", busy, error, onBack) {
         Field(groupId, { groupId = it }, "Mob id (optional)", busy)
@@ -475,10 +493,10 @@ private fun SheepShearingScreen(
     onRecord: (String, String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var groupId by remember { mutableStateOf("") }
+    var groupId by rememberSaveable { mutableStateOf("") }
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var kind by remember { mutableStateOf("shearing") }
-    var grams by remember { mutableStateOf("") }
+    var kind by rememberSaveable { mutableStateOf("shearing") }
+    var grams by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-019", "Shearing", "Kinds are shearing, crutching or classing.", busy, error, onBack) {
         Field(groupId, { groupId = it }, "Mob id (optional)", busy)
@@ -503,9 +521,9 @@ private fun SheepMicronScreen(
     onRecord: (String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var groupId by remember { mutableStateOf("") }
+    var groupId by rememberSaveable { mutableStateOf("") }
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var tenths by remember { mutableStateOf("") }
+    var tenths by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-021", "Micron / fibre result", "Store micron as tenths from 80 to 500.", busy, error, onBack) {
         Field(groupId, { groupId = it }, "Mob id (optional)", busy)
@@ -534,7 +552,7 @@ private fun SheepScoreScreen(
     visualClass: FarmVisualClass = FarmVisualClass.I3,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var score by remember { mutableStateOf("") }
+    var score by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage(screenId, title, subtitle, busy, error, onBack, visualClass) {
         OpsAnimalPicker("Sheep", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
@@ -558,8 +576,8 @@ private fun SheepIdentifierScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var type by remember { mutableStateOf("ear_tag") }
-    var value by remember { mutableStateOf("") }
+    var type by rememberSaveable { mutableStateOf("ear_tag") }
+    var value by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-029", "Official identifier", "Bind an approved identifier type to this sheep.", busy, error, onBack) {
         OpsAnimalPicker("Sheep", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
@@ -587,9 +605,9 @@ private fun SheepMovementScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var direction by remember { mutableStateOf("on") }
-    var from by remember { mutableStateOf("") }
-    var to by remember { mutableStateOf("") }
+    var direction by rememberSaveable { mutableStateOf("on") }
+    var from by rememberSaveable { mutableStateOf("") }
+    var to by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage("FOS-SHEEP-027", "Movement", "Record on, off or transfer movement and places.", busy, error, onBack) {
         OpsAnimalPicker("Sheep", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
@@ -612,8 +630,8 @@ private fun SheepPedigreeScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var parentId by remember { mutableStateOf("") }
-    var relation by remember { mutableStateOf("sire") }
+    var parentId by rememberSaveable { mutableStateOf("") }
+    var relation by rememberSaveable { mutableStateOf("sire") }
     SheepFormPage(
         "FOS-SHEEP-026",
         "Pedigree",
@@ -644,7 +662,7 @@ private fun SheepBcsScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var score by remember { mutableStateOf("") }
+    var score by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     SheepFormPage(
         "FOS-SHEEP-008",
@@ -677,8 +695,8 @@ private fun SheepPaddockAssignScreen(
 ) {
     var groups by remember { mutableStateOf(emptyList<SheepGroupOption>()) }
     var paddocks by remember { mutableStateOf(emptyList<SheepPaddockOption>()) }
-    var groupId by remember { mutableStateOf("") }
-    var paddockId by remember { mutableStateOf("") }
+    var groupId by rememberSaveable { mutableStateOf("") }
+    var paddockId by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     LaunchedEffect(Unit) {
         runCatching {
@@ -782,9 +800,9 @@ internal fun SheepEidScanScreen(
     onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var eidValue by remember { mutableStateOf("") }
+    var eidValue by rememberSaveable { mutableStateOf("") }
     var note by remember { mutableStateOf<String?>(null) }
-    var reading by remember { mutableStateOf(false) }
+    var reading by rememberSaveable { mutableStateOf(false) }
     FarmOperationalPage(
         screenId = "FOS-SHEEP-005",
         title = "EID scan",

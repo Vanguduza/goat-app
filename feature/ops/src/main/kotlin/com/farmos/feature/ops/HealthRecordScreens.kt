@@ -205,7 +205,7 @@ internal fun HealthWithdrawalDetailScreen(
                 Text("Until ${LocalDate.ofEpochDay(w.endsEpochDay)}")
             }
         }
-        FarmOperationalSection("Window") {
+        WithdrawalWorkflow(w, model.treatments.firstOrNull { it.id == w.treatmentId }, today, recordsContent = {
             HealthRecordRow("Product", w.product, "health-withdrawal-product")
             HealthRecordRow("Applies to", HealthRecords.kindLabel(w.windowKind), "health-withdrawal-kind")
             HealthRecordRow(if (active) "Ends" else "Ended", LocalDate.ofEpochDay(w.endsEpochDay).toString(), "health-withdrawal-end")
@@ -214,7 +214,7 @@ internal fun HealthWithdrawalDetailScreen(
             } else {
                 HealthRecordRow("Source", "Treatment not on this device", "health-withdrawal-source")
             }
-        }
+        })
     }
 }
 

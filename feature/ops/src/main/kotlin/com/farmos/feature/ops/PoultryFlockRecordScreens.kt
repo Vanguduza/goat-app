@@ -1,5 +1,9 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmWorkflowState
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowTimeline
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -152,10 +156,16 @@ private fun FlockTimelineContent(records: PoultryFlockRecords) {
         AnimalFarmEmptyState("No records for this flock on this device.")
         return
     }
-    FarmOperationalSection("Events · ${events.size}") {
+    FarmWorkflowTimeline(
+        title = "Flock history",
+        steps = events.take(6).map { (_, _, text) -> FarmWorkflowStep(text.first, text.second, state = FarmWorkflowState.RECORDED) },
+        caption = "${minOf(6, events.size)} latest events · ${events.size} recorded events",
+        recordsContent = {
+            Text("Events · ${events.size}", style = MaterialTheme.typography.titleMedium)
         events.forEachIndexed { index, (_, key, text) ->
             if (index > 0) HorizontalDivider()
             FlockRow(text.first, text.second, "flock-event:$key")
         }
-    }
+        },
+    )
 }

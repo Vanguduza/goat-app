@@ -9,16 +9,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -29,6 +30,11 @@ import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
@@ -405,12 +411,14 @@ private fun RabbitCagesScreen(
     var boxCode by remember { mutableStateOf("") }
     var boxId by remember { mutableStateOf("") }
     var boxStatus by remember { mutableStateOf("") }
-    FarmOperationalPage("FOS-RABBIT-006", "Cages & nest boxes", "Rabbit housing and nest-box availability.", FarmVisualClass.I2, onBack) {
-        FarmOperationalRows(cages, "No cages yet", "Create a cage before starting a breeding wave.")
-        FarmOperationalSection(
+    var housingSection by rememberSaveable { mutableStateOf("Cages") }
+    FarmOperationalPage("FOS-RABBIT-006", "Cages & nest boxes", "", FarmVisualClass.I2, onBack) {
+        FarmSectionTabs(listOf("Cages", "Nest boxes", "Nest-box cycle"), housingSection, { housingSection = it })
+        if (housingSection == "Cages") FarmOperationalRows(cages, "No cages yet", "Create a cage before starting a breeding wave.")
+        if (housingSection != "Cages") FarmOperationalSection(
             "Nest capacity",
         ) { Text("$availableBoxes available nest box(es)", style = MaterialTheme.typography.titleLarge) }
-        FarmOperationalSection("Create cage") {
+        if (housingSection == "Cages") FarmOperationalSection("Create cage") {
             OutlinedTextField(cageCode, {
                 cageCode = it
             }, label = { Text("Cage code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -418,7 +426,7 @@ private fun RabbitCagesScreen(
                 onCreateCage(cageCode)
             }, enabled = !busy && cageCode.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Create cage") }
         }
-        FarmOperationalSection("Add nest box") {
+        if (housingSection == "Nest boxes") FarmOperationalSection("Add nest box") {
             OutlinedTextField(cageCode, {
                 cageCode = it
             }, label = { Text("Cage code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -433,8 +441,10 @@ private fun RabbitCagesScreen(
                 )
             }
         }
-        FarmOperationalRows(nestBoxes, "No nest boxes yet", null)
-        FarmOperationalSection("Nest-box cycle", "Available/sanitized → assigned → in cage → dirty → sanitize.") {
+        if (housingSection == "Nest boxes") FarmOperationalRows(nestBoxes, "No nest boxes yet", null)
+        if (housingSection == "Nest-box cycle") {
+        RabbitNestCycle(nestBoxChoices.map { RabbitNestBoxView(it.id, it.code, it.status) })
+        FarmOperationalSection("Update nest box") {
             FarmEntitySelector(
                 atomTag = "rabbit-nest-box-selector",
                 title = "Nest box",
@@ -462,6 +472,7 @@ private fun RabbitCagesScreen(
             Button(onClick = {
                 onSetNestStatus(boxId, boxStatus)
             }, enabled = !busy && boxId.isNotBlank() && boxStatus.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Set nest status") }
+        }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
@@ -938,6 +949,19 @@ private fun RabbitReportScreen(
 ) {
     val activeKits = records.kits.count { it.status == "active" }
     FarmOperationalPage("FOS-RABBIT-036", "Rabbit report", "Rabbitry totals for this farm.", onBack = onBack) {
+        FarmMetricStrip(listOf(
+            FarmMetricValue("Cages", records.cages.size.toString()),
+            FarmMetricValue("Breeding waves", records.waves.size.toString()),
+            FarmMetricValue("Active kits", activeKits.toString()),
+        ))
+        FarmMetricBars(
+            "Kits by wave",
+            records.waves.map { wave ->
+                val count = records.kits.count { it.waveId == wave.id }
+                FarmBarValue("Cage ${wave.cageLabel} · ${LocalDate.ofEpochDay(wave.matingEpochDay)}", count.toDouble(), count.toString())
+            },
+            unit = "Individual kits recorded",
+        )
         FarmOperationalSection("Totals") {
             Text("Cages: ${records.cages.size}")
             Text("Waves: ${records.waves.size}")
@@ -950,7 +974,7 @@ private fun RabbitReportScreen(
                 Text("Wave ${wave.id}: $kits kits")
             }
         }
-        FarmOperationalSection("Latest weights · FOS-RABBIT-032") {
+        FarmOperationalSection("Latest weights") {
             val latest = records.weights.distinctBy { it.animalId }
             if (latest.isEmpty()) Text("No weights recorded yet.")
             latest.forEach { weight ->

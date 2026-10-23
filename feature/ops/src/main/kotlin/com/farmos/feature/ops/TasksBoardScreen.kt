@@ -16,11 +16,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -391,6 +391,7 @@ fun TaskDetailScreen(
         if (task == null) {
             Text("The selected task is not in the local records.")
         } else {
+            TaskStateWorkflow(task, today)
             val overdue = task.status == "open" && task.dueEpochDay < today
             Text(
                 when {

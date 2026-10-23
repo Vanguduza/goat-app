@@ -1,9 +1,9 @@
 package com.farmos.feature.ops
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -32,6 +32,12 @@ fun SimpleCaptureScreen(
     extra: @Composable () -> Unit = {},
     /** True after the latest capture committed locally; shows the FOS-ATOM-034 receipt. */
     saved: Boolean = false,
+    overview: @Composable () -> Unit = {},
+    navigation: @Composable () -> Unit = {},
+    captureVisible: Boolean = true,
+    recordsVisible: Boolean = true,
+    recordTitle: String = actionLabel,
+    showPrimaryAction: Boolean = true,
 ) {
     FarmOperationalPage(
         screenId = screenId,
@@ -40,12 +46,10 @@ fun SimpleCaptureScreen(
         visualClass = visualClass,
         onBack = onBack,
     ) {
-        FarmOperationalRows(
-            rows = rows,
-            emptyTitle = empty,
-            emptyHint = "Saved farm records for this area will appear here.",
-        )
-        FarmOperationalSection("Record") {
+        overview()
+        navigation()
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        if (captureVisible) FarmOperationalSection(recordTitle) {
             extra()
             fields.forEach { (label, state) ->
                 OutlinedTextField(
@@ -57,11 +61,11 @@ fun SimpleCaptureScreen(
                     singleLine = true,
                 )
             }
-            Button(onClick = onSubmit, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
+            if (showPrimaryAction) Button(onClick = onSubmit, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
                 Text(actionLabel)
             }
             if (saved && !busy) FarmOfflineSaveReceipt()
         }
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        if (recordsVisible) FarmOperationalRows(rows = rows, emptyTitle = empty)
     }
 }

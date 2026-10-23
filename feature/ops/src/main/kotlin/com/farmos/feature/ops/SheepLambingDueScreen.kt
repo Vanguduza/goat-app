@@ -72,7 +72,7 @@ internal fun SheepLambingDueScreen(loadDue: suspend () -> SheepLambingDue, today
     FarmOperationalPage(
         "FOS-SHEEP-013",
         "Lambing due",
-        "When each mob starts lambing, and the ewes scanned in lamb that have not lambed yet.",
+        "",
         FarmVisualClass.I2,
         onBack,
     ) {
@@ -85,6 +85,7 @@ internal fun SheepLambingDueScreen(loadDue: suspend () -> SheepLambingDue, today
                     AnimalFarmEmptyState("No joinings or in-lamb scans recorded.")
                     return@FarmOperationalPage
                 }
+                SheepLambingWorkflow(due, today, recordsContent = {
                 val todayEpochDay = today.toEpochDay()
                 FarmOperationalSection(
                     "Mobs · ${due.mobs.size}",
@@ -117,6 +118,7 @@ internal fun SheepLambingDueScreen(loadDue: suspend () -> SheepLambingDue, today
                         )
                     }
                 }
+                })
             }
         }
     }

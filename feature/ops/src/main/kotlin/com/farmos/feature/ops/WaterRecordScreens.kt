@@ -1,5 +1,11 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmToolAction
+
+import com.farmos.core.design.FarmToolGroup
+
+import com.farmos.core.design.FarmModuleTools
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,9 +67,9 @@ fun WaterRecordNavigator(records: WaterRecords, home: @Composable (recordActions
         WaterHistoryScreen(records) { open = false }
     } else {
         home {
-            FarmOperationalSection("Records") {
-                TextButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth()) { Text("Open Water history") }
-            }
+            FarmModuleTools(listOf(FarmToolGroup("Browse", listOf(
+                FarmToolAction("Open Water history", { open = true }),
+            ))), title = "Records")
         }
     }
 }
@@ -76,6 +82,8 @@ internal fun WaterHistoryScreen(records: WaterRecords, onBack: () -> Unit) {
             AnimalFarmEmptyState("No water recorded on this device.")
             return@FarmOperationalPage
         }
+        WaterSourceChart(records)
+        WaterRecordedFlow(records, recordsContent = {
         FarmOperationalSection("By source, all recorded rows") {
             records.sources.forEach {
                 WaterRow(
@@ -92,5 +100,6 @@ internal fun WaterHistoryScreen(records: WaterRecords, onBack: () -> Unit) {
                 WaterRow("${LocalDate.ofEpochDay(record.epochDay)} · ${record.source}", waterLitres(record.litresMilli), "water-record:${record.id}")
             }
         }
+        })
     }
 }

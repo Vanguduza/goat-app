@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -240,6 +240,7 @@ internal fun PoultryIncubationBatchScreen(records: PoultryRecords, onBack: () ->
         }
         PoultrySwitcher("Batches", records.hatches.map { it.id to "${LocalDate.ofEpochDay(it.setEpochDay)} · ${it.poultryKind} · ${it.eggsSet} eggs" }, selectedId) { selectedId = it }
         val batch = records.hatches.firstOrNull { it.id == selectedId } ?: return@FarmOperationalPage
+        PoultryHatchProgress(batch, recordsContent = {
         FarmOperationalSection("Batch") {
             PoultryRecordRow("Status", batch.status, "poultry-batch-status")
             PoultryRecordRow("Set", "${batch.eggsSet} eggs · ${LocalDate.ofEpochDay(batch.setEpochDay)}", "poultry-batch-set")
@@ -261,6 +262,7 @@ internal fun PoultryIncubationBatchScreen(records: PoultryRecords, onBack: () ->
                 batch.placementGroupId?.let { PoultryRecordRow("Placed as flock", it, "poultry-batch-placement") }
             }
         }
+        })
     }
 }
 
