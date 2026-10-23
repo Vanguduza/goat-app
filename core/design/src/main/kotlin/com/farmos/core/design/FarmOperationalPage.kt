@@ -3,6 +3,9 @@ package com.farmos.core.design
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,14 +13,17 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -42,8 +48,10 @@ fun FarmOperationalPage(
     key(screenId) {
         FarmBackHandler(onBack)
         Surface(modifier = modifier.fillMaxSize().testTag("farm-screen:$screenId"), color = AnimalFarmTheme.colors.background) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Column(
                 Modifier
+                    .widthIn(max = 840.dp)
                     .fillMaxSize()
                     .imePadding()
                     .navigationBarsPadding()
@@ -51,9 +59,11 @@ fun FarmOperationalPage(
                     .padding(FosDimens.ScreenMargin),
                 verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
             ) {
-                onBack?.let { back -> FarmBackButton(backLabel, back) }
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    onBack?.let { back -> FarmBackButton(backLabel, back, Modifier.weight(1f, fill = false)) }
+                    if (LocalDensity.current.fontScale < 1.5f) Text("Animal Farm", Modifier.padding(start = 12.dp), style = MaterialTheme.typography.labelMedium, color = AnimalFarmTheme.colors.mutedInk)
+                }
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Animal Farm", style = MaterialTheme.typography.labelMedium, color = AnimalFarmTheme.colors.mutedInk)
                     Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold)
                     if (subtitle.isNotBlank()) Text(
                         subtitle,
@@ -68,6 +78,7 @@ fun FarmOperationalPage(
                 }
                 content()
             }
+            }
         }
     }
 }
@@ -80,7 +91,7 @@ fun FarmOperationalSection(
 ) {
     FarmIllustratedSectionSurface {
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        description?.let {
+        description?.takeIf { it.isNotBlank() }?.let {
             Text(it, style = MaterialTheme.typography.bodyMedium, color = AnimalFarmTheme.colors.mutedInk)
         }
         Column(
@@ -101,7 +112,10 @@ fun FarmOperationalRows(
         FarmOperationalSection(emptyTitle, emptyHint) {}
     } else {
         FarmOperationalSection("Current records") {
-            rows.forEach { row -> Text(row, style = MaterialTheme.typography.bodyMedium) }
+            rows.forEachIndexed { index, row ->
+                if (index > 0) HorizontalDivider(color = AnimalFarmTheme.colors.divider)
+                FarmRecordRow(row)
+            }
         }
     }
 }

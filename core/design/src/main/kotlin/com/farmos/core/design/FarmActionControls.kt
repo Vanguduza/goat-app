@@ -1,6 +1,7 @@
 package com.farmos.core.design
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -33,6 +34,7 @@ fun FarmActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     content: @Composable RowScope.() -> Unit,
 ) {
     val colors = AnimalFarmTheme.colors
@@ -48,6 +50,7 @@ fun FarmActionButton(
             disabledContainerColor = colors.softSurface,
             disabledContentColor = colors.mutedInk,
         ),
+        contentPadding = contentPadding,
         content = content,
     )
 }
@@ -57,6 +60,7 @@ fun FarmPrimaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     content: @Composable RowScope.() -> Unit,
 ) {
     val colors = AnimalFarmTheme.colors
@@ -71,6 +75,7 @@ fun FarmPrimaryButton(
             disabledContainerColor = colors.softSurface,
             disabledContentColor = colors.mutedInk,
         ),
+        contentPadding = contentPadding,
         content = content,
     )
 }
