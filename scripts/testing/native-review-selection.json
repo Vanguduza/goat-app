@@ -304,7 +304,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
       "class": "com.farmos.app.LocalFarmSessionAuthorityTest",
-      "sha256": "cbbd2a81f5d625e459abd70b474a5d3b56aa6b946f4a1b2ff7d4c9bf162d6601",
+      "sha256": "a0eac28745893664b40b7c9adc7167e65e9765444ef70b351ae1df0821020485",
       "methods": [
         "aSignInResultThatBecameDisabledBeforeAdmissionNeverStartsCarriersOrFarmContent",
         "disablingTheCurrentAccountEndsTheSignedInComposition",
@@ -538,7 +538,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
       "class": "com.farmos.app.ReportDisclosureAuthorityTest",
-      "sha256": "d0ac1116d97e3a560ef187baca9f5aea227329e47857ccfbdf378ad5eb88933c",
+      "sha256": "a06494d330a347feac8bc6b962fd3d4087e924079084641502bbb154267099e5",
       "methods": [
         "aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
         "aDelayedChooserCannotUseTheOldAuthenticatedCredentialAfterAReset",
@@ -555,7 +555,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
       "class": "com.farmos.app.ReportRuntimeNavigationTest",
-      "sha256": "3a8c22f9937a521a9c9c91a239dc519cc2778ec42ae77e98821311cbf0804dab",
+      "sha256": "440205ac0c34dbd015e8e4e34c38ec98907af5b8890ad2aee01bead25bf20c72",
       "methods": [
         "aRoleWithoutExportPermissionCanReadReportsButCannotOpenExportOrShare",
         "animalSearchSelectsOnlyThisFarmsRecordAndBackRestoresTheReportHub",
@@ -570,9 +570,24 @@
     },
     {
       "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/ReportsFocusedWorkspaceTest.kt",
+      "class": "com.farmos.app.ReportsFocusedWorkspaceTest",
+      "sha256": "180bd3044bd74bbb108bdf0712647d58ce26959bf16780ec9a47a8044ccbec22",
+      "methods": [
+        "emptyFiguresAreNotMistakenForAnEmptyAnimalRegister",
+        "failedOrLoadingFiguresDoNotBlockReportNavigationOrInventZeros",
+        "incompleteMetricKeepsItsWarningVisibleBeforeCalculationExpansion",
+        "noRecordedValuesAreNotPresentedAsZeroInScreenOrSharedSummary",
+        "reportActionsAreReachableBeforeAnyMetricDetailsEvenForManyMetrics",
+        "wholeFigureSearchFindsLateItemsAndSurvivesExportBackWithoutWriting"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/ReportsScreensTest.kt",
       "class": "com.farmos.app.ReportsScreensTest",
-      "sha256": "a0eb2c97cad8442ed944571ab47d50be5002ecdad279364e67aa527db164164c",
+      "sha256": "2e425c127845c8cda23fcf7936e8b95c04413f57f6c715e30bc5e93908d5df56",
       "methods": [
         "anEmptyFarmIsShownTruthfully",
         "eachMetricShowsHowItIsWorkedOutAndAPartialFigureSaysSo",
@@ -661,7 +676,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt",
       "class": "com.farmos.app.SpeciesHerdRuntimeNavigationTest",
-      "sha256": "be9adf239bbb08f583ad890525b9aa280032076f93db578939370a0403f09129",
+      "sha256": "905d4c08d93fc9f5fb8c99215cb0723593983ab82b331022ba69e42b566009bb",
       "methods": [
         "cattleIndividualAnimalSurfacesTraverseAndReturn",
         "herdMetricsUseExhaustiveCountsAndTheListSaysWhenBounded",
@@ -790,7 +805,7 @@
       "task": ":feature:goat:testDebugUnitTest",
       "source": "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt",
       "class": "com.farmos.feature.goat.GoatHistoryRuntimeNavigationTest",
-      "sha256": "6f769bc1ca1c2f4ee046bd4debdb149a172dd13aaafd35ae0796b044b1d64e75",
+      "sha256": "a08fa247704f63a104296d83bb2db5a53abe65b05838c19738ba26986a23b0b1",
       "methods": [
         "bucksDoNotOfferDoeOnlyRecordsAndEmptyHistoriesStayEmpty",
         "profileRecordLinksTraverseToEachHistoryAndRestoreTheProfile",

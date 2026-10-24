@@ -4,8 +4,8 @@
   "sources": [
     {
       "path": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
-      "sha256": "3a8c22f9937a521a9c9c91a239dc519cc2778ec42ae77e98821311cbf0804dab",
-      "reviewed_source_commit": "a8ef9d7ad16abb83f06d633ebc98be90c491b588",
+      "sha256": "440205ac0c34dbd015e8e4e34c38ec98907af5b8890ad2aee01bead25bf20c72",
+      "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
       "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
       "cases": [
         {
@@ -1346,8 +1346,8 @@
     },
     {
       "path": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
-      "sha256": "cbbd2a81f5d625e459abd70b474a5d3b56aa6b946f4a1b2ff7d4c9bf162d6601",
-      "reviewed_source_commit": "107b19904995dd793e0fa7c2ed434215fdacdaec",
+      "sha256": "a0eac28745893664b40b7c9adc7167e65e9765444ef70b351ae1df0821020485",
+      "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
       "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
       "cases": [
         {
@@ -1407,8 +1407,8 @@
     },
     {
       "path": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
-      "sha256": "d0ac1116d97e3a560ef187baca9f5aea227329e47857ccfbdf378ad5eb88933c",
-      "reviewed_source_commit": "c535152bd3fad23d3ebd961709fb2cf06dc2d8f0",
+      "sha256": "a06494d330a347feac8bc6b962fd3d4087e924079084641502bbb154267099e5",
+      "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
       "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
       "cases": [
         {
@@ -1449,6 +1449,44 @@
         {
           "method": "cancellationWhileProviderReturnIsDelayedClosesExactlyOnce",
           "execution_only_reason": "Resource-cleanup cancellation regression. Execution evidence only; no additional route, owner or visual approval claim.",
+          "claims": []
+        }
+      ]
+    },
+    {
+      "path": "app/src/test/java/com/farmos/app/ReportsFocusedWorkspaceTest.kt",
+      "sha256": "180bd3044bd74bbb108bdf0712647d58ce26959bf16780ec9a47a8044ccbec22",
+      "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+      "class_name": "com.farmos.app.ReportsFocusedWorkspaceTest",
+      "cases": [
+        {
+          "method": "emptyFiguresAreNotMistakenForAnEmptyAnimalRegister",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+          "claims": []
+        },
+        {
+          "method": "failedOrLoadingFiguresDoNotBlockReportNavigationOrInventZeros",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+          "claims": []
+        },
+        {
+          "method": "incompleteMetricKeepsItsWarningVisibleBeforeCalculationExpansion",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+          "claims": []
+        },
+        {
+          "method": "noRecordedValuesAreNotPresentedAsZeroInScreenOrSharedSummary",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+          "claims": []
+        },
+        {
+          "method": "reportActionsAreReachableBeforeAnyMetricDetailsEvenForManyMetrics",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+          "claims": []
+        },
+        {
+          "method": "wholeFigureSearchFindsLateItemsAndSurvivesExportBackWithoutWriting",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
           "claims": []
         }
       ]
