@@ -96,7 +96,6 @@ internal fun RabbitProfileScreen(
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(rabbit.tag, style = MaterialTheme.typography.titleLarge)
                 rabbit.name?.takeIf { it.isNotBlank() }?.let { Text(it) }
-                Text("$kind · ${rabbit.status}", color = AnimalFarmTheme.colors.mutedInk)
             }
         }
         FarmSectionTabs(listOf("Identity", "Photos and documents", "Exit record"), section, { section = it })

@@ -101,7 +101,6 @@ private fun TodaySummaryContent(
         FarmMetricValue("Waiting to sync", summary.pendingSync.toString(), onClick = { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) }),
     ))
     if (summary.pendingSync > 0) FarmSyncPendingReceipt(summary.pendingSync)
-    AnimalFarmQuickAction("Open tasks", { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) })
     AnimalFarmQuickAction("Open health", { onOpen(FarmDestination.Health()) })
     AnimalFarmQuickAction("Open sync status", { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) })
     summary.syncQueueCounts?.let { counts -> SyncQueueEntries(counts, onOpen) }
