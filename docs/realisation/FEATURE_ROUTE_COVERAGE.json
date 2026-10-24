@@ -2,7 +2,7 @@
   "schema_version": 2,
   "catalog_status": "ROUTE_EVIDENCE_PENDING_CI",
   "certification_status": "CI_PENDING",
-  "source_fingerprint": "sha256:503c7fbab8182b5ad82a3f0bf963f8cecbe63cdd7a14a29d1504c29efe057be9",
+  "source_fingerprint": "sha256:7bf014980f6a2e540baaa5f2f01434d92d81b708f87fab085f25612f881e60ed",
   "feature_count": 156,
   "mandatory_feature_count": 156,
   "features_with_route_evidence": 0,
