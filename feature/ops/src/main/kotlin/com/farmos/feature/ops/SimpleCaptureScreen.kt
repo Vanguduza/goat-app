@@ -1,5 +1,7 @@
 package com.farmos.feature.ops
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.layout.fillMaxWidth
 import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +40,8 @@ fun SimpleCaptureScreen(
     recordsVisible: Boolean = true,
     recordTitle: String = actionLabel,
     showPrimaryAction: Boolean = true,
+    /** Canonical embedded capture owner, distinct from its home/overview owner. */
+    captureScreenId: String? = null,
 ) {
     FarmOperationalPage(
         screenId = screenId,
@@ -49,7 +53,8 @@ fun SimpleCaptureScreen(
         overview()
         navigation()
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (captureVisible) FarmOperationalSection(recordTitle) {
+        if (captureVisible) Column(Modifier.fillMaxWidth().then(captureScreenId?.let { Modifier.testTag("farm-screen:$it") } ?: Modifier)) {
+        FarmOperationalSection(recordTitle) {
             extra()
             fields.forEach { (label, state) ->
                 OutlinedTextField(
@@ -65,6 +70,7 @@ fun SimpleCaptureScreen(
                 Text(actionLabel)
             }
             if (saved && !busy) FarmOfflineSaveReceipt()
+        }
         }
         if (recordsVisible) FarmOperationalRows(rows = rows, emptyTitle = empty)
     }

@@ -72,6 +72,7 @@ fun WaterModuleHost(
         overview = { if (workspace.value == "Overview") WaterStockOverview(records.value) },
         navigation = { WaterHomeNavigation(workspace.value, { workspace.value = it }, { page.value = it }, recordActions, records.value) },
         captureVisible = workspace.value == "Record water",
+        captureScreenId = "FOS-WATER-004",
         recordsVisible = false,
     ) }
         WaterModulePage.POINTS -> WaterPointListScreen(

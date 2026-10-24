@@ -35,6 +35,7 @@ data class FarmSelectorOption(val id: String, val label: String, val detail: Str
 
 /** P13 selection atoms; each tag names the canonical atom Screen ID the selector realises. */
 object FarmSelectionAtoms {
+    const val WORKER_SELECTOR = "farm-atom:FOS-ATOM-013"
     const val INVENTORY_ITEM_SELECTOR = "farm-atom:FOS-ATOM-009"
     const val SUPPLIER_SELECTOR = "farm-atom:FOS-ATOM-011"
     const val GROUP_SELECTOR = "farm-atom:FOS-ATOM-005"

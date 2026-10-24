@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-SYNC-014",
+  "registry_name": "Local Data Safe Confirmation",
+  "feature_ids": [
+    "FTR-SYNC-004"
+  ],
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "user_job": "Confirm a record is durably saved on this device without asserting a remote acknowledgement or permanent backup safety.",
+  "personas_and_grants": [
+    {
+      "persona": "Existing authorized parent-module user",
+      "grant_source": "No new grants. Existing parent command/read-model authorization and enabled state remain authoritative.",
+      "independent_role_matrix_review": "PENDING"
+    }
+  ],
+  "scope": {
+    "farm_source": "Active farm from the existing owning module",
+    "species_kind": "Not species-restricted; no species ownership is inferred by the presentation",
+    "subject": "The owning local operation only; pending synchronization is a separate fact.",
+    "sensitive_fields": []
+  },
+  "navigation": {
+    "route": "FarmOfflineSaveReceipt embedded after owning local commit",
+    "entry_points": [
+      "Successful local record commit in an existing capture owner"
+    ],
+    "arguments": [
+      "Existing parent farm and subject IDs only"
+    ],
+    "deep_link_authorization": "No new external deep link; parent route must enforce its existing farm/role boundary.",
+    "back_and_draft_behavior": "Read-only status in the parent page; no independent route or action.",
+    "aliases": [
+      "FOS-ATOM-034 local-save receipt shares this same rendered confirmation"
+    ]
+  },
+  "design": {
+    "recipe": "P15",
+    "reference_ids": [
+      "LOCK-MANAGEMENT-A"
+    ],
+    "native_golden_family": "Animal Farm shared native controls; ID-specific candidates are unapproved",
+    "token_version": "Current committed AnimalFarmTheme and protected visual-lock tokens",
+    "ordered_sections": [
+      "Existing owner header/navigation",
+      "Focused controls or read-only status",
+      "Actual matching records or local receipt"
+    ],
+    "shared_components": [
+      "FarmOperationalPage or its existing parent",
+      "FarmActionButton/FarmPrimaryButton/FarmOutlinedTextField as applicable",
+      "AnimalFarmTheme"
+    ],
+    "illustration_use": "Inherited parent illustration; no new decoration that obscures focused capture or status.",
+    "copy": {
+      "job": "Confirm a record is durably saved on this device without asserting a remote acknowledgement or permanent backup safety.",
+      "scope_disclosure": "The owning local operation only; pending synchronization is a separate fact."
+    },
+    "adaptive_layout": {
+      "phone": "Flow/wrap and vertical scrolling at 360 and 411dp; no font shrinking.",
+      "tablet": "Use the existing parent width and page layout at 780dp.",
+      "large_text": "Exercise 1.0,1.3,2.0 font scales and retain all lower content.",
+      "outdoor": "Outdoor palette and 64dp minimum touch targets; no hardware availability claim."
+    }
+  },
+  "fields": [],
+  "queries": [
+    {
+      "name": "localReceipt",
+      "read_model": "Existing saved flag set by local commit success, not by pressing Save",
+      "loading_empty_error": "Absent before commit or on validation failure.",
+      "freshness": "Local state supplied by existing owner; no remote freshness claim.",
+      "offline_source": "Current farm local database or already loaded parent state."
+    }
+  ],
+  "actions": [],
+  "state_matrix": [
+    {
+      "state": "before-commit",
+      "fixture": "Water form before local success",
+      "expected_ui": "No confirmation is rendered.",
+      "test_id": "ResourceVisualOwnerCertificationTest.waterCaptureCommitsExactLocalQuantityBeforeShowingItsReceipt"
+    },
+    {
+      "state": "committed-local",
+      "fixture": "One committed water operation",
+      "expected_ui": "Readable local receipt appears without claiming cloud or peer delivery.",
+      "test_id": "ResourceVisualOwnerCertificationTest.waterCaptureCommitsExactLocalQuantityBeforeShowingItsReceipt"
+    }
+  ],
+  "not_applicable_states": [
+    {
+      "state": "remote_acknowledged",
+      "reason": "This presentation does not establish a remote delivery acknowledgement."
+    }
+  ],
+  "accessibility_tests": [
+    "Named clickable controls and selected/disabled semantics",
+    "Actual touch bounds in every matrix cell",
+    "Text-layout overflow and ellipsis diagnostics",
+    "TalkBack and keyboard/manual pixel review remain unapproved"
+  ],
+  "functional_tests": [
+    "ResourceVisualOwnerCertificationTest.waterCaptureCommitsExactLocalQuantityBeforeShowingItsReceipt"
+  ],
+  "linked_routes": [
+    "Successful local record commit in an existing capture owner"
+  ],
+  "guide_and_resource_links": [
+    "core/design/src/main/kotlin/com/farmos/core/design/FarmFeedbackAtoms.kt",
+    "feature/ops/src/main/kotlin/com/farmos/feature/ops/SimpleCaptureScreen.kt"
+  ],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": null
+}
