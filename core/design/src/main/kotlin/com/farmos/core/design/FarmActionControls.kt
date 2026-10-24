@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +40,7 @@ fun FarmActionButton(
     val colors = AnimalFarmTheme.colors
     OutlinedButton(
         onClick = onClick,
-        modifier = modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
+        modifier = modifier.sizeIn(minWidth = AnimalFarmTheme.minimumTouchDp.dp, minHeight = AnimalFarmTheme.minimumTouchDp.dp),
         enabled = enabled,
         shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius),
         border = BorderStroke(FosDimens.Hairline, if (enabled) colors.divider else colors.divider.copy(alpha = 0.5f)),
@@ -66,7 +66,7 @@ fun FarmPrimaryButton(
     val colors = AnimalFarmTheme.colors
     Button(
         onClick = onClick,
-        modifier = modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
+        modifier = modifier.sizeIn(minWidth = AnimalFarmTheme.minimumTouchDp.dp, minHeight = AnimalFarmTheme.minimumTouchDp.dp),
         enabled = enabled,
         shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius),
         colors = ButtonDefaults.buttonColors(
@@ -92,7 +92,7 @@ fun FarmFilterChip(
         selected = selected,
         onClick = onClick,
         label = { Text(label) },
-        modifier = modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
+        modifier = modifier.sizeIn(minWidth = AnimalFarmTheme.minimumTouchDp.dp, minHeight = AnimalFarmTheme.minimumTouchDp.dp),
         shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius),
         leadingIcon = if (selected) {
             { Icon(Icons.Rounded.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }

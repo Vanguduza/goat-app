@@ -5,6 +5,10 @@ import com.farmos.review.NativeModuleReviewTheme
 import com.farmos.review.captureObservedNativeOwners
 
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.text.TextLayoutResult
+import org.junit.Assert.assertEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
@@ -117,6 +121,11 @@ class GoatHistoryRuntimeNavigationTest {
         render(doe().copy(status = GoatStatus.SOLD))
         traverse("Growth history", "FOS-GOAT-013") {
             compose.onNodeWithText("54.25 kg").assertExists().also { compose.captureObservedNativeOwners() }
+            val value = compose.onNodeWithText("54.25 kg").performScrollTo().assertIsDisplayed().fetchSemanticsNode()
+            val layouts = mutableListOf<TextLayoutResult>()
+            compose.runOnIdle { value.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts) }
+            assertEquals("Recorded weight must retain a readable native text layout", 1, layouts.size)
+            assertEquals("A short recorded value must not collapse into a vertical column", 1, layouts.single().lineCount)
         }
     }
 

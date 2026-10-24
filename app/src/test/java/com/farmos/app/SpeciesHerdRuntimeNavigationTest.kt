@@ -1,6 +1,12 @@
 package com.farmos.app
 
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.test.assertIsDisplayed
+import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -46,6 +52,7 @@ class SpeciesHerdRuntimeNavigationTest {
         open("Open profile")
         open("Lifecycle status")
         assertScreen("FOS-SHEEP-030")
+        assertReadableStatusActions()
         home()
     }
 
@@ -72,6 +79,7 @@ class SpeciesHerdRuntimeNavigationTest {
         open("Open profile")
         open("Lifecycle status")
         assertScreen("FOS-CATTLE-034")
+        assertReadableStatusActions()
         home()
     }
 
@@ -83,6 +91,21 @@ class SpeciesHerdRuntimeNavigationTest {
         open("Cattle records")
         assertScreen("FOS-CATTLE-002")
         compose.onNodeWithText("Showing the first 1 of 640 cattle by tag.").assertExists().also { compose.captureObservedNativeOwners() }
+    }
+
+    private fun assertReadableStatusActions() {
+        val minimum = if (System.getenv("GOAT_MODULE_REVIEW_MODE") == "OUTDOOR") 64f else 48f
+        listOf("Sold", "Deceased", "Culled").forEach { label ->
+            val control = compose.onNode(hasClickAction() and hasText(label)).performScrollTo().assertIsDisplayed().fetchSemanticsNode()
+            val target = control.touchBoundsInRoot
+            val density = control.layoutInfo.density.density
+            assertTrue("$label needs the full $minimum dp touch width and height", target.width / density + 0.5f >= minimum && target.height / density + 0.5f >= minimum)
+            val text = compose.onNodeWithText(label, useUnmergedTree = true).fetchSemanticsNode()
+            val layouts = mutableListOf<TextLayoutResult>()
+            compose.runOnIdle { text.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts) }
+            assertEquals("A named lifecycle action must expose a text layout", 1, layouts.size)
+            assertEquals("$label must not be squeezed into letter-by-letter wrapping", 1, layouts.single().lineCount)
+        }
     }
 
     private fun renderSpecies(module: FarmModule, label: String, counts: SpeciesHerdCounts? = null) {

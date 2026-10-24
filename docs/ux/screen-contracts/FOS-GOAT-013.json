@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-GOAT-013",
+  "registry_name": "Growth History",
+  "feature_ids": [
+    "FTR-GOAT-002"
+  ],
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "user_job": "Read the selected goat's recorded weights and changes through time, including after it leaves the active herd, without losing units at enlarged text sizes.",
+  "personas_and_grants": [
+    {
+      "persona": "An existing authorized reader of the owning farm/module",
+      "grant_source": "Original command/read authorization remains unchanged; export requires current EXPORT_FARM_DATA authority at disclosure time.",
+      "independent_role_matrix_approval": "PENDING"
+    }
+  ],
+  "scope": {
+    "farm_source": "Current authenticated farm/session owner",
+    "species_kind": "Goat",
+    "subject": "The selected GoatSnapshot and its owning farm; rendering a history is not a new measurement, status change or health recommendation.",
+    "sensitive_fields": [
+      "Current farm records and document contents; keep original scope and authority checks."
+    ]
+  },
+  "navigation": {
+    "route": "GoatExperienceScreen selected animal > Growth history; GoatGrowthHistoryScreen",
+    "entry_points": [
+      "GoatExperienceScreen selected animal > Growth history; GoatGrowthHistoryScreen"
+    ],
+    "arguments": [
+      "Existing farm/subject identity from the owning route only"
+    ],
+    "deep_link_authorization": "No new external deep link or authorization route. Existing owner validation is unchanged.",
+    "back_and_draft_behavior": "Use the original callback and preserve selected-animal identity. Changing presentation does not reclassify an exited animal or write a measurement.",
+    "aliases": []
+  },
+  "design": {
+    "recipe": "P09",
+    "reference_ids": [
+      "LOCK-MANAGEMENT-A"
+    ],
+    "native_golden_family": "Native review candidates; no approved baseline or independent review is asserted.",
+    "token_version": "Current AnimalFarmTheme/metrics; protected references unchanged",
+    "ordered_sections": [
+      "Existing owner Back and goat family header",
+      "Selected animal identity",
+      "Recorded date/change label and exact formatted recorded weight",
+      "Existing no-record and local-sync context"
+    ],
+    "shared_components": [
+      "FarmOperationalPage",
+      "FarmModuleTools and FarmSectionTabs where applicable",
+      "FarmPrimaryButton / FarmActionButton",
+      "Existing AnimalFarm native surfaces and species artwork"
+    ],
+    "illustration_use": "Existing approved goat artwork on the goat history; inherited report chrome without decorative data claims.",
+    "copy": {
+      "job": "Read the selected goat's recorded weights and changes through time, including after it leaves the active herd, without losing units at enlarged text sizes.",
+      "scope_disclosure": "The selected GoatSnapshot and its owning farm; rendering a history is not a new measurement, status change or health recommendation."
+    },
+    "adaptive_layout": {
+      "phone": "360 and 411dp; no fixed-width value squeezed behind a long label",
+      "tablet": "780dp; balanced key/value columns where space and font scale permit",
+      "large_text": "Respect 1.0,1.3,2.0 font scale; stack history label/value on narrow or large-text layouts, wrap actions without reducing text",
+      "outdoor": "Existing outdoor colors and a minimum 64dp control width and height; preserve readable values."
+    }
+  },
+  "fields": [],
+  "queries": [
+    {
+      "name": "Existing owning local projection",
+      "read_model": "Read the weight history supplied by the existing selected-goat owner. Do not impose another display cap or create records. Preserve existing kilogram/date/change formatting.",
+      "loading_empty_error": "Distinguish loading, error, empty, partial and wholly unrecorded values; no false zero or completion.",
+      "freshness": "Local recorded values; no new remote freshness or acknowledgement claim.",
+      "offline_source": "Original Room/read-model state and local operation ownership."
+    }
+  ],
+  "actions": [
+    {
+      "label": "Back",
+      "intent": "Return to the same goat profile through the existing owner; no record operation is emitted.",
+      "permission": "Current owning route and command permission; no new grant.",
+      "command_or_destination": "Return to the same goat profile through the existing owner; no record operation is emitted.",
+      "validation": [
+        "Preserve existing farm/subject and export authority checks."
+      ],
+      "effects": [
+        "Only the described read/navigation/export through its existing owner."
+      ],
+      "idempotency": "Reads/navigation create no farm operation; exports keep existing busy/cancellation ownership.",
+      "success_receipt": "Only existing real result receipts; viewing a page is not a saved record or a successful export.",
+      "failure_and_recovery": "Keep the original owner error and recovery route; never substitute an approval or successful export."
+    }
+  ],
+  "state_matrix": [
+    {
+      "state": "recorded history",
+      "fixture": "Three deterministic weights for Nala/GT-024",
+      "expected_ui": "Keep their existing record values, units, order and subject identity.",
+      "test_id": "GoatHistoryRuntimeNavigationTest.profileRecordLinksTraverseToEachHistoryAndRestoreTheProfile"
+    },
+    {
+      "state": "after lifecycle exit and enlarged text",
+      "fixture": "The same selected goat has exited; weight 54.25 kg remains recorded",
+      "expected_ui": "History stays accessible; the short value has one native text line rather than eight letter-sized lines at 200% text.",
+      "test_id": "GoatHistoryRuntimeNavigationTest.recordsRemainReadableAfterALifecycleExit"
+    }
+  ],
+  "not_applicable_states": [
+    {
+      "state": "new farm mutation or schema migration",
+      "reason": "This contract changes presentation, navigation and display truthfulness; existing query/command/schema ownership is retained."
+    }
+  ],
+  "accessibility_tests": [
+    "Selected/expanded/disabled control semantics remain named",
+    "Actual control touch bounds at normal and 200% text",
+    "Short recorded value must remain a readable line; long labels may reflow without clipping",
+    "Keyboard/TalkBack and independent pixel review remain pending; automated captures are not approval."
+  ],
+  "functional_tests": [
+    "GoatHistoryRuntimeNavigationTest.profileRecordLinksTraverseToEachHistoryAndRestoreTheProfile",
+    "GoatHistoryRuntimeNavigationTest.recordsRemainReadableAfterALifecycleExit"
+  ],
+  "linked_routes": [
+    "GoatExperienceScreen selected animal > Growth history; GoatGrowthHistoryScreen"
+  ],
+  "guide_and_resource_links": [
+    "feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatHistoryScreens.kt",
+    "feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatExperienceScreen.kt",
+    "docs/ux/animal-farm-visual-lock/PAGE-PATTERNS.md"
+  ],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": null
+}

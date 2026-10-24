@@ -19,6 +19,8 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveable
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -462,6 +464,7 @@ private fun SpeciesOperations(
     extra(selected, onBack)
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SpeciesStatus(
     config: SpeciesUiConfig,
@@ -484,7 +487,7 @@ private fun SpeciesStatus(
             FarmOperationalRows(emptyList(), "No animal selected", null)
         } else {
             FarmOperationalSection(selected.label) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = { pending = "sold" }, enabled = !busy) { Text("Sold") }
                     TextButton(onClick = { pending = "dead" }, enabled = !busy) { Text("Deceased") }
                     TextButton(onClick = { pending = "culled" }, enabled = !busy) { Text("Culled") }

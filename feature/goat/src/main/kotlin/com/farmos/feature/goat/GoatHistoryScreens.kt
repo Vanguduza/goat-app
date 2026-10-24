@@ -8,6 +8,7 @@ import com.farmos.core.design.FarmModuleTools
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -147,12 +150,18 @@ internal fun GoatHistoryFrame(
 
 @Composable
 internal fun GoatHistoryRow(primary: String, secondary: String, modifier: Modifier = Modifier) {
-    Row(
-        modifier.fillMaxWidth().padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(primary, style = MaterialTheme.typography.bodyLarge)
-        Text(secondary, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+    BoxWithConstraints(modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        if (maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.3f) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(primary, Modifier.fillMaxWidth(), style = MaterialTheme.typography.bodyLarge, color = AnimalFarmTheme.colors.mutedInk)
+                Text(secondary, Modifier.fillMaxWidth(), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+            }
+        } else {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(primary, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = AnimalFarmTheme.colors.mutedInk)
+                Text(secondary, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.End)
+            }
+        }
     }
 }
 
