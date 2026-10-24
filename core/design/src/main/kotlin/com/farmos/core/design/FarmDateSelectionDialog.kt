@@ -48,7 +48,9 @@ internal fun FarmDateSelectionDialog(
     val colors = AnimalFarmTheme.colors
     val calendarWidth = AnimalFarmTheme.minimumTouchDp.dp * 7 + FosDimens.CardPadding * 4
     val availableWidth = configuration.screenWidthDp.dp - FosDimens.ScreenMargin * 2
-    val compact = availableWidth < calendarWidth || inheritedDensity.fontScale > 1.3f
+    // Material's native calendar day cells remain 48 dp even in a wider container.
+    // The outdoor 64 dp contract therefore requires its native date-input presentation.
+    val compact = AnimalFarmTheme.minimumTouchDp > 48 || availableWidth < calendarWidth || inheritedDensity.fontScale > 1.3f
     val state = rememberDatePickerState(
         initialSelectedDateMillis = initialDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
         initialDisplayMode = if (compact) DisplayMode.Input else DisplayMode.Picker,
