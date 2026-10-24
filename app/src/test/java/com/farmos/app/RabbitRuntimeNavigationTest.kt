@@ -20,13 +20,13 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class RabbitRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     @Test
     fun dashboardActionsReachExactRegisteredOwnersAndReturn() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 RabbitProgrammeScreen(
                     cages = emptyList(),
                     waves = emptyList(),
@@ -47,28 +47,34 @@ class RabbitRuntimeNavigationTest {
         }
 
         val routes = listOf(
-            "Open Breeding animals" to "FOS-RABBIT-002",
-            "Open Register rabbit" to "FOS-RABBIT-005",
-            "Open Cages & nest boxes" to "FOS-RABBIT-006",
-            "Open Breeding wave" to "FOS-RABBIT-009",
-            "Open Palpation" to "FOS-RABBIT-011",
-            "Open Kindling" to "FOS-RABBIT-017",
-            "Open Foster kits" to "FOS-RABBIT-020",
-            "Open Weaning" to "FOS-RABBIT-022",
-            "Open Mating outcome" to "FOS-RABBIT-012",
-            "Open Nest-box schedule" to "FOS-RABBIT-013",
-            "Open GI-stasis red flag" to "FOS-RABBIT-034",
+            "Breeding animals" to "FOS-RABBIT-002",
+            "Register rabbit" to "FOS-RABBIT-005",
+            "Cages & nest boxes" to "FOS-RABBIT-006",
+            "Breeding wave" to "FOS-RABBIT-009",
+            "Palpation" to "FOS-RABBIT-011",
+            "Kindling" to "FOS-RABBIT-017",
+            "Foster kits" to "FOS-RABBIT-020",
+            "Weaning" to "FOS-RABBIT-022",
+            "Mating outcome" to "FOS-RABBIT-012",
+            "Nest-box schedule" to "FOS-RABBIT-013",
+            "GI-stasis red flag" to "FOS-RABBIT-034",
         )
 
         routes.forEach { (action, screenId) ->
+            val section = when (action) {
+                "Breeding animals", "Register rabbit", "GI-stasis red flag" -> "Animals"
+                "Cages & nest boxes", "Nest-box schedule" -> "Housing"
+                else -> "Breeding"
+            }
+            compose.onNodeWithTag("rabbit-section:$section").performScrollTo().performClick()
             compose.onNode(hasClickAction() and hasText(action))
                 .performScrollTo()
                 .performClick()
-            compose.onNodeWithTag("farm-screen:$screenId").assertExists()
+            compose.onNodeWithTag("farm-screen:$screenId").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNode(hasClickAction() and hasText("Farm home"))
                 .performScrollTo()
                 .performClick()
-            compose.onNode(hasClickAction() and hasText(action)).assertExists()
+            compose.onNode(hasClickAction() and hasText(action)).assertExists().also { compose.captureObservedNativeOwners() }
         }
     }
 }

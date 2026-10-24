@@ -3,15 +3,18 @@ package com.farmos.feature.ops
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
+import com.farmos.core.design.FarmActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -30,7 +33,7 @@ import com.farmos.core.design.NoFarmSelectorSearch
 import java.time.LocalDate
 import java.time.ZoneId
 
-private enum class HealthPage {
+internal enum class HealthPage {
     DASHBOARD,
     OBSERVATIONS,
     RECORD_OBSERVATION,
@@ -153,9 +156,9 @@ fun HealthObservationScreen(
     /** Red-flag observation summaries for FOS-HEALTH-028; empty when none are recorded. */
     redFlagObservations: List<String> = emptyList(),
 ) {
-    var page by remember { mutableStateOf(entryPage.toHealthPage()) }
-    var backStack by remember { mutableStateOf(emptyList<HealthPage>()) }
-    var selectedRecordId by remember { mutableStateOf<String?>(null) }
+    var page by rememberSaveable { mutableStateOf(entryPage.toHealthPage()) }
+    var backStack by rememberSaveable { mutableStateOf(emptyList<HealthPage>()) }
+    var selectedRecordId by rememberSaveable { mutableStateOf<String?>(null) }
     val home = {
         backStack = emptyList()
         page = HealthPage.DASHBOARD
@@ -175,6 +178,8 @@ fun HealthObservationScreen(
     val vetVisitBack = if (entryPage == HealthEntryPage.VET_VISIT) onBack else home
     val labResultBack = if (entryPage == HealthEntryPage.LAB_RESULT) onBack else home
     val formularyBack = if (entryPage == HealthEntryPage.FORMULARY) onBack else home
+    val pageStateHolder = rememberSaveableStateHolder()
+    pageStateHolder.SaveableStateProvider(page.name) {
     when (page) {
         HealthPage.DASHBOARD -> {
             HealthDashboard(readModel, packs, error, { openRecord(it) }, onBack)
@@ -299,6 +304,7 @@ fun HealthObservationScreen(
             HealthReportScreen(reportStats, readModel, vaccinations, home)
         }
     }
+    }
 }
 
 private fun HealthEntryPage.toHealthPage(): HealthPage =
@@ -316,78 +322,6 @@ private fun HealthEntryPage.toHealthPage(): HealthPage =
  * FOS-HEALTH-001 — health dashboard. FOS-HEALTH-002 — today health actions: a dedicated page
  * (HealthPage.TODAY_ACTIONS) plus the compact "Today health picture" summary section below.
  */
-@Composable
-private fun HealthDashboard(
-    counts: HealthReadModel,
-    packs: List<String>,
-    error: String?,
-    onOpen: (HealthPage) -> Unit,
-    onBack: () -> Unit,
-) {
-    FarmOperationalPage(
-        "FOS-HEALTH-001",
-        "Health",
-        "Observations, treatments and withdrawals on this device.",
-        FarmVisualClass.I2,
-        onBack,
-    ) {
-        FarmOperationalSection("Today health picture") {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                // Exhaustive farm-scoped counts; shown as a dash until loaded, never as a capped list size.
-                HealthMetric("Observations", counts.observationCount)
-                HealthMetric("Treatments", counts.treatmentCount)
-                HealthMetric("Active withdrawals", counts.activeWithdrawalCount)
-            }
-        }
-        FarmOperationalSection("Observe and review") {
-            TextButton(onClick = { onOpen(HealthPage.OBSERVATIONS) }) { Text("Observation list") }
-            Button(onClick = { onOpen(HealthPage.RECORD_OBSERVATION) }) { Text("Record observation") }
-            TextButton(onClick = { onOpen(HealthPage.REFERENCES) }) { Text("Reference library") }
-            TextButton(onClick = { onOpen(HealthPage.EMERGENCY) }) { Text("Emergency / red flag") }
-            Button(onClick = { onOpen(HealthPage.TODAY_ACTIONS) }) { Text("Today health actions") }
-        }
-        FarmOperationalSection(
-            "Clinical records",
-            "Treatment capture requires a vet-approved formulary item. Farm OS does not prescribe a dose.",
-        ) {
-            TextButton(onClick = { onOpen(HealthPage.FORMULARY) }) { Text("Formulary") }
-            TextButton(onClick = { onOpen(HealthPage.TREATMENT) }) { Text("Record treatment") }
-            TextButton(onClick = { onOpen(HealthPage.WITHDRAWALS) }) { Text("Withdrawal windows") }
-            TextButton(onClick = { onOpen(HealthPage.VET_VISIT) }) { Text("Record vet visit") }
-            TextButton(onClick = { onOpen(HealthPage.LAB_RESULT) }) { Text("Record lab result") }
-        }
-        FarmOperationalSection("Health records", "Recorded history on this device. Records only; no diagnosis or dosing.") {
-            TextButton(onClick = { onOpen(HealthPage.TREATMENT_RECORDS) }) { Text("Treatment records") }
-            TextButton(onClick = { onOpen(HealthPage.VACCINATION_SCHEDULE) }) { Text("Vaccination schedule") }
-            TextButton(onClick = { onOpen(HealthPage.VET_VISITS) }) { Text("Vet visits") }
-            TextButton(onClick = { onOpen(HealthPage.LAB_RESULTS) }) { Text("Lab results") }
-            TextButton(onClick = { onOpen(HealthPage.FORMULARY_ITEM) }) { Text("Formulary items") }
-            TextButton(onClick = { onOpen(HealthPage.PROTOCOL_PACK_DETAIL) }) { Text("Protocol pack detail") }
-            TextButton(onClick = { onOpen(HealthPage.TIMELINE) }) { Text("Health timeline") }
-            TextButton(onClick = { onOpen(HealthPage.HEALTH_REPORT) }) { Text("Health report") }
-        }
-        FarmOperationalSection("Protocol packs") {
-            Text("${packs.size} protocol pack(s) on this device")
-            TextButton(onClick = { onOpen(HealthPage.PROTOCOLS) }) { Text("View protocol packs") }
-            TextButton(onClick = { onOpen(HealthPage.ACCEPT_PROTOCOL) }) { Text("Accept protocol pack") }
-            TextButton(onClick = { onOpen(HealthPage.EDIT_PROTOCOL) }) { Text("Add protocol slot") }
-            TextButton(onClick = { onOpen(HealthPage.APPLY_PROTOCOL) }) { Text("Apply protocol pack") }
-        }
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-    }
-}
-
-@Composable
-private fun HealthMetric(
-    label: String,
-    value: Int?,
-) {
-    androidx.compose.foundation.layout.Column(Modifier.testTag("health-metric:$label")) {
-        Text(value?.toString() ?: "—", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(label, style = MaterialTheme.typography.labelMedium)
-    }
-}
-
 @Composable
 private fun HealthRows(
     screenId: String,
@@ -518,8 +452,8 @@ private fun RecordObservationScreen(
     onBack: () -> Unit,
 ) {
     var species by remember { mutableStateOf(speciesCodes.firstOrNull().orEmpty()) }
-    var signs by remember { mutableStateOf("") }
-    var firstAid by remember { mutableStateOf("") }
+    var signs by rememberSaveable { mutableStateOf("") }
+    var firstAid by rememberSaveable { mutableStateOf("") }
     FarmOperationalPage("FOS-HEALTH-004", "Record observation", "Record signs first; this is not a diagnosis.", onBack = onBack) {
         FarmOperationalSection("Observation") {
             FarmSpeciesSelector(speciesCodes, species, busy) { species = it }
@@ -556,10 +490,10 @@ private fun FormularyScreen(
     onCreate: (String, String, String, Int?) -> Unit,
     onBack: () -> Unit,
 ) {
-    var product by remember { mutableStateOf("") }
-    var species by remember { mutableStateOf("goat") }
-    var vetClass by remember { mutableStateOf("vaccine") }
-    var meatDays by remember { mutableStateOf("") }
+    var product by rememberSaveable { mutableStateOf("") }
+    var species by rememberSaveable { mutableStateOf("goat") }
+    var vetClass by rememberSaveable { mutableStateOf("vaccine") }
+    var meatDays by rememberSaveable { mutableStateOf("") }
     FarmOperationalPage("FOS-HEALTH-013", "Formulary", "New entries are unapproved drafts and cannot be used for treatment.", onBack = onBack) {
         FarmOperationalRows(formulary, "No formulary items", "Record a draft product; veterinary approval is separate.")
         FarmOperationalSection("New draft item") {
@@ -596,9 +530,9 @@ private fun TreatmentScreen(
     onRecord: (String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var species by remember { mutableStateOf("goat") }
-    var formularyId by remember { mutableStateOf("") }
-    var reason by remember { mutableStateOf("") }
+    var species by rememberSaveable { mutableStateOf("goat") }
+    var formularyId by rememberSaveable { mutableStateOf("") }
+    var reason by rememberSaveable { mutableStateOf("") }
     FarmOperationalPage(
         "FOS-HEALTH-007",
         "Record treatment",
@@ -641,9 +575,9 @@ private fun AcceptProtocolScreen(
     onAccept: (String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var species by remember { mutableStateOf("goat") }
-    var name by remember { mutableStateOf("") }
-    var vet by remember { mutableStateOf("") }
+    var species by rememberSaveable { mutableStateOf("goat") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var vet by rememberSaveable { mutableStateOf("") }
     FarmOperationalPage(
         "FOS-HEALTH-017",
         "Accept protocol pack",
@@ -681,11 +615,11 @@ private fun ProtocolSlotScreen(
     onAdd: (String, String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var packId by remember { mutableStateOf("") }
-    var code by remember { mutableStateOf("") }
-    var title by remember { mutableStateOf("") }
-    var offset by remember { mutableStateOf("0") }
-    var anchor by remember { mutableStateOf("apply_date") }
+    var packId by rememberSaveable { mutableStateOf("") }
+    var code by rememberSaveable { mutableStateOf("") }
+    var title by rememberSaveable { mutableStateOf("") }
+    var offset by rememberSaveable { mutableStateOf("0") }
+    var anchor by rememberSaveable { mutableStateOf("apply_date") }
     FarmOperationalPage(
         "FOS-HEALTH-019",
         "Protocol slot editor",
@@ -739,7 +673,7 @@ private fun ApplyProtocolScreen(
     onApply: (String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var packId by remember { mutableStateOf("") }
+    var packId by rememberSaveable { mutableStateOf("") }
     var animal by remember { mutableStateOf<FarmSelectorOption?>(null) }
     val animalId = animal?.id.orEmpty()
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
@@ -792,8 +726,8 @@ private fun VetVisitScreen(
     onBack: () -> Unit,
 ) {
     var species by remember { mutableStateOf(speciesCodes.firstOrNull().orEmpty()) }
-    var reason by remember { mutableStateOf("") }
-    var vet by remember { mutableStateOf("") }
+    var reason by rememberSaveable { mutableStateOf("") }
+    var vet by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage(
         "FOS-HEALTH-021",
@@ -837,9 +771,9 @@ private fun LabResultScreen(
 ) {
     var animal by remember { mutableStateOf<FarmSelectorOption?>(null) }
     val animalId = animal?.id.orEmpty()
-    var test by remember { mutableStateOf("") }
-    var result by remember { mutableStateOf("") }
-    var cells by remember { mutableStateOf("") }
+    var test by rememberSaveable { mutableStateOf("") }
+    var result by rememberSaveable { mutableStateOf("") }
+    var cells by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage(
         "FOS-HEALTH-024",
@@ -920,7 +854,7 @@ private fun VaccinationScheduleScreen(
                 Text("No review candidates on this device")
             } else {
                 dueCandidates.forEach { candidate ->
-                    TextButton(onClick = onCapture, modifier = Modifier.fillMaxWidth()) {
+                    FarmActionButton(onClick = onCapture, modifier = Modifier.fillMaxWidth()) {
                         Text("${candidate.label} — ${candidate.reason}")
                     }
                 }
@@ -932,7 +866,7 @@ private fun VaccinationScheduleScreen(
                 Text("No vaccinations recorded on this device")
             } else {
                 vaccinations.forEach { record ->
-                    TextButton(onClick = { onOpenDetail(record.id) }, modifier = Modifier.fillMaxWidth()) {
+                    FarmActionButton(onClick = { onOpenDetail(record.id) }, modifier = Modifier.fillMaxWidth()) {
                         Text("${record.subjectLabel} · ${record.formularyLabel} · ${LocalDate.ofEpochDay(record.occurredEpochDay)}")
                     }
                 }
@@ -957,12 +891,12 @@ private fun VaccinationCaptureScreen(
     onBack: () -> Unit,
 ) {
     var species by remember { mutableStateOf(speciesCodes.firstOrNull().orEmpty()) }
-    var useGroup by remember { mutableStateOf(false) }
+    var useGroup by rememberSaveable { mutableStateOf(false) }
     var animal by remember { mutableStateOf<FarmSelectorOption?>(null) }
-    var groupId by remember { mutableStateOf("") }
-    var formularyId by remember { mutableStateOf("") }
-    var dose by remember { mutableStateOf("") }
-    var method by remember { mutableStateOf("") }
+    var groupId by rememberSaveable { mutableStateOf("") }
+    var formularyId by rememberSaveable { mutableStateOf("") }
+    var dose by rememberSaveable { mutableStateOf("") }
+    var method by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     val dayOk = runCatching { LocalDate.parse(day) }.isSuccess
     val targetOk = if (useGroup) groupId.isNotBlank() else animal != null
@@ -1085,15 +1019,15 @@ private fun TodayHealthActionsScreen(
                 }
                 if (dueCandidates.size > 20) Text("…and ${dueCandidates.size - 20} more on the schedule")
             }
-            TextButton(onClick = onOpenSchedule) { Text("Open vaccination schedule") }
+            FarmActionButton(onClick = onOpenSchedule) { Text("Open vaccination schedule") }
             Button(onClick = onCapture, modifier = Modifier.fillMaxWidth()) { Text("Record vaccination") }
         }
         FarmOperationalSection("Pending health work") {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                HealthMetric("Active withdrawals", counts.activeWithdrawalCount)
-                HealthMetric("Observations", counts.observationCount)
-                HealthMetric("Treatments", counts.treatmentCount)
-            }
+            com.farmos.core.design.FarmMetricStrip(listOf(
+                com.farmos.core.design.FarmMetricValue("Active withdrawals", counts.activeWithdrawalCount?.toString() ?: "—"),
+                com.farmos.core.design.FarmMetricValue("Observations", counts.observationCount?.toString() ?: "—"),
+                com.farmos.core.design.FarmMetricValue("Treatments", counts.treatmentCount?.toString() ?: "—"),
+            ))
         }
     }
 }
@@ -1142,15 +1076,13 @@ private fun HealthReportScreen(
             }
         }
         FarmOperationalSection("Recorded activity") {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                HealthMetric("Observations", counts.observationCount)
-                HealthMetric("Treatments", counts.treatmentCount)
-                HealthMetric("Active withdrawals", counts.activeWithdrawalCount)
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                HealthMetric("Vet visits", counts.vetVisitCount)
-                HealthMetric("Lab results", counts.labResultCount)
-            }
+            com.farmos.core.design.FarmMetricStrip(listOf(
+                com.farmos.core.design.FarmMetricValue("Observations", counts.observationCount?.toString() ?: "—"),
+                com.farmos.core.design.FarmMetricValue("Treatments", counts.treatmentCount?.toString() ?: "—"),
+                com.farmos.core.design.FarmMetricValue("Active withdrawals", counts.activeWithdrawalCount?.toString() ?: "—"),
+                com.farmos.core.design.FarmMetricValue("Vet visits", counts.vetVisitCount?.toString() ?: "—"),
+                com.farmos.core.design.FarmMetricValue("Lab results", counts.labResultCount?.toString() ?: "—"),
+            ))
         }
     }
 }

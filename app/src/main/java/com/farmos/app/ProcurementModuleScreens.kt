@@ -1,10 +1,21 @@
 package com.farmos.app
 
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmPrimaryButton as Button
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -164,6 +175,11 @@ internal fun PurchaseReceiptScreen(
     ) {
         picked.value?.let { purchase ->
             val item = itemsByName[purchase.itemLabel]
+            FarmWorkflowTimeline("Recorded purchase", listOf(
+                FarmWorkflowStep("Supplier", purchase.supplierName, LocalDate.ofEpochDay(purchase.epochDay).toString(), FarmWorkflowState.RECORDED),
+                FarmWorkflowStep("Inventory received", purchase.quantity, purchase.itemLabel, FarmWorkflowState.RECORDED),
+                FarmWorkflowStep("Expense", procurementMoney(purchase.amountMinor, purchase.currency), state = FarmWorkflowState.RECORDED),
+            ), caption = "These effects were recorded together with this purchase.")
             FarmOperationalSection("Receipt") {
                 Text("Supplier: ${purchase.supplierName}")
                 Text("Item: ${purchase.itemLabel}")

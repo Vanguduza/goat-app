@@ -13,7 +13,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
+import com.farmos.core.design.FarmOperationalPage
+import com.farmos.core.design.FarmSectionTabs
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -236,57 +238,25 @@ internal fun SyncQueueScreen(
     onTrace: (String) -> Unit = {},
     onRetry: () -> Unit = {},
 ) {
-    AnimalFarmCanvas(Modifier.testTag("farm-screen:${view.screenId}")) {
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(AnimalFarmHomeMetrics.pageInset),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            AnimalFarmModuleHeader(view.title, view.subtitle)
-            if (state != SyncQueueUiState.Denied) SyncQueueSwitcher(view, onSelectView)
-            when (state) {
-                SyncQueueUiState.Loading -> FarmLoadingSkeleton("Loading sync queue")
-                SyncQueueUiState.Denied -> FarmPermissionExplanation(
-                    "Sync queues are not available for your farm role.",
-                    "Sync queues show changes saved on this device and are limited to farm roles that record farm work.",
-                )
-                is SyncQueueUiState.Failed -> FarmErrorRecovery(state.message, onRetry)
-                is SyncQueueUiState.Loaded -> SyncQueueContent(view, state.rows, state.total, onTrace)
-            }
-            TextButton(
-                onClick = onBack,
-                modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
-            ) { Text("Farm home") }
+    FarmOperationalPage(view.screenId, view.title, view.subtitle, onBack = onBack) {
+        if (state != SyncQueueUiState.Denied) SyncQueueSwitcher(view, onSelectView)
+        when (state) {
+            SyncQueueUiState.Loading -> FarmLoadingSkeleton("Loading sync queue")
+            SyncQueueUiState.Denied -> FarmPermissionExplanation(
+                "Sync queues are not available for your farm role.",
+                "Sync queues are limited to farm roles that record farm work.",
+            )
+            is SyncQueueUiState.Failed -> FarmErrorRecovery(state.message, onRetry)
+            is SyncQueueUiState.Loaded -> SyncQueueContent(view, state.rows, state.total, onTrace)
         }
     }
 }
 
 @Composable
 private fun SyncQueueSwitcher(current: SyncQueueView, onSelectView: (SyncQueueView) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        SyncQueueView.entries.chunked(2).forEach { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                row.forEach { option ->
-                    val selected = option == current
-                    TextButton(
-                        onClick = { if (!selected) onSelectView(option) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
-                            .semantics { this.selected = selected },
-                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
-                    ) {
-                        Text(
-                            option.shortLabel,
-                            maxLines = 1,
-                            softWrap = false,
-                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                        )
-                    }
-                }
-                repeat(2 - row.size) { Spacer(Modifier.weight(1f)) }
-            }
-        }
-    }
+    FarmSectionTabs(SyncQueueView.entries.map { it.shortLabel }, current.shortLabel, { label ->
+        SyncQueueView.entries.firstOrNull { it.shortLabel == label }?.takeIf { it != current }?.let(onSelectView)
+    })
 }
 
 @Composable

@@ -1,5 +1,16 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -82,11 +93,7 @@ fun GroupRecordNavigator(
     val current = page
     if (current == null) {
         home {
-            FarmOperationalSection("Records") {
-                GroupRecordPage.entries.forEach { target ->
-                    TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text("Open ${target.label}") }
-                }
-            }
+            FarmModuleTools(listOf(FarmToolGroup("Browse", GroupRecordPage.entries.map { target -> FarmToolAction("Open ${target.label}", { page = target }) })), title = "Records")
         }
     } else {
         GroupRecordPageScreen(current, groups, loadGroup) { page = null }
@@ -164,12 +171,12 @@ private fun GroupCensusContent(records: GroupRecords) {
         AnimalFarmEmptyState("No census recorded for this group.")
         return
     }
-    FarmOperationalSection("Census records · ${records.census.size}") {
-        records.census.forEachIndexed { index, census ->
+    FarmWorkflowTimeline("Census history", records.census.sortedBy { it.epochDay }.map { FarmWorkflowStep(day(it.epochDay), "${it.headCount} head", state = FarmWorkflowState.RECORDED) }, recordsContent = {
+        FarmOperationalSection("Census records · ${records.census.size}") { records.census.forEachIndexed { index, census ->
             if (index > 0) HorizontalDivider()
             GroupRow(day(census.epochDay), "${census.headCount} head", "group-census:${census.id}")
-        }
-    }
+        } }
+    })
 }
 
 /** FOS-GROUP-009 */
@@ -187,10 +194,12 @@ private fun GroupTimelineContent(records: GroupRecords) {
         AnimalFarmEmptyState("No records for this group on this device.")
         return
     }
+    FarmWorkflowTimeline("Group events", events.reversed().map { (_, _, text) -> FarmWorkflowStep(text.first, text.second, state = FarmWorkflowState.RECORDED) }, caption = "Recorded census, grazing and feed events.", recordsContent = {
     FarmOperationalSection("Events · ${events.size}") {
         events.forEachIndexed { index, (_, key, text) ->
             if (index > 0) HorizontalDivider()
             GroupRow(text.first, text.second, "group-event:$key")
         }
     }
+    })
 }

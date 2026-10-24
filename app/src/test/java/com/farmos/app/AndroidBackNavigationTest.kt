@@ -128,10 +128,10 @@ class AndroidBackNavigationTest {
         compose.onNodeWithTag("farm-screen:FOS-HOME-002").assertDoesNotExist()
 
         compose.onNode(hasClickAction() and hasText("More")).performClick()
-        compose.onNodeWithText("Farm records and tools").assertIsDisplayed()
+        compose.onNodeWithTag("farm-menu").assertIsDisplayed()
         back()
         compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertIsDisplayed()
-        compose.onNodeWithText("Farm records and tools").assertDoesNotExist()
+        compose.onNodeWithTag("farm-menu").assertDoesNotExist()
         compose.runOnIdle {
             assertEquals(0, signOuts)
             assertEquals(0, opened)
@@ -157,7 +157,7 @@ class AndroidBackNavigationTest {
                 onBack = { leftSheep++ },
             )
         }
-        click("Open Sheep records")
+        click("Sheep records")
         compose.onNodeWithTag("farm-screen:FOS-SHEEP-002").assertIsDisplayed()
         click("SH-B · Hazel · female · active")
         compose.onNodeWithTag("farm-screen:FOS-SHEEP-003").assertIsDisplayed()
@@ -168,7 +168,7 @@ class AndroidBackNavigationTest {
         compose.onNodeWithText("SH-B · Hazel · female · active").assertExists()
         back()
         // This page's rendered return action is the sheep dashboard.
-        compose.onNodeWithText("Individual sheep records on this device").assertIsDisplayed()
+        compose.onNodeWithTag("farm-screen:FOS-SHEEP-001").assertIsDisplayed()
         compose.onNodeWithTag("farm-screen:FOS-SHEEP-006").assertDoesNotExist()
         compose.runOnIdle {
             assertEquals(0, leftSheep)
@@ -231,7 +231,7 @@ class AndroidBackNavigationTest {
     }
 
     private fun click(label: String) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+        compose.revealFarmTool(label).performScrollTo().performClick()
     }
 
     @Composable

@@ -1,7 +1,14 @@
 package com.farmos.feature.goat
 
+import com.farmos.core.design.FarmToolGroup
+
+import com.farmos.core.design.FarmToolAction
+
+import com.farmos.core.design.FarmModuleTools
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,7 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -95,32 +104,23 @@ internal fun GoatHistoryPage(
 /** Profile entry points into the read-only record pages. Records stay readable after an exit. */
 @Composable
 internal fun GoatRecordLinks(goat: GoatSnapshot, onOpen: (GoatPage) -> Unit) {
-    FarmIllustratedSectionSurface {
-        Text("Records", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        val links = buildList {
-            add("Timeline" to GoatPage.TIMELINE)
-            add("Growth history" to GoatPage.GROWTH_HISTORY)
-            add("Growth chart" to GoatPage.GROWTH_CHART)
-            add("Average daily gain" to GoatPage.ADG_DETAIL)
-            add("FAMACHA history" to GoatPage.FAMACHA_HISTORY)
-            add("Health summary" to GoatPage.HEALTH_SUMMARY)
-            add("Treatment history" to GoatPage.TREATMENT_HISTORY)
-            add("Withdrawal status" to GoatPage.WITHDRAWAL_STATUS)
-            add("Vet visits" to GoatPage.VET_VISITS)
-            add("Lab results" to GoatPage.LAB_RESULTS)
-            if (goat.sex == GoatSex.FEMALE) add("Breeding records" to GoatPage.DOE_REPRODUCTION)
-            add("Pedigree" to GoatPage.PEDIGREE)
-            if (goat.birthRecord != null) add("Birth record" to GoatPage.KID_PROFILE)
-            if (goat.sex == GoatSex.FEMALE) add("Milk history" to GoatPage.LACTATION_HISTORY)
-            if (goat.sex == GoatSex.FEMALE) add("SCC history" to GoatPage.SCC_HISTORY)
-        }
-        links.forEach { (label, page) ->
-            TextButton(
-                onClick = { onOpen(page) },
-                modifier = Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp),
-            ) { Text(label, maxLines = 1, softWrap = false) }
-        }
-    }
+    fun record(label: String, page: GoatPage) = FarmToolAction(label, { onOpen(page) }, tag = "goat-record:${page.name}")
+    FarmModuleTools(
+        title = "Records",
+        groups = listOf(
+            FarmToolGroup("Growth & timeline", listOf(record("Timeline", GoatPage.TIMELINE), record("Growth history", GoatPage.GROWTH_HISTORY), record("Growth chart", GoatPage.GROWTH_CHART), record("Average daily gain", GoatPage.ADG_DETAIL))),
+            FarmToolGroup("Health records", listOf(record("FAMACHA history", GoatPage.FAMACHA_HISTORY), record("Health summary", GoatPage.HEALTH_SUMMARY), record("Treatment history", GoatPage.TREATMENT_HISTORY), record("Withdrawal status", GoatPage.WITHDRAWAL_STATUS), record("Vet visits", GoatPage.VET_VISITS), record("Lab results", GoatPage.LAB_RESULTS))),
+            FarmToolGroup("Breeding & family", buildList {
+                if (goat.sex == GoatSex.FEMALE) add(record("Breeding records", GoatPage.DOE_REPRODUCTION))
+                add(record("Pedigree", GoatPage.PEDIGREE))
+                if (goat.birthRecord != null) add(record("Birth record", GoatPage.KID_PROFILE))
+            }),
+            FarmToolGroup("Dairy records", buildList {
+                if (goat.sex == GoatSex.FEMALE) add(record("Milk history", GoatPage.LACTATION_HISTORY))
+                if (goat.sex == GoatSex.FEMALE) add(record("SCC history", GoatPage.SCC_HISTORY))
+            }),
+        ).filter { it.actions.isNotEmpty() },
+    )
 }
 
 @Composable
@@ -150,12 +150,18 @@ internal fun GoatHistoryFrame(
 
 @Composable
 internal fun GoatHistoryRow(primary: String, secondary: String, modifier: Modifier = Modifier) {
-    Row(
-        modifier.fillMaxWidth().padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(primary, style = MaterialTheme.typography.bodyLarge)
-        Text(secondary, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+    BoxWithConstraints(modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+        if (maxWidth < 360.dp || LocalDensity.current.fontScale >= 1.3f) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(primary, Modifier.fillMaxWidth(), style = MaterialTheme.typography.bodyLarge, color = AnimalFarmTheme.colors.mutedInk)
+                Text(secondary, Modifier.fillMaxWidth(), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+            }
+        } else {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(primary, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = AnimalFarmTheme.colors.mutedInk)
+                Text(secondary, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.End)
+            }
+        }
     }
 }
 
@@ -186,8 +192,8 @@ private fun GoatTimelineScreen(goat: GoatSnapshot?, onBack: () -> Unit) {
                         ) {
                             Text(
                                 kind?.label ?: "All",
-                                maxLines = 1,
-                                softWrap = false,
+                                maxLines = Int.MAX_VALUE,
+                                softWrap = true,
                                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                             )
                         }

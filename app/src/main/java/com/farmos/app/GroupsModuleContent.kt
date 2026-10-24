@@ -1,5 +1,20 @@
 package com.farmos.app
 
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,6 +33,8 @@ import java.util.UUID
 @Composable
 internal fun GroupsModuleContent(state: GroupsModuleState) {
     with(state) {
+    var homeSection by rememberSaveable(farmId) { mutableStateOf("Overview") }
+    var captureMode by rememberSaveable(farmId) { mutableStateOf("Create group") }
     when (page) {
         GroupsPage.HOME -> GroupRecordNavigator(groupViews, loadGroup) { recordActions -> SimpleCaptureScreen(
             screenId = "FOS-GROUP-001",
@@ -27,7 +44,7 @@ internal fun GroupsModuleContent(state: GroupsModuleState) {
             rows = rows,
             busy = busy,
             error = error,
-            fields = listOf("Name" to name, "Head count" to heads),
+            fields = if (captureMode == "Create group") listOf("Name" to name, "Head count" to heads) else emptyList(),
             actionLabel = "Create group",
             onSubmit = {
                 run {
@@ -38,72 +55,44 @@ internal fun GroupsModuleContent(state: GroupsModuleState) {
                 }
             },
             onBack = onBack,
-            extra = {
-                androidx.compose.material3.TextButton(
-                    onClick = { page = GroupsPage.CREATE },
-                    enabled = !busy,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { androidx.compose.material3.Text("New group") }
-                androidx.compose.material3.TextButton(
-                    onClick = { page = GroupsPage.MEMBERSHIP },
-                    enabled = !busy,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { androidx.compose.material3.Text("Membership") }
-                androidx.compose.material3.TextButton(
-                    onClick = { page = GroupsPage.EDIT },
-                    enabled = !busy,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { androidx.compose.material3.Text("Edit group") }
-                androidx.compose.material3.TextButton(
-                    onClick = { page = GroupsPage.HEALTH },
-                    enabled = !busy,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { androidx.compose.material3.Text("Group health") }
-                androidx.compose.material3.TextButton(
-                    onClick = { page = GroupsPage.MOVE },
-                    enabled = !busy,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { androidx.compose.material3.Text("Move animals") }
-                FarmEntitySelector(
-                    FarmSelectionAtoms.SPECIES_SELECTOR,
-                    "Species",
-                    FarmSpeciesCodes.ALL.map { code -> FarmSelectorOption(code, code.replaceFirstChar { it.uppercase() }) },
-                    species.value,
-                    { species.value = it },
-                    "No species available.",
-                    enabled = !busy,
-                )
+            overview = {
+                FarmSectionTabs(listOf("Overview", "Record", "Tools", "Records"), homeSection, { homeSection = it })
+                if (homeSection == "Overview") {
+                FarmMetricStrip(listOf(FarmMetricValue("Groups", groupViews.size.toString()), FarmMetricValue("Species", groupViews.map { it.speciesCode }.distinct().size.toString())))
+                if (groupViews.isNotEmpty()) FarmMetricBars("Registered group sizes", groupViews.map { FarmBarValue(it.name, it.recordedHeadCount.toDouble(), "${it.recordedHeadCount} head", it.speciesCode) }, "head", caption = "Registered sizes. Census records remain separate.")
+                }
+            },
+            navigation = { if (homeSection == "Tools") {
+                FarmModuleTools(listOf(
+                    FarmToolGroup("Manage", listOf(
+                        FarmToolAction("New group", { page = GroupsPage.CREATE }),
+                        FarmToolAction("Membership", { page = GroupsPage.MEMBERSHIP }),
+                        FarmToolAction("Edit group", { page = GroupsPage.EDIT }),
+                    )),
+                    FarmToolGroup("Operations", listOf(
+                        FarmToolAction("Group health", { page = GroupsPage.HEALTH }),
+                        FarmToolAction("Move animals", { page = GroupsPage.MOVE }),
+                        FarmToolAction("Record census", { captureMode = "Record census"; homeSection = "Record" }),
+                    )),
+                ), title = "Group tools")
                 recordActions()
-                FarmEntitySelector(FarmSelectionAtoms.GROUP_SELECTOR, "Census group", groupOptions, groupId.value.ifBlank { null }, { groupId.value = it }, "Create a group first.", enabled = !busy)
-                androidx.compose.material3.OutlinedTextField(
-                    day.value,
-                    { day.value = it },
-                    label = { androidx.compose.material3.Text("Census day") },
-                    placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                androidx.compose.material3.OutlinedTextField(
-                    heads.value,
-                    { heads.value = it },
-                    label = { androidx.compose.material3.Text("Census head count") },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                androidx.compose.material3.Button(
-                    onClick = {
-                        run {
-                            ops.recordCensus(
-                                RecordGroupCensus(
-                                    UUID.randomUUID().toString(),
-                                    groupId.value,
-                                    heads.value.toIntOrNull() ?: -1,
-                                    LocalDate.parse(day.value).toEpochDay(),
-                                ),
-                                newContext(),
-                            )
-                        }
-                    },
-                    enabled = !busy && groupId.value.isNotBlank() && heads.value.isNotBlank() && day.value.isNotBlank(),
-                ) { androidx.compose.material3.Text("Record census") }
+            } },
+            captureVisible = homeSection == "Record",
+            recordsVisible = homeSection == "Records",
+            showPrimaryAction = captureMode == "Create group",
+            recordTitle = captureMode,
+            extra = {
+                FarmSectionTabs(listOf("Create group", "Record census"), captureMode, { captureMode = it })
+                if (captureMode == "Create group") {
+                    FarmEntitySelector(FarmSelectionAtoms.SPECIES_SELECTOR, "Species", FarmSpeciesCodes.ALL.map { FarmSelectorOption(it, it.replaceFirstChar { c -> c.uppercase() }) }, species.value, { species.value = it }, "No species available.", enabled = !busy)
+                } else {
+                    FarmEntitySelector(FarmSelectionAtoms.GROUP_SELECTOR, "Census group", groupOptions, groupId.value.ifBlank { null }, { groupId.value = it }, "Create a group first.", enabled = !busy)
+                    com.farmos.core.design.FarmOutlinedTextField(day.value, { day.value = it }, label = { androidx.compose.material3.Text("Census day") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), enabled = !busy)
+                    com.farmos.core.design.FarmOutlinedTextField(heads.value, { heads.value = it }, label = { androidx.compose.material3.Text("Census head count") }, modifier = Modifier.fillMaxWidth(), enabled = !busy)
+                    com.farmos.core.design.FarmPrimaryButton(onClick = {
+                        run { ops.recordCensus(RecordGroupCensus(UUID.randomUUID().toString(), groupId.value, heads.value.toIntOrNull() ?: -1, LocalDate.parse(day.value).toEpochDay()), newContext()) }
+                    }, enabled = !busy && groupId.value.isNotBlank() && heads.value.isNotBlank() && day.value.isNotBlank(), modifier = Modifier.fillMaxWidth()) { androidx.compose.material3.Text("Record census") }
+                }
             },
         ) }
         GroupsPage.CREATE -> GroupCreatePage(

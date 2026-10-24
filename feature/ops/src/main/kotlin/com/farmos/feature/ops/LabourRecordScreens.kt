@@ -1,5 +1,11 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmToolAction
+
+import com.farmos.core.design.FarmToolGroup
+
+import com.farmos.core.design.FarmModuleTools
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,12 +72,10 @@ fun LabourRecordNavigator(
         register && workers != null -> workers { register = false }
         open -> LabourWorkLogScreen(records) { open = false }
         else -> home {
-            FarmOperationalSection("Records") {
-                TextButton(onClick = { open = true }, modifier = Modifier.fillMaxWidth()) { Text("Open Work log") }
-                if (workers != null) {
-                    TextButton(onClick = { register = true }, modifier = Modifier.fillMaxWidth()) { Text("Workers") }
-                }
-            }
+            FarmModuleTools(listOf(FarmToolGroup("Browse", buildList {
+                add(FarmToolAction("Open Work log", { open = true }))
+                if (workers != null) add(FarmToolAction("Workers", { register = true }))
+            })), title = "Records")
         }
     }
 }

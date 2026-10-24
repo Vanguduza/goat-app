@@ -78,6 +78,7 @@ for file in \
   app/src/main/java/com/farmos/app/SalesModule{Host,State,Content}.kt \
   app/src/main/java/com/farmos/app/ProcurementModule{Host,State,Content}.kt \
   app/src/main/java/com/farmos/app/RabbitCommerceModuleHost.kt \
+  app/src/main/java/com/farmos/app/RabbitCommerceContent.kt \
   app/src/main/java/com/farmos/app/FeedModuleHost.kt \
   app/src/main/java/com/farmos/app/WaterModuleHost.kt \
   app/src/main/java/com/farmos/app/OperatingModuleHost.kt

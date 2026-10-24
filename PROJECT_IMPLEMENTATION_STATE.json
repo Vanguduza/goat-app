@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "repository": "Vanguduza/goat-app",
-  "source_fingerprint": "sha256:0a65545a83e6694540bbdbbe2f06efd118fd812e47c1a15a168984e8929d1c23",
+  "source_fingerprint": "sha256:0777452ce0b20af6b3aa30e32d3b6adbe5775c8765975b65671ba3e69e3910f0",
   "canonical_branch": "main",
   "release_state": "BLOCKED",
   "green_states": {
@@ -21,11 +21,11 @@
   "screen_coverage": {
     "registered": 545,
     "feature_bound": 545,
-    "kotlin_referenced": 519,
+    "kotlin_referenced": 523,
     "implementation_mapped": 128,
     "qdu_states": {
-      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 519,
-      "PLANNED_NOT_IMPLEMENTED": 26
+      "IMPLEMENTATION_EVIDENCE_PRESENT_NOT_GREEN": 523,
+      "PLANNED_NOT_IMPLEMENTED": 22
     }
   },
   "module_coverage": {
@@ -63,7 +63,7 @@
     },
     "atom": {
       "registered": 35,
-      "kotlin_referenced": 20,
+      "kotlin_referenced": 21,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 6,
@@ -87,7 +87,7 @@
     },
     "feed": {
       "registered": 12,
-      "kotlin_referenced": 11,
+      "kotlin_referenced": 12,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 5,
@@ -239,7 +239,7 @@
     },
     "sync": {
       "registered": 18,
-      "kotlin_referenced": 9,
+      "kotlin_referenced": 10,
       "implementation_mapped": 2,
       "visual_green": 0,
       "feature_count": 5,
@@ -255,7 +255,7 @@
     },
     "water": {
       "registered": 10,
-      "kotlin_referenced": 9,
+      "kotlin_referenced": 10,
       "implementation_mapped": 0,
       "visual_green": 0,
       "feature_count": 4,
@@ -266,7 +266,7 @@
   "blocking_completion_gaps": [
     "156 mandatory features remain not FEATURE_GREEN",
     "545 registered screens remain not VISUAL_GREEN until native evidence and independent approval exist",
-    "26 registered screens remain PLANNED_NOT_IMPLEMENTED at this implementation fingerprint",
+    "22 registered screens remain PLANNED_NOT_IMPLEMENTED at this implementation fingerprint",
     "whole-product MODULE_GREEN and MVP_GREEN certification remains outstanding"
   ],
   "status_law": "Feature binding is scope accounting only; it is not route reachability, FEATURE_GREEN, MODULE_GREEN, VISUAL_GREEN, or MVP_GREEN."

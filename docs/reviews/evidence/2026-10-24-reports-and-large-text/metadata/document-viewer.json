@@ -1,0 +1,74 @@
+{
+  "schema_version": 2,
+  "screen_id": "FOS-REPORT-013",
+  "visit": 1,
+  "test": "ReportRuntimeNavigationTest.generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+  "test_class": "com.farmos.app.ReportRuntimeNavigationTest",
+  "owner_node_id": 2719,
+  "owner_instance_tag": "farm-screen:FOS-REPORT-013",
+  "evidence_class": "OBSERVED_NATIVE_PRODUCT_OWNER",
+  "source": "actual Compose tree",
+  "variant": "asserted destination",
+  "owner_observed_before_capture": true,
+  "mode": "LIGHT",
+  "width_dp": 411,
+  "actual_device_width_dp": 411,
+  "actual_device_height_dp": 900,
+  "font_scale": 1,
+  "vertical_scroll_containers": 1,
+  "vertical_sweep_complete": true,
+  "scroll_restored": true,
+  "incomplete_reasons": [],
+  "viewports": [
+    {
+      "image": "FOS-REPORT-013.png",
+      "image_sha256": "5e5ecfbc444037b93e2b201800d2be3ed255a74681b194503e7c5a7f42b0c4a2",
+      "width_px": 411,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 1,
+      "visible_tags": [
+        "farm-screen:FOS-REPORT-013"
+      ],
+      "observed_owner_ids": [
+        "FOS-REPORT-013"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-REPORT-013",
+          "tag": "farm-screen:FOS-REPORT-013",
+          "node_id": 2719,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [
+        {
+          "tag": null,
+          "name": "Reports",
+          "width_dp": 104,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            16,
+            120,
+            64
+          ],
+          "touch_bounds_px": [
+            16,
+            16,
+            120,
+            64
+          ],
+          "touch_width_dp": 104,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        }
+      ],
+      "layout_findings": [],
+      "scroll_position": 0
+    }
+  ],
+  "accessibility_manual_review": "TALKBACK_FOCUS_AND_HUMAN_PIXEL_REVIEW_REMAIN_REQUIRED",
+  "approval": "UNAPPROVED_REVIEW_CANDIDATE"
+}

@@ -1,0 +1,321 @@
+{
+  "schema_version": 2,
+  "screen_id": "FOS-GOAT-013",
+  "visit": 1,
+  "test": "GoatHistoryRuntimeNavigationTest.recordsRemainReadableAfterALifecycleExit",
+  "test_class": "com.farmos.feature.goat.GoatHistoryRuntimeNavigationTest",
+  "owner_node_id": 2949,
+  "owner_instance_tag": "farm-screen:FOS-GOAT-013",
+  "evidence_class": "OBSERVED_NATIVE_PRODUCT_OWNER",
+  "source": "actual Compose tree",
+  "variant": "observed state after successful assertion",
+  "owner_observed_before_capture": true,
+  "mode": "OUTDOOR",
+  "width_dp": 360,
+  "actual_device_width_dp": 360,
+  "actual_device_height_dp": 900,
+  "font_scale": 2,
+  "vertical_scroll_containers": 1,
+  "vertical_sweep_complete": true,
+  "scroll_restored": true,
+  "incomplete_reasons": [],
+  "viewports": [
+    {
+      "image": "FOS-GOAT-013.png",
+      "image_sha256": "fecddd0a609646370a5c342be025b5b92a2d84f2abbc61beb391e7422bdeda54",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-GOAT-013"
+      ],
+      "observed_owner_ids": [
+        "FOS-GOAT-013"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-GOAT-013",
+          "tag": "farm-screen:FOS-GOAT-013",
+          "node_id": 2949,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [
+        {
+          "tag": null,
+          "name": "Back",
+          "width_dp": 114,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            16,
+            130,
+            80
+          ],
+          "touch_bounds_px": [
+            16,
+            16,
+            130,
+            80
+          ],
+          "touch_width_dp": 114,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        }
+      ],
+      "layout_findings": [
+        {
+          "kind": "TEXT_LAYOUT_OVERFLOW_REQUIRES_PIXEL_REVIEW",
+          "text": "54.25 kg",
+          "tag": null,
+          "bounds_px": [
+            325,
+            329,
+            328,
+            642
+          ],
+          "text_layouts": [
+            {
+              "measured_width_px": 3,
+              "measured_height_px": 313,
+              "paragraph_width_px": 3,
+              "paragraph_height_px": 313,
+              "line_ink_bounds_px": [
+                [
+                  0,
+                  16
+                ],
+                [
+                  0,
+                  17
+                ],
+                [
+                  0,
+                  8
+                ],
+                [
+                  0,
+                  16
+                ],
+                [
+                  0,
+                  16
+                ],
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  15
+                ],
+                [
+                  0,
+                  17
+                ]
+              ],
+              "exceeded_max_lines": false,
+              "ellipsized": false
+            }
+          ]
+        },
+        {
+          "kind": "TEXT_LAYOUT_OVERFLOW_REQUIRES_PIXEL_REVIEW",
+          "text": "51.70 kg",
+          "tag": null,
+          "bounds_px": [
+            323,
+            662,
+            328,
+            900
+          ],
+          "text_layouts": [
+            {
+              "measured_width_px": 5,
+              "measured_height_px": 313,
+              "paragraph_width_px": 5,
+              "paragraph_height_px": 313,
+              "line_ink_bounds_px": [
+                [
+                  0,
+                  16
+                ],
+                [
+                  0,
+                  11
+                ],
+                [
+                  0,
+                  8
+                ],
+                [
+                  0,
+                  15
+                ],
+                [
+                  0,
+                  17
+                ],
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  15
+                ],
+                [
+                  0,
+                  17
+                ]
+              ],
+              "exceeded_max_lines": false,
+              "ellipsized": false
+            }
+          ]
+        }
+      ],
+      "scroll_position": 0
+    },
+    {
+      "image": "FOS-GOAT-013-viewport002.png",
+      "image_sha256": "2fcece290e5912673d426f70c0129c1f69656cec3cc30db0cc9262b5b80cbbbe",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-GOAT-013"
+      ],
+      "observed_owner_ids": [
+        "FOS-GOAT-013"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-GOAT-013",
+          "tag": "farm-screen:FOS-GOAT-013",
+          "node_id": 2949,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [],
+      "layout_findings": [
+        {
+          "kind": "TEXT_LAYOUT_OVERFLOW_REQUIRES_PIXEL_REVIEW",
+          "text": "54.25 kg",
+          "tag": null,
+          "bounds_px": [
+            325,
+            0,
+            328,
+            196
+          ],
+          "text_layouts": [
+            {
+              "measured_width_px": 3,
+              "measured_height_px": 313,
+              "paragraph_width_px": 3,
+              "paragraph_height_px": 313,
+              "line_ink_bounds_px": [
+                [
+                  0,
+                  16
+                ],
+                [
+                  0,
+                  17
+                ],
+                [
+                  0,
+                  8
+                ],
+                [
+                  0,
+                  16
+                ],
+                [
+                  0,
+                  16
+                ],
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  15
+                ],
+                [
+                  0,
+                  17
+                ]
+              ],
+              "exceeded_max_lines": false,
+              "ellipsized": false
+            }
+          ]
+        },
+        {
+          "kind": "TEXT_LAYOUT_OVERFLOW_REQUIRES_PIXEL_REVIEW",
+          "text": "51.70 kg",
+          "tag": null,
+          "bounds_px": [
+            323,
+            216,
+            328,
+            529
+          ],
+          "text_layouts": [
+            {
+              "measured_width_px": 5,
+              "measured_height_px": 313,
+              "paragraph_width_px": 5,
+              "paragraph_height_px": 313,
+              "line_ink_bounds_px": [
+                [
+                  0,
+                  16
+                ],
+                [
+                  0,
+                  11
+                ],
+                [
+                  0,
+                  8
+                ],
+                [
+                  0,
+                  15
+                ],
+                [
+                  0,
+                  17
+                ],
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  15
+                ],
+                [
+                  0,
+                  17
+                ]
+              ],
+              "exceeded_max_lines": false,
+              "ellipsized": false
+            }
+          ]
+        }
+      ],
+      "scroll_position": 446
+    }
+  ],
+  "accessibility_manual_review": "TALKBACK_FOCUS_AND_HUMAN_PIXEL_REVIEW_REMAIN_REQUIRED",
+  "approval": "UNAPPROVED_REVIEW_CANDIDATE"
+}

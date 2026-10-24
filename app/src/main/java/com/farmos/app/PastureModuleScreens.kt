@@ -188,53 +188,17 @@ fun PastureReportScreen(
  * geographic positions are fabricated.
  */
 @Composable
-fun PastureMapScreen(
-    ops: RoomOpsRepository,
-    farmId: String,
-    onBack: () -> Unit,
-) {
-    var cells by remember { mutableStateOf(emptyList<PaddockMapCell>()) }
+fun PastureMapScreen(ops: RoomOpsRepository, farmId: String, onBack: () -> Unit) {
+    var records by remember { mutableStateOf(com.farmos.feature.ops.PastureRecords()) }
     LaunchedEffect(farmId) {
-        val paddocks = ops.paddocks()
-        val open = ops.openGrazing().groupBy { it.paddockId }
-        val summaries = ops.grazingSummary().associateBy { it.paddockId }
-        cells = paddocks.map { p ->
-            val grazingNow = open[p.id].orEmpty().sumOf { it.headCount }
-            val lastEnd = summaries[p.id]?.latestExitedEpochDay
-            PaddockMapCell(p.code, p.displayName, grazingNow, lastEnd)
-        }
+        records = com.farmos.feature.ops.PastureRecords(paddocks = loadPaddockPastureStats(ops).map { stats ->
+            val p = stats.paddock
+            com.farmos.feature.ops.PaddockView(p.id, p.code, p.displayName, p.areaM2, p.waterSource, p.shade, p.active,
+                stats.sessionCount, stats.openSessions, stats.openHeadCount, stats.latestEnteredEpochDay, stats.latestExitedEpochDay)
+        })
     }
-    val today = LocalDate.now().toEpochDay()
-    FarmOperationalPage(
-        screenId = "FOS-PASTURE-010",
-        title = "Pasture map",
-        subtitle = "Schematic layout — cells are not geographic positions.",
-        onBack = onBack,
-        backLabel = "Pasture",
-    ) {
-        if (cells.isEmpty()) {
-            FarmOperationalSection("No paddocks", "Create a paddock on the pasture home screen first.") {}
-        } else {
-            FarmOperationalSection("Legend") {
-                Text("Green: grazing now · Amber: resting (a session ended, rest accumulating) · Grey: idle (no sessions recorded)")
-            }
-            cells.chunked(2).forEach { row ->
-                androidx.compose.foundation.layout.Row(modifier = Modifier.fillMaxWidth()) {
-                    row.forEach { cell ->
-                        val state = when {
-                            cell.grazingHead > 0 -> "GRAZING NOW — ${cell.grazingHead} head"
-                            cell.lastSessionEnd != null -> "RESTING — ${today - cell.lastSessionEnd}d since last session"
-                            else -> "IDLE — no sessions recorded"
-                        }
-                        androidx.compose.foundation.layout.Box(modifier = Modifier.weight(1f)) {
-                            FarmOperationalSection("${cell.code} · ${cell.displayName}") {
-                                Text(state)
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    FarmOperationalPage("FOS-PASTURE-010", "Pasture map", "", onBack = onBack, backLabel = "Pasture") {
+        com.farmos.feature.ops.PastureOccupancyBoard(records)
     }
 }
 

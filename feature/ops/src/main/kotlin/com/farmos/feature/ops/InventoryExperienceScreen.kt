@@ -3,15 +3,17 @@ package com.farmos.feature.ops
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -25,7 +27,7 @@ import com.farmos.core.design.FarmVisualClass
 import java.time.LocalDate
 import java.time.ZoneId
 
-private enum class InventoryPage {
+internal enum class InventoryPage {
     DASHBOARD,
     ITEMS,
     CREATE,
@@ -65,10 +67,10 @@ fun InventoryScreen(
     onOpenStockCount: (() -> Unit)? = null,
     extraActions: @Composable () -> Unit = {},
 ) {
-    var page by remember { mutableStateOf(InventoryPage.DASHBOARD) }
-    var backStack by remember { mutableStateOf(emptyList<InventoryPage>()) }
-    var selectedItemId by remember { mutableStateOf<String?>(null) }
-    var selectedLotId by remember { mutableStateOf<String?>(null) }
+    var page by rememberSaveable { mutableStateOf(InventoryPage.DASHBOARD) }
+    var backStack by rememberSaveable { mutableStateOf(emptyList<InventoryPage>()) }
+    var selectedItemId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedLotId by rememberSaveable { mutableStateOf<String?>(null) }
     val home = {
         backStack = emptyList()
         page = InventoryPage.DASHBOARD
@@ -89,8 +91,10 @@ fun InventoryScreen(
         selectedLotId = id
         open(InventoryPage.LOT_DETAIL)
     }
+    val pageStateHolder = rememberSaveableStateHolder()
+    pageStateHolder.SaveableStateProvider(page.name) {
     when (page) {
-        InventoryPage.DASHBOARD -> InventoryDashboard(rows, error, { open(it) }, onBack, onOpenStockCount, extraActions)
+        InventoryPage.DASHBOARD -> InventoryDashboard(rows, readModel, error, { open(it) }, onBack, onOpenStockCount, extraActions)
         InventoryPage.ITEM_DETAIL -> InventoryItemDetailScreen(readModel, selectedItemId, today, zone, openLot, back)
         InventoryPage.LOT_DETAIL -> InventoryLotDetailScreen(readModel, selectedLotId, today, back)
         InventoryPage.EXPIRY_QUEUE -> InventoryExpiryQueueScreen(readModel, today, openLot, back)
@@ -106,50 +110,6 @@ fun InventoryScreen(
         InventoryPage.REORDER_RULE -> InventoryReorderRuleScreen(itemOptions, busy, error, onSetReorder, home)
         InventoryPage.REORDER_ALERT -> InventoryReorderAlertScreen(itemOptions, busy, error, onRecordReorder, home)
     }
-}
-
-@Composable
-private fun InventoryDashboard(
-    rows: List<String>,
-    error: String?,
-    onOpen: (InventoryPage) -> Unit,
-    onBack: () -> Unit,
-    onOpenStockCount: (() -> Unit)?,
-    extraActions: @Composable () -> Unit,
-) {
-    FarmOperationalPage("FOS-INV-001", "Inventory", "On-hand lots, dates and reorder points.", FarmVisualClass.I2, onBack) {
-        FarmOperationalSection("Stock overview") {
-            Text("${rows.size} inventory item(s)", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            TextButton(onClick = { onOpen(InventoryPage.ITEMS) }) { Text("Open inventory list") }
-        }
-        FarmOperationalSection("Stock movement") {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Button(onClick = { onOpen(InventoryPage.RECEIVE) }) { Text("Receive") }
-                Button(onClick = { onOpen(InventoryPage.ISSUE) }) { Text("Issue") }
-            }
-            TextButton(onClick = { onOpen(InventoryPage.CREATE) }) { Text("Create inventory item") }
-        }
-        FarmOperationalSection("Dated lots and FEFO") {
-            TextButton(onClick = { onOpen(InventoryPage.RECEIVE_LOT) }) { Text("Receive dated lot") }
-            TextButton(onClick = { onOpen(InventoryPage.FEFO_ISSUE) }) { Text("Issue oldest-expiry lot") }
-        }
-        FarmOperationalSection("Stock records") {
-            TextButton(onClick = { onOpen(InventoryPage.SEARCH) }) { Text("Search inventory") }
-            TextButton(onClick = { onOpen(InventoryPage.LOW_STOCK) }) { Text("Low stock") }
-            TextButton(onClick = { onOpen(InventoryPage.EXPIRY_QUEUE) }) { Text("Expiry queue") }
-            TextButton(onClick = { onOpen(InventoryPage.MOVEMENTS) }) { Text("Movement history") }
-        }
-        onOpenStockCount?.let { open ->
-            FarmOperationalSection("Stock count") {
-                TextButton(onClick = open) { Text("Count stock and review differences") }
-            }
-        }
-        FarmOperationalSection("Reorder") {
-            TextButton(onClick = { onOpen(InventoryPage.REORDER_RULE) }) { Text("Set reorder point") }
-            TextButton(onClick = { onOpen(InventoryPage.REORDER_ALERT) }) { Text("Record reorder alert") }
-        }
-        extraActions()
-        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }
 
@@ -172,9 +132,9 @@ private fun CreateInventoryItemScreen(
     onCreate: (String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var sku by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var unit by remember { mutableStateOf("kg") }
+    var sku by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var unit by rememberSaveable { mutableStateOf("kg") }
     FarmOperationalPage("FOS-INV-004", "Create inventory item", "Define the stock identity before receiving quantity.", onBack = onBack) {
         FarmOperationalSection("Item identity") {
             OutlinedTextField(
@@ -218,8 +178,8 @@ private fun InventoryMoveScreen(
     onMove: (String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var itemId by remember { mutableStateOf("") }
-    var quantity by remember { mutableStateOf("") }
+    var itemId by rememberSaveable { mutableStateOf("") }
+    var quantity by rememberSaveable { mutableStateOf("") }
     val receive = kind == "receive"
     FarmOperationalPage(
         if (receive) "FOS-INV-005" else "FOS-INV-007",
@@ -250,10 +210,10 @@ private fun InventoryLotReceiveScreen(
     onReceive: (String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var itemId by remember { mutableStateOf("") }
-    var lotCode by remember { mutableStateOf("") }
-    var expiry by remember { mutableStateOf("") }
-    var quantity by remember { mutableStateOf("") }
+    var itemId by rememberSaveable { mutableStateOf("") }
+    var lotCode by rememberSaveable { mutableStateOf("") }
+    var expiry by rememberSaveable { mutableStateOf("") }
+    var quantity by rememberSaveable { mutableStateOf("") }
     FarmOperationalPage("FOS-INV-006", "Receive dated lot", "Capture lot identity, expiry and quantity.", onBack = onBack) {
         FarmOperationalSection("Lot details") {
             InventoryItemSelector(itemOptions, itemId, busy) { itemId = it }
@@ -288,8 +248,8 @@ private fun InventoryFefoIssueScreen(
     onIssue: (String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var itemId by remember { mutableStateOf("") }
-    var quantity by remember { mutableStateOf("") }
+    var itemId by rememberSaveable { mutableStateOf("") }
+    var quantity by rememberSaveable { mutableStateOf("") }
     FarmOperationalPage("FOS-INV-008", "FEFO issue", "Issue from the oldest-expiry dated lot first.", FarmVisualClass.I4, onBack) {
         FarmOperationalSection("Issue dated stock", "Non-lot stock is not substituted for this operation.") {
             InventoryItemSelector(itemOptions, itemId, busy) { itemId = it }
@@ -316,8 +276,8 @@ private fun InventoryReorderRuleScreen(
     onSet: (String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var itemId by remember { mutableStateOf("") }
-    var quantity by remember { mutableStateOf("") }
+    var itemId by rememberSaveable { mutableStateOf("") }
+    var quantity by rememberSaveable { mutableStateOf("") }
     FarmOperationalPage("FOS-INV-012", "Reorder rules", "Set the on-hand point that should trigger attention.", onBack = onBack) {
         FarmOperationalSection("Reorder point") {
             InventoryItemSelector(itemOptions, itemId, busy) { itemId = it }
@@ -344,7 +304,7 @@ private fun InventoryReorderAlertScreen(
     onRecord: (String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var itemId by remember { mutableStateOf("") }
+    var itemId by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage("FOS-INV-013", "Reorder alert", "Record that stock reached its reorder point.", FarmVisualClass.I4, onBack) {
         FarmOperationalSection("Alert record", "This is an auditable record, not a forecast engine.") {

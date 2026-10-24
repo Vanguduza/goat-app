@@ -13,7 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,12 +74,14 @@ fun FarmErrorRecovery(message: String, onRetry: () -> Unit, modifier: Modifier =
 
 /**
  * FOS-ATOM-034 — truthful receipt after a local save: the record is committed on this device and
- * queued for sync. It never claims the farm server has the change.
+ * queued for sync. It does not claim another device or backup has received the change.
  */
 @Composable
 fun FarmOfflineSaveReceipt(modifier: Modifier = Modifier, text: String = "Saved on this device · waiting to sync") {
     FarmReceiptSurface(FarmFeedbackAtoms.OFFLINE_SAVE_RECEIPT, modifier) {
-        Text(text, fontWeight = FontWeight.SemiBold)
+        Column(Modifier.testTag("farm-screen:FOS-SYNC-014")) {
+            Text(text, fontWeight = FontWeight.SemiBold)
+        }
     }
 }
 
@@ -92,7 +94,7 @@ fun FarmSyncPendingReceipt(pendingCount: Long, modifier: Modifier = Modifier) {
                 (if (pendingCount == 1L) "is" else "are") + " waiting to sync",
             fontWeight = FontWeight.SemiBold,
         )
-        Text("Nothing is lost while offline; sync sends these when the farm server is reachable.", style = MaterialTheme.typography.bodySmall)
+        Text("Pending changes remain on this device. Sync resumes when a configured destination is reachable.", style = MaterialTheme.typography.bodySmall)
     }
 }
 

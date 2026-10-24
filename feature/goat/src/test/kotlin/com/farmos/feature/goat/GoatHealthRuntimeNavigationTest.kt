@@ -1,5 +1,9 @@
 package com.farmos.feature.goat
 
+import com.farmos.review.NativeModuleReviewRule
+import com.farmos.review.NativeModuleReviewTheme
+import com.farmos.review.captureObservedNativeOwners
+
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
@@ -38,8 +42,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class GoatHealthRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val today = LocalDate.of(2026, 9, 24)
     private val profileTag = "farm-screen:" + "FOS-" + "GOAT-" + "003"
@@ -49,60 +53,60 @@ class GoatHealthRuntimeNavigationTest {
         render(goatWithHealth())
 
         traverse("Health summary", "FOS-GOAT-025") {
-            compose.onNodeWithTag("goat-health-active-withdrawal").assertExists()
-            compose.onNodeWithText("Milk · Oxytet LA · until 2026-09-30").assertExists()
-            compose.onNodeWithText("Red flag").assertExists()
-            compose.onNodeWithText("Pale gums, weak").assertExists()
+            compose.onNodeWithTag("goat-health-active-withdrawal").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Milk · Oxytet LA · until 2026-09-30").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Red flag").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Pale gums, weak").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Treatment history", "FOS-GOAT-026") {
-            compose.onNodeWithTag("goat-treatment:t-new").assertExists()
-            compose.onNodeWithText("Oxytet LA").assertExists()
-            compose.onNodeWithText("Withdrawal: meat 28 day(s) · milk 7 day(s)").assertExists()
-            compose.onNodeWithText("Product not on this device").assertExists()
+            compose.onNodeWithTag("goat-treatment:t-new").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Oxytet LA").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Withdrawal: meat 28 day(s) · milk 7 day(s)").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Product not on this device").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Withdrawal status", "FOS-GOAT-027") {
-            compose.onNodeWithTag("goat-withdrawal-active:t-new:milk").assertExists()
-            compose.onNodeWithTag("goat-withdrawal-active:t-new:meat").assertExists()
-            compose.onNodeWithTag("goat-withdrawal-ended:t-old:milk").assertExists()
-            compose.onNodeWithText("Ended 2026-08-20").assertExists()
+            compose.onNodeWithTag("goat-withdrawal-active:t-new:milk").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithTag("goat-withdrawal-active:t-new:meat").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithTag("goat-withdrawal-ended:t-old:milk").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Ended 2026-08-20").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Vet visits", "FOS-GOAT-028") {
-            compose.onNodeWithTag("goat-vet-visit:v2").assertExists()
-            compose.onNodeWithText("Dr Moyo").assertExists()
-            compose.onNodeWithText("Lameness check").assertExists()
+            compose.onNodeWithTag("goat-vet-visit:v2").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Dr Moyo").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Lameness check").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Lab results", "FOS-GOAT-029") {
-            compose.onNodeWithText("CAE ELISA").assertExists()
-            compose.onNodeWithText("Negative for CAE").assertExists()
-            compose.onNodeWithText("350,000 cells/mL").assertExists()
+            compose.onNodeWithText("CAE ELISA").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Negative for CAE").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("350,000 cells/mL").assertExists().also { compose.captureObservedNativeOwners() }
         }
     }
 
     @Test
     fun summaryLinksOpenTheOwningRecordPages() {
         render(goatWithHealth())
-        compose.onNode(hasClickAction() and hasText("Health summary")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GOAT-025").assertExists()
-        compose.onNode(hasClickAction() and hasText("Withdrawal status")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GOAT-027").assertExists()
+        compose.revealGoatTool("Health summary").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-025").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.revealGoatTool("Withdrawal status").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-027").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
-        compose.onNodeWithTag(profileTag).assertExists()
+        compose.onNodeWithTag(profileTag).assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun noActiveWithdrawalIsStatedWithoutClaimingClearance() {
         render(goatWithHealth().copy(withdrawalWindows = emptyList(), treatmentHistory = emptyList(), observationHistory = emptyList(), vetVisits = emptyList(), labResults = emptyList()))
         traverse("Vet visits", "FOS-GOAT-028") {
-            compose.onNodeWithText("No vet visits recorded for this goat on this device.").assertExists()
+            compose.onNodeWithText("No vet visits recorded for this goat on this device.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Lab results", "FOS-GOAT-029") {
-            compose.onNodeWithText("No lab results recorded for this goat on this device.").assertExists()
+            compose.onNodeWithText("No lab results recorded for this goat on this device.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Withdrawal status", "FOS-GOAT-027") {
-            compose.onNodeWithText("No active withdrawal windows recorded on this device.").assertExists()
+            compose.onNodeWithText("No active withdrawal windows recorded on this device.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Treatment history", "FOS-GOAT-026") {
-            compose.onNodeWithText("No treatments recorded for this goat on this device.").assertExists()
+            compose.onNodeWithText("No treatments recorded for this goat on this device.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Health summary", "FOS-GOAT-025") {
             compose.onNodeWithTag("goat-health-active-withdrawal").assertDoesNotExist()
@@ -123,7 +127,7 @@ class GoatHealthRuntimeNavigationTest {
 
     private fun render(goat: GoatSnapshot) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 GoatExperienceScreen(
                     state = GoatSliceUiState(farmName = "Premier Farm", herd = listOf(goat), selected = goat, animalId = goat.animalId),
                     actions = GoatExperienceActions(
@@ -151,16 +155,16 @@ class GoatHealthRuntimeNavigationTest {
                 )
             }
         }
-        compose.onNodeWithTag(profileTag).assertIsDisplayed()
+        compose.onNodeWithTag(profileTag).assertIsDisplayed().also { compose.captureObservedNativeOwners() }
     }
 
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:$screenId").assertExists()
-        compose.onNodeWithText("Nala · GT-024").assertExists()
+        compose.revealGoatTool(label).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:$screenId").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Nala · GT-024").assertExists().also { compose.captureObservedNativeOwners() }
         assertions()
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
-        compose.onNodeWithTag(profileTag).assertExists()
+        compose.onNodeWithTag(profileTag).assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
 

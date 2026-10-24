@@ -22,6 +22,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.ui.semantics.selected
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Surface
@@ -118,7 +122,7 @@ fun AnimalFarmModuleHeader(
                 style = MaterialThemeLocal.largeTitle(),
                 fontWeight = FontWeight.SemiBold,
             )
-            Text(subtitle, color = colors.mutedInk, style = MaterialThemeLocal.body())
+            if (subtitle.isNotBlank()) Text(subtitle, color = colors.mutedInk, style = MaterialThemeLocal.body())
         }
         if (family != null) {
             AnimalFarmFamilyPortrait(family, Modifier.size(AnimalFarmHomeMetrics.compactPortrait))
@@ -150,10 +154,11 @@ fun AnimalFarmHeroCard(
                 Text(category, style = MaterialThemeLocal.label())
                 Text(title, style = MaterialThemeLocal.largeTitle(), fontWeight = FontWeight.SemiBold)
                 Text(context, style = MaterialThemeLocal.body())
-                TextButton(
+                Button(
                     onClick = onAction,
                     modifier = Modifier.heightIn(min = minTouch),
-                    colors = ButtonDefaults.textButtonColors(contentColor = colors.onPrimary),
+                    shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.lime, contentColor = colors.onLime),
                 ) {
                     Text(actionLabel, fontWeight = FontWeight.SemiBold)
                 }
@@ -288,7 +293,8 @@ private fun AnimalFarmStageSelectorItem(
             modifier
                 .heightIn(min = minTouch)
                 .clip(RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius))
-                .clickable(role = Role.Tab, onClick = onClick),
+                .clickable(role = Role.Tab, onClick = onClick)
+                .semantics { this.selected = selected },
         color = if (selected) colors.primary else colors.surface,
         contentColor = if (selected) colors.onPrimary else colors.ink,
     ) {
@@ -396,8 +402,13 @@ fun AnimalFarmQuickAction(
         color = colors.surface,
         contentColor = colors.ink,
     ) {
-        Box(Modifier.fillMaxWidth().padding(14.dp), contentAlignment = Alignment.CenterStart) {
-            Text(label, style = MaterialThemeLocal.smallTitle())
+        Row(
+            Modifier.fillMaxWidth().padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.moduleGap),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(label, Modifier.weight(1f), style = MaterialThemeLocal.smallTitle())
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(20.dp))
         }
     }
 }

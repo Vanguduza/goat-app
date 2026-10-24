@@ -19,13 +19,13 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class OperationalOwnerContractTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     @Test
     fun sheepOperationsHomeRendersCanonicalOwner() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SheepOperationsScreen(
                     selectedAnimalId = "sheep-1",
                     busy = false,
@@ -36,13 +36,13 @@ class OperationalOwnerContractTest {
             }
         }
 
-        compose.onNodeWithTag("farm-screen:FOS-SHEEP-010").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-SHEEP-010").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun cattleOperationsHomeRendersCanonicalOwner() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 CattleOperationsScreen(
                     selectedAnimalId = "cattle-1",
                     busy = false,
@@ -53,7 +53,7 @@ class OperationalOwnerContractTest {
             }
         }
 
-        compose.onNodeWithTag("farm-screen:FOS-CATTLE-018").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-CATTLE-018").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     private fun sheepActions() = SheepOperationsActions(

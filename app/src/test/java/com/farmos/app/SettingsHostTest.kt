@@ -61,8 +61,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class SettingsHostTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private lateinit var database: FarmOsDatabase
     private lateinit var directory: LocalFarmDirectory
@@ -89,7 +89,7 @@ class SettingsHostTest {
 
     private fun render(actorId: String?, io: CoroutineDispatcher = Dispatchers.IO) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SettingsHost(directory, database, farmId, actorId, deviceId = "device-a", onBack = {}, io = io)
             }
         }
@@ -100,7 +100,7 @@ class SettingsHostTest {
     }
 
     private fun click(label: String) {
-        compose.onNode(hasClickAction() and hasText(label, substring = true)).performScrollTo().performClick()
+        compose.revealFarmTool(label, substring = true).performScrollTo().performClick()
     }
 
     private fun waitForTag(tag: String) = compose.waitUntil(10_000) { compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }
@@ -151,7 +151,7 @@ class SettingsHostTest {
         click("Create account")
 
         waitForTag("settings-error")
-        compose.onNodeWithTag("farm-screen:FOS-ADMIN-004").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-ADMIN-004").assertExists().also { compose.captureObservedNativeOwners() }
         waitForText("That username is already used on this farm")
         assertEquals(2, database.localAccess().accounts(farmId).size)
     }
@@ -197,7 +197,7 @@ class SettingsHostTest {
         waitForText("Signed in as Rudo Chari · Worker")
         click("Accounts and access")
         waitForTag("farm-screen:FOS-ADMIN-003")
-        compose.onNodeWithTag(FarmSafetyAtoms.PERMISSION_EXPLANATION).assertExists()
+        compose.onNodeWithTag(FarmSafetyAtoms.PERMISSION_EXPLANATION).assertExists().also { compose.captureObservedNativeOwners() }
         assertTrue(compose.onAllNodesWithText("Add account").fetchSemanticsNodes().isEmpty())
     }
 
@@ -294,7 +294,7 @@ class SettingsHostTest {
         waitForText("Signed in as Rudo Chari · Worker")
         click("Currency")
         waitForTag("farm-screen:FOS-ADMIN-011")
-        compose.onNodeWithTag(FarmSafetyAtoms.PERMISSION_EXPLANATION).assertExists()
+        compose.onNodeWithTag(FarmSafetyAtoms.PERMISSION_EXPLANATION).assertExists().also { compose.captureObservedNativeOwners() }
         assertTrue(compose.onAllNodesWithTag("settings-currency").fetchSemanticsNodes().isEmpty())
         assertEquals("USD", runBlocking { database.farmCurrency(farmId) })
     }
@@ -354,7 +354,7 @@ class SettingsHostTest {
         click("Species configuration")
         waitForTag("farm-screen:FOS-ADMIN-007")
         waitForText("Typical 283 days")
-        compose.onNodeWithTag(FarmSafetyAtoms.PERMISSION_EXPLANATION).assertExists()
+        compose.onNodeWithTag(FarmSafetyAtoms.PERMISSION_EXPLANATION).assertExists().also { compose.captureObservedNativeOwners() }
         assertTrue(compose.onAllNodes(hasSetTextAction() and hasText("Goat typical days")).fetchSemanticsNodes().isEmpty())
     }
 

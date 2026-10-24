@@ -55,6 +55,7 @@ jobs:
           :core:sync:testDebugUnitTest
           :app:testDebugUnitTest
           :feature:goat:testDebugUnitTest
+          :feature:rabbit:testDebugUnitTest
           :app:compileDebugKotlin
           :app:assembleDebug
           :core:database:compileDebugAndroidTestKotlin

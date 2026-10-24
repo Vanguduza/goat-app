@@ -29,8 +29,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class WorkerRegisterScreensTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val workers = listOf(
         WorkerView("w1", "Tendai", active = true, linkedAccount = null),
@@ -44,21 +44,21 @@ class WorkerRegisterScreensTest {
         val renamed = mutableListOf<Pair<String, String>>()
         val status = mutableListOf<Pair<String, Boolean>>()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 WorkerRegisterScreens(workers, canManage = true, busy = false, error = null, onAdd = { added += it }, onRename = { i, n -> renamed += i to n }, onSetActive = { i, a -> status += i to a }, onBack = {})
             }
         }
-        compose.onNodeWithTag("farm-screen:FOS-LABOUR-002").assertExists()
-        compose.onNodeWithText("Workers · 2 active").assertExists()
-        compose.onNodeWithText("Active · no login").assertExists()
-        compose.onNodeWithText("Active · signs in as farai").assertExists()
-        compose.onNodeWithText("Inactive · no login").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-LABOUR-002").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Workers · 2 active").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Active · no login").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Active · signs in as farai").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Inactive · no login").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("worker-add-name").performTextInput("Rudo")
         compose.onNodeWithTag("worker-add").performClick()
 
         compose.onNodeWithTag("worker:w1").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-LABOUR-003").assertExists()
-        compose.onNodeWithText("No login. Work can still be assigned and recorded for this worker.").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-LABOUR-003").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("No login. Work can still be assigned and recorded for this worker.").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("worker-rename-name").performTextReplacement("Tendai M.")
         compose.onNodeWithTag("worker-rename").performScrollTo().performClick()
         compose.onNodeWithTag("worker-set-active").performScrollTo().performClick()
@@ -72,11 +72,11 @@ class WorkerRegisterScreensTest {
     @Test
     fun othersSeeTheRegisterWithoutChangingIt() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 WorkerRegisterScreens(workers, canManage = false, busy = false, error = null, onAdd = {}, onRename = { _, _ -> }, onSetActive = { _, _ -> }, onBack = {})
             }
         }
-        compose.onNodeWithText("Workers are managed by supervisors and farm management").assertExists()
+        compose.onNodeWithText("Workers are managed by supervisors and farm management").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitForIdle()
         assertTrue(compose.onAllNodes(hasText("Add worker")).fetchSemanticsNodes().isEmpty())
         compose.onNodeWithTag("worker:w1").performScrollTo().performClick()
@@ -86,7 +86,7 @@ class WorkerRegisterScreensTest {
     @Test
     fun theLabourHomeOpensTheRegisterAndReturns() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 LabourRecordNavigator(
                     LabourRecords(),
                     workers = { back -> WorkerRegisterScreens(workers, false, false, null, {}, { _, _ -> }, { _, _ -> }, back) },
@@ -94,18 +94,18 @@ class WorkerRegisterScreensTest {
             }
         }
         // The test renders the labour actions directly, without a scrolling page.
-        compose.onNode(hasClickAction() and hasText("Workers")).performClick()
-        compose.onNodeWithTag("farm-screen:FOS-LABOUR-002").assertExists()
+        compose.revealFarmTool("Workers").performClick()
+        compose.onNodeWithTag("farm-screen:FOS-LABOUR-002").assertExists().also { compose.captureObservedNativeOwners() }
         // The register page's back control is at the end of its scrolling content.
         compose.onNode(hasClickAction() and hasText("Labour")).performScrollTo().performClick()
-        compose.onNode(hasClickAction() and hasText("Open Work log")).assertExists()
+        compose.revealFarmTool("Open Work log").assertExists()
     }
 
     @Test
     fun labourCaptureChoosesARegisteredWorker() {
         var chosen: String? = null
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 com.farmos.feature.ops.LabourWorkerPicker(
                     listOf(com.farmos.feature.ops.LabourWorkerOption("w1", "Tendai"), com.farmos.feature.ops.LabourWorkerOption("w2", "Rudo")),
                     selectedWorkerId = "w2",
@@ -113,7 +113,7 @@ class WorkerRegisterScreensTest {
                 ) { chosen = it }
             }
         }
-        compose.onNodeWithText("Rudo · selected").assertExists()
+        compose.onNodeWithText("Rudo · selected").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("labour-worker:w1").performClick()
         compose.runOnIdle { assertEquals("w1", chosen) }
     }

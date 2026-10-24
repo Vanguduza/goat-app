@@ -56,7 +56,7 @@ internal fun ProtocolGeneratedTasksPage(
         } else {
             FarmOperationalSection("Protocol tasks") {
                 rows.forEach { row ->
-                    androidx.compose.material3.TextButton(
+                    com.farmos.core.design.FarmActionButton(
                         onClick = { onOpenDetail(row.id) },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
@@ -89,7 +89,7 @@ internal fun LifecycleGeneratedTasksPage(
         } else {
             FarmOperationalSection("Lifecycle tasks") {
                 rows.forEach { row ->
-                    androidx.compose.material3.TextButton(
+                    com.farmos.core.design.FarmActionButton(
                         onClick = { onOpenDetail(row.id) },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
@@ -123,19 +123,10 @@ internal fun TaskDetailWorkspace(
 ) {
     var tab by remember(taskId) { mutableStateOf(TaskDetailTab.DETAIL) }
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            TaskDetailTab.entries.forEach { entry ->
-                androidx.compose.material3.TextButton(
-                    onClick = { tab = entry },
-                    enabled = tab != entry,
-                ) {
-                    androidx.compose.material3.Text(entry.label)
-                }
-            }
-        }
+        com.farmos.core.design.FarmSectionTabs(
+            TaskDetailTab.entries.map { it.label }, tab.label,
+            { label -> tab = TaskDetailTab.entries.first { it.label == label } },
+        )
         when (tab) {
             TaskDetailTab.DETAIL -> TaskDetailScreen(
                 task = task,
@@ -214,7 +205,7 @@ internal fun TaskAssignPage(
                 title = "Assign to",
                 description = "Choosing a name and saving writes the assignment to this device and the farm.",
             ) {
-                androidx.compose.material3.TextButton(
+                com.farmos.core.design.FarmActionButton(
                     onClick = { selectedKey = null },
                     enabled = !busy,
                     modifier = Modifier.fillMaxWidth(),
@@ -222,7 +213,7 @@ internal fun TaskAssignPage(
                     androidx.compose.material3.Text(if (selectedKey == null) "Nobody (current)" else "Nobody")
                 }
                 assignees.forEach { option ->
-                    androidx.compose.material3.TextButton(
+                    com.farmos.core.design.FarmActionButton(
                         onClick = { selectedKey = option.key },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth(),
@@ -230,7 +221,7 @@ internal fun TaskAssignPage(
                         androidx.compose.material3.Text(option.label + if (option.key == selectedKey) " (current)" else "")
                     }
                 }
-                androidx.compose.material3.Button(
+                com.farmos.core.design.FarmPrimaryButton(
                     onClick = { onAssign(assigneeChange(selectedKey)) },
                     enabled = !busy && selectedKey != currentKey,
                     modifier = Modifier.fillMaxWidth(),

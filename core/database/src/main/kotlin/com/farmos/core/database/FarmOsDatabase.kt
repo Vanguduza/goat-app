@@ -361,6 +361,46 @@ interface AnimalDao {
         query: String,
         limit: Int,
     ): List<AnimalEntity>
+
+    /** Canonical animals are filtered before limiting; identifier aliases never consume result slots. */
+    @Query("""
+        SELECT a.* FROM animals AS a
+        WHERE a.farmId = :farmId
+          AND a.status != 'closed'
+          AND (:species IS NULL OR a.speciesCode = :species COLLATE NOCASE)
+          AND (:status IS NULL OR a.status = :status COLLATE NOCASE)
+          AND (
+              a.tag LIKE '%' || :query || '%' COLLATE NOCASE
+              OR COALESCE(a.name, '') LIKE '%' || :query || '%' COLLATE NOCASE
+              OR a.speciesCode LIKE '%' || :query || '%' COLLATE NOCASE
+              OR EXISTS (
+                  SELECT 1 FROM animal_identifiers AS i
+                  WHERE i.farmId = :farmId AND i.animalId = a.id AND i.isActive = 1
+                    AND i.value LIKE '%' || :query || '%' COLLATE NOCASE
+              )
+          )
+        ORDER BY CASE WHEN
+            a.tag = :query COLLATE NOCASE
+            OR EXISTS (
+                SELECT 1 FROM animal_identifiers AS exactIdentifier
+                WHERE exactIdentifier.farmId = :farmId AND exactIdentifier.animalId = a.id
+                  AND exactIdentifier.isActive = 1
+                  AND exactIdentifier.value = :query COLLATE NOCASE
+            )
+            THEN 0 ELSE 1 END,
+            a.speciesCode COLLATE NOCASE, a.tag COLLATE NOCASE, a.id
+        LIMIT :limit
+    """)
+    suspend fun searchGlobal(
+        farmId: String,
+        query: String,
+        species: String?,
+        status: String?,
+        limit: Int,
+    ): List<AnimalEntity>
+
+    @Query("SELECT DISTINCT status FROM animals WHERE farmId = :farmId AND status != 'closed' ORDER BY status COLLATE NOCASE")
+    suspend fun globalSearchStatuses(farmId: String): List<String>
 }
 
 @Dao

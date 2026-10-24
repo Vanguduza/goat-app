@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "8846676126d1baa7efa1216b2c4823c9856f4b17",
+  "tested_commit": "1db35c94c3b754688f1eda43a36452dfe6f4bfe5",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
     "static_implementation_map_unique_registered_ids": 128,
     "registered_ids_absent_from_static_implementation_map": 417,
-    "registered_ids_mentioned_in_kotlin": 519
+    "registered_ids_mentioned_in_kotlin": 523
   },
   "top_level": {
     "farm_modules": [
@@ -77,8 +77,8 @@
         },
         {
           "value": "HERD",
-          "refs": 12,
-          "transition_refs": 11,
+          "refs": 16,
+          "transition_refs": 14,
           "render_only_candidate": false
         },
         {
@@ -90,7 +90,7 @@
         {
           "value": "REGISTER",
           "refs": 3,
-          "transition_refs": 2,
+          "transition_refs": 1,
           "render_only_candidate": false
         },
         {
@@ -107,32 +107,32 @@
         },
         {
           "value": "REPRODUCTION",
-          "refs": 6,
-          "transition_refs": 5,
+          "refs": 9,
+          "transition_refs": 8,
           "render_only_candidate": false
         },
         {
           "value": "KIDDING",
           "refs": 8,
-          "transition_refs": 6,
+          "transition_refs": 5,
           "render_only_candidate": false
         },
         {
           "value": "SEARCH",
           "refs": 3,
-          "transition_refs": 2,
+          "transition_refs": 1,
           "render_only_candidate": false
         },
         {
           "value": "SCAN",
           "refs": 3,
-          "transition_refs": 2,
+          "transition_refs": 1,
           "render_only_candidate": false
         },
         {
           "value": "SYNC",
           "refs": 3,
-          "transition_refs": 2,
+          "transition_refs": 1,
           "render_only_candidate": false
         },
         {
@@ -240,19 +240,19 @@
         {
           "value": "PREGNANCY_DASHBOARD",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "KIDDING_DUE",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "LACTATION_DASHBOARD",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
@@ -270,7 +270,7 @@
         {
           "value": "KID_COHORT",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
@@ -324,7 +324,7 @@
         {
           "value": "GOAT_GROUPS",
           "refs": 3,
-          "transition_refs": 2,
+          "transition_refs": 1,
           "render_only_candidate": false
         },
         {
@@ -336,13 +336,13 @@
         {
           "value": "GOAT_REPORT",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "SCALE_PAIRING",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         }
       ]
@@ -363,103 +363,103 @@
         {
           "value": "ANIMALS",
           "refs": 4,
-          "transition_refs": 3,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
           "value": "REGISTER",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "CAGES",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
           "value": "WAVE",
-          "refs": 2,
+          "refs": 3,
           "transition_refs": 1,
           "render_only_candidate": false
         },
         {
           "value": "PALPATION",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "KINDLING",
           "refs": 4,
-          "transition_refs": 2,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "FOSTER",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "WEAN",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "OUTCOME",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "NESTS",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "GI_STASIS",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "WEIGHT",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "CAGE_OCCUPANCY",
-          "refs": 2,
+          "refs": 3,
           "transition_refs": 1,
           "render_only_candidate": false
         },
         {
           "value": "CAGE_DETAIL",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "KINDLING_DUE",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "LITTER_PROFILE",
-          "refs": 2,
+          "refs": 3,
           "transition_refs": 1,
           "render_only_candidate": false
         },
         {
           "value": "KIT_CENSUS",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
@@ -471,37 +471,37 @@
         {
           "value": "PEDIGREE",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "COI",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "MATE_COMPARE",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "REPLACEMENT_COMPARE",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "SALE_ALLOCATION",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "RABBIT_REPORT",
           "refs": 2,
-          "transition_refs": 1,
+          "transition_refs": 0,
           "render_only_candidate": false
         }
       ]
@@ -521,8 +521,8 @@
         },
         {
           "value": "HERD",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 4,
+          "transition_refs": 3,
           "render_only_candidate": false
         },
         {
@@ -572,51 +572,51 @@
         },
         {
           "value": "ITEMS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "CREATE",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "RECEIVE",
-          "refs": 4,
-          "transition_refs": 2,
+          "refs": 2,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "ISSUE",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "RECEIVE_LOT",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "FEFO_ISSUE",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "REORDER_RULE",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "REORDER_ALERT",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "ITEM_DETAIL",
@@ -632,27 +632,27 @@
         },
         {
           "value": "EXPIRY_QUEUE",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "LOW_STOCK",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "MOVEMENTS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "SEARCH",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         }
       ]
     },
@@ -671,81 +671,81 @@
         },
         {
           "value": "OBSERVATIONS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "RECORD_OBSERVATION",
-          "refs": 3,
-          "transition_refs": 1,
+          "refs": 2,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "FORMULARY",
-          "refs": 5,
-          "transition_refs": 2,
+          "refs": 3,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "TREATMENT",
-          "refs": 8,
-          "transition_refs": 2,
+          "refs": 6,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "WITHDRAWALS",
-          "refs": 3,
-          "transition_refs": 1,
+          "refs": 2,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "REFERENCES",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "PROTOCOLS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "ACCEPT_PROTOCOL",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "EDIT_PROTOCOL",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "APPLY_PROTOCOL",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "VET_VISIT",
-          "refs": 7,
-          "transition_refs": 2,
+          "refs": 5,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "LAB_RESULT",
-          "refs": 7,
-          "transition_refs": 2,
+          "refs": 5,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "TREATMENT_RECORDS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "TREATMENT_DETAIL",
@@ -761,9 +761,9 @@
         },
         {
           "value": "VET_VISITS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "VET_VISIT_DETAIL",
@@ -773,9 +773,9 @@
         },
         {
           "value": "LAB_RESULTS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "LAB_RESULT_DETAIL",
@@ -785,26 +785,26 @@
         },
         {
           "value": "FORMULARY_ITEM",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "PROTOCOL_PACK_DETAIL",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "TIMELINE",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "VACCINATION_SCHEDULE",
-          "refs": 3,
-          "transition_refs": 1,
+          "refs": 2,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
@@ -821,15 +821,15 @@
         },
         {
           "value": "TODAY_ACTIONS",
-          "refs": 3,
-          "transition_refs": 1,
+          "refs": 2,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "HEALTH_REPORT",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "REFERENCE_DETAIL",
@@ -839,9 +839,9 @@
         },
         {
           "value": "EMERGENCY",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         }
       ]
     },
@@ -1226,135 +1226,135 @@
         },
         {
           "value": "KINDS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "HOUSES",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "FLOCKS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "PLACEMENT",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "DAILY",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "HATCHERY",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "SET_EGGS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "CANDLING",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "HATCH_RESULT",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "VACCINATION",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "BIOSECURITY",
-          "refs": 4,
-          "transition_refs": 2,
+          "refs": 2,
+          "transition_refs": 0,
           "render_only_candidate": false
         },
         {
           "value": "FLOCK_PROFILE",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "HOUSE_DETAIL",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "EGG_PRODUCTION",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "FEED",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "INCUBATION_BATCH",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "BIOSECURITY_RECORDS",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "FLOCK_HEALTH",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "FLOCK_TIMELINE",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "FLOCK_MOVE",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "FLOCK_CLOSEOUT",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "POULTRY_REPORT",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         }
       ]
     },
@@ -1373,8 +1373,8 @@
         },
         {
           "value": "TRANSACTIONS",
-          "refs": 2,
-          "transition_refs": 1,
+          "refs": 3,
+          "transition_refs": 2,
           "render_only_candidate": false
         },
         {
@@ -1450,7 +1450,54 @@
     }
   ],
   "findings": {
-    "render_only_state_candidates": [],
+    "render_only_state_candidates": [
+      "InventoryPage.ITEMS",
+      "InventoryPage.CREATE",
+      "InventoryPage.ISSUE",
+      "InventoryPage.RECEIVE_LOT",
+      "InventoryPage.FEFO_ISSUE",
+      "InventoryPage.REORDER_RULE",
+      "InventoryPage.REORDER_ALERT",
+      "InventoryPage.EXPIRY_QUEUE",
+      "InventoryPage.LOW_STOCK",
+      "InventoryPage.MOVEMENTS",
+      "InventoryPage.SEARCH",
+      "HealthPage.OBSERVATIONS",
+      "HealthPage.REFERENCES",
+      "HealthPage.PROTOCOLS",
+      "HealthPage.ACCEPT_PROTOCOL",
+      "HealthPage.EDIT_PROTOCOL",
+      "HealthPage.APPLY_PROTOCOL",
+      "HealthPage.TREATMENT_RECORDS",
+      "HealthPage.VET_VISITS",
+      "HealthPage.LAB_RESULTS",
+      "HealthPage.FORMULARY_ITEM",
+      "HealthPage.PROTOCOL_PACK_DETAIL",
+      "HealthPage.TIMELINE",
+      "HealthPage.HEALTH_REPORT",
+      "HealthPage.EMERGENCY",
+      "PoultryPage.KINDS",
+      "PoultryPage.HOUSES",
+      "PoultryPage.FLOCKS",
+      "PoultryPage.PLACEMENT",
+      "PoultryPage.DAILY",
+      "PoultryPage.HATCHERY",
+      "PoultryPage.SET_EGGS",
+      "PoultryPage.CANDLING",
+      "PoultryPage.HATCH_RESULT",
+      "PoultryPage.VACCINATION",
+      "PoultryPage.FLOCK_PROFILE",
+      "PoultryPage.HOUSE_DETAIL",
+      "PoultryPage.EGG_PRODUCTION",
+      "PoultryPage.FEED",
+      "PoultryPage.INCUBATION_BATCH",
+      "PoultryPage.BIOSECURITY_RECORDS",
+      "PoultryPage.FLOCK_HEALTH",
+      "PoultryPage.FLOCK_TIMELINE",
+      "PoultryPage.FLOCK_MOVE",
+      "PoultryPage.FLOCK_CLOSEOUT",
+      "PoultryPage.POULTRY_REPORT"
+    ],
     "operating_module_host_callers": [
       "app/src/main/java/com/farmos/app/FarmSessionContent.kt",
       "app/src/main/java/com/farmos/app/FarmSpeciesModuleHost.kt",

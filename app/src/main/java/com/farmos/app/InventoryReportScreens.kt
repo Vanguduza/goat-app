@@ -106,10 +106,10 @@ internal fun InventoryReportPage(
 @Composable
 internal fun InventoryAdditionalActions(onOpen: (InventoryPage) -> Unit) {
     FarmOperationalSection("Suppliers and reports") {
-        androidx.compose.material3.TextButton(onClick = { onOpen(InventoryPage.SUPPLIERS) }) {
+        com.farmos.core.design.FarmActionButton(onClick = { onOpen(InventoryPage.SUPPLIERS) }) {
             androidx.compose.material3.Text("Supplier bindings")
         }
-        androidx.compose.material3.TextButton(onClick = { onOpen(InventoryPage.REPORT) }) {
+        com.farmos.core.design.FarmActionButton(onClick = { onOpen(InventoryPage.REPORT) }) {
             androidx.compose.material3.Text("Inventory report")
         }
     }

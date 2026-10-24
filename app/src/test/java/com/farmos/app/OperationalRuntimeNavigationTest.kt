@@ -27,7 +27,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class OperationalRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private fun exercise(
@@ -36,22 +37,23 @@ class OperationalRuntimeNavigationTest {
         parentScreenId: String? = null,
     ) {
         routes.forEach { (action, screenId) ->
-            compose.onNode(hasClickAction() and hasText(action))
+            compose.revealFarmTool(action)
                 .performScrollTo()
                 .performClick()
             compose.onNodeWithTag("farm-screen:$screenId").assertExists()
-            compose.onNode(hasClickAction() and hasText(backLabel))
+            compose.captureModuleReview(screenId)
+            compose.revealFarmTool(if (screenId == "FOS-POULTRY-017") "Poultry" else backLabel)
                 .performScrollTo()
                 .performClick()
             parentScreenId?.let { compose.onNodeWithTag("farm-screen:$it").assertExists() }
-            compose.onNode(hasClickAction() and hasText(action)).assertExists()
+            compose.revealFarmTool(action).assertExists()
         }
     }
 
     @Test
     fun inventoryDashboardTraversesAllOwnedScreensAndReturns() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 InventoryScreen(
                     rows = emptyList(),
                     busy = false,
@@ -79,7 +81,7 @@ class OperationalRuntimeNavigationTest {
     @Test
     fun financeDashboardTraversesAllOwnedScreensAndReturns() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 MoneyCaptureScreen(
                     rows = emptyList(),
                     busy = false,
@@ -103,7 +105,7 @@ class OperationalRuntimeNavigationTest {
     @Test
     fun healthDashboardTraversesAllOwnedScreensAndReturns() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 HealthObservationScreen(
                     rows = emptyList(),
                     catalog = emptyList(),
@@ -137,7 +139,7 @@ class OperationalRuntimeNavigationTest {
     @Test
     fun poultryDashboardTraversesAllOwnedScreensAndReturns() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 PoultryExperienceScreen(
                     enabledKinds = emptyList(),
                     houses = emptyList(),
@@ -162,17 +164,17 @@ class OperationalRuntimeNavigationTest {
         }
         exercise(
             listOf(
-                "Open Enabled kinds" to "FOS-POULTRY-002",
-                "Open Houses" to "FOS-POULTRY-006",
-                "Open Flocks" to "FOS-POULTRY-004",
-                "Open Place flock" to "FOS-POULTRY-008",
-                "Open Daily flock record" to "FOS-POULTRY-009",
-                "Open Hatchery" to "FOS-POULTRY-017",
-                "Open Set eggs" to "FOS-POULTRY-018",
-                "Open Candling" to "FOS-POULTRY-020",
-                "Open Hatch result" to "FOS-POULTRY-021",
-                "Open Vaccination" to "FOS-POULTRY-014",
-                "Open Biosecurity" to "FOS-POULTRY-016",
+                "Enabled kinds" to "FOS-POULTRY-002",
+                "Houses" to "FOS-POULTRY-006",
+                "Flocks" to "FOS-POULTRY-004",
+                "Place flock" to "FOS-POULTRY-008",
+                "Daily flock record" to "FOS-POULTRY-009",
+                "Hatchery" to "FOS-POULTRY-017",
+                "Set eggs" to "FOS-POULTRY-018",
+                "Candling" to "FOS-POULTRY-020",
+                "Hatch result" to "FOS-POULTRY-021",
+                "Vaccination" to "FOS-POULTRY-014",
+                "Biosecurity" to "FOS-POULTRY-016",
             ),
         )
     }
@@ -197,7 +199,7 @@ class OperationalRuntimeNavigationTest {
             onPedigree = { _, _, _ -> },
         )
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SheepOperationsScreen(
                     selectedAnimalId = "sheep-1",
                     busy = false,
@@ -250,7 +252,7 @@ class OperationalRuntimeNavigationTest {
             onCloseLot = { _, _, _, _, _ -> },
         )
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 CattleOperationsScreen(
                     selectedAnimalId = "cattle-1",
                     busy = false,

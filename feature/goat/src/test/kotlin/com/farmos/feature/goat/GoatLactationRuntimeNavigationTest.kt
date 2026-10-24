@@ -1,5 +1,9 @@
 package com.farmos.feature.goat
 
+import com.farmos.review.NativeModuleReviewRule
+import com.farmos.review.NativeModuleReviewTheme
+import com.farmos.review.captureObservedNativeOwners
+
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -31,8 +35,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class GoatLactationRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val dashboardTag = "farm-screen:" + "FOS-" + "GOAT-" + "001"
     private fun day(m: Int, d: Int) = LocalDate.of(2026, m, d).toEpochDay()
@@ -49,21 +53,21 @@ class GoatLactationRuntimeNavigationTest {
             ),
             onSelect = selected::set,
         )
-        compose.onNode(hasClickAction() and hasText("Lactation")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GOAT-018").assertExists()
-        compose.onNodeWithText("Goats with milk recorded · 2").assertExists()
-        compose.onNodeWithText("614.25 L across 241 records").assertExists()
-        compose.onNodeWithText("GT-024 · Nala · Active").assertExists()
-        compose.onNodeWithText("612.75 L over 240 records").assertExists()
-        compose.onNodeWithText("Latest 2026-09-21: 3.25 L · first 2026-01-03").assertExists()
-        compose.onNodeWithText("SCC results recorded: 4").assertExists()
-        compose.onNodeWithText("Goat not on this device").assertExists()
+        compose.revealGoatTool("Lactation").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-018").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Goats with milk recorded · 2").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("614.25 L across 241 records").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("GT-024 · Nala · Active").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("612.75 L over 240 records").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Latest 2026-09-21: 3.25 L · first 2026-01-03").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("SCC results recorded: 4").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Goat not on this device").assertExists().also { compose.captureObservedNativeOwners() }
 
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
-        compose.onNodeWithTag(dashboardTag).assertExists()
+        compose.onNodeWithTag(dashboardTag).assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-screen:FOS-GOAT-018").assertDoesNotExist()
 
-        compose.onNode(hasClickAction() and hasText("Lactation")).performScrollTo().performClick()
+        compose.revealGoatTool("Lactation").performScrollTo().performClick()
         compose.onNodeWithTag("goat-lactation:goat-nala").performScrollTo().performClick()
         compose.runOnIdle { assertEquals("goat-nala", selected.get()) }
     }
@@ -71,35 +75,35 @@ class GoatLactationRuntimeNavigationTest {
     @Test
     fun loadingFailedAndEmptyStatesAreDistinct() {
         render(GoatLactationState.Failed("milk records unavailable"))
-        compose.onNode(hasClickAction() and hasText("Lactation")).performScrollTo().performClick()
-        compose.onNodeWithText("milk records unavailable").assertExists()
+        compose.revealGoatTool("Lactation").performScrollTo().performClick()
+        compose.onNodeWithText("milk records unavailable").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("No milk recorded on this device.").assertDoesNotExist()
     }
 
     @Test
     fun emptyLactationSaysNothingIsRecorded() {
         render(GoatLactationState.Loaded(emptyList()))
-        compose.onNode(hasClickAction() and hasText("Lactation")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GOAT-018").assertExists()
-        compose.onNodeWithText("No milk recorded on this device.").assertExists()
+        compose.revealGoatTool("Lactation").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-018").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("No milk recorded on this device.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun herdDerivedPagesSayWhenTheHerdListIsBounded() {
         render(GoatLactationState.Loading, herdCounts = GoatHerdCounts(active = 880, does = 600, bucks = 280, kids = 90, notClosed = 900))
-        compose.onNode(hasClickAction() and hasText("Pregnancy")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GOAT-035").assertExists()
-        compose.onNodeWithText("Built from the first 1 of 900 goats by tag. Goats beyond these are not shown here.").assertExists()
+        compose.revealGoatTool("Pregnancy").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-035").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Built from the first 1 of 900 goats by tag. Goats beyond these are not shown here.").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
-        compose.onNode(hasClickAction() and hasText("Kids")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GOAT-040").assertExists()
-        compose.onNodeWithTag("goat-kid-cohort-bounded").assertExists()
+        compose.revealGoatTool("Kids").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-040").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("goat-kid-cohort-bounded").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun unboundedHerdShowsNoNotice() {
         render(GoatLactationState.Loading, herdCounts = GoatHerdCounts(active = 1, does = 1, bucks = 0, kids = 0, notClosed = 1))
-        compose.onNode(hasClickAction() and hasText("Pregnancy")).performScrollTo().performClick()
+        compose.revealGoatTool("Pregnancy").performScrollTo().performClick()
         compose.onNodeWithTag("goat-pregnancy-bounded").assertDoesNotExist()
     }
 
@@ -118,7 +122,7 @@ class GoatLactationRuntimeNavigationTest {
             syncPending = false,
         )
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 GoatExperienceScreen(
                     state = GoatSliceUiState(
                         farmName = "Premier Farm",
@@ -153,6 +157,6 @@ class GoatLactationRuntimeNavigationTest {
                 )
             }
         }
-        compose.onNodeWithTag(dashboardTag).assertExists()
+        compose.onNodeWithTag(dashboardTag).assertExists().also { compose.captureObservedNativeOwners() }
     }
 }

@@ -1,5 +1,11 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmToolAction
+
+import com.farmos.core.design.FarmToolGroup
+
+import com.farmos.core.design.FarmModuleTools
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,7 +57,11 @@ enum class SalesRecordPage(val label: String) {
     DETAIL("Sale detail"),
 }
 
-private fun saleAmount(minor: Long, currency: String) = "$minor $currency minor units"
+private fun saleAmount(minor: Long, currency: String): String {
+    val digits = runCatching { java.util.Currency.getInstance(currency).defaultFractionDigits }.getOrNull()?.takeIf { it >= 0 }
+        ?: return "$minor $currency minor units"
+    return java.math.BigDecimal.valueOf(minor, digits).toPlainString() + " " + currency
+}
 
 @Composable
 private fun SalesRow(primary: String, secondary: String, tag: String) {
@@ -88,17 +98,13 @@ fun SalesRecordNavigator(
     }
     when (page) {
         null -> home {
-            FarmOperationalSection("Records") {
+            FarmModuleTools(listOf(FarmToolGroup("Browse", buildList {
                 SalesRecordPage.entries.forEach { target ->
-                    TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text("Open ${target.label}") }
+                    add(FarmToolAction("Open ${target.label}", { page = target }))
                 }
-                if (customers != null) {
-                    TextButton(onClick = { register = true }, modifier = Modifier.fillMaxWidth()) { Text("Customers") }
-                }
-                if (animalSale != null) {
-                    TextButton(onClick = { animalSaleOpen = true }, modifier = Modifier.fillMaxWidth()) { Text("Animal sale") }
-                }
-            }
+                if (customers != null) add(FarmToolAction("Customers", { register = true }))
+                if (animalSale != null) add(FarmToolAction("Animal sale", { animalSaleOpen = true }))
+            })), title = "Records")
         }
         SalesRecordPage.HISTORY -> SalesHistoryScreen(records, back)
         SalesRecordPage.DETAIL -> SaleDetailScreen(records, back)

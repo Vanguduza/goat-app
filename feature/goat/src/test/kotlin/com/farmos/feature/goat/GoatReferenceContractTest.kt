@@ -59,7 +59,7 @@ class GoatReferenceContractTest {
         }
 
         compose.onNodeWithTag("farm-screen:FOS-GOAT-001").assertIsDisplayed()
-        compose.onNode(hasClickAction() and hasText("Herd")).performClick()
+        compose.revealGoatTool("Herd").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-002").assertIsDisplayed()
         compose.onNodeWithText("Register goat").assertExists()
         assertNamedClickTargets()
@@ -107,7 +107,7 @@ class GoatReferenceContractTest {
         }
 
         compose.onNodeWithTag("farm-screen:FOS-GOAT-003").assertIsDisplayed()
-        compose.onNode(hasClickAction() and hasText("Weight")).performClick()
+        compose.revealGoatTool("Weight").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-011").assertIsDisplayed()
         compose.onNodeWithText("Saving succeeds when the measurement is durable on this device. Sync can happen later.").assertExists()
         compose.onAllNodes(hasSetTextAction())[0].performTextInput("55.4")
@@ -213,7 +213,9 @@ class GoatReferenceContractTest {
             }
         }
 
-        listOf("FOS-GOAT-022", "FOS-GOAT-016", "FOS-GOAT-020").forEach { screenId ->
+        // These are three independent capture tabs, not three simultaneous forms.
+        listOf("FAMACHA" to "FOS-GOAT-022", "Body condition" to "FOS-GOAT-016", "SCC" to "FOS-GOAT-020").forEach { (section, screenId) ->
+            compose.onNodeWithTag("farm-section:$section").performScrollTo().performClick()
             compose.onNodeWithTag("farm-screen:$screenId").performScrollTo().assertIsDisplayed()
         }
         assertNamedClickTargets()
@@ -234,8 +236,16 @@ class GoatReferenceContractTest {
             }
         }
 
-        listOf("FOS-GOAT-017", "FOS-GOAT-031", "FOS-GOAT-032", "FOS-GOAT-034", "FOS-GOAT-043").forEach { screenId ->
-            compose.onNodeWithTag("farm-screen:$screenId").performScrollTo().assertIsDisplayed()
+        // A single focused form is presented for each selected species-native workflow.
+        listOf(
+            "Milk" to listOf("FOS-GOAT-017"),
+            "Heat" to listOf("FOS-GOAT-031"),
+            "Mating" to listOf("FOS-GOAT-032", "FOS-GOAT-033"),
+            "Pregnancy" to listOf("FOS-GOAT-034"),
+            "Lactation" to listOf("FOS-GOAT-043"),
+        ).forEach { (section, screenIds) ->
+            compose.onNodeWithTag("farm-section:$section").performScrollTo().performClick()
+            screenIds.forEach { screenId -> compose.onNodeWithTag("farm-screen:$screenId").performScrollTo().assertIsDisplayed() }
         }
         assertNamedClickTargets()
     }
@@ -255,7 +265,9 @@ class GoatReferenceContractTest {
             }
         }
 
+        compose.onNodeWithTag("farm-section:Birth").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-037").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("farm-section:Register kid").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-039").performScrollTo().assertIsDisplayed()
         assertNamedClickTargets()
     }

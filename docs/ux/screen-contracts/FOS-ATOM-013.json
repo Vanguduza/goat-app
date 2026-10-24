@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-ATOM-013",
+  "registry_name": "Worker Selector",
+  "feature_ids": [
+    "FTR-ATOM-001"
+  ],
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "user_job": "Choose the exact registered worker from the owning farm without confusing worker identity with an application login.",
+  "personas_and_grants": [
+    {
+      "persona": "Existing authorized parent-module user",
+      "grant_source": "No new grants. Existing parent command/read-model authorization and enabled state remain authoritative.",
+      "independent_role_matrix_review": "PENDING"
+    }
+  ],
+  "scope": {
+    "farm_source": "Active farm from the existing owning module",
+    "species_kind": "Not species-restricted; no species ownership is inferred by the presentation",
+    "subject": "Active LabourWorkerOption rows supplied by the existing farm owner; widget does not create workers or widen farm scope.",
+    "sensitive_fields": [
+      "Worker names remain scoped to the authorized farm"
+    ]
+  },
+  "navigation": {
+    "route": "LabourWorkerPicker embedded in labour capture",
+    "entry_points": [
+      "Labour capture requiring a worker"
+    ],
+    "arguments": [
+      "Existing parent farm and subject IDs only"
+    ],
+    "deep_link_authorization": "No new external deep link; parent route must enforce its existing farm/role boundary.",
+    "back_and_draft_behavior": "Embedded selection does not navigate. Parent owns draft discard and commit.",
+    "aliases": []
+  },
+  "design": {
+    "recipe": "P13",
+    "reference_ids": [
+      "LOCK-MANAGEMENT-A"
+    ],
+    "native_golden_family": "Animal Farm shared native controls; ID-specific candidates are unapproved",
+    "token_version": "Current committed AnimalFarmTheme and protected visual-lock tokens",
+    "ordered_sections": [
+      "Existing owner header/navigation",
+      "Focused controls or read-only status",
+      "Actual matching records or local receipt"
+    ],
+    "shared_components": [
+      "FarmOperationalPage or its existing parent",
+      "FarmActionButton/FarmPrimaryButton/FarmOutlinedTextField as applicable",
+      "AnimalFarmTheme"
+    ],
+    "illustration_use": "Inherited parent illustration; no new decoration that obscures focused capture or status.",
+    "copy": {
+      "job": "Choose the exact registered worker from the owning farm without confusing worker identity with an application login.",
+      "scope_disclosure": "Active LabourWorkerOption rows supplied by the existing farm owner; widget does not create workers or widen farm scope."
+    },
+    "adaptive_layout": {
+      "phone": "Flow/wrap and vertical scrolling at 360 and 411dp; no font shrinking.",
+      "tablet": "Use the existing parent width and page layout at 780dp.",
+      "large_text": "Exercise 1.0,1.3,2.0 font scales and retain all lower content.",
+      "outdoor": "Outdoor palette and 64dp minimum touch targets; no hardware availability claim."
+    }
+  },
+  "fields": [
+    {
+      "key": "query",
+      "label": "Find worker",
+      "type": "text",
+      "unit": "not applicable",
+      "required": false,
+      "bounds_source": "Existing owning command/component at feature/ops/src/main/kotlin/com/farmos/feature/ops/LabourWorkerPicker.kt",
+      "default_source": "",
+      "editable_by": [
+        "Enabled authorized parent-module user"
+      ],
+      "validation": [
+        "Search the complete supplied worker list before taking the visible window; selected worker identity stays pinned."
+      ]
+    }
+  ],
+  "queries": [
+    {
+      "name": "workers",
+      "read_model": "Existing Labour capture supplies farm-scoped active workers",
+      "loading_empty_error": "Empty register preserves the existing typed worker-label fallback; unmatched query is explicit.",
+      "freshness": "Local state supplied by existing owner; no remote freshness claim.",
+      "offline_source": "Current farm local database or already loaded parent state."
+    }
+  ],
+  "actions": [
+    {
+      "label": "Worker row",
+      "intent": "Select exact workerId in the parent draft",
+      "permission": "Existing parent command/read authorization; no new authority.",
+      "command_or_destination": "onSelect(worker.workerId), no persistence command",
+      "validation": [
+        "Existing owner validation remains unchanged."
+      ],
+      "effects": [
+        "Only the described action; no implicit extra save or cross-farm lookup."
+      ],
+      "idempotency": "Existing LocalCommandContext and busy-write guard for mutations; read-only navigation/selection emits no operation.",
+      "success_receipt": "Local-commit receipt only for persisted writes; selection/read is not a save.",
+      "failure_and_recovery": "Retain existing owner errors; no fabricated success on failure."
+    },
+    {
+      "label": "Show more workers",
+      "intent": "Expand current matching choices",
+      "permission": "Existing parent command/read authorization; no new authority.",
+      "command_or_destination": "Local visibleLimit += 50",
+      "validation": [
+        "Existing owner validation remains unchanged."
+      ],
+      "effects": [
+        "Only the described action; no implicit extra save or cross-farm lookup."
+      ],
+      "idempotency": "Existing LocalCommandContext and busy-write guard for mutations; read-only navigation/selection emits no operation.",
+      "success_receipt": "Local-commit receipt only for persisted writes; selection/read is not a save.",
+      "failure_and_recovery": "Retain existing owner errors; no fabricated success on failure."
+    }
+  ],
+  "state_matrix": [
+    {
+      "state": "search-content",
+      "fixture": "120 active workers; w120 named Rudo Zebra",
+      "expected_ui": "Search Zebra reaches w120 beyond initial rows and preserves its selected ID.",
+      "test_id": "ResourceVisualOwnerCertificationTest.workerSearchReachesBeyondTheInitialWindowAndKeepsIdentity"
+    },
+    {
+      "state": "registered-worker",
+      "fixture": "Two workers, w2 initially selected",
+      "expected_ui": "Selected semantics and callback preserve exact identity.",
+      "test_id": "WorkerRegisterScreensTest.labourCaptureChoosesARegisteredWorker"
+    },
+    {
+      "state": "disabled",
+      "fixture": "Parent enabled=false",
+      "expected_ui": "Query and selection remain disabled.",
+      "test_id": null
+    }
+  ],
+  "not_applicable_states": [
+    {
+      "state": "remote_acknowledged",
+      "reason": "This presentation does not establish a remote delivery acknowledgement."
+    }
+  ],
+  "accessibility_tests": [
+    "Named clickable controls and selected/disabled semantics",
+    "Actual touch bounds in every matrix cell",
+    "Text-layout overflow and ellipsis diagnostics",
+    "TalkBack and keyboard/manual pixel review remain unapproved"
+  ],
+  "functional_tests": [
+    "ResourceVisualOwnerCertificationTest.workerSearchReachesBeyondTheInitialWindowAndKeepsIdentity",
+    "WorkerRegisterScreensTest.labourCaptureChoosesARegisteredWorker"
+  ],
+  "linked_routes": [
+    "Labour capture requiring a worker"
+  ],
+  "guide_and_resource_links": [
+    "feature/ops/src/main/kotlin/com/farmos/feature/ops/LabourWorkerPicker.kt",
+    "app/src/main/java/com/farmos/app/LabourModuleContent.kt"
+  ],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": null
+}

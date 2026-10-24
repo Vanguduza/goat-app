@@ -31,7 +31,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class AssetRecordRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private val homeTag = "farm-screen:" + "FOS-" + "ASSET-" + "001"
@@ -69,10 +70,11 @@ class AssetRecordRuntimeNavigationTest {
     }
 
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText("Open $label")).performScrollTo().performClick()
+        compose.revealFarmTool("Open $label").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         assertions()
-        compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
+        compose.captureModuleReview(screenId)
+        compose.revealFarmTool("Farm home").performScrollTo().performClick()
         compose.onNodeWithTag(homeTag).assertExists()
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
@@ -92,7 +94,7 @@ class AssetRecordRuntimeNavigationTest {
 
     private fun render(records: AssetRecords) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 AssetRecordNavigator(records) { recordActions ->
                     SimpleCaptureScreen(
                         screenId = "FOS-" + "ASSET-" + "001",

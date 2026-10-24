@@ -43,6 +43,9 @@ android {
         buildConfig = true
     }
 
+    // Reuse evidence collectors only in JVM tests; never include them in production.
+    sourceSets.getByName("test").kotlin.directories.add(rootProject.file("core/design/src/sharedTest/kotlin").absolutePath)
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true

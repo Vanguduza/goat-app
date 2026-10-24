@@ -3,20 +3,23 @@ package com.farmos.feature.rabbit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -27,6 +30,11 @@ import com.farmos.core.design.AnimalFarmFamily
 import com.farmos.core.design.AnimalFarmModuleHeader
 import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmIllustratedSectionSurface
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
@@ -118,10 +126,11 @@ fun RabbitProgrammeScreen(
 ) {
     var page by remember(entryProfile) { mutableStateOf(if (entryProfile == null) RabbitPage.DASHBOARD else RabbitPage.PROFILE) }
     var profileId by remember(entryProfile) { mutableStateOf(entryProfile?.animalId) }
+    var dashboardSection by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("Breeding") }
     val home = { page = RabbitPage.DASHBOARD }
     when (page) {
         RabbitPage.DASHBOARD -> {
-            RabbitDashboard(does, rabbitCount, cages, waves, availableBoxes, error, { page = it }, onBack, showPedigree = pedigree != null)
+            RabbitDashboard(rabbitCount, error, { page = it }, onBack, dashboardSection, { dashboardSection = it }, showPedigree = pedigree != null, records = records, today = today, loading = loading)
         }
 
         RabbitPage.ANIMALS -> if (rabbits.isNotEmpty()) {
@@ -203,7 +212,13 @@ fun RabbitProgrammeScreen(
         }
 
         RabbitPage.NESTS -> {
-            RabbitRows("FOS-RABBIT-013", "Nest-box schedule", nestBoxes, "No nest boxes on this device", error, home)
+            FarmOperationalPage("FOS-RABBIT-013", "Nest-box schedule", "", onBack = home) {
+                RabbitNestCycle(records.cages.flatMap { it.nestBoxes })
+                com.farmos.core.design.FarmActionButton(onClick = { page = RabbitPage.CAGES }, modifier = Modifier.fillMaxWidth()) { Text("Manage nest boxes") }
+                RabbitCageRotationBoard(records, today)
+                com.farmos.core.design.FarmActionButton(onClick = { page = RabbitPage.WAVE }, modifier = Modifier.fillMaxWidth()) { Text("Breeding wave") }
+                error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            }
         }
 
         RabbitPage.GI_STASIS -> {
@@ -214,7 +229,7 @@ fun RabbitProgrammeScreen(
             RabbitWeightScreen(searchRabbits, busy, error, onRecordWeight, home)
         }
 
-        RabbitPage.CAGE_OCCUPANCY -> RabbitCageOccupancyScreen(records, home)
+        RabbitPage.CAGE_OCCUPANCY -> RabbitCageOccupancyScreen(records, home, today, { page = RabbitPage.CAGES })
         RabbitPage.CAGE_DETAIL -> RabbitCageDetailScreen(records, home)
         RabbitPage.KINDLING_DUE -> RabbitKindlingDueScreen(records, today, home)
         RabbitPage.LITTER_PROFILE -> RabbitLitterProfileScreen(records, home)
@@ -227,86 +242,95 @@ fun RabbitProgrammeScreen(
 
 /** FOS-RABBIT-001 — illustrated rabbitry dashboard. */
 @Composable
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 private fun RabbitDashboard(
-    animals: List<String>,
     rabbitCount: Int?,
-    cages: List<String>,
-    waves: List<String>,
-    availableBoxes: Long,
     error: String?,
     onOpen: (RabbitPage) -> Unit,
     onBack: () -> Unit,
+    section: String,
+    onSection: (String) -> Unit,
     showPedigree: Boolean = false,
+    records: RabbitRecords = RabbitRecords(),
+    today: LocalDate = LocalDate.now(),
+    loading: Boolean = false,
 ) {
+    val actions = when (section) {
+        "Animals" -> listOf(
+            "Breeding animals" to RabbitPage.ANIMALS,
+            "Register rabbit" to RabbitPage.REGISTER,
+            "Record weight" to RabbitPage.WEIGHT,
+            "GI-stasis red flag" to RabbitPage.GI_STASIS,
+        )
+        "Housing" -> listOf(
+            "Cages & nest boxes" to RabbitPage.CAGES,
+            "Nest-box schedule" to RabbitPage.NESTS,
+            "Cage occupancy" to RabbitPage.CAGE_OCCUPANCY,
+            "Cage detail" to RabbitPage.CAGE_DETAIL,
+        )
+        "Records" -> listOf(
+            "Kit census" to RabbitPage.KIT_CENSUS,
+            "Replacement compare" to RabbitPage.REPLACEMENT_COMPARE,
+            "Sale allocation" to RabbitPage.SALE_ALLOCATION,
+            "Rabbit report" to RabbitPage.RABBIT_REPORT,
+        ) + if (showPedigree) listOf(
+            "Rabbit pedigree" to RabbitPage.PEDIGREE,
+            "Inbreeding check" to RabbitPage.COI,
+            "Compare bucks" to RabbitPage.MATE_COMPARE,
+        ) else emptyList()
+        else -> listOf(
+            "Breeding wave" to RabbitPage.WAVE,
+            "Palpation" to RabbitPage.PALPATION,
+            "Kindling" to RabbitPage.KINDLING,
+            "Foster kits" to RabbitPage.FOSTER,
+            "Weaning" to RabbitPage.WEAN,
+            "Mating outcome" to RabbitPage.OUTCOME,
+            "Kindling due" to RabbitPage.KINDLING_DUE,
+            "Litter profiles" to RabbitPage.LITTER_PROFILE,
+        )
+    }
     AnimalFarmCanvas {
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(com.farmos.core.design.AnimalFarmHomeMetrics.pageInset),
+            verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
         ) {
-            AnimalFarmModuleHeader(
-                title = "Rabbitry",
-                subtitle = "Waves, cages, nests and litters",
-                family = AnimalFarmFamily.RABBIT,
-            )
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                RabbitMetric("Rabbits", rabbitCount ?: animals.size, Modifier.weight(1f))
-                RabbitMetric("Cages", cages.size, Modifier.weight(1f))
-                RabbitMetric("Waves", waves.size, Modifier.weight(1f))
-                RabbitMetric("Boxes", availableBoxes.toInt(), Modifier.weight(1f))
+            com.farmos.core.design.FarmBackButton("Farm home", onBack)
+            AnimalFarmModuleHeader("Rabbitry", "", family = AnimalFarmFamily.RABBIT)
+            if (loading) Text("Loading rabbitry…", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            else {
+                Row(Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    RabbitMetric("Rabbits", rabbitCount, Modifier.weight(1f).fillMaxHeight())
+                    RabbitMetric("Ready nests", records.cages.flatMap { it.nestBoxes }.count { it.status in setOf("available", "sanitized") }, Modifier.weight(1f).fillMaxHeight())
+                }
+                RabbitWorkflowOverview(records, today, { onOpen(RabbitPage.LITTER_PROFILE) }, { onOpen(RabbitPage.CAGE_OCCUPANCY) })
             }
-            RabbitDashboardAction("Breeding animals", "Does and bucks", { onOpen(RabbitPage.ANIMALS) })
-            RabbitDashboardAction("Register rabbit", "Add a doe or buck", { onOpen(RabbitPage.REGISTER) })
-            RabbitDashboardAction("Cages & nest boxes", "Housing, capacity and nest cycle", { onOpen(RabbitPage.CAGES) })
-            RabbitDashboardAction("Breeding wave", "Mating schedule and generated due work", { onOpen(RabbitPage.WAVE) })
-            RabbitDashboardAction("Palpation", "Record pregnant or open", { onOpen(RabbitPage.PALPATION) })
-            RabbitDashboardAction("Kindling", "Record live and dead kits", { onOpen(RabbitPage.KINDLING) })
-            RabbitDashboardAction("Foster kits", "Move kits between waves with timing acknowledgement", { onOpen(RabbitPage.FOSTER) })
-            RabbitDashboardAction("Weaning", "Record kits leaving the litter", { onOpen(RabbitPage.WEAN) })
-            RabbitDashboardAction("Mating outcome", "Record false pregnancy or outcome", { onOpen(RabbitPage.OUTCOME) })
-            RabbitDashboardAction("Nest-box schedule", "Placement, occupancy and removal windows", { onOpen(RabbitPage.NESTS) })
-            RabbitDashboardAction("GI-stasis red flag", "Flag signs and create vet-call work", { onOpen(RabbitPage.GI_STASIS) })
-            RabbitDashboardAction("Record weight", "Weigh a rabbit with a governed record", { onOpen(RabbitPage.WEIGHT) })
-            RabbitDashboardAction("Cage occupancy", "Recorded capacity, nest boxes and waves per cage", { onOpen(RabbitPage.CAGE_OCCUPANCY) })
-            RabbitDashboardAction("Cage detail", "Nest boxes and waves for one cage", { onOpen(RabbitPage.CAGE_DETAIL) })
-            RabbitDashboardAction("Kindling due", "Waves with no kindling recorded yet", { onOpen(RabbitPage.KINDLING_DUE) })
-            RabbitDashboardAction("Litter profiles", "Schedule, events and kits per wave", { onOpen(RabbitPage.LITTER_PROFILE) })
-            RabbitDashboardAction("Kit census", "Individual kits by wave", { onOpen(RabbitPage.KIT_CENSUS) })
-            RabbitDashboardAction("Replacement compare", "Compare young rabbits for replacement selection", { onOpen(RabbitPage.REPLACEMENT_COMPARE) })
-            RabbitDashboardAction("Sale allocation", "Allocate rabbits to a planned sale", { onOpen(RabbitPage.SALE_ALLOCATION) })
-            RabbitDashboardAction("Rabbit report", "Rabbitry totals for this farm", { onOpen(RabbitPage.RABBIT_REPORT) })
-            if (showPedigree) {
-                RabbitDashboardAction("Rabbit pedigree", "Sire and dam of each rabbit", { onOpen(RabbitPage.PEDIGREE) })
-                RabbitDashboardAction("Inbreeding check", "Kits' inbreeding for a doe and buck", { onOpen(RabbitPage.COI) })
-                RabbitDashboardAction("Compare bucks", "Up to four bucks side by side for a doe", { onOpen(RabbitPage.MATE_COMPARE) })
+            // Reveal navigation after the initial projection so the overview cannot
+            // move an already active action under a user's tap.
+            if (!loading) {
+                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf("Breeding", "Housing", "Animals", "Records").forEach { name ->
+                        com.farmos.core.design.FarmFilterChip(name, name == section, { onSection(name) }, Modifier.testTag("rabbit-section:$name"))
+                    }
+                }
+                actions.forEach { (label, target) ->
+                    com.farmos.core.design.AnimalFarmQuickAction(label, { onOpen(target) }, Modifier.testTag("rabbit-action:${target.name}"))
+                }
             }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            TextButton(onClick = onBack) { Text("Farm home") }
         }
     }
 }
 
+
 @Composable
 private fun RabbitMetric(
     label: String,
-    value: Int,
+    value: Int?,
     modifier: Modifier,
 ) {
     FarmIllustratedSectionSurface(modifier) {
-        Text(value.toString(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(value?.toString() ?: "—", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text(label, style = MaterialTheme.typography.labelMedium)
-    }
-}
-
-@Composable
-private fun RabbitDashboardAction(
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-) {
-    FarmIllustratedSectionSurface(Modifier.fillMaxWidth()) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        TextButton(onClick = onClick) { Text("Open $title") }
     }
 }
 
@@ -387,12 +411,14 @@ private fun RabbitCagesScreen(
     var boxCode by remember { mutableStateOf("") }
     var boxId by remember { mutableStateOf("") }
     var boxStatus by remember { mutableStateOf("") }
-    FarmOperationalPage("FOS-RABBIT-006", "Cages & nest boxes", "Rabbit housing and nest-box availability.", FarmVisualClass.I2, onBack) {
-        FarmOperationalRows(cages, "No cages yet", "Create a cage before starting a breeding wave.")
-        FarmOperationalSection(
+    var housingSection by rememberSaveable { mutableStateOf("Cages") }
+    FarmOperationalPage("FOS-RABBIT-006", "Cages & nest boxes", "", FarmVisualClass.I2, onBack) {
+        FarmSectionTabs(listOf("Cages", "Nest boxes", "Nest-box cycle"), housingSection, { housingSection = it })
+        if (housingSection == "Cages") FarmOperationalRows(cages, "No cages yet", "Create a cage before starting a breeding wave.")
+        if (housingSection != "Cages") FarmOperationalSection(
             "Nest capacity",
         ) { Text("$availableBoxes available nest box(es)", style = MaterialTheme.typography.titleLarge) }
-        FarmOperationalSection("Create cage") {
+        if (housingSection == "Cages") FarmOperationalSection("Create cage") {
             OutlinedTextField(cageCode, {
                 cageCode = it
             }, label = { Text("Cage code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -400,7 +426,7 @@ private fun RabbitCagesScreen(
                 onCreateCage(cageCode)
             }, enabled = !busy && cageCode.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Create cage") }
         }
-        FarmOperationalSection("Add nest box") {
+        if (housingSection == "Nest boxes") FarmOperationalSection("Add nest box") {
             OutlinedTextField(cageCode, {
                 cageCode = it
             }, label = { Text("Cage code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -415,8 +441,10 @@ private fun RabbitCagesScreen(
                 )
             }
         }
-        FarmOperationalRows(nestBoxes, "No nest boxes yet", null)
-        FarmOperationalSection("Nest-box cycle", "Available/sanitized → assigned → in cage → dirty → sanitize.") {
+        if (housingSection == "Nest boxes") FarmOperationalRows(nestBoxes, "No nest boxes yet", null)
+        if (housingSection == "Nest-box cycle") {
+        RabbitNestCycle(nestBoxChoices.map { RabbitNestBoxView(it.id, it.code, it.status) })
+        FarmOperationalSection("Update nest box") {
             FarmEntitySelector(
                 atomTag = "rabbit-nest-box-selector",
                 title = "Nest box",
@@ -444,6 +472,7 @@ private fun RabbitCagesScreen(
             Button(onClick = {
                 onSetNestStatus(boxId, boxStatus)
             }, enabled = !busy && boxId.isNotBlank() && boxStatus.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Set nest status") }
+        }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
@@ -920,6 +949,19 @@ private fun RabbitReportScreen(
 ) {
     val activeKits = records.kits.count { it.status == "active" }
     FarmOperationalPage("FOS-RABBIT-036", "Rabbit report", "Rabbitry totals for this farm.", onBack = onBack) {
+        FarmMetricStrip(listOf(
+            FarmMetricValue("Cages", records.cages.size.toString()),
+            FarmMetricValue("Breeding waves", records.waves.size.toString()),
+            FarmMetricValue("Active kits", activeKits.toString()),
+        ))
+        FarmMetricBars(
+            "Kits by wave",
+            records.waves.map { wave ->
+                val count = records.kits.count { it.waveId == wave.id }
+                FarmBarValue("Cage ${wave.cageLabel} · ${LocalDate.ofEpochDay(wave.matingEpochDay)}", count.toDouble(), count.toString())
+            },
+            unit = "Individual kits recorded",
+        )
         FarmOperationalSection("Totals") {
             Text("Cages: ${records.cages.size}")
             Text("Waves: ${records.waves.size}")
@@ -932,7 +974,7 @@ private fun RabbitReportScreen(
                 Text("Wave ${wave.id}: $kits kits")
             }
         }
-        FarmOperationalSection("Latest weights · FOS-RABBIT-032") {
+        FarmOperationalSection("Latest weights") {
             val latest = records.weights.distinctBy { it.animalId }
             if (latest.isEmpty()) Text("No weights recorded yet.")
             latest.forEach { weight ->

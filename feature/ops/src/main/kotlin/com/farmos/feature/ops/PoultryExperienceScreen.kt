@@ -7,15 +7,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -35,7 +37,7 @@ import com.farmos.core.design.FarmVisualClass
 import com.farmos.core.design.FosDimens
 import java.time.LocalDate
 
-private enum class PoultryPage {
+internal enum class PoultryPage {
     DASHBOARD,
     KINDS,
     HOUSES,
@@ -97,16 +99,18 @@ fun PoultryExperienceScreen(
     /** Hatches in `candled` status; a hatch result accepts only these. */
     candledHatches: List<FarmSelectorOption> = emptyList(),
 ) {
-    var page by remember { mutableStateOf(PoultryPage.DASHBOARD) }
+    var page by rememberSaveable { mutableStateOf(PoultryPage.DASHBOARD) }
     val home = { page = PoultryPage.DASHBOARD }
+    val pageStateHolder = rememberSaveableStateHolder()
+    pageStateHolder.SaveableStateProvider(page.name) {
     when (page) {
-        PoultryPage.DASHBOARD -> PoultryDashboard(enabledKinds, houses, records.flockCount, flockDays, hatches, error, { page = it }, onBack)
+        PoultryPage.DASHBOARD -> PoultryDashboard(enabledKinds, houses, records, error, { page = it }, onBack)
         PoultryPage.KINDS -> PoultryKinds(enabledKinds, busy, error, onEnableKind, home)
         PoultryPage.HOUSES -> PoultryHouses(houses, busy, error, onCreateHouse, home)
         PoultryPage.FLOCKS -> PoultryRows("FOS-POULTRY-004", "Flocks", placements, "No flock placements yet", error, home)
         PoultryPage.PLACEMENT -> PoultryPlacement(flockGroups, houseOptions, busy, error, onPlaceFlock, home)
         PoultryPage.DAILY -> PoultryDaily(flockDays, flockGroups, busy, error, onRecordFlockDay, home)
-        PoultryPage.HATCHERY -> PoultryRows("FOS-POULTRY-017", "Hatchery", hatches, "No hatch batches yet", error, home, FarmVisualClass.I2)
+        PoultryPage.HATCHERY -> PoultryHatcheryScreen(records, error, { page = it }, home)
         PoultryPage.SET_EGGS -> PoultrySetEggs(houseOptions, flockGroups, busy, error, onSetEggs, home)
         PoultryPage.CANDLING -> PoultryCandling(setHatches, busy, error, onCandle, home)
         PoultryPage.HATCH_RESULT -> PoultryHatchResult(candledHatches, busy, error, onRecordHatch, home)
@@ -124,88 +128,6 @@ fun PoultryExperienceScreen(
         PoultryPage.FLOCK_CLOSEOUT -> PoultryFlockCloseout(flockGroups, records.flocks, busy, error, onCloseFlock, home)
         PoultryPage.POULTRY_REPORT -> PoultryReportScreen(records, home)
     }
-}
-
-/** FOS-POULTRY-001 — illustrated flock/house operating dashboard. */
-@Composable
-private fun PoultryDashboard(
-    enabledKinds: List<String>,
-    houses: List<String>,
-    flockCount: Int?,
-    flockDays: List<String>,
-    hatches: List<String>,
-    error: String?,
-    onOpen: (PoultryPage) -> Unit,
-    onBack: () -> Unit,
-) {
-    AnimalFarmCanvas {
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
-        ) {
-            AnimalFarmModuleHeader(
-                title = "Poultry",
-                subtitle = "Houses, flocks and hatchery",
-                family = AnimalFarmFamily.POULTRY,
-            )
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PoultryMetric("Kinds", enabledKinds.size, Modifier.weight(1f))
-                PoultryMetric("Houses", houses.size, Modifier.weight(1f))
-                // Distinct flocks from the exhaustive placement aggregate, not the bounded placement rows.
-                PoultryMetric("Flocks", flockCount, Modifier.weight(1f))
-                PoultryMetric("Hatches", hatches.size, Modifier.weight(1f))
-            }
-            PoultryAction("Enabled kinds", "Chicken, duck, turkey, quail and farm-defined kinds") { onOpen(PoultryPage.KINDS) }
-            PoultryAction("Houses", "Housing units and poultry kind") { onOpen(PoultryPage.HOUSES) }
-            PoultryAction("Flocks", "Current flock placements") { onOpen(PoultryPage.FLOCKS) }
-            PoultryAction("Place flock", "Assign a flock to a house") { onOpen(PoultryPage.PLACEMENT) }
-            PoultryAction("Daily flock record", "Eggs, mortality, culls and feed") { onOpen(PoultryPage.DAILY) }
-            PoultryAction("Hatchery", "Egg sets, candling and hatch outcomes") { onOpen(PoultryPage.HATCHERY) }
-            PoultryAction("Set eggs", "Start an incubation batch") { onOpen(PoultryPage.SET_EGGS) }
-            PoultryAction("Candling", "Record fertile, infertile and mid-dead counts") { onOpen(PoultryPage.CANDLING) }
-            PoultryAction("Hatch result", "Record hatched and culled chicks") { onOpen(PoultryPage.HATCH_RESULT) }
-            PoultryAction("Vaccination", "Use a vet-approved formulary item") { onOpen(PoultryPage.VACCINATION) }
-            PoultryAction("Biosecurity", "Record house/flock findings") { onOpen(PoultryPage.BIOSECURITY) }
-            PoultryAction("Flock profiles", "Placement, daily records and losses per flock") { onOpen(PoultryPage.FLOCK_PROFILE) }
-            PoultryAction("House details", "Placements and biosecurity per house") { onOpen(PoultryPage.HOUSE_DETAIL) }
-            PoultryAction("Egg production", "Eggs recorded per flock and day") { onOpen(PoultryPage.EGG_PRODUCTION) }
-            PoultryAction("Feed", "Feed recorded per flock and day") { onOpen(PoultryPage.FEED) }
-            PoultryAction("Incubation batches", "Egg set, candling and hatch as recorded") { onOpen(PoultryPage.INCUBATION_BATCH) }
-            PoultryAction("Biosecurity records", "Recorded walks and findings") { onOpen(PoultryPage.BIOSECURITY_RECORDS) }
-            PoultryAction("Flock health", "Recorded losses, vaccinations and walks for one flock") { onOpen(PoultryPage.FLOCK_HEALTH) }
-            PoultryAction("Flock timeline", "Every recorded event for one flock") { onOpen(PoultryPage.FLOCK_TIMELINE) }
-            PoultryAction("Move flock", "Move a flock to another house") { onOpen(PoultryPage.FLOCK_MOVE) }
-            PoultryAction("Close out flock", "End a flock's production cycle") { onOpen(PoultryPage.FLOCK_CLOSEOUT) }
-            PoultryAction("Poultry report", "Flock, egg and loss totals for this farm") { onOpen(PoultryPage.POULTRY_REPORT) }
-            if (flockDays.isEmpty()) Text("No daily flock records yet.")
-            error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            TextButton(onClick = onBack) { Text("Farm home") }
-        }
-    }
-}
-
-@Composable
-private fun PoultryMetric(
-    label: String,
-    value: Int?,
-    modifier: Modifier,
-) {
-    FarmIllustratedSectionSurface(modifier) {
-        Text(value?.toString() ?: "—", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Text(label, style = MaterialTheme.typography.labelMedium)
-    }
-}
-
-@Composable
-private fun PoultryAction(
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-) {
-    FarmIllustratedSectionSurface(Modifier.fillMaxWidth()) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        TextButton(onClick = onClick) { Text("Open $title") }
     }
 }
 
@@ -219,8 +141,8 @@ private fun PoultryRows(
     onBack: () -> Unit,
     visualClass: FarmVisualClass = FarmVisualClass.I3,
 ) {
-    FarmOperationalPage(screenId, title, "Flock and house records on this device.", visualClass, onBack) {
-        FarmOperationalRows(rows, empty, "New records will appear here after local capture.")
+    FarmOperationalPage(screenId, title, "", visualClass, onBack) {
+        FarmOperationalRows(rows, empty, null)
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }
@@ -237,7 +159,7 @@ private fun PoultryKinds(
     onEnable: (String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var kind by remember { mutableStateOf("chicken") }
+    var kind by rememberSaveable { mutableStateOf("chicken") }
     FarmOperationalPage(
         "FOS-POULTRY-002",
         "Enabled poultry kinds",
@@ -269,9 +191,9 @@ private fun PoultryHouses(
     onCreate: (String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var code by remember { mutableStateOf("") }
-    var houseKind by remember { mutableStateOf("house") }
-    var poultryKind by remember { mutableStateOf("chicken") }
+    var code by rememberSaveable { mutableStateOf("") }
+    var houseKind by rememberSaveable { mutableStateOf("house") }
+    var poultryKind by rememberSaveable { mutableStateOf("chicken") }
     FarmOperationalPage(
         "FOS-POULTRY-006",
         "Houses",
@@ -311,10 +233,10 @@ private fun PoultryPlacement(
     onPlace: (String, String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var group by remember { mutableStateOf("") }
-    var house by remember { mutableStateOf("") }
-    var kind by remember { mutableStateOf("chicken") }
-    var heads by remember { mutableStateOf("") }
+    var group by rememberSaveable { mutableStateOf("") }
+    var house by rememberSaveable { mutableStateOf("") }
+    var kind by rememberSaveable { mutableStateOf("chicken") }
+    var heads by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage("FOS-POULTRY-008", "Flock placement", "Place a flock into a configured house.", onBack = onBack) {
         FarmOperationalSection("Placement") {
@@ -361,11 +283,11 @@ private fun PoultryDaily(
     onRecord: (String, String, String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var group by remember { mutableStateOf("") }
-    var eggs by remember { mutableStateOf("0") }
-    var dead by remember { mutableStateOf("0") }
-    var culls by remember { mutableStateOf("0") }
-    var feed by remember { mutableStateOf("0") }
+    var group by rememberSaveable { mutableStateOf("") }
+    var eggs by rememberSaveable { mutableStateOf("0") }
+    var dead by rememberSaveable { mutableStateOf("0") }
+    var culls by rememberSaveable { mutableStateOf("0") }
+    var feed by rememberSaveable { mutableStateOf("0") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage(
         "FOS-POULTRY-009",
@@ -429,11 +351,11 @@ private fun PoultrySetEggs(
     onSet: (String, String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var kind by remember { mutableStateOf("chicken") }
-    var eggs by remember { mutableStateOf("") }
+    var kind by rememberSaveable { mutableStateOf("chicken") }
+    var eggs by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
-    var house by remember { mutableStateOf("") }
-    var group by remember { mutableStateOf("") }
+    var house by rememberSaveable { mutableStateOf("") }
+    var group by rememberSaveable { mutableStateOf("") }
     FarmOperationalPage("FOS-POULTRY-018", "Set eggs", "Incubation timing follows the selected poultry kind.", FarmVisualClass.I2, onBack) {
         FarmOperationalSection("Incubation batch") {
             OutlinedTextField(kind, {
@@ -473,10 +395,10 @@ private fun PoultryCandling(
     onRecord: (String, String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var hatch by remember { mutableStateOf("") }
-    var fertile by remember { mutableStateOf("") }
-    var infertile by remember { mutableStateOf("0") }
-    var midDead by remember { mutableStateOf("0") }
+    var hatch by rememberSaveable { mutableStateOf("") }
+    var fertile by rememberSaveable { mutableStateOf("") }
+    var infertile by rememberSaveable { mutableStateOf("0") }
+    var midDead by rememberSaveable { mutableStateOf("0") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage("FOS-POULTRY-020", "Candling", "Record incubation evidence without inventing a diagnosis.", onBack = onBack) {
         FarmOperationalSection("Candling result") {
@@ -517,9 +439,9 @@ private fun PoultryHatchResult(
     onRecord: (String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var hatch by remember { mutableStateOf("") }
-    var hatched by remember { mutableStateOf("") }
-    var culls by remember { mutableStateOf("0") }
+    var hatch by rememberSaveable { mutableStateOf("") }
+    var hatched by rememberSaveable { mutableStateOf("") }
+    var culls by rememberSaveable { mutableStateOf("0") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage(
         "FOS-POULTRY-021",
@@ -571,9 +493,9 @@ private fun PoultryVaccination(
     onRecord: (String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var group by remember { mutableStateOf("") }
-    var kind by remember { mutableStateOf("chicken") }
-    var formulary by remember { mutableStateOf("") }
+    var group by rememberSaveable { mutableStateOf("") }
+    var kind by rememberSaveable { mutableStateOf("chicken") }
+    var formulary by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage(
         "FOS-POULTRY-014",
@@ -621,10 +543,10 @@ private fun PoultryBiosecurity(
     onRecord: (String, String, String, Boolean, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var house by remember { mutableStateOf("") }
-    var group by remember { mutableStateOf("") }
-    var findings by remember { mutableStateOf("") }
-    var mixed by remember { mutableStateOf(false) }
+    var house by rememberSaveable { mutableStateOf("") }
+    var group by rememberSaveable { mutableStateOf("") }
+    var findings by rememberSaveable { mutableStateOf("") }
+    var mixed by rememberSaveable { mutableStateOf(false) }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage(
         "FOS-POULTRY-016",
@@ -729,10 +651,10 @@ private fun PoultryFlockMove(
     onMove: (groupId: String, fromHouseId: String, toHouseId: String, heads: String, day: String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var group by remember { mutableStateOf("") }
-    var fromHouse by remember { mutableStateOf("") }
-    var toHouse by remember { mutableStateOf("") }
-    var heads by remember { mutableStateOf("") }
+    var group by rememberSaveable { mutableStateOf("") }
+    var fromHouse by rememberSaveable { mutableStateOf("") }
+    var toHouse by rememberSaveable { mutableStateOf("") }
+    var heads by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     FarmOperationalPage("FOS-POULTRY-023", "Move flock", "Move a flock to another house.", onBack = onBack) {
         FarmOperationalSection("Flock move") {
@@ -784,9 +706,9 @@ private fun PoultryFlockCloseout(
     onClose: (groupId: String, headOut: String, reason: String, day: String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var group by remember { mutableStateOf("") }
-    var headOut by remember { mutableStateOf("") }
-    var reason by remember { mutableStateOf("") }
+    var group by rememberSaveable { mutableStateOf("") }
+    var headOut by rememberSaveable { mutableStateOf("") }
+    var reason by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     val selected = flocks.firstOrNull { it.groupId == group }
     FarmOperationalPage("FOS-POULTRY-024", "Close out flock", "End a flock's production cycle.", onBack = onBack) {

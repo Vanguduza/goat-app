@@ -1,0 +1,140 @@
+{
+  "schema_version": 2,
+  "screen_id": "FOS-SHEEP-030",
+  "visit": 1,
+  "test": "SpeciesHerdRuntimeNavigationTest.sheepIndividualAnimalSurfacesTraverseAndReturn",
+  "test_class": "com.farmos.app.SpeciesHerdRuntimeNavigationTest",
+  "owner_node_id": 439,
+  "owner_instance_tag": "farm-screen:FOS-SHEEP-030",
+  "evidence_class": "OBSERVED_NATIVE_PRODUCT_OWNER",
+  "source": "actual Compose tree",
+  "variant": "observed state after successful assertion",
+  "owner_observed_before_capture": true,
+  "mode": "OUTDOOR",
+  "width_dp": 360,
+  "actual_device_width_dp": 360,
+  "actual_device_height_dp": 900,
+  "font_scale": 2,
+  "vertical_scroll_containers": 1,
+  "vertical_sweep_complete": true,
+  "scroll_restored": true,
+  "incomplete_reasons": [],
+  "viewports": [
+    {
+      "image": "FOS-SHEEP-030.png",
+      "image_sha256": "8d21807570e81db139dc9826cc7096b8a5fcced24870f407a6efa986acc8c8c8",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-SHEEP-030"
+      ],
+      "observed_owner_ids": [
+        "FOS-SHEEP-030"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-SHEEP-030",
+          "tag": "farm-screen:FOS-SHEEP-030",
+          "node_id": 439,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [
+        {
+          "tag": null,
+          "name": "Farm home",
+          "width_dp": 190,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            16,
+            206,
+            80
+          ],
+          "touch_bounds_px": [
+            16,
+            16,
+            206,
+            80
+          ],
+          "touch_width_dp": 190,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": null,
+          "name": "Sold",
+          "width_dp": 84,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            393,
+            116,
+            457
+          ],
+          "touch_bounds_px": [
+            32,
+            393,
+            116,
+            457
+          ],
+          "touch_width_dp": 84,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": null,
+          "name": "Deceased",
+          "width_dp": 152,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            124,
+            393,
+            276,
+            457
+          ],
+          "touch_bounds_px": [
+            124,
+            393,
+            276,
+            457
+          ],
+          "touch_width_dp": 152,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": null,
+          "name": "Culled",
+          "width_dp": 107,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            465,
+            139,
+            529
+          ],
+          "touch_bounds_px": [
+            32,
+            465,
+            139,
+            529
+          ],
+          "touch_width_dp": 107,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        }
+      ],
+      "layout_findings": [],
+      "scroll_position": 0
+    }
+  ],
+  "accessibility_manual_review": "TALKBACK_FOCUS_AND_HUMAN_PIXEL_REVIEW_REMAIN_REQUIRED",
+  "approval": "UNAPPROVED_REVIEW_CANDIDATE"
+}

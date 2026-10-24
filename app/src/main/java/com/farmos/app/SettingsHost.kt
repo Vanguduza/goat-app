@@ -10,9 +10,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +23,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -170,7 +174,7 @@ internal fun SettingsHost(
     val current = snapshot ?: SettingsSnapshot(null, emptyList(), emptyList(), 0, emptyList(), 0, FarmCurrency.DEFAULT_CODE)
     val home = { page = SettingsPage.HOME; error = null }
     when (page) {
-        SettingsPage.HOME -> FarmOperationalPage("FOS-ADMIN-001", "Farm settings", "Accounts, storage and devices on this farm.", onBack = onBack) {
+        SettingsPage.HOME -> FarmOperationalPage("FOS-ADMIN-001", "Farm settings", "", onBack = onBack) {
             if (!loaded) {
                 SettingsError(error)
                 Text("Loading settings saved on this device", color = AnimalFarmTheme.colors.mutedInk)
@@ -181,28 +185,7 @@ internal fun SettingsHost(
                 FarmPermissionExplanation("Local settings", "Settings are managed by local farm accounts. Sign in with a farm account on this device to use them.")
                 return@FarmOperationalPage
             }
-            Text("Signed in as ${actor.displayName} · ${roleLabel(actor.role)}", modifier = Modifier.testTag("settings-signed-in"))
-            AnimalFarmQuickAction("Farm profile", { page = SettingsPage.PROFILE })
-            AnimalFarmQuickAction("Accounts and access", { page = SettingsPage.MEMBERS })
-            AnimalFarmQuickAction("Roles and permissions", { page = SettingsPage.PERMISSIONS })
-            AnimalFarmQuickAction("Access history", { page = SettingsPage.AUDIT })
-            AnimalFarmQuickAction("Currency", { page = SettingsPage.CURRENCY })
-            AnimalFarmQuickAction("Species configuration", { page = SettingsPage.SPECIES })
-            AnimalFarmQuickAction("Poultry kinds", { page = SettingsPage.POULTRY_KINDS })
-            AnimalFarmQuickAction("Locations", { page = SettingsPage.LOCATIONS })
-            AnimalFarmQuickAction("Notifications", { page = SettingsPage.NOTIFICATIONS })
-            AnimalFarmQuickAction("Offline and sync", { page = SettingsPage.SYNC_SETTINGS })
-            AnimalFarmQuickAction("Search settings", { page = SettingsPage.SEARCH_SETTINGS })
-            AnimalFarmQuickAction("Integrations", { page = SettingsPage.INTEGRATIONS })
-            AnimalFarmQuickAction("Hardware", { page = SettingsPage.HARDWARE })
-            AnimalFarmQuickAction("Security", { page = SettingsPage.SECURITY })
-            AnimalFarmQuickAction("Data export", { page = SettingsPage.DATA_EXPORT })
-            AnimalFarmQuickAction("Storage and backup", { page = SettingsPage.STORAGE })
-            AnimalFarmQuickAction("Devices", { page = SettingsPage.DEVICES })
-            AnimalFarmQuickAction("App permissions", { page = SettingsPage.PERM_NOTIFICATIONS })
-            AnimalFarmQuickAction("Terms and privacy", { page = SettingsPage.TERMS })
-            AnimalFarmQuickAction("About", { page = SettingsPage.ABOUT })
-            AnimalFarmQuickAction("Units", { page = SettingsPage.UNITS })
+            FarmSettingsMenu(actor.displayName, roleLabel(actor.role)) { target -> page = SettingsPage.valueOf(target) }
         }
         SettingsPage.MEMBERS -> FarmOperationalPage("FOS-ADMIN-003", "Accounts and access", "People who can sign in to this farm.", onBack = home, backLabel = "Farm settings") {
             val actor = current.actor
@@ -244,10 +227,13 @@ internal fun SettingsHost(
             )
         }
         SettingsPage.PERMISSIONS -> FarmOperationalPage("FOS-ADMIN-006", "Roles and permissions", "What each role may do on this farm.", onBack = home, backLabel = "Farm settings") {
-            LocalRole.entries.forEach { role ->
-                FarmOperationalSection(roleLabel(role)) {
-                    RolePermissions.of(role).sortedBy { it.ordinal }.forEach { Text(permissionLabel(it)) }
-                }
+            var selectedRoleName by rememberSaveable { mutableStateOf((current.actor?.role ?: LocalRole.OWNER).name) }
+            val selectedRole = LocalRole.valueOf(selectedRoleName)
+            FarmSectionTabs(LocalRole.entries.map(::roleLabel), roleLabel(selectedRole), { label ->
+                selectedRoleName = LocalRole.entries.first { roleLabel(it) == label }.name
+            })
+            FarmOperationalSection(roleLabel(selectedRole)) {
+                RolePermissions.of(selectedRole).sortedBy { it.ordinal }.forEach { Text(permissionLabel(it)) }
             }
         }
         SettingsPage.AUDIT -> FarmOperationalPage("FOS-ADMIN-024", "Access history", "Sign-ins and account changes on this farm.", onBack = home, backLabel = "Farm settings") {
@@ -275,6 +261,10 @@ internal fun SettingsHost(
                 FarmPermissionExplanation("Storage is managed by farm management", "Only Owner and Manager accounts can change storage and backup.")
                 return@FarmOperationalPage
             }
+            FarmMetricStrip(listOf(
+                FarmMetricValue("Saved changes", current.journalCount.toString()),
+                FarmMetricValue("Need review", current.unappliedTotal.toString()),
+            ))
             FarmOperationalSection("Saved on this device") {
                 Text("${current.journalCount} operation(s) recorded in this device's replication journal.", modifier = Modifier.testTag("settings-journal-count"))
                 Text("Farm work is always saved here first and never waits for a network.", color = AnimalFarmTheme.colors.mutedInk)

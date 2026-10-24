@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-TASK-001",
+  "registry_name": "Today Board",
+  "feature_ids": [
+    "FTR-TASK-001"
+  ],
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "user_job": "Choose a work view, identify due tasks and open, create or complete permitted work.",
+  "personas_and_grants": [
+    "Active local farm session; preserve each existing persona's destination and command grants"
+  ],
+  "scope": {
+    "farm_source": "Active authenticated local farm session",
+    "species_kind": "Existing route's explicit species/module; N/A for menu chrome",
+    "subject": "Existing selected record/route; menu never fabricates a subject",
+    "sensitive_fields": []
+  },
+  "navigation": {
+    "route": "TasksBoardScreen and its existing TaskTab screen variants",
+    "entry_points": [
+      "Existing home/module navigation"
+    ],
+    "arguments": [
+      "Unchanged existing FarmDestination/host arguments"
+    ],
+    "deep_link_authorization": "Unchanged native farm/record authorization; no new deep link or grant",
+    "back_and_draft_behavior": "Existing navigation callbacks; shared page back control is now visible before content; no business draft ownership moves",
+    "aliases": []
+  },
+  "design": {
+    "recipe": "P05",
+    "reference_ids": [
+      "DERIVED-LOCKED-FAMILY_REQUIRES_NATIVE_APPROVAL"
+    ],
+    "native_golden_family": "CANDIDATE; protected references unchanged",
+    "token_version": "Existing AnimalFarmThemeTokens.kt and AnimalFarmHomeMetrics",
+    "ordered_sections": [
+      "Task count",
+      "Add task button and optional capture",
+      "Wrapped selectable task-view chips",
+      "Protocol/lifecycle buttons",
+      "Task rows, calendar, repeating work or precise empty state",
+      "Error and return"
+    ],
+    "shared_components": [
+      "AnimalFarmCanvas",
+      "AnimalFarmModuleHeader",
+      "FarmPrimaryButton",
+      "FarmFilterChip",
+      "FarmActionButton",
+      "FarmIllustratedSectionSurface",
+      "FarmBackButton"
+    ],
+    "illustration_use": "Original approved family assets only where already applicable",
+    "copy": {
+      "policy": "Concise action labels; preserve identity, units, safety and truthful receipt text"
+    },
+    "adaptive_layout": {
+      "phone": "Scrollable content within existing insets; compact controls use governed 48dp targets",
+      "tablet": "Existing responsive layout preserved; no separate data/command model",
+      "large_text": "Wrap labels and chips, retain user font scale; summaries stack at large text",
+      "outdoor": "Existing outdoor tokens and 64dp minimum controls"
+    }
+  },
+  "fields": [],
+  "queries": [
+    {
+      "name": "Existing TaskBoardData rows and exhaustive completed count; filters keep their existing domain predicates",
+      "read_model": "Existing TaskBoardData rows and exhaustive completed count; filters keep their existing domain predicates",
+      "loading_empty_error": "Retain existing loading/error/empty contract; sync unknown is not zero",
+      "freshness": "Local host projection; no invented remote freshness",
+      "offline_source": "Room/SQLite and immutable local operation journal"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Filter chip changes view without completing a task",
+      "intent": "Existing navigation or explicit user selection",
+      "permission": "Unchanged existing destination/command authorization",
+      "command_or_destination": "Filter chip changes view without completing a task",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Navigation or existing governed command only"
+      ],
+      "idempotency": "Navigation is read-only; writes retain their existing operation identity",
+      "success_receipt": "Existing owning screen's truthful local receipt",
+      "failure_and_recovery": "Retain existing error and retry route"
+    },
+    {
+      "label": "Row opens exact task detail",
+      "intent": "Existing navigation or explicit user selection",
+      "permission": "Unchanged existing destination/command authorization",
+      "command_or_destination": "Row opens exact task detail",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Navigation or existing governed command only"
+      ],
+      "idempotency": "Navigation is read-only; writes retain their existing operation identity",
+      "success_receipt": "Existing owning screen's truthful local receipt",
+      "failure_and_recovery": "Retain existing error and retry route"
+    },
+    {
+      "label": "Done delegates to the existing task command adapter",
+      "intent": "Existing navigation or explicit user selection",
+      "permission": "Unchanged existing destination/command authorization",
+      "command_or_destination": "Done delegates to the existing task command adapter",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Navigation or existing governed command only"
+      ],
+      "idempotency": "Navigation is read-only; writes retain their existing operation identity",
+      "success_receipt": "Existing owning screen's truthful local receipt",
+      "failure_and_recovery": "Retain existing error and retry route"
+    },
+    {
+      "label": "Add task preserves existing typed fields and command boundary",
+      "intent": "Existing navigation or explicit user selection",
+      "permission": "Unchanged existing destination/command authorization",
+      "command_or_destination": "Add task preserves existing typed fields and command boundary",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Navigation or existing governed command only"
+      ],
+      "idempotency": "Navigation is read-only; writes retain their existing operation identity",
+      "success_receipt": "Existing owning screen's truthful local receipt",
+      "failure_and_recovery": "Retain existing error and retry route"
+    }
+  ],
+  "state_matrix": [
+    {
+      "state": "empty",
+      "fixture": "No applicable farm records",
+      "expected_ui": "Truthful empty state with working relevant controls",
+      "test_id": "HomeMenuAndTaskUxTest"
+    },
+    {
+      "state": "content",
+      "fixture": "Explicit deterministic test records",
+      "expected_ui": "Data-backed content and exact destination callbacks",
+      "test_id": "HomeMenuAndTaskUxTest"
+    }
+  ],
+  "not_applicable_states": [
+    {
+      "state": "schema migration / new business mutation",
+      "reason": "This contract changes presentation/navigation; existing query and command authorities retained"
+    }
+  ],
+  "accessibility_tests": [
+    "HomeNavigationLayoutTest",
+    "Native light/dark/outdoor, narrow/large text capture review; acceptance remains pending until evidence recorded"
+  ],
+  "functional_tests": [
+    "HomeMenuAndTaskUxTest",
+    "TaskViewRuntimeNavigationTest",
+    "TaskPlanningTest",
+    "TaskSeriesCommandsTest"
+  ],
+  "linked_routes": [],
+  "guide_and_resource_links": [
+    "docs/ux/animal-farm-visual-lock/PAGE-PATTERNS.md",
+    "docs/reviews/2026-10-18-ux-repair.md"
+  ],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": "docs/reviews/2026-10-18-ux-repair.md"
+}

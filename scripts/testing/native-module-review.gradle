@@ -1,0 +1,13 @@
+// Candidate evidence from real route traversals. Does not write protected golden images.
+gradle.projectsEvaluated {
+    allprojects {
+        tasks.withType(org.gradle.api.tasks.testing.Test).configureEach {
+            maxHeapSize = '1536m'
+            maxParallelForks = 1
+            forkEvery = 5
+            systemProperty 'roborazzi.test.record', 'true'
+            outputs.upToDateWhen { false }
+            outputs.cacheIf { false }
+        }
+    }
+}

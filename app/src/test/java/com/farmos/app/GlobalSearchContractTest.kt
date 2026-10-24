@@ -22,8 +22,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class GlobalSearchContractTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     @Test
     fun searchAndResultsRenderCanonicalOwnersAndOpenSpecies() {
@@ -38,11 +38,11 @@ class GlobalSearchContractTest {
         var opened: GlobalSearchResultUi? = null
 
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 GlobalSearchScreen(
                     busy = false,
                     searched = true,
-                    message = "1 local result(s)",
+                    message = "",
                     results = listOf(result),
                     onSearch = {},
                     onOpenResult = { opened = it },
@@ -51,9 +51,11 @@ class GlobalSearchContractTest {
             }
         }
 
-        compose.onNodeWithTag("farm-screen:FOS-HOME-006").assertIsDisplayed()
-        compose.onNodeWithTag("farm-screen:FOS-HOME-007").performScrollTo().assertIsDisplayed()
-        compose.onNode(hasClickAction() and hasText("Goat · GT-024 · Nala · active · local"))
+        compose.onNodeWithTag("farm-screen:FOS-HOME-006").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-screen:FOS-HOME-007").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("GT-024 · Nala").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Goat · active").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("search-result:goat-nala")
             .performScrollTo()
             .performClick()
         compose.runOnIdle { assertEquals(result, opened) }
@@ -62,11 +64,11 @@ class GlobalSearchContractTest {
     @Test
     fun searchWithNoMatchesShowsTheSearchEmptyState() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 GlobalSearchScreen(
                     busy = false,
                     searched = true,
-                    message = "0 local result(s)",
+                    message = "",
                     results = emptyList(),
                     onSearch = {},
                     onOpenResult = {},
@@ -74,20 +76,20 @@ class GlobalSearchContractTest {
                 )
             }
         }
-        compose.onNodeWithTag("farm-screen:FOS-HOME-007").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithTag("farm-screen:FOS-SEARCH-004").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithTag("farm-atom:FOS-ATOM-031").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("No matching animal records.").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-HOME-007").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-screen:FOS-SEARCH-004").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-031").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("No matching animal records.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun searchWithMatchesShowsNoEmptyState() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 GlobalSearchScreen(
                     busy = false,
                     searched = true,
-                    message = "1 local result(s)",
+                    message = "",
                     results = listOf(GlobalSearchResultUi("goat-nala", "goat", "GT-024", "Nala", "active", "local")),
                     onSearch = {},
                     onOpenResult = {},

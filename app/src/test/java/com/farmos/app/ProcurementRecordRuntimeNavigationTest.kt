@@ -32,7 +32,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class ProcurementRecordRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private val homeTag = "farm-screen:" + "FOS-" + "PROC-" + "001"
@@ -43,7 +44,7 @@ class ProcurementRecordRuntimeNavigationTest {
         render(records())
         traverse("Supplier list", "FOS-PROC-002") {
             compose.onNodeWithText("Agri Supply · lead time 5 days").assertExists()
-            compose.onNodeWithText("1250000 USD minor units · 612 purchases · 900 ZAR minor units · 1 purchase").assertExists()
+            compose.onNodeWithText("12500.00 USD · 612 purchases · 9.00 ZAR · 1 purchase").assertExists()
             compose.onNodeWithText("No purchases recorded").assertExists()
         }
         traverse("Supplier detail", "FOS-PROC-003") {
@@ -55,7 +56,7 @@ class ProcurementRecordRuntimeNavigationTest {
         }
         traverse("Purchase detail", "FOS-PROC-005") {
             compose.onNodeWithText("12.5 kg").assertExists()
-            compose.onNodeWithText("2500 USD minor units").assertExists()
+            compose.onNodeWithText("25.00 USD").assertExists()
             compose.onNodeWithTag("procurement-option:p2").performScrollTo().performClick()
             compose.onNodeWithText("Item not on this device").assertExists()
             compose.onNodeWithText("3 (unit not on this device)").assertExists()
@@ -78,10 +79,11 @@ class ProcurementRecordRuntimeNavigationTest {
     }
 
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText("Open $label")).performScrollTo().performClick()
+        compose.revealFarmTool("Open $label").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         assertions()
-        compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
+        compose.captureModuleReview(screenId)
+        compose.revealFarmTool("Farm home").performScrollTo().performClick()
         compose.onNodeWithTag(homeTag).assertExists()
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
@@ -106,7 +108,7 @@ class ProcurementRecordRuntimeNavigationTest {
 
     private fun render(records: ProcurementRecords) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ProcurementRecordNavigator(records) { recordActions ->
                     SimpleCaptureScreen(
                         screenId = "FOS-" + "PROC-" + "001",

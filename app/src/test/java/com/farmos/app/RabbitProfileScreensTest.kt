@@ -26,15 +26,15 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class RabbitProfileScreensTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val doe = RabbitAnimalView("r1", "RB-1", "Luna", isDoe = true, status = "active")
     private val buck = RabbitAnimalView("r2", "RB-2", null, isDoe = false, status = "culled")
 
     private fun render(onRecord: (SpeciesExitDraft) -> Unit = {}, onReverse: (String, String) -> Unit = { _, _ -> }) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 RabbitProgrammeScreen(
                     cages = emptyList(), waves = emptyList(), availableBoxes = 0, busy = false, error = null, does = listOf("RB-1 · Luna · doe · active"),
                     onRegisterDoe = { _, _, _ -> }, onCreateCage = {}, onCreateNestBox = { _, _ -> }, onCreateWave = { _, _, _ -> },
@@ -48,8 +48,9 @@ class RabbitProfileScreensTest {
                 )
             }
         }
-        compose.onNode(hasClickAction() and hasText("Open Breeding animals")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-RABBIT-002").assertExists()
+        compose.onNodeWithTag("rabbit-section:Animals").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Breeding animals")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-RABBIT-002").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
@@ -57,10 +58,12 @@ class RabbitProfileScreensTest {
         val recorded = mutableListOf<SpeciesExitDraft>()
         render(onRecord = { recorded += it })
         compose.onNodeWithTag("rabbit:r1").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-RABBIT-003").assertExists()
-        compose.onNodeWithText("In the rabbitry").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-RABBIT-003").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("In the rabbitry").assertExists().also { compose.captureObservedNativeOwners() }
         // Photos and documents of the doe (D-015) sit on her profile.
-        compose.onNodeWithTag("farm-atom:FOS-ATOM-016:photo").performScrollTo().assertExists()
+        compose.onNodeWithTag("farm-section:Photos and documents").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-016:photo").performScrollTo().assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-section:Exit record").performScrollTo().performClick()
         compose.onNodeWithTag("species-exit-kind:CULL").performScrollTo().performClick()
         compose.onNodeWithTag("species-exit-reason").performScrollTo().performTextInput("Poor mothering")
         compose.onNodeWithTag("species-exit-continue").performScrollTo().performClick()
@@ -76,9 +79,10 @@ class RabbitProfileScreensTest {
         val reversed = mutableListOf<Pair<String, String>>()
         render(onReverse = { id, reason -> reversed += id to reason })
         compose.onNodeWithTag("rabbit:r2").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-RABBIT-004").assertExists()
-        compose.onNodeWithText("Left the rabbitry: culled").assertExists()
-        compose.onNodeWithTag("species-standing-exit").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-RABBIT-004").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Left the rabbitry: culled").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-section:Exit record").performScrollTo().performClick()
+        compose.onNodeWithTag("species-standing-exit").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("species-exit-reverse-reason").performScrollTo().performTextInput("Culled the wrong buck")
         compose.onNodeWithTag("species-exit-reverse").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(listOf("exit-9" to "Culled the wrong buck"), reversed) }

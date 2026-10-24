@@ -39,8 +39,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class AssetsCaptureOwnerTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val farm = "11111111-1111-4111-8111-111111111111"
     private val otherFarm = "22222222-2222-4222-8222-222222222222"
@@ -65,7 +65,7 @@ class AssetsCaptureOwnerTest {
     fun maintenanceSelectsThisFarmsAssetAndCommitsLocally() {
         var syncRequests = 0
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 AssetsModuleHost(
                     farmId = farm,
                     ops = RoomOpsRepository(database, farm),
@@ -75,15 +75,17 @@ class AssetsCaptureOwnerTest {
                 )
             }
         }
+        compose.onNodeWithTag("farm-section:Record").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-section:Record maintenance").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-014:option:asset-pump").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithTag("farm-screen:FOS-ASSET-001").assertExists()
-        compose.onNodeWithTag("farm-atom:FOS-ATOM-014").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-ASSET-001").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-014").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-014:option:asset-other").assertDoesNotExist()
 
         compose.onNodeWithTag("farm-atom:FOS-ATOM-014:option:asset-pump").performScrollTo().performClick()
         compose.onNode(hasSetTextAction() and hasText("Maintenance title")).performScrollTo().performTextInput("Replaced impeller")
         compose.onNode(hasSetTextAction() and hasText("Date")).performScrollTo().performTextInput("2026-09-20")
-        compose.onNode(hasClickAction() and hasText("Record maintenance")).performScrollTo().performClick()
+        compose.formSubmit("Record maintenance").performScrollTo().performClick()
 
         compose.waitUntil(10_000) { runBlocking { database.maintenance().recent(farm, 10) }.isNotEmpty() }
         val event = runBlocking { database.maintenance().recent(farm, 10) }.single()

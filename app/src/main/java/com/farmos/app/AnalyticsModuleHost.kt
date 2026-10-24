@@ -3,7 +3,7 @@ package com.farmos.app
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,7 +23,7 @@ import java.math.BigDecimal
 import com.farmos.core.design.runSuspendCatching
 
 /** Analytics module pages; each maps to one canonical FOS-AN-* screen. */
-private enum class AnalyticsPage(val screenId: String, val title: String) {
+internal enum class AnalyticsPage(val screenId: String, val title: String) {
     OVERVIEW("FOS-AN-001", "Farm analytics"),
     SPECIES("FOS-AN-002", "Species performance"),
     REPRODUCTION("FOS-AN-003", "Reproduction analytics"),
@@ -40,9 +40,9 @@ private enum class AnalyticsPage(val screenId: String, val title: String) {
     EVIDENCE("FOS-AN-014", "Evidence drilldown"),
 }
 
-private data class Anomaly(val title: String, val detail: String, val evidence: String)
+internal data class Anomaly(val title: String, val detail: String, val evidence: String)
 
-private data class AnalyticsModel(
+internal data class AnalyticsModel(
     val speciesLines: List<String>,
     val birthLines: List<String>,
     val exitKinds: List<ExitKindCount>,
@@ -53,6 +53,12 @@ private data class AnalyticsModel(
     val feedLines: List<String>,
     val growthLines: List<String>,
     val anomalies: List<Anomaly>,
+    val speciesBars: List<com.farmos.core.design.FarmBarValue>,
+    val birthBars: List<com.farmos.core.design.FarmBarValue>,
+    val growthBars: List<com.farmos.core.design.FarmBarValue>,
+    val productionBars: Map<String, List<com.farmos.core.design.FarmBarValue>>,
+    val moneyBars: Map<String, List<com.farmos.core.design.FarmBarValue>>,
+    val feedBars: Map<String, List<com.farmos.core.design.FarmBarValue>>,
 )
 
 /**
@@ -85,7 +91,8 @@ fun AnalyticsModuleHost(
             val birthLines = births.map { "${it.speciesCode}: ${it.events} event(s) · ${it.live} live · ${it.dead} dead" }
             val exitKinds = database.animalExits().exitKindCounts(farmId)
             val health = database.reports().healthTotals(farmId, today)
-            val productionLines = database.reports().productionTotals(farmId).map {
+            val productionRows = database.reports().productionTotals(farmId)
+            val productionLines = productionRows.map {
                 val quantity = when (it.product) {
                     "goat-milk", "cattle-milk" -> reportMilli(it.amount) + " L"
                     "sheep-wool" -> reportMilli(it.amount) + " kg"
@@ -94,13 +101,17 @@ fun AnalyticsModuleHost(
                 }
                 it.product + ": " + it.records + " record(s) · " + quantity + " total"
             }
-            val moneyLines = database.reports().moneyTotals(farmId).map {
+            val moneyRows = database.reports().moneyTotals(farmId)
+            val moneyLines = moneyRows.map {
                 it.kind + " " + reportMoney(BigDecimal.valueOf(it.amountMinor), it.currency) +
                     " (" + it.records + " record(s))"
             }
             val inventory = database.reports().inventoryTotals(farmId)
+            val feedBars = mutableMapOf<String, MutableList<com.farmos.core.design.FarmBarValue>>()
             val feedLines = database.feedIssues().totalsByItem(farmId).map {
                 val item = database.inventory().item(farmId, it.itemId)
+                val unit = item?.unit ?: "unit unavailable"
+                feedBars.getOrPut(unit) { mutableListOf() }.add(com.farmos.core.design.FarmBarValue(item?.name ?: it.itemId, if (item == null) null else BigDecimal.valueOf(it.quantityMilli, 3).toDouble(), reportMilli(it.quantityMilli) + " " + unit, "${it.issueCount} issues"))
                 (item?.name ?: it.itemId) + ": " + reportMilli(it.quantityMilli) + " " +
                     (item?.unit ?: "(unit unavailable)") + " in " + it.issueCount + " issue(s)"
             }
@@ -143,142 +154,21 @@ fun AnalyticsModuleHost(
                 feedLines = feedLines,
                 growthLines = growthLines,
                 anomalies = anomalies,
+                speciesBars = bySpecies.toSortedMap().map { (species, rows) -> com.farmos.core.design.FarmBarValue(species.replaceFirstChar { it.uppercase() }, rows.count { it.status == "active" }.toDouble(), "${rows.count { it.status == "active" }} active", "${rows.size} animals recorded") },
+                birthBars = births.flatMap { row -> listOf(com.farmos.core.design.FarmBarValue("${row.speciesCode} · live", row.live.toDouble(), "${row.live} young", "${row.events} birth events"), com.farmos.core.design.FarmBarValue("${row.speciesCode} · dead", row.dead.toDouble(), "${row.dead} young", "${row.events} birth events")) },
+                growthBars = bySpecies.toSortedMap().map { (species, rows) ->
+                    val known = rows.count { it.latestWeightGrams != null }
+                    com.farmos.core.design.FarmBarValue(species, if (rows.isEmpty()) null else 100.0 * known / rows.size, "$known of ${rows.size} animals", "A recorded weight; not a growth-rate estimate")
+                },
+                productionBars = productionRows.groupBy { when (it.product) { "goat-milk", "cattle-milk" -> "L"; "sheep-wool" -> "kg"; "poultry-eggs" -> "eggs"; else -> "recorded units · ${it.product}" } }.mapValues { (unit, rows) -> rows.map {
+                    val milli = it.product in setOf("goat-milk", "cattle-milk", "sheep-wool")
+                    com.farmos.core.design.FarmBarValue(it.product, if (milli) BigDecimal.valueOf(it.amount, 3).toDouble() else it.amount.toDouble(), (if (milli) reportMilli(it.amount) else it.amount.toString()) + " " + unit, "${it.records} records")
+                } },
+                moneyBars = moneyRows.groupBy { it.currency }.mapValues { (currency, rows) -> rows.map { com.farmos.core.design.FarmBarValue(it.kind, BigDecimal.valueOf(it.amountMinor, com.farmos.domain.ops.FarmCurrency.minorDigits(currency)).toDouble(), reportMoney(BigDecimal.valueOf(it.amountMinor), currency), "${it.records} records") } },
+                feedBars = feedBars,
             )
         }.onSuccess { model = it }.onFailure { error = it.message }
     }
 
-    val current = page
-    FarmOperationalPage(
-        screenId = current.screenId,
-        title = current.title,
-        subtitle = "Aggregates from this device's local database. Figures are recorded, not estimated.",
-        onBack = if (current == AnalyticsPage.OVERVIEW) onBack else ({ page = AnalyticsPage.OVERVIEW }),
-        backLabel = if (current == AnalyticsPage.OVERVIEW) "Farm home" else "Analytics",
-    ) {
-        if (error != null) {
-            FarmOperationalSection("Attention", error) {}
-        }
-        val m = model
-        @Composable
-        fun nav(target: AnalyticsPage, label: String) {
-            TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text(label) }
-        }
-        when (current) {
-            AnalyticsPage.OVERVIEW -> {
-                FarmOperationalSection("Farm at a glance") {
-                    val rows = m?.let {
-                        listOf(
-                            "Species tracked: ${it.speciesLines.size}",
-                            "Health: ${it.health?.observations} observations · ${it.health?.treatments} treatments · ${it.health?.activeWithdrawals} active withdrawals",
-                            "Inventory items: ${it.inventory?.items} · ${it.inventory?.atOrBelowReorder} at/below reorder",
-                            "Open anomaly flags: ${it.anomalies.count { a -> a.title != "No anomalies" }}",
-                        )
-                    } ?: listOf("Loading…")
-                    rows.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
-                }
-                FarmOperationalSection("Analyse") {
-                    nav(AnalyticsPage.SPECIES, "Species performance")
-                    nav(AnalyticsPage.REPRODUCTION, "Reproduction")
-                    nav(AnalyticsPage.GROWTH, "Growth")
-                    nav(AnalyticsPage.MORTALITY, "Mortality")
-                    nav(AnalyticsPage.HEALTH, "Health trends")
-                    nav(AnalyticsPage.PRODUCTION, "Production")
-                    nav(AnalyticsPage.FEED_EFFICIENCY, "Feed efficiency")
-                    nav(AnalyticsPage.FINANCE, "Financial performance")
-                    nav(AnalyticsPage.COMPARE, "Benchmark compare")
-                    nav(AnalyticsPage.ANOMALIES, "Anomaly centre")
-                    nav(AnalyticsPage.FORECASTS, "Forecasts")
-                }
-            }
-            AnalyticsPage.SPECIES -> FarmOperationalRows(
-                m?.speciesLines ?: listOf("Loading…"), "No animals recorded",
-                "Register animals to see species performance.",
-            )
-            AnalyticsPage.REPRODUCTION -> FarmOperationalRows(
-                m?.birthLines ?: listOf("Loading…"), "No birth records",
-                "Record kiddings, lambings or calvings to see reproduction analytics.",
-            )
-            AnalyticsPage.GROWTH -> FarmOperationalRows(
-                m?.growthLines ?: listOf("Loading…"), "No animals recorded", null,
-            )
-            AnalyticsPage.MORTALITY -> {
-                val rows = m?.exitKinds?.map { "${it.kind}: ${it.exits} exit(s)" } ?: listOf("Loading…")
-                FarmOperationalRows(rows, "No exits recorded", "Record deaths, culls and sales to see mortality analytics.")
-            }
-            AnalyticsPage.HEALTH -> {
-                val rows = m?.health?.let {
-                    listOf(
-                        "Observations recorded: ${it.observations}",
-                        "Treatments recorded: ${it.treatments}",
-                        "Active withdrawal windows: ${it.activeWithdrawals}",
-                    )
-                } ?: listOf("Loading…")
-                FarmOperationalRows(rows, "No health records", null)
-            }
-            AnalyticsPage.PRODUCTION -> FarmOperationalRows(
-                m?.productionLines ?: listOf("Loading…"), "No production records",
-                "Record milk, eggs or other production to see trends.",
-            )
-            AnalyticsPage.FEED_EFFICIENCY -> {
-                FarmOperationalSection(
-                    "Feed efficiency",
-                    "Recorded feed issued alongside recorded production. No conversion ratios are invented.",
-                ) {
-                    val rows = m?.let { it.feedLines + it.productionLines } ?: listOf("Loading…")
-                    if (rows.isEmpty()) Text("No feed or production records.", style = MaterialTheme.typography.bodyMedium)
-                    rows.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
-                }
-            }
-            AnalyticsPage.FINANCE -> FarmOperationalRows(
-                m?.moneyLines ?: listOf("Loading…"), "No money records",
-                "Record income and expenses to see financial performance.",
-            )
-            AnalyticsPage.COMPARE -> {
-                FarmOperationalSection("Benchmark compare", "Species side-by-side from the same local herd register.") {
-                    val rows = m?.speciesLines ?: listOf("Loading…")
-                    rows.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
-                }
-            }
-            AnalyticsPage.ANOMALIES -> {
-                FarmOperationalSection("Anomaly centre", "Deterministic on-device checks over local records.") {
-                    (m?.anomalies ?: listOf()).forEach { anomaly ->
-                        TextButton(onClick = { selectedAnomaly = anomaly; page = AnalyticsPage.INSIGHT }, modifier = Modifier.fillMaxWidth()) {
-                            Text(anomaly.title)
-                        }
-                    }
-                    if (m == null) Text("Loading…", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-            AnalyticsPage.FORECASTS -> {
-                FarmOperationalSection(
-                    "Forecasts",
-                    "Whole-history totals do not establish a rate. A forecast needs a dated baseline and explicit assumptions.",
-                ) {
-                    val rows = m?.productionLines ?: listOf("Loading…")
-                    if (rows.isEmpty()) Text("No production records available for a baseline.", style = MaterialTheme.typography.bodyMedium)
-                    rows.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
-                }
-            }
-            AnalyticsPage.INSIGHT -> {
-                val anomaly = selectedAnomaly
-                FarmOperationalSection("Insight detail") {
-                    if (anomaly == null) {
-                        Text("Open an item from the anomaly centre to see its detail.", style = MaterialTheme.typography.bodyMedium)
-                    } else {
-                        Text(anomaly.title, style = MaterialTheme.typography.titleMedium)
-                        Text(anomaly.detail, style = MaterialTheme.typography.bodyMedium)
-                        TextButton(onClick = { page = AnalyticsPage.EVIDENCE }, modifier = Modifier.fillMaxWidth()) {
-                            Text("View evidence sources")
-                        }
-                    }
-                }
-            }
-            AnalyticsPage.EVIDENCE -> {
-                val anomaly = selectedAnomaly
-                FarmOperationalSection("Evidence drilldown", "The exact local queries behind the insight.") {
-                    Text(anomaly?.evidence ?: "No insight selected.", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
-    }
+    AnalyticsModuleScreen(page, model, error, selectedAnomaly, onBack, { page = it }, { selectedAnomaly = it; page = AnalyticsPage.INSIGHT })
 }

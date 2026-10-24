@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-REPORT-001",
+  "registry_name": "Reports Hub",
+  "feature_ids": [
+    "FTR-REPORT-001"
+  ],
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "user_job": "Find the appropriate current-farm report without traversing every metric, or inspect an exact figure with its unit, period, completeness and calculation.",
+  "personas_and_grants": [
+    {
+      "persona": "An existing authorized reader of the owning farm/module",
+      "grant_source": "Original command/read authorization remains unchanged; export requires current EXPORT_FARM_DATA authority at disclosure time.",
+      "independent_role_matrix_approval": "PENDING"
+    }
+  ],
+  "scope": {
+    "farm_source": "Current authenticated farm/session owner",
+    "species_kind": "Farm-wide reports; no implicit species reassignment",
+    "subject": "Current authenticated farm only; report catalogue navigation is separate from optional metric inspection.",
+    "sensitive_fields": [
+      "Current farm records and document contents; keep original scope and authority checks."
+    ]
+  },
+  "navigation": {
+    "route": "FarmReportsSession report hub; ReportsScreen",
+    "entry_points": [
+      "FarmReportsSession report hub; ReportsScreen"
+    ],
+    "arguments": [
+      "Existing farm/subject identity from the owning route only"
+    ],
+    "deep_link_authorization": "No new external deep link or authorization route. Existing owner validation is unchanged.",
+    "back_and_draft_behavior": "Retain report-hub view/query on detail or export Back; the enclosing farm/session authority key discards state on farm or authenticated identity change.",
+    "aliases": []
+  },
+  "design": {
+    "recipe": "P05",
+    "reference_ids": [
+      "LOCK-MANAGEMENT-A"
+    ],
+    "native_golden_family": "Native review candidates; no approved baseline or independent review is asserted.",
+    "token_version": "Current AnimalFarmTheme/metrics; protected references unchanged",
+    "ordered_sections": [
+      "Existing owner Back and Reports heading",
+      "Reports / Farm figures selected view",
+      "Report groups or whole-metric search",
+      "Visible loading/error/empty/completeness state",
+      "Permission-gated export entry"
+    ],
+    "shared_components": [
+      "FarmOperationalPage",
+      "FarmModuleTools and FarmSectionTabs where applicable",
+      "FarmPrimaryButton / FarmActionButton",
+      "Existing AnimalFarm native surfaces and species artwork"
+    ],
+    "illustration_use": "Existing approved goat artwork on the goat history; inherited report chrome without decorative data claims.",
+    "copy": {
+      "job": "Find the appropriate current-farm report without traversing every metric, or inspect an exact figure with its unit, period, completeness and calculation.",
+      "scope_disclosure": "Current authenticated farm only; report catalogue navigation is separate from optional metric inspection."
+    },
+    "adaptive_layout": {
+      "phone": "360 and 411dp; no fixed-width value squeezed behind a long label",
+      "tablet": "780dp; balanced key/value columns where space and font scale permit",
+      "large_text": "Respect 1.0,1.3,2.0 font scale; stack history label/value on narrow or large-text layouts, wrap actions without reducing text",
+      "outdoor": "Existing outdoor colors and a minimum 64dp control width and height; preserve readable values."
+    }
+  },
+  "fields": [
+    {
+      "key": "view",
+      "label": "Reports / Farm figures",
+      "type": "selected view",
+      "unit": "not applicable",
+      "required": true,
+      "bounds_source": "Fixed ReportsScreen tabs",
+      "default_source": "Reports",
+      "editable_by": [
+        "Current permitted reader"
+      ],
+      "validation": [
+        "Does not write a farm record or bypass a report owner."
+      ]
+    },
+    {
+      "key": "query",
+      "label": "Find a figure",
+      "type": "text",
+      "unit": "not applicable",
+      "required": false,
+      "bounds_source": "Report MetricResult collection from the owning Room projection",
+      "default_source": "Blank until entered",
+      "editable_by": [
+        "Current permitted reader"
+      ],
+      "validation": [
+        "Trim the query; match name or scope case-insensitively or exact metric ID; consider every supplied metric before displaying matches."
+      ]
+    }
+  ],
+  "queries": [
+    {
+      "name": "Existing owning local projection",
+      "read_model": "Existing exhaustive loadReportMetrics projection: herd, money, production, health, births and inventory; MetricResult retains its definition, value, included and missing counts.",
+      "loading_empty_error": "Distinguish loading, error, empty, partial and wholly unrecorded values; no false zero or completion.",
+      "freshness": "Local recorded values; no new remote freshness or acknowledgement claim.",
+      "offline_source": "Original Room/read-model state and local operation ownership."
+    }
+  ],
+  "actions": [
+    {
+      "label": "Report group / report row",
+      "intent": "Open the existing selected ReportDetail with the same farm scope; use the normal owning route, not an injected command.",
+      "permission": "Current owning route and command permission; no new grant.",
+      "command_or_destination": "Open the existing selected ReportDetail with the same farm scope; use the normal owning route, not an injected command.",
+      "validation": [
+        "Preserve existing farm/subject and export authority checks."
+      ],
+      "effects": [
+        "Only the described read/navigation/export through its existing owner."
+      ],
+      "idempotency": "Reads/navigation create no farm operation; exports keep existing busy/cancellation ownership.",
+      "success_receipt": "Only existing real result receipts; viewing a page is not a saved record or a successful export.",
+      "failure_and_recovery": "Keep the original owner error and recovery route; never substitute an approval or successful export."
+    },
+    {
+      "label": "Calculation and scope",
+      "intent": "Read-only disclosure. Keep value, period and completeness visible before expansion; do not hide a partial-data warning.",
+      "permission": "Current owning route and command permission; no new grant.",
+      "command_or_destination": "Read-only disclosure. Keep value, period and completeness visible before expansion; do not hide a partial-data warning.",
+      "validation": [
+        "Preserve existing farm/subject and export authority checks."
+      ],
+      "effects": [
+        "Only the described read/navigation/export through its existing owner."
+      ],
+      "idempotency": "Reads/navigation create no farm operation; exports keep existing busy/cancellation ownership.",
+      "success_receipt": "Only existing real result receipts; viewing a page is not a saved record or a successful export.",
+      "failure_and_recovery": "Keep the original owner error and recovery route; never substitute an approval or successful export."
+    },
+    {
+      "label": "Export records",
+      "intent": "Open FOS-REPORT-011 only while current canExport permits it. The real export owner rechecks authority before disclosure.",
+      "permission": "Current owning route and command permission; no new grant.",
+      "command_or_destination": "Open FOS-REPORT-011 only while current canExport permits it. The real export owner rechecks authority before disclosure.",
+      "validation": [
+        "Preserve existing farm/subject and export authority checks."
+      ],
+      "effects": [
+        "Only the described read/navigation/export through its existing owner."
+      ],
+      "idempotency": "Reads/navigation create no farm operation; exports keep existing busy/cancellation ownership.",
+      "success_receipt": "Only existing real result receipts; viewing a page is not a saved record or a successful export.",
+      "failure_and_recovery": "Keep the original owner error and recovery route; never substitute an approval or successful export."
+    }
+  ],
+  "state_matrix": [
+    {
+      "state": "loading and failure",
+      "fixture": "Unknown or failed metric query",
+      "expected_ui": "Report navigation remains available; no invented zero or empty-animal assertion.",
+      "test_id": "ReportsFocusedWorkspaceTest.failedOrLoadingFiguresDoNotBlockReportNavigationOrInventZeros"
+    },
+    {
+      "state": "empty",
+      "fixture": "Known empty metric list",
+      "expected_ui": "Say that no report figures are recorded, not that the animal register is empty.",
+      "test_id": "ReportsFocusedWorkspaceTest.emptyFiguresAreNotMistakenForAnEmptyAnimalRegister"
+    },
+    {
+      "state": "catalogue",
+      "fixture": "120 synthetic metrics",
+      "expected_ui": "Report actions are reachable before any metric card.",
+      "test_id": "ReportsFocusedWorkspaceTest.reportActionsAreReachableBeforeAnyMetricDetailsEvenForManyMetrics"
+    },
+    {
+      "state": "whole-list search and return",
+      "fixture": "Search the 120th metric then visit Export and return",
+      "expected_ui": "Keep the selected Farm figures tab and search; export navigation alone writes nothing.",
+      "test_id": "ReportsFocusedWorkspaceTest.wholeFigureSearchFindsLateItemsAndSurvivesExportBackWithoutWriting"
+    },
+    {
+      "state": "partial figure",
+      "fixture": "One included weight and two missing values",
+      "expected_ui": "Show the known value and partial warning before optional formula and scope.",
+      "test_id": "ReportsFocusedWorkspaceTest.incompleteMetricKeepsItsWarningVisibleBeforeCalculationExpansion"
+    },
+    {
+      "state": "unrecorded value",
+      "fixture": "No included weights and three missing values",
+      "expected_ui": "Show Not recorded with the unit; never substitute zero, including in the shared summary.",
+      "test_id": "ReportsFocusedWorkspaceTest.noRecordedValuesAreNotPresentedAsZeroInScreenOrSharedSummary"
+    },
+    {
+      "state": "farm change",
+      "fixture": "A different active farm opens Reports",
+      "expected_ui": "Discard the previous selected animal/report/search projection.",
+      "test_id": "ReportRuntimeNavigationTest.switchingFarmsDiscardsThePreviousAnimalsReportAndSearchSelection"
+    }
+  ],
+  "not_applicable_states": [
+    {
+      "state": "new farm mutation or schema migration",
+      "reason": "This contract changes presentation, navigation and display truthfulness; existing query/command/schema ownership is retained."
+    }
+  ],
+  "accessibility_tests": [
+    "Selected/expanded/disabled control semantics remain named",
+    "Actual control touch bounds at normal and 200% text",
+    "Short recorded value must remain a readable line; long labels may reflow without clipping",
+    "Keyboard/TalkBack and independent pixel review remain pending; automated captures are not approval."
+  ],
+  "functional_tests": [
+    "ReportsFocusedWorkspaceTest.failedOrLoadingFiguresDoNotBlockReportNavigationOrInventZeros",
+    "ReportsFocusedWorkspaceTest.emptyFiguresAreNotMistakenForAnEmptyAnimalRegister",
+    "ReportsFocusedWorkspaceTest.reportActionsAreReachableBeforeAnyMetricDetailsEvenForManyMetrics",
+    "ReportsFocusedWorkspaceTest.wholeFigureSearchFindsLateItemsAndSurvivesExportBackWithoutWriting",
+    "ReportsFocusedWorkspaceTest.incompleteMetricKeepsItsWarningVisibleBeforeCalculationExpansion",
+    "ReportsFocusedWorkspaceTest.noRecordedValuesAreNotPresentedAsZeroInScreenOrSharedSummary",
+    "ReportRuntimeNavigationTest.switchingFarmsDiscardsThePreviousAnimalsReportAndSearchSelection"
+  ],
+  "linked_routes": [
+    "FarmReportsSession report hub; ReportsScreen"
+  ],
+  "guide_and_resource_links": [
+    "app/src/main/java/com/farmos/app/ReportsHost.kt",
+    "app/src/main/java/com/farmos/app/ReportsHubScreen.kt",
+    "docs/ux/animal-farm-visual-lock/PAGE-PATTERNS.md"
+  ],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": null
+}

@@ -1,6 +1,14 @@
 package com.farmos.feature.goat
 
+import com.farmos.review.NativeModuleReviewRule
+import com.farmos.review.NativeModuleReviewTheme
+import com.farmos.review.captureObservedNativeOwners
+
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.text.TextLayoutResult
+import org.junit.Assert.assertEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
@@ -37,8 +45,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class GoatHistoryRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val profileTag = "farm-screen:" + "FOS-" + "GOAT-" + "003"
 
@@ -47,32 +55,32 @@ class GoatHistoryRuntimeNavigationTest {
         render(doe())
 
         traverse("Timeline", "FOS-GOAT-009") {
-            compose.onNodeWithText("2026-09-20 · Weight").assertExists()
-            compose.onNodeWithText("3 born · 2 live · 1 dead").assertExists()
+            compose.onNodeWithText("2026-09-20 · Weight").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("3 born · 2 live · 1 dead").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Growth history", "FOS-GOAT-013") {
-            compose.onNodeWithText("2026-08-01 · +3.60 kg").assertExists()
-            compose.onNodeWithText("2026-07-01 · first weight").assertExists()
+            compose.onNodeWithText("2026-08-01 · +3.60 kg").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("2026-07-01 · first weight").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Growth chart", "FOS-GOAT-014") {
-            compose.onNodeWithTag("goat-growth-chart").assertExists()
-            compose.onNodeWithText("48.10 kg lowest · 54.25 kg highest").assertExists()
+            compose.onNodeWithTag("goat-growth-chart").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("48.10 kg lowest · 54.25 kg highest").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Average daily gain", "FOS-GOAT-015") {
             // (54 250 g - 48 100 g) over 81 days, truncated by the domain rule.
-            compose.onNodeWithText("75 g/day").assertExists()
-            compose.onNodeWithText("81").assertExists()
+            compose.onNodeWithText("75 g/day").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("81").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("FAMACHA history", "FOS-GOAT-024") {
-            compose.onNodeWithText("Score 2").assertExists()
-            compose.onNodeWithText("Score 3").assertExists()
+            compose.onNodeWithText("Score 2").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Score 3").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Milk history", "FOS-GOAT-019") {
-            compose.onNodeWithText("5.30 L").assertExists()
-            compose.onNodeWithText("2.60 L").assertExists()
+            compose.onNodeWithText("5.30 L").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("2.60 L").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("SCC history", "FOS-GOAT-021") {
-            compose.onNodeWithText("350,000 cells/mL · DIM 45").assertExists()
+            compose.onNodeWithText("350,000 cells/mL · DIM 45").assertExists().also { compose.captureObservedNativeOwners() }
         }
         assertNamedClickTargets()
     }
@@ -82,10 +90,10 @@ class GoatHistoryRuntimeNavigationTest {
         render(doe())
         traverse("Timeline", "FOS-GOAT-009") {
             compose.onNode(hasClickAction() and hasText("Milk")).performScrollTo().performClick()
-            compose.onNodeWithTag("goat-timeline-entry:m1").assertExists()
+            compose.onNodeWithTag("goat-timeline-entry:m1").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNodeWithTag("goat-timeline-entry:w3").assertDoesNotExist()
             compose.onNode(hasClickAction() and hasText("All")).performScrollTo().performClick()
-            compose.onNodeWithTag("goat-timeline-entry:w3").assertExists()
+            compose.onNodeWithTag("goat-timeline-entry:w3").assertExists().also { compose.captureObservedNativeOwners() }
         }
     }
 
@@ -96,15 +104,15 @@ class GoatHistoryRuntimeNavigationTest {
         compose.onNode(hasClickAction() and hasText("Milk history")).assertDoesNotExist()
         compose.onNode(hasClickAction() and hasText("SCC history")).assertDoesNotExist()
         traverse("Growth chart", "FOS-GOAT-014") {
-            compose.onNodeWithText("Record at least two weights to draw a growth chart.").assertExists()
+            compose.onNodeWithText("Record at least two weights to draw a growth chart.").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNodeWithTag("goat-growth-chart").assertDoesNotExist()
         }
         traverse("Average daily gain", "FOS-GOAT-015") {
-            compose.onNodeWithText("Average daily gain needs two weights recorded on different days.").assertExists()
+            compose.onNodeWithText("Average daily gain needs two weights recorded on different days.").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNodeWithTag("goat-adg-value").assertDoesNotExist()
         }
         traverse("Timeline", "FOS-GOAT-009") {
-            compose.onNodeWithText("No records for this goat yet.").assertExists()
+            compose.onNodeWithText("No records for this goat yet.").assertExists().also { compose.captureObservedNativeOwners() }
         }
     }
 
@@ -112,13 +120,18 @@ class GoatHistoryRuntimeNavigationTest {
     fun recordsRemainReadableAfterALifecycleExit() {
         render(doe().copy(status = GoatStatus.SOLD))
         traverse("Growth history", "FOS-GOAT-013") {
-            compose.onNodeWithText("54.25 kg").assertExists()
+            compose.onNodeWithText("54.25 kg").assertExists().also { compose.captureObservedNativeOwners() }
+            val value = compose.onNodeWithText("54.25 kg").performScrollTo().assertIsDisplayed().fetchSemanticsNode()
+            val layouts = mutableListOf<TextLayoutResult>()
+            compose.runOnIdle { value.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts) }
+            assertEquals("Recorded weight must retain a readable native text layout", 1, layouts.size)
+            assertEquals("A short recorded value must not collapse into a vertical column", 1, layouts.single().lineCount)
         }
     }
 
     private fun render(goat: GoatSnapshot) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 GoatExperienceScreen(
                     state = GoatSliceUiState(farmName = "Premier Farm", herd = listOf(goat), selected = goat, animalId = goat.animalId),
                     actions = GoatExperienceActions(
@@ -146,16 +159,16 @@ class GoatHistoryRuntimeNavigationTest {
                 )
             }
         }
-        compose.onNodeWithTag(profileTag).assertIsDisplayed()
+        compose.onNodeWithTag(profileTag).assertIsDisplayed().also { compose.captureObservedNativeOwners() }
     }
 
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:$screenId").assertExists()
-        compose.onNodeWithText("Nala · GT-024").assertExists()
+        compose.revealGoatTool(label).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:$screenId").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Nala · GT-024").assertExists().also { compose.captureObservedNativeOwners() }
         assertions()
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
-        compose.onNodeWithTag(profileTag).assertExists()
+        compose.onNodeWithTag(profileTag).assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
 
