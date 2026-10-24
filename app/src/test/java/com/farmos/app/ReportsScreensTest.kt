@@ -40,8 +40,10 @@ class ReportsScreensTest {
             }
         }
         compose.onNodeWithTag("farm-screen:FOS-REPORT-001").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-section:Farm figures").performScrollTo().performClick()
         compose.onNodeWithTag("report-metric:active-sheep").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("2 animals").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("report-calculation:active-sheep").performScrollTo().performClick()
         compose.onNodeWithText("How: Count of sheep records whose status is active").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("42.5 kg").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("Partial: 1 of 2 record(s) have no value").assertExists().also { compose.captureObservedNativeOwners() }
@@ -73,6 +75,6 @@ class ReportsScreensTest {
                 ReportsScreen(emptyList(), failure = null, canExport = true, exporting = false, exportMessage = null, onExportHerdRegister = {}, onBack = {})
             }
         }
-        compose.onNodeWithText("No animals are recorded on this device yet.").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("No report figures are recorded on this device yet.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 }

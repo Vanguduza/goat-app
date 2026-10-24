@@ -217,9 +217,14 @@ class LocalFarmSessionAuthorityTest {
     }
 
     private fun openReport(id: String) {
-        // The hub exists before its Room summary arrives; wait for data before scrolling past it.
+        // Verify exact current-farm totals in the figures view before opening a report.
+        awaitTag("report-data-ready")
+        compose.onNodeWithTag("farm-section:Farm figures").performScrollTo().performClick()
         awaitTag("report-metric:active-goat")
         compose.onNodeWithTag("report-metric:active-goat").assertTextEquals("1 animals")
+        compose.onNodeWithTag("farm-section:Reports").performScrollTo().performClick()
+        val entry = reportDetailEntries.single { it.screenId == id }
+        compose.revealFarmTool(entry.label)
         clickTag("report-open:$id")
         awaitTag("farm-screen:$id")
     }

@@ -141,17 +141,6 @@ private fun epochDayText(epochDay: Long): String = LocalDate.ofEpochDay(epochDay
 private fun millisDateText(millis: Long): String =
     Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate().toString()
 
-/** One metric rendered the hub way: figure, how it is worked out, period, scope and completeness. */
-@Composable
-private fun MetricSection(result: MetricResult) {
-    FarmOperationalSection(result.definition.name) {
-        Text(metricValueText(result), fontWeight = FontWeight.SemiBold, modifier = Modifier.testTag("report-metric:${result.definition.id}"))
-        Text("How: ${result.definition.formula}", color = AnimalFarmTheme.colors.mutedInk)
-        Text("Period: ${result.definition.period} · Scope: ${result.definition.scope}", color = AnimalFarmTheme.colors.mutedInk)
-        Text(result.completeness, color = if (result.complete) AnimalFarmTheme.colors.mutedInk else AnimalFarmTheme.colors.critical)
-    }
-}
-
 private data class AnimalReportDetail(
     val animal: AnimalEntity,
     val latestWeightGrams: Long?,
@@ -411,7 +400,7 @@ internal fun ProductionReportScreen(database: FarmOsDatabase, farmId: String, on
         when {
             metrics == null -> Text("Reading production records")
             metrics!!.isEmpty() -> AnimalFarmEmptyState("No production records on this device yet.")
-            else -> metrics!!.forEach { MetricSection(it) }
+            else -> metrics!!.forEach { ReportMetricSection(it) }
         }
     }
 }
@@ -442,7 +431,7 @@ internal fun FinanceReportScreen(database: FarmOsDatabase, farmId: String, onBac
             AnimalFarmEmptyState("No money records on this device yet.")
             return@FarmOperationalPage
         }
-        report.metrics.forEach { MetricSection(it) }
+        report.metrics.forEach { ReportMetricSection(it) }
         FarmOperationalSection("Recent records", "Most recent 50 of ${report.records.size}.") {
             report.records.takeLast(50).reversed().forEach { record ->
                 val amount = BigDecimal.valueOf(record.amountMinor, FarmCurrency.minorDigits(record.currency)).toPlainString()
@@ -511,7 +500,7 @@ internal fun BreedingReportScreen(database: FarmOsDatabase, farmId: String, onBa
         when {
             metrics == null -> Text("Reading birth records")
             metrics!!.isEmpty() -> AnimalFarmEmptyState("No birth events recorded yet.")
-            else -> metrics!!.forEach { MetricSection(it) }
+            else -> metrics!!.forEach { ReportMetricSection(it) }
         }
     }
 }

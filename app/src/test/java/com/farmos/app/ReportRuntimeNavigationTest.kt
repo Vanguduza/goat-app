@@ -188,12 +188,14 @@ class ReportRuntimeNavigationTest {
         awaitText("Suggested filename: first.csv")
         compose.onNodeWithTag("farm-screen:FOS-REPORT-013").assertExists()
         compose.onNodeWithText("Records: 2").assertExists()
+        compose.captureModuleReview("FOS-REPORT-013")
         compose.onNodeWithText("Suggested filename: second.csv").assertDoesNotExist()
         click("Reports")
         awaitTag("farm-screen:FOS-REPORT-012")
         clickTag("report-document:second")
         awaitText("Suggested filename: second.csv")
         compose.onNodeWithText("Records: 52").assertExists()
+        compose.captureModuleReview("FOS-REPORT-013")
         click("Reports")
         backToHub("FOS-REPORT-012")
     }
@@ -319,9 +321,11 @@ class ReportRuntimeNavigationTest {
     }
 
     private fun open(screenId: String) {
-        // A mounted hub is not yet a stable navigation layout while its summary loads from Room.
-        awaitTag("report-metric:active-goat")
-        clickTag("report-open:$screenId")
+        // Wait for the real farm projection before observing the stable, menu-first hub.
+        awaitTag("report-data-ready")
+        compose.captureModuleReview("FOS-REPORT-001")
+        val label = reportDetailEntries.single { it.screenId == screenId }.label
+        compose.revealFarmTool(label).performScrollTo().assertIsDisplayed().assertIsEnabled().performClick()
         awaitTag("farm-screen:$screenId")
     }
 

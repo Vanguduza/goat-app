@@ -16,6 +16,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -133,6 +134,7 @@ internal fun inventoryMetrics(totals: InventoryTotalRow): List<MetricResult> = i
 /** The metric value in its declared unit; weights are stored in grams and money in minor units. */
 internal fun metricValueText(result: MetricResult): String {
     val unit = result.definition.unit
+    if (result.included == 0 && result.missing > 0) return "Not recorded ($unit)"
     return when {
         unit == "kg" -> "%.1f kg".format(result.value / 1000.0)
         unit == "L" -> "%.1f L".format(result.value / 1000.0)
@@ -283,6 +285,8 @@ private fun FarmReportsSession(
     val backToHub: () -> Unit = { detail = null }
     // Do not render a stale share action during the frame in which permission changes.
     val permittedDetail = detail.takeUnless { it == ReportDetail.Share && !canExport }
+    val retainedPages = rememberSaveableStateHolder()
+    retainedPages.SaveableStateProvider(permittedDetail?.toString() ?: "report-hub") {
     when (val current = permittedDetail) {
         null -> ReportsScreen(
             metrics = metrics,
@@ -312,73 +316,6 @@ private fun FarmReportsSession(
         ReportDetail.Share -> ShareReportScreen(database, farmId, canShare = { exportAllowed }, exportAuthority = exportAuthority, onBack = backToHub)
         ReportDetail.Movements -> MovementCertificatesScreen(database, farmId, onBack = backToHub)
     }
-}
-
-@Composable
-internal fun ReportsScreen(
-    metrics: List<MetricResult>?,
-    failure: String?,
-    canExport: Boolean,
-    exporting: Boolean,
-    exportMessage: String?,
-    onExportHerdRegister: () -> Unit,
-    onExportMoney: () -> Unit = {},
-    onExportSummary: () -> Unit = {},
-    onOpenDetail: (ReportDetail) -> Unit = {},
-    onBack: () -> Unit,
-) {
-    var exportSheet by remember { mutableStateOf(false) }
-    LaunchedEffect(canExport) { if (!canExport) exportSheet = false }
-    if (exportSheet && canExport) {
-        FarmOperationalPage("FOS-REPORT-011", "Export", "Files are written to a location you choose on this device.", FarmVisualClass.I3, { exportSheet = false }, backLabel = "Reports") {
-            FarmOperationalSection("Herd register (CSV)") {
-                Text("Every animal on this farm, one row each: species, tag, name, sex, status, date of birth, latest weight and poultry kind.")
-                Button(onClick = onExportHerdRegister, enabled = !exporting, modifier = Modifier.fillMaxWidth().testTag("report-export-herd-register")) {
-                    Text(if (exporting) "Exporting" else "Export herd register")
-                }
-            }
-            FarmOperationalSection("Money records (CSV)") {
-                Text("Every income and expense record, oldest first: date, kind, category, amount, currency and note.")
-                Button(onClick = onExportMoney, enabled = !exporting, modifier = Modifier.fillMaxWidth().testTag("report-export-money")) {
-                    Text(if (exporting) "Exporting" else "Export money records")
-                }
-            }
-            FarmOperationalSection("Farm summary (PDF)") {
-                Text("Every figure on Reports with how it is worked out, its period and scope, and whether it is complete, for printing or sharing.")
-                Button(onClick = onExportSummary, enabled = !exporting, modifier = Modifier.fillMaxWidth().testTag("report-export-summary")) {
-                    Text(if (exporting) "Exporting" else "Export farm summary")
-                }
-            }
-            exportMessage?.let { Text(it, modifier = Modifier.testTag("report-export-message")) }
-        }
-        return
-    }
-    FarmOperationalPage("FOS-REPORT-001", "Reports", "Figures from every record on this device. Each says how it is worked out.", FarmVisualClass.I3, onBack) {
-        when {
-            failure != null -> AnimalFarmWarningSurface { Text(failure) }
-            metrics == null -> Text("Reading farm records")
-            metrics.isEmpty() -> AnimalFarmEmptyState("No animals are recorded on this device yet.")
-            else -> metrics.forEach { result ->
-                FarmOperationalSection(result.definition.name) {
-                    Text(metricValueText(result), fontWeight = FontWeight.SemiBold, modifier = Modifier.testTag("report-metric:${result.definition.id}"))
-                    Text("How: ${result.definition.formula}", color = AnimalFarmTheme.colors.mutedInk)
-                    Text("Period: ${result.definition.period} · Scope: ${result.definition.scope}", color = AnimalFarmTheme.colors.mutedInk)
-                    Text(result.completeness, color = if (result.complete) AnimalFarmTheme.colors.mutedInk else AnimalFarmTheme.colors.critical)
-                }
-            }
-        }
-        FarmOperationalSection("Report types", "One screen per report. Every figure is read from the records on this device.") {
-            reportDetailEntries.filter { canExport || it.detail != ReportDetail.Share }.forEach { entry ->
-                TextButton(onClick = { onOpenDetail(entry.detail) }, modifier = Modifier.fillMaxWidth().testTag("report-open:${entry.screenId}")) {
-                    Text(entry.label)
-                }
-            }
-        }
-        if (canExport) {
-            TextButton(onClick = { exportSheet = true }, modifier = Modifier.fillMaxWidth().testTag("report-open-export")) { Text("Export records") }
-        } else {
-            Text("Exports are made by farm management.", color = AnimalFarmTheme.colors.mutedInk)
-        }
     }
 }
 

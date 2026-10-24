@@ -229,8 +229,9 @@ class ReportDisclosureAuthorityTest {
             }
         }
         awaitTag("farm-screen:FOS-REPORT-001")
-        // The hub exists before the Room projection inserts metric sections above its actions.
-        // Exited is present even for an empty farm, so both authority fixtures wait for final data.
+        // Inspect the same actual totals in the focused figures view, then return through the real tab.
+        awaitTag("report-data-ready")
+        compose.onNodeWithTag("farm-section:Farm figures").performScrollTo().performClick()
         awaitTag("report-metric:exited")
         compose.onNodeWithTag("report-metric:exited").assertTextEquals("0 animals")
         if (farmId == fixture.farmId) {
@@ -238,6 +239,7 @@ class ReportDisclosureAuthorityTest {
         } else {
             compose.onNodeWithTag("report-metric:active-goat").assertDoesNotExist()
         }
+        compose.onNodeWithTag("farm-section:Reports").performScrollTo().performClick()
     }
 
     private fun choose(action: String, farmId: String = fixture.farmId) {
@@ -253,6 +255,10 @@ class ReportDisclosureAuthorityTest {
     }
 
     private fun clickTag(tag: String) {
+        if (tag.startsWith("report-open:")) {
+            val entry = reportDetailEntries.single { "report-open:${it.screenId}" == tag }
+            compose.revealFarmTool(entry.label)
+        }
         compose.waitUntil(10_000) {
             compose.onAllNodes(hasTestTag(tag) and hasClickAction() and isEnabled())
                 .fetchSemanticsNodes().size == 1
