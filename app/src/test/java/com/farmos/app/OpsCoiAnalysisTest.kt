@@ -33,8 +33,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class OpsCoiAnalysisTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private fun searchOf(vararg options: FarmSelectorOption) = FarmSelectorSearch { query, offset, limit ->
         val matches = options.filter { query.isBlank() || it.label.contains(query, ignoreCase = true) }
@@ -50,22 +50,22 @@ class OpsCoiAnalysisTest {
             MateCoiView(0.125, 2, listOf("SH-3 · Old Ram"), 0)
         }
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 CompositionLocalProvider(LocalOpsAnimalSearch provides OpsAnimalSearch(searchOf(), ewes, rams, mateCoi = analysis)) {
                     SheepOperationsScreen(selectedAnimalId = null, busy = false, error = null, actions = sheepActions(), onBack = {})
                 }
             }
         }
         compose.revealFarmTool("Inbreeding check").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GEN-006").assertExists()
-        compose.onNodeWithText("Choose a ewe and a ram.").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-GEN-006").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Choose a ewe and a ram.").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-004:option:ewe-1").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:ewe-1").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-008:option:ram-1").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:ram-1").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("mate-coi").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText("Inbreeding of the lambs (COI) 12.50% · 2 complete generations recorded").assertExists()
-        compose.onNodeWithText("Common ancestors: SH-3 · Old Ram").assertExists()
+        compose.onNodeWithText("Inbreeding of the lambs (COI) 12.50% · 2 complete generations recorded").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Common ancestors: SH-3 · Old Ram").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
@@ -78,32 +78,32 @@ class OpsCoiAnalysisTest {
             else MateCoiView(0.0, 1, emptyList(), 1)
         }
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 CompositionLocalProvider(LocalOpsAnimalSearch provides OpsAnimalSearch(searchOf(), ewes, rams, mateCoi = analysis)) {
                     SheepOperationsScreen(selectedAnimalId = null, busy = false, error = null, actions = sheepActions(), onBack = {})
                 }
             }
         }
         compose.revealFarmTool("Compare rams").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GEN-007").assertExists()
-        compose.onNodeWithText("Choose a ewe to compare rams for.").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-GEN-007").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Choose a ewe to compare rams for.").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-004:option:ewe-1").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:ewe-1").performScrollTo().performClick()
-        compose.onNodeWithText("Add up to 4 rams to compare.").assertExists()
+        compose.onNodeWithText("Add up to 4 rams to compare.").assertExists().also { compose.captureObservedNativeOwners() }
         listOf("ram-1", "ram-2").forEach { ram ->
             compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-008:option:$ram").fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:$ram").performScrollTo().performClick()
             compose.waitUntil(10_000) { compose.onAllNodesWithTag("mate-candidate-coi:$ram").fetchSemanticsNodes().isNotEmpty() }
         }
-        compose.onNodeWithText("Inbreeding of the lambs (COI) 25.00% · 3 complete generations recorded").assertExists()
-        compose.onNodeWithText("Born: 2022-01-08").assertExists()
-        compose.onNodeWithText("Latest weight: 82.5 kg").assertExists()
-        compose.onNodeWithText("Born: Not recorded").assertExists()
-        compose.onNodeWithText("Latest weight: Not recorded").assertExists()
-        compose.onNodeWithText("1 animal(s) have conflicting parentage recorded and were left out.").assertExists()
+        compose.onNodeWithText("Inbreeding of the lambs (COI) 25.00% · 3 complete generations recorded").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Born: 2022-01-08").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Latest weight: 82.5 kg").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Born: Not recorded").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Latest weight: Not recorded").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("1 animal(s) have conflicting parentage recorded and were left out.").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("mate-candidate-remove:ram-2").performScrollTo().performClick()
         compose.onAllNodesWithTag("mate-candidate-coi:ram-2").assertCountEquals(0)
-        compose.onNodeWithTag("mate-candidate-coi:ram-1").assertExists()
+        compose.onNodeWithTag("mate-candidate-coi:ram-1").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     private fun sheepActions() = SheepOperationsActions(

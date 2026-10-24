@@ -60,7 +60,8 @@ import org.robolectric.shadows.ShadowContentResolver
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class ReportDisclosureAuthorityTest {
-    @get:Rule val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
     private val context get() = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var fixture: LocalSessionAuthorityFixture
     private lateinit var authority: LocalSessionAuthority
@@ -190,7 +191,7 @@ class ReportDisclosureAuthorityTest {
 
     private fun render(farmId: String = fixture.farmId) {
         compose.setContent {
-            if (mounted.value) FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            if (mounted.value) NativeModuleReviewTheme() {
                 CompositionLocalProvider(LocalActivityResultRegistryOwner provides documents) {
                     ReportsModuleHost(fixture.database, farmId, canExport = true, onBack = {}, exportAuthority = authority)
                 }
@@ -227,7 +228,7 @@ class ReportDisclosureAuthorityTest {
         }
         compose.onNodeWithTag(tag)
             .performScrollTo()
-            .assertIsDisplayed()
+            .assertIsDisplayed().also { compose.captureObservedNativeOwners() }
             .assertIsEnabled()
             .performClick()
     }

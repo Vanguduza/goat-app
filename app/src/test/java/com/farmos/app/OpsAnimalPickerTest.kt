@@ -32,8 +32,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class OpsAnimalPickerTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private fun searchOf(vararg options: FarmSelectorOption) = FarmSelectorSearch { query, offset, limit ->
         val matches = options.filter { query.isBlank() || it.label.contains(query, ignoreCase = true) }
@@ -44,14 +44,14 @@ class OpsAnimalPickerTest {
 
     private fun render(selectedId: String?, onService: (String, String, String) -> Unit) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 CompositionLocalProvider(LocalOpsAnimalSearch provides OpsAnimalSearch(searchOf(*cows), searchOf(*cows), searchOf(), selectedId, "CT-1 · Daisy")) {
                     CattleOperationsScreen(selectedAnimalId = selectedId, busy = false, error = null, actions = actions(onService), onBack = {})
                 }
             }
         }
         compose.revealFarmTool("Service").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-CATTLE-010").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-CATTLE-010").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test

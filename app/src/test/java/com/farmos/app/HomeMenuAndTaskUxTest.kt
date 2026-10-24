@@ -39,13 +39,13 @@ import org.robolectric.annotation.GraphicsMode
 @Config(sdk = [36], qualifiers = "en-rUS")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class HomeMenuAndTaskUxTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     @Test
     fun pendingSyncAndSecondaryUtilitiesDoNotOccupyManagementHome() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ManagementControlRoomScreen(
                     farmName = "Premier Farm", ownerMode = false,
                     summary = FarmHomeSummary(goatCount = 12, pendingSync = 8),
@@ -54,8 +54,8 @@ class HomeMenuAndTaskUxTest {
                 )
             }
         }
-        compose.onNodeWithText("Modules").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText("Goats").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Modules").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Goats").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("Sync", substring = true, ignoreCase = true).assertDoesNotExist()
         listOf("Search farm", "Today summary", "Farm alerts", "Farm activity", "Switch farm")
             .forEach { compose.onNodeWithText(it).assertDoesNotExist() }
@@ -65,7 +65,7 @@ class HomeMenuAndTaskUxTest {
     fun syncRemainsAnActionInMoreAndOpensItsExistingDestination() {
         var opened: FarmDestination? = null
         showMore(FarmHomePersona.MANAGER) { opened = it }
-        compose.onNodeWithTag("farm-menu").assertIsDisplayed()
+        compose.onNodeWithTag("farm-menu").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-screen:FOS-HOME-009")
             .performScrollTo().assertHasClickAction().performClick()
         compose.runOnIdle { assertEquals(FarmDestination.Goat(GoatEntryPage.SYNC), opened) }
@@ -97,7 +97,7 @@ class HomeMenuAndTaskUxTest {
         var persona by mutableStateOf(FarmHomePersona.WORKER)
         var opened: FarmDestination? = null
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 FarmMoreScreen(
                     onOpen = {}, onBack = {}, onSignOut = {},
                     onNavigate = { opened = it }, persona = persona,
@@ -137,15 +137,15 @@ class HomeMenuAndTaskUxTest {
     fun taskFiltersExposeSelectionAndChangeTheDisplayedWork() {
         showTasks(taskRows())
         compose.onNodeWithTag("task-filter:TODAY").assertIsSelected()
-        compose.onNodeWithText("Today checks").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Today checks").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("Future feed").assertDoesNotExist()
         compose.onNodeWithTag("task-filter:SCHEDULED").performScrollTo().performClick()
         compose.onNodeWithTag("task-filter:SCHEDULED").assertIsSelected()
-        compose.onNodeWithText("Future feed").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Future feed").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("Today checks").assertDoesNotExist()
         compose.onNodeWithTag("task-filter:OVERDUE").performScrollTo().performClick()
         compose.onNodeWithTag("task-filter:OVERDUE").assertIsSelected()
-        compose.onNodeWithText("Overdue inspection").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Overdue inspection").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("Future feed").assertDoesNotExist()
     }
 
@@ -187,7 +187,7 @@ class HomeMenuAndTaskUxTest {
 
     private fun showMore(persona: FarmHomePersona, onNavigate: (FarmDestination) -> Unit) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 FarmMoreScreen(
                     onOpen = {}, onBack = {}, onSignOut = {}, onNavigate = onNavigate,
                     persona = persona, summary = homeSummary(), farmName = "Premier Farm",
@@ -204,7 +204,7 @@ class HomeMenuAndTaskUxTest {
         onCreate: (String, String, String, String) -> Unit = { _, _, _, _ -> },
     ) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 TasksBoardScreen(
                     rows = rows, busy = false, error = null, onCreate = onCreate,
                     onComplete = onComplete, onBack = onBack, onOpenDetail = onOpenDetail,

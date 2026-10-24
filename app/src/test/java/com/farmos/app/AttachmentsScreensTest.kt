@@ -21,8 +21,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class AttachmentsScreensTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private fun row(id: String, name: String, type: String, size: Long) =
         AttachmentEntity(id, "farm", "animal", "s1", "a".repeat(64), size, type, name, 1L, "worker-1")
@@ -32,7 +32,7 @@ class AttachmentsScreensTest {
         var photos = 0
         var documents = 0
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 AttachmentsSection(
                     items = listOf(
                         AttachmentView(row("p1", "Ear tag.jpg", "image/jpeg", 2_500_000), local = true, preview = null),
@@ -46,10 +46,10 @@ class AttachmentsScreensTest {
                 )
             }
         }
-        compose.onNodeWithTag("attachment:p1").assertExists()
-        compose.onNodeWithText("Photo · 2.4 MB · On this device").assertExists()
-        compose.onNodeWithText("PDF document · 40 KB · Available when connected").assertExists()
-        compose.onNodeWithText("Saved on this device: Ear tag.jpg").assertExists()
+        compose.onNodeWithTag("attachment:p1").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Photo · 2.4 MB · On this device").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("PDF document · 40 KB · Available when connected").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Saved on this device: Ear tag.jpg").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-016:photo").performClick()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-016:document").performClick()
         compose.runOnIdle {
@@ -61,11 +61,11 @@ class AttachmentsScreensTest {
     @Test
     fun aClosedRecordShowsItsAttachmentsWithoutAddingMore() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 AttachmentsSection(items = emptyList(), canAttach = false, busy = false, message = null, onAddPhoto = {}, onAddDocument = {})
             }
         }
-        compose.onNodeWithText("No photos or documents yet.").assertExists()
+        compose.onNodeWithText("No photos or documents yet.").assertExists().also { compose.captureObservedNativeOwners() }
         assertEquals(0, compose.onAllNodesWithTag("farm-atom:FOS-ATOM-016:photo").fetchSemanticsNodes().size)
     }
 }

@@ -30,12 +30,12 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class FarmRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private fun openMore() {
         compose.onNode(hasClickAction() and hasText("More")).performClick()
-        compose.onNodeWithTag("farm-menu").assertIsDisplayed()
+        compose.onNodeWithTag("farm-menu").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
     }
 
     private fun expandAllMenuGroups() {
@@ -54,14 +54,14 @@ class FarmRuntimeNavigationTest {
         } else {
             "farm-menu-action:$originalLabel"
         }
-        compose.onNodeWithTag(tag).performScrollTo().assertIsDisplayed().performClick()
+        compose.onNodeWithTag(tag).performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }.performClick()
     }
 
     @Test
     fun generalHomeTraversesSpeciesUtilitiesAndRestoresHome() {
         val opened = AtomicReference<FarmDestination?>(null)
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 FarmHomeScreen(
                     farmName = "Premier Farm",
                     summary = FarmHomeSummary(goatCount = 12, openTasks = 3, pendingSync = 2),
@@ -72,7 +72,7 @@ class FarmRuntimeNavigationTest {
         }
 
         compose.onNode(hasClickAction() and hasText("Animals")).performClick()
-        compose.onNodeWithText("Choose a species").assertIsDisplayed()
+        compose.onNodeWithText("Choose a species").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
 
         val species = listOf(
             Triple("Goats", FarmDestination.Goat(), "FOS-GOAT-001"),
@@ -85,7 +85,7 @@ class FarmRuntimeNavigationTest {
             opened.set(null)
             compose.onNode(hasClickAction() and hasText(label))
                 .performScrollTo()
-                .assertIsDisplayed()
+                .assertIsDisplayed().also { compose.captureObservedNativeOwners() }
                 .performClick()
             compose.runOnIdle {
                 assertEquals(expected, opened.get())
@@ -96,14 +96,14 @@ class FarmRuntimeNavigationTest {
         compose.onNode(hasClickAction() and hasText("Farm home"))
             .performScrollTo()
             .performClick()
-        compose.onNodeWithText("Farm home").assertIsDisplayed()
+        compose.onNodeWithText("Farm home").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
 
         openMore()
         expandAllMenuGroups()
         opened.set(null)
         compose.onNode(hasClickAction() and hasText("Search farm"))
             .performScrollTo()
-            .assertIsDisplayed()
+            .assertIsDisplayed().also { compose.captureObservedNativeOwners() }
             .performClick()
         compose.runOnIdle {
             assertEquals(FarmDestination.Search, opened.get())
@@ -128,7 +128,7 @@ class FarmRuntimeNavigationTest {
         }
 
         compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
-        compose.onNodeWithText("Farm home").assertIsDisplayed()
+        compose.onNodeWithText("Farm home").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         opened.set(null)
         compose.onNode(hasClickAction() and hasText("Tasks")).performClick()
         compose.runOnIdle {
@@ -159,13 +159,13 @@ class FarmRuntimeNavigationTest {
         compose.onNode(hasClickAction() and hasText("Farm home"))
             .performScrollTo()
             .performClick()
-        compose.onNodeWithText("Farm home").assertIsDisplayed()
+        compose.onNodeWithText("Farm home").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
     }
     @Test
     fun workerHomeScanActionOpensCanonicalRfidRoute() {
         val opened = AtomicReference<FarmDestination?>(null)
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 WorkerWorkBoardScreen(
                     farmName = "Premier Farm",
                     summary = FarmHomeSummary(),
@@ -179,7 +179,7 @@ class FarmRuntimeNavigationTest {
 
         compose.onNode(hasClickAction() and hasText("Scan animal"))
             .performScrollTo()
-            .assertIsDisplayed()
+            .assertIsDisplayed().also { compose.captureObservedNativeOwners() }
             .performClick()
         compose.runOnIdle {
             assertEquals(FarmDestination.Goat(GoatEntryPage.SCAN), opened.get())
@@ -191,7 +191,7 @@ class FarmRuntimeNavigationTest {
     fun managementHomeExposesTheRemainingExactModuleOwners() {
         val opened = AtomicReference<FarmDestination?>(null)
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 RoleAwareFarmHomeScreen(
                     role = "owner",
                     farmName = "Premier Farm",
@@ -231,7 +231,7 @@ class FarmRuntimeNavigationTest {
             SyncQueueView.DEAD_LETTER to 4L,
         )
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 HomeUtilityScreen(
                     surface = HomeSurface.TODAY_SUMMARY,
                     summary = FarmHomeSummary(pendingSync = 6, syncQueueCounts = counts),
@@ -252,7 +252,7 @@ class FarmRuntimeNavigationTest {
             opened.set(null)
             compose.onNode(hasClickAction() and hasText(label))
                 .performScrollTo()
-                .assertIsDisplayed()
+                .assertIsDisplayed().also { compose.captureObservedNativeOwners() }
                 .performClick()
             compose.runOnIdle {
                 assertEquals(FarmDestination.SyncQueue(view), opened.get())
@@ -264,7 +264,7 @@ class FarmRuntimeNavigationTest {
     @Test
     fun todaySummaryHidesSyncQueuesWhenTheRoleMayNotSeeThem() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 HomeUtilityScreen(
                     surface = HomeSurface.TODAY_SUMMARY,
                     summary = FarmHomeSummary(pendingSync = 6, syncQueueCounts = null),
@@ -273,7 +273,7 @@ class FarmRuntimeNavigationTest {
                 )
             }
         }
-        compose.onNodeWithText("Open sync status").assertExists()
+        compose.onNodeWithText("Open sync status").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("Sync queues").assertDoesNotExist()
         compose.onNode(hasClickAction() and hasText("Conflicts · 0")).assertDoesNotExist()
     }

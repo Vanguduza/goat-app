@@ -20,13 +20,13 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class RabbitRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     @Test
     fun dashboardActionsReachExactRegisteredOwnersAndReturn() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 RabbitProgrammeScreen(
                     cages = emptyList(),
                     waves = emptyList(),
@@ -70,11 +70,11 @@ class RabbitRuntimeNavigationTest {
             compose.onNode(hasClickAction() and hasText(action))
                 .performScrollTo()
                 .performClick()
-            compose.onNodeWithTag("farm-screen:$screenId").assertExists()
+            compose.onNodeWithTag("farm-screen:$screenId").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNode(hasClickAction() and hasText("Farm home"))
                 .performScrollTo()
                 .performClick()
-            compose.onNode(hasClickAction() and hasText(action)).assertExists()
+            compose.onNode(hasClickAction() and hasText(action)).assertExists().also { compose.captureObservedNativeOwners() }
         }
     }
 }

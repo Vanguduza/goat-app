@@ -1,5 +1,9 @@
 package com.farmos.feature.goat
 
+import com.farmos.review.NativeModuleReviewRule
+import com.farmos.review.NativeModuleReviewTheme
+import com.farmos.review.captureObservedNativeOwners
+
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
@@ -31,8 +35,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class GoatKidRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private fun tag(suffix: String) = "farm-screen:" + "FOS-" + "GOAT-" + suffix
     private fun day(m: Int, d: Int) = LocalDate.of(2026, m, d).toEpochDay()
@@ -41,31 +45,31 @@ class GoatKidRuntimeNavigationTest {
     fun kiddingDetailOpensFromTheDoeRecordAndReturnsToIt() {
         render(nala(), GoatPage.PROFILE)
         compose.revealGoatTool("Breeding records").performScrollTo().performClick()
-        compose.onNodeWithTag(tag("030")).assertExists()
+        compose.onNodeWithTag(tag("030")).assertExists().also { compose.captureObservedNativeOwners() }
 
         compose.onNode(hasClickAction() and hasText("2026-03-02")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GOAT-038").assertExists()
-        compose.onNodeWithText("1 of 2 live").assertExists()
-        compose.onNodeWithTag("goat-kidding-kid:goat-tumi").assertExists()
-        compose.onNodeWithText("Doeling").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-038").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("1 of 2 live").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("goat-kidding-kid:goat-tumi").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Doeling").assertExists().also { compose.captureObservedNativeOwners() }
 
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
-        compose.onNodeWithTag(tag("030")).assertExists()
+        compose.onNodeWithTag(tag("030")).assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-screen:FOS-GOAT-038").assertDoesNotExist()
     }
 
     @Test
     fun kidProfileShowsTheBirthRecordAndReturnsToTheProfile() {
         render(tumi(), GoatPage.PROFILE)
-        compose.onNodeWithTag(tag("003")).assertIsDisplayed()
+        compose.onNodeWithTag(tag("003")).assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         compose.revealGoatTool("Birth record").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GOAT-041").assertExists()
-        compose.onNodeWithText("GT-024 · Nala").assertExists()
-        compose.onNodeWithText("3 born · 2 live").assertExists()
-        compose.onNodeWithText("3.20 kg").assertExists()
-        compose.onNodeWithTag("goat-littermate:goat-sipho").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-041").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("GT-024 · Nala").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("3 born · 2 live").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("3.20 kg").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("goat-littermate:goat-sipho").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
-        compose.onNodeWithTag(tag("003")).assertExists()
+        compose.onNodeWithTag(tag("003")).assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
@@ -80,17 +84,17 @@ class GoatKidRuntimeNavigationTest {
         val selected = AtomicReference<String?>(null)
         render(tumi(), GoatPage.DASHBOARD, herd = listOf(nala(), tumi()), onSelect = selected::set)
         compose.revealGoatTool("Kids").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GOAT-040").assertExists()
-        compose.onNodeWithTag("goat-kid-cohort:k1").assertExists()
-        compose.onNodeWithText("GT-024 · Nala · 2026-03-02").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-040").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("goat-kid-cohort:k1").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("GT-024 · Nala · 2026-03-02").assertExists().also { compose.captureObservedNativeOwners() }
 
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
-        compose.onNodeWithTag(tag("001")).assertExists()
+        compose.onNodeWithTag(tag("001")).assertExists().also { compose.captureObservedNativeOwners() }
 
         compose.revealGoatTool("Kids").performScrollTo().performClick()
         compose.onNodeWithText("Tumi · GT-101").performScrollTo().performClick()
         compose.runOnIdle { assertEquals("goat-tumi", selected.get()) }
-        compose.onNodeWithTag("farm-screen:FOS-GOAT-041").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-GOAT-041").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     private fun render(
@@ -100,7 +104,7 @@ class GoatKidRuntimeNavigationTest {
         onSelect: (String) -> Unit = {},
     ) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 GoatExperienceScreen(
                     state = GoatSliceUiState(farmName = "Premier Farm", herd = herd, selected = selected, animalId = selected.animalId),
                     actions = GoatExperienceActions(

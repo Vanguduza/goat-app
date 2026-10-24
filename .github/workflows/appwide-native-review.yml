@@ -8,6 +8,10 @@ on:
       - 'core/design/**'
       - 'feature/**'
       - 'scripts/testing/native-module-review.gradle'
+      - 'scripts/testing/native-review-selection.json'
+      - 'scripts/testing/run-native-review.py'
+      - 'scripts/design/audit_native_visual_certification.py'
+      - 'scripts/design/test_native_visual_certification.py'
       - '.github/workflows/appwide-native-review.yml'
 
 permissions:
@@ -20,34 +24,18 @@ concurrency:
 jobs:
   review:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     strategy:
       fail-fast: false
+      max-parallel: 9
       matrix:
-        include:
-          - name: light-phone
-            mode: LIGHT
-            width: 411
-            scale: '1'
-          - name: dark-phone
-            mode: DARK
-            width: 411
-            scale: '1'
-          - name: outdoor-large-text
-            mode: OUTDOOR
-            width: 360
-            scale: '2'
-          - name: light-tablet
-            mode: LIGHT
-            width: 780
-            scale: '1.3'
-    env:
-      GOAT_MODULE_REVIEW_MODE: ${{ matrix.mode }}
-      GOAT_MODULE_REVIEW_WIDTH: ${{ matrix.width }}
-      GOAT_MODULE_REVIEW_SCALE: ${{ matrix.scale }}
-      GOAT_MODULE_REVIEW_DIR: ${{ github.workspace }}/app/build/reports/native-module-review
+        mode: [LIGHT, DARK, OUTDOOR]
+        width: [360, 411, 780]
+        scale: ['1', '1.3', '2']
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
         with:
           distribution: temurin
@@ -62,45 +50,21 @@ jobs:
           yes | "$manager" --licenses >/dev/null || true
           "$manager" "platforms;android-37.0" "build-tools;37.0.0"
       - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a
-      - name: Render and verify actual module navigation
+      - name: Verify native evidence integrity controls
+        run: python3 scripts/design/test_native_visual_certification.py
+      - name: Render and verify actual native owners, states and lower content
         run: >-
-          ./gradlew :app:testDebugUnitTest
-          -I scripts/testing/native-module-review.gradle
-          --no-parallel --max-workers=2 --continue --stacktrace
-          --tests com.farmos.app.SheepRecordRuntimeNavigationTest
-          --tests com.farmos.app.CattleRecordRuntimeNavigationTest
-          --tests com.farmos.app.PoultryRecordRuntimeNavigationTest
-          --tests com.farmos.app.FeedRecordRuntimeNavigationTest
-          --tests com.farmos.app.WaterRecordRuntimeNavigationTest
-          --tests com.farmos.app.PastureRecordRuntimeNavigationTest
-          --tests com.farmos.app.HealthRecordRuntimeNavigationTest
-          --tests com.farmos.app.InventoryRecordRuntimeNavigationTest
-          --tests com.farmos.app.AssetRecordRuntimeNavigationTest
-          --tests com.farmos.app.LabourRecordRuntimeNavigationTest
-          --tests com.farmos.app.GroupRecordRuntimeNavigationTest
-          --tests com.farmos.app.SalesRecordRuntimeNavigationTest
-          --tests com.farmos.app.ProcurementRecordRuntimeNavigationTest
-          --tests com.farmos.app.RabbitCommerceRecordRuntimeNavigationTest
-          --tests com.farmos.app.OperationalRuntimeNavigationTest
-          --tests com.farmos.app.ReportRuntimeNavigationTest
-          --tests com.farmos.app.PlanningVisualWorkspaceTest
-          --tests com.farmos.app.GeneticsAndAdvisoryVisualTest
-      - name: Retain exact source identity
-        if: always()
-        run: |
-          mkdir -p app/build/reports/native-module-review
-          git rev-parse HEAD > app/build/reports/native-module-review/commit.txt
-          git rev-parse 'HEAD^{tree}' > app/build/reports/native-module-review/tree.txt
-          git status --porcelain=v1 > app/build/reports/native-module-review/worktree-status.txt
-          find app/build/reports/native-module-review -name '*.png' -print0 | sort -z | xargs -0 -r sha256sum > app/build/reports/native-module-review/images.sha256
-      - name: Upload unapproved native review evidence
+          python3 scripts/testing/run-native-review.py
+          --mode '${{ matrix.mode }}'
+          --width '${{ matrix.width }}'
+          --scale '${{ matrix.scale }}'
+          --output app/build/reports/full-native-review
+          --timeout-seconds 2100
+      - name: Upload unapproved full-matrix evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: appwide-native-${{ matrix.name }}
-          path: |
-            app/build/reports/native-module-review/**
-            app/build/test-results/testDebugUnitTest/**
-            app/build/reports/tests/testDebugUnitTest/**
+          name: full-native-${{ matrix.mode }}-w${{ matrix.width }}-f${{ matrix.scale }}
+          path: app/build/reports/full-native-review/**
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30

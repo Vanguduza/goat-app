@@ -39,8 +39,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class GroupsCaptureOwnerTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val farm = "11111111-1111-4111-8111-111111111111"
     private val otherFarm = "22222222-2222-4222-8222-222222222222"
@@ -67,7 +67,7 @@ class GroupsCaptureOwnerTest {
         render { syncRequests++ }
         compose.onNodeWithTag("farm-section:Record").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-003:option:cattle").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithTag("farm-screen:FOS-GROUP-001").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-GROUP-001").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-003:option:cattle").performScrollTo().performClick()
         compose.onNode(hasSetTextAction() and hasText("Name")).performScrollTo().performTextInput("Weaner steers")
         compose.onNode(hasSetTextAction() and hasText("Head count")).performScrollTo().performTextInput("40")
@@ -102,7 +102,7 @@ class GroupsCaptureOwnerTest {
 
     private fun render(onSync: () -> Unit) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 GroupsModuleHost(
                     farmId = farm,
                     ops = RoomOpsRepository(database, farm),

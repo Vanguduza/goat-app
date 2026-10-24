@@ -48,8 +48,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class LocalFarmEntryTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private lateinit var database: FarmOsDatabase
     private lateinit var directory: LocalFarmDirectory
@@ -70,7 +70,7 @@ class LocalFarmEntryTest {
 
     private fun render() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 // Unconfined keeps the entry's database work on the test's main thread, so Compose idling
                 // covers it and nothing still holds the database when the test closes it.
                 LocalFarmEntry(directory, onSignedIn = { account, farmName -> signedIn = account to farmName }, io = Dispatchers.Unconfined)
@@ -179,7 +179,7 @@ class LocalFarmEntryTest {
         click("Recover owner")
 
         waitForTag("local-recovery-code")
-        compose.onNodeWithTag("farm-screen:FOS-GLOBAL-004").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-GLOBAL-004").assertExists().also { compose.captureObservedNativeOwners() }
         val rotated = shownRecoveryCode()
         assertNotEquals(original, rotated)
         click("I have saved the recovery code")

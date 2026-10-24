@@ -20,8 +20,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class SpeciesHerdRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     @Test
     fun sheepIndividualAnimalSurfacesTraverseAndReturn() {
@@ -78,16 +78,16 @@ class SpeciesHerdRuntimeNavigationTest {
     @Test
     fun herdMetricsUseExhaustiveCountsAndTheListSaysWhenBounded() {
         renderSpecies(FarmModule.CATTLE, "Cow One", SpeciesHerdCounts(total = 640, active = 612))
-        compose.onNodeWithText("640").assertExists()
-        compose.onNodeWithText("612").assertExists()
+        compose.onNodeWithText("640").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("612").assertExists().also { compose.captureObservedNativeOwners() }
         open("Cattle records")
         assertScreen("FOS-CATTLE-002")
-        compose.onNodeWithText("Showing the first 1 of 640 cattle by tag.").assertExists()
+        compose.onNodeWithText("Showing the first 1 of 640 cattle by tag.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     private fun renderSpecies(module: FarmModule, label: String, counts: SpeciesHerdCounts? = null) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SpeciesHerdScreen(
                     module = module,
                     title = module.name,
@@ -114,7 +114,7 @@ class SpeciesHerdRuntimeNavigationTest {
     }
 
     private fun assertScreen(screenId: String) {
-        compose.onNodeWithTag("farm-screen:$screenId").assertExists()
+        compose.onNodeWithTag("farm-screen:$screenId").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     private fun home() {

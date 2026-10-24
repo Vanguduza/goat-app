@@ -35,8 +35,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class RabbitRecordRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val today = LocalDate.of(2026, 9, 24)
     private fun day(m: Int, d: Int) = LocalDate.of(2026, m, d).toEpochDay()
@@ -45,39 +45,39 @@ class RabbitRecordRuntimeNavigationTest {
     fun rabbitRecordPagesTraverseFromTheDashboardAndRestoreIt() {
         render(records())
         traverse("Cage occupancy", "FOS-RABBIT-008") {
-            compose.onNodeWithTag("rabbit-cage-tile:c1").assertExists()
-            compose.onNodeWithText("Capacity: 12 does").assertExists()
-            compose.onNodeWithTag("rabbit-wave-plan:w1").assertExists()
-            compose.onNodeWithTag("rabbit-wave-plan:w2").assertExists()
+            compose.onNodeWithTag("rabbit-cage-tile:c1").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Capacity: 12 does").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithTag("rabbit-wave-plan:w1").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithTag("rabbit-wave-plan:w2").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNodeWithTag("rabbit-cage-tile:c2").performScrollTo().performClick()
-            compose.onNodeWithText("No wave plans linked to this cage.").assertExists()
+            compose.onNodeWithText("No wave plans linked to this cage.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Cage detail", "FOS-RABBIT-007") {
-            compose.onNodeWithTag("rabbit-cage-box:b2").assertExists()
-            compose.onNodeWithTag("rabbit-cage-wave:w1").assertExists()
+            compose.onNodeWithTag("rabbit-cage-box:b2").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithTag("rabbit-cage-wave:w1").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNodeWithTag("rabbit-option:c2").performScrollTo().performClick()
-            compose.onNodeWithText("No nest boxes recorded for this cage.").assertExists()
-            compose.onNodeWithText("No breeding waves recorded for this cage.").assertExists()
+            compose.onNodeWithText("No nest boxes recorded for this cage.").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("No breeding waves recorded for this cage.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Kindling due", "FOS-RABBIT-016") {
             // w1's latest outcome is false_pregnancy, w0 has a kindling record: neither is due.
             compose.onNodeWithTag("rabbit-kindling-due:w1").assertDoesNotExist()
             compose.onNodeWithTag("rabbit-kindling-due:w0").assertDoesNotExist()
-            compose.onNodeWithText("Kindling 2026-10-11 · in 17 days · no outcome recorded · no palpation recorded").assertExists()
+            compose.onNodeWithText("Kindling 2026-10-11 · in 17 days · no outcome recorded · no palpation recorded").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNodeWithTag("rabbit-kindling-past").assertDoesNotExist()
         }
         traverse("Litter profiles", "FOS-RABBIT-018") {
             compose.onNodeWithTag("rabbit-option:w0").performScrollTo().performClick()
             compose.onNodeWithText("Stored dates").performScrollTo().performClick()
-            compose.onNodeWithText("2026-07-31").assertExists()
-            compose.onNodeWithText("8 live · 1 dead").assertExists()
-            compose.onNodeWithTag("rabbit-litter-event:f1:out").assertExists()
-            compose.onNodeWithTag("rabbit-litter-kits:weaned").assertExists()
+            compose.onNodeWithText("2026-07-31").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("8 live · 1 dead").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithTag("rabbit-litter-event:f1:out").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithTag("rabbit-litter-kits:weaned").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Kit census", "FOS-RABBIT-019") {
-            compose.onNodeWithTag("rabbit-kits-total").assertExists()
-            compose.onNodeWithText("weaned · retain · tag R-17").assertExists()
-            compose.onNodeWithText("Wave not on this device · 1").assertExists()
+            compose.onNodeWithTag("rabbit-kits-total").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("weaned · retain · tag R-17").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Wave not on this device · 1").assertExists().also { compose.captureObservedNativeOwners() }
         }
     }
 
@@ -96,48 +96,48 @@ class RabbitRecordRuntimeNavigationTest {
             ),
         )
         traverse("Kindling due", "FOS-RABBIT-016") {
-            compose.onNodeWithText("Awaiting kindling record · 2").assertExists()
-            compose.onNodeWithText("Kindling 2026-09-20 · 4 days past scheduled date · outcome pregnant · palpation pregnant").assertExists()
-            compose.onNodeWithText("Kindling 2026-10-11 · in 17 days · no outcome recorded · no palpation recorded").assertExists()
+            compose.onNodeWithText("Awaiting kindling record · 2").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Kindling 2026-09-20 · 4 days past scheduled date · outcome pregnant · palpation pregnant").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("Kindling 2026-10-11 · in 17 days · no outcome recorded · no palpation recorded").assertExists().also { compose.captureObservedNativeOwners() }
             listOf("fp", "op", "ko", "kr").forEach { compose.onNodeWithTag("rabbit-kindling-due:$it").assertDoesNotExist() }
-            compose.onNodeWithTag("rabbit-kindling-past").assertExists()
-            compose.onNodeWithText("1 wave(s) have a kindled outcome but no kindling record. See the litter profile.").assertExists()
+            compose.onNodeWithTag("rabbit-kindling-past").assertExists().also { compose.captureObservedNativeOwners() }
+            compose.onNodeWithText("1 wave(s) have a kindled outcome but no kindling record. See the litter profile.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Litter profiles", "FOS-RABBIT-018") {
             compose.onNodeWithTag("rabbit-option:ko").performScrollTo().performClick()
-            compose.onNodeWithTag("rabbit-litter-inconsistent").assertExists()
+            compose.onNodeWithTag("rabbit-litter-inconsistent").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onAllNodesWithText("Outcome kindled, but no kindling record on this device").assertCountEquals(2)
             compose.onNodeWithTag("rabbit-option:kr").performScrollTo().performClick()
-            compose.onNodeWithText("Kindling recorded").assertExists()
+            compose.onNodeWithText("Kindling recorded").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNodeWithTag("rabbit-litter-inconsistent").assertDoesNotExist()
             compose.onNodeWithTag("rabbit-option:fp").performScrollTo().performClick()
-            compose.onNodeWithText("Not pregnant · outcome false_pregnancy").assertExists()
+            compose.onNodeWithText("Not pregnant · outcome false_pregnancy").assertExists().also { compose.captureObservedNativeOwners() }
         }
     }
 
     @Test
     fun rabbitCountIsExhaustiveAndTheListSaysWhenBounded() {
         render(RabbitRecords(), does = listOf("R-1 · doe · active"), rabbitCount = 240)
-        compose.onNodeWithText("240").assertExists()
+        compose.onNodeWithText("240").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("rabbit-section:Animals").performScrollTo().performClick()
         compose.onNode(hasClickAction() and hasText("Breeding animals")).performScrollTo().performClick()
-        compose.onNodeWithText("Showing the first 1 of 240 rabbits by tag.").assertExists()
+        compose.onNodeWithText("Showing the first 1 of 240 rabbits by tag.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun emptyRecordsSayNothingIsRecorded() {
         render(RabbitRecords())
         traverse("Cage occupancy", "FOS-RABBIT-008") {
-            compose.onNodeWithText("Add a cage to begin its rotation plan.").assertExists()
+            compose.onNodeWithText("Add a cage to begin its rotation plan.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Kindling due", "FOS-RABBIT-016") {
-            compose.onNodeWithText("No waves awaiting a kindling record on this device.").assertExists()
+            compose.onNodeWithText("No waves awaiting a kindling record on this device.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Litter profiles", "FOS-RABBIT-018") {
-            compose.onNodeWithText("No breeding waves on this device.").assertExists()
+            compose.onNodeWithText("No breeding waves on this device.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Kit census", "FOS-RABBIT-019") {
-            compose.onNodeWithText("No individual kits recorded on this device.").assertExists()
+            compose.onNodeWithText("No individual kits recorded on this device.").assertExists().also { compose.captureObservedNativeOwners() }
         }
     }
 
@@ -149,10 +149,10 @@ class RabbitRecordRuntimeNavigationTest {
         }
         compose.onNodeWithTag("rabbit-section:$section").performScrollTo().performClick()
         compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:$screenId").assertExists()
+        compose.onNodeWithTag("farm-screen:$screenId").assertExists().also { compose.captureObservedNativeOwners() }
         assertions()
         compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
-        compose.onNode(hasClickAction() and hasText(label)).assertExists()
+        compose.onNode(hasClickAction() and hasText(label)).assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
 
@@ -187,7 +187,7 @@ class RabbitRecordRuntimeNavigationTest {
 
     private fun render(records: RabbitRecords, does: List<String> = emptyList(), rabbitCount: Int? = null) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 RabbitProgrammeScreen(
                     cages = emptyList(),
                     waves = emptyList(),

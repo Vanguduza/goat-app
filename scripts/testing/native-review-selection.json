@@ -1,0 +1,819 @@
+{
+  "schema_version": 1,
+  "purpose": "EXACT_EXISTING_NATIVE_TEST_SELECTION_NOT_SCOPE_CERTIFICATION",
+  "classes": [
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/AnimalSaleScreensTest.kt",
+      "class": "com.farmos.app.AnimalSaleScreensTest",
+      "sha256": "1b56e9e280c4692180535fccc7e001013d1942bb903540d0437650381dae0104",
+      "methods": [
+        "aSoldAnimalsMoneyIsRecordedFromItsExitWithThePricePrefilled",
+        "theSalesHomeOpensAnimalSale"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/AssetRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.AssetRecordRuntimeNavigationTest",
+      "sha256": "38bff64a8998be9e5b4ce8b2a06cf88f85ce7e06775c24c94921f78cfb69775a",
+      "methods": [
+        "assetRecordPagesTraverseFromHomeAndRestoreIt",
+        "emptyRecordsSayNothingIsRecorded"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/AssetsCaptureOwnerTest.kt",
+      "class": "com.farmos.app.AssetsCaptureOwnerTest",
+      "sha256": "5c1370c2a9ceae2b928f685d7b94ed076ce2403b67984bffdb4e316850bf3cd0",
+      "methods": [
+        "maintenanceSelectsThisFarmsAssetAndCommitsLocally"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/AttachmentsScreensTest.kt",
+      "class": "com.farmos.app.AttachmentsScreensTest",
+      "sha256": "cacc078bdf1ef97373d745fd1048a8af5ab951a81db8c8cd21980a1201ab639b",
+      "methods": [
+        "aClosedRecordShowsItsAttachmentsWithoutAddingMore",
+        "attachmentsSayWhetherTheirBytesAreOnThisDevice"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.CattleRecordRuntimeNavigationTest",
+      "sha256": "379da05380489141a465d586fd28dd2b3cebe0a3860cfc326cbf2b3e9f707da6",
+      "methods": [
+        "animalRecordPagesTraverseFromCattleHomeAndRestoreIt",
+        "calvingDueFailureIsShown",
+        "calvingDueGroupsCowsByWindowAndSaysWhereEachDateCameFrom",
+        "calvingDueWithNoCowsSaysSo",
+        "calvingWorkflowKeepsPredictionsSeparateAndSelectsTheActualCow",
+        "emptyAndFailedLoadsAreDistinct",
+        "failedLoadIsShownNotEmpty",
+        "feedlotPagesShowRecordedLotsWithoutDerivedPerformance",
+        "loadingShowsTheSkeletonAndAFailedLoadRecoversOnRetry",
+        "movementRecordWithNothingRecordedSaysSo",
+        "withoutASelectedAnimalRecordPagesSaySoAndLoadNothing"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/ConflictCentreScreensTest.kt",
+      "class": "com.farmos.app.ConflictCentreScreensTest",
+      "sha256": "0dd52296701fe6fa8583096c6ac2883d30e565913bac98ae39cb08ca9ae55dfb",
+      "methods": [
+        "managementSetsAChangeAsideOnlyWithAReasonAndSeesTheCorrection",
+        "theCentreListsWaitingAndSetAsideChangesWithTheirProvenance",
+        "withoutConflictPermissionTheDetailExplainsWhoResolves"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/CustomerScreensTest.kt",
+      "class": "com.farmos.app.CustomerScreensTest",
+      "sha256": "647491bee1e240bff0de39c2d12378683eab4cb89c208bef6397d3302873f962",
+      "methods": [
+        "aViewerSeesCustomersButCannotChangeThem",
+        "staffAddAndUpdateCustomersWithoutDeletingThem",
+        "theSalesHomeOpensCustomersAndReturns"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.FarmRuntimeNavigationTest",
+      "sha256": "c25067ad78c0f682a77d9b6b8271dd4e7c81ef8298f3fc56980d0c3bb20a479f",
+      "methods": [
+        "generalHomeTraversesSpeciesUtilitiesAndRestoresHome",
+        "managementHomeExposesTheRemainingExactModuleOwners",
+        "todaySummaryHidesSyncQueuesWhenTheRoleMayNotSeeThem",
+        "todaySummarySyncQueueEntriesOpenExactQueueOwners",
+        "workerHomeScanActionOpensCanonicalRfidRoute"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/FeedRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.FeedRecordRuntimeNavigationTest",
+      "sha256": "bd53dd8737991b32ee7adf87f693b299c656eb30e9838516ba49b615d6fabff4",
+      "methods": [
+        "emptyRecordsSayNothingIsRecorded",
+        "feedRecordPagesTraverseFromHomeAndRestoreIt"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/GeneticsAndAdvisoryVisualTest.kt",
+      "class": "com.farmos.app.GeneticsAndAdvisoryVisualTest",
+      "sha256": "47918b1ef423d4e79cf4b8805e3489b9ba105cfeb66d6aef047205494108d353",
+      "methods": [
+        "advisoryReviewShowsRecordedEvidenceButDoesNotApplyOrDismissAnActionByItself",
+        "parentageUsesSelectedControlsAndRetainsTheDraftWithoutWriting",
+        "pedigreeDrawsOnlyThisAnimalsRecordedParentsAndKeepsTheFullRecordView"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/GlobalSearchContractTest.kt",
+      "class": "com.farmos.app.GlobalSearchContractTest",
+      "sha256": "e4790b1e2dd58930193a3d325783dd3ce2dd0f2ed34de6ce337ba2623320dcc5",
+      "methods": [
+        "searchAndResultsRenderCanonicalOwnersAndOpenSpecies",
+        "searchWithMatchesShowsNoEmptyState",
+        "searchWithNoMatchesShowsTheSearchEmptyState"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/GroupRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.GroupRecordRuntimeNavigationTest",
+      "sha256": "e89f5d6dd6f425efdbf60c71c77be6cdfc686a9626dc5815c3709073bb8747ee",
+      "methods": [
+        "failedLoadIsShownNotEmpty",
+        "groupRecordPagesTraverseFromHomeAndRestoreIt",
+        "withoutGroupsPagesSaySo"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/GroupsCaptureOwnerTest.kt",
+      "class": "com.farmos.app.GroupsCaptureOwnerTest",
+      "sha256": "2c4634a80d025a84de8a1d3f6f45cfa0c10a6319e17bb556cdd7210bfae700cb",
+      "methods": [
+        "censusTakesItsGroupFromThisFarmsGroupSelector",
+        "groupCreationTakesItsSpeciesFromTheSpeciesSelector"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/HealthCaptureOwnerTest.kt",
+      "class": "com.farmos.app.HealthCaptureOwnerTest",
+      "sha256": "8464f803424caf1d3050739dae4bdae9a9e831f17afc08175e378f9c27d3b0c8",
+      "methods": [
+        "labResultSearchesEveryAnimalOnTheFarmNotACappedList",
+        "likeWildcardsTypedIntoSearchMatchLiterally",
+        "observationTakesItsSpeciesFromTheSpeciesSelector",
+        "ownerFormularyEntrySavesAnExplicitUnapprovedDraft",
+        "protocolSlotIsAddedOnlyToAVetAcceptedPack",
+        "treatmentReferencesAnApprovedFormularyItemFromTheSelector"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/HealthRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.HealthRecordRuntimeNavigationTest",
+      "sha256": "b17ad170c6701522db600873c241ead8be8e98249754f0c424b9ebc56a0f56e5",
+      "methods": [
+        "dashboardShowsExhaustiveCountsAndBoundedListsSaySo",
+        "emptyHealthTimelineSaysNothingIsRecorded",
+        "emptyRecordsSayNothingIsRecorded",
+        "endedWindowShowsNoActiveWarningAndLinksToItsTreatment",
+        "formularyItemsAndProtocolPacksShowRecordedFactsOnly",
+        "healthTimelineListsTheCompleteWindowAndRestoresTheDashboard",
+        "treatmentRecordsDrillIntoWindowsAndBackToTheirOrigin",
+        "vetVisitsAndLabResultsTraverseListToDetailAndBack"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/HomeMenuAndTaskUxTest.kt",
+      "class": "com.farmos.app.HomeMenuAndTaskUxTest",
+      "sha256": "cf09adc06e454e64ce70ec9934b4db2ad5d837ae383c58f4b7cd2e740d221f14",
+      "methods": [
+        "addTaskButtonSubmitsThroughTheExistingCreateCallback",
+        "completingATaskAndReturningHomeInvokeTheCorrectCallbacks",
+        "pendingSyncAndSecondaryUtilitiesDoNotOccupyManagementHome",
+        "secondaryGroupsStartCollapsedAndAnExpandedActionStillNavigates",
+        "switchingBetweenWorkerAndBuyerDoesNotLeakManagerMenuActions",
+        "syncRemainsAnActionInMoreAndOpensItsExistingDestination",
+        "taskFiltersExposeSelectionAndChangeTheDisplayedWork"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.HomeUtilityRuntimeNavigationTest",
+      "sha256": "56c5ee037d292f5a94d4154527dd969f4fddd66cea1993c9025a8b35b3507586",
+      "methods": [
+        "homeUtilityPanelsTraverseAndRestoreWithoutCrossingAuthorityBoundaries",
+        "todaySummaryShowsTheSyncPendingReceiptOnlyWhileChangesWait"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/InventoryCaptureOwnerTest.kt",
+      "class": "com.farmos.app.InventoryCaptureOwnerTest",
+      "sha256": "fbf8b38adf3d1ed721252e66194ea15b0dfecf5fa24d0b281d5d7fabe3cc034b",
+      "methods": [
+        "receiptTakesItsItemFromThisFarmsItemSelector",
+        "reorderRuleTakesItsItemFromThisFarmsItemSelector"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/InventoryRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.InventoryRecordRuntimeNavigationTest",
+      "sha256": "d9c60f8f5930cd15a7a3372c1089f972d525638a80391ef3e6bb34e8a3352532",
+      "methods": [
+        "dashboardRecordPagesTraverseAndRestoreTheDashboard",
+        "drillDownsOpenItemAndLotRecordsAndReturnToTheirOrigin",
+        "searchMatchesSkuOrNameAndOpensTheItem"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/LabourRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.LabourRecordRuntimeNavigationTest",
+      "sha256": "e04a25f654ceae9f53a6263eb37c2ee5216ccc9fab232bd7c3e5b76be0638c0d",
+      "methods": [
+        "emptyRecordsSayNothingIsRecorded",
+        "workLogTraversesFromHomeAndRestoresIt"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/LocalFarmEntryTest.kt",
+      "class": "com.farmos.app.LocalFarmEntryTest",
+      "sha256": "196cdb3bc92c50d0d251a537bd04a8ec5219b3ed6ae2310c555d9840bc3658c3",
+      "methods": [
+        "firstRunCreatesTheFarmAndOwnerOfflineAndShowsTheRecoveryCodeOnce",
+        "localSignInRejectsAWrongPinAndAcceptsTheRightOne",
+        "ownerRecoveryReplacesThePinAndRotatesTheCode"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
+      "class": "com.farmos.app.LocalFarmSessionAuthorityTest",
+      "sha256": "cbbd2a81f5d625e459abd70b474a5d3b56aa6b946f4a1b2ff7d4c9bf162d6601",
+      "methods": [
+        "aSignInResultThatBecameDisabledBeforeAdmissionNeverStartsCarriersOrFarmContent",
+        "disablingTheCurrentAccountEndsTheSignedInComposition",
+        "receivedCredentialResetEndsTheSessionAndOnlyTheNewPinCanOpenItAgain",
+        "receivedDeviceRevocationDisposesTheCarriersAndFarmContent",
+        "receivedRoleDowngradeRefreshesMembershipAndClearsTheNestedManagementRouteWithoutRestartingCarriers",
+        "unavailableCarrierKeysKeepLocalRecordsOpenAndCloseAnythingAlreadyStarted"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/NativeReviewEvidenceContractTest.kt",
+      "class": "com.farmos.app.NativeReviewEvidenceContractTest",
+      "sha256": "327fa17abe9f4c1ed6474d6367bd9f6abc18899935d5e69f0b4e7a0bcf1d429f",
+      "methods": [
+        "rejectsARequestedOwnerThatIsOnlyTextNotARenderedOwner",
+        "repeatedVisitsDoNotOverwriteDifferentStates",
+        "retainsLowerContentAndRestoresPositionWithoutExecutingControls"
+      ],
+      "evidence_kind": "COLLECTOR_NEGATIVE_CONTROL_NOT_PRODUCT"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/OperationalOwnerContractTest.kt",
+      "class": "com.farmos.app.OperationalOwnerContractTest",
+      "sha256": "0b6ce7688393116f6ceebaa327ae623df272284c7a85c9bfe19c83dfb8f9932d",
+      "methods": [
+        "cattleOperationsHomeRendersCanonicalOwner",
+        "sheepOperationsHomeRendersCanonicalOwner"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.OperationalRuntimeNavigationTest",
+      "sha256": "d7182e4675bc838fe97c5912ff5a898abfe642a7d8ec02b30818551a025ceea7",
+      "methods": [
+        "cattleOperationsTraverseAllOwnedScreensAndReturn",
+        "financeDashboardTraversesAllOwnedScreensAndReturns",
+        "healthDashboardTraversesAllOwnedScreensAndReturns",
+        "inventoryDashboardTraversesAllOwnedScreensAndReturns",
+        "poultryDashboardTraversesAllOwnedScreensAndReturns",
+        "sheepOperationsTraverseAllOwnedScreensAndReturn"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/OpsAnimalPickerTest.kt",
+      "class": "com.farmos.app.OpsAnimalPickerTest",
+      "sha256": "781041ad2ab921706e2c71adf5cace349321a6284990b837f3f020a3612b8dd6",
+      "methods": [
+        "aCowIsChosenBySearchAndTheServiceRecordsHerId",
+        "theHerdScreensChosenAnimalStartsSelected"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/OpsCoiAnalysisTest.kt",
+      "class": "com.farmos.app.OpsCoiAnalysisTest",
+      "sha256": "e3ad33167b9d3f0c8e15acb7fe9d9227171d285e1c54afdd1d516ec831c564b0",
+      "methods": [
+        "choosingAnEweAndARamShowsTheLambsInbreeding",
+        "comparingRamsForAnEweShowsEachRamsFactsAndLambsInbreedingWithoutRanking"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/PastureCaptureOwnerTest.kt",
+      "class": "com.farmos.app.PastureCaptureOwnerTest",
+      "sha256": "f37d2eb6bc3ec1c4a06b9b21f7f727b401a538d90a76c37469bfee777f10b307",
+      "methods": [
+        "grazingSelectsThisFarmsPaddockAndGroupAndStartsLocally"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/PastureRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.PastureRecordRuntimeNavigationTest",
+      "sha256": "ab13b944546c5027b94084f7e3bdbbaf3356b2ab3fc0eac0d28db155459e26d8",
+      "methods": [
+        "emptyRecordsSayNothingIsRecorded",
+        "pastureRecordPagesTraverseFromHomeAndRestoreIt"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/PlanningVisualWorkspaceTest.kt",
+      "class": "com.farmos.app.PlanningVisualWorkspaceTest",
+      "sha256": "75ab0ce0db9346116794432dd392edb65bc40ad5b20ae1442692974379c0bbf0",
+      "methods": [
+        "capacityProjectionUsesItsActualDatedSpanRatherThanClaimingThirtyDaysOfHistory",
+        "capacityShowsExactRecordedQuantitiesWithoutMixingUnitsOrFarms",
+        "feedScenarioRetainsItsDraftAndDoesNotPretendToRecordConsumption",
+        "financialScenarioContainsOnlyRelevantInputsAndKeepsTheRecordedBaseline"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt",
+      "class": "com.farmos.app.PoultryCaptureOwnerTest",
+      "sha256": "4cf3176c0ab4584d75b03abccd09efe458b1a9483107ad2f43c08c4058eada65",
+      "methods": [
+        "biosecurityWalkCanNameAHouseWithoutAFlock",
+        "candlingOffersOnlyHatchesStillAtTheSetStage",
+        "dailyFlockRecordTakesItsFlockFromThisFarmsPoultryGroups",
+        "placementTakesItsFlockAndHouseFromThisFarmsSelectors",
+        "vaccinationOffersOnlyVetApprovedPoultryFormularyItems"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.PoultryRecordRuntimeNavigationTest",
+      "sha256": "bc06e56f61ee667e489880a523b3d76de698ba90bcce6b2e85a7bc1c93565876",
+      "methods": [
+        "dashboardFlockMetricIsUnknownUntilLoaded",
+        "dashboardFlockMetricUsesTheExhaustiveFlockCount",
+        "emptyRecordsSayNothingIsRecorded",
+        "failedFlockLoadIsShownNotEmpty",
+        "feedPageListsRecordedFeedPerFlockWithoutARatio",
+        "feedPageSaysWhenNoFeedIsRecorded",
+        "flockHealthAndTimelineLoadTheSelectedFlock",
+        "poultryRecordPagesTraverseFromTheDashboardAndRestoreIt"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/ProcurementCaptureOwnerTest.kt",
+      "class": "com.farmos.app.ProcurementCaptureOwnerTest",
+      "sha256": "3685564a0e1061c7ae83649afef5c6c90f2ddf02fba18cf9aef83e11e1931629",
+      "methods": [
+        "purchaseIsRecordedInTheFarmCurrencyWithThatCurrencysMinorUnit",
+        "purchaseSelectsThisFarmsSupplierAndItemAndCommitsLocally",
+        "supplierSuccessDoesNotClaimANewPurchaseWasSaved"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/ProcurementRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.ProcurementRecordRuntimeNavigationTest",
+      "sha256": "87868aba4c34fc364efdac444ab5df42c8fa17daa5c7f937887ccde6739343c3",
+      "methods": [
+        "emptyRecordsSayNothingIsRecorded",
+        "procurementRecordPagesTraverseFromHomeAndRestoreIt"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/RabbitCaptureOwnerTest.kt",
+      "class": "com.farmos.app.RabbitCaptureOwnerTest",
+      "sha256": "18fde2bfe89181b2dd172c7e773988ce699262f25ab5da755f66d7e429b3dd22",
+      "methods": [
+        "nestBoxCycleOffersOnlyTheGovernedNextStatuses",
+        "palpationTakesItsWaveFromThisFarmsWaves"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/RabbitCommerceRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.RabbitCommerceRecordRuntimeNavigationTest",
+      "sha256": "c86221c692931a061ab7ad4c61480b436f2483123b92420338be391fabc24106",
+      "methods": [
+        "commerceRecordPagesTraverseFromTheWaitlistHomeAndRestoreIt",
+        "contractAmountsKeepCurrencyScaleAndUnknownCurrencyEvidence",
+        "emptyRecordsSayNothingIsRecorded"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt",
+      "class": "com.farmos.app.RabbitPedigreeScreensTest",
+      "sha256": "62bb5bc887fdfcc17a2b855ecfc7ebe6214832983288dd88d873089e626be2cb",
+      "methods": [
+        "aRabbitsSireIsLinkedFromTheWholeRabbitry",
+        "bucksAreComparedSideBySideForADoeWithoutRanking",
+        "theKitsInbreedingShowsForADoeAndBuck"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/RabbitProfileScreensTest.kt",
+      "class": "com.farmos.app.RabbitProfileScreensTest",
+      "sha256": "0105792af8637b22be14877c41ca54e981b18002b2c68bff731b0836e56cc53a",
+      "methods": [
+        "aBuckThatLeftShowsHisExitWhichIsReversedWithAReason",
+        "aDoeProfileRecordsHerCullAfterConfirmation"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/RabbitRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.RabbitRecordRuntimeNavigationTest",
+      "sha256": "4e06129428981357533ec040c6c46538920e5a6579ba61e526ebfc645d72c3f1",
+      "methods": [
+        "emptyRecordsSayNothingIsRecorded",
+        "kindlingDueListsOnlyWavesAwaitingKindling",
+        "rabbitCountIsExhaustiveAndTheListSaysWhenBounded",
+        "rabbitRecordPagesTraverseFromTheDashboardAndRestoreIt"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/RabbitRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.RabbitRuntimeNavigationTest",
+      "sha256": "2c3b9954124fd8a0ee972bc20ca5a0e29aa909211dc5248f0fc12ce1975add71",
+      "methods": [
+        "dashboardActionsReachExactRegisteredOwnersAndReturn"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+      "class": "com.farmos.app.ReportDisclosureAuthorityTest",
+      "sha256": "b87c260c3930b103cfcc2fc4b9124c388e9a57c727e38ab6f3ea73d4530a96ab",
+      "methods": [
+        "aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
+        "aDelayedChooserCannotUseTheOldAuthenticatedCredentialAfterAReset",
+        "aDelayedCsvChooserCannotDiscloseAfterAnAcceptedRemoteDemotionEvenWithAStaleUiBoolean",
+        "aDelayedPdfChooserCannotDiscloseAfterDeviceRevocation",
+        "aRetainedShareActionChecksTheCurrentRoomRoleBeforeStartingAnyActivity",
+        "anAuthorityFromAnotherFarmCannotWriteThisFarmsChosenReport",
+        "cancellationInsideDestinationOpenClosesTheResourceBeforeAWriteOrSuccessCanRun"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.ReportRuntimeNavigationTest",
+      "sha256": "3a8c22f9937a521a9c9c91a239dc519cc2778ec42ae77e98821311cbf0804dab",
+      "methods": [
+        "aRoleWithoutExportPermissionCanReadReportsButCannotOpenExportOrShare",
+        "animalSearchSelectsOnlyThisFarmsRecordAndBackRestoresTheReportHub",
+        "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+        "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
+        "revokingExportPermissionClosesAnAlreadyOpenShareRoute",
+        "revokingExportPermissionClosesTheExportSheetAndDoesNotRestoreItOnRegrant",
+        "sharingUsesThisFarmsActualSummaryAndRetainsMissingDataDisclosure",
+        "switchingFarmsDiscardsThePreviousAnimalsReportAndSearchSelection"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/ReportsScreensTest.kt",
+      "class": "com.farmos.app.ReportsScreensTest",
+      "sha256": "a0eb2c97cad8442ed944571ab47d50be5002ecdad279364e67aa527db164164c",
+      "methods": [
+        "anEmptyFarmIsShownTruthfully",
+        "eachMetricShowsHowItIsWorkedOutAndAPartialFigureSaysSo",
+        "managementOpensTheExportSheetAndExportsTheHerdRegister"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/ResourceVisualOwnerCertificationTest.kt",
+      "class": "com.farmos.app.ResourceVisualOwnerCertificationTest",
+      "sha256": "aa28292d8616cd4976a91ec68ff63cd27f967d67018ec7f58b9f4f9f5d61e022",
+      "methods": [
+        "feedInventorySearchOpensTheExactItemAndReturnsToTheSameQuery",
+        "syncReceiptDoesNotPromiseBackupOrAnApplicationServer",
+        "waterCaptureCommitsExactLocalQuantityBeforeShowingItsReceipt",
+        "workerSearchReachesBeyondTheInitialWindowAndKeepsIdentity"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/SalesRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.SalesRecordRuntimeNavigationTest",
+      "sha256": "4fa4ad4ecca71925bd99aac6818e0d4514553c2aaf3355d4d1d3f9b07e39ca97",
+      "methods": [
+        "emptyRecordsSayNothingIsRecorded",
+        "salesRecordPagesTraverseFromHomeAndRestoreIt"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/SettingsHostTest.kt",
+      "class": "com.farmos.app.SettingsHostTest",
+      "sha256": "7659d8368823b5bd6975a8c3020048fbf3d537fc21390b262e9440a337e642e0",
+      "methods": [
+        "aDuplicateUsernameIsRefusedOnTheFormWithoutCreatingAnAccount",
+        "aWorkerCannotChangeTheFarmCurrency",
+        "aWorkerIsShownWhyAccountsStorageAndDevicesAreManagementOnly",
+        "aWorkerSeesGestationPeriodsButCannotChangeThem",
+        "accessHistoryCountsEveryEntry",
+        "devicesShowsThisDeviceIdentity",
+        "ownerAddsAWorkerAccountThatIsHashedAuditedAndCanSignIn",
+        "ownerChangesTheFarmCurrencyThroughSearchAndTheChangeIsJournalled",
+        "ownerDisablesAnAccountAndItCanNoLongerSignIn",
+        "ownerPromotesAWorkerToSupervisorThroughTheRoleSelector",
+        "retiringADeviceWarnsAboutWorkThisDeviceHasNotReceivedAndIsJournalled",
+        "rolesAndPermissionsListsWhatEachRoleMayDo",
+        "storageAndDevicesReportOnlyWhatThisDeviceActuallyHas",
+        "storageListsReceivedChangesThatHaveNotTakenEffectWithTheReason",
+        "theOwnerSetsTheFarmsGoatGestationWhichIsJournalledAndOthersKeepTheirDefaults",
+        "withoutALocalAccountSettingsExplainsHowToSignIn"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/SheepRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.SheepRecordRuntimeNavigationTest",
+      "sha256": "d46854bd5a91b7c89876a8eb43bc14303e7e21f335758e7109071bea6fd3b2ff",
+      "methods": [
+        "animalPagesNeedASelectionButWoolDashboardDoesNot",
+        "lambingDueFailureIsShown",
+        "lambingDueShowsEachMobsWindowAndTheEwesStillInLamb",
+        "lambingDueWithNothingRecordedSaysSo",
+        "lambingWorkflowUsesTheSelectedMobAndRetainsEveryRecordedScan",
+        "noActiveWithdrawalIsStatedWithoutClaimingClearance",
+        "sheepRecordPagesTraverseFromTheHomeAndRestoreIt"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/SpeciesExitScreensTest.kt",
+      "class": "com.farmos.app.SpeciesExitScreensTest",
+      "sha256": "0d16728490cbac0578d39890b2e067e9a7eb5de528543fcf4c609225a48b7386",
+      "methods": [
+        "aCattleDeathNeedsACause",
+        "aSheepSaleNamesTheBuyerAndIsRecordedAfterConfirmationWithoutPostingMoney",
+        "anAnimalThatHasLeftShowsItsExitAndReversesOnlyWithAReason"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/SpeciesHerdRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.SpeciesHerdRuntimeNavigationTest",
+      "sha256": "be9adf239bbb08f583ad890525b9aa280032076f93db578939370a0403f09129",
+      "methods": [
+        "cattleIndividualAnimalSurfacesTraverseAndReturn",
+        "herdMetricsUseExhaustiveCountsAndTheListSaysWhenBounded",
+        "sheepIndividualAnimalSurfacesTraverseAndReturn"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/StockCountScreensTest.kt",
+      "class": "com.farmos.app.StockCountScreensTest",
+      "sha256": "cc68df2ece92bd2fbbde860ee4663e7b149165885891118e81ab7ad7790f7cd3",
+      "methods": [
+        "aViewerCanNeitherStartNorRecordACount",
+        "aWorkerCountsBlindAndSubmitsForReview",
+        "aWorkerSeesTheReviewButCannotPost",
+        "managementReviewsDifferencesAndPostsOrRejects",
+        "theInventoryDashboardOpensStockCount"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/SyncMutationTraceRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.SyncMutationTraceRuntimeNavigationTest",
+      "sha256": "96a998aef4eb67a002c3ca4eacf05a818cfaf2dfc21b8aaf21fbc9a4cb66fdfc",
+      "methods": [
+        "appliedServerTraceShowsTheEventAndSearchJobs",
+        "refusedAndFailedServerChecksAreShownNotHidden",
+        "traceOpensFromTheDeadLetterQueueAndBackRestoresIt",
+        "withoutAFarmServerOnlyTheDeviceRecordIsShown"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/SyncQueueOwnerContractTest.kt",
+      "class": "com.farmos.app.SyncQueueOwnerContractTest",
+      "sha256": "f75255c495a3455aa01f10ebf38ab6225db289135c743eff8f13fc1a4b28d42c",
+      "methods": [
+        "boundedQueueStatesTheExhaustiveTotal",
+        "conflictCentreStatesChangesWereNotApplied",
+        "deadLetterQueueRendersStoppedChanges",
+        "deniedRoleNeverLoadsRows",
+        "emptyDeadLetterQueueSaysSo",
+        "emptyQueueSaysSoAndSwitcherSelectsAnotherView",
+        "failedLoadIsShownInsteadOfAnEmptyQueue",
+        "failedQueueLoadRecoversOnRetry",
+        "inFlightQueueRendersClaimedRows",
+        "queueCountsDefaultMissingStatesToZeroAndIgnoreOtherStates",
+        "rejectedQueueShowsTheRejectionClass",
+        "retryQueueRendersNextAttemptAndReason",
+        "rowsFromAnotherStateAreRefused",
+        "serverQueuesAreShownOnlyWithAServer"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/TaskViewRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.TaskViewRuntimeNavigationTest",
+      "sha256": "802a73c21222e5b1602bf23ddfa011085155ebd57978038aaa5d88aae18e126a",
+      "methods": [
+        "allTasksViewListsOpenAndCompletedWorkWithTheExactCompletedTotal",
+        "assignedToMeAndRepeatingViewsShowOnlyTheirOwnWork",
+        "calendarGroupsOpenTasksUnderTheirDueDates",
+        "editingAOneOffTaskOffersNoScopeAndSavesOnlyWhatChanged",
+        "editingARepeatingTaskOffersEachScopeAndMovesOnlyThisOccurrence",
+        "emptyAllTasksViewSaysNothingIsRecorded",
+        "onlyPlannersSeeRepeatAndAssignmentWhenCreatingATask",
+        "scheduledOverdueAndCompletedViewsAreDistinctAndRestoreToday"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/WaterRecordRuntimeNavigationTest.kt",
+      "class": "com.farmos.app.WaterRecordRuntimeNavigationTest",
+      "sha256": "49d801ae161546473fc839aab6a2049a337a552e6d2d333403f965b1b5573f01",
+      "methods": [
+        "emptyRecordsSayNothingIsRecorded",
+        "savedCaptureShowsTheOfflineSaveReceiptOnlyAfterALocalSave",
+        "waterHistoryTraversesFromHomeAndRestoresIt"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/WorkerRegisterScreensTest.kt",
+      "class": "com.farmos.app.WorkerRegisterScreensTest",
+      "sha256": "ca19104b176b820cc684cf95b340cd8fd552bf547b9a2c0efc82e1e52cda6ae1",
+      "methods": [
+        "labourCaptureChoosesARegisteredWorker",
+        "managersAddRenameAndDeactivateWorkers",
+        "othersSeeTheRegisterWithoutChangingIt",
+        "theLabourHomeOpensTheRegisterAndReturns"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":feature:goat:testDebugUnitTest",
+      "source": "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHealthRuntimeNavigationTest.kt",
+      "class": "com.farmos.feature.goat.GoatHealthRuntimeNavigationTest",
+      "sha256": "bb4782dc84bf0834a331dab1b619ed3c4163b9ed1d3e743d6c34f7c27d63db15",
+      "methods": [
+        "healthRecordsTraverseFromTheProfileAndRestoreIt",
+        "noActiveWithdrawalIsStatedWithoutClaimingClearance",
+        "summaryLinksOpenTheOwningRecordPages",
+        "withdrawalWindowIsActiveThroughItsEndDay"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":feature:goat:testDebugUnitTest",
+      "source": "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHerdCountTruthTest.kt",
+      "class": "com.farmos.feature.goat.GoatHerdCountTruthTest",
+      "sha256": "115bf1e1bc27427361c627b4165c5b5eab93f3a90697d130a17736967ac35c92",
+      "methods": [
+        "completeHerdListHasNoBoundNotice",
+        "dashboardMetricsUseExhaustiveCounts",
+        "herdListSaysWhenItShowsOnlyPartOfTheHerd"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":feature:goat:testDebugUnitTest",
+      "source": "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatHistoryRuntimeNavigationTest.kt",
+      "class": "com.farmos.feature.goat.GoatHistoryRuntimeNavigationTest",
+      "sha256": "6f769bc1ca1c2f4ee046bd4debdb149a172dd13aaafd35ae0796b044b1d64e75",
+      "methods": [
+        "bucksDoNotOfferDoeOnlyRecordsAndEmptyHistoriesStayEmpty",
+        "profileRecordLinksTraverseToEachHistoryAndRestoreTheProfile",
+        "recordsRemainReadableAfterALifecycleExit",
+        "timelineFilterNarrowsToOneRecordKind"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":feature:goat:testDebugUnitTest",
+      "source": "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKidRuntimeNavigationTest.kt",
+      "class": "com.farmos.feature.goat.GoatKidRuntimeNavigationTest",
+      "sha256": "7566a7ccd5a7a4893f396c11194dfe41299a351156013c94b7c9c7777e878feb",
+      "methods": [
+        "goatsWithoutABirthRecordOfferNoBirthRecordLink",
+        "kidCohortGroupsKidsByKiddingAndOpensTheKid",
+        "kidProfileShowsTheBirthRecordAndReturnsToTheProfile",
+        "kiddingDetailOpensFromTheDoeRecordAndReturnsToIt"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":feature:goat:testDebugUnitTest",
+      "source": "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatKiddingDueTest.kt",
+      "class": "com.farmos.feature.goat.GoatKiddingDueTest",
+      "sha256": "0bd35a8f224d89c75757e425c48365b5b9ba007d289a18a65c215b3aeede4d64",
+      "methods": [
+        "anEmptyFarmSaysNoDoesAreExpected",
+        "doesAreGroupedByWindowAndOpenTheirReproductionRecord"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":feature:goat:testDebugUnitTest",
+      "source": "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatLactationRuntimeNavigationTest.kt",
+      "class": "com.farmos.feature.goat.GoatLactationRuntimeNavigationTest",
+      "sha256": "984c8d26ec8610ec12e926801bd4745d01d6b829b6c451a3647c33ae18d49520",
+      "methods": [
+        "emptyLactationSaysNothingIsRecorded",
+        "herdDerivedPagesSayWhenTheHerdListIsBounded",
+        "lactationDashboardListsEveryGoatWithMilkAndOpensTheDoe",
+        "loadingFailedAndEmptyStatesAreDistinct",
+        "unboundedHerdShowsNoNotice"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":feature:goat:testDebugUnitTest",
+      "source": "feature/goat/src/test/kotlin/com/farmos/feature/goat/GoatReproductionRuntimeNavigationTest.kt",
+      "class": "com.farmos.feature.goat.GoatReproductionRuntimeNavigationTest",
+      "sha256": "095c9ef4d117467e735d7bf2229d1c2a7dfbbac00d2b431a24260d211bd36e1b",
+      "methods": [
+        "aChosenSireShowsTheKidsInbreedingAndBucksCompareWithoutARanking",
+        "breedingRecordsAndPedigreeTraverseFromTheProfile",
+        "breedingStatusFollowsTheNewestRecordWithStableSameDayOrder",
+        "matingDateIsChosenThroughTheDatePickerAtomWithoutSubmitting",
+        "matingSireIsSearchedAcrossTheWholeFarmNotTheCappedHerdList",
+        "pregnancyDashboardGroupsDoesAndOpensTheSelectedDoe"
+      ],
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    }
+  ]
+}

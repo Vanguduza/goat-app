@@ -45,8 +45,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class HealthCaptureOwnerTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val farm = "11111111-1111-4111-8111-111111111111"
     private val otherFarm = "22222222-2222-4222-8222-222222222222"
@@ -74,7 +74,7 @@ class HealthCaptureOwnerTest {
     fun ownerFormularyEntrySavesAnExplicitUnapprovedDraft() {
         var syncRequests = 0
         render(HealthEntryPage.FORMULARY) { syncRequests++ }
-        compose.onNodeWithTag("farm-screen:FOS-HEALTH-013").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-013").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNode(hasSetTextAction() and hasText("Product")).performScrollTo().performTextInput("Draft vaccine")
         compose.onNode(hasClickAction() and hasText("Save draft item")).performScrollTo().performClick()
         compose.waitUntil(10_000) {
@@ -94,7 +94,7 @@ class HealthCaptureOwnerTest {
     fun treatmentReferencesAnApprovedFormularyItemFromTheSelector() {
         var syncRequests = 0
         render(HealthEntryPage.TREATMENT) { syncRequests++ }
-        compose.onNodeWithTag("farm-screen:FOS-HEALTH-007").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-007").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("health-formulary-selector:option:form-ivo").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("health-formulary-selector:option:form-draft").assertDoesNotExist()
         compose.onNodeWithTag("health-formulary-selector:option:form-other").assertDoesNotExist()
@@ -114,7 +114,7 @@ class HealthCaptureOwnerTest {
     fun observationTakesItsSpeciesFromTheSpeciesSelector() {
         var syncRequests = 0
         render(HealthEntryPage.RECORD_OBSERVATION) { syncRequests++ }
-        compose.onNodeWithTag("farm-screen:FOS-HEALTH-004").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-004").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-003:option:goat").assertIsSelected()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-003:option:cattle").performScrollTo().performClick()
         compose.onNode(hasSetTextAction() and hasText("Signs observed")).performScrollTo().performTextInput("Lame on left hind")
@@ -130,7 +130,7 @@ class HealthCaptureOwnerTest {
         var syncRequests = 0
         render(HealthEntryPage.DASHBOARD) { syncRequests++ }
         compose.revealFarmTool("Add protocol slot").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-HEALTH-019").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-019").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("health-pack-selector:option:pack-kid").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("health-pack-selector:option:pack-draft").assertDoesNotExist()
 
@@ -152,8 +152,8 @@ class HealthCaptureOwnerTest {
         seedAnimals()
         var syncRequests = 0
         render(HealthEntryPage.LAB_RESULT) { syncRequests++ }
-        compose.onNodeWithTag("farm-screen:FOS-HEALTH-024").assertExists()
-        compose.onNodeWithTag("farm-atom:FOS-ATOM-004").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-HEALTH-024").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-004").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-004:option:cow-1").fetchSemanticsNodes().isNotEmpty() }
         // One page of 25 in tag order: cattle C-0001 then G-0001..G-0024; the rest is one "Show more" away.
         compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:goat-0025").assertDoesNotExist()
@@ -184,7 +184,7 @@ class HealthCaptureOwnerTest {
 
     private fun render(entryPage: HealthEntryPage, onSync: () -> Unit) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 HealthModuleHost(
                     farmId = farm,
                     ops = RoomOpsRepository(database, farm),

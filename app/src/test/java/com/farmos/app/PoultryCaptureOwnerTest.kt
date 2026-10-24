@@ -46,8 +46,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class PoultryCaptureOwnerTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val farm = "11111111-1111-4111-8111-111111111111"
     private val otherFarm = "22222222-2222-4222-8222-222222222222"
@@ -81,7 +81,7 @@ class PoultryCaptureOwnerTest {
         var syncRequests = 0
         render { syncRequests++ }
         compose.onNode(hasClickAction() and hasText("Daily flock record")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-POULTRY-009").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-POULTRY-009").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:grp-ewes").assertDoesNotExist()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:grp-other").assertDoesNotExist()
@@ -105,7 +105,7 @@ class PoultryCaptureOwnerTest {
         var syncRequests = 0
         render { syncRequests++ }
         compose.revealFarmTool("Place flock").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-POULTRY-008").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-POULTRY-008").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-007:option:house-a").fetchSemanticsNodes().isNotEmpty() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-007:option:house-other").assertDoesNotExist()
@@ -129,7 +129,7 @@ class PoultryCaptureOwnerTest {
         var syncRequests = 0
         render { syncRequests++ }
         compose.revealFarmTool("Vaccination").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-POULTRY-014").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-POULTRY-014").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("poultry-formulary-selector:option:form-nd").fetchSemanticsNodes().isNotEmpty() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("poultry-formulary-selector:option:form-goat").assertDoesNotExist()
@@ -152,7 +152,7 @@ class PoultryCaptureOwnerTest {
         var syncRequests = 0
         render { syncRequests++ }
         compose.revealFarmTool("Candling").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-POULTRY-020").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-POULTRY-020").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("poultry-hatch-selector:option:hatch-set").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("poultry-hatch-selector:option:hatch-candled").assertDoesNotExist()
 
@@ -173,7 +173,7 @@ class PoultryCaptureOwnerTest {
         var syncRequests = 0
         render { syncRequests++ }
         compose.revealFarmTool("Biosecurity").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-POULTRY-016").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-POULTRY-016").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-007:option:house-a").fetchSemanticsNodes().isNotEmpty() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-layers").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:none").assertIsSelected()
@@ -193,7 +193,7 @@ class PoultryCaptureOwnerTest {
 
     private fun render(onSync: () -> Unit) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 PoultryModuleHost(
                     farmId = farm,
                     ops = RoomOpsRepository(database, farm),
