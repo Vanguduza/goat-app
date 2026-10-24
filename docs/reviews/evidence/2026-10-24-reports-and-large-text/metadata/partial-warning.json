@@ -1,0 +1,191 @@
+{
+  "schema_version": 2,
+  "screen_id": "FOS-REPORT-001",
+  "visit": 1,
+  "test": "ReportsFocusedWorkspaceTest.incompleteMetricKeepsItsWarningVisibleBeforeCalculationExpansion",
+  "test_class": "com.farmos.app.ReportsFocusedWorkspaceTest",
+  "owner_node_id": 5430,
+  "owner_instance_tag": "farm-screen:FOS-REPORT-001",
+  "evidence_class": "OBSERVED_NATIVE_PRODUCT_OWNER",
+  "source": "actual Compose tree",
+  "variant": "asserted destination",
+  "owner_observed_before_capture": true,
+  "mode": "LIGHT",
+  "width_dp": 411,
+  "actual_device_width_dp": 411,
+  "actual_device_height_dp": 900,
+  "font_scale": 1,
+  "vertical_scroll_containers": 1,
+  "vertical_sweep_complete": true,
+  "scroll_restored": true,
+  "incomplete_reasons": [],
+  "viewports": [
+    {
+      "image": "FOS-REPORT-001.png",
+      "image_sha256": "2504621c07ef2adfc9d6328486f5419f76b36e20812fbf01363107e34660fb50",
+      "width_px": 411,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 1,
+      "visible_tags": [
+        "farm-screen:FOS-REPORT-001",
+        "farm-section:Farm figures",
+        "farm-section:Reports",
+        "report-calculation:weight-goat",
+        "report-data-ready",
+        "report-figures-query",
+        "report-metric:weight-goat",
+        "report-open-export"
+      ],
+      "observed_owner_ids": [
+        "FOS-REPORT-001"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-REPORT-001",
+          "tag": "farm-screen:FOS-REPORT-001",
+          "node_id": 5430,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [
+        {
+          "tag": null,
+          "name": "Farm home",
+          "width_dp": 126,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            16,
+            142,
+            64
+          ],
+          "touch_bounds_px": [
+            16,
+            16,
+            142,
+            64
+          ],
+          "touch_width_dp": 126,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        },
+        {
+          "tag": "farm-section:Reports",
+          "name": "Reports",
+          "width_dp": 80,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            161,
+            96,
+            209
+          ],
+          "touch_bounds_px": [
+            16,
+            161,
+            96,
+            209
+          ],
+          "touch_width_dp": 80,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        },
+        {
+          "tag": "farm-section:Farm figures",
+          "name": "Farm figures",
+          "width_dp": 129,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            104,
+            161,
+            233,
+            209
+          ],
+          "touch_bounds_px": [
+            104,
+            161,
+            233,
+            209
+          ],
+          "touch_width_dp": 129,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-figures-query",
+          "name": "Find a figure",
+          "width_dp": 379,
+          "height_dp": 65,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            233,
+            395,
+            298
+          ],
+          "touch_bounds_px": [
+            16,
+            233,
+            395,
+            298
+          ],
+          "touch_width_dp": 379,
+          "touch_height_dp": 65,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-calculation:weight-goat",
+          "name": "Hide calculation and scope",
+          "width_dp": 347,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            509,
+            379,
+            557
+          ],
+          "touch_bounds_px": [
+            32,
+            509,
+            379,
+            557
+          ],
+          "touch_width_dp": 347,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open-export",
+          "name": "Export records",
+          "width_dp": 379,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            693,
+            395,
+            741
+          ],
+          "touch_bounds_px": [
+            16,
+            693,
+            395,
+            741
+          ],
+          "touch_width_dp": 379,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        }
+      ],
+      "layout_findings": [],
+      "scroll_position": 0
+    }
+  ],
+  "accessibility_manual_review": "TALKBACK_FOCUS_AND_HUMAN_PIXEL_REVIEW_REMAIN_REQUIRED",
+  "approval": "UNAPPROVED_REVIEW_CANDIDATE"
+}

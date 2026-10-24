@@ -1,0 +1,618 @@
+{
+  "schema_version": 1,
+  "purpose": "UNAPPROVED_NATIVE_PIXEL_REVIEW_CANDIDATES_NOT_GOLDENS",
+  "created_at": "2026-10-24T19:36:09.374410+00:00",
+  "before_source": "e085e95270d3b0779cae015f204d3a3494136783",
+  "after_exact_code_source": "38f975630a576eec0093dde83cde630382472fbb",
+  "baseline_matrix": {
+    "run": 40112946240,
+    "jobs": 27,
+    "tests_per_cell": 265,
+    "test_executions": 7155,
+    "actual_pngs": 19529,
+    "observed_screen_ids_all27": 298,
+    "canonical_scope": 545,
+    "coverage_gaps": 247,
+    "source": "e085e95270d3b0779cae015f204d3a3494136783"
+  },
+  "local_run_receipts": [
+    {
+      "run": "reports-and-rows-light-green-r1",
+      "tested_worktree_head": "e085e95270d3b0779cae015f204d3a3494136783",
+      "exact_kotlin_gradle_source_matches_commit": "38f975630a576eec0093dde83cde630382472fbb",
+      "source_fingerprint_sha256": "1bd09c17258567a067b398a9b907ef8e8c5d688fef48aa7794fd84981de1c4db",
+      "started_at": "2026-10-24T19:14:39.652317+00:00",
+      "finished_at": "2026-10-24T19:17:38.923686+00:00",
+      "tests_passed": 45,
+      "failures": 0,
+      "skipped": 0,
+      "source_changed_during_run": false,
+      "suites": [
+        {
+          "name": "com.farmos.feature.goat.GoatHistoryRuntimeNavigationTest",
+          "tests": "4",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.feature.goat.GoatHealthRuntimeNavigationTest",
+          "tests": "4",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.SpeciesHerdRuntimeNavigationTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.SpeciesExitScreensTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.ReportsFocusedWorkspaceTest",
+          "tests": "6",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.ReportRuntimeNavigationTest",
+          "tests": "8",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.ReportDisclosureAuthorityTest",
+          "tests": "8",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.ReportsScreensTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+          "tests": "6",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        }
+      ]
+    },
+    {
+      "run": "large-text-and-reports-green-r1",
+      "tested_worktree_head": "e085e95270d3b0779cae015f204d3a3494136783",
+      "exact_kotlin_gradle_source_matches_commit": "38f975630a576eec0093dde83cde630382472fbb",
+      "source_fingerprint_sha256": "1bd09c17258567a067b398a9b907ef8e8c5d688fef48aa7794fd84981de1c4db",
+      "started_at": "2026-10-24T19:01:55.214393+00:00",
+      "finished_at": "2026-10-24T19:07:26.857082+00:00",
+      "tests_passed": 45,
+      "failures": 0,
+      "skipped": 0,
+      "source_changed_during_run": false,
+      "suites": [
+        {
+          "name": "com.farmos.feature.goat.GoatHistoryRuntimeNavigationTest",
+          "tests": "4",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.feature.goat.GoatHealthRuntimeNavigationTest",
+          "tests": "4",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.SpeciesHerdRuntimeNavigationTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.SpeciesExitScreensTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.ReportsFocusedWorkspaceTest",
+          "tests": "6",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.ReportRuntimeNavigationTest",
+          "tests": "8",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.ReportDisclosureAuthorityTest",
+          "tests": "8",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.ReportsScreensTest",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        },
+        {
+          "name": "com.farmos.app.LocalFarmSessionAuthorityTest",
+          "tests": "6",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0"
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "id": "reports-light",
+      "title": "Reports · navigation before calculations",
+      "note": "The same farm fixture now starts with grouped report choices. Figures and complete calculation disclosure remain in the focused figures view.",
+      "same_behavioural_fixture": true,
+      "before": {
+        "label": "reports-light-before",
+        "screen_id": "FOS-REPORT-001",
+        "test": "ReportDisclosureAuthorityTest.aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
+        "kind": "before-light",
+        "source_commit": "e085e95270d3b0779cae015f204d3a3494136783",
+        "source_evidence": "GitHub Actions run40112946240 immutable artifact",
+        "mode": "LIGHT",
+        "width_dp": 411,
+        "font_scale": 1,
+        "native_manifest": "metadata/reports-light-before.json",
+        "native_manifest_sha256": "f8a3bd5cde318ed68b9b5d91b965c252d1f6c7fac98a64e1f862f1021861d5c5",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/reports-light-before.png",
+            "sha256": "665847b71a8bf57e6eea5b236254c9fe0a91d2f43a9a5ea4c85210d06e87402a",
+            "source_image_name": "FOS-REPORT-001.png",
+            "viewport": 1,
+            "width_px": 411,
+            "height_px": 900
+          },
+          {
+            "path": "images/reports-light-before-2.png",
+            "sha256": "35716181a32a3885ff1861c8c4a8f82ae43d99b1854ff055c3d9f33a08d6529e",
+            "source_image_name": "FOS-REPORT-001-viewport002.png",
+            "viewport": 2,
+            "width_px": 411,
+            "height_px": 900
+          },
+          {
+            "path": "images/reports-light-before-3.png",
+            "sha256": "5ba9291e977944c439510bcf30a7554d9b4b0d567f8854625f9b0a9882a5ceda",
+            "source_image_name": "FOS-REPORT-001-viewport003.png",
+            "viewport": 3,
+            "width_px": 411,
+            "height_px": 900
+          },
+          {
+            "path": "images/reports-light-before-4.png",
+            "sha256": "f3e8e79fb912d3fd89b821df982aff655ec680c5b6468752172034602c7c5be5",
+            "source_image_name": "FOS-REPORT-001-viewport004.png",
+            "viewport": 4,
+            "width_px": 411,
+            "height_px": 900
+          }
+        ]
+      },
+      "after": {
+        "label": "reports-light-after",
+        "screen_id": "FOS-REPORT-001",
+        "test": "ReportDisclosureAuthorityTest.aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
+        "kind": "after-light",
+        "source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+        "source_evidence": "Local unchanged Kotlin/Gradle source fingerprints exactly match code commit; original worktree HEAD retained in local_run_receipts",
+        "mode": "LIGHT",
+        "width_dp": 411,
+        "font_scale": 1,
+        "native_manifest": "metadata/reports-light-after.json",
+        "native_manifest_sha256": "0db13a5853b4afc48aa9b77d8be8d47906f493f2700368c4dc93cfb735557ddb",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/reports-light-after.png",
+            "sha256": "8957030bbccca9b7f59be0a679c69d1b770e7f8b3c1817904b5adc898b1a6d18",
+            "source_image_name": "FOS-REPORT-001.png",
+            "viewport": 1,
+            "width_px": 411,
+            "height_px": 900
+          }
+        ]
+      }
+    },
+    {
+      "id": "reports-outdoor",
+      "title": "Reports · 200% text",
+      "note": "Navigation is no longer below a vertical wall of metrics. The large-text layout retains its real font size.",
+      "same_behavioural_fixture": true,
+      "before": {
+        "label": "reports-outdoor-before",
+        "screen_id": "FOS-REPORT-001",
+        "test": "ReportDisclosureAuthorityTest.aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
+        "kind": "before-outdoor",
+        "source_commit": "e085e95270d3b0779cae015f204d3a3494136783",
+        "source_evidence": "GitHub Actions run40112946240 immutable artifact",
+        "mode": "OUTDOOR",
+        "width_dp": 360,
+        "font_scale": 2,
+        "native_manifest": "metadata/reports-outdoor-before.json",
+        "native_manifest_sha256": "8e2101e8d202e86c934e6be3df157ed50a673281744350756005f8ec676d67aa",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/reports-outdoor-before.png",
+            "sha256": "5c95ca721047f957b89744c717f3c6465940c43c2d6bcc2697c22acc4a69b27d",
+            "source_image_name": "FOS-REPORT-001.png",
+            "viewport": 1,
+            "width_px": 360,
+            "height_px": 900
+          },
+          {
+            "path": "images/reports-outdoor-before-2.png",
+            "sha256": "e62d4f3b3b79ef4032ff9e4344153d7836f0baad430ffc37132c7d85a08145f7",
+            "source_image_name": "FOS-REPORT-001-viewport002.png",
+            "viewport": 2,
+            "width_px": 360,
+            "height_px": 900
+          },
+          {
+            "path": "images/reports-outdoor-before-3.png",
+            "sha256": "9ad59b2f14ee9a89685e51970ffdc5009ca9136eec582503bb2664f4076d6600",
+            "source_image_name": "FOS-REPORT-001-viewport003.png",
+            "viewport": 3,
+            "width_px": 360,
+            "height_px": 900
+          },
+          {
+            "path": "images/reports-outdoor-before-4.png",
+            "sha256": "deaf7ad80f8a00780326d65fd7618701ea793043ff3ee6a5d77f93b2d99db39c",
+            "source_image_name": "FOS-REPORT-001-viewport004.png",
+            "viewport": 4,
+            "width_px": 360,
+            "height_px": 900
+          },
+          {
+            "path": "images/reports-outdoor-before-5.png",
+            "sha256": "b8cb843a531a8161dc4c6c6d4a8c65b81d5ab518948ae5247a97ed7121cde79f",
+            "source_image_name": "FOS-REPORT-001-viewport005.png",
+            "viewport": 5,
+            "width_px": 360,
+            "height_px": 900
+          },
+          {
+            "path": "images/reports-outdoor-before-6.png",
+            "sha256": "bdd9b722731130faa40cf11e54010fb8f3bec0033ba482e1ee950edae74563fd",
+            "source_image_name": "FOS-REPORT-001-viewport006.png",
+            "viewport": 6,
+            "width_px": 360,
+            "height_px": 900
+          }
+        ]
+      },
+      "after": {
+        "label": "reports-outdoor-after",
+        "screen_id": "FOS-REPORT-001",
+        "test": "ReportDisclosureAuthorityTest.aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
+        "kind": "after-outdoor",
+        "source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+        "source_evidence": "Local unchanged Kotlin/Gradle source fingerprints exactly match code commit; original worktree HEAD retained in local_run_receipts",
+        "mode": "OUTDOOR",
+        "width_dp": 360,
+        "font_scale": 2,
+        "native_manifest": "metadata/reports-outdoor-after.json",
+        "native_manifest_sha256": "f5e602369fdcdaa7a7ef058a403eab83c196356fa26f8894728907e319935dc4",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/reports-outdoor-after.png",
+            "sha256": "2c219d2e6cca27b525ffcc4839398194d9f4e7ec4200e65525b89fdc03b9e77c",
+            "source_image_name": "FOS-REPORT-001.png",
+            "viewport": 1,
+            "width_px": 360,
+            "height_px": 900
+          },
+          {
+            "path": "images/reports-outdoor-after-2.png",
+            "sha256": "5a77192832ac8012bf8c1a4ed4718b8ca1e88ccfc74b3a9334306caca047ecde",
+            "source_image_name": "FOS-REPORT-001-viewport002.png",
+            "viewport": 2,
+            "width_px": 360,
+            "height_px": 900
+          }
+        ]
+      }
+    },
+    {
+      "id": "growth-outdoor",
+      "title": "Goat growth history · readable recorded values",
+      "note": "The original 54.25 kg value collapsed into eight lines. Date/change and value now stack at narrow or enlarged text sizes; the recorded value and selected animal are unchanged.",
+      "same_behavioural_fixture": true,
+      "before": {
+        "label": "growth-outdoor-before",
+        "screen_id": "FOS-GOAT-013",
+        "test": "GoatHistoryRuntimeNavigationTest.recordsRemainReadableAfterALifecycleExit",
+        "kind": "before-outdoor",
+        "source_commit": "e085e95270d3b0779cae015f204d3a3494136783",
+        "source_evidence": "GitHub Actions run40112946240 immutable artifact",
+        "mode": "OUTDOOR",
+        "width_dp": 360,
+        "font_scale": 2,
+        "native_manifest": "metadata/growth-outdoor-before.json",
+        "native_manifest_sha256": "e5a98aac674e0c89208fc1e536739fa8597727bf9a9d475d1160aae740d56b41",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/growth-outdoor-before.png",
+            "sha256": "fecddd0a609646370a5c342be025b5b92a2d84f2abbc61beb391e7422bdeda54",
+            "source_image_name": "FOS-GOAT-013.png",
+            "viewport": 1,
+            "width_px": 360,
+            "height_px": 900
+          },
+          {
+            "path": "images/growth-outdoor-before-2.png",
+            "sha256": "2fcece290e5912673d426f70c0129c1f69656cec3cc30db0cc9262b5b80cbbbe",
+            "source_image_name": "FOS-GOAT-013-viewport002.png",
+            "viewport": 2,
+            "width_px": 360,
+            "height_px": 900
+          }
+        ]
+      },
+      "after": {
+        "label": "growth-outdoor-after",
+        "screen_id": "FOS-GOAT-013",
+        "test": "GoatHistoryRuntimeNavigationTest.recordsRemainReadableAfterALifecycleExit",
+        "kind": "after-outdoor",
+        "source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+        "source_evidence": "Local unchanged Kotlin/Gradle source fingerprints exactly match code commit; original worktree HEAD retained in local_run_receipts",
+        "mode": "OUTDOOR",
+        "width_dp": 360,
+        "font_scale": 2,
+        "native_manifest": "metadata/growth-outdoor-after.json",
+        "native_manifest_sha256": "8858abaa259db1b0675b938ee8a81c2ce5ae3d89005092bd7c2ffac83fc547b6",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/growth-outdoor-after.png",
+            "sha256": "977b66813d4b3fb8dd836b0f41f8464c61d2ac76d5f31cff7d04b3d967988fa7",
+            "source_image_name": "FOS-GOAT-013.png",
+            "viewport": 1,
+            "width_px": 360,
+            "height_px": 900
+          }
+        ]
+      }
+    },
+    {
+      "id": "sheep-outdoor",
+      "title": "Sheep lifecycle · wrapping controls",
+      "note": "The short Culled action was squeezed below the outdoor touch minimum. Controls now wrap without shrinking text; the confirmation step remains mandatory.",
+      "same_behavioural_fixture": true,
+      "before": {
+        "label": "sheep-outdoor-before",
+        "screen_id": "FOS-SHEEP-030",
+        "test": "SpeciesHerdRuntimeNavigationTest.sheepIndividualAnimalSurfacesTraverseAndReturn",
+        "kind": "before-outdoor",
+        "source_commit": "e085e95270d3b0779cae015f204d3a3494136783",
+        "source_evidence": "GitHub Actions run40112946240 immutable artifact",
+        "mode": "OUTDOOR",
+        "width_dp": 360,
+        "font_scale": 2,
+        "native_manifest": "metadata/sheep-outdoor-before.json",
+        "native_manifest_sha256": "498feb12e180c252ae0239abe08b0cfa21b63be8d35a0fea6ab40c470e075ca7",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/sheep-outdoor-before.png",
+            "sha256": "05211b6284fdb1f078740fafe3e89951372b7f3b8dca5e5e9a259df535bc1757",
+            "source_image_name": "FOS-SHEEP-030.png",
+            "viewport": 1,
+            "width_px": 360,
+            "height_px": 900
+          }
+        ]
+      },
+      "after": {
+        "label": "sheep-outdoor-after",
+        "screen_id": "FOS-SHEEP-030",
+        "test": "SpeciesHerdRuntimeNavigationTest.sheepIndividualAnimalSurfacesTraverseAndReturn",
+        "kind": "after-outdoor",
+        "source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+        "source_evidence": "Local unchanged Kotlin/Gradle source fingerprints exactly match code commit; original worktree HEAD retained in local_run_receipts",
+        "mode": "OUTDOOR",
+        "width_dp": 360,
+        "font_scale": 2,
+        "native_manifest": "metadata/sheep-outdoor-after.json",
+        "native_manifest_sha256": "d3a2057063b08619d377bbe6433ddd81a28d1fe24df0b34298c4d74666dc0923",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/sheep-outdoor-after.png",
+            "sha256": "8d21807570e81db139dc9826cc7096b8a5fcced24870f407a6efa986acc8c8c8",
+            "source_image_name": "FOS-SHEEP-030.png",
+            "viewport": 1,
+            "width_px": 360,
+            "height_px": 900
+          }
+        ]
+      }
+    },
+    {
+      "id": "cattle-outdoor",
+      "title": "Cattle lifecycle · wrapping controls",
+      "note": "The same adaptive lifecycle control correction applies to the cattle owner; no status mutation or confirmation semantics changed.",
+      "same_behavioural_fixture": true,
+      "before": {
+        "label": "cattle-outdoor-before",
+        "screen_id": "FOS-CATTLE-034",
+        "test": "SpeciesHerdRuntimeNavigationTest.cattleIndividualAnimalSurfacesTraverseAndReturn",
+        "kind": "before-outdoor",
+        "source_commit": "e085e95270d3b0779cae015f204d3a3494136783",
+        "source_evidence": "GitHub Actions run40112946240 immutable artifact",
+        "mode": "OUTDOOR",
+        "width_dp": 360,
+        "font_scale": 2,
+        "native_manifest": "metadata/cattle-outdoor-before.json",
+        "native_manifest_sha256": "3ce1a84f0a88b10a337a6c0725d6fc8f588ed19cfe9a94173df78c966770bf6f",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/cattle-outdoor-before.png",
+            "sha256": "5319e3a6cb53a487eeb3ccfc83a09964a45607cd45be61040ef514abc52e0055",
+            "source_image_name": "FOS-CATTLE-034.png",
+            "viewport": 1,
+            "width_px": 360,
+            "height_px": 900
+          }
+        ]
+      },
+      "after": {
+        "label": "cattle-outdoor-after",
+        "screen_id": "FOS-CATTLE-034",
+        "test": "SpeciesHerdRuntimeNavigationTest.cattleIndividualAnimalSurfacesTraverseAndReturn",
+        "kind": "after-outdoor",
+        "source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+        "source_evidence": "Local unchanged Kotlin/Gradle source fingerprints exactly match code commit; original worktree HEAD retained in local_run_receipts",
+        "mode": "OUTDOOR",
+        "width_dp": 360,
+        "font_scale": 2,
+        "native_manifest": "metadata/cattle-outdoor-after.json",
+        "native_manifest_sha256": "07e23bd356e42ed859e6bc3f29a49b5b3915aee5f5f777b74177b316848ef340",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/cattle-outdoor-after.png",
+            "sha256": "f98945139a7393177fd09c9b4467623a386987844854288a497893bd661a64f0",
+            "source_image_name": "FOS-CATTLE-034.png",
+            "viewport": 1,
+            "width_px": 360,
+            "height_px": 900
+          }
+        ]
+      }
+    }
+  ],
+  "additional_views": [
+    {
+      "id": "unknown-not-zero",
+      "title": "Unrecorded measurement is not zero",
+      "after": {
+        "label": "unknown-not-zero",
+        "screen_id": "FOS-REPORT-001",
+        "test": "ReportsFocusedWorkspaceTest.noRecordedValuesAreNotPresentedAsZeroInScreenOrSharedSummary",
+        "kind": "after-light",
+        "source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+        "source_evidence": "Local unchanged Kotlin/Gradle source fingerprints exactly match code commit; original worktree HEAD retained in local_run_receipts",
+        "mode": "LIGHT",
+        "width_dp": 411,
+        "font_scale": 1,
+        "native_manifest": "metadata/unknown-not-zero.json",
+        "native_manifest_sha256": "99c0f9b6edc27a694149dd351f47ab286a4facd87df0901a9d4644a161e76fda",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/unknown-not-zero.png",
+            "sha256": "e2cdea70b2fd94c7b34c258bb5e54f94c079ff0f8678940afb73299c91a446bf",
+            "source_image_name": "FOS-REPORT-001.png",
+            "viewport": 1,
+            "width_px": 411,
+            "height_px": 900
+          }
+        ]
+      }
+    },
+    {
+      "id": "partial-warning",
+      "title": "Partial values keep a visible warning",
+      "after": {
+        "label": "partial-warning",
+        "screen_id": "FOS-REPORT-001",
+        "test": "ReportsFocusedWorkspaceTest.incompleteMetricKeepsItsWarningVisibleBeforeCalculationExpansion",
+        "kind": "after-light",
+        "source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+        "source_evidence": "Local unchanged Kotlin/Gradle source fingerprints exactly match code commit; original worktree HEAD retained in local_run_receipts",
+        "mode": "LIGHT",
+        "width_dp": 411,
+        "font_scale": 1,
+        "native_manifest": "metadata/partial-warning.json",
+        "native_manifest_sha256": "2db85d9d73e40825926560649f551a27744ef9d7bddae1cfe40601687e03eae5",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/partial-warning.png",
+            "sha256": "2504621c07ef2adfc9d6328486f5419f76b36e20812fbf01363107e34660fb50",
+            "source_image_name": "FOS-REPORT-001.png",
+            "viewport": 1,
+            "width_px": 411,
+            "height_px": 900
+          }
+        ]
+      }
+    },
+    {
+      "id": "document-viewer",
+      "title": "Existing generated-document viewer",
+      "after": {
+        "label": "document-viewer",
+        "screen_id": "FOS-REPORT-013",
+        "test": "ReportRuntimeNavigationTest.generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
+        "kind": "after-light",
+        "source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+        "source_evidence": "Local unchanged Kotlin/Gradle source fingerprints exactly match code commit; original worktree HEAD retained in local_run_receipts",
+        "mode": "LIGHT",
+        "width_dp": 411,
+        "font_scale": 1,
+        "native_manifest": "metadata/document-viewer.json",
+        "native_manifest_sha256": "9ba9ef63386e4531cb0f795253a1fbbdaf04d9eb121e73bddf0bc5e5bb121273",
+        "full_vertical_sweep": true,
+        "images": [
+          {
+            "path": "images/document-viewer.png",
+            "sha256": "5e5ecfbc444037b93e2b201800d2be3ed255a74681b194503e7c5a7f42b0c4a2",
+            "source_image_name": "FOS-REPORT-013.png",
+            "viewport": 1,
+            "width_px": 411,
+            "height_px": 900
+          }
+        ]
+      }
+    }
+  ],
+  "limits": [
+    "Fixtures are synthetic farm records rendered by actual native Composables, not live owner farm records.",
+    "Only the retained test states and viewports are represented. This gallery does not certify all 545 registered entries.",
+    "Before/after screenshots are copied byte-for-byte; HTML scaling is presentation only. No approved reference or golden was replaced.",
+    "Independent owner visual approval, physical S24 and live Drive checks remain outstanding."
+  ]
+}

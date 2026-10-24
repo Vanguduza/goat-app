@@ -1,0 +1,668 @@
+{
+  "schema_version": 2,
+  "screen_id": "FOS-REPORT-001",
+  "visit": 1,
+  "test": "ReportDisclosureAuthorityTest.aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
+  "test_class": "com.farmos.app.ReportDisclosureAuthorityTest",
+  "owner_node_id": 4556,
+  "owner_instance_tag": "farm-screen:FOS-REPORT-001",
+  "evidence_class": "OBSERVED_NATIVE_PRODUCT_OWNER",
+  "source": "actual Compose tree",
+  "variant": "observed state after successful assertion",
+  "owner_observed_before_capture": true,
+  "mode": "OUTDOOR",
+  "width_dp": 360,
+  "actual_device_width_dp": 360,
+  "actual_device_height_dp": 900,
+  "font_scale": 2,
+  "vertical_scroll_containers": 1,
+  "vertical_sweep_complete": true,
+  "scroll_restored": true,
+  "incomplete_reasons": [],
+  "viewports": [
+    {
+      "image": "FOS-REPORT-001.png",
+      "image_sha256": "5c95ca721047f957b89744c717f3c6465940c43c2d6bcc2697c22acc4a69b27d",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-REPORT-001",
+        "report-metric:active-goat",
+        "report-metric:live-weight-goat"
+      ],
+      "observed_owner_ids": [
+        "FOS-REPORT-001"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-REPORT-001",
+          "tag": "farm-screen:FOS-REPORT-001",
+          "node_id": 4556,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [
+        {
+          "tag": null,
+          "name": "Farm home",
+          "width_dp": 190,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            16,
+            206,
+            80
+          ],
+          "touch_bounds_px": [
+            16,
+            16,
+            206,
+            80
+          ],
+          "touch_width_dp": 190,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        }
+      ],
+      "layout_findings": [],
+      "scroll_position": 0
+    },
+    {
+      "image": "FOS-REPORT-001-viewport002.png",
+      "image_sha256": "e62d4f3b3b79ef4032ff9e4344153d7836f0baad430ffc37132c7d85a08145f7",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-REPORT-001",
+        "report-metric:exited",
+        "report-metric:live-weight-goat"
+      ],
+      "observed_owner_ids": [
+        "FOS-REPORT-001"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-REPORT-001",
+          "tag": "farm-screen:FOS-REPORT-001",
+          "node_id": 4556,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [],
+      "layout_findings": [],
+      "scroll_position": 765
+    },
+    {
+      "image": "FOS-REPORT-001-viewport003.png",
+      "image_sha256": "9ad59b2f14ee9a89685e51970ffdc5009ca9136eec582503bb2664f4076d6600",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-REPORT-001",
+        "report-metric:health-observations",
+        "report-metric:health-treatments"
+      ],
+      "observed_owner_ids": [
+        "FOS-REPORT-001"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-REPORT-001",
+          "tag": "farm-screen:FOS-REPORT-001",
+          "node_id": 4556,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [],
+      "layout_findings": [],
+      "scroll_position": 1530
+    },
+    {
+      "image": "FOS-REPORT-001-viewport004.png",
+      "image_sha256": "deaf7ad80f8a00780326d65fd7618701ea793043ff3ee6a5d77f93b2d99db39c",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-REPORT-001",
+        "report-metric:health-withdrawals"
+      ],
+      "observed_owner_ids": [
+        "FOS-REPORT-001"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-REPORT-001",
+          "tag": "farm-screen:FOS-REPORT-001",
+          "node_id": 4556,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [],
+      "layout_findings": [],
+      "scroll_position": 2295
+    },
+    {
+      "image": "FOS-REPORT-001-viewport005.png",
+      "image_sha256": "b8cb843a531a8161dc4c6c6d4a8c65b81d5ab518948ae5247a97ed7121cde79f",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-REPORT-001",
+        "report-open:FOS-REPORT-002",
+        "report-open:FOS-REPORT-003",
+        "report-open:FOS-REPORT-004",
+        "report-open:FOS-REPORT-005",
+        "report-open:FOS-REPORT-006",
+        "report-open:FOS-REPORT-007",
+        "report-open:FOS-REPORT-008",
+        "report-open:FOS-REPORT-009",
+        "report-open:FOS-REPORT-010"
+      ],
+      "observed_owner_ids": [
+        "FOS-REPORT-001"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-REPORT-001",
+          "tag": "farm-screen:FOS-REPORT-001",
+          "node_id": 4556,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [
+        {
+          "tag": "report-open:FOS-REPORT-002",
+          "name": "Animal report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            226,
+            328,
+            290
+          ],
+          "touch_bounds_px": [
+            32,
+            226,
+            328,
+            290
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-003",
+          "name": "Herd or flock report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            302,
+            328,
+            366
+          ],
+          "touch_bounds_px": [
+            32,
+            302,
+            328,
+            366
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-004",
+          "name": "Health report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            378,
+            328,
+            442
+          ],
+          "touch_bounds_px": [
+            32,
+            378,
+            328,
+            442
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-005",
+          "name": "Production report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            454,
+            328,
+            518
+          ],
+          "touch_bounds_px": [
+            32,
+            454,
+            328,
+            518
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-006",
+          "name": "Finance report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            530,
+            328,
+            594
+          ],
+          "touch_bounds_px": [
+            32,
+            530,
+            328,
+            594
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-007",
+          "name": "Inventory report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            606,
+            328,
+            670
+          ],
+          "touch_bounds_px": [
+            32,
+            606,
+            328,
+            670
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-008",
+          "name": "Breeding report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            682,
+            328,
+            746
+          ],
+          "touch_bounds_px": [
+            32,
+            682,
+            328,
+            746
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-009",
+          "name": "Genetics report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            758,
+            328,
+            822
+          ],
+          "touch_bounds_px": [
+            32,
+            758,
+            328,
+            822
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-010",
+          "name": "Operations report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            834,
+            328,
+            898
+          ],
+          "touch_bounds_px": [
+            32,
+            834,
+            328,
+            898
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        }
+      ],
+      "layout_findings": [],
+      "scroll_position": 3060
+    },
+    {
+      "image": "FOS-REPORT-001-viewport006.png",
+      "image_sha256": "bdd9b722731130faa40cf11e54010fb8f3bec0033ba482e1ee950edae74563fd",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-REPORT-001",
+        "report-open-export",
+        "report-open:FOS-REPORT-005",
+        "report-open:FOS-REPORT-006",
+        "report-open:FOS-REPORT-007",
+        "report-open:FOS-REPORT-008",
+        "report-open:FOS-REPORT-009",
+        "report-open:FOS-REPORT-010",
+        "report-open:FOS-REPORT-012",
+        "report-open:FOS-REPORT-013",
+        "report-open:FOS-REPORT-014",
+        "report-open:FOS-REPORT-015"
+      ],
+      "observed_owner_ids": [
+        "FOS-REPORT-001"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-REPORT-001",
+          "tag": "farm-screen:FOS-REPORT-001",
+          "node_id": 4556,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [
+        {
+          "tag": "report-open:FOS-REPORT-005",
+          "name": "Production report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            2,
+            328,
+            66
+          ],
+          "touch_bounds_px": [
+            32,
+            2,
+            328,
+            66
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-006",
+          "name": "Finance report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            78,
+            328,
+            142
+          ],
+          "touch_bounds_px": [
+            32,
+            78,
+            328,
+            142
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-007",
+          "name": "Inventory report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            154,
+            328,
+            218
+          ],
+          "touch_bounds_px": [
+            32,
+            154,
+            328,
+            218
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-008",
+          "name": "Breeding report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            230,
+            328,
+            294
+          ],
+          "touch_bounds_px": [
+            32,
+            230,
+            328,
+            294
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-009",
+          "name": "Genetics report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            306,
+            328,
+            370
+          ],
+          "touch_bounds_px": [
+            32,
+            306,
+            328,
+            370
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-010",
+          "name": "Operations report",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            382,
+            328,
+            446
+          ],
+          "touch_bounds_px": [
+            32,
+            382,
+            328,
+            446
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-012",
+          "name": "Generated documents",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            458,
+            328,
+            522
+          ],
+          "touch_bounds_px": [
+            32,
+            458,
+            328,
+            522
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-013",
+          "name": "Document viewer",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            534,
+            328,
+            598
+          ],
+          "touch_bounds_px": [
+            32,
+            534,
+            328,
+            598
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-014",
+          "name": "Share or print",
+          "width_dp": 296,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            610,
+            328,
+            674
+          ],
+          "touch_bounds_px": [
+            32,
+            610,
+            328,
+            674
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open:FOS-REPORT-015",
+          "name": "Movement certificates",
+          "width_dp": 296,
+          "height_dp": 94,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            686,
+            328,
+            780
+          ],
+          "touch_bounds_px": [
+            32,
+            686,
+            328,
+            780
+          ],
+          "touch_width_dp": 296,
+          "touch_height_dp": 94,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open-export",
+          "name": "Export records",
+          "width_dp": 328,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            820,
+            344,
+            884
+          ],
+          "touch_bounds_px": [
+            16,
+            820,
+            344,
+            884
+          ],
+          "touch_width_dp": 328,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        }
+      ],
+      "layout_findings": [],
+      "scroll_position": 3512
+    }
+  ],
+  "accessibility_manual_review": "TALKBACK_FOCUS_AND_HUMAN_PIXEL_REVIEW_REMAIN_REQUIRED",
+  "approval": "UNAPPROVED_REVIEW_CANDIDATE"
+}
