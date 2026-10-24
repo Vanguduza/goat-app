@@ -4,6 +4,18 @@
   "classes": [
     {
       "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/AnalyticsVisualNavigationTest.kt",
+      "class": "com.farmos.app.AnalyticsVisualNavigationTest",
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE",
+      "sha256": "92a628c7a8fe36edd602790022544e2e97efbe689a1c4a92a5f0a4e622a1ee3a",
+      "methods": [
+        "anEmptyFarmIsNotFilledWithAnotherFarmsData",
+        "analyticsMenuOpensEverySummaryOwnerAndReturnsWithoutWrites",
+        "anomalyOpensItsRecordedEvidenceRatherThanMakingAMutation"
+      ]
+    },
+    {
+      "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/AnimalSaleScreensTest.kt",
       "class": "com.farmos.app.AnimalSaleScreensTest",
       "sha256": "1b56e9e280c4692180535fccc7e001013d1942bb903540d0437650381dae0104",
@@ -91,6 +103,17 @@
     },
     {
       "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/DatePickerAdaptiveReviewTest.kt",
+      "class": "com.farmos.app.DatePickerAdaptiveReviewTest",
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE",
+      "sha256": "7bfe5ce9b040607a2ec5a9662ba495341cfbf187c8dfaa7d80a46b29715197c8",
+      "methods": [
+        "dialogRetainsTheUsersFontScaleAndAllFullyVisibleTouchTargets",
+        "explicitDateConfirmationPreservesTheEnteredDayAndDoesNotSubmitFarmWork"
+      ]
+    },
+    {
+      "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt",
       "class": "com.farmos.app.FarmRuntimeNavigationTest",
       "sha256": "c25067ad78c0f682a77d9b6b8271dd4e7c81ef8298f3fc56980d0c3bb20a479f",
@@ -113,6 +136,17 @@
         "feedRecordPagesTraverseFromHomeAndRestoreIt"
       ],
       "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/FinanceFocusedWorkspaceTest.kt",
+      "class": "com.farmos.app.FinanceFocusedWorkspaceTest",
+      "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE",
+      "sha256": "63d9d49e80be0a74535398f97236f192a20e81e8a6c97d7b96c70bde605fbe77",
+      "methods": [
+        "changingCaptureJobsRetainsEachDraftWithoutRecordingMoney",
+        "transactionFilterSurvivesAVisitToAnotherJobAndSelectsTheExactRecord"
+      ]
     },
     {
       "task": ":app:testDebugUnitTest",
@@ -285,11 +319,13 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/NativeReviewEvidenceContractTest.kt",
       "class": "com.farmos.app.NativeReviewEvidenceContractTest",
-      "sha256": "327fa17abe9f4c1ed6474d6367bd9f6abc18899935d5e69f0b4e7a0bcf1d429f",
+      "sha256": "b9bae536206b63e1d58852519bcbd118a4e0051afffce2e3fa26515db8d5b6f5",
       "methods": [
+        "genuinelyClippedSingleLineTextRemainsAReviewFinding",
         "rejectsARequestedOwnerThatIsOnlyTextNotARenderedOwner",
         "repeatedVisitsDoNotOverwriteDifferentStates",
-        "retainsLowerContentAndRestoresPositionWithoutExecutingControls"
+        "retainsLowerContentAndRestoresPositionWithoutExecutingControls",
+        "unusedParagraphWidthDoesNotManufactureATextOverflow"
       ],
       "evidence_kind": "COLLECTOR_NEGATIVE_CONTROL_NOT_PRODUCT"
     },
@@ -502,7 +538,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
       "class": "com.farmos.app.ReportDisclosureAuthorityTest",
-      "sha256": "b87c260c3930b103cfcc2fc4b9124c388e9a57c727e38ab6f3ea73d4530a96ab",
+      "sha256": "d0ac1116d97e3a560ef187baca9f5aea227329e47857ccfbdf378ad5eb88933c",
       "methods": [
         "aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
         "aDelayedChooserCannotUseTheOldAuthenticatedCredentialAfterAReset",
@@ -510,7 +546,8 @@
         "aDelayedPdfChooserCannotDiscloseAfterDeviceRevocation",
         "aRetainedShareActionChecksTheCurrentRoomRoleBeforeStartingAnyActivity",
         "anAuthorityFromAnotherFarmCannotWriteThisFarmsChosenReport",
-        "cancellationInsideDestinationOpenClosesTheResourceBeforeAWriteOrSuccessCanRun"
+        "cancellationInsideDestinationOpenClosesTheResourceBeforeAWriteOrSuccessCanRun",
+        "cancellationWhileProviderReturnIsDelayedClosesExactlyOnce"
       ],
       "evidence_kind": "NATIVE_BEHAVIOURAL_FIXTURE"
     },

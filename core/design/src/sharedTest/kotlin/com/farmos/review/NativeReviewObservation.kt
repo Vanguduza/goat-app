@@ -86,7 +86,7 @@ internal fun ComposeContentTestRule.captureNativeReviewViewports(
                     if (textLayouts.any { layout ->
                         layout.multiParagraph.didExceedMaxLines ||
                             layout.multiParagraph.height > layout.size.height + 0.5f ||
-                            layout.multiParagraph.width > layout.size.width + 0.5f ||
+                            (0 until layout.lineCount).any { layout.getLineLeft(it) < -0.5f || layout.getLineRight(it) > layout.size.width + 0.5f } ||
                             (0 until layout.lineCount).any { layout.isLineEllipsized(it) }
                     }) findings.put(JSONObject()
                         .put("kind", "TEXT_LAYOUT_OVERFLOW_REQUIRES_PIXEL_REVIEW").put("text", if (node.config.contains(SemanticsProperties.Password)) "REDACTED" else node.config.getOrNull(SemanticsProperties.Text)?.joinToString(" · ") { it.text }.orEmpty()).put("tag", node.config.getOrNull(SemanticsProperties.TestTag) ?: JSONObject.NULL)
@@ -94,6 +94,7 @@ internal fun ComposeContentTestRule.captureNativeReviewViewports(
                         .put("text_layouts", JSONArray(textLayouts.map { layout -> JSONObject()
                             .put("measured_width_px", layout.size.width).put("measured_height_px", layout.size.height)
                             .put("paragraph_width_px", layout.multiParagraph.width).put("paragraph_height_px", layout.multiParagraph.height)
+                            .put("line_ink_bounds_px", JSONArray((0 until layout.lineCount).map { line -> JSONArray(listOf(layout.getLineLeft(line), layout.getLineRight(line))) }))
                             .put("exceeded_max_lines", layout.multiParagraph.didExceedMaxLines)
                             .put("ellipsized", (0 until layout.lineCount).any { layout.isLineEllipsized(it) }) })))
                 }

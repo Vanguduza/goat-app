@@ -3,6 +3,8 @@ package com.farmos.app
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
@@ -75,6 +77,34 @@ class NativeReviewEvidenceContractTest {
         val proofs = records().filter { it.optInt("schema_version") == 2 && it.optString("screen_id") == "FOS-TASK-003" }
         assertEquals("Each visit retains its own evidence", 2, proofs.size)
         assertEquals(setOf(1, 2), proofs.map { it.getInt("visit") }.toSet())
+    }
+
+    @Test fun unusedParagraphWidthDoesNotManufactureATextOverflow() {
+        compose.setContent { NativeModuleReviewTheme {
+            Column(Modifier.fillMaxWidth().testTag("farm-screen:FOS-TASK-003")) { Text("Short label") }
+        } }
+        compose.captureModuleReview("FOS-TASK-003")
+        val proof = records().first { it.optInt("schema_version") == 2 }
+        val pages = proof.getJSONArray("viewports")
+        val findings = pages.getJSONObject(0).getJSONArray("layout_findings")
+        assertFalse("Unused paragraph constraints are not painted-text clipping", (0 until findings.length()).any {
+            findings.getJSONObject(it).optString("text") == "Short label"
+        })
+    }
+
+    @Test fun genuinelyClippedSingleLineTextRemainsAReviewFinding() {
+        val text = "Long text deliberately wider than its small fixture"
+        compose.setContent { NativeModuleReviewTheme {
+            Column(Modifier.fillMaxWidth().testTag("farm-screen:FOS-TASK-003")) {
+                Text(text, Modifier.width(40.dp), maxLines = 1, softWrap = false, overflow = TextOverflow.Clip)
+            }
+        } }
+        compose.captureModuleReview("FOS-TASK-003")
+        val proof = records().first { it.optInt("schema_version") == 2 }
+        val findings = proof.getJSONArray("viewports").getJSONObject(0).getJSONArray("layout_findings")
+        assertTrue("A real clipped line must not be filtered out", (0 until findings.length()).any {
+            findings.getJSONObject(it).optString("text") == text && findings.getJSONObject(it).getString("kind") == "TEXT_LAYOUT_OVERFLOW_REQUIRES_PIXEL_REVIEW"
+        })
     }
 
     private fun output(): File = File(requireNotNull(System.getenv("GOAT_MODULE_REVIEW_DIR")), requireNotNull(System.getProperty("goat.moduleReview.case")))

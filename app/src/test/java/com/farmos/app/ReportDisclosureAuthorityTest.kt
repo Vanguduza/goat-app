@@ -189,6 +189,37 @@ class ReportDisclosureAuthorityTest {
         assertNoOutput()
     }
 
+    @Test
+    fun cancellationWhileProviderReturnIsDelayedClosesExactlyOnce() = runBlocking {
+        repeat(12) {
+            val closes = AtomicInteger()
+            val writes = AtomicInteger()
+            val successes = AtomicInteger()
+            val stream = object : ByteArrayOutputStream() {
+                override fun close() { closes.incrementAndGet(); super.close() }
+            }
+            val job = launch(Dispatchers.IO) {
+                val caller = coroutineContext
+                writeAuthorizedReport(fixture.farmId, authority,
+                    open = {
+                        caller.cancel()
+                        // A provider may finish returning a descriptor after cancellation is delivered.
+                        Thread.sleep(10)
+                        stream
+                    },
+                    write = { writes.incrementAndGet() },
+                )
+                successes.incrementAndGet()
+            }
+            job.join()
+            assertTrue(job.isCancelled)
+            assertEquals("Acquired provider resource must be closed before completion", 1, closes.get())
+            assertEquals(0, writes.get())
+            assertEquals(0, successes.get())
+        }
+        assertNoOutput()
+    }
+
     private fun render(farmId: String = fixture.farmId) {
         compose.setContent {
             if (mounted.value) NativeModuleReviewTheme() {

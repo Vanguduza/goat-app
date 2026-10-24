@@ -27,12 +27,13 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class FinanceFocusedWorkspaceTest {
-    @get:Rule val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     @Test
     fun changingCaptureJobsRetainsEachDraftWithoutRecordingMoney() {
         val writes = mutableListOf<List<String>>()
-        compose.setContent { FarmOsTheme { MoneyCaptureScreen(emptyList(), false, null,
+        compose.setContent { NativeModuleReviewTheme { MoneyCaptureScreen(emptyList(), false, null,
             { kind, category, amount, day -> writes.add(listOf(kind, category, amount, day)) }, {}) } }
         open("Record income")
         compose.onNodeWithText("Amount").performScrollTo().performTextReplacement("125.50")
@@ -57,7 +58,7 @@ class FinanceFocusedWorkspaceTest {
     fun transactionFilterSurvivesAVisitToAnotherJobAndSelectsTheExactRecord() {
         val day = LocalDate.of(2026, 10, 23).toEpochDay()
         var selected: String? = null
-        compose.setContent { FarmOsTheme { MoneyCaptureScreen(
+        compose.setContent { NativeModuleReviewTheme { MoneyCaptureScreen(
             rows = emptyList(), busy = false, error = null, onRecord = { _, _, _, _ -> }, onBack = {},
             transactions = listOf(FinanceTransactionView("feed-1", "expense", "feed", 825, "USD", day, null),
                 FinanceTransactionView("sale-1", "income", "produce", 12550, "USD", day, null)),
@@ -77,6 +78,7 @@ class FinanceFocusedWorkspaceTest {
 
     private fun fieldEquals(label: String, value: String) {
         compose.onNodeWithText(label).assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString(value)))
+        compose.captureObservedNativeOwners()
     }
-    private fun open(label: String) { compose.revealFarmTool(label).performScrollTo().performClick() }
+    private fun open(label: String) { compose.revealFarmTool(label).performScrollTo().performClick(); compose.captureObservedNativeOwners() }
 }
