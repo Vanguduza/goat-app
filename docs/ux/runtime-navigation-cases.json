@@ -1407,8 +1407,8 @@
     },
     {
       "path": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
-      "sha256": "b87c260c3930b103cfcc2fc4b9124c388e9a57c727e38ab6f3ea73d4530a96ab",
-      "reviewed_source_commit": "107b19904995dd793e0fa7c2ed434215fdacdaec",
+      "sha256": "d0ac1116d97e3a560ef187baca9f5aea227329e47857ccfbdf378ad5eb88933c",
+      "reviewed_source_commit": "c535152bd3fad23d3ebd961709fb2cf06dc2d8f0",
       "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
       "cases": [
         {
@@ -1444,6 +1444,11 @@
         {
           "method": "cancellationInsideDestinationOpenClosesTheResourceBeforeAWriteOrSuccessCanRun",
           "execution_only_reason": "Cancellation/resource ownership regression at output-open; no delivery or traversal claim.",
+          "claims": []
+        },
+        {
+          "method": "cancellationWhileProviderReturnIsDelayedClosesExactlyOnce",
+          "execution_only_reason": "Resource-cleanup cancellation regression. Execution evidence only; no additional route, owner or visual approval claim.",
           "claims": []
         }
       ]
