@@ -65,12 +65,13 @@ class GroupsCaptureOwnerTest {
     fun groupCreationTakesItsSpeciesFromTheSpeciesSelector() {
         var syncRequests = 0
         render { syncRequests++ }
+        compose.onNodeWithTag("farm-section:Record").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-003:option:cattle").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-screen:FOS-GROUP-001").assertExists()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-003:option:cattle").performScrollTo().performClick()
         compose.onNode(hasSetTextAction() and hasText("Name")).performScrollTo().performTextInput("Weaner steers")
         compose.onNode(hasSetTextAction() and hasText("Head count")).performScrollTo().performTextInput("40")
-        compose.onNode(hasClickAction() and hasText("Create group")).performScrollTo().performClick()
+        compose.formSubmit("Create group").performScrollTo().performClick()
 
         compose.waitUntil(10_000) { runBlocking { database.groups().forFarm(farm) }.size == 2 }
         val created = runBlocking { database.groups().forFarm(farm) }.single { it.name == "Weaner steers" }
@@ -84,12 +85,14 @@ class GroupsCaptureOwnerTest {
     fun censusTakesItsGroupFromThisFarmsGroupSelector() {
         var syncRequests = 0
         render { syncRequests++ }
+        compose.onNodeWithTag("farm-section:Record").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-section:Record census").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-ewes").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:grp-other").assertDoesNotExist()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:grp-ewes").performScrollTo().performClick()
         compose.onNode(hasSetTextAction() and hasText("Census day")).performScrollTo().performTextInput("2026-09-20")
         compose.onNode(hasSetTextAction() and hasText("Census head count")).performScrollTo().performTextInput("118")
-        compose.onNode(hasClickAction() and hasText("Record census")).performScrollTo().performClick()
+        compose.formSubmit("Record census").performScrollTo().performClick()
 
         compose.waitUntil(10_000) { runBlocking { database.lifecycle().censusForGroup(farm, "grp-ewes") }.isNotEmpty() }
         assertEquals(118, runBlocking { database.lifecycle().censusForGroup(farm, "grp-ewes") }.single().headCount)

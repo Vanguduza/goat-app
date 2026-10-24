@@ -50,7 +50,7 @@ class OpsAnimalPickerTest {
                 }
             }
         }
-        compose.onNode(hasClickAction() and hasText("Service")).performScrollTo().performClick()
+        compose.revealFarmTool("Service").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-CATTLE-010").assertExists()
     }
 

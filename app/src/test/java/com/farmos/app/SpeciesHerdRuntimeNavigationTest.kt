@@ -27,13 +27,13 @@ class SpeciesHerdRuntimeNavigationTest {
     fun sheepIndividualAnimalSurfacesTraverseAndReturn() {
         renderSpecies(FarmModule.SHEEP, "Sheep One")
 
-        open("Open Sheep records")
+        open("Sheep records")
         assertScreen("FOS-SHEEP-002")
         open("Sheep One")
         assertScreen("FOS-SHEEP-003")
         home()
 
-        open("Open Register sheep")
+        open("Register sheep")
         assertScreen("FOS-SHEEP-004")
         home()
 
@@ -53,13 +53,13 @@ class SpeciesHerdRuntimeNavigationTest {
     fun cattleIndividualAnimalSurfacesTraverseAndReturn() {
         renderSpecies(FarmModule.CATTLE, "Cattle One")
 
-        open("Open Cattle records")
+        open("Cattle records")
         assertScreen("FOS-CATTLE-002")
         open("Cattle One")
         assertScreen("FOS-CATTLE-003")
         home()
 
-        open("Open Register cattle")
+        open("Register cattle")
         assertScreen("FOS-CATTLE-004")
         home()
 
@@ -80,7 +80,7 @@ class SpeciesHerdRuntimeNavigationTest {
         renderSpecies(FarmModule.CATTLE, "Cow One", SpeciesHerdCounts(total = 640, active = 612))
         compose.onNodeWithText("640").assertExists()
         compose.onNodeWithText("612").assertExists()
-        open("Open Cattle records")
+        open("Cattle records")
         assertScreen("FOS-CATTLE-002")
         compose.onNodeWithText("Showing the first 1 of 640 cattle by tag.").assertExists()
     }

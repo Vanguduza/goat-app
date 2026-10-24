@@ -78,6 +78,7 @@ class PastureCaptureOwnerTest {
                 )
             }
         }
+        compose.onNodeWithTag("farm-section:Start").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-ewes").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-screen:FOS-PASTURE-001").assertExists()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-007").assertExists()

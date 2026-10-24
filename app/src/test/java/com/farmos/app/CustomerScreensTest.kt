@@ -87,9 +87,9 @@ class CustomerScreensTest {
                 ) { actions -> androidx.compose.foundation.layout.Column { actions() } }
             }
         }
-        compose.onNode(hasClickAction() and hasText("Customers")).performClick()
+        compose.revealFarmTool("Customers").performClick()
         compose.onNodeWithTag("farm-screen:FOS-SALES-002").assertExists()
         compose.onNode(hasClickAction() and hasText("Sales")).performScrollTo().performClick()
-        compose.onNode(hasClickAction() and hasText("Customers")).assertExists()
+        compose.revealFarmTool("Customers").assertExists()
     }
 }

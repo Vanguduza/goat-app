@@ -90,6 +90,7 @@ class RabbitCaptureOwnerTest {
         compose.onNodeWithTag("rabbit-section:Housing").performScrollTo().performClick()
         compose.onNode(hasClickAction() and hasText("Cages & nest boxes")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-RABBIT-006").assertExists()
+        compose.onNodeWithTag("farm-section:Nest-box cycle").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-nest-box-selector:option:box-7").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("rabbit-nest-status-selector").assertDoesNotExist()
 

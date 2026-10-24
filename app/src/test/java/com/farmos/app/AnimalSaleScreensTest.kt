@@ -62,7 +62,7 @@ class AnimalSaleScreensTest {
                 ) { actions -> androidx.compose.foundation.layout.Column { actions() } }
             }
         }
-        compose.onNode(hasClickAction() and hasText("Animal sale")).performClick()
+        compose.revealFarmTool("Animal sale").performClick()
         compose.onNodeWithText("No sold animals are waiting for their sale money.").assertExists()
     }
 }

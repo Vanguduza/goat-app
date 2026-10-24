@@ -100,7 +100,7 @@ class SettingsHostTest {
     }
 
     private fun click(label: String) {
-        compose.onNode(hasClickAction() and hasText(label, substring = true)).performScrollTo().performClick()
+        compose.revealFarmTool(label, substring = true).performScrollTo().performClick()
     }
 
     private fun waitForTag(tag: String) = compose.waitUntil(10_000) { compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }

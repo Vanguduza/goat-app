@@ -56,7 +56,7 @@ class OpsCoiAnalysisTest {
                 }
             }
         }
-        compose.onNode(hasClickAction() and hasText("Inbreeding check")).performScrollTo().performClick()
+        compose.revealFarmTool("Inbreeding check").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GEN-006").assertExists()
         compose.onNodeWithText("Choose a ewe and a ram.").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-004:option:ewe-1").fetchSemanticsNodes().isNotEmpty() }
@@ -84,7 +84,7 @@ class OpsCoiAnalysisTest {
                 }
             }
         }
-        compose.onNode(hasClickAction() and hasText("Compare rams")).performScrollTo().performClick()
+        compose.revealFarmTool("Compare rams").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GEN-007").assertExists()
         compose.onNodeWithText("Choose a ewe to compare rams for.").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-004:option:ewe-1").fetchSemanticsNodes().isNotEmpty() }

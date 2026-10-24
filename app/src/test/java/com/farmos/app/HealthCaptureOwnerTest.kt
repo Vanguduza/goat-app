@@ -129,7 +129,7 @@ class HealthCaptureOwnerTest {
     fun protocolSlotIsAddedOnlyToAVetAcceptedPack() {
         var syncRequests = 0
         render(HealthEntryPage.DASHBOARD) { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Add protocol slot")).performScrollTo().performClick()
+        compose.revealFarmTool("Add protocol slot").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-HEALTH-019").assertExists()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("health-pack-selector:option:pack-kid").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("health-pack-selector:option:pack-draft").assertDoesNotExist()
@@ -138,7 +138,7 @@ class HealthCaptureOwnerTest {
         compose.onNode(hasSetTextAction() and hasText("Slot code")).performScrollTo().performTextInput("DEWORM")
         compose.onNode(hasSetTextAction() and hasText("Title")).performScrollTo().performTextInput("Deworm kids")
         compose.onNode(hasSetTextAction() and hasText("Offset days")).performScrollTo().performTextReplacement("14")
-        compose.onNode(hasClickAction() and hasText("Add protocol slot")).performScrollTo().performClick()
+        compose.revealFarmTool("Add protocol slot").performScrollTo().performClick()
 
         compose.waitUntil(10_000) { runBlocking { database.lifecycle().packSlots(farm) }.isNotEmpty() }
         val slot = runBlocking { database.lifecycle().packSlots(farm) }.single()

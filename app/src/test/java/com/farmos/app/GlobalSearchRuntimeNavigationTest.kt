@@ -113,7 +113,7 @@ class GlobalSearchRuntimeNavigationTest {
         compose.onNodeWithText("First doe").assertDoesNotExist()
         compose.onNodeWithText("Target cow").assertDoesNotExist()
         compose.onNodeWithText("Other farm doe").assertDoesNotExist()
-        click("Weight")
+        compose.revealFarmTool("Weight").performScrollTo().performClick()
         awaitScreen("FOS-GOAT-011")
         field("Weight", "53.125")
         click("Record weight")

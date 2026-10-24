@@ -138,7 +138,7 @@ class StockCountScreensTest {
                 InventoryScreen(rows = emptyList(), busy = false, error = null, onCreate = { _, _, _ -> }, onMove = { _, _, _ -> }, onBack = {}, onOpenStockCount = { opened++ })
             }
         }
-        compose.onNode(hasClickAction() and hasText("Count stock and review differences")).performScrollTo().performClick()
+        compose.revealFarmTool("Count stock and review differences").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(1, opened) }
     }
 }

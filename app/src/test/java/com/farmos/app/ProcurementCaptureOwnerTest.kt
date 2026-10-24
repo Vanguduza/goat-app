@@ -150,6 +150,7 @@ class ProcurementCaptureOwnerTest {
                 )
             }
         }
+        compose.onNodeWithTag("farm-section:Record").performScrollTo().performClick()
         compose.onNode(hasSetTextAction() and hasText("Supplier name"))
             .performScrollTo().performTextInput("Local co-op")
         compose.onNode(hasClickAction() and hasText("Create supplier")).performScrollTo().performClick()
@@ -165,7 +166,7 @@ class ProcurementCaptureOwnerTest {
 
     private fun openPurchaseCapture(currency: String) {
         compose.onNodeWithTag("farm-screen:FOS-PROC-001").assertExists()
-        compose.onNode(hasClickAction() and hasText("Create purchase")).performScrollTo().performClick()
+        compose.revealFarmTool("Create purchase").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-PROC-006").assertExists()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("farm-atom:FOS-ATOM-011:option:sup-agri").fetchSemanticsNodes().isNotEmpty()

@@ -61,7 +61,9 @@ class RabbitProfileScreensTest {
         compose.onNodeWithTag("farm-screen:FOS-RABBIT-003").assertExists()
         compose.onNodeWithText("In the rabbitry").assertExists()
         // Photos and documents of the doe (D-015) sit on her profile.
+        compose.onNodeWithTag("farm-section:Photos and documents").performScrollTo().performClick()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-016:photo").performScrollTo().assertExists()
+        compose.onNodeWithTag("farm-section:Exit record").performScrollTo().performClick()
         compose.onNodeWithTag("species-exit-kind:CULL").performScrollTo().performClick()
         compose.onNodeWithTag("species-exit-reason").performScrollTo().performTextInput("Poor mothering")
         compose.onNodeWithTag("species-exit-continue").performScrollTo().performClick()
@@ -79,6 +81,7 @@ class RabbitProfileScreensTest {
         compose.onNodeWithTag("rabbit:r2").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-RABBIT-004").assertExists()
         compose.onNodeWithText("Left the rabbitry: culled").assertExists()
+        compose.onNodeWithTag("farm-section:Exit record").performScrollTo().performClick()
         compose.onNodeWithTag("species-standing-exit").assertExists()
         compose.onNodeWithTag("species-exit-reverse-reason").performScrollTo().performTextInput("Culled the wrong buck")
         compose.onNodeWithTag("species-exit-reverse").performScrollTo().performClick()
