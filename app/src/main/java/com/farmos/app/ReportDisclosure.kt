@@ -5,6 +5,7 @@ import com.farmos.domain.access.Permission
 import java.io.Closeable
 import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -30,12 +31,20 @@ internal suspend fun writeAuthorizedReport(
     open: () -> OutputStream,
     write: (OutputStream) -> Unit,
 ) = withContext(Dispatchers.IO) {
+    val caller = currentCoroutineContext()
     var output: OutputStream? = null
     Closeable { output?.close() }.use {
-        withReportDisclosure(farmId, authority) {
-            output = open()
+        // Room's cancellable transaction handoff can finish cancellation before a provider returns
+        // its descriptor. Finish only this acquisition handoff so finally always owns that resource.
+        // Revalidate the same Room permission and caller immediately before opening; never continue
+        // to writing or a UI/success callback after cancellation.
+        withContext(NonCancellable) {
+            withReportDisclosure(farmId, authority) {
+                caller.ensureActive()
+                output = open()
+            }
         }
-        currentCoroutineContext().ensureActive()
+        caller.ensureActive()
         write(requireNotNull(output))
     }
 }

@@ -17,7 +17,7 @@ internal fun FeedInventoryScreen(records: FeedRecords, onOpen: (String) -> Unit,
     var query by rememberSaveable { mutableStateOf("") }
     var limit by rememberSaveable(query) { mutableStateOf(50) }
     FarmOperationalPage("FOS-FEED-002", "Feed inventory", "", FarmVisualClass.I3, onBack) {
-        Text("Items linked by recorded feed issues. Quantities retain each item's recorded unit.")
+        Text("Items linked to feed issues", style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
         if (records.issueCount == null && records.items.isEmpty()) {
             FarmLoadingSkeleton("Reading recorded feed inventory")
             return@FarmOperationalPage
@@ -30,7 +30,7 @@ internal fun FeedInventoryScreen(records: FeedRecords, onOpen: (String) -> Unit,
             modifier = Modifier.fillMaxWidth().testTag("feed-inventory-query"))
         val found = records.items.filter { it.itemLabel.contains(query.trim(), ignoreCase = true) || it.itemId == query.trim() }
         val visible = found.take(limit)
-        FarmMetricStrip(listOf(FarmMetricValue("Recorded feed items", records.items.size.toString()), FarmMetricValue("Matches", found.size.toString())))
+        Text("${found.size} of ${records.items.size} items", style = androidx.compose.material3.MaterialTheme.typography.bodySmall, color = AnimalFarmTheme.colors.mutedInk)
         visible.forEach { item ->
             FarmToolRow(FarmToolAction(item.itemLabel, { onOpen(item.itemId) },
                 detail = "On hand: ${item.onHand ?: "item not on this device"} · ${item.issueCount} recorded issue(s)",
