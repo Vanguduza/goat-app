@@ -49,7 +49,7 @@ class GoatLactationRuntimeNavigationTest {
             ),
             onSelect = selected::set,
         )
-        compose.onNode(hasClickAction() and hasText("Lactation")).performScrollTo().performClick()
+        compose.revealGoatTool("Lactation").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-018").assertExists()
         compose.onNodeWithText("Goats with milk recorded · 2").assertExists()
         compose.onNodeWithText("614.25 L across 241 records").assertExists()
@@ -63,7 +63,7 @@ class GoatLactationRuntimeNavigationTest {
         compose.onNodeWithTag(dashboardTag).assertExists()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-018").assertDoesNotExist()
 
-        compose.onNode(hasClickAction() and hasText("Lactation")).performScrollTo().performClick()
+        compose.revealGoatTool("Lactation").performScrollTo().performClick()
         compose.onNodeWithTag("goat-lactation:goat-nala").performScrollTo().performClick()
         compose.runOnIdle { assertEquals("goat-nala", selected.get()) }
     }
@@ -71,7 +71,7 @@ class GoatLactationRuntimeNavigationTest {
     @Test
     fun loadingFailedAndEmptyStatesAreDistinct() {
         render(GoatLactationState.Failed("milk records unavailable"))
-        compose.onNode(hasClickAction() and hasText("Lactation")).performScrollTo().performClick()
+        compose.revealGoatTool("Lactation").performScrollTo().performClick()
         compose.onNodeWithText("milk records unavailable").assertExists()
         compose.onNodeWithText("No milk recorded on this device.").assertDoesNotExist()
     }
@@ -79,7 +79,7 @@ class GoatLactationRuntimeNavigationTest {
     @Test
     fun emptyLactationSaysNothingIsRecorded() {
         render(GoatLactationState.Loaded(emptyList()))
-        compose.onNode(hasClickAction() and hasText("Lactation")).performScrollTo().performClick()
+        compose.revealGoatTool("Lactation").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-018").assertExists()
         compose.onNodeWithText("No milk recorded on this device.").assertExists()
     }
@@ -87,11 +87,11 @@ class GoatLactationRuntimeNavigationTest {
     @Test
     fun herdDerivedPagesSayWhenTheHerdListIsBounded() {
         render(GoatLactationState.Loading, herdCounts = GoatHerdCounts(active = 880, does = 600, bucks = 280, kids = 90, notClosed = 900))
-        compose.onNode(hasClickAction() and hasText("Pregnancy")).performScrollTo().performClick()
+        compose.revealGoatTool("Pregnancy").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-035").assertExists()
         compose.onNodeWithText("Built from the first 1 of 900 goats by tag. Goats beyond these are not shown here.").assertExists()
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
-        compose.onNode(hasClickAction() and hasText("Kids")).performScrollTo().performClick()
+        compose.revealGoatTool("Kids").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-040").assertExists()
         compose.onNodeWithTag("goat-kid-cohort-bounded").assertExists()
     }
@@ -99,7 +99,7 @@ class GoatLactationRuntimeNavigationTest {
     @Test
     fun unboundedHerdShowsNoNotice() {
         render(GoatLactationState.Loading, herdCounts = GoatHerdCounts(active = 1, does = 1, bucks = 0, kids = 0, notClosed = 1))
-        compose.onNode(hasClickAction() and hasText("Pregnancy")).performScrollTo().performClick()
+        compose.revealGoatTool("Pregnancy").performScrollTo().performClick()
         compose.onNodeWithTag("goat-pregnancy-bounded").assertDoesNotExist()
     }
 

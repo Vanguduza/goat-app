@@ -81,9 +81,9 @@ class GoatHealthRuntimeNavigationTest {
     @Test
     fun summaryLinksOpenTheOwningRecordPages() {
         render(goatWithHealth())
-        compose.onNode(hasClickAction() and hasText("Health summary")).performScrollTo().performClick()
+        compose.revealGoatTool("Health summary").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-025").assertExists()
-        compose.onNode(hasClickAction() and hasText("Withdrawal status")).performScrollTo().performClick()
+        compose.revealGoatTool("Withdrawal status").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-027").assertExists()
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
         compose.onNodeWithTag(profileTag).assertExists()
@@ -155,7 +155,7 @@ class GoatHealthRuntimeNavigationTest {
     }
 
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+        compose.revealGoatTool(label).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         compose.onNodeWithText("Nala · GT-024").assertExists()
         assertions()

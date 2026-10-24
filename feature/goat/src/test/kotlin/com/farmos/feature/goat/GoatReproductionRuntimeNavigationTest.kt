@@ -82,7 +82,7 @@ class GoatReproductionRuntimeNavigationTest {
         render(nala(), GoatPage.DASHBOARD, others = listOf(openDoe(), buck()), onSelect = selected::set)
         compose.onNodeWithTag(dashboardTag).assertIsDisplayed()
 
-        compose.onNode(hasClickAction() and hasText("Pregnancy")).performScrollTo().performClick()
+        compose.revealGoatTool("Pregnancy").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-035").assertExists()
         compose.onNodeWithText("Confirmed pregnant · 1").assertExists()
         compose.onNodeWithText("Checked open · 1").assertExists()
@@ -91,7 +91,7 @@ class GoatReproductionRuntimeNavigationTest {
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
         compose.onNodeWithTag(dashboardTag).assertExists()
 
-        compose.onNode(hasClickAction() and hasText("Pregnancy")).performScrollTo().performClick()
+        compose.revealGoatTool("Pregnancy").performScrollTo().performClick()
         compose.onNodeWithText("Nala · GT-024").performScrollTo().performClick()
         compose.runOnIdle { assertEquals("goat-nala", selected.get()) }
         compose.onNodeWithTag("farm-screen:FOS-GOAT-030").assertExists()
@@ -262,7 +262,7 @@ class GoatReproductionRuntimeNavigationTest {
     }
 
     private fun traverse(label: String, screenId: String, originTag: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+        compose.revealGoatTool(label).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         assertions()
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()

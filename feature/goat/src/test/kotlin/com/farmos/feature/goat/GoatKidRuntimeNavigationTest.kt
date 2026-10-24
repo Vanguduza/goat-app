@@ -40,7 +40,7 @@ class GoatKidRuntimeNavigationTest {
     @Test
     fun kiddingDetailOpensFromTheDoeRecordAndReturnsToIt() {
         render(nala(), GoatPage.PROFILE)
-        compose.onNode(hasClickAction() and hasText("Breeding records")).performScrollTo().performClick()
+        compose.revealGoatTool("Breeding records").performScrollTo().performClick()
         compose.onNodeWithTag(tag("030")).assertExists()
 
         compose.onNode(hasClickAction() and hasText("2026-03-02")).performScrollTo().performClick()
@@ -58,7 +58,7 @@ class GoatKidRuntimeNavigationTest {
     fun kidProfileShowsTheBirthRecordAndReturnsToTheProfile() {
         render(tumi(), GoatPage.PROFILE)
         compose.onNodeWithTag(tag("003")).assertIsDisplayed()
-        compose.onNode(hasClickAction() and hasText("Birth record")).performScrollTo().performClick()
+        compose.revealGoatTool("Birth record").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-041").assertExists()
         compose.onNodeWithText("GT-024 · Nala").assertExists()
         compose.onNodeWithText("3 born · 2 live").assertExists()
@@ -71,14 +71,15 @@ class GoatKidRuntimeNavigationTest {
     @Test
     fun goatsWithoutABirthRecordOfferNoBirthRecordLink() {
         render(nala(), GoatPage.PROFILE)
-        compose.onNode(hasClickAction() and hasText("Birth record")).assertDoesNotExist()
+        compose.openGoatToolGroup("Breeding & family")
+        compose.onNodeWithTag("goat-record:KID_PROFILE").assertDoesNotExist()
     }
 
     @Test
     fun kidCohortGroupsKidsByKiddingAndOpensTheKid() {
         val selected = AtomicReference<String?>(null)
         render(tumi(), GoatPage.DASHBOARD, herd = listOf(nala(), tumi()), onSelect = selected::set)
-        compose.onNode(hasClickAction() and hasText("Kids")).performScrollTo().performClick()
+        compose.revealGoatTool("Kids").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-GOAT-040").assertExists()
         compose.onNodeWithTag("goat-kid-cohort:k1").assertExists()
         compose.onNodeWithText("GT-024 · Nala · 2026-03-02").assertExists()
@@ -86,7 +87,7 @@ class GoatKidRuntimeNavigationTest {
         compose.onNode(hasClickAction() and hasText("Back")).performScrollTo().performClick()
         compose.onNodeWithTag(tag("001")).assertExists()
 
-        compose.onNode(hasClickAction() and hasText("Kids")).performScrollTo().performClick()
+        compose.revealGoatTool("Kids").performScrollTo().performClick()
         compose.onNodeWithText("Tumi · GT-101").performScrollTo().performClick()
         compose.runOnIdle { assertEquals("goat-tumi", selected.get()) }
         compose.onNodeWithTag("farm-screen:FOS-GOAT-041").assertExists()

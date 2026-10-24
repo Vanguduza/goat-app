@@ -150,7 +150,7 @@ class GoatHistoryRuntimeNavigationTest {
     }
 
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+        compose.revealGoatTool(label).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         compose.onNodeWithText("Nala · GT-024").assertExists()
         assertions()
