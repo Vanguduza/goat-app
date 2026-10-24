@@ -2,14 +2,14 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "e2f4dbce60dce2d6ca1a191d0ec220a247077330",
-  "source_fingerprint": "sha256:60c1a932c4047402c728de58ecd2b677ff9228e43f10f3487c675118d20bd4f2",
+  "tested_commit": "32059bc8ebe70bf7405b0a349e1fdcfe5dff35ba",
+  "source_fingerprint": "sha256:503c7fbab8182b5ad82a3f0bf963f8cecbe63cdd7a14a29d1504c29efe057be9",
   "ci_status": "CI_PENDING",
   "foundation_run_id": null,
   "additional_case_evidence": {
     "schema_version": 1,
     "mapping_path": "docs/ux/runtime-navigation-cases.json",
-    "mapping_sha256": "6738df36b84177c764b636897df3c0c9fb0d2e27b36c7777425804dc2014e243",
+    "mapping_sha256": "ee8b4cfe308bdf9dd2c511df4da388bd109a2b14aa8e87974201f7be8586ca6e",
     "sources": [
       {
         "path": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
@@ -19,14 +19,14 @@
       },
       {
         "path": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
-        "sha256": "fd0204f3c0a0915cdd0d9ad5621ba1a4a2e06a5ee76af8e4335f067c864ae00a",
-        "reviewed_source_commit": "555afc283cba673078a99b25230ee42258e42e06",
+        "sha256": "9935f273afa73899533b6934a32d270162fc6c801b7c7f8c8adefd40d7ac3d06",
+        "reviewed_source_commit": "e133a803f62e13b7ab466fc33b45a568d5ec2f83",
         "class_name": "com.farmos.app.AndroidBackNavigationTest"
       },
       {
         "path": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
-        "sha256": "f45edbc8044fd0b62fea50ad826bf9c2da613bb4a7166c898a73f8b2fbda3efc",
-        "reviewed_source_commit": "555afc283cba673078a99b25230ee42258e42e06",
+        "sha256": "8af91b564a5926ae96b79e35aa84a2190c597178ddc3054408a5a719fe9c883e",
+        "reviewed_source_commit": "e133a803f62e13b7ab466fc33b45a568d5ec2f83",
         "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest"
       },
       {
