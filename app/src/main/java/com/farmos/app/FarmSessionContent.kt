@@ -2,6 +2,7 @@ package com.farmos.app
 
 import com.farmos.domain.access.Permission
 import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -36,6 +37,8 @@ internal fun FarmSessionContent(
     actorId: String? = null,
     localAuthority: LocalSessionAuthority? = null,
 ) {
+    val retainedHomeState = rememberSaveableStateHolder()
+    val homeStateKey = "home:${membership.farmId}:${actorId ?: "server-session"}:${membership.role}"
     var destination by remember(membership.farmId) { mutableStateOf<FarmDestination>(FarmDestination.Home) }
     var returnToSearch by remember(membership.farmId) { mutableStateOf(false) }
     val searchState = remember(membership.farmId) { GlobalSearchSessionState(membership.farmId) }
@@ -91,7 +94,8 @@ internal fun FarmSessionContent(
     FarmBackHandler(if (destination == FarmDestination.Home) null else backFromDestination)
     Box(Modifier.testTag(runtimeRoute.testTag)) {
         when (val dest = destination) {
-        FarmDestination.Home -> FarmHomeHost(
+        FarmDestination.Home -> retainedHomeState.SaveableStateProvider(homeStateKey) {
+        FarmHomeHost(
             farmName = farmName,
             membershipRole = membership.role,
             farmId = membership.farmId,
@@ -99,6 +103,7 @@ internal fun FarmSessionContent(
             loadGoatCount = { app.database.animals().countBySpecies(membership.farmId, "goat") },
             loadCompletedTaskCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
             loadActiveWithdrawalCount = { app.database.lifecycle().activeWithdrawalCount(membership.farmId, it) },
+            loadTaskIdentities = { loadHomeTaskIdentities(app.database, membership.farmId, it) },
             loadPendingSync = { pendingSync() },
             loadSyncQueueCounts = ::loadSyncQueueCounts,
             onOpen = { destination = it },
@@ -107,6 +112,7 @@ internal fun FarmSessionContent(
             farmNames = farmNames,
             onSwitchFarm = onSwitchFarm,
         )
+        }
         FarmDestination.Search -> GlobalSearchHost(
             database = app.database,
             farmId = membership.farmId,
@@ -283,6 +289,7 @@ internal fun FarmSessionContent(
                 loadGoatCount = { app.database.animals().countBySpecies(membership.farmId, "goat") },
                 loadCompletedTaskCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
                 loadActiveWithdrawalCount = { app.database.lifecycle().activeWithdrawalCount(membership.farmId, it) },
+            loadTaskIdentities = { loadHomeTaskIdentities(app.database, membership.farmId, it) },
                 loadPendingSync = { pendingSync() },
             loadSyncQueueCounts = ::loadSyncQueueCounts,
                 onOpen = { destination = it },

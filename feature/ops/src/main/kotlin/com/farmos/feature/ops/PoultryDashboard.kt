@@ -42,9 +42,9 @@ internal fun PoultryDashboard(
     AnimalFarmCanvas {
         Column(
             Modifier.weight(1f).imePadding().navigationBarsPadding()
-                .verticalScroll(rememberScrollState()).padding(FosDimens.ScreenMargin)
+                .verticalScroll(rememberScrollState()).padding(horizontal = com.farmos.core.design.animalFarmHomePageInset(), vertical = com.farmos.core.design.AnimalFarmHomeMetrics.headerInset)
                 .testTag("farm-screen:FOS-POULTRY-001"),
-            verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
+            verticalArrangement = Arrangement.spacedBy(com.farmos.core.design.AnimalFarmHomeMetrics.contentGap),
         ) {
             FarmBackButton("Farm home", onBack)
             AnimalFarmModuleHeader("Poultry", "Houses, flocks and hatchery", family = AnimalFarmFamily.POULTRY)

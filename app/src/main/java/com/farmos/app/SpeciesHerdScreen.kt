@@ -208,8 +208,8 @@ private fun SpeciesDashboard(
     FarmBackHandler(onBack)
     AnimalFarmCanvas(Modifier.testTag("farm-screen:${config.prefix}-001")) {
         Column(
-            Modifier.weight(1f).imePadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(FosDimens.ScreenMargin),
-            verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
+            Modifier.weight(1f).imePadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = com.farmos.core.design.animalFarmHomePageInset(), vertical = com.farmos.core.design.AnimalFarmHomeMetrics.headerInset),
+            verticalArrangement = Arrangement.spacedBy(com.farmos.core.design.AnimalFarmHomeMetrics.contentGap),
         ) {
             FarmBackButton("Farm home", onBack)
             AnimalFarmModuleHeader(
@@ -247,12 +247,9 @@ private fun SpeciesMetric(
 
 @Composable
 private fun SpeciesAction(title: String, subtitle: String, onClick: () -> Unit) {
-    FarmActionButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(FosDimens.Grid)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            if (title == "Open profile") Text(subtitle, style = MaterialTheme.typography.bodyMedium)
-        }
-    }
+    com.farmos.core.design.FarmResourceAction(
+        title = title, detail = subtitle.takeIf { title == "Open profile" }, onClick = onClick,
+    )
 }
 
 @Composable

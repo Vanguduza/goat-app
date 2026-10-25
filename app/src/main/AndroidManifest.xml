@@ -6,7 +6,7 @@
     <application
         android:name=".FarmOsApplication"
         android:allowBackup="false"
-        android:label="Farm OS"
+        android:label="Animal Farm"
         android:supportsRtl="true"
         android:theme="@style/Theme.FarmOS">
         <activity

@@ -114,7 +114,7 @@ internal fun GlobalSearchScreen(
                     } else null,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { runSearch(query) }),
-                    shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius),
+                    shape = RoundedCornerShape(AnimalFarmHomeMetrics.fieldRadius),
                     modifier = Modifier.fillMaxWidth().testTag("farm-screen:FOS-SEARCH-001"),
                     singleLine = true,
                 )
@@ -280,7 +280,7 @@ private fun GlobalSearchResultRow(result: GlobalSearchResultUi, onOpen: () -> Un
                     color = colors.mutedInk,
                 )
             }
-            if (opens) Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, modifier = Modifier.size(20.dp), tint = colors.mutedInk)
+            if (opens) com.farmos.core.design.FarmHtmlIcon("arrow-up-right", null, Modifier.size(18.dp), tint = colors.mutedInk)
         }
     }
 }

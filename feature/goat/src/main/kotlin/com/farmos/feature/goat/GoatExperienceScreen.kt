@@ -322,8 +322,8 @@ private fun GoatDashboardScreen(
         FarmToolAction(label, { onOpen(page) }, detail = detail, tag = "goat-action:${page.name}")
     AnimalFarmCanvas(modifier.testTag("farm-screen:FOS-GOAT-001")) {
         Column(
-            Modifier.weight(1f).imePadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(FosDimens.ScreenMargin),
-            verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
+            Modifier.weight(1f).imePadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = com.farmos.core.design.animalFarmHomePageInset(), vertical = com.farmos.core.design.AnimalFarmHomeMetrics.headerInset),
+            verticalArrangement = Arrangement.spacedBy(com.farmos.core.design.AnimalFarmHomeMetrics.contentGap),
         ) {
             FarmBackButton("Farm home", onBackToFarm)
             AnimalFarmModuleHeader("Goats", state.farmName.orEmpty(), family = AnimalFarmFamily.GOAT)
@@ -604,8 +604,8 @@ internal fun IllustratedGoatPage(
     val canonicalScreenId = screenId.substringBefore(" ").takeIf { it.startsWith("FOS-") && "/" !in it }
     AnimalFarmCanvas(canonicalScreenId?.let { Modifier.testTag("farm-screen:$it") } ?: Modifier) {
         Column(
-            Modifier.weight(1f).imePadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(FosDimens.ScreenMargin),
-            verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
+            Modifier.weight(1f).imePadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = com.farmos.core.design.animalFarmHomePageInset(), vertical = com.farmos.core.design.AnimalFarmHomeMetrics.headerInset),
+            verticalArrangement = Arrangement.spacedBy(com.farmos.core.design.AnimalFarmHomeMetrics.contentGap),
         ) {
             FarmBackButton("Back", onBack)
             AnimalFarmModuleHeader(title, "", family = if (safety) null else AnimalFarmFamily.GOAT)

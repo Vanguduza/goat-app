@@ -291,27 +291,23 @@ private fun RabbitDashboard(
     }
     AnimalFarmCanvas {
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(com.farmos.core.design.AnimalFarmHomeMetrics.pageInset),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = com.farmos.core.design.animalFarmHomePageInset(), vertical = com.farmos.core.design.AnimalFarmHomeMetrics.headerInset),
             verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
         ) {
             com.farmos.core.design.FarmBackButton("Farm home", onBack)
             AnimalFarmModuleHeader("Rabbitry", "", family = AnimalFarmFamily.RABBIT)
             if (loading) Text("Loading rabbitry…", color = MaterialTheme.colorScheme.onSurfaceVariant)
             else {
-                Row(Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    RabbitMetric("Rabbits", rabbitCount, Modifier.weight(1f).fillMaxHeight())
-                    RabbitMetric("Ready nests", records.cages.flatMap { it.nestBoxes }.count { it.status in setOf("available", "sanitized") }, Modifier.weight(1f).fillMaxHeight())
-                }
+                com.farmos.core.design.FarmMetricStrip(listOf(
+                    com.farmos.core.design.FarmMetricValue("Rabbits", rabbitCount?.toString() ?: "—", onClick = { onOpen(RabbitPage.ANIMALS) }),
+                    com.farmos.core.design.FarmMetricValue("Ready nests", records.cages.flatMap { it.nestBoxes }.count { it.status in setOf("available", "sanitized") }.toString(), onClick = { onOpen(RabbitPage.NESTS) }),
+                ))
                 RabbitWorkflowOverview(records, today, { onOpen(RabbitPage.LITTER_PROFILE) }, { onOpen(RabbitPage.CAGE_OCCUPANCY) })
             }
             // Reveal navigation after the initial projection so the overview cannot
             // move an already active action under a user's tap.
             if (!loading) {
-                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf("Breeding", "Housing", "Animals", "Records").forEach { name ->
-                        com.farmos.core.design.FarmFilterChip(name, name == section, { onSection(name) }, Modifier.testTag("rabbit-section:$name"))
-                    }
-                }
+                com.farmos.core.design.FarmSectionTabs(listOf("Breeding", "Housing", "Animals", "Records"), section, onSection, tagPrefix = "rabbit-section:")
                 actions.forEach { (label, target) ->
                     com.farmos.core.design.AnimalFarmQuickAction(label, { onOpen(target) }, Modifier.testTag("rabbit-action:${target.name}"))
                 }
@@ -703,7 +699,7 @@ private fun RabbitGiStasisScreen(
     RabbitEventPage(
         "FOS-RABBIT-034",
         "GI-stasis red flag",
-        "Record signs and create vet-call work. Farm OS does not diagnose GI stasis.",
+        "Record signs and create vet-call work. Animal Farm does not diagnose GI stasis.",
         busy,
         error,
         onBack,

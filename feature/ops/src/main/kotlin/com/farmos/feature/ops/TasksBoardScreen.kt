@@ -108,7 +108,7 @@ fun TasksBoardScreen(
 
     AnimalFarmCanvas {
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = com.farmos.core.design.animalFarmHomePageInset(), vertical = com.farmos.core.design.AnimalFarmHomeMetrics.headerInset),
             verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
         ) {
             AnimalFarmModuleHeader(

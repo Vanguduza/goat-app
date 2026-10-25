@@ -18,6 +18,11 @@ fun SignOutConfirmationDialog(
     AlertDialog(
         modifier = Modifier.testTag("farm-screen:FOS-GLOBAL-020"),
         onDismissRequest = onDismiss,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(com.farmos.core.design.AnimalFarmHomeMetrics.tileRadius),
+        containerColor = com.farmos.core.design.AnimalFarmTheme.colors.surface,
+        titleContentColor = com.farmos.core.design.AnimalFarmTheme.colors.ink,
+        textContentColor = com.farmos.core.design.AnimalFarmTheme.colors.mutedInk,
+        tonalElevation = androidx.compose.ui.unit.Dp(0f),
         title = { Text("Sign out?") },
         text = { Text("Locally saved farm records stay on this device. Pending synchronization will resume after you sign in again.") },
         dismissButton = {

@@ -500,7 +500,7 @@ private fun PoultryVaccination(
     FarmOperationalPage(
         "FOS-POULTRY-014",
         "Vaccination",
-        "Use a vet-approved formulary item. Farm OS does not calculate a dose.",
+        "Use a vet-approved formulary item. Animal Farm does not calculate a dose.",
         FarmVisualClass.I4,
         onBack,
     ) {

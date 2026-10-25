@@ -40,7 +40,7 @@ import com.farmos.core.design.runSuspendCatching
 /** AI module pages; each maps to one canonical FOS-AI-* screen. */
 private enum class AiPage(val screenId: String, val title: String) {
     HOME("FOS-AI-001", "Copilot home"),
-    ASK("FOS-AI-002", "Ask Farm OS"),
+    ASK("FOS-AI-002", "Ask Animal Farm"),
     CONVERSATION("FOS-AI-003", "Conversation"),
     INSIGHT("FOS-AI-004", "Insight detail"),
     EVIDENCE("FOS-AI-005", "Evidence sources"),
@@ -70,7 +70,7 @@ private data class AiProviderConfig(
 )
 
 /**
- * Farm OS-owned AI boundary. Vendor SDKs live behind this boundary; until a provider adapter is
+ * Animal Farm-owned AI boundary. Vendor SDKs live behind this boundary; until a provider adapter is
  * connected, every analytical answer is computed on-device from local records and labelled as such.
  * No prescribing, dosing, treating, culling, selling, posting or authorization bypass happens here.
  */
@@ -199,7 +199,7 @@ fun AiBoundaryHost(
                     FarmMetricValue("Analysis mode", "On device"),
                     FarmMetricValue("Suggestions to review", if (!signalsLoaded) "—" else pending.size.toString(), onClick = { page = AiPage.SUGGESTED }),
                 ))
-                Button(onClick = { page = AiPage.ASK }, modifier = Modifier.fillMaxWidth()) { Text("Ask Farm OS") }
+                Button(onClick = { page = AiPage.ASK }, modifier = Modifier.fillMaxWidth()) { Text("Ask Animal Farm") }
                 FarmModuleTools(listOf(
                     FarmToolGroup("Review", listOf(
                         FarmToolAction("Conversation log", { page = AiPage.CONVERSATION }),
@@ -218,7 +218,7 @@ fun AiBoundaryHost(
             AiPage.ASK -> {
                 var question by rememberSaveable { mutableStateOf("") }
                 var answer by remember { mutableStateOf<String?>(null) }
-                FarmOperationalSection("Ask Farm OS") {
+                FarmOperationalSection("Ask Animal Farm") {
                     Text(
                         "No model provider is connected, so answers come from on-device analysis of your records.",
                         style = MaterialTheme.typography.bodyMedium,

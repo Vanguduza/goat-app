@@ -428,7 +428,7 @@ private fun HealthEmergencyScreen(
         FarmOperationalSection("What to do") {
             Text(
                 "Isolate the animal if safe to do so, keep it calm and warm, and call the vet. " +
-                    "Record what you see; Farm OS does not diagnose.",
+                    "Record what you see; Animal Farm does not diagnose.",
             )
         }
         FarmOperationalSection("Recent red-flag observations") {
@@ -536,7 +536,7 @@ private fun TreatmentScreen(
     FarmOperationalPage(
         "FOS-HEALTH-007",
         "Record treatment",
-        "Use a vet-approved formulary item. Farm OS does not calculate or prescribe dose.",
+        "Use a vet-approved formulary item. Animal Farm does not calculate or prescribe dose.",
         FarmVisualClass.I4,
         onBack,
     ) {
@@ -778,7 +778,7 @@ private fun LabResultScreen(
     FarmOperationalPage(
         "FOS-HEALTH-024",
         "Record lab result",
-        "A lab result is recorded evidence, not a Farm OS diagnosis.",
+        "A lab result is recorded evidence, not a Animal Farm diagnosis.",
         FarmVisualClass.I4,
         onBack,
     ) {
@@ -903,7 +903,7 @@ private fun VaccinationCaptureScreen(
     FarmOperationalPage(
         "FOS-HEALTH-012",
         "Record vaccination",
-        "A vaccination references a vet-approved formulary item and exactly one target. Farm OS does not prescribe dose.",
+        "A vaccination references a vet-approved formulary item and exactly one target. Animal Farm does not prescribe dose.",
         FarmVisualClass.I4,
         onBack,
     ) {

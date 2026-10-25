@@ -488,7 +488,7 @@ internal fun SettingsHost(
             current.actor ?: return@FarmOperationalPage
             val context = LocalContext.current
             val prefs = remember(context) { context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE) }
-            Text("These stay on this device. Farm OS has no notification server.", color = AnimalFarmTheme.colors.mutedInk)
+            Text("These stay on this device. Animal Farm has no notification server.", color = AnimalFarmTheme.colors.mutedInk)
             FarmOperationalSection("Local alerts") {
                 SettingsToggle("Health alerts", "Due vaccinations and red-flag observations.", prefs, PREF_NOTIFY_HEALTH)
                 SettingsToggle("Sync completed", "When this device finishes synchronising.", prefs, PREF_NOTIFY_SYNC)
@@ -551,7 +551,7 @@ internal fun SettingsHost(
                 Text("Google Drive: ${driveSummary(drive)}", modifier = Modifier.testTag("settings-integration-drive"))
                 Text("AI provider: managed inside the Copilot module boundary; keys stay sealed in this device's Keystore.", modifier = Modifier.testTag("settings-integration-ai"))
             }
-            Text("Farm OS has no application server. Integrations are bounded adapters, never authorities.", color = AnimalFarmTheme.colors.mutedInk)
+            Text("Animal Farm has no application server. Integrations are bounded adapters, never authorities.", color = AnimalFarmTheme.colors.mutedInk)
         }
         /** FOS-ADMIN-016 — Hardware: this device and its reader pages. */
         SettingsPage.HARDWARE -> FarmOperationalPage("FOS-ADMIN-016", "Hardware", "This device and its readers.", onBack = home, backLabel = "Farm settings") {
@@ -613,7 +613,7 @@ internal fun SettingsHost(
         /** FOS-ADMIN-018 — RFID readers: honest unavailable state; no reader adapter is bundled. The EID reader toggle lives on the sheep EID scan screen (FOS-SHEEP-005). */
         SettingsPage.RFID_DEVICES -> FarmOperationalPage("FOS-ADMIN-018", "RFID readers", "Tag readers paired with this farm.", onBack = { page = SettingsPage.HARDWARE }, backLabel = "Hardware") {
             current.actor ?: return@FarmOperationalPage
-            // No RFID reader adapter is bundled with Farm OS on this device.
+            // No RFID reader adapter is bundled with Animal Farm on this device.
             FarmOperationalSection("Readers") {
                 Text("No RFID reader is connected.", modifier = Modifier.testTag("settings-rfid-state"))
                 Text(
@@ -631,7 +631,7 @@ internal fun SettingsHost(
             current.actor ?: return@FarmOperationalPage
             // The AI boundary owns provider keys and adapters; settings does not duplicate them.
             FarmOperationalSection("Provider configuration") {
-                Text("AI provider keys and adapters are managed inside the Copilot module's Farm OS-owned boundary.", modifier = Modifier.testTag("settings-model-api"))
+                Text("AI provider keys and adapters are managed inside the Copilot module's Animal Farm-owned boundary.", modifier = Modifier.testTag("settings-model-api"))
                 Text("Keys are sealed in this device's Keystore and never leave it through settings.", color = AnimalFarmTheme.colors.mutedInk)
                 Text("Suggested actions stay advisory: Copilot never prescribes, doses, treats, culls, sells or posts on its own.", color = AnimalFarmTheme.colors.mutedInk)
             }
@@ -691,13 +691,13 @@ internal fun SettingsHost(
         /** FOS-ADMIN-025 — About: app version and canonical registry scope. */
         SettingsPage.ABOUT -> FarmOperationalPage("FOS-ADMIN-025", "About", "This app and its canonical scope.", onBack = home, backLabel = "Farm settings") {
             current.actor ?: return@FarmOperationalPage
-            FarmOperationalSection("Farm OS") {
+            FarmOperationalSection("Animal Farm") {
                 Text("Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})", modifier = Modifier.testTag("settings-about-version"))
                 Text("Local-first farm operating system. No application server: this device's database is the operational record.", color = AnimalFarmTheme.colors.mutedInk)
             }
             FarmOperationalSection("Canonical scope") {
                 Text("545 registered screens · 156 mandatory features · 29 modules", modifier = Modifier.testTag("settings-about-scope"))
-                Text("Counts come from the Farm OS screen and feature registries.", color = AnimalFarmTheme.colors.mutedInk)
+                Text("Counts come from the Animal Farm screen and feature registries.", color = AnimalFarmTheme.colors.mutedInk)
             }
         }
         /** FOS-ADMIN-010 — Units of measure: farm display-unit preferences via governed command. */
@@ -706,7 +706,7 @@ internal fun SettingsHost(
         SettingsPage.PERM_NOTIFICATIONS -> PermissionPage(
             screenId = "FOS-GLOBAL-010",
             title = "Notification permission",
-            subtitle = "Let Farm OS notify you about farm work on this device.",
+            subtitle = "Let Animal Farm notify you about farm work on this device.",
             permission = NOTIFICATION_PERMISSION,
             rationale = "Notifications tell you about due vaccinations, red-flag observations and finished syncs. They never leave this device.",
             onBack = home,
@@ -715,7 +715,7 @@ internal fun SettingsHost(
         SettingsPage.PERM_CAMERA -> PermissionPage(
             screenId = "FOS-GLOBAL-011",
             title = "Camera permission",
-            subtitle = "Let Farm OS use the camera for photos and tag scans.",
+            subtitle = "Let Animal Farm use the camera for photos and tag scans.",
             permission = Manifest.permission.CAMERA,
             rationale = "The camera takes animal photos and scans QR and barcodes. Photos stay in this farm's records on this device.",
             onBack = home,
@@ -724,29 +724,29 @@ internal fun SettingsHost(
         SettingsPage.PERM_BLUETOOTH -> PermissionPage(
             screenId = "FOS-GLOBAL-012",
             title = "Bluetooth permission",
-            subtitle = "Let Farm OS find nearby Bluetooth devices.",
+            subtitle = "Let Animal Farm find nearby Bluetooth devices.",
             permission = BLUETOOTH_PERMISSION,
-            rationale = "Bluetooth lists bonded devices such as tag readers. Farm OS never scans silently in the background.",
+            rationale = "Bluetooth lists bonded devices such as tag readers. Animal Farm never scans silently in the background.",
             onBack = home,
         )
         /** FOS-GLOBAL-013 — Location permission: current grant state and system request. */
         SettingsPage.PERM_LOCATION -> PermissionPage(
             screenId = "FOS-GLOBAL-013",
             title = "Location permission",
-            subtitle = "Let Farm OS record where farm work happened.",
+            subtitle = "Let Animal Farm record where farm work happened.",
             permission = Manifest.permission.ACCESS_FINE_LOCATION,
             rationale = "Location stamps where observations and movements were recorded. It is stored with the farm record on this device.",
             onBack = home,
         )
-        /** FOS-GLOBAL-015 — Terms and privacy: how Farm OS treats the farm's records. */
-        SettingsPage.TERMS -> FarmOperationalPage("FOS-GLOBAL-015", "Terms and privacy", "How Farm OS treats your farm's records.", onBack = home, backLabel = "Farm settings") {
+        /** FOS-GLOBAL-015 — Terms and privacy: how Animal Farm treats the farm's records. */
+        SettingsPage.TERMS -> FarmOperationalPage("FOS-GLOBAL-015", "Terms and privacy", "How Animal Farm treats your farm's records.", onBack = home, backLabel = "Farm settings") {
             current.actor ?: return@FarmOperationalPage
             FarmOperationalSection("Terms") {
-                Text("Farm OS is a local-first farm operating system. Your farm's records live in a database on your devices, not on our servers — there is no application server to hold them.", modifier = Modifier.testTag("settings-terms"))
+                Text("Animal Farm is a local-first farm operating system. Your farm's records live in a database on your devices, not on our servers — there is no application server to hold them.", modifier = Modifier.testTag("settings-terms"))
             }
             FarmOperationalSection("Privacy") {
-                Text("Records replicate only between devices you pair on your farm network, and to Google Drive only if you connect it. Farm OS itself receives nothing.")
-                Text("AI features run against your local records; provider keys you add are sealed in this device's Keystore and never logged or backed up by Farm OS.")
+                Text("Records replicate only between devices you pair on your farm network, and to Google Drive only if you connect it. Animal Farm itself receives nothing.")
+                Text("AI features run against your local records; provider keys you add are sealed in this device's Keystore and never logged or backed up by Animal Farm.")
             }
         }
     }

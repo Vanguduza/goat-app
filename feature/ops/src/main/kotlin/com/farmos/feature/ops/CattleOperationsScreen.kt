@@ -336,7 +336,7 @@ private fun CattlePdScreen(
     CattleFormPage(
         "FOS-CATTLE-013",
         "Pregnancy diagnosis",
-        "Record pregnant or open. Farm OS records the result; it does not diagnose.",
+        "Record pregnant or open. Animal Farm records the result; it does not diagnose.",
         busy,
         error,
         onBack,
@@ -496,7 +496,7 @@ private fun CattleSccScreen(
     CattleFormPage(
         "FOS-CATTLE-021",
         "SCC capture",
-        "SCC is a cell count, not a Farm OS diagnosis.",
+        "SCC is a cell count, not a Animal Farm diagnosis.",
         busy,
         error,
         onBack,
