@@ -1,5 +1,9 @@
 package com.farmos.core.design
 
+import androidx.compose.ui.platform.testTag
+
+import androidx.compose.ui.Alignment
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -45,6 +49,11 @@ private fun ThemeOption(label: String, mode: AnimalFarmThemeMode, selected: Anim
         border = BorderStroke(1.dp, if (active) AnimalFarmTheme.colors.primary else AnimalFarmTheme.colors.divider),
         color = if (active) AnimalFarmTheme.colors.primary else AnimalFarmTheme.colors.background,
         contentColor = if (active) AnimalFarmTheme.colors.onPrimary else AnimalFarmTheme.colors.ink) {
-        Text(label, Modifier.padding(12.dp), style = AnimalFarmHtmlType.action)
+        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            FarmHtmlIcon(if (mode == AnimalFarmThemeMode.DARK) "moon" else "sun", null,
+                Modifier.size(AnimalFarmHomeMetrics.lineIconSize).testTag("theme-symbol:$label"))
+            Spacer(Modifier.width(8.dp))
+            Text(label, style = AnimalFarmHtmlType.action)
+        }
     }
 }

@@ -37,7 +37,7 @@ fun AnimalFarmContextHeader(farmName: String?, dateLabel: String, title: String,
     Column(modifier.fillMaxWidth().padding(start = animalFarmHomeHeaderInset(), end = animalFarmHomeHeaderInset(), top = 22.dp, bottom = 16.dp)) {
         Row(Modifier.fillMaxWidth().padding(bottom = 18.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(7.dp), verticalAlignment = Alignment.CenterVertically) {
-                FarmHtmlIcon("sprout", null, Modifier.size(18.dp))
+                FarmHtmlIcon("sprout", null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
                 Text(farmName?.takeIf { it.isNotBlank() } ?: "Animal Farm", style = AnimalFarmHtmlType.brand,
                     modifier = Modifier.semantics { contentDescription = "Animal Farm · ${farmName ?: "This farm"}" })
             }
@@ -49,7 +49,7 @@ fun AnimalFarmContextHeader(farmName: String?, dateLabel: String, title: String,
                 Text(title, style = AnimalFarmHtmlType.pageTitle, modifier = Modifier.semantics { heading() })
             }
             Box(Modifier.size(42.dp).background(colors.softSurface, CircleShape), contentAlignment = Alignment.Center) {
-                FarmHtmlIcon(if (worker) "sun" else "chart-no-axes-combined", if (worker) "Worker home" else "Management home", Modifier.size(20.dp))
+                FarmHtmlIcon(if (worker) "sun" else "chart-no-axes-combined", if (worker) "Worker home" else "Management home", Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
             }
         }
     }
@@ -78,12 +78,12 @@ fun AnimalFarmHeroCard(category: String, title: String, context: String, actionL
             val stacked = maxWidth < 250.dp || LocalDensity.current.fontScale >= 1.75f
             val copy: @Composable (Modifier) -> Unit = { m ->
                 Column(m.testTag("home-attention-copy")) {
-                    Text(category.uppercase(Locale.ROOT), style = AnimalFarmHtmlType.eyebrow)
+                    Text(category.uppercase(Locale.ROOT), style = AnimalFarmHtmlType.eyebrow, color = colors.onPrimary.copy(alpha = 0.85f))
                     Text(title, Modifier.padding(top = 5.dp, bottom = 7.dp), style = AnimalFarmHtmlType.heroTitle)
-                    Text(context, style = AnimalFarmHtmlType.caption)
+                    Text(context, style = AnimalFarmHtmlType.caption, color = colors.onPrimary.copy(alpha = 0.85f))
                     Row(Modifier.padding(top = 15.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(actionLabel, style = AnimalFarmHtmlType.caption)
-                        FarmHtmlIcon("arrow-up-right", null, Modifier.size(18.dp))
+                        FarmHtmlIcon("arrow-up-right", null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
                     }
                 }
             }
@@ -111,7 +111,7 @@ fun AnimalFarmSummaryTile(title: String, value: String, detail: String, onClick:
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(title, style = AnimalFarmHtmlType.caption, modifier = Modifier.weight(1f))
-                FarmHtmlIcon(if (title == "Resources") "package" else "arrow-up-right", null, Modifier.size(18.dp))
+                FarmHtmlIcon(if (title == "Resources") "package" else "arrow-up-right", null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
             }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
                 Text(value, style = AnimalFarmHtmlType.numeric)
@@ -124,12 +124,16 @@ fun AnimalFarmSummaryTile(title: String, value: String, detail: String, onClick:
 
 @Composable
 fun AnimalFarmFamilyLauncher(family: AnimalFarmFamily, subtitle: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp).clip(RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius))
-        .clickable(role = Role.Button, onClick = onClick), color = AnimalFarmTheme.colors.surface, contentColor = AnimalFarmTheme.colors.ink,
-        shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius)) {
-        Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            AnimalFarmFamilyPortrait(family, Modifier.size(72.dp))
-            Text(animalFarmFamilyLabel(family), style = AnimalFarmHtmlType.subject, textAlign = TextAlign.Center)
+    Surface(modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
+        .clickable(role = Role.Button, onClick = onClick),
+        color = AnimalFarmTheme.colors.surface, contentColor = AnimalFarmTheme.colors.ink) {
+        Column(Modifier.padding(vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            AnimalFarmFamilyPortrait(family,
+                Modifier.fillMaxWidth().height(AnimalFarmHomeMetrics.familyChoiceHeight)
+                    .testTag("family-choice-portrait:${animalFarmFamilyLabel(family)}")
+                    .clip(RoundedCornerShape(AnimalFarmHomeMetrics.familyChoiceRadius)).background(AnimalFarmTheme.colors.softSurface),
+                cornerRadius = AnimalFarmHomeMetrics.familyChoiceRadius)
+            Text(animalFarmFamilyLabel(family), style = AnimalFarmHtmlType.familyChoice, textAlign = TextAlign.Center)
             if (subtitle.isNotBlank()) Text(subtitle, style = AnimalFarmHtmlType.caption, color = AnimalFarmTheme.colors.mutedInk, textAlign = TextAlign.Center)
         }
     }
@@ -141,7 +145,7 @@ fun AnimalFarmModuleTile(label: String, icon: String, onClick: () -> Unit, modif
         .testTag("home-module:$label").clip(RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius)).clickable(role = Role.Button, onClick = onClick),
         shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius), color = AnimalFarmTheme.colors.surface, contentColor = AnimalFarmTheme.colors.ink) {
         Column(Modifier.padding(horizontal = 5.dp, vertical = 13.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            FarmHtmlIcon(icon, null, Modifier.size(22.dp))
+            FarmHtmlIcon(icon, null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize), tint = AnimalFarmTheme.colors.primary)
             Text(label, style = AnimalFarmHtmlType.caption, textAlign = TextAlign.Center)
         }
     }
@@ -154,7 +158,7 @@ fun AnimalFarmQuickAction(label: String, onClick: () -> Unit, modifier: Modifier
         color = AnimalFarmTheme.colors.surface, contentColor = AnimalFarmTheme.colors.ink) {
         Row(Modifier.fillMaxWidth().padding(15.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(label, Modifier.weight(1f), style = AnimalFarmHtmlType.brand)
-            FarmHtmlIcon("arrow-up-right", null, Modifier.size(18.dp))
+            FarmHtmlIcon("arrow-up-right", null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
         }
     }
 }

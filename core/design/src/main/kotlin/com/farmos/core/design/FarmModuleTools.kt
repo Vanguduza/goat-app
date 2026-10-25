@@ -149,6 +149,6 @@ fun FarmToolRow(action: FarmToolAction, modifier: Modifier = Modifier) {
                 Text(it, style = AnimalFarmHtmlType.caption, color = colors.mutedInk)
             }
         }
-        FarmHtmlIcon("arrow-up-right", null, Modifier.size(18.dp).align(Alignment.CenterVertically), tint = colors.mutedInk)
+        FarmHtmlIcon("arrow-up-right", null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize).align(Alignment.CenterVertically), tint = colors.mutedInk)
     }
 }

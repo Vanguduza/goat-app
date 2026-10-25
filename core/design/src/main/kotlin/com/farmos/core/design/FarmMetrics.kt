@@ -69,7 +69,7 @@ fun FarmMetricStrip(metrics: List<FarmMetricValue>, modifier: Modifier = Modifie
                             Column(Modifier.padding(FosDimens.CardPadding), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Text(metric.label, Modifier.weight(1f), style = AnimalFarmHtmlType.caption)
-                                    if (click != null) FarmHtmlIcon("arrow-up-right", null, Modifier.size(18.dp))
+                                    if (click != null) FarmHtmlIcon("arrow-up-right", null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
                                 }
                                 Text(metric.value, style = AnimalFarmHtmlType.metricValue)
                                 metric.detail?.takeIf { it.isNotBlank() }?.let {

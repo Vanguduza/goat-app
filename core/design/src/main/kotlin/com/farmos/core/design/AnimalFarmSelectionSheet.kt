@@ -1,5 +1,7 @@
 package com.farmos.core.design
 
+import androidx.compose.ui.graphics.Color
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,6 +23,7 @@ fun AnimalFarmSelectionSheet(title: String, onDismiss: () -> Unit, content: @Com
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         shape = RoundedCornerShape(topStart = AnimalFarmHomeMetrics.sheetRadius, topEnd = AnimalFarmHomeMetrics.sheetRadius),
         containerColor = AnimalFarmTheme.colors.surface, contentColor = AnimalFarmTheme.colors.ink, tonalElevation = 0.dp,
+        scrimColor = if (AnimalFarmTheme.mode == AnimalFarmThemeMode.DARK) Color(0xAA050B09) else Color(0x80102819),
         dragHandle = { Box(Modifier.padding(top = 12.dp, bottom = 12.dp).size(34.dp, 4.dp).background(AnimalFarmTheme.colors.divider, RoundedCornerShape(4.dp))) }) {
         Column(Modifier.fillMaxWidth().imePadding().testTag("home-sheet:$title").verticalScroll(rememberScrollState())
             .padding(start = animalFarmHomeHeaderInset(), end = animalFarmHomeHeaderInset(), bottom = 25.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

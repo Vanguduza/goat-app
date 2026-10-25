@@ -1,5 +1,7 @@
 package com.farmos.core.design
 
+import androidx.compose.foundation.layout.size
+
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
@@ -23,6 +25,7 @@ fun FarmHtmlIcon(name: String, contentDescription: String?, modifier: Modifier =
         "house" -> R.drawable.af_html_house
         "layout-grid" -> R.drawable.af_html_layout_grid
         "message-square-plus" -> R.drawable.af_html_message_square_plus
+        "moon" -> R.drawable.af_html_moon
         "package" -> R.drawable.af_html_package
         "paw-print" -> R.drawable.af_html_paw_print
         "plus" -> R.drawable.af_html_plus
@@ -35,5 +38,5 @@ fun FarmHtmlIcon(name: String, contentDescription: String?, modifier: Modifier =
         "x" -> R.drawable.af_html_x
         else -> error("Unregistered approved HTML icon: $name")
     }
-    Icon(painterResource(resource), contentDescription, modifier, tint)
+    Icon(painterResource(resource), contentDescription, modifier.size(AnimalFarmHomeMetrics.lineIconSize), tint)
 }

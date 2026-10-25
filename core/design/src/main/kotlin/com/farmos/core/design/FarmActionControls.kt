@@ -114,7 +114,7 @@ fun FarmBackButton(
     modifier: Modifier = Modifier,
 ) {
     FarmActionButton(onClick, modifier) {
-        FarmHtmlIcon("arrow-left", null, Modifier.size(20.dp))
+        FarmHtmlIcon("arrow-left", null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
         Text(label, Modifier.padding(start = FosDimens.Grid))
     }
 }

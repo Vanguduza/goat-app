@@ -60,7 +60,7 @@ private fun HomeNavigationItem(label: String, icon: String, action: () -> Unit, 
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(5.dp)) {
         Box(Modifier.background(if (active) AnimalFarmTheme.colors.lime else AnimalFarmTheme.colors.surface, RoundedCornerShape(16.dp))
             .padding(horizontal = 14.dp, vertical = 4.dp), contentAlignment = Alignment.Center) {
-            FarmHtmlIcon(icon, null, Modifier.size(16.dp), if (active) AnimalFarmTheme.colors.primary else AnimalFarmTheme.colors.mutedInk)
+            FarmHtmlIcon(icon, null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize), if (active) AnimalFarmTheme.colors.primary else AnimalFarmTheme.colors.mutedInk)
         }
         Text(label, style = AnimalFarmHtmlType.navigation, textAlign = TextAlign.Start,
             color = if (active) AnimalFarmTheme.colors.primary else AnimalFarmTheme.colors.mutedInk)

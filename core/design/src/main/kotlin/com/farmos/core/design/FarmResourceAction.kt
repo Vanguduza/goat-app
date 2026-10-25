@@ -30,7 +30,7 @@ fun FarmResourceAction(title: String, onClick: () -> Unit, modifier: Modifier = 
                 Text(title, style = AnimalFarmHtmlType.action)
                 detail?.takeIf { it.isNotBlank() }?.let { Text(it, style = AnimalFarmHtmlType.caption, color = colors.mutedInk) }
             }
-            if (trailing != null) trailing() else FarmHtmlIcon("arrow-up-right", null, Modifier.size(18.dp))
+            if (trailing != null) trailing() else FarmHtmlIcon("arrow-up-right", null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
         }
     }
 }

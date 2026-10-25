@@ -59,14 +59,14 @@ internal fun HomeReferenceSheets(sheet: HomeReferenceSheet?, onDismiss: () -> Un
     fun navigate(destination: FarmDestination) { onDismiss(); onOpen(destination) }
     AnimalFarmSelectionSheet(title, onDismiss) {
         when (sheet) {
-            HomeReferenceSheet.FAMILIES -> Column(Modifier.testTag("farm-screen:FOS-HOME-002"), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            HomeReferenceSheet.FAMILIES -> Column(Modifier.testTag("farm-screen:FOS-HOME-002"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 val families = listOf(
                     AnimalFarmFamily.GOAT to FarmDestination.Goat(), AnimalFarmFamily.RABBIT to FarmDestination.Module(FarmModule.RABBIT),
                     AnimalFarmFamily.SHEEP to FarmDestination.Module(FarmModule.SHEEP), AnimalFarmFamily.CATTLE to FarmDestination.Module(FarmModule.CATTLE),
                     AnimalFarmFamily.POULTRY to FarmDestination.Module(FarmModule.POULTRY))
                 val columns = if (LocalDensity.current.fontScale >= 1.75f) 2 else 3
                 families.chunked(columns).forEach { row ->
-                    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         row.forEach { (family, target) ->
                             AnimalFarmFamilyLauncher(family, "", { navigate(target) },
                                 Modifier.weight(1f).fillMaxHeight().testTag("home-family:${animalFarmFamilyLabel(family)}"))

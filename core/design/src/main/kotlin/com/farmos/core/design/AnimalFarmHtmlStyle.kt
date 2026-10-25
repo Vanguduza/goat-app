@@ -11,6 +11,9 @@ import androidx.compose.ui.unit.sp
  * Inter is the explicit native adaptation; Android touch/large-text rules remain mandatory.
  */
 object AnimalFarmHomeMetrics {
+    val lineIconSize = 16.dp
+    val familyChoiceHeight = 90.dp
+    val familyChoiceRadius = 17.dp
     val pageInset = 18.dp
     val headerInset = 22.dp
     val heroPadding = 20.dp
@@ -45,17 +48,18 @@ object AnimalFarmHtmlType {
     val pageTitle = face(28, 35, FontWeight.Medium, -0.9f)
     val heroTitle = face(26, 32.5f, FontWeight.Medium, -0.4f)
     val focusTitle = face(30, 37.5f, FontWeight.Medium, -0.8f)
-    val sheetTitle = face(21, 28, FontWeight.Medium, -0.4f)
+    val sheetTitle = face(21, 26.25f, FontWeight.Medium, -0.4f)
     val reviewTitle = face(23, 28.75f, FontWeight.Medium, -0.5f)
     val sectionTitle = face(16, 20, FontWeight.Medium)
     val body = face(15, 21)
     val action = face(15, 21, FontWeight.Medium)
-    val field = face(16, 23)
+    val field = face(15, 21)
     val brand = face(14, 19.6f, FontWeight.Medium)
-    val subject = face(13, 19, FontWeight.Medium)
+    val subject = face(13, 18.2f, FontWeight.Medium)
+    val familyChoice = face(13, 18.2f)
     val caption = face(12, 16.8f)
     val navigation = face(11, 15.4f)
-    val eyebrow = face(11, 16, FontWeight.Medium, 1.25f)
+    val eyebrow = face(11, 15.4f, FontWeight.Medium, 1.25f)
     val calendarDay = face(30, 30, tracking = -1f)
     val metricValue = face(24, 30, FontWeight.Medium, -0.5f).copy(fontFeatureSettings = "tnum")
     val numeric = face(32, 32, FontWeight.Medium, -1f).copy(fontFeatureSettings = "tnum")

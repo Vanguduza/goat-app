@@ -1,5 +1,7 @@
 package com.farmos.core.design
 
+import androidx.compose.ui.draw.alpha
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -68,7 +70,7 @@ fun AnimalFarmReviewTaskCard(category: String, dueLabel: String, subjectName: St
             FarmPrimaryButton(onAction, Modifier.fillMaxWidth().padding(top = 19.dp).testTag("home-task-action")) {
                 Text(actionLabel, style = AnimalFarmHtmlType.action)
                 Spacer(Modifier.width(9.dp))
-                FarmHtmlIcon("arrow-right", null, Modifier.size(18.dp))
+                FarmHtmlIcon("arrow-right", null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
             }
         }
     }
@@ -96,9 +98,9 @@ fun AnimalFarmCarouselControls(positionLabel: String, onPrevious: () -> Unit, on
 fun AnimalFarmRoundIcon(icon: String, description: String, onClick: () -> Unit, modifier: Modifier = Modifier,
     enabled: Boolean = true, lime: Boolean = false) {
     IconButton(onClick, modifier.sizeIn(minWidth = AnimalFarmTheme.minimumTouchDp.dp, minHeight = AnimalFarmTheme.minimumTouchDp.dp), enabled = enabled) {
-        Box(Modifier.size(44.dp).background(if (lime) AnimalFarmTheme.colors.lime else AnimalFarmTheme.colors.surface, CircleShape), contentAlignment = Alignment.Center) {
-            FarmHtmlIcon(icon, description, Modifier.size(20.dp),
-                tint = if (enabled) if (lime) AnimalFarmTheme.colors.onLime else AnimalFarmTheme.colors.ink else AnimalFarmTheme.colors.mutedInk.copy(alpha = 0.4f))
+        Box(Modifier.size(44.dp).alpha(if (enabled) 1f else 0.55f).background(if (lime) AnimalFarmTheme.colors.lime else AnimalFarmTheme.colors.softSurface, CircleShape), contentAlignment = Alignment.Center) {
+            FarmHtmlIcon(icon, description, Modifier.size(AnimalFarmHomeMetrics.lineIconSize),
+                tint = if (lime) AnimalFarmTheme.colors.onLime else AnimalFarmTheme.colors.ink)
         }
     }
 }
@@ -108,7 +110,7 @@ fun AnimalFarmWorkDayBanner(day: String, weekday: String, context: String, onRec
     Surface(Modifier.fillMaxWidth().testTag("home-workday-banner"), shape = RoundedCornerShape(18.dp), color = AnimalFarmTheme.colors.primary, contentColor = AnimalFarmTheme.colors.onPrimary) {
         Row(Modifier.padding(horizontal = 18.dp, vertical = 16.dp), horizontalArrangement = Arrangement.spacedBy(13.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(day, style = AnimalFarmHtmlType.calendarDay)
-            Column(Modifier.weight(1f)) { Text(weekday, style = AnimalFarmHtmlType.action); Text(context, style = AnimalFarmHtmlType.navigation) }
+            Column(Modifier.weight(1f)) { Text(weekday, style = AnimalFarmHtmlType.action); Text(context, style = AnimalFarmHtmlType.navigation, color = AnimalFarmTheme.colors.onPrimary.copy(alpha = 0.8f)) }
             AnimalFarmRoundIcon("plus", "Add a work update", onRecord, lime = true)
         }
     }
@@ -120,7 +122,7 @@ fun AnimalFarmQuickCaptureTile(label: String, icon: String, onClick: () -> Unit,
         .clip(RoundedCornerShape(16.dp)).clickable(role = Role.Button, onClick = onClick),
         shape = RoundedCornerShape(16.dp), color = AnimalFarmTheme.colors.surface, contentColor = AnimalFarmTheme.colors.ink) {
         Column(Modifier.padding(horizontal = 4.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            FarmHtmlIcon(icon, null, Modifier.size(22.dp))
+            FarmHtmlIcon(icon, null, Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
             Text(label, style = AnimalFarmHtmlType.caption, textAlign = TextAlign.Center)
         }
     }
