@@ -28,6 +28,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
@@ -58,9 +60,9 @@ fun FarmModuleTools(
     var searching by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
     val visibleGroups = groups.filter { it.actions.isNotEmpty() }
-    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(title, Modifier.weight(1f).padding(top = 12.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(title, Modifier.weight(1f), style = AnimalFarmHtmlType.sectionTitle)
             if (visibleGroups.sumOf { it.actions.size } > 6) FarmActionButton(onClick = { searching = !searching; if (!searching) query = "" }) {
                 Icon(Icons.Rounded.Search, contentDescription = null, modifier = Modifier.size(18.dp))
                 Text(if (searching) "Close" else "Find tool", Modifier.padding(start = 8.dp))
@@ -73,7 +75,7 @@ fun FarmModuleTools(
                 label = { Text("Find a tool") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().testTag("farm-tools-search"),
-                shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius),
+                shape = RoundedCornerShape(AnimalFarmHomeMetrics.fieldRadius),
             )
         }
         val search = query.trim()
@@ -92,9 +94,9 @@ fun FarmModuleTools(
                 val isExpanded = expanded == group.label
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius),
+                    shape = RoundedCornerShape(AnimalFarmHomeMetrics.resourceRadius),
                     color = AnimalFarmTheme.colors.surface,
-                    border = BorderStroke(FosDimens.Hairline, AnimalFarmTheme.colors.divider),
+                    border = if (AnimalFarmTheme.mode == AnimalFarmThemeMode.OUTDOOR) BorderStroke(FosDimens.Hairline, AnimalFarmTheme.colors.divider) else null,
                 ) {
                     Column {
                         Row(
@@ -103,11 +105,11 @@ fun FarmModuleTools(
                                 .clickable(role = Role.Button) { expanded = if (isExpanded) null else group.label }
                                 .semantics { stateDescription = if (isExpanded) "Expanded" else "Collapsed" }
                                 .testTag("farm-tools-group:" + group.label)
-                                .padding(FosDimens.CardPadding),
+                                .padding(AnimalFarmHomeMetrics.rowPadding),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            Text(group.label, Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
-                            Text(group.actions.size.toString(), color = AnimalFarmTheme.colors.mutedInk)
+                            Text(group.label, Modifier.weight(1f), style = AnimalFarmHtmlType.sectionTitle)
+                            Text(group.actions.size.toString(), style = AnimalFarmHtmlType.caption, color = AnimalFarmTheme.colors.mutedInk)
                             Icon(
                                 if (isExpanded) Icons.Rounded.ExpandMore else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                                 contentDescription = null,
@@ -138,25 +140,15 @@ fun FarmToolRow(action: FarmToolAction, modifier: Modifier = Modifier) {
             .heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
             .clickable(enabled = action.enabled, role = Role.Button, onClick = action.onClick)
             .testTag(action.tag ?: ("farm-tool:" + action.label))
-            .padding(horizontal = 12.dp, vertical = 12.dp),
+            .padding(horizontal = 12.dp, vertical = AnimalFarmHomeMetrics.rowPadding),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(action.label, style = MaterialTheme.typography.bodyLarge, color = if (action.enabled) colors.ink else colors.mutedInk)
+            Text(action.label, style = AnimalFarmHtmlType.action, color = if (action.enabled) colors.ink else colors.mutedInk)
             action.detail?.takeIf { it.isNotBlank() }?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall, color = colors.mutedInk)
+                Text(it, style = AnimalFarmHtmlType.caption, color = colors.mutedInk)
             }
         }
-        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(20.dp), tint = colors.mutedInk)
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun FarmSectionTabs(labels: List<String>, selected: String, onSelect: (String) -> Unit, modifier: Modifier = Modifier) {
-    FlowRow(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        labels.forEach { label ->
-            FarmFilterChip(label, label == selected, { onSelect(label) }, Modifier.testTag("farm-section:" + label))
-        }
+        FarmHtmlIcon("arrow-up-right", null, Modifier.size(18.dp).align(Alignment.CenterVertically), tint = colors.mutedInk)
     }
 }

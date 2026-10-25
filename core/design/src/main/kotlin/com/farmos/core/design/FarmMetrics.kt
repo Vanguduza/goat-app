@@ -1,5 +1,11 @@
 package com.farmos.core.design
 
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+
 import androidx.compose.ui.platform.testTag
 
 import androidx.compose.foundation.background
@@ -31,9 +37,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 
-data class FarmMetricValue(val label: String, val value: String, val detail: String? = null, val onClick: (() -> Unit)? = null)
+/** Metric formatting and meaning are supplied by the module; no display value becomes a domain fact. */
+data class FarmMetricValue(val label: String, val value: String, val detail: String? = null,
+    val onClick: (() -> Unit)? = null, val emphasized: Boolean = false)
 
-/** P04/P10: missing values remain explicitly supplied by the owner, never defaulted to zero. */
+/** P04/P10: compact HTML-derived tiles. Missing values remain unknown, exact quantities retain their units. */
 @Composable
 fun FarmMetricStrip(metrics: List<FarmMetricValue>, modifier: Modifier = Modifier) {
     BoxWithConstraints(modifier.fillMaxWidth()) {
@@ -42,23 +50,30 @@ fun FarmMetricStrip(metrics: List<FarmMetricValue>, modifier: Modifier = Modifie
             maxWidth >= 600.dp -> 3
             else -> 2
         }
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) {
             metrics.chunked(columns).forEach { row ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.fillMaxWidth().height(androidx.compose.foundation.layout.IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) {
                     row.forEach { metric ->
                         val click = metric.onClick
+                        val colors = AnimalFarmTheme.colors
+                        val shape = RoundedCornerShape(AnimalFarmHomeMetrics.tileRadius)
                         Surface(
-                            modifier = Modifier.weight(1f).then(if (click == null) Modifier else Modifier.clickable(role = Role.Button, onClick = click)),
-                            shape = RoundedCornerShape(AnimalFarmHomeMetrics.tileRadius),
-                            color = AnimalFarmTheme.colors.softSurface,
-                            contentColor = AnimalFarmTheme.colors.ink,
-                            border = BorderStroke(FosDimens.Hairline, AnimalFarmTheme.colors.divider),
+                            modifier = Modifier.weight(1f).fillMaxHeight().heightIn(min = AnimalFarmHomeMetrics.metricMinimumHeight)
+                                .clip(shape).testTag("farm-metric:" + metric.label)
+                                .then(if (click == null) Modifier else Modifier.clickable(role = Role.Button, onClick = click)),
+                            shape = shape,
+                            color = if (metric.emphasized) colors.lime else colors.surface,
+                            contentColor = if (metric.emphasized) colors.onLime else colors.ink,
+                            border = if (AnimalFarmTheme.mode == AnimalFarmThemeMode.OUTDOOR) BorderStroke(FosDimens.Hairline, colors.divider) else null,
                         ) {
-                            Column(Modifier.padding(FosDimens.CardPadding), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text(metric.label, style = MaterialTheme.typography.labelLarge)
-                                Text(metric.value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+                            Column(Modifier.padding(FosDimens.CardPadding), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Text(metric.label, Modifier.weight(1f), style = AnimalFarmHtmlType.caption)
+                                    if (click != null) FarmHtmlIcon("arrow-up-right", null, Modifier.size(18.dp))
+                                }
+                                Text(metric.value, style = AnimalFarmHtmlType.metricValue)
                                 metric.detail?.takeIf { it.isNotBlank() }?.let {
-                                    Text(it, style = MaterialTheme.typography.bodySmall, color = AnimalFarmTheme.colors.mutedInk)
+                                    Text(it, style = AnimalFarmHtmlType.caption, color = if (metric.emphasized) colors.onLime else colors.mutedInk)
                                 }
                             }
                         }

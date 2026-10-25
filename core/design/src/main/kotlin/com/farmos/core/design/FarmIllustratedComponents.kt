@@ -78,7 +78,6 @@ fun FarmIllustratedSectionSurface(
         shape = RoundedCornerShape(AnimalFarmHomeMetrics.tileRadius),
         color = colors.surface,
         contentColor = colors.ink,
-        border = BorderStroke(1.dp, colors.divider),
     ) {
         Column(Modifier.padding(FosDimens.CardPadding), verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
     }

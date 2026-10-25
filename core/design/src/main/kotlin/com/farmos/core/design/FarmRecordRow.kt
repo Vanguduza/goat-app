@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 fun FarmRecordRow(text: String, modifier: Modifier = Modifier) {
     val lines = text.split('\n')
     Column(modifier.fillMaxWidth().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(lines.first(), style = MaterialTheme.typography.bodyLarge)
-        if (lines.size > 1) Text(lines.drop(1).joinToString("\n"), style = MaterialTheme.typography.bodyMedium, color = AnimalFarmTheme.colors.mutedInk)
+        Text(lines.first(), style = AnimalFarmHtmlType.action)
+        if (lines.size > 1) Text(lines.drop(1).joinToString("\n"), style = AnimalFarmHtmlType.body, color = AnimalFarmTheme.colors.mutedInk)
     }
 }

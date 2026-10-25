@@ -34,7 +34,7 @@ fun FarmActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 13.dp),
     content: @Composable RowScope.() -> Unit,
 ) {
     val colors = AnimalFarmTheme.colors
@@ -42,7 +42,7 @@ fun FarmActionButton(
         onClick = onClick,
         modifier = modifier.sizeIn(minWidth = AnimalFarmTheme.minimumTouchDp.dp, minHeight = AnimalFarmTheme.minimumTouchDp.dp),
         enabled = enabled,
-        shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius),
+        shape = RoundedCornerShape(AnimalFarmHomeMetrics.secondaryActionRadius),
         border = BorderStroke(FosDimens.Hairline, if (enabled) colors.divider else colors.divider.copy(alpha = 0.5f)),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = colors.surface,
@@ -51,7 +51,7 @@ fun FarmActionButton(
             disabledContentColor = colors.mutedInk,
         ),
         contentPadding = contentPadding,
-        content = content,
+        content = { androidx.compose.material3.ProvideTextStyle(AnimalFarmHtmlType.action) { content() } },
     )
 }
 
@@ -60,7 +60,7 @@ fun FarmPrimaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 13.dp),
     content: @Composable RowScope.() -> Unit,
 ) {
     val colors = AnimalFarmTheme.colors
@@ -76,7 +76,7 @@ fun FarmPrimaryButton(
             disabledContentColor = colors.mutedInk,
         ),
         contentPadding = contentPadding,
-        content = content,
+        content = { androidx.compose.material3.ProvideTextStyle(AnimalFarmHtmlType.action) { content() } },
     )
 }
 
@@ -114,7 +114,7 @@ fun FarmBackButton(
     modifier: Modifier = Modifier,
 ) {
     FarmActionButton(onClick, modifier) {
-        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, modifier = Modifier.size(20.dp))
+        FarmHtmlIcon("arrow-left", null, Modifier.size(20.dp))
         Text(label, Modifier.padding(start = FosDimens.Grid))
     }
 }

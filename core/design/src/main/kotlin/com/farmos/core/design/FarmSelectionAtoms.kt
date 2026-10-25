@@ -72,7 +72,7 @@ fun FarmEntitySelector(
             OutlinedTextField(
                 value = query, onValueChange = { query = it }, label = { Text("Find " + title.lowercase()) },
                 modifier = Modifier.fillMaxWidth().testTag("$atomTag:search"), enabled = enabled, singleLine = true,
-                shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius),
+                shape = RoundedCornerShape(AnimalFarmHomeMetrics.fieldRadius),
             )
         }
         val needle = if (options.size > 6) query.trim() else ""
@@ -94,7 +94,7 @@ internal fun FarmSelectorOptionRow(atomTag: String, option: FarmSelectorOption, 
     val colors = AnimalFarmTheme.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius),
+        shape = RoundedCornerShape(AnimalFarmHomeMetrics.secondaryActionRadius),
         color = if (selected) colors.lime else colors.surface,
         contentColor = if (selected) colors.onLime else colors.ink,
         border = BorderStroke(FosDimens.Hairline, colors.divider),
@@ -102,13 +102,13 @@ internal fun FarmSelectorOptionRow(atomTag: String, option: FarmSelectorOption, 
         Row(
             Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
                 .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onSelect)
-                .padding(12.dp).testTag(atomTag + ":option:" + option.id),
+                .padding(AnimalFarmHomeMetrics.rowPadding).testTag(atomTag + ":option:" + option.id),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Icon(if (selected) Icons.Rounded.RadioButtonChecked else Icons.Rounded.RadioButtonUnchecked, contentDescription = null, modifier = Modifier.size(20.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(option.label + if (selected) " · selected" else "", fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
+                Text(option.label + if (selected) " · selected" else "", style = AnimalFarmHtmlType.action, fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal)
                 option.detail?.let { Text(it, color = if (selected) colors.onLime else colors.mutedInk, style = MaterialTheme.typography.bodySmall) }
             }
         }

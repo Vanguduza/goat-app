@@ -1,5 +1,8 @@
 package com.farmos.core.design
 
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -56,15 +59,15 @@ fun FarmOperationalPage(
                     .imePadding()
                     .navigationBarsPadding()
                     .verticalScroll(rememberScrollState())
-                    .padding(FosDimens.ScreenMargin),
-                verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
+                    .padding(horizontal = animalFarmHomePageInset(), vertical = AnimalFarmHomeMetrics.headerInset),
+                verticalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.contentGap),
             ) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     onBack?.let { back -> FarmBackButton(backLabel, back, Modifier.weight(1f, fill = false)) }
                     if (LocalDensity.current.fontScale < 1.5f) Text("Animal Farm", Modifier.padding(start = 12.dp), style = MaterialTheme.typography.labelMedium, color = AnimalFarmTheme.colors.mutedInk)
                 }
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.SemiBold)
+                    Text(title, modifier = Modifier.semantics { heading() }, style = AnimalFarmHtmlType.pageTitle)
                     if (subtitle.isNotBlank()) Text(
                         subtitle,
                         style = MaterialTheme.typography.bodyMedium,
@@ -90,7 +93,7 @@ fun FarmOperationalSection(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     FarmIllustratedSectionSurface {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Text(title, style = AnimalFarmHtmlType.sectionTitle)
         description?.takeIf { it.isNotBlank() }?.let {
             Text(it, style = MaterialTheme.typography.bodyMedium, color = AnimalFarmTheme.colors.mutedInk)
         }
