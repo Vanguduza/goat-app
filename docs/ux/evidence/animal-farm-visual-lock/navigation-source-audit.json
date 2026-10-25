@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "1db35c94c3b754688f1eda43a36452dfe6f4bfe5",
+  "tested_commit": "434472330f313c02334c1c640af1de2ca1794b5d",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
@@ -362,8 +362,8 @@
         },
         {
           "value": "ANIMALS",
-          "refs": 4,
-          "transition_refs": 2,
+          "refs": 5,
+          "transition_refs": 3,
           "render_only_candidate": false
         },
         {
@@ -416,8 +416,8 @@
         },
         {
           "value": "NESTS",
-          "refs": 2,
-          "transition_refs": 0,
+          "refs": 3,
+          "transition_refs": 1,
           "render_only_candidate": false
         },
         {
