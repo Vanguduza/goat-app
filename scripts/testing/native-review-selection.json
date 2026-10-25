@@ -256,6 +256,19 @@
     },
     {
       "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/HtmlHomeTaskSheetContractTest.kt",
+      "class": "com.farmos.app.HtmlHomeTaskSheetContractTest",
+      "sha256": "7464844cff4d481c172d0026cea4e684a3359ff73b560bab6f124be69994d85b",
+      "methods": [
+        "aRemovedTaskCannotOpenOrMutateAnotherRecord",
+        "openingAndDismissingThePreviewDoesNotNavigateOrMutateTheTask",
+        "profileActionKeepsExactAnimalAndDoesNotGuessRabbitSex",
+        "workStripReportsDueProportionNotTaskCompletion"
+      ],
+      "evidence_kind": "NATIVE_HOME_BEHAVIOUR_NOT_SCOPE_APPROVAL"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/InventoryCaptureOwnerTest.kt",
       "class": "com.farmos.app.InventoryCaptureOwnerTest",
       "sha256": "fbf8b38adf3d1ed721252e66194ea15b0dfecf5fa24d0b281d5d7fabe3cc034b",
