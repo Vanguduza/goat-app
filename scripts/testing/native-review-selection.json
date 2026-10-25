@@ -116,7 +116,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt",
       "class": "com.farmos.app.FarmRuntimeNavigationTest",
-      "sha256": "c25067ad78c0f682a77d9b6b8271dd4e7c81ef8298f3fc56980d0c3bb20a479f",
+      "sha256": "857c7276e0b6111a31180fbce8446d64218634bd3e63dd15a35be7d0564f973b",
       "methods": [
         "generalHomeTraversesSpeciesUtilitiesAndRestoresHome",
         "managementHomeExposesTheRemainingExactModuleOwners",
@@ -231,7 +231,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/HomeMenuAndTaskUxTest.kt",
       "class": "com.farmos.app.HomeMenuAndTaskUxTest",
-      "sha256": "cf09adc06e454e64ce70ec9934b4db2ad5d837ae383c58f4b7cd2e740d221f14",
+      "sha256": "d07a3eda4234f1caa5d1184678286df17d48bc998bcc64e5df75ff07a36c990f",
       "methods": [
         "addTaskButtonSubmitsThroughTheExistingCreateCallback",
         "completingATaskAndReturningHomeInvokeTheCorrectCallbacks",
