@@ -1,5 +1,7 @@
 package com.farmos.app
 
+import androidx.compose.ui.test.isDisplayed
+
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material3.Text
@@ -121,13 +123,15 @@ class AndroidBackNavigationTest {
             )
         }
         compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertIsDisplayed()
-        compose.onNode(hasClickAction() and hasText("Animals")).performClick()
+        compose.onNodeWithTag("home-module:Animals").performScrollTo().performClick()
+        compose.waitUntil(5_000) { compose.onNodeWithTag("farm-screen:FOS-HOME-002").isDisplayed() }
         compose.onNodeWithTag("farm-screen:FOS-HOME-002").assertIsDisplayed()
         back()
         compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertIsDisplayed()
         compose.onNodeWithTag("farm-screen:FOS-HOME-002").assertDoesNotExist()
 
-        compose.onNode(hasClickAction() and hasText("More")).performClick()
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-menu").assertIsDisplayed()
         back()
         compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertIsDisplayed()

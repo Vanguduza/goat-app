@@ -66,6 +66,9 @@ class LockedHtmlHomeParityTest {
         val text = compose.onNodeWithTag("home-attention-copy", useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
         assertTrue("Image and text share a horizontal hero", image.left >= text.right)
         compose.onNodeWithTag("home-attention").performClick()
+        compose.onNodeWithTag("home-task-sheet:nest").assertIsDisplayed()
+        compose.runOnIdle { assertNull(opened) }
+        compose.onNodeWithTag("home-task-preview-open").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(FarmDestination.Task("nest"), opened) }
     }
 
@@ -95,6 +98,9 @@ class LockedHtmlHomeParityTest {
         compose.onNodeWithContentDescription("Next task").performScrollTo().performClick()
         compose.onNodeWithTag("home-task-title", useUnmergedTree = true).assertTextEquals("Record Nala’s weight")
         compose.onNodeWithTag("home-task-action").performScrollTo().performClick()
+        compose.onNodeWithTag("home-task-sheet:weight").assertIsDisplayed()
+        compose.runOnIdle { assertNull(opened) }
+        compose.onNodeWithTag("home-task-preview-open").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(FarmDestination.Task("weight"), opened) }
         compose.onNodeWithTag("home-task-title", useUnmergedTree = true).assertTextEquals("Record Nala’s weight")
         compose.onNodeWithTag("home-stage:1").performScrollTo().performClick()

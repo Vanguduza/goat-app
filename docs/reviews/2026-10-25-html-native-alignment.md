@@ -42,3 +42,12 @@ The display name is Animal Farm, including the launcher, clinical disclaimers, s
 `verify_html_style_adoption.py` and its negative tests prevent newly added app/feature controls from silently importing a second default Material design system. This check is a source-level regression guard, not a pixel-based approval or a substitute for inspecting real native output.
 
 A first integrated run completed 62 native/unit checks with zero failures, errors or skips, including six dedicated light/dark/dashboard-sheet captures and the 200% text footer check. That run preceded display-brand wording changes. The current full integration and source-bound remote workflow results must be recorded separately; do not relabel those initial results as final full-product certification.
+
+
+## Native interaction and optical closure
+
+Actual browser renders establish Lucide16px/stroke1.6, family image windows90px high,17px image corners,12/8px family-grid gaps and forest-tinted modal backdrops. The native optical tests reproduced and then corrected the previous discrepancies without altering the HTML, its original artwork or the native accessibility targets.
+
+The Work strip now uses actual due/open counts, not simulated completion. A task opens a read-only native preview with its recorded subject, due date and status before the exact existing detail/profile route. Unknown clinical measurements and prototype resource quantities are never fabricated. Opening, closing or pressing Back on the preview does not change task status. Native Back closes the overlay before navigating away from Home.
+
+Foundation at6fff75f exposed eight remaining menu-entry regressions after More became Modules. Tests now traverse Modules/All farm tools, wait for the actual native family sheet, and retain their original subject, farm-isolation, durable-write and Back assertions. The expanded current CI and native captures remain required; no independent visual approval is manufactured by source changes.

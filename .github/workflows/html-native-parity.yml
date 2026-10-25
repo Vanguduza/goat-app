@@ -57,6 +57,10 @@ jobs:
           --tests com.farmos.app.HomeTaskIdentityTest
           --tests com.farmos.app.HtmlAppWideStyleContractTest
           --tests com.farmos.app.HtmlOpticalParityTest
+          --tests com.farmos.app.HtmlHomeTaskSheetContractTest
+          --tests com.farmos.app.AndroidBackNavigationTest
+          --tests com.farmos.app.GlobalSearchRuntimeNavigationTest
+          --tests com.farmos.app.SpeciesSearchRuntimeNavigationTest
           --tests com.farmos.app.HomeNavigationLayoutTest
           --tests com.farmos.app.AnimalFarmReferenceContractTest
           --tests com.farmos.app.HomeMenuAndTaskUxTest

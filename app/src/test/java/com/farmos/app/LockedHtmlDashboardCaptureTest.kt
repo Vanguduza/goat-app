@@ -61,4 +61,17 @@ class LockedHtmlDashboardCaptureTest {
         compose.onNodeWithTag("home-sheet:Theme").assertIsDisplayed()
         capture("native-theme-light")
     }
+    @Test fun managementTaskPreview() {
+        render(false, AnimalFarmThemeMode.LIGHT)
+        compose.onNodeWithTag("home-attention").performClick()
+        compose.onNodeWithTag("home-task-sheet:health").assertIsDisplayed()
+        capture("native-task-health-light")
+    }
+    @Test fun workerTaskPreview() {
+        render(true, AnimalFarmThemeMode.LIGHT)
+        compose.onNodeWithTag("home-task-action").performScrollTo().performClick()
+        compose.onNodeWithTag("home-task-sheet:nest").assertIsDisplayed()
+        capture("native-task-nest-light")
+    }
+
 }

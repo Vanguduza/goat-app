@@ -53,7 +53,7 @@ object AnimalFarmHtmlType {
     val sectionTitle = face(16, 20, FontWeight.Medium)
     val body = face(15, 21)
     val action = face(15, 21, FontWeight.Medium)
-    val field = face(15, 21)
+    val field = face(16, 22.4f)
     val brand = face(14, 19.6f, FontWeight.Medium)
     val subject = face(13, 18.2f, FontWeight.Medium)
     val familyChoice = face(13, 18.2f)

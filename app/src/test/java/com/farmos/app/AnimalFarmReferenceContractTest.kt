@@ -103,6 +103,8 @@ class AnimalFarmReferenceContractTest {
         }
 
         compose.onNodeWithTag("home-attention").performClick()
+        compose.onNodeWithTag("home-task-sheet:task-health-nala").assertIsDisplayed()
+        compose.onNodeWithTag("home-task-preview-open").performScrollTo().performClick()
 
         compose.runOnIdle {
             assertEquals(FarmDestination.Task("task-health-nala"), opened)
@@ -175,6 +177,8 @@ class AnimalFarmReferenceContractTest {
             .performScrollTo()
             .assertIsDisplayed()
             .performClick()
+        compose.onNodeWithTag("home-task-sheet:task-health-nala").assertIsDisplayed()
+        compose.onNodeWithTag("home-task-preview-open").performScrollTo().performClick()
 
         compose.runOnIdle {
             assertEquals(FarmDestination.Task("task-health-nala"), opened)

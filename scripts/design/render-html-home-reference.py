@@ -37,12 +37,14 @@ def main():
     chrome=args.chrome or shutil.which('google-chrome') or shutil.which('chromium') or shutil.which('chromium-browser')
     if not chrome:raise SystemExit('A qualified local Chromium executable is required')
     output=args.output.resolve();output.mkdir(parents=True,exist_ok=True)
-    cases=[('management','light',None),('management','dark',None),('worker','light',None),('worker','dark',None),('management','light','animals'),('management','light','settings')]
+    cases=[('management','light',None),('management','dark',None),('worker','light',None),('worker','dark',None),('management','light','animals'),('management','light','settings'),('management','light','task-health'),('worker','light','task-nest')]
     results=[]
     for role,theme,sheet in cases:
         name='reference-'+(sheet or role)+'-'+theme
         extra=''
-        if sheet:extra="root.querySelector("+json.dumps('[data-open="'+sheet+'"]')+").click();"
+        if sheet:
+            selector = '[data-task="'+sheet.removeprefix('task-')+'"]' if sheet.startswith('task-') else '[data-open="'+sheet+'"]'
+            extra="root.querySelector("+json.dumps(selector)+").click();"
         script="""<script>window.addEventListener('load',()=>{
 const root=document.getElementById('animal-farm-locked-homes');
 root.querySelector('[data-role="ROLE"]').click();

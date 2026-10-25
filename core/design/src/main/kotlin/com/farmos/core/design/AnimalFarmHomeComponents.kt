@@ -45,11 +45,11 @@ fun AnimalFarmContextHeader(farmName: String?, dateLabel: String, title: String,
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                if (!eyebrow.isNullOrBlank()) Text(eyebrow.uppercase(Locale.ROOT), style = AnimalFarmHtmlType.eyebrow, color = colors.mutedInk, modifier = Modifier.padding(bottom = 5.dp))
+                if (!eyebrow.isNullOrBlank()) Text(eyebrow.uppercase(Locale.ROOT), style = AnimalFarmHtmlType.eyebrow, color = colors.ink, modifier = Modifier.padding(bottom = 5.dp))
                 Text(title, style = AnimalFarmHtmlType.pageTitle, modifier = Modifier.semantics { heading() })
             }
             Box(Modifier.size(42.dp).background(colors.softSurface, CircleShape), contentAlignment = Alignment.Center) {
-                FarmHtmlIcon(if (worker) "sun" else "chart-no-axes-combined", if (worker) "Worker home" else "Management home", Modifier.size(AnimalFarmHomeMetrics.lineIconSize))
+                FarmHtmlIcon(if (worker) "sun" else "chart-no-axes-combined", if (worker) "Worker home" else "Management home", Modifier.size(AnimalFarmHomeMetrics.lineIconSize), tint = colors.primary)
             }
         }
     }
@@ -102,7 +102,7 @@ fun AnimalFarmHeroCard(category: String, title: String, context: String, actionL
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AnimalFarmSummaryTile(title: String, value: String, detail: String, onClick: () -> Unit, modifier: Modifier = Modifier,
-    lime: Boolean = false, valueSuffix: String? = null) {
+    lime: Boolean = false, valueSuffix: String? = null, indicator: (@Composable () -> Unit)? = null) {
     val colors = AnimalFarmTheme.colors
     Surface(modifier.testTag("home-summary:$title").heightIn(min = AnimalFarmHomeMetrics.summaryMinimumHeight)
         .clip(RoundedCornerShape(AnimalFarmHomeMetrics.tileRadius)).clickable(role = Role.Button, onClick = onClick),
@@ -117,6 +117,7 @@ fun AnimalFarmSummaryTile(title: String, value: String, detail: String, onClick:
                 Text(value, style = AnimalFarmHtmlType.numeric)
                 if (!valueSuffix.isNullOrBlank()) Text(valueSuffix, style = AnimalFarmHtmlType.subject, modifier = Modifier.align(Alignment.Bottom).padding(bottom = 4.dp))
             }
+            indicator?.invoke()
             Text(detail, style = AnimalFarmHtmlType.caption)
         }
     }

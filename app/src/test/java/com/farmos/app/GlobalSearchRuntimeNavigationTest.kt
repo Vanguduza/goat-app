@@ -194,7 +194,8 @@ class GlobalSearchRuntimeNavigationTest {
         compose.runOnIdle { membership.value = FarmMembership(farmB, "owner") }
         awaitScreen("FOS-HOME-012-A")
         compose.onNodeWithTag("farm-screen:FOS-GOAT-003").assertDoesNotExist()
-        compose.onNode(hasClickAction() and hasText("More")).performClick()
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-menu-action:Search farm").performClick()
         awaitScreen("FOS-HOME-006")
         compose.onNodeWithTag("farm-screen:FOS-HOME-007").assertDoesNotExist()
@@ -415,7 +416,8 @@ class GlobalSearchRuntimeNavigationTest {
 
     private fun search(query: String) {
         awaitScreen("FOS-HOME-012-A")
-        compose.onNode(hasClickAction() and hasText("More")).performClick()
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-menu-action:Search farm").performClick()
         awaitScreen("FOS-HOME-006")
         compose.onNodeWithTag("farm-screen:FOS-SEARCH-005").assertExists()

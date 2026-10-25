@@ -350,7 +350,8 @@ class SpeciesSearchRuntimeNavigationTest {
 
     private fun search(query: String) {
         awaitScreen("FOS-HOME-012-A")
-        compose.onNode(hasClickAction() and hasText("More")).performClick()
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-menu-action:Search farm").performClick()
         awaitScreen("FOS-HOME-006")
         field("Tag, name or ID", query)

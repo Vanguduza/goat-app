@@ -29,6 +29,13 @@ private val HomeDateFormat = DateTimeFormatter.ofPattern("EEE, d MMM", Locale.UK
 internal fun ManagementControlRoomScreen(farmName: String?, ownerMode: Boolean, summary: FarmHomeSummary,
     onOpen: (FarmDestination) -> Unit, onAnimals: () -> Unit, onMore: () -> Unit, today: LocalDate = LocalDate.now()) {
     var sheet by rememberSaveable { mutableStateOf<HomeReferenceSheet?>(null) }
+    var previewTaskId by rememberSaveable { mutableStateOf<String?>(null) }
+    val homeOpen: (FarmDestination) -> Unit = { destination ->
+        if (destination is FarmDestination.Task && summary.tasks.any { it.id == destination.taskId }) {
+            sheet = null; previewTaskId = destination.taskId
+        } else onOpen(destination)
+    }
+    androidx.activity.compose.BackHandler(enabled = sheet != null || previewTaskId != null) { previewTaskId = null; sheet = null }
     AnimalFarmCanvas {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             AnimalFarmContextHeader(farmName, today.format(HomeDateFormat), "Farm pulse", eyebrow = "Command centre")
@@ -38,7 +45,7 @@ internal fun ManagementControlRoomScreen(farmName: String?, ownerMode: Boolean, 
                     summary.loading -> AnimalFarmEmptyState("Loading farm records")
                     summary.loadError != null -> AnimalFarmEmptyState("Farm records could not be loaded. ${summary.loadError}")
                     else -> {
-                        ManagementAttention(summary, today.toEpochDay(), onOpen)
+                        ManagementAttention(summary, today.toEpochDay(), homeOpen)
                         ManagementSummaries(summary, onOpen, onResources = { sheet = HomeReferenceSheet.RESOURCES })
                         Row(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 3.dp)) {
                             Text("Farm modules", style = AnimalFarmHtmlType.sectionTitle, modifier = Modifier.semantics { heading() })
@@ -52,7 +59,12 @@ internal fun ManagementControlRoomScreen(farmName: String?, ownerMode: Boolean, 
             onTasks = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
             onMore = { sheet = HomeReferenceSheet.MODULES }, onRecord = { sheet = HomeReferenceSheet.RECORD })
     }
-    HomeReferenceSheets(sheet, { sheet = null }, { sheet = it }, onOpen, onMore, summary, worker = false)
+    HomeReferenceSheets(sheet, { sheet = null }, { sheet = it }, homeOpen, onMore, summary, worker = false)
+    previewTaskId?.let { taskId ->
+        HomeTaskPreviewSheet(taskId, summary, { previewTaskId = null },
+            { destination -> previewTaskId = null; onOpen(destination) },
+            { previewTaskId = null; sheet = HomeReferenceSheet.RESOURCES })
+    }
 }
 
 @Composable
@@ -84,7 +96,7 @@ private fun ManagementSummaries(summary: FarmHomeSummary, onOpen: (FarmDestinati
         val stack = maxWidth < 300.dp || LocalDensity.current.fontScale >= 1.5f
         val work: @Composable (Modifier) -> Unit = { modifier ->
             AnimalFarmSummaryTile("Work", summary.overdueTasks.toString(), "${summary.openTasks} open · ${summary.upcomingTasks} upcoming",
-                { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) }, modifier, lime = true, valueSuffix = "due now")
+                { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) }, modifier, lime = true, valueSuffix = "due now", indicator = { AnimalFarmDueWorkStrip(summary.overdueTasks, summary.openTasks) })
         }
         val resources: @Composable (Modifier) -> Unit = { modifier -> ResourceSummaryTile(summary, onOpen, modifier, onResources) }
         if (stack) Column(verticalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) { work(Modifier.fillMaxWidth()); resources(Modifier.fillMaxWidth()) }
@@ -103,6 +115,13 @@ internal fun WorkerWorkBoardScreen(farmName: String?, summary: FarmHomeSummary, 
     var cardIndex by rememberSaveable { mutableIntStateOf(0) }
     var selectedTaskId by rememberSaveable { mutableStateOf<String?>(null) }
     var sheet by rememberSaveable { mutableStateOf<HomeReferenceSheet?>(null) }
+    var previewTaskId by rememberSaveable { mutableStateOf<String?>(null) }
+    val homeOpen: (FarmDestination) -> Unit = { destination ->
+        if (destination is FarmDestination.Task && summary.tasks.any { it.id == destination.taskId }) {
+            sheet = null; previewTaskId = destination.taskId
+        } else onOpen(destination)
+    }
+    androidx.activity.compose.BackHandler(enabled = sheet != null || previewTaskId != null) { previewTaskId = null; sheet = null }
     val stage = stages[stageIndex.coerceIn(stages.indices)]
     val matching = summary.tasks.filter { projectWorkerTaskStage(it.status, it.dueEpochDay, today.toEpochDay()) == stage }
     val selectedIndex = matching.indexOfFirst { it.id == selectedTaskId }.takeIf { it >= 0 }
@@ -145,7 +164,7 @@ internal fun WorkerWorkBoardScreen(farmName: String?, summary: FarmHomeSummary, 
                                 dueLabel = LocalDate.ofEpochDay(current.dueEpochDay).format(DateTimeFormatter.ofPattern("d MMM", Locale.UK)),
                                 subjectName = current.subjectLabel.orEmpty(), familyLabel = family?.let(::animalFarmFamilyLabel), title = current.title,
                                 fact = if (current.status == "done") "Completed" else "Open · ${current.moduleCode}",
-                                actionLabel = "Open task", onAction = { onOpen(FarmDestination.Task(current.id)) }, family = family, modifier = swipe,
+                                actionLabel = "Open task", onAction = { homeOpen(FarmDestination.Task(current.id)) }, family = family, modifier = swipe,
                             )
                             AnimalFarmCarouselControls("${safeIndex + 1} / ${matching.size}", { move(-1) }, { move(1) },
                                 safeIndex > 0, safeIndex < matching.lastIndex, position = safeIndex, count = matching.size)
@@ -162,7 +181,12 @@ internal fun WorkerWorkBoardScreen(farmName: String?, summary: FarmHomeSummary, 
         AnimalFarmHomeBottomBar(onHome = {}, onAnimals = onAnimals, onTasks = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
             onMore = { sheet = HomeReferenceSheet.GUIDES }, onRecord = { sheet = HomeReferenceSheet.RECORD }, worker = true)
     }
-    HomeReferenceSheets(sheet, { sheet = null }, { sheet = it }, onOpen, onMore, summary, worker = true)
+    HomeReferenceSheets(sheet, { sheet = null }, { sheet = it }, homeOpen, onMore, summary, worker = true)
+    previewTaskId?.let { taskId ->
+        HomeTaskPreviewSheet(taskId, summary, { previewTaskId = null },
+            { destination -> previewTaskId = null; onOpen(destination) },
+            { previewTaskId = null; sheet = HomeReferenceSheet.RESOURCES })
+    }
 }
 
 @Composable
