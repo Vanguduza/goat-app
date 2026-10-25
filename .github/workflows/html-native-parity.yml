@@ -64,6 +64,7 @@ jobs:
           --tests com.farmos.app.HomeNavigationLayoutTest
           --tests com.farmos.app.AnimalFarmReferenceContractTest
           --tests com.farmos.app.HomeMenuAndTaskUxTest
+          --tests com.farmos.app.HomeUtilityRuntimeNavigationTest
           --tests com.farmos.app.FarmRuntimeNavigationTest
           -I scripts/testing/html-native-parity.gradle
           -I scripts/testing/fresh-test-evidence.gradle

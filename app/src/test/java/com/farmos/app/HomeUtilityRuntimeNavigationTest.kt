@@ -123,7 +123,8 @@ class HomeUtilityRuntimeNavigationTest {
     }
 
     private fun openFromMenu(label: String) {
-        compose.onNode(hasClickAction() and hasText("More")).performClick()
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-menu").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-menu-action:$label").performScrollTo().performClick()
     }
