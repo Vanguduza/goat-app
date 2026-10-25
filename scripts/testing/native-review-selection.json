@@ -247,7 +247,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt",
       "class": "com.farmos.app.HomeUtilityRuntimeNavigationTest",
-      "sha256": "56c5ee037d292f5a94d4154527dd969f4fddd66cea1993c9025a8b35b3507586",
+      "sha256": "c225e62bb6a9365ed32abaeec86216b6e70327175b2c90c34c5dec0a9c403b20",
       "methods": [
         "homeUtilityPanelsTraverseAndRestoreWithoutCrossingAuthorityBoundaries",
         "todaySummaryShowsTheSyncPendingReceiptOnlyWhileChangesWait"
