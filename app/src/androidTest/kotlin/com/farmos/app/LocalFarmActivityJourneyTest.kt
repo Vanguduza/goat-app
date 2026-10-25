@@ -90,7 +90,7 @@ class LocalFarmActivityJourneyTest {
         awaitScreen("FOS-HOME-012-A")
         assertTrue(DriveSetupFlags(app).isDismissed(farm.farmId))
 
-        click("Animals", scroll = false)
+        compose.onNodeWithTag("home-module:Animals").performScrollTo().performClick()
         awaitScreen("FOS-HOME-002")
         click("Goats")
         awaitScreen("FOS-GOAT-001")
@@ -146,7 +146,8 @@ class LocalFarmActivityJourneyTest {
         click("Sign in")
         awaitScreen("FOS-HOME-012-A")
         compose.onNodeWithTag("farm-screen:FOS-ADMIN-013").assertDoesNotExist()
-        click("More", scroll = false)
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        click("All farm tools")
         awaitTag("farm-menu")
         click("Search farm")
         awaitScreen("FOS-HOME-006")

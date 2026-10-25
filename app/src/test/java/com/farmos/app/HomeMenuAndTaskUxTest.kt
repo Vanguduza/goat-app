@@ -54,7 +54,8 @@ class HomeMenuAndTaskUxTest {
                 )
             }
         }
-        compose.onNodeWithText("Modules").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Farm modules").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("home-module:Animals").performScrollTo().assertIsDisplayed().performClick()
         compose.onNodeWithText("Goats").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("Sync", substring = true, ignoreCase = true).assertDoesNotExist()
         listOf("Search farm", "Today summary", "Farm alerts", "Farm activity", "Switch farm")

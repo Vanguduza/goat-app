@@ -3,6 +3,7 @@ package com.farmos.app
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 
 import androidx.compose.ui.test.assertIsDisplayed
@@ -34,7 +35,10 @@ class FarmRuntimeNavigationTest {
     @get:Rule(order = 1) val compose = createComposeRule()
 
     private fun openMore() {
-        compose.onNode(hasClickAction() and hasText("More")).performClick()
+        if (compose.onAllNodesWithTag("home-nav:Modules").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithTag("home-nav:Modules").performClick()
+            compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
+        } else compose.onNode(hasClickAction() and hasText("More")).performClick()
         compose.onNodeWithTag("farm-menu").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
     }
 
@@ -177,6 +181,7 @@ class FarmRuntimeNavigationTest {
             }
         }
 
+        compose.onNodeWithTag("home-nav:Record").performClick()
         compose.onNode(hasClickAction() and hasText("Scan animal"))
             .performScrollTo()
             .assertIsDisplayed().also { compose.captureObservedNativeOwners() }

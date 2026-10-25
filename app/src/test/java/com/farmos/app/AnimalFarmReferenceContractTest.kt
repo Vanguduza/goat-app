@@ -102,10 +102,10 @@ class AnimalFarmReferenceContractTest {
             }
         }
 
-        compose.onNodeWithText("Open tasks").performClick()
+        compose.onNodeWithTag("home-attention").performClick()
 
         compose.runOnIdle {
-            assertEquals(FarmDestination.Tasks(TaskEntryPage.BOARD), opened)
+            assertEquals(FarmDestination.Task("task-health-nala"), opened)
         }
         assertNamedClickTargets()
     }
@@ -141,7 +141,8 @@ class AnimalFarmReferenceContractTest {
         }
 
         compose.onNodeWithTag("farm-screen:FOS-HOME-009").assertDoesNotExist()
-        compose.onNode(hasClickAction() and hasText("More")).performClick()
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
         compose.onNodeWithTag("farm-menu").assertIsDisplayed()
         compose.onNodeWithTag("farm-screen:FOS-HOME-009")
             .performScrollTo()
@@ -170,7 +171,7 @@ class AnimalFarmReferenceContractTest {
             }
         }
 
-        compose.onNode(hasClickAction() and hasText("Continue task"))
+        compose.onNode(hasClickAction() and hasText("Open task"))
             .performScrollTo()
             .assertIsDisplayed()
             .performClick()
