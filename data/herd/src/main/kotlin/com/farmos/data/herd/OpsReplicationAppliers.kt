@@ -265,7 +265,7 @@ object OpsReplicationAppliers {
         "water.record.v1" to replay { ops, op -> ops.recordWater(decode<RecordWater>(op), context(op)) },
         "water.record_point.v1" to replay { ops, op -> ops.recordWaterPoint(decode<RecordWaterPoint>(op), context(op)) },
         "water.record_point_event.v1" to replay { ops, op -> ops.recordWaterPointEvent(decode<RecordWaterPointEvent>(op), context(op)) },
-    )
+    ) + RabbitryReplication.all
 
     private inline fun <reified T> decode(op: OperationEnvelope): T = json.decodeFromString(op.payload.getValue(COMMAND_PAYLOAD_KEY))
 

@@ -24,6 +24,7 @@ class PedigreeQueries(private val database: FarmOsDatabase, private val farmId: 
 
     /** Reads parentage upward from [roots] for at most [generations] generations. */
     suspend fun graph(roots: Collection<String>, generations: Int = MAX_GENERATIONS): PedigreeGraph {
+        require(generations in 1..MAX_GENERATIONS)
         val parents = HashMap<String, PedigreeParents>()
         val conflicting = HashSet<String>()
         val seen = HashSet<String>(roots)
@@ -48,7 +49,7 @@ class PedigreeQueries(private val database: FarmOsDatabase, private val farmId: 
     }
 
     companion object {
-        /** Generations read above each parent; older records change the coefficient very little. */
+        /** Explicit data horizon. Older omitted ancestry can still matter; never interpret this limit as completeness. */
         const val MAX_GENERATIONS = 10
     }
 }

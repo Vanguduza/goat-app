@@ -43,6 +43,7 @@ class PedigreeInbreeding(private val parentsOf: Map<String, PedigreeParents>) {
 
     /** F of a recorded animal: the coancestry of its parents. */
     fun inbreeding(id: String): Double {
+        depth(id) // Standalone calls must reject cycles too, before recursing into coancestry.
         val parents = parentsOf[id] ?: return 0.0
         val sire = parents.sireId ?: return 0.0
         val dam = parents.damId ?: return 0.0
@@ -86,12 +87,13 @@ class PedigreeInbreeding(private val parentsOf: Map<String, PedigreeParents>) {
     }
 
     private fun completeGenerations(offspring: PedigreeParents): Int {
-        var generation = listOf(offspring)
-        var complete = 0
-        while (generation.all { it.sireId != null && it.damId != null }) {
-            complete++
-            generation = generation.flatMap { listOf(it.sireId!!, it.damId!!) }.map { parentsOf[it] ?: PedigreeParents(null, null) }
+        val cache=HashMap<String,Int>()
+        fun complete(id:String):Int {
+            cache[id]?.let { return it }
+            val p=parentsOf[id]
+            val result=if(p?.sireId==null || p.damId==null) 0 else 1+minOf(complete(p.sireId),complete(p.damId))
+            cache[id]=result;return result
         }
-        return complete
+        return if(offspring.sireId==null || offspring.damId==null) 0 else 1+minOf(complete(offspring.sireId),complete(offspring.damId))
     }
 }

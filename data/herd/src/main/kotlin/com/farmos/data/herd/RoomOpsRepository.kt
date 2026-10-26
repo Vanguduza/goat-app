@@ -836,6 +836,7 @@ class RoomOpsRepository(
         val parent = requireNotNull(database.animals().get(farmId, command.parentId)) { "Pedigree link needs two animals of the same species on this farm" }
         require(child.speciesCode == parent.speciesCode) { "Pedigree link needs two animals of the same species on this farm" }
         enqueue(context, "pedigree.link.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
+            if (!replaying) database.requireNewPedigreeLink(farmId, command)
             database.lifecycle().insertPedigree(
                 PedigreeRelationEntity(command.linkId, farmId, command.animalId, command.parentId, command.relationType),
             )
