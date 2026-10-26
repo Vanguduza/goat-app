@@ -23,6 +23,7 @@ class OpsCommandPermissionTest {
             "RoomOpsRepository", "FarmConfigurationCommands", "FarmResourceCommands", "AnimalGroupCommands",
             "FormularyCommands", "ReorderAlertCommands", "CustomerCommands", "StockCountCommands", "TaskSeriesCommands",
             "BreedingDueCommands", "WorkerRegisterCommands", "LabourCommands", "AttachmentCommands", "AnimalExitCommands",
+            "RabbitryCommands",
         )
         val commandPattern = Regex("\"([a-z][a-z_.]+\\.v[0-9]+)\"")
         val emitted = writers.flatMap { writer ->
