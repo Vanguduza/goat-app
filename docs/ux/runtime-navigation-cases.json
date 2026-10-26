@@ -867,8 +867,8 @@
     },
     {
       "path": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
-      "sha256": "0000143a4203713f34c211c4b50c8576966a2963445ae4076319f2f2c749b9dc",
-      "reviewed_source_commit": "26b8e84cedaec7347d056e840fed64f15dc5e49f",
+      "sha256": "fc6c49082dba52a2e93ffd3d198b0eaf6be0e082fca6b026a525a451cc9c9420",
+      "reviewed_source_commit": "7b8a5221a34cfc8fd20724e6cb0d6bc53d0c0958",
       "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
       "cases": [
         {
@@ -892,7 +892,7 @@
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
                 ],
-                "occurrence": 0
+                "occurrence": 1
               },
               "return": {
                 "within": "exerciseWeightJourney",
@@ -905,10 +905,10 @@
             },
             {
               "kind": "rendered_destination_traversal",
-              "screen_id": "FOS-SHEEP-006",
+              "screen_id": "FOS-HOME-008",
               "entry": {
                 "within": "exerciseWeightJourney",
-                "expression": "awaitScreen(\"$prefix-006\")",
+                "expression": "awaitScreen(\"FOS-HOME-008\")",
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
                 ],
@@ -916,7 +916,7 @@
               },
               "return_action": {
                 "within": "exerciseWeightJourney",
-                "expression": "click(\"Profile\")",
+                "expression": "back()",
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
                 ],
@@ -948,7 +948,7 @@
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
                 ],
-                "occurrence": 1
+                "occurrence": 0
               },
               "return": {
                 "within": "exerciseWeightJourney",
@@ -976,7 +976,7 @@
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
                 ],
-                "occurrence": 2
+                "occurrence": 1
               },
               "return": {
                 "within": "exerciseWeightJourney",
@@ -1005,7 +1005,7 @@
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.SHEEP, sheepId, firstSheepId, foreignSheepId, \"Target ewe\", \"12.345\", 12_345L)"
                 ],
-                "occurrence": 1
+                "occurrence": 2
               },
               "return": {
                 "within": "exerciseWeightJourney",
@@ -1069,7 +1069,7 @@
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
                 ],
-                "occurrence": 0
+                "occurrence": 1
               },
               "return": {
                 "within": "exerciseWeightJourney",
@@ -1082,10 +1082,10 @@
             },
             {
               "kind": "rendered_destination_traversal",
-              "screen_id": "FOS-CATTLE-006",
+              "screen_id": "FOS-HOME-008",
               "entry": {
                 "within": "exerciseWeightJourney",
-                "expression": "awaitScreen(\"$prefix-006\")",
+                "expression": "awaitScreen(\"FOS-HOME-008\")",
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
                 ],
@@ -1093,7 +1093,7 @@
               },
               "return_action": {
                 "within": "exerciseWeightJourney",
-                "expression": "click(\"Profile\")",
+                "expression": "back()",
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
                 ],
@@ -1125,7 +1125,7 @@
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
                 ],
-                "occurrence": 1
+                "occurrence": 0
               },
               "return": {
                 "within": "exerciseWeightJourney",
@@ -1153,7 +1153,7 @@
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
                 ],
-                "occurrence": 2
+                "occurrence": 1
               },
               "return": {
                 "within": "exerciseWeightJourney",
@@ -1182,7 +1182,7 @@
                 "via": [
                   "exerciseWeightJourney(AnimalProfileKind.CATTLE, cattleId, firstCattleId, foreignCattleId, \"Target cow\", \"456.789\", 456_789L)"
                 ],
-                "occurrence": 1
+                "occurrence": 2
               },
               "return": {
                 "within": "exerciseWeightJourney",
