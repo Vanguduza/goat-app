@@ -169,7 +169,7 @@ class FarmDestinationTest {
             actions.first { it.first == "Add task" }.second,
         )
         assertEquals(
-            FarmDestination.Goat(GoatEntryPage.WEIGHT),
+            FarmDestination.Weight(),
             actions.first { it.first == "Record weight" }.second,
         )
         assertEquals(
