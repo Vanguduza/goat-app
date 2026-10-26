@@ -1,5 +1,7 @@
 package com.farmos.app
 
+import kotlinx.coroutines.launch
+
 import com.farmos.domain.access.Permission
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
@@ -94,7 +96,32 @@ internal fun FarmSessionContent(
     val taskPlanning = remember(membership.farmId, actorId, membership.role) { TaskPlanning(app.database, membership.farmId, canPlanFarmWork(membership.role), actorId) }
     val runtimeRoute = destination.runtimeRouteContract()
     FarmBackHandler(if (destination == FarmDestination.Home) null else backFromDestination)
+    val breedingNavigationScope=androidx.compose.runtime.rememberCoroutineScope()
+    var breedingNavigationError by androidx.compose.runtime.remember(membership.farmId) { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    val openBreeding:com.farmos.core.design.FarmBreedingOpen = { animalId,species,view ->
+        if(rolePermits(membership.role,Permission.VIEW_FARM)) breedingNavigationScope.launch {
+            com.farmos.core.design.runSuspendCatching {
+                val animal=animalId?.let { requireNotNull(app.database.animals().get(membership.farmId,it)) { "Animal is no longer on this farm" } }
+                require(animal==null || species==null || animal.speciesCode==species) { "Selected breeding subject does not match its species" }
+                val previous=animal?.let(::breedingProfileReturnRoute) ?: destination
+                if(destination !is FarmDestination.Breeding) returnToProfile=previous
+                destination=FarmDestination.Breeding(animalId,species,view)
+            }.onFailure { breedingNavigationError=it.message }
+        }
+    }
+    breedingNavigationError?.let { message ->
+        com.farmos.core.design.AnimalFarmSelectionSheet("Breeding records",{breedingNavigationError=null}) {
+            androidx.compose.material3.Text(message)
+        }
+    }
     androidx.compose.runtime.CompositionLocalProvider(
+        com.farmos.feature.rabbit.LocalRabbitryAccess provides com.farmos.feature.rabbit.RabbitryAccess(
+            record=rolePermits(membership.role,Permission.RECORD_FARM_WORK),
+            breed=rolePermits(membership.role,Permission.MANAGE_BREEDING)),
+        com.farmos.core.design.LocalFarmBreedingOpen provides (if(rolePermits(membership.role,Permission.VIEW_FARM)) openBreeding else null),
+        com.farmos.core.design.LocalFarmLineageContent provides { id,species ->
+            if(rolePermits(membership.role,Permission.VIEW_FARM)) LineageExplorerContent(app.database,membership.farmId,id,species,showSelector=false)
+        },
         com.farmos.core.design.LocalFarmProfileHealth provides { subject ->
             if(rolePermits(membership.role,Permission.VIEW_FARM)) ProfileHealthHost(app.database,membership.farmId,subject,ops,::context,::enqueueSync,
                 canRecord=rolePermits(membership.role,Permission.RECORD_FARM_WORK),
@@ -201,6 +228,7 @@ internal fun FarmSessionContent(
             planning = taskPlanning,
             database = app.database,
         )
+        is FarmDestination.Breeding -> BreedingWorkspace(app.database,membership.farmId,dest,backFromDestination)
         is FarmDestination.Weight -> SpeciesWeightCaptureHost(app.database,membership.farmId,dest,
             onRecord={species,id,kg,date -> recordSpeciesWeight(app.database,membership.farmId,ops,species,id,kg,date,context(),repository::recordWeight)},
             enqueueSync=::enqueueSync,onBack=backFromDestination)

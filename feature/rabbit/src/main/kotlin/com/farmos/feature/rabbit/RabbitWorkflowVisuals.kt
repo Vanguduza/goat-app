@@ -244,6 +244,13 @@ fun RabbitWaveTimeline(wave: RabbitWaveView, today: LocalDate, showOutcome: Bool
 
 @Composable
 fun RabbitCageRotationBoard(records: RabbitRecords, today: LocalDate) {
+    var view by rememberSaveable { mutableStateOf("Units") }
+    com.farmos.core.design.FarmSectionTabs(listOf("Units","Wave calendar"),view,{view=it},tagPrefix="rabbit-housing-view:")
+    if(view=="Units") RabbitUnitBoard(records,today) else RabbitWaveCalendar(records,today)
+}
+
+@Composable
+private fun RabbitWaveCalendar(records: RabbitRecords, today: LocalDate) {
     val colors = AnimalFarmTheme.colors
     val fontScale = LocalDensity.current.fontScale
     var cageId by rememberSaveable { mutableStateOf<String?>(null) }

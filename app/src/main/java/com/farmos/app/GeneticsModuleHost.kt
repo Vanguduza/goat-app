@@ -168,50 +168,7 @@ private fun GeneticsDashboard(summary: GeneticsSummary?, onOpen: (GeneticsPage) 
 
 @Composable
 private fun PedigreeExplorer(pedigree: PedigreeQueries, database: FarmOsDatabase, farmId: String) {
-    val scope = rememberCoroutineScope()
-    var tag by rememberSaveable(farmId) { mutableStateOf("") }
-    var families by remember(farmId) { mutableStateOf(emptyList<FarmPedigreeView>()) }
-    var view by rememberSaveable(farmId) { mutableStateOf("Family view") }
-    var lines by remember { mutableStateOf(listOf("Enter an animal tag to explore its recorded ancestors.")) }
-    var busy by remember { mutableStateOf(false) }
-    FarmOperationalSection("Pedigree explorer") {
-        OutlinedTextField(value = tag, onValueChange = { tag = it }, label = { Text("Animal tag") }, modifier = Modifier.fillMaxWidth())
-        Button(onClick = {
-            scope.launch {
-                busy = true
-                families = emptyList()
-                lines = runSuspendCatching {
-                    val animal = resolveGeneticsAnimal(database, farmId, tag)
-                    val graph = pedigree.graph(listOf(animal.id))
-                    suspend fun label(id: String): String =
-                        database.animals().get(farmId, id)?.let { "${it.tag}${it.name?.let { n -> " ($n)" } ?: ""}" } ?: id
-                    val ids = listOf(animal.id) + graph.parents.keys.filter { it != animal.id }.sorted()
-                    families = ids.map { id ->
-                        val parents = graph.parents[id]
-                        val conflict = id in graph.conflicting
-                        FarmPedigreeView(id, label(id), if (conflict) null else parents?.sireId?.let { label(it) }, if (conflict) null else parents?.damId?.let { label(it) }, conflict)
-                    }
-                    val out = mutableListOf("Ancestors of ${animal.tag}:")
-                    if (graph.parents.isEmpty()) out += "No recorded parentage for ${animal.tag}."
-                    graph.parents.forEach { (child, parents) ->
-                        val bits = listOfNotNull(
-                            parents.sireId?.let { "sire ${label(it)}" },
-                            parents.damId?.let { "dam ${label(it)}" },
-                        )
-                        out += "${label(child)} <- ${bits.joinToString(", ")}"
-                    }
-                    if (graph.conflicting.isNotEmpty()) out += "Conflicting parentage left unknown for: ${graph.conflicting.joinToString(", ")}"
-                    out
-                }.getOrElse { listOf("Could not load pedigree: ${it.message}") }
-                busy = false
-            }
-        }, enabled = !busy) { Text(if (busy) "Loading…" else "Show pedigree") }
-    }
-    if (families.isNotEmpty()) {
-        FarmSectionTabs(listOf("Family view", "Records"), view, { view = it })
-        if (view == "Family view") families.forEach { family -> FarmPedigreeFamily(family, Modifier.testTag("genetics-family:${family.childId}")) }
-        else FarmOperationalRows(lines, "No pedigree loaded", null)
-    } else FarmOperationalRows(lines, "No pedigree loaded", "Search by the exact animal tag.")
+    LineageExplorerContent(database,farmId)
 }
 
 /** FOS-GEN-003 — record a parentage link through the governed pedigree command. */
@@ -310,49 +267,15 @@ private suspend fun resolveGeneticsAnimal(database: FarmOsDatabase, farmId: Stri
 
 @Composable
 private fun CandidateRanking(pedigree: PedigreeQueries, database: FarmOsDatabase, farmId: String) {
-    val scope = rememberCoroutineScope()
-    var damTag by rememberSaveable(farmId) { mutableStateOf("") }
-    var bars by remember(farmId) { mutableStateOf(emptyList<FarmBarValue>()) }
-    var lines by remember(farmId) { mutableStateOf(listOf("Enter a dam tag to compare active sires by recorded offspring inbreeding coefficient.")) }
-    var busy by remember(farmId) { mutableStateOf(false) }
-    FarmOperationalSection("Candidate ranking", "Recorded COI is a lower bound. Incomplete parentage does not establish that animals are unrelated.") {
-        OutlinedTextField(value = damTag, onValueChange = { damTag = it }, label = { Text("Dam tag") }, modifier = Modifier.fillMaxWidth())
-        Button(onClick = {
-            scope.launch {
-                busy = true
-                lines = runSuspendCatching {
-                    bars = emptyList()
-                    val dam = resolveGeneticsAnimal(database, farmId, damTag)
-                    require(dam.sex.equals("FEMALE", ignoreCase = true) && dam.status == "active") { "Select an active female" }
-                    val sires = database.animals().search(farmId, dam.speciesCode, null, null, -1, 0)
-                        .filter { it.status == "active" && it.sex.equals("MALE", ignoreCase = true) }
-                    if (sires.isEmpty()) return@runSuspendCatching listOf("No active sires of " + dam.speciesCode + " on this farm.")
-                    val ranked = sires.map { sire -> sire to pedigree.mating(sire.id, dam.id) }
-                        .sortedWith(compareBy({ it.second.inbreeding.coefficient }, { it.first.tag }, { it.first.id }))
-                    bars = ranked.take(20).map { (sire, analysis) ->
-                        val result = analysis.inbreeding
-                        FarmBarValue(sire.tag + (sire.name?.let { " · $it" } ?: ""), result.coefficient.takeIf { result.generationsKnown > 0 },
-                            "${"%.4f".format(java.util.Locale.ROOT, result.coefficient)} recorded lower bound", "${result.generationsKnown} complete generations · ${analysis.conflictingParentage.size} parentage conflicts", "genetics-candidate:${sire.id}")
-                    }
-                    val out = mutableListOf("Sire candidates for " + dam.tag + " (recorded offspring COI, lowest first):")
-                    ranked.take(20).forEach { (sire, analysis) ->
-                        val label = sire.tag + (sire.name?.let { " (" + it + ")" } ?: "")
-                        val result = analysis.inbreeding
-                        out += label + " — recorded COI " + "%.4f".format(result.coefficient) +
-                            " over " + result.generationsKnown + " complete generations"
-                        if (analysis.conflictingParentage.isNotEmpty()) {
-                            out += "Parentage conflicts left unknown: " + analysis.conflictingParentage.size + "; review before selecting this candidate."
-                        }
-                    }
-                    if (ranked.size > 20) out += "Showing the first 20 of " + ranked.size + " candidates assessed."
-                    out
-                }.getOrElse { listOf("Could not rank: " + it.message) }
-                busy = false
-            }
-        }, enabled = !busy) { Text(if (busy) "Ranking…" else "Rank sires") }
+    var selectedPedigree by remember { mutableStateOf<String?>(null) }
+    PairingEvidenceContent(database,farmId) { id ->
+        selectedPedigree=id
     }
-    if (bars.isNotEmpty()) FarmMetricBars("Recorded offspring inbreeding", bars, "coefficient", caption = "Incomplete pedigrees do not establish that animals are unrelated. Showing up to 20 candidates after assessing every eligible sire.")
-    FarmOperationalRows(lines, "No ranking yet", null)
+    selectedPedigree?.let { id ->
+        com.farmos.core.design.AnimalFarmSelectionSheet("Candidate pedigree",{selectedPedigree=null}) {
+            LineageExplorerContent(database,farmId,id,showSelector=false)
+        }
+    }
 }
 
 @Composable

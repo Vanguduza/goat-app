@@ -81,6 +81,7 @@ internal fun RabbitPedigreeScreen(ports: RabbitPedigreePorts, busy: Boolean, onB
         FarmSearchSelector(FarmSelectionAtoms.ANIMAL_SELECTOR, "Rabbit", ports.searchRabbits, rabbit, { rabbit = it; parent = null }, "No rabbits match on this device", enabled = !busy && !working)
         val chosen = rabbit
         if (chosen != null) {
+            androidx.compose.runtime.key(chosen.id,version) { com.farmos.core.design.LocalFarmLineageContent.current?.invoke(chosen.id,"rabbit") }
             val parents by produceState<List<RabbitParentView>?>(null, chosen.id, version) { value = runCatching { ports.parents(chosen.id) }.getOrElse { emptyList() } }
             FarmOperationalSection("Recorded parents") {
                 val current = parents
@@ -167,6 +168,10 @@ internal fun RabbitMateCompareScreen(ports: RabbitPedigreePorts, busy: Boolean, 
             )
         }
         val d = doe
+        val openEvidence=com.farmos.core.design.LocalFarmBreedingOpen.current
+        if(openEvidence!=null) com.farmos.core.design.FarmPrimaryButton({openEvidence(d?.id,"rabbit",com.farmos.core.design.FarmBreedingView.PAIRINGS)},Modifier.fillMaxWidth()) {
+            Text("Compare all bucks using offspring evidence")
+        }
         when {
             d == null -> AnimalFarmEmptyState("Choose a doe to compare bucks for.")
             chosen.isEmpty() -> AnimalFarmEmptyState("Add up to $MAX_COMPARED bucks to compare.")

@@ -31,6 +31,7 @@ fun RabbitModuleHost(
     pedigree: RabbitPedigreePorts? = null,
     attachmentsFor: @Composable (rabbit: RabbitAnimalView) -> Unit = {},
     entryProfile: RabbitProfileEntry? = null,
+    database: com.farmos.core.database.FarmOsDatabase? = null,
 ) {
     val scope = rememberCoroutineScope()
     val state = remember(farmId, ops, rabbitHerd, entryProfile) {
@@ -53,5 +54,9 @@ fun RabbitModuleHost(
             state.loading = false
         }
     }
-    RabbitModuleContent(state)
+    val access=com.farmos.feature.rabbit.LocalRabbitryAccess.current
+    val controls=remember(database,state,access) { database?.let{rabbitryControlPorts(it,state,access)} }
+    androidx.compose.runtime.CompositionLocalProvider(com.farmos.feature.rabbit.LocalRabbitryPorts provides controls) {
+        RabbitModuleContent(state)
+    }
 }

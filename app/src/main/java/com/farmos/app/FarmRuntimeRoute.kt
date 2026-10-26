@@ -35,6 +35,11 @@ fun FarmDestination.runtimeRouteContract(): FarmRuntimeRoute =
             require(entry != GoatEntryPage.PROFILE || animalId != null) { "Goat profile requires an animal id" }
             entry.runtimeRouteContract().copy(scopedParameter = animalId?.let { "animalId=$it" })
         }
+        is FarmDestination.Breeding -> FarmRuntimeRoute(
+            if(view==com.farmos.core.design.FarmBreedingView.PEDIGREE) "genetics.pedigree" else "genetics.ranking",
+            if(view==com.farmos.core.design.FarmBreedingView.PEDIGREE) "FOS-GEN-002" else "FOS-GEN-008",
+            animalId?.let { "animalId=$it" },
+        )
         is FarmDestination.Weight -> {
             require(speciesCode==null || speciesCode in WEIGHT_SPECIES)
             require(animalId==null || animalId.isNotBlank() && speciesCode!=null)

@@ -112,6 +112,7 @@ data class RabbitRecords(
     val waves: List<RabbitWaveView> = emptyList(),
     val kits: List<RabbitKitView> = emptyList(),
     val weights: List<RabbitWeightView> = emptyList(),
+    val units: List<RabbitUnitView> = emptyList(),
 )
 
 private val AVAILABLE_BOX_STATES = setOf("available", "sanitized")

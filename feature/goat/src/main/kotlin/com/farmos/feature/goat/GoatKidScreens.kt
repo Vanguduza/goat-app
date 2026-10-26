@@ -58,6 +58,7 @@ internal fun GoatKiddingDetailScreen(goat: GoatSnapshot?, kiddingId: String?, on
 internal fun GoatKidProfileScreen(goat: GoatSnapshot?, onBack: () -> Unit) {
     GoatHistoryFrame("Kid profile", "FOS-GOAT-041", goat, onBack) { kid ->
         com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(kid.animalId,"goat"))
+            com.farmos.core.design.FarmProfileBreeding(kid.animalId,"goat")
         val birth = kid.birthRecord
         if (birth == null) {
             AnimalFarmEmptyState("This goat was not registered from a recorded kidding on this device.")

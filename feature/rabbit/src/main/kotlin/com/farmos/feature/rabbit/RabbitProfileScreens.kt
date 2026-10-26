@@ -99,6 +99,7 @@ internal fun RabbitProfileScreen(
             }
         }
         com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(rabbit.animalId,"rabbit"))
+            com.farmos.core.design.FarmProfileBreeding(rabbit.animalId,"rabbit")
         FarmSectionTabs(listOf("Identity", "Photos and documents", "Exit record"), section, { section = it })
         when (section) {
             "Identity" -> FarmOperationalSection("Identity") {

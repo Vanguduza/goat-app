@@ -251,6 +251,7 @@ internal fun SheepLambProfileScreen(
                 profile.birthType?.let { SheepRow("Birth type", it, "sheep-lamb-type") }
             }
             com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(profile.lambId,"sheep"))
+            com.farmos.core.design.FarmProfileBreeding(profile.lambId,"sheep")
             FarmOperationalSection("Dam") {
                 if (profile.damId == null) {
                     Text("Dam not linked on this device.", color = AnimalFarmTheme.colors.mutedInk)

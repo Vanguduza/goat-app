@@ -92,6 +92,7 @@ internal suspend fun loadRabbitRecords(database: FarmOsDatabase, farmId: String)
         },
         kits = lifecycle.kits(farmId).map { RabbitKitView(it.id, it.waveId, it.tempLabel, it.sex, it.status, it.retention, it.earTag) },
         weights = weights,
+        units = loadRabbitUnits(database,farmId),
     )
 }
 
