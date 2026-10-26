@@ -45,6 +45,7 @@ class RabbitRecordRuntimeNavigationTest {
     fun rabbitRecordPagesTraverseFromTheDashboardAndRestoreIt() {
         render(records())
         traverse("Cage occupancy", "FOS-RABBIT-008") {
+            compose.onNodeWithTag("rabbit-housing-view:Wave calendar").performScrollTo().performClick()
             compose.onNodeWithTag("rabbit-cage-tile:c1").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNodeWithText("Capacity: 12 does").assertExists().also { compose.captureObservedNativeOwners() }
             compose.onNodeWithTag("rabbit-wave-plan:w1").assertExists().also { compose.captureObservedNativeOwners() }
@@ -128,6 +129,7 @@ class RabbitRecordRuntimeNavigationTest {
     fun emptyRecordsSayNothingIsRecorded() {
         render(RabbitRecords())
         traverse("Cage occupancy", "FOS-RABBIT-008") {
+            compose.onNodeWithTag("rabbit-housing-view:Wave calendar").performScrollTo().performClick()
             compose.onNodeWithText("Add a cage to begin its rotation plan.").assertExists().also { compose.captureObservedNativeOwners() }
         }
         traverse("Kindling due", "FOS-RABBIT-016") {

@@ -32,7 +32,7 @@ class FarmOsDatabaseMigrationTest {
 
     // Execute the full upgrade chain: a fresh database alone cannot prove migration compatibility.
     @Test
-    fun version1DatabaseMigratesThroughVersion37WithoutLosingFoundationData() = runBlocking {
+    fun version1DatabaseMigratesThroughVersion38WithoutLosingFoundationData() = runBlocking {
         val farmId = "11111111-1111-4111-8111-111111111111"
         val animalId = "33333333-3333-4333-8333-333333333333"
         val mutationId = "55555555-5555-4555-8555-555555555555"

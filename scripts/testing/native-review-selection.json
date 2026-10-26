@@ -59,6 +59,19 @@
     },
     {
       "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/BreedingRabbitryVisualTest.kt",
+      "class": "com.farmos.app.BreedingRabbitryVisualTest",
+      "sha256": "2ef34a567fda970a80a18587717733f000a79b6b79b18ac30d743c4fae27bf68",
+      "methods": [
+        "cageTileShowsActualBuckResidentsAndNestStates",
+        "connectedPedigreeNodesAreTappableAndMissingParentsStayUnknown",
+        "missingHousingIsNotMislabelledAsAnEmptyOrPregnantUnit",
+        "serviceAndMatingFactsRemainDistinctFromPlannedPregnancy"
+      ],
+      "evidence_kind": "NATIVE_BREEDING_RABBITRY_BEHAVIOUR_NOT_SCOPE_APPROVAL"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/CattleRecordRuntimeNavigationTest.kt",
       "class": "com.farmos.app.CattleRecordRuntimeNavigationTest",
       "sha256": "379da05380489141a465d586fd28dd2b3cebe0a3860cfc326cbf2b3e9f707da6",
@@ -152,7 +165,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/GeneticsAndAdvisoryVisualTest.kt",
       "class": "com.farmos.app.GeneticsAndAdvisoryVisualTest",
-      "sha256": "47918b1ef423d4e79cf4b8805e3489b9ba105cfeb66d6aef047205494108d353",
+      "sha256": "44dd8270f606ffbdf9e6418a158c73f8dc9520f81631e669a35848ce74bf9fd9",
       "methods": [
         "advisoryReviewShowsRecordedEvidenceButDoesNotApplyOrDismissAnActionByItself",
         "parentageUsesSelectedControlsAndRetainsTheDraftWithoutWriting",
@@ -231,7 +244,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/HomeMenuAndTaskUxTest.kt",
       "class": "com.farmos.app.HomeMenuAndTaskUxTest",
-      "sha256": "d07a3eda4234f1caa5d1184678286df17d48bc998bcc64e5df75ff07a36c990f",
+      "sha256": "4e2c09e3b6e6e2cf2d2a0797bb97989567be65ddc08571f0236082944b58f940",
       "methods": [
         "addTaskButtonSubmitsThroughTheExistingCreateCallback",
         "completingATaskAndReturningHomeInvokeTheCorrectCallbacks",
@@ -392,6 +405,16 @@
     },
     {
       "task": ":app:testDebugUnitTest",
+      "source": "app/src/test/java/com/farmos/app/PairingEvidenceRuntimeTest.kt",
+      "class": "com.farmos.app.PairingEvidenceRuntimeTest",
+      "sha256": "36d0069c4c1d0cdea9658a34dbbd346ad26131e67d52134b5f86b1bfa474c197",
+      "methods": [
+        "ownerCriteriaRankOnlySupportedCandidatesAndExposeActualOffspring"
+      ],
+      "evidence_kind": "NATIVE_BREEDING_EVIDENCE_NOT_GENETIC_SUPERIORITY"
+    },
+    {
+      "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/PastureCaptureOwnerTest.kt",
       "class": "com.farmos.app.PastureCaptureOwnerTest",
       "sha256": "f37d2eb6bc3ec1c4a06b9b21f7f727b401a538d90a76c37469bfee777f10b307",
@@ -528,7 +551,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/RabbitRecordRuntimeNavigationTest.kt",
       "class": "com.farmos.app.RabbitRecordRuntimeNavigationTest",
-      "sha256": "4e06129428981357533ec040c6c46538920e5a6579ba61e526ebfc645d72c3f1",
+      "sha256": "e9cf61978871490876b72060a95b963f27d8afb0499bdd42cc70a84d889d78dc",
       "methods": [
         "emptyRecordsSayNothingIsRecorded",
         "kindlingDueListsOnlyWavesAwaitingKindling",
@@ -751,7 +774,7 @@
       "task": ":app:testDebugUnitTest",
       "source": "app/src/test/java/com/farmos/app/TaskViewRuntimeNavigationTest.kt",
       "class": "com.farmos.app.TaskViewRuntimeNavigationTest",
-      "sha256": "802a73c21222e5b1602bf23ddfa011085155ebd57978038aaa5d88aae18e126a",
+      "sha256": "d5b4e4f2e96bb23b7edb5ee01c9fee3dbe9b5b166e7119c890983ab14bd3e137",
       "methods": [
         "allTasksViewListsOpenAndCompletedWorkWithTheExactCompletedTotal",
         "assignedToMeAndRepeatingViewsShowOnlyTheirOwnWork",

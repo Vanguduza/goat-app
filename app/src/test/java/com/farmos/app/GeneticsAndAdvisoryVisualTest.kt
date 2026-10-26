@@ -57,15 +57,17 @@ class GeneticsAndAdvisoryVisualTest {
     @Test fun pedigreeDrawsOnlyThisAnimalsRecordedParentsAndKeepsTheFullRecordView() {
         compose.setContent { NativeModuleReviewTheme { GeneticsModuleHost(db, farm, ops, ::context, { syncs++ }, {}) } }
         compose.revealFarmTool("Pedigree explorer").performScrollTo().performClick()
-        compose.onNodeWithText("Animal tag").performScrollTo().performTextInput("G-003")
-        compose.revealFarmTool("Show pedigree").performScrollTo().performClick()
-        compose.waitUntil(10_000) { compose.onAllNodesWithTag("genetics-family:$child").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNode(hasText("G-001 (Atlas)") and hasAnyAncestor(hasTestTag("genetics-family:$child"))).assertExists()
-        compose.onNode(hasText("G-002 (Fern)") and hasAnyAncestor(hasTestTag("genetics-family:$child"))).assertExists()
+        compose.onNodeWithTag("lineage-animal:field").performScrollTo().performClick()
+        compose.onNodeWithTag("lineage-animal:query").performTextInput("G-003")
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("lineage-animal:option:$child").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("lineage-animal:option:$child").performScrollTo().performClick()
+        compose.waitUntil(10_000) { compose.onAllNodesWithTag("pedigree-connected-tree").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("pedigree-node:RS").assertTextContains("G-001 · Atlas")
+        compose.onNodeWithTag("pedigree-node:RD").assertTextContains("G-002 · Fern")
         compose.onNodeWithText("Other farm animal", substring = true).assertDoesNotExist()
         compose.captureModuleReview("FOS-GEN-002")
-        compose.onNodeWithTag("farm-section:Records").performScrollTo().performClick()
-        compose.onNodeWithText("G-003 (Willow) <- sire G-001 (Atlas), dam G-002 (Fern)").assertExists()
+        compose.onNodeWithTag("lineage-view:Ancestors").performScrollTo().performClick()
+        compose.onNodeWithTag("lineage-ancestor:$child").assertTextContains("Sire: G-001 · Atlas · Genetic dam: G-002 · Fern")
         assertEquals(0, syncs)
         runBlocking { assertEquals(2, db.lifecycle().pedigreeRelationCount(farm)) }
     }
