@@ -38,7 +38,7 @@ internal fun ManagementControlRoomScreen(farmName: String?, ownerMode: Boolean, 
     androidx.activity.compose.BackHandler(enabled = sheet != null || previewTaskId != null) { previewTaskId = null; sheet = null }
     AnimalFarmCanvas {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            AnimalFarmContextHeader(farmName, today.format(HomeDateFormat), "Farm pulse", eyebrow = "Command centre")
+            AnimalFarmHomeHeader(farmName)
             Column(Modifier.padding(start = animalFarmHomePageInset(), end = animalFarmHomePageInset(), bottom = 18.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 when {
@@ -133,14 +133,13 @@ internal fun WorkerWorkBoardScreen(farmName: String?, summary: FarmHomeSummary, 
     fun move(delta: Int) { if (matching.isNotEmpty()) { cardIndex = (safeIndex + delta).coerceIn(matching.indices); selectedTaskId = matching[cardIndex].id } }
     AnimalFarmCanvas {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            AnimalFarmContextHeader(farmName, today.format(HomeDateFormat), "My work", eyebrow = "Work board", worker = true)
+            AnimalFarmHomeHeader(farmName)
             Column(Modifier.padding(start = animalFarmHomePageInset(), end = animalFarmHomePageInset(), bottom = 18.dp)) {
                 when {
                     summary.loading -> AnimalFarmEmptyState("Loading farm work")
                     summary.loadError != null -> AnimalFarmEmptyState("Work could not be loaded. ${summary.loadError}")
                     else -> {
-                        AnimalFarmWorkDayBanner(today.dayOfMonth.toString(), today.format(DateTimeFormatter.ofPattern("EEEE", Locale.UK)),
-                            today.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.UK)) + " · ${summary.overdueTasks} due now", { sheet = HomeReferenceSheet.RECORD })
+                        AnimalFarmWorkSummaryBanner("${summary.overdueTasks} due now", "${summary.openTasks} open tasks", { sheet = HomeReferenceSheet.RECORD })
                         val counts = stages.map { projected -> summary.tasks.count { projectWorkerTaskStage(it.status, it.dueEpochDay, today.toEpochDay()) == projected } }
                         AnimalFarmStageSelector(listOf("To do", "Later", "Completed"), stageIndex, {
                             stageIndex = it; cardIndex = 0; selectedTaskId = null

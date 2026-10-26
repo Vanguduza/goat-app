@@ -742,6 +742,9 @@ interface LifecycleDao {
     @Upsert suspend fun upsertEnabledKind(row: EnabledPoultryKindEntity)
     @Query("SELECT * FROM farm_enabled_poultry_kinds WHERE farmId = :farmId ORDER BY poultryKindCode")
     suspend fun enabledPoultryKinds(farmId: String): List<EnabledPoultryKindEntity>
+    @Query("SELECT * FROM rabbit_gi_stasis_flags WHERE farmId = :farmId AND animalId = :animalId ORDER BY occurredEpochDay DESC, id")
+    suspend fun rabbitGiFlagsForAnimal(farmId: String, animalId: String): List<RabbitGiStasisEntity>
+
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertGiStasis(row: RabbitGiStasisEntity)
     @Upsert suspend fun upsertGiStasis(row: RabbitGiStasisEntity)
     @Insert(onConflict = OnConflictStrategy.ABORT) suspend fun insertPedigree(row: PedigreeRelationEntity)

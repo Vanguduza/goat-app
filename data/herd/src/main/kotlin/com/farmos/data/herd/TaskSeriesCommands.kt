@@ -38,6 +38,7 @@ class TaskSeriesCommands(
     suspend fun create(command: CreateTaskSeries, context: LocalCommandContext): LocalCommandResult {
         TaskSeriesRules.create(command)?.let { error(it) }
         journal(context, SERIES_CREATE, command.seriesId, command) {
+            database.requireFarmAnimalSubject(farmId, command.animalId)
             requireAssignee(command.assignee)
             database.taskSeries().upsert(
                 TaskSeriesEntity(

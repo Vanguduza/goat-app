@@ -98,6 +98,7 @@ internal fun RabbitProfileScreen(
                 rabbit.name?.takeIf { it.isNotBlank() }?.let { Text(it) }
             }
         }
+        com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(rabbit.animalId,"rabbit"))
         FarmSectionTabs(listOf("Identity", "Photos and documents", "Exit record"), section, { section = it })
         when (section) {
             "Identity" -> FarmOperationalSection("Identity") {

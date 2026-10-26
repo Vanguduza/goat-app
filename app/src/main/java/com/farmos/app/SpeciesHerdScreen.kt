@@ -333,6 +333,7 @@ private fun SpeciesProfile(
                 Text(selected.label, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Text(if (selected.active) "Active" else "Closed lifecycle record")
             }
+            com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(selected.animalId,config.plural))
             FarmOperationalSection("Actions") {
                 Button(
                     onClick = { onOpen(SpeciesPage.WEIGHT) },

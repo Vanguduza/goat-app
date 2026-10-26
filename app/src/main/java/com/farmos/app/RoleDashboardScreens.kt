@@ -181,7 +181,7 @@ internal fun workerHomeQuickActions(): List<Pair<String, FarmDestination>> =
         // FOS-TASK-004
         "Add task" to FarmDestination.Tasks(TaskEntryPage.CREATE),
         // FOS-GOAT-011
-        "Record weight" to FarmDestination.Goat(GoatEntryPage.WEIGHT),
+        "Record weight" to FarmDestination.Weight(),
         // FOS-HEALTH-007
         "Add treatment" to FarmDestination.Health(HealthEntryPage.TREATMENT),
         // FOS-HEALTH-004

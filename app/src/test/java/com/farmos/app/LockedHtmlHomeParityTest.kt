@@ -43,7 +43,7 @@ class LockedHtmlHomeParityTest {
         compose.setContent { FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
             ManagementControlRoomScreen("Premier Farm", true, summary(), {}, {}, {}, day)
         } }
-        compose.onNodeWithText("Farm pulse").assertIsDisplayed()
+        compose.onNodeWithText("Command center").assertIsDisplayed()
         compose.onNodeWithTag("home-attention").assertIsDisplayed().assertHasClickAction()
         val work = compose.onNodeWithTag("home-summary:Work").fetchSemanticsNode().boundsInRoot
         val resources = compose.onNodeWithTag("home-summary:Resources").fetchSemanticsNode().boundsInRoot
@@ -82,7 +82,7 @@ class LockedHtmlHomeParityTest {
         compose.onNodeWithTag("home-family:Rabbits").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(FarmDestination.Module(FarmModule.RABBIT), opened) }
         compose.onNodeWithTag("home-sheet:Animal families").assertDoesNotExist()
-        compose.onNodeWithText("Farm pulse").assertExists()
+        compose.onNodeWithText("Command center").assertExists()
     }
 
     @Test fun workerRetainsTheDayBannerImageCardAndActualTaskIdentity() {

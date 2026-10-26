@@ -484,6 +484,7 @@ private fun GoatProfileScreen(
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         GoatIdentityCard(goat)
+                        com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(goat.animalId,"goat"))
                         GoatProfileActions(goat, onOpen)
                     }
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -495,6 +496,7 @@ private fun GoatProfileScreen(
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     GoatIdentityCard(goat)
+                    com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(goat.animalId,"goat"))
                     GoatProfileActions(goat, onOpen)
                     GoatHistoryCard(goat)
                     GoatRecordLinks(goat, onOpen)

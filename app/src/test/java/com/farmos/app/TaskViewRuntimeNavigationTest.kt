@@ -243,8 +243,10 @@ class TaskViewRuntimeNavigationTest {
 
         planner = true
         compose.onNodeWithText("Title").performTextInput("Check troughs")
+        compose.onNodeWithTag("task-repeat:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-repeat:EVERY_N_DAYS").performScrollTo().performClick()
         compose.onNodeWithTag("task-repeat-interval").performTextReplacement("3")
+        compose.onNodeWithTag("task-assignee:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-assignee:farai").performScrollTo().performClick()
         compose.onNode(hasClickAction() and hasText("Create task")).performScrollTo().performClick()
         compose.runOnIdle {
@@ -278,8 +280,10 @@ class TaskViewRuntimeNavigationTest {
         }
 
         // This and future: no due date to move; the repeat can change.
+        compose.onNodeWithTag("task-edit-scope:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-edit-scope:THIS_AND_FUTURE").performScrollTo().performClick()
         assertTextAbsent("Due date")
+        compose.onNodeWithTag("task-edit-repeat:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-edit-repeat:WEEKLY").performScrollTo().performClick()
         compose.onNodeWithTag("task-edit-save").performScrollTo().performClick()
         compose.runOnIdle {
@@ -307,6 +311,7 @@ class TaskViewRuntimeNavigationTest {
         }
         compose.onNodeWithTag("farm-screen:FOS-TASK-005").assertExists().also { compose.captureObservedNativeOwners() }
         assertTextAbsent("This occurrence")
+        compose.onNodeWithTag("task-edit-assignee:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-edit-assignee:farai").performScrollTo().performClick()
         compose.onNodeWithTag("task-edit-save").performScrollTo().performClick()
         compose.runOnIdle {
@@ -316,9 +321,10 @@ class TaskViewRuntimeNavigationTest {
     }
 
     private fun openTab(label: String) {
-        compose.onNode(hasClickAction() and hasText(label))
-            .performScrollTo()
-            .performClick()
+        compose.onNodeWithTag("task-filter:field").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText(label) and
+            androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag("home-sheet:Work view")))
+            .performScrollTo().performClick()
     }
 
     private fun restoreToday() {

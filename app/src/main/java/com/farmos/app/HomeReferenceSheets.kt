@@ -1,5 +1,8 @@
 package com.farmos.app
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,8 +39,10 @@ internal fun HomeReferenceModuleGrid(onOpen: (FarmDestination) -> Unit, onSheet:
 
 @Composable
 internal fun HomeReferenceQuickRow(onOpen: (FarmDestination) -> Unit, onResources: () -> Unit) {
+    var weightPicker by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    if(weightPicker) WeightSpeciesSheet({weightPicker=false}) { species -> weightPicker=false;onOpen(FarmDestination.Weight(species)) }
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        AnimalFarmQuickCaptureTile("Weight", "scale", { onOpen(FarmDestination.Goat(GoatEntryPage.WEIGHT)) }, Modifier.weight(1f).fillMaxHeight())
+        AnimalFarmQuickCaptureTile("Weight", "scale", { weightPicker = true }, Modifier.weight(1f).fillMaxHeight())
         AnimalFarmQuickCaptureTile("Finding", "message-square-plus", { onOpen(FarmDestination.Health(HealthEntryPage.RECORD_OBSERVATION)) }, Modifier.weight(1f).fillMaxHeight())
         AnimalFarmQuickCaptureTile("Resources", "boxes", onResources, Modifier.weight(1f).fillMaxHeight())
     }

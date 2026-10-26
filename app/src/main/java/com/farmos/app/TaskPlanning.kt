@@ -96,10 +96,11 @@ class TaskPlanning(
 
     suspend fun create(draft: TaskSeriesDraft, context: LocalCommandContext) {
         check(canPlanWork) { "Only supervisors and farm management plan repeating or assigned work" }
+        val subject = draft.animalId?.let { requireNotNull(database.animals().get(farmId,it)) { "The selected animal is not on this farm" } }
         commands.create(
             CreateTaskSeries(
                 seriesId = UUID.randomUUID().toString(),
-                moduleCode = draft.moduleCode,
+                moduleCode = if(draft.moduleCode=="farm" && subject!=null) subject.speciesCode else draft.moduleCode,
                 taskCode = draft.taskCode,
                 title = draft.title,
                 recurrenceKind = draft.repeat.name,
@@ -107,6 +108,7 @@ class TaskPlanning(
                 startEpochDay = draft.startDate.toEpochDay(),
                 endEpochDay = draft.endDate?.toEpochDay(),
                 assignee = TaskAssignee(accountId = draft.assigneeAccountId, workerId = draft.assigneeWorkerId),
+                animalId = draft.animalId,
             ),
             context,
         )

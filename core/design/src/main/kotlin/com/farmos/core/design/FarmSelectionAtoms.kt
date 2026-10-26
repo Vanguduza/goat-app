@@ -90,7 +90,7 @@ fun FarmEntitySelector(
 
 /** Visible single-choice control, shared by the fixed and asynchronous searchable selectors. */
 @Composable
-internal fun FarmSelectorOptionRow(atomTag: String, option: FarmSelectorOption, selected: Boolean, enabled: Boolean, onSelect: () -> Unit) {
+internal fun FarmSelectorOptionRow(atomTag: String, option: FarmSelectorOption, selected: Boolean, enabled: Boolean, optionTag: String = atomTag + ":option:" + option.id, onSelect: () -> Unit) {
     val colors = AnimalFarmTheme.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -102,7 +102,7 @@ internal fun FarmSelectorOptionRow(atomTag: String, option: FarmSelectorOption, 
         Row(
             Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
                 .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onSelect)
-                .padding(AnimalFarmHomeMetrics.rowPadding).testTag(atomTag + ":option:" + option.id),
+                .padding(AnimalFarmHomeMetrics.rowPadding).testTag(optionTag),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {

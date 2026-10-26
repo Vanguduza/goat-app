@@ -138,6 +138,7 @@ internal fun PoultryFlockProfileScreen(records: PoultryRecords, onBack: () -> Un
         }
         PoultrySwitcher("Flocks", records.flocks.map { it.groupId to "${it.groupId} · ${it.poultryKind}" }, selectedId) { selectedId = it }
         val flock = records.flocks.firstOrNull { it.groupId == selectedId } ?: return@FarmOperationalPage
+        com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(flock.groupId,"poultry",com.farmos.core.design.FarmHealthSubjectKind.FLOCK))
         FarmOperationalSection("Flock ${flock.groupId}") {
             PoultryRecordRow("House", flock.houseLabel, "poultry-flock-house")
             PoultryRecordRow("Placed, all placements", "${flock.placedHeads} head · first placed ${LocalDate.ofEpochDay(flock.firstPlacedEpochDay)}", "poultry-flock-placed")

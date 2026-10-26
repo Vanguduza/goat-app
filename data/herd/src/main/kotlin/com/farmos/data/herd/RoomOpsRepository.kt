@@ -192,6 +192,7 @@ class RoomOpsRepository(
     suspend fun createTask(command: CreateFarmTask, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.task(command)?.let { error(it) }
         enqueue(context, "task.create.v1", "task", command.taskId, 0, command) {
+            database.requireFarmAnimalSubject(farmId, command.animalId)
             database.tasks().insert(command.toEntity(farmId, context.occurredAtEpochMillis, "open"))
         }
         return LocalCommandResult(context.mutationId, command.taskId, true)
@@ -850,6 +851,7 @@ class RoomOpsRepository(
     suspend fun recordObservation(command: RecordHealthObservation, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.observation(command)?.let { error(it) }
         enqueue(context, "health.record_observation.v1", "health_observation", command.observationId, 0, command) {
+            database.requireFarmAnimalSubject(farmId, command.animalId, command.speciesCode)
             database.healthObservations().insert(
                 HealthObservationEntity(
                     id = command.observationId,

@@ -250,6 +250,7 @@ internal fun SheepLambProfileScreen(
                 profile.birthEpochDay?.let { SheepRow("Birth date", LocalDate.ofEpochDay(it).toString(), "sheep-lamb-birth") }
                 profile.birthType?.let { SheepRow("Birth type", it, "sheep-lamb-type") }
             }
+            com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(profile.lambId,"sheep"))
             FarmOperationalSection("Dam") {
                 if (profile.damId == null) {
                     Text("Dam not linked on this device.", color = AnimalFarmTheme.colors.mutedInk)

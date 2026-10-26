@@ -40,6 +40,7 @@ internal fun FarmSessionContent(
     val retainedHomeState = rememberSaveableStateHolder()
     val homeStateKey = "home:${membership.farmId}:${actorId ?: "server-session"}:${membership.role}"
     var destination by remember(membership.farmId) { mutableStateOf<FarmDestination>(FarmDestination.Home) }
+    var returnToProfile by remember(membership.farmId) { mutableStateOf<FarmDestination?>(null) }
     var returnToSearch by remember(membership.farmId) { mutableStateOf(false) }
     val searchState = remember(membership.farmId) { GlobalSearchSessionState(membership.farmId) }
     val repository = remember(membership.farmId) { app.goatRepository(membership.farmId) }
@@ -85,13 +86,24 @@ internal fun FarmSessionContent(
             app.database.unsharedLocalOperations(membership.farmId, app.deviceId)
         }
     val backFromDestination = {
-        destination = if (returnToSearch) FarmDestination.Search else FarmDestination.Home
-        returnToSearch = false
+        val profile=returnToProfile
+        if(profile!=null) { destination=profile;returnToProfile=null }
+        else { destination=if(returnToSearch) FarmDestination.Search else FarmDestination.Home;returnToSearch=false }
     }
     // Repeating and assigned tasks (D-020); Assigned to me needs a signed-in local account.
     val taskPlanning = remember(membership.farmId, actorId, membership.role) { TaskPlanning(app.database, membership.farmId, canPlanFarmWork(membership.role), actorId) }
     val runtimeRoute = destination.runtimeRouteContract()
     FarmBackHandler(if (destination == FarmDestination.Home) null else backFromDestination)
+    androidx.compose.runtime.CompositionLocalProvider(
+        com.farmos.core.design.LocalFarmProfileHealth provides { subject ->
+            if(rolePermits(membership.role,Permission.VIEW_FARM)) ProfileHealthHost(app.database,membership.farmId,subject,ops,::context,::enqueueSync,
+                canRecord=rolePermits(membership.role,Permission.RECORD_FARM_WORK),
+                canPlan=canPlanFarmWork(membership.role),onOpen={next,profile ->
+                    if(next!=destination) { returnToProfile=profile ?: destination;destination=next }
+                })
+            else com.farmos.core.design.AnimalFarmEmptyState("Health information requires an authorized farm session")
+        },
+    ) {
     Box(Modifier.testTag(runtimeRoute.testTag)) {
         when (val dest = destination) {
         FarmDestination.Home -> retainedHomeState.SaveableStateProvider(homeStateKey) {
@@ -189,6 +201,9 @@ internal fun FarmSessionContent(
             planning = taskPlanning,
             database = app.database,
         )
+        is FarmDestination.Weight -> SpeciesWeightCaptureHost(app.database,membership.farmId,dest,
+            onRecord={species,id,kg,date -> recordSpeciesWeight(app.database,membership.farmId,ops,species,id,kg,date,context(),repository::recordWeight)},
+            enqueueSync=::enqueueSync,onBack=backFromDestination)
         is FarmDestination.Tasks -> TasksModuleHost(
             farmId = membership.farmId,
             ops = ops,
@@ -199,6 +214,7 @@ internal fun FarmSessionContent(
             loadCompletedCount = { app.database.tasks().countCompletedForFarm(membership.farmId) },
             planning = taskPlanning,
             database = app.database,
+            subjectAnimalId = dest.animalId,
         )
         is FarmDestination.Module -> when (dest.module) {
             FarmModule.TASKS -> TasksModuleHost(
@@ -379,5 +395,6 @@ internal fun FarmSessionContent(
             )
         }
         }
+    }
     }
 }

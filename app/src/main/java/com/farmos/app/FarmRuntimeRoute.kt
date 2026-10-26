@@ -35,12 +35,20 @@ fun FarmDestination.runtimeRouteContract(): FarmRuntimeRoute =
             require(entry != GoatEntryPage.PROFILE || animalId != null) { "Goat profile requires an animal id" }
             entry.runtimeRouteContract().copy(scopedParameter = animalId?.let { "animalId=$it" })
         }
+        is FarmDestination.Weight -> {
+            require(speciesCode==null || speciesCode in WEIGHT_SPECIES)
+            require(animalId==null || animalId.isNotBlank() && speciesCode!=null)
+            FarmRuntimeRoute("home.record_weight","FOS-HOME-008",listOfNotNull(speciesCode?.let { "species=$it" },animalId?.let { "animalId=$it" }).joinToString("&").ifBlank { null })
+        }
         is FarmDestination.Health -> entry.runtimeRouteContract()
         is FarmDestination.Task -> {
             require(taskId.isNotBlank()) { "Task destination requires a non-blank task id" }
             FarmRuntimeRoute("task.detail", "FOS-TASK-003", "taskId=$taskId")
         }
-        is FarmDestination.Tasks -> entry.runtimeRouteContract()
+        is FarmDestination.Tasks -> {
+            require(animalId==null || animalId.isNotBlank())
+            entry.runtimeRouteContract().copy(scopedParameter=animalId?.let { "animalId=$it" })
+        }
         is FarmDestination.SyncQueue -> FarmRuntimeRoute("sync.${view.name.lowercase()}", view.screenId)
     }
 

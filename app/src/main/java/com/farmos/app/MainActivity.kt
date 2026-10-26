@@ -1,5 +1,7 @@
 package com.farmos.app
 
+import androidx.activity.enableEdgeToEdge
+
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -26,6 +28,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         val app = application as FarmOsApplication
 
         setContent {
@@ -39,6 +42,7 @@ class MainActivity : ComponentActivity() {
                     app.saveThemeMode(selected)
                 },
             ) {
+                FarmAppViewport(window) {
                 var showSplash by remember { mutableStateOf(true) }
                 LaunchedEffect(Unit) {
                     delay(650)
@@ -46,11 +50,11 @@ class MainActivity : ComponentActivity() {
                 }
                 if (showSplash) {
                     FarmOsSplashScreen()
-                    return@FarmOsTheme
+                    return@FarmAppViewport
                 }
 
                 // No application server: farms, accounts and sign-in live on this device (owner lock, 30 Sep 2026).
-                if (!app.backendConfigured) { LocalFarmSession(app); return@FarmOsTheme }
+                if (!app.backendConfigured) { LocalFarmSession(app); return@FarmAppViewport }
                 val scope = rememberCoroutineScope()
                 val restoredMembership = remember { app.lastMembershipForCurrentSession() }
                 var memberships by remember {
@@ -253,6 +257,8 @@ class MainActivity : ComponentActivity() {
                         onRequireFarmReselection = requireFarmReselection,
                         onSignOut = signOut,
                     )
+                }
+
                 }
             }
         }

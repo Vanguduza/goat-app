@@ -34,6 +34,9 @@ sealed class FarmDestination {
         val animalId: String? = null,
     ) : FarmDestination()
 
+    /** Generic capture entry, followed by explicit species and a farm-local individual. */
+    data class Weight(val speciesCode:String?=null,val animalId:String?=null):FarmDestination()
+
     data class Health(
         val entry: HealthEntryPage = HealthEntryPage.DASHBOARD,
     ) : FarmDestination()
@@ -44,6 +47,7 @@ sealed class FarmDestination {
 
     data class Tasks(
         val entry: TaskEntryPage = TaskEntryPage.BOARD,
+        val animalId: String? = null,
     ) : FarmDestination()
 
     data class SyncQueue(

@@ -1,5 +1,7 @@
 package com.farmos.app
 
+import androidx.compose.ui.test.assertTextContains
+
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -137,15 +139,17 @@ class HomeMenuAndTaskUxTest {
     @Test
     fun taskFiltersExposeSelectionAndChangeTheDisplayedWork() {
         showTasks(taskRows())
-        compose.onNodeWithTag("task-filter:TODAY").assertIsSelected()
+        compose.onNodeWithTag("task-filter:field").assertTextContains("Today")
         compose.onNodeWithText("Today checks").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("Future feed").assertDoesNotExist()
+        compose.onNodeWithTag("task-filter:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-filter:SCHEDULED").performScrollTo().performClick()
-        compose.onNodeWithTag("task-filter:SCHEDULED").assertIsSelected()
+        compose.onNodeWithTag("task-filter:field").assertTextContains("Scheduled")
         compose.onNodeWithText("Future feed").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("Today checks").assertDoesNotExist()
+        compose.onNodeWithTag("task-filter:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-filter:OVERDUE").performScrollTo().performClick()
-        compose.onNodeWithTag("task-filter:OVERDUE").assertIsSelected()
+        compose.onNodeWithTag("task-filter:field").assertTextContains("Overdue")
         compose.onNodeWithText("Overdue inspection").performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("Future feed").assertDoesNotExist()
     }
@@ -181,7 +185,7 @@ class HomeMenuAndTaskUxTest {
             .performScrollTo().performTextInput("Inspect water trough")
         compose.onNodeWithText("Create task").performScrollTo().assertIsEnabled().performClick()
         compose.runOnIdle {
-            assertEquals(listOf("Inspect water trough", "goat", "CHECK", due), created)
+            assertEquals(listOf("Inspect water trough", "farm", "CHECK", due), created)
         }
         compose.onNodeWithText("Close task form").assertDoesNotExist()
     }
