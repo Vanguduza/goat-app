@@ -2,14 +2,14 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "fc5a399bbe9c0f7e66d84847336b66143f2857d9",
-  "source_fingerprint": "sha256:575c05da9c0e2160b967966ca2f04a7ab5c6b1a6f98a1fffaa61ea14cb7700ec",
+  "tested_commit": "f0151c6a8e1aa79e3d0ac5e84c240e9b16e20b77",
+  "source_fingerprint": "sha256:3284e40a6df15a510d1d79cc8ee96f1f30e2566a957f0cfb23e2587a56f45971",
   "ci_status": "CI_PENDING",
   "foundation_run_id": null,
   "additional_case_evidence": {
     "schema_version": 1,
     "mapping_path": "docs/ux/runtime-navigation-cases.json",
-    "mapping_sha256": "daa9d250f9435a663008eef7387901e8ba66156697242abba992cb2166cef51e",
+    "mapping_sha256": "403c0578140c24aef55eb8d5b1aa112e7534cd2ac9452012ce74b63f7844a938",
     "sources": [
       {
         "path": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
@@ -31,8 +31,8 @@
       },
       {
         "path": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
-        "sha256": "0000143a4203713f34c211c4b50c8576966a2963445ae4076319f2f2c749b9dc",
-        "reviewed_source_commit": "26b8e84cedaec7347d056e840fed64f15dc5e49f",
+        "sha256": "fc6c49082dba52a2e93ffd3d198b0eaf6be0e082fca6b026a525a451cc9c9420",
+        "reviewed_source_commit": "7b8a5221a34cfc8fd20724e6cb0d6bc53d0c0958",
         "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest"
       },
       {
@@ -399,7 +399,7 @@
           },
           {
             "kind": "rendered_destination_traversal",
-            "screen_id": "FOS-SHEEP-006"
+            "screen_id": "FOS-HOME-008"
           },
           {
             "kind": "rendered_destination_traversal",
@@ -435,7 +435,7 @@
           },
           {
             "kind": "rendered_destination_traversal",
-            "screen_id": "FOS-CATTLE-006"
+            "screen_id": "FOS-HOME-008"
           },
           {
             "kind": "rendered_destination_traversal",
@@ -992,14 +992,13 @@
       ],
       "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt": [
         "FOS-CATTLE-003",
-        "FOS-CATTLE-006",
         "FOS-CATTLE-018",
         "FOS-CATTLE-034",
         "FOS-HOME-006",
+        "FOS-HOME-008",
         "FOS-RABBIT-003",
         "FOS-RABBIT-004",
         "FOS-SHEEP-003",
-        "FOS-SHEEP-006",
         "FOS-SHEEP-010",
         "FOS-SHEEP-030"
       ]

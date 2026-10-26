@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "evidence_class": "STATIC_SOURCE_DERIVED_NOT_RUNTIME_REACHABILITY",
-  "tested_commit": "fc5a399bbe9c0f7e66d84847336b66143f2857d9",
+  "tested_commit": "f0151c6a8e1aa79e3d0ac5e84c240e9b16e20b77",
   "registry": {
     "exact_entries": 545,
     "unique_entries": 545,
@@ -539,9 +539,9 @@
         },
         {
           "value": "WEIGHT",
-          "refs": 2,
-          "transition_refs": 1,
-          "render_only_candidate": false
+          "refs": 1,
+          "transition_refs": 0,
+          "render_only_candidate": true
         },
         {
           "value": "OPERATIONS",
@@ -1451,6 +1451,7 @@
   ],
   "findings": {
     "render_only_state_candidates": [
+      "SpeciesPage.WEIGHT",
       "InventoryPage.ITEMS",
       "InventoryPage.CREATE",
       "InventoryPage.ISSUE",
