@@ -1,4 +1,5 @@
 name: Candidate source evidence refresh
+# retrigger: final-weight-profile-binding
 
 on:
   push:
