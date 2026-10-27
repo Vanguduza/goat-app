@@ -255,7 +255,7 @@ class SpeciesSearchRuntimeNavigationTest {
         compose.onNodeWithText("Other farm", substring = true).assertDoesNotExist()
         compose.onNodeWithText("AA-FIRST", substring = true).assertDoesNotExist()
 
-        click("Record weight")
+        clickTag("species-profile-record-weight")
         awaitScreen("$prefix-006")
         compose.onNodeWithText("ZZ-TARGET · $name · female · active").assertExists()
         field("Weight", weight)
