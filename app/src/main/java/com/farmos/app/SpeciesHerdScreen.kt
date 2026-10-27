@@ -336,6 +336,7 @@ private fun SpeciesProfile(
             com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(selected.animalId,config.plural))
             com.farmos.core.design.FarmProfileBreeding(selected.animalId,config.plural)
             FarmOperationalSection("Actions") {
+                TextButton(onClick = { onOpen(SpeciesPage.WEIGHT) }, enabled = selected.active, modifier = Modifier.fillMaxWidth()) { Text("Record weight") }
                 TextButton(onClick = { onOpen(SpeciesPage.OPERATIONS) }, enabled = selected.active, modifier = Modifier.fillMaxWidth()) { Text(config.operationsTitle) }
                 TextButton(onClick = { onOpen(SpeciesPage.STATUS) }, enabled = selected.active || exitsReversible, modifier = Modifier.fillMaxWidth()) { Text("Lifecycle status") }
             }
