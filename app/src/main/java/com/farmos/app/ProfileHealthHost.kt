@@ -88,7 +88,6 @@ internal fun ProfileHealthHost(database:FarmOsDatabase,farmId:String,subject:Far
                 if(subject.kind==FarmHealthSubjectKind.ANIMAL) {
                     FarmPrimaryButton({capture="observation"},Modifier.fillMaxWidth().testTag("profile-health-observe"),enabled=canRecord && data.active && !busy) {Text("Record health observation")}
                     FarmModuleTools(title="Health actions",groups=listOf(FarmToolGroup("More actions",listOf(
-                        FarmToolAction("Record weight",{navigate(FarmDestination.Weight(subject.speciesCode,subject.id))},enabled=canRecord && data.active),
                         FarmToolAction("Plan health follow-up",{capture="follow-up"},enabled=canPlan && data.active),
                         FarmToolAction("Open health workspace",{navigate(FarmDestination.Health())}),
                     ))))
