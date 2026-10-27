@@ -31,8 +31,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class RabbitPedigreeScreensTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private fun searchOf(vararg options: FarmSelectorOption) = FarmSelectorSearch { query, offset, limit ->
         val matches = options.filter { query.isBlank() || it.label.contains(query, ignoreCase = true) }
@@ -54,7 +54,7 @@ class RabbitPedigreeScreensTest {
 
     private fun render() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 RabbitProgrammeScreen(
                     cages = emptyList(), waves = emptyList(), availableBoxes = 0, busy = false, error = null, does = emptyList(),
                     onRegisterDoe = { _, _, _ -> }, onCreateCage = {}, onCreateNestBox = { _, _ -> }, onCreateWave = { _, _, _ -> },
@@ -67,42 +67,49 @@ class RabbitPedigreeScreensTest {
 
     private fun waitForOption(tag: String) = compose.waitUntil(10_000) { compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }
 
+    private fun openRecordsAction(label: String) {
+        waitForOption("rabbit-section:Records")
+        compose.onNodeWithTag("rabbit-section:Records").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+    }
+
+
     @Test
     fun aRabbitsSireIsLinkedFromTheWholeRabbitry() {
         render()
-        compose.onNode(hasClickAction() and hasText("Open Rabbit pedigree")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-RABBIT-031").assertExists()
+        openRecordsAction("Rabbit pedigree")
+        compose.onNodeWithTag("farm-screen:FOS-RABBIT-031").assertExists().also { compose.captureObservedNativeOwners() }
         waitForOption("farm-atom:FOS-ATOM-004:option:r1")
         compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:r1").performScrollTo().performClick()
-        compose.onNodeWithText("No parents recorded for RB-1 · Luna.").assertExists()
+        compose.onNodeWithText("No parents recorded for RB-1 · Luna.").assertExists().also { compose.captureObservedNativeOwners() }
         waitForOption("farm-atom:FOS-ATOM-008:option:r2")
         compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:r2").performScrollTo().performClick()
         compose.onNodeWithTag("rabbit-link:sire").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-parent:sire").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText("Sire: RB-2 · Max").assertExists()
+        compose.onNodeWithText("Sire: RB-2 · Max").assertExists().also { compose.captureObservedNativeOwners() }
         compose.runOnIdle { assertEquals(listOf(Triple("r1", "r2", "sire")), links) }
     }
 
     @Test
     fun theKitsInbreedingShowsForADoeAndBuck() {
         render()
-        compose.onNode(hasClickAction() and hasText("Open Inbreeding check")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GEN-006").assertExists()
-        compose.onNodeWithText("Choose a doe and a buck.").assertExists()
+        openRecordsAction("Inbreeding check")
+        compose.onNodeWithTag("farm-screen:FOS-GEN-006").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Choose a doe and a buck.").assertExists().also { compose.captureObservedNativeOwners() }
         waitForOption("farm-atom:FOS-ATOM-004:option:r1")
         compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:r1").performScrollTo().performClick()
         waitForOption("farm-atom:FOS-ATOM-008:option:r2")
         compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:r2").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-coi").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText("Inbreeding of the kits (COI) 25.00% · 1 complete generation recorded").assertExists()
+        compose.onNodeWithText("Inbreeding of the kits (COI) 25.00% · 1 complete generation recorded").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun bucksAreComparedSideBySideForADoeWithoutRanking() {
         render()
-        compose.onNode(hasClickAction() and hasText("Open Compare bucks")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-GEN-007").assertExists()
-        compose.onNodeWithText("Choose a doe to compare bucks for.").assertExists()
+        openRecordsAction("Compare bucks")
+        compose.onNodeWithTag("farm-screen:FOS-GEN-007").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Choose a doe to compare bucks for.").assertExists().also { compose.captureObservedNativeOwners() }
         waitForOption("farm-atom:FOS-ATOM-004:option:r1")
         compose.onNodeWithTag("farm-atom:FOS-ATOM-004:option:r1").performScrollTo().performClick()
         listOf("r2", "r3").forEach { buck ->
@@ -110,13 +117,13 @@ class RabbitPedigreeScreensTest {
             compose.onNodeWithTag("farm-atom:FOS-ATOM-008:option:$buck").performScrollTo().performClick()
             compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-candidate-coi:$buck").fetchSemanticsNodes().isNotEmpty() }
         }
-        compose.onNodeWithText("Inbreeding of the kits (COI) 25.00% · 1 complete generation recorded").assertExists()
-        compose.onNodeWithText("Latest weight: 3.25 kg").assertExists()
-        compose.onNodeWithText("Born: 2023-05-23").assertExists()
-        compose.onNodeWithText("Born: Not recorded").assertExists()
-        compose.onNodeWithText("Inbreeding of the kits (COI) 0.00% · no complete generation recorded").assertExists()
+        compose.onNodeWithText("Inbreeding of the kits (COI) 25.00% · 1 complete generation recorded").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Latest weight: 3.25 kg").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Born: 2023-05-23").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Born: Not recorded").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Inbreeding of the kits (COI) 0.00% · no complete generation recorded").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("rabbit-candidate-remove:r2").performScrollTo().performClick()
         compose.onAllNodesWithTag("rabbit-candidate-coi:r2").assertCountEquals(0)
-        compose.onNodeWithTag("rabbit-candidate-coi:r3").assertExists()
+        compose.onNodeWithTag("rabbit-candidate-coi:r3").assertExists().also { compose.captureObservedNativeOwners() }
     }
 }

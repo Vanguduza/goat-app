@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -112,6 +112,7 @@ data class RabbitRecords(
     val waves: List<RabbitWaveView> = emptyList(),
     val kits: List<RabbitKitView> = emptyList(),
     val weights: List<RabbitWeightView> = emptyList(),
+    val units: List<RabbitUnitView> = emptyList(),
 )
 
 private val AVAILABLE_BOX_STATES = setOf("available", "sanitized")
@@ -133,7 +134,7 @@ private fun RabbitSwitcher(title: String, options: List<Pair<String, String>>, s
     FarmOperationalSection(title) {
         options.forEach { (id, label) ->
             val selected = id == selectedId
-            TextButton(
+            FarmActionButton(
                 onClick = { onSelect(id) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -147,25 +148,18 @@ private fun RabbitSwitcher(title: String, options: List<Pair<String, String>>, s
 
 /** FOS-RABBIT-008 — every cage with its recorded capacity, nest boxes and waves. */
 @Composable
-internal fun RabbitCageOccupancyScreen(records: RabbitRecords, onBack: () -> Unit) {
-    FarmOperationalPage("FOS-RABBIT-008", "Cage occupancy", "Recorded capacity, nest boxes and wave assignments per cage; not a physical head count.", FarmVisualClass.I3, onBack) {
-        if (records.cages.isEmpty()) {
-            AnimalFarmEmptyState("No cages on this device.")
-            return@FarmOperationalPage
+internal fun RabbitCageOccupancyScreen(
+    records: RabbitRecords,
+    onBack: () -> Unit,
+    today: LocalDate = LocalDate.now(),
+    onManageCages: (() -> Unit)? = null,
+) {
+    FarmOperationalPage("FOS-RABBIT-008", "Cage occupancy", "", FarmVisualClass.I3, onBack) {
+        onManageCages?.let { manage ->
+            com.farmos.core.design.FarmActionButton(onClick = manage, modifier = Modifier.fillMaxWidth()) { Text("Manage cages & nests") }
         }
-        FarmOperationalSection("Cages · ${records.cages.size}") {
-            records.cages.forEachIndexed { index, cage ->
-                if (index > 0) HorizontalDivider()
-                val available = cage.nestBoxes.count { it.status in AVAILABLE_BOX_STATES }
-                val latest = records.waves.filter { it.id in cage.waveIds }.maxByOrNull { it.matingEpochDay }
-                RabbitRecordRow(
-                    "Cage ${cage.code} · capacity ${cage.doeCapacity} does",
-                    "$available of ${cage.nestBoxes.size} nest boxes available · ${cage.waveIds.size} waves" +
-                        (latest?.let { " · latest ${it.doeCount} does mated ${date(it.matingEpochDay)}" } ?: ""),
-                    "rabbit-cage:${cage.id}",
-                )
-            }
-        }
+        RabbitCageRotationBoard(records, today)
+        RabbitNestCycle(records.cages.flatMap { it.nestBoxes })
     }
 }
 
@@ -263,7 +257,10 @@ internal fun RabbitLitterProfileScreen(records: RabbitRecords, onBack: () -> Uni
             RabbitRecordRow("Recorded state", state.label(wave.latestOutcome), "rabbit-litter-state")
             RabbitRecordRow("Latest palpation", wave.latestPalpation ?: "No palpation recorded", "rabbit-litter-palpation")
         }
-        FarmOperationalSection("Schedule stored on the wave") {
+        RabbitWaveTimeline(wave, LocalDate.now(), showOutcome = false)
+        var showStoredDates by rememberSaveable(wave.id) { mutableStateOf(false) }
+        FarmActionButton(onClick = { showStoredDates = !showStoredDates }) { Text(if (showStoredDates) "Hide stored dates" else "Stored dates") }
+        if (showStoredDates) FarmOperationalSection("Schedule stored on the wave") {
             RabbitRecordRow("Mating", date(wave.matingEpochDay), "rabbit-litter-mating")
             RabbitRecordRow("Nest in", date(wave.nestInEpochDay), "rabbit-litter-nest-in")
             RabbitRecordRow("Kindling", date(wave.kindlingEpochDay), "rabbit-litter-kindling")

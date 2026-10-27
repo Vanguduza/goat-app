@@ -1,11 +1,22 @@
 package com.farmos.app
 
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
+
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,7 +40,7 @@ import com.farmos.core.design.runSuspendCatching
 /** AI module pages; each maps to one canonical FOS-AI-* screen. */
 private enum class AiPage(val screenId: String, val title: String) {
     HOME("FOS-AI-001", "Copilot home"),
-    ASK("FOS-AI-002", "Ask Farm OS"),
+    ASK("FOS-AI-002", "Ask Animal Farm"),
     CONVERSATION("FOS-AI-003", "Conversation"),
     INSIGHT("FOS-AI-004", "Insight detail"),
     EVIDENCE("FOS-AI-005", "Evidence sources"),
@@ -59,7 +70,7 @@ private data class AiProviderConfig(
 )
 
 /**
- * Farm OS-owned AI boundary. Vendor SDKs live behind this boundary; until a provider adapter is
+ * Animal Farm-owned AI boundary. Vendor SDKs live behind this boundary; until a provider adapter is
  * connected, every analytical answer is computed on-device from local records and labelled as such.
  * No prescribing, dosing, treating, culling, selling, posting or authorization bypass happens here.
  */
@@ -100,8 +111,9 @@ fun AiBoundaryHost(
     onOpenModule: (FarmModule) -> Unit,
     onBack: () -> Unit,
 ) {
-    var page by remember(farmId) { mutableStateOf(AiPage.HOME) }
+    var page by rememberSaveable(farmId) { mutableStateOf(AiPage.HOME) }
     var config by remember(farmId) { mutableStateOf<AiProviderConfig?>(null) }
+    var signalsLoaded by remember(farmId) { mutableStateOf(false) }
     var suggestions by remember(farmId) { mutableStateOf(listOf<SuggestedAction>()) }
     var dismissed by remember(farmId) { mutableStateOf(setOf<String>()) }
     var selectedAction by remember(farmId) { mutableStateOf<SuggestedAction?>(null) }
@@ -149,6 +161,7 @@ fun AiBoundaryHost(
             ownerScreenId = "FOS-GEN-004",
         )
         suggestions = out
+        signalsLoaded = true
     }
 
     LaunchedEffect(farmId) {
@@ -162,11 +175,12 @@ fun AiBoundaryHost(
         log = (listOf(entry) + log).take(50)
     }
 
+    val retainedPages = rememberSaveableStateHolder()
     val current = page
     FarmOperationalPage(
         screenId = current.screenId,
         title = current.title,
-        subtitle = "Advisory and evidence-bound. Nothing here acts on the farm without you.",
+        subtitle = "",
         onBack = if (current == AiPage.HOME) onBack else ({ page = AiPage.HOME }),
         backLabel = if (current == AiPage.HOME) "Farm home" else "Copilot home",
     ) {
@@ -177,39 +191,34 @@ fun AiBoundaryHost(
         fun nav(target: AiPage, label: String) {
             TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text(label) }
         }
+        retainedPages.SaveableStateProvider("$farmId:${current.name}") {
         when (current) {
             AiPage.HOME -> {
-                FarmOperationalSection("Copilot home") {
-                    Text(
-                        "On-device analysis answers from your farm's own records. A connected model provider " +
-                            "can assist with questions; it never prescribes, doses, treats, culls, sells, posts " +
-                            "accounts or bypasses permissions.",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                FarmOperationalSection("Work areas") {
-                    nav(AiPage.ASK, "Ask Farm OS")
-                    nav(AiPage.CONVERSATION, "Conversation log")
-                    nav(AiPage.SUGGESTED, "Suggested actions")
-                    nav(AiPage.REVIEW, "Action review")
-                    nav(AiPage.ANOMALY, "Anomaly review")
-                    nav(AiPage.PROVIDER, "Model provider settings")
-                    nav(AiPage.PRIVACY, "AI privacy and controls")
-                }
                 val pending = suggestions.filter { it.id !in dismissed }
-                if (pending.isNotEmpty()) {
-                    FarmOperationalSection("Suggested actions (${pending.size})", "Advisory only.") {
-                        pending.take(3).forEach { action ->
-                            Text("• ${action.title}", style = MaterialTheme.typography.bodyMedium)
-                        }
-                        nav(AiPage.SUGGESTED, "Review all")
-                    }
-                }
+                FarmMetricStrip(listOf(
+                    FarmMetricValue("Analysis mode", "On device"),
+                    FarmMetricValue("Suggestions to review", if (!signalsLoaded) "—" else pending.size.toString(), onClick = { page = AiPage.SUGGESTED }),
+                ))
+                Button(onClick = { page = AiPage.ASK }, modifier = Modifier.fillMaxWidth()) { Text("Ask Animal Farm") }
+                FarmModuleTools(listOf(
+                    FarmToolGroup("Review", listOf(
+                        FarmToolAction("Conversation log", { page = AiPage.CONVERSATION }),
+                        FarmToolAction("Suggested actions", { page = AiPage.SUGGESTED }),
+                        FarmToolAction("Action review", { page = AiPage.REVIEW }),
+                        FarmToolAction("Anomaly review", { page = AiPage.ANOMALY }),
+                    )),
+                    FarmToolGroup("Provider and privacy", listOf(
+                        FarmToolAction("Model provider settings", { page = AiPage.PROVIDER }),
+                        FarmToolAction("AI privacy and controls", { page = AiPage.PRIVACY }),
+                    )),
+                    FarmToolGroup("Current suggestions", pending.map { action -> FarmToolAction(action.title, { selectedAction = action; page = AiPage.REVIEW }, action.detail) }),
+                ).filter { it.actions.isNotEmpty() }, title = "Copilot tools")
+                Text("Local analysis only. Suggestions require your review in the owning module; nothing is prescribed, sold or posted here.", style = MaterialTheme.typography.bodySmall)
             }
             AiPage.ASK -> {
-                var question by remember { mutableStateOf("") }
+                var question by rememberSaveable { mutableStateOf("") }
                 var answer by remember { mutableStateOf<String?>(null) }
-                FarmOperationalSection("Ask Farm OS") {
+                FarmOperationalSection("Ask Animal Farm") {
                     Text(
                         "No model provider is connected, so answers come from on-device analysis of your records.",
                         style = MaterialTheme.typography.bodyMedium,
@@ -257,17 +266,13 @@ fun AiBoundaryHost(
                 }
             }
             AiPage.SUGGESTED -> {
-                FarmOperationalSection("Suggested actions", "Advisory only. Each action needs your review; nothing executes here.") {
-                    val pending = suggestions.filter { it.id !in dismissed }
-                    if (pending.isEmpty()) Text("No pending suggestions.", style = MaterialTheme.typography.bodyMedium)
-                    pending.forEach { action ->
-                        Text(action.title, style = MaterialTheme.typography.titleMedium)
-                        Text(action.detail, style = MaterialTheme.typography.bodyMedium)
-                        TextButton(onClick = { selectedAction = action; page = AiPage.REVIEW }, modifier = Modifier.fillMaxWidth()) {
-                            Text("Review")
-                        }
-                    }
-                }
+                val pending = suggestions.filter { it.id !in dismissed }
+                if (!signalsLoaded && error == null) Text("Reading farm signals")
+                else if (pending.isEmpty()) Text("No pending suggestions.")
+                else FarmModuleTools(listOf(FarmToolGroup("Needs review", pending.map { action ->
+                    FarmToolAction(action.title, { selectedAction = action; page = AiPage.REVIEW }, action.detail)
+                })), title = "Suggested actions")
+                Text("Advisory only. Nothing executes from this list.", style = MaterialTheme.typography.bodySmall)
             }
             AiPage.REVIEW -> {
                 val action = selectedAction
@@ -277,7 +282,12 @@ fun AiBoundaryHost(
                     } else {
                         Text(action.title, style = MaterialTheme.typography.titleMedium)
                         Text(action.detail, style = MaterialTheme.typography.bodyMedium)
-                        Text("Owner screen: ${action.ownerScreenId}", style = MaterialTheme.typography.bodyMedium)
+                        FarmWorkflowTimeline("Review steps", listOf(
+                            FarmWorkflowStep("Local evidence", action.detail, state = FarmWorkflowState.RECORDED),
+                            FarmWorkflowStep("Your review", "Review the evidence and decide", state = FarmWorkflowState.CURRENT),
+                            FarmWorkflowStep("Related module", "No farm action has been recorded here", state = FarmWorkflowState.NOT_RECORDED),
+                        ), showViewToggle = false)
+                        TextButton(onClick = { page = AiPage.EVIDENCE }, modifier = Modifier.fillMaxWidth()) { Text("View evidence sources") }
                         Button(onClick = { onOpenModule(action.ownerModule) }, modifier = Modifier.fillMaxWidth()) {
                             Text("Open related module")
                         }
@@ -291,7 +301,7 @@ fun AiBoundaryHost(
             }
             AiPage.ANOMALY -> {
                 FarmOperationalSection("Anomaly review", "Deterministic on-device checks over local records.") {
-                    if (suggestions.isEmpty()) Text("No anomalies flagged.", style = MaterialTheme.typography.bodyMedium)
+                    if (!signalsLoaded && error == null) Text("Reading farm signals") else if (suggestions.isEmpty()) Text("No anomalies flagged.", style = MaterialTheme.typography.bodyMedium)
                     suggestions.forEach { action ->
                         TextButton(onClick = { selectedAction = action; page = AiPage.INSIGHT }, modifier = Modifier.fillMaxWidth()) {
                             Text(action.title)
@@ -367,6 +377,7 @@ fun AiBoundaryHost(
                     nav(AiPage.ASK, "Use on-device analysis")
                 }
             }
+        }
         }
     }
 }

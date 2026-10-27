@@ -1,16 +1,18 @@
 package com.farmos.app
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -33,7 +35,7 @@ import kotlinx.serialization.json.Json
 import com.farmos.core.design.runSuspendCatching
 
 /** Simulation module pages; each maps to one canonical FOS-SIM-* screen. */
-private enum class SimulationPage(val screenId: String, val title: String) {
+internal enum class SimulationPage(val screenId: String, val title: String) {
     HUB("FOS-SIM-001", "Simulation hub"),
     GROWTH("FOS-SIM-002", "Herd growth scenario"),
     BREEDING("FOS-SIM-003", "Breeding scenario"),
@@ -47,7 +49,7 @@ private enum class SimulationPage(val screenId: String, val title: String) {
 
 /** A saved what-if scenario. Parameters are owner-entered; results are deterministic projections. */
 @Serializable
-private data class FarmScenario(
+internal data class FarmScenario(
     val name: String,
     val kind: String,
     val speciesCode: String,
@@ -57,9 +59,10 @@ private data class FarmScenario(
     val feedGramsPerHeadPerDay: Long,
     val createdEpochMillis: Long,
     val resultLines: List<String>,
+    val metrics: List<ScenarioMetric> = emptyList(),
 )
 
-private data class ScenarioParams(
+internal data class ScenarioParams(
     val speciesCode: String = "goat",
     val periodsMonths: Int = 12,
     val birthRate: Double = 1.5,
@@ -101,8 +104,13 @@ fun SimulationModuleHost(
     filesDir: File,
     onBack: () -> Unit,
 ) {
-    var page by remember(farmId) { mutableStateOf(SimulationPage.HUB) }
-    var params by remember(farmId) { mutableStateOf(ScenarioParams()) }
+    var page by rememberSaveable(farmId) { mutableStateOf(SimulationPage.HUB) }
+    var inputs by rememberSaveable(farmId, stateSaver = listSaver<ScenarioInputs, String>(
+        save = { listOf(it.species, it.months, it.birthRate, it.deathRate, it.feedGrams) },
+        restore = { ScenarioInputs(it[0], it[1], it[2], it[3], it[4]) },
+    )) { mutableStateOf(ScenarioInputs()) }
+    var scenarioName by rememberSaveable(farmId) { mutableStateOf("") }
+    var saving by remember(farmId) { mutableStateOf(false) }
     var stats by remember(farmId) { mutableStateOf<FarmStats?>(null) }
     var saved by remember(farmId) { mutableStateOf(listOf<FarmScenario>()) }
     var error by remember(farmId) { mutableStateOf<String?>(null) }
@@ -144,8 +152,8 @@ fun SimulationModuleHost(
 
     fun runScenario(kind: String): FarmScenario {
         val s = requireNotNull(stats) { "Farm figures are still loading" }
-        val p = params
-        require(p.speciesCode in FarmSpeciesCodes.ALL) { "Select a supported species code" }
+        val p = inputs.parameters(kind)
+        require(kind == "FINANCE" || p.speciesCode in FarmSpeciesCodes.ALL) { "Select a supported species code" }
         require(p.periodsMonths in 1..120 && p.birthRate.isFinite() && p.birthRate in 0.0..10.0 &&
             p.deathRate.isFinite() && p.deathRate in 0.0..1.0 && p.feedGramsPerHeadPerDay in 0..100_000) {
             "Enter finite scenario parameters within their stated ranges"
@@ -156,9 +164,10 @@ fun SimulationModuleHost(
         val today = LocalDate.now()
         val horizonDays = ChronoUnit.DAYS.between(today, today.plusMonths(p.periodsMonths.toLong()))
         val lines = mutableListOf<String>()
-        lines += "Basis: " + head + " individually registered active " + p.speciesCode +
+        val metrics = mutableListOf<ScenarioMetric>()
+        if (kind != "FINANCE") lines += "Basis: " + head + " individually registered active " + p.speciesCode +
             ", " + females + " females, over " + p.periodsMonths + " months (" + horizonDays + " days)."
-        lines += "Assumptions: " + p.birthRate + " births per female per year; " +
+        if (kind in setOf("GROWTH", "BREEDING", "CAPACITY")) lines += "Assumptions: " + p.birthRate + " births per female per year; " +
             p.deathRate + " annual death rate. Group-only head counts are not included."
         when (kind) {
             "GROWTH" -> {
@@ -168,11 +177,18 @@ fun SimulationModuleHost(
                 lines += "Projected births: ${births.toLong()}"
                 lines += "Projected deaths: ${deaths.toLong()}"
                 lines += "Projected head: $projected (from $head)"
+                metrics += ScenarioMetric("Recorded active head", "$head animals", head.toDouble(), "animals")
+                metrics += ScenarioMetric("Projected births", "${births.toLong()} animals", births.toLong().toDouble(), "animals")
+                metrics += ScenarioMetric("Projected deaths", "${deaths.toLong()} animals", deaths.toLong().toDouble(), "animals")
+                metrics += ScenarioMetric("Projected head", "$projected animals", projected.toDouble(), "animals")
             }
             "BREEDING" -> {
                 val births = females * p.birthRate * years
                 lines += "Expected offspring: ${births.toLong()} from $females females"
                 lines += "At 50% female ratio: ${(births / 2).toLong()} replacement females"
+                metrics += ScenarioMetric("Recorded females", "$females females", females.toDouble(), "animals")
+                metrics += ScenarioMetric("Projected offspring", "${births.toLong()} young", births.toLong().toDouble(), "animals")
+                metrics += ScenarioMetric("At 50% female ratio", "${(births / 2).toLong()} replacement females", (births / 2).toLong().toDouble(), "animals")
             }
             "FEED" -> {
                 val totalGrams = BigDecimal.valueOf(p.feedGramsPerHeadPerDay)
@@ -180,15 +196,20 @@ fun SimulationModuleHost(
                 lines += "Entered feed assumption: " + p.feedGramsPerHeadPerDay + " g/head/day"
                 lines += "Projected feed for " + head + " head: " + reportKg(totalGrams)
                 lines += "Feed issues alone do not establish measured intake per animal per day."
+                metrics += ScenarioMetric("Projected feed", reportKg(totalGrams), totalGrams.movePointLeft(3).toDouble(), "kg")
             }
             "CAPACITY" -> {
                 val births = females * p.birthRate * years
                 val projected = (head + births - head * p.deathRate * years).toLong().coerceAtLeast(0)
                 lines += "Projected head: $projected"
+                metrics += ScenarioMetric("Recorded active head", "$head animals", head.toDouble(), "animals")
+                metrics += ScenarioMetric("Projected head", "$projected animals", projected.toDouble(), "animals")
                 if (p.speciesCode == "rabbit") {
                     val projectedFemales = (females + births / 2.0 - females * p.deathRate * years).toLong().coerceAtLeast(0)
                     lines += "Assuming 50% female offspring: " + projectedFemales + " projected females."
                     lines += "Recorded doe cage capacity: " + s.doeCageCapacity
+                    metrics += ScenarioMetric("Recorded doe capacity", "${s.doeCageCapacity} doe places", s.doeCageCapacity.toDouble(), "female places")
+                    metrics += ScenarioMetric("Projected females needing places", "$projectedFemales females", projectedFemales.toDouble(), "female places")
                     if (projectedFemales > s.doeCageCapacity) {
                         lines += "If every projected female needs a doe place, shortfall: " + (projectedFemales - s.doeCageCapacity)
                     } else {
@@ -206,10 +227,13 @@ fun SimulationModuleHost(
                     val observedDays = Math.addExact(Math.subtractExact(basis.lastEpochDay, basis.firstEpochDay), 1L)
                     val projected = basis.netMinor.multiply(BigDecimal.valueOf(horizonDays))
                         .divide(BigDecimal.valueOf(observedDays), MathContext.DECIMAL128)
-                    lines += "Recorded net " + reportMoney(basis.netMinor, basis.currency) + " from " +
+                    lines += "Recorded net " + scenarioMoney(basis.netMinor, basis.currency) + " from " +
                         LocalDate.ofEpochDay(basis.firstEpochDay) + " to " + LocalDate.ofEpochDay(basis.lastEpochDay) +
                         " (" + observedDays + " days)."
-                    lines += "If that daily net continues for " + horizonDays + " days: " + reportMoney(projected, basis.currency)
+                    lines += "If that daily net continues for " + horizonDays + " days: " + scenarioMoney(projected, basis.currency)
+                    val digits = runCatching { com.farmos.domain.ops.FarmCurrency.minorDigits(basis.currency) }.getOrNull()
+                    metrics += ScenarioMetric("Recorded net", scenarioMoney(basis.netMinor, basis.currency), digits?.let { basis.netMinor.movePointLeft(it).toDouble() }, basis.currency)
+                    metrics += ScenarioMetric("Projected net", scenarioMoney(projected, basis.currency), digits?.let { projected.movePointLeft(it).toDouble() }, basis.currency)
                 }
                 lines += "The baseline assumes records cover their first-to-last date span; missing entries change the result."
             }
@@ -225,12 +249,15 @@ fun SimulationModuleHost(
             feedGramsPerHeadPerDay = p.feedGramsPerHeadPerDay,
             createdEpochMillis = System.currentTimeMillis(),
             resultLines = lines,
+            metrics = metrics,
         )
     }
 
     var lastResult by remember(farmId) { mutableStateOf<FarmScenario?>(null) }
 
     fun saveScenario(name: String) {
+        if (saving) return
+        saving = true
         scope.launch {
             error = null
             runSuspendCatching {
@@ -243,142 +270,37 @@ fun SimulationModuleHost(
                     loadScenarios(filesDir, farmId)
                 }
             }.onFailure { error = it.message }
+            saving = false
         }
     }
 
     val current = page
-    FarmOperationalPage(
-        screenId = current.screenId,
-        title = current.title,
-        subtitle = "What-if projections from recorded figures. Nothing here changes farm records.",
-        onBack = if (current == SimulationPage.HUB) onBack else ({ page = SimulationPage.HUB }),
-        backLabel = if (current == SimulationPage.HUB) "Farm home" else "Simulation hub",
-    ) {
-        if (error != null) {
-            FarmOperationalSection("Attention", error) {}
-        }
-        @Composable
-        fun nav(target: SimulationPage, label: String) {
-            TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text(label) }
-        }
+    FarmOperationalPage(current.screenId, current.title, "", onBack = if (current == SimulationPage.HUB) onBack else ({ page = SimulationPage.HUB }), backLabel = if (current == SimulationPage.HUB) "Farm home" else "Simulation hub") {
+        error?.let { FarmOperationalSection("Needs attention", it) {} }
         when (current) {
-            SimulationPage.HUB -> {
-                FarmOperationalSection("Scenario types", "Each scenario projects recorded figures forward; parameters are yours to set.") {
-                    nav(SimulationPage.GROWTH, "Herd growth scenario")
-                    nav(SimulationPage.BREEDING, "Breeding scenario")
-                    nav(SimulationPage.FEED, "Feed scenario")
-                    nav(SimulationPage.CAPACITY, "Capacity scenario")
-                    nav(SimulationPage.FINANCE, "Financial scenario")
-                    nav(SimulationPage.COMPARE, "Compare saved scenarios")
-                    nav(SimulationPage.SAVE, "Save a scenario")
-                    nav(SimulationPage.REPORT, "Scenario report")
-                }
-                FarmOperationalSection("Saved scenarios") {
-                    if (saved.isEmpty()) Text("None saved yet.", style = MaterialTheme.typography.bodyMedium)
-                    saved.forEach { Text("${it.name} · ${it.kind} · ${it.speciesCode}", style = MaterialTheme.typography.bodyMedium) }
-                }
-            }
-            SimulationPage.GROWTH,
-            SimulationPage.BREEDING,
-            SimulationPage.FEED,
-            SimulationPage.CAPACITY,
-            SimulationPage.FINANCE,
-            -> {
-                val kind = when (current) {
-                    SimulationPage.GROWTH -> "GROWTH"
-                    SimulationPage.BREEDING -> "BREEDING"
-                    SimulationPage.FEED -> "FEED"
-                    SimulationPage.CAPACITY -> "CAPACITY"
-                    else -> "FINANCE"
-                }
-                ScenarioEditor(params = params, onParams = { params = it })
+            SimulationPage.HUB -> SimulationOverview(saved, stats != null, { page = it }, { lastResult = it; page = SimulationPage.REPORT })
+            SimulationPage.GROWTH, SimulationPage.BREEDING, SimulationPage.FEED, SimulationPage.CAPACITY, SimulationPage.FINANCE -> {
+                val kind = current.name
+                ScenarioEditor(inputs, kind) { inputs = it }
                 Button(onClick = {
                     error = null
-                    lastResult = runCatching { runScenario(kind) }.getOrElse {
-                        error = it.message
-                        null
-                    }
-                }, modifier = Modifier.fillMaxWidth()) { Text("Run scenario") }
+                    lastResult = runCatching { runScenario(kind) }.getOrElse { error = it.message; null }
+                }, enabled = stats != null, modifier = Modifier.fillMaxWidth()) { Text("Run scenario") }
                 lastResult?.takeIf { it.kind == kind }?.let { result ->
-                    FarmOperationalSection("Projection") {
-                        result.resultLines.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
-                    }
-                    TextButton(onClick = { page = SimulationPage.SAVE }, modifier = Modifier.fillMaxWidth()) {
-                        Text("Save this scenario")
-                    }
+                    ScenarioResultVisual(result)
+                    TextButton(onClick = { page = SimulationPage.SAVE }, modifier = Modifier.fillMaxWidth()) { Text("Save this scenario") }
                 }
             }
-            SimulationPage.COMPARE -> {
-                FarmOperationalSection("Scenario compare", "Saved scenarios side by side.") {
-                    if (saved.isEmpty()) {
-                        Text("No saved scenarios to compare.", style = MaterialTheme.typography.bodyMedium)
-                    }
-                    saved.forEach { scenario ->
-                        Text(scenario.name + " · " + scenario.kind, style = MaterialTheme.typography.titleMedium)
-                        scenario.resultLines.forEach { Text("  $it", style = MaterialTheme.typography.bodyMedium) }
-                    }
-                }
-            }
+            SimulationPage.COMPARE -> ScenarioComparison(saved)
             SimulationPage.SAVE -> {
-                var name by remember { mutableStateOf("") }
-                FarmOperationalSection("Save scenario", "Save the last completed projection for this farm.") {
-                    OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Scenario name") }, modifier = Modifier.fillMaxWidth())
-                    Button(onClick = { saveScenario(name) }, enabled = lastResult != null, modifier = Modifier.fillMaxWidth()) { Text("Save") }
-                    if (lastResult == null) Text("Run a scenario first.", style = MaterialTheme.typography.bodyMedium)
+                FarmOperationalSection("Save scenario", "Keeps this projection separately from farm records.") {
+                    OutlinedTextField(scenarioName, { scenarioName = it }, label = { Text("Scenario name") }, modifier = Modifier.fillMaxWidth(), enabled = !saving)
+                    Button(onClick = { saveScenario(scenarioName) }, enabled = !saving && lastResult != null && scenarioName.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text(if (saving) "Saving" else "Save") }
+                    if (lastResult == null) Text("Run a scenario first.")
                 }
-                FarmOperationalRows(
-                    saved.map { "${it.name} · ${it.kind} · ${it.speciesCode} · ${it.periodsMonths} months" },
-                    "No saved scenarios",
-                    null,
-                )
+                FarmOperationalRows(saved.map { "${it.name} · ${it.kind} · ${it.periodsMonths} months" }, "No saved scenarios", null)
             }
-            SimulationPage.REPORT -> {
-                FarmOperationalSection("Scenario report") {
-                    val result = lastResult
-                    if (result == null) {
-                        Text("Run a scenario to see its report.", style = MaterialTheme.typography.bodyMedium)
-                    } else {
-                        Text("Kind: ${result.kind} · Species: ${result.speciesCode}", style = MaterialTheme.typography.titleMedium)
-                        result.resultLines.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
-                    }
-                }
-            }
+            SimulationPage.REPORT -> lastResult?.let { ScenarioResultVisual(it) } ?: Text("Run or open a saved scenario to review it.")
         }
-    }
-}
-
-@Composable
-private fun ScenarioEditor(params: ScenarioParams, onParams: (ScenarioParams) -> Unit) {
-    FarmOperationalSection("Parameters") {
-        OutlinedTextField(
-            value = params.speciesCode,
-            onValueChange = { onParams(params.copy(speciesCode = it.trim().lowercase())) },
-            label = { Text("Species code") },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = params.periodsMonths.toString(),
-            onValueChange = { onParams(params.copy(periodsMonths = it.toIntOrNull()?.coerceIn(1, 120) ?: params.periodsMonths)) },
-            label = { Text("Horizon (months)") },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = params.birthRate.toString(),
-            onValueChange = { onParams(params.copy(birthRate = it.toDoubleOrNull()?.takeIf { value -> value.isFinite() }?.coerceIn(0.0, 10.0) ?: params.birthRate)) },
-            label = { Text("Births per female per year") },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = params.deathRate.toString(),
-            onValueChange = { onParams(params.copy(deathRate = it.toDoubleOrNull()?.takeIf { value -> value.isFinite() }?.coerceIn(0.0, 1.0) ?: params.deathRate)) },
-            label = { Text("Death rate per year") },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = params.feedGramsPerHeadPerDay.toString(),
-            onValueChange = { onParams(params.copy(feedGramsPerHeadPerDay = it.toLongOrNull()?.coerceIn(0, 100000) ?: params.feedGramsPerHeadPerDay)) },
-            label = { Text("Assumed feed g/head/day") },
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }

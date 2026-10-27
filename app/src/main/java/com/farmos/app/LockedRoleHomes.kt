@@ -1,337 +1,190 @@
 @file:Suppress("ktlint:standard:function-naming")
-
 package com.farmos.app
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.farmos.core.design.AnimalFarmCanvas
-import com.farmos.core.design.AnimalFarmCarouselControls
-import com.farmos.core.design.AnimalFarmContextHeader
-import com.farmos.core.design.AnimalFarmEmptyState
-import com.farmos.core.design.AnimalFarmFamily
-import com.farmos.core.design.AnimalFarmFamilyLauncher
-import com.farmos.core.design.AnimalFarmHeroCard
-import com.farmos.core.design.AnimalFarmHomeBottomBar
-import com.farmos.core.design.AnimalFarmHomeMetrics
-import com.farmos.core.design.AnimalFarmQuickAction
-import com.farmos.core.design.AnimalFarmReviewTaskCard
-import com.farmos.core.design.AnimalFarmStageSelector
-import com.farmos.core.design.AnimalFarmSummaryTile
-import com.farmos.core.design.AnimalFarmTheme
-import com.farmos.core.design.animalFarmFamilyFromKey
-import com.farmos.core.design.animalFarmFamilyLabel
-import com.farmos.domain.ops.HomeAttentionKind
-import com.farmos.domain.ops.WorkerTaskStage
-import com.farmos.domain.ops.inferTaskSpeciesFamily
-import com.farmos.domain.ops.projectWorkerTaskStage
-import com.farmos.domain.ops.rankHomeAttention
+import com.farmos.core.design.*
+import com.farmos.domain.ops.*
 import com.farmos.feature.ops.TaskEntryPage
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val HomeDateFormat = DateTimeFormatter.ofPattern("EEE d MMM", Locale.UK)
+private val HomeDateFormat = DateTimeFormatter.ofPattern("EEE, d MMM", Locale.UK)
 
+/** Management A from the actual approved HTML: priority, paired summaries, six compact tools. */
 @Composable
-internal fun ManagementControlRoomScreen(
-    farmName: String?,
-    ownerMode: Boolean,
-    summary: FarmHomeSummary,
-    onOpen: (FarmDestination) -> Unit,
-    onAnimals: () -> Unit,
-    onMore: () -> Unit,
-    today: LocalDate = LocalDate.now(),
-) {
-    val title = if (ownerMode) "Control room" else "Farm control"
+internal fun ManagementControlRoomScreen(farmName: String?, ownerMode: Boolean, summary: FarmHomeSummary,
+    onOpen: (FarmDestination) -> Unit, onAnimals: () -> Unit, onMore: () -> Unit, today: LocalDate = LocalDate.now()) {
+    var sheet by rememberSaveable { mutableStateOf<HomeReferenceSheet?>(null) }
+    var previewTaskId by rememberSaveable { mutableStateOf<String?>(null) }
+    val homeOpen: (FarmDestination) -> Unit = { destination ->
+        if (destination is FarmDestination.Task && summary.tasks.any { it.id == destination.taskId }) {
+            sheet = null; previewTaskId = destination.taskId
+        } else onOpen(destination)
+    }
+    androidx.activity.compose.BackHandler(enabled = sheet != null || previewTaskId != null) { previewTaskId = null; sheet = null }
     AnimalFarmCanvas {
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            AnimalFarmContextHeader(
-                farmName = farmName,
-                dateLabel = today.format(HomeDateFormat),
-                title = title,
-                modifier = Modifier.padding(top = 16.dp),
-            )
-            if (summary.loading) {
-                AnimalFarmEmptyState("Loading farm records", Modifier.padding(horizontal = AnimalFarmHomeMetrics.pageInset))
-            } else if (summary.loadError != null) {
-                AnimalFarmEmptyState(
-                    "Farm records could not be loaded. ${summary.loadError} Local records stay on this device.",
-                    Modifier.padding(horizontal = AnimalFarmHomeMetrics.pageInset),
-                )
-            } else {
-                ManagementAttention(summary, today.toEpochDay(), onOpen)
-                ManagementSummaries(summary, onOpen)
-                ManagementFamilies(summary.goatCount, onOpen)
-            }
-        }
-        AnimalFarmHomeBottomBar(
-            onHome = {},
-            onAnimals = onAnimals,
-            onTasks = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
-            onMore = onMore,
-        )
-    }
-}
-
-@Composable
-private fun ManagementAttention(
-    summary: FarmHomeSummary,
-    today: Long,
-    onOpen: (FarmDestination) -> Unit,
-) {
-    val kind = rankHomeAttention(summary.activeWithdrawals, summary.overdueTasks, summary.pendingSync)
-    val family = summary.tasks.firstOrNull { projectWorkerTaskStage(it.status, it.dueEpochDay, today) == WorkerTaskStage.DUE_NOW }
-        ?.let { animalFarmFamilyFromKey(inferTaskSpeciesFamily(it.moduleCode)) }
-    Column(Modifier.padding(horizontal = AnimalFarmHomeMetrics.pageInset)) {
-        when (kind) {
-            HomeAttentionKind.WITHDRAWAL -> {
-                val (label, dest) = managementAttentionAction(kind)!!
-                AnimalFarmHeroCard(
-                    category = "Health",
-                    title = "Withdrawal window open",
-                    context = "${summary.activeWithdrawals} active window(s)",
-                    actionLabel = label,
-                    onAction = { onOpen(dest) },
-                    family = family,
-                )
-            }
-            HomeAttentionKind.OVERDUE_WORK -> {
-                val (label, dest) = managementAttentionAction(kind)!!
-                AnimalFarmHeroCard(
-                    category = "Work",
-                    title = "Due or overdue work",
-                    context = "${summary.overdueTasks} open task(s) due today or earlier",
-                    actionLabel = label,
-                    onAction = { onOpen(dest) },
-                    family = family,
-                )
-            }
-            HomeAttentionKind.PENDING_SYNC -> {
-                val (label, dest) = managementAttentionAction(kind)!!
-                AnimalFarmHeroCard(
-                    category = "Sync",
-                    title = "Waiting to sync",
-                    context = "${summary.pendingSync} local change(s) stored on this device",
-                    actionLabel = label,
-                    onAction = { onOpen(dest) },
-                    modifier = syncStatusEntryModifier(label),
-                )
-            }
-            HomeAttentionKind.NONE -> AnimalFarmEmptyState("No attention items on this device")
-        }
-    }
-}
-
-@Composable
-private fun ManagementSummaries(
-    summary: FarmHomeSummary,
-    onOpen: (FarmDestination) -> Unit,
-) {
-    BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = AnimalFarmHomeMetrics.pageInset)) {
-        val stacked = maxWidth < 360.dp
-        val work: @Composable (Modifier) -> Unit = { modifier ->
-            AnimalFarmSummaryTile(
-                title = "Work",
-                value = if (summary.openTasks == 0) "None due" else "${summary.openTasks} open",
-                detail = "${summary.overdueTasks} due now · ${summary.upcomingTasks} upcoming",
-                onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
-                modifier = modifier,
-                lime = true,
-            )
-        }
-        val resources: @Composable (Modifier) -> Unit = { modifier ->
-            ResourceSummaryTile(summary, onOpen, modifier)
-        }
-        if (stacked) {
-            Column(verticalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) {
-                work(Modifier.fillMaxWidth())
-                resources(Modifier.fillMaxWidth())
-            }
-        } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) {
-                work(Modifier.weight(1f))
-                resources(Modifier.weight(1f))
-            }
-        }
-    }
-}
-
-@Composable
-private fun ManagementFamilies(
-    goatCount: Int,
-    onOpen: (FarmDestination) -> Unit,
-) {
-    val families = listOf(
-        AnimalFarmFamily.GOAT to FarmDestination.Goat(),
-        AnimalFarmFamily.RABBIT to FarmDestination.Module(FarmModule.RABBIT),
-        AnimalFarmFamily.SHEEP to FarmDestination.Module(FarmModule.SHEEP),
-        AnimalFarmFamily.CATTLE to FarmDestination.Module(FarmModule.CATTLE),
-        AnimalFarmFamily.POULTRY to FarmDestination.Module(FarmModule.POULTRY),
-    )
-    Column(
-        Modifier.padding(horizontal = AnimalFarmHomeMetrics.pageInset),
-        verticalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.moduleGap),
-    ) {
-        Text("Modules", color = AnimalFarmTheme.colors.ink)
-        families.chunked(3).forEach { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.moduleGap)) {
-                row.forEach { (family, dest) ->
-                    val subtitle = if (family == AnimalFarmFamily.GOAT) {
-                        if (goatCount == 0) "No goats" else "$goatCount on this device"
-                    } else {
-                        "Open"
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+            AnimalFarmHomeHeader(farmName)
+            Column(Modifier.padding(start = animalFarmHomePageInset(), end = animalFarmHomePageInset(), bottom = 18.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                when {
+                    summary.loading -> AnimalFarmEmptyState("Loading farm records")
+                    summary.loadError != null -> AnimalFarmEmptyState("Farm records could not be loaded. ${summary.loadError}")
+                    else -> {
+                        ManagementAttention(summary, today.toEpochDay(), homeOpen)
+                        ManagementSummaries(summary, onOpen, onResources = { sheet = HomeReferenceSheet.RESOURCES })
+                        Row(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 3.dp)) {
+                            Text("Farm modules", style = AnimalFarmHtmlType.sectionTitle, modifier = Modifier.semantics { heading() })
+                        }
+                        HomeReferenceModuleGrid(onOpen = onOpen, onSheet = { sheet = it })
                     }
-                    AnimalFarmFamilyLauncher(
-                        family = family,
-                        subtitle = subtitle,
-                        onClick = { onOpen(dest) },
-                        modifier = Modifier.weight(1f),
-                    )
                 }
-                repeat(3 - row.size) { androidx.compose.foundation.layout.Spacer(Modifier.weight(1f)) }
             }
         }
-        AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
-        managementHomeActions().forEach { (label, dest) ->
-            AnimalFarmQuickAction(
-                label,
-                { onOpen(dest) },
-                modifier = syncStatusEntryModifier(label),
-            )
-        }
+        AnimalFarmHomeBottomBar(onHome = {}, onAnimals = onAnimals,
+            onTasks = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
+            onMore = { sheet = HomeReferenceSheet.MODULES }, onRecord = { sheet = HomeReferenceSheet.RECORD })
+    }
+    HomeReferenceSheets(sheet, { sheet = null }, { sheet = it }, homeOpen, onMore, summary, worker = false)
+    previewTaskId?.let { taskId ->
+        HomeTaskPreviewSheet(taskId, summary, { previewTaskId = null },
+            { destination -> previewTaskId = null; onOpen(destination) },
+            { previewTaskId = null; sheet = HomeReferenceSheet.RESOURCES })
     }
 }
 
 @Composable
-internal fun WorkerWorkBoardScreen(
-    farmName: String?,
-    summary: FarmHomeSummary,
-    onOpen: (FarmDestination) -> Unit,
-    onAnimals: () -> Unit,
-    onMore: () -> Unit,
-    today: LocalDate = LocalDate.now(),
-) {
+private fun ManagementAttention(summary: FarmHomeSummary, today: Long, onOpen: (FarmDestination) -> Unit) {
+    val kind = rankHomeAttention(summary.activeWithdrawals, summary.overdueTasks, pendingSync = 0)
+    val task = summary.tasks.firstOrNull { projectWorkerTaskStage(it.status, it.dueEpochDay, today) == WorkerTaskStage.DUE_NOW }
+    // A generic withdrawal warning cannot borrow an unrelated task's animal portrait.
+    val family = if (kind == HomeAttentionKind.OVERDUE_WORK) task?.let { animalFarmFamilyFromKey(it.subjectSpecies ?: inferTaskSpeciesFamily(it.moduleCode)) } else null
+    val action = if (kind == HomeAttentionKind.OVERDUE_WORK && task != null) "Open review" to FarmDestination.Task(task.id) else managementAttentionAction(kind) ?: ("Open work" to FarmDestination.Tasks(TaskEntryPage.BOARD))
+    AnimalFarmHeroCard(
+        category = if (kind == HomeAttentionKind.NONE) "Farm attention" else "Needs attention",
+        title = when (kind) {
+            HomeAttentionKind.WITHDRAWAL -> "Withdrawal window open"
+            HomeAttentionKind.OVERDUE_WORK -> task?.title ?: "Review due work"
+            else -> "No tasks due"
+        },
+        context = when (kind) {
+            HomeAttentionKind.WITHDRAWAL -> "${summary.activeWithdrawals} active window(s)"
+            HomeAttentionKind.OVERDUE_WORK -> "${summary.overdueTasks} task(s) due today or earlier"
+            else -> "${summary.openTasks} open task(s) on this device"
+        },
+        actionLabel = action.first, onAction = { onOpen(action.second) }, family = family,
+    )
+}
+
+@Composable
+private fun ManagementSummaries(summary: FarmHomeSummary, onOpen: (FarmDestination) -> Unit, onResources: () -> Unit) {
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val stack = maxWidth < 300.dp || LocalDensity.current.fontScale >= 1.5f
+        val work: @Composable (Modifier) -> Unit = { modifier ->
+            AnimalFarmSummaryTile("Work", summary.overdueTasks.toString(), "${summary.openTasks} open · ${summary.upcomingTasks} upcoming",
+                { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) }, modifier, lime = true, valueSuffix = "due now", indicator = { AnimalFarmDueWorkStrip(summary.overdueTasks, summary.openTasks) })
+        }
+        val resources: @Composable (Modifier) -> Unit = { modifier -> ResourceSummaryTile(summary, onOpen, modifier, onResources) }
+        if (stack) Column(verticalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) { work(Modifier.fillMaxWidth()); resources(Modifier.fillMaxWidth()) }
+        else Row(Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(AnimalFarmHomeMetrics.tileGap)) {
+            work(Modifier.weight(1f).fillMaxHeight()); resources(Modifier.weight(1f).fillMaxHeight())
+        }
+    }
+}
+
+/** D+C layout. Stage presentation is shared with the HTML; real open/done task states remain authoritative. */
+@Composable
+internal fun WorkerWorkBoardScreen(farmName: String?, summary: FarmHomeSummary, onOpen: (FarmDestination) -> Unit,
+    onAnimals: () -> Unit, onMore: () -> Unit, today: LocalDate = LocalDate.now()) {
     val stages = WorkerTaskStage.entries
     var stageIndex by rememberSaveable { mutableIntStateOf(0) }
     var cardIndex by rememberSaveable { mutableIntStateOf(0) }
-    val stage = stages[stageIndex]
-    val visible = summary.tasks.mapNotNull { row ->
-        val projected = projectWorkerTaskStage(row.status, row.dueEpochDay, today.toEpochDay()) ?: return@mapNotNull null
-        if (projected == stage) row else null
+    var selectedTaskId by rememberSaveable { mutableStateOf<String?>(null) }
+    var sheet by rememberSaveable { mutableStateOf<HomeReferenceSheet?>(null) }
+    var previewTaskId by rememberSaveable { mutableStateOf<String?>(null) }
+    val homeOpen: (FarmDestination) -> Unit = { destination ->
+        if (destination is FarmDestination.Task && summary.tasks.any { it.id == destination.taskId }) {
+            sheet = null; previewTaskId = destination.taskId
+        } else onOpen(destination)
     }
-    val safeCardIndex = if (visible.isEmpty()) 0 else cardIndex.coerceIn(0, visible.lastIndex)
+    androidx.activity.compose.BackHandler(enabled = sheet != null || previewTaskId != null) { previewTaskId = null; sheet = null }
+    val stage = stages[stageIndex.coerceIn(stages.indices)]
+    val matching = summary.tasks.filter { projectWorkerTaskStage(it.status, it.dueEpochDay, today.toEpochDay()) == stage }
+    val selectedIndex = matching.indexOfFirst { it.id == selectedTaskId }.takeIf { it >= 0 }
+    val safeIndex = if (matching.isEmpty()) 0 else selectedIndex ?: cardIndex.coerceIn(matching.indices)
+    val current = matching.getOrNull(safeIndex)
+    LaunchedEffect(current?.id, stage, summary.loading, summary.loadError) {
+        if (!summary.loading && summary.loadError == null) { selectedTaskId = current?.id; cardIndex = safeIndex }
+    }
+    fun move(delta: Int) { if (matching.isNotEmpty()) { cardIndex = (safeIndex + delta).coerceIn(matching.indices); selectedTaskId = matching[cardIndex].id } }
     AnimalFarmCanvas {
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(bottom = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            AnimalFarmContextHeader(
-                farmName = farmName,
-                dateLabel = today.format(HomeDateFormat),
-                title = "My day",
-                modifier = Modifier.padding(top = 16.dp),
-            )
-            Column(
-                Modifier.padding(horizontal = AnimalFarmHomeMetrics.pageInset),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                if (summary.loading) {
-                    AnimalFarmEmptyState("Loading assigned work")
-                } else if (summary.loadError != null) {
-                    AnimalFarmEmptyState("Work could not be loaded. ${summary.loadError} Saved records stay on this device.")
-                } else {
-                    AnimalFarmSummaryTile(
-                        title = "Work",
-                        value = "${summary.overdueTasks} due now",
-                        detail = "${summary.upcomingTasks} upcoming · ${summary.completedTasks} completed",
-                        onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
-                        lime = true,
-                    )
-                    ResourceSummaryTile(summary, onOpen)
-                    AnimalFarmStageSelector(
-                        labels = listOf(
-                            "Due now (${summary.overdueTasks})",
-                            "Upcoming (${summary.upcomingTasks})",
-                            "Completed (${summary.completedTasks})",
-                        ),
-                        selectedIndex = stageIndex,
-                        onSelect = {
-                            stageIndex = it
-                            cardIndex = 0
-                        },
-                    )
-                    Text("Review & decide", color = AnimalFarmTheme.colors.ink)
-                    if (visible.isEmpty()) {
-                        AnimalFarmEmptyState(
-                            when (stage) {
-                                WorkerTaskStage.DUE_NOW -> "No open tasks due today or overdue"
-                                WorkerTaskStage.UPCOMING -> "No upcoming open tasks"
-                                WorkerTaskStage.COMPLETED -> "No completed tasks on this device"
-                            },
-                        )
-                    } else {
-                        val row = visible[safeCardIndex]
-                        val family = animalFarmFamilyFromKey(inferTaskSpeciesFamily(row.moduleCode))
-                        AnimalFarmReviewTaskCard(
-                            category = row.taskCode.ifBlank { row.moduleCode },
-                            dueLabel = LocalDate.ofEpochDay(row.dueEpochDay).format(HomeDateFormat),
-                            subjectName = row.title,
-                            familyLabel = family?.let(::animalFarmFamilyLabel),
-                            title = row.title,
-                            fact = if (row.status == "done") "Completed" else "Open · ${row.moduleCode}",
-                            actionLabel = if (row.status == "done") "Open task" else "Continue task",
-                            onAction = { onOpen(FarmDestination.Task(row.id)) },
-                            family = family,
-                        )
-                        AnimalFarmCarouselControls(
-                            positionLabel = "${safeCardIndex + 1} of ${visible.size}",
-                            onPrevious = { if (safeCardIndex > 0) cardIndex = safeCardIndex - 1 },
-                            onNext = { if (safeCardIndex < visible.lastIndex) cardIndex = safeCardIndex + 1 },
-                            previousEnabled = safeCardIndex > 0,
-                            nextEnabled = safeCardIndex < visible.lastIndex,
-                        )
-                    }
-                    Text("Quick record", color = AnimalFarmTheme.colors.ink)
-                    workerHomeQuickActions().forEach { (label, dest) ->
-                        AnimalFarmQuickAction(label, { onOpen(dest) })
-                    }
-                    Text("Guides and areas", color = AnimalFarmTheme.colors.ink)
-                    AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
-                    AnimalFarmQuickAction("Open animals", onAnimals)
-                    workerHomeAreaActions().forEach { (label, dest) ->
-                        AnimalFarmQuickAction(
-                            label,
-                            { onOpen(dest) },
-                            modifier = syncStatusEntryModifier(label),
-                        )
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+            AnimalFarmHomeHeader(farmName)
+            Column(Modifier.padding(start = animalFarmHomePageInset(), end = animalFarmHomePageInset(), bottom = 18.dp)) {
+                when {
+                    summary.loading -> AnimalFarmEmptyState("Loading farm work")
+                    summary.loadError != null -> AnimalFarmEmptyState("Work could not be loaded. ${summary.loadError}")
+                    else -> {
+                        AnimalFarmWorkSummaryBanner("${summary.overdueTasks} due now", "${summary.openTasks} open tasks", { sheet = HomeReferenceSheet.RECORD })
+                        val counts = stages.map { projected -> summary.tasks.count { projectWorkerTaskStage(it.status, it.dueEpochDay, today.toEpochDay()) == projected } }
+                        AnimalFarmStageSelector(listOf("To do", "Later", "Completed"), stageIndex, {
+                            stageIndex = it; cardIndex = 0; selectedTaskId = null
+                        }, Modifier.padding(top = 14.dp, bottom = 14.dp), counts = counts)
+                        Text("Review & decide", Modifier.padding(top = 4.dp, bottom = 14.dp).semantics { heading() }, style = AnimalFarmHtmlType.reviewTitle)
+                        if (current == null) AnimalFarmEmptyState(when (stage) {
+                            WorkerTaskStage.DUE_NOW -> "No open tasks due today or overdue"
+                            WorkerTaskStage.UPCOMING -> "No upcoming open tasks"
+                            WorkerTaskStage.COMPLETED -> "No completed tasks on this device"
+                        })
+                        else {
+                            val family = animalFarmFamilyFromKey(current.subjectSpecies ?: inferTaskSpeciesFamily(current.moduleCode))
+                            val swipe = Modifier.pointerInput(stage, current.id, matching.map { it.id }) {
+                                var distance = 0f
+                                detectHorizontalDragGestures(onDragStart = { distance = 0f }, onDragCancel = { distance = 0f },
+                                    onDragEnd = { if (distance < -64.dp.toPx()) move(1) else if (distance > 64.dp.toPx()) move(-1) },
+                                    onHorizontalDrag = { change, delta -> change.consume(); distance += delta })
+                            }
+                            AnimalFarmReviewTaskCard(
+                                category = current.taskCode.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() },
+                                dueLabel = LocalDate.ofEpochDay(current.dueEpochDay).format(DateTimeFormatter.ofPattern("d MMM", Locale.UK)),
+                                subjectName = current.subjectLabel.orEmpty(), familyLabel = family?.let(::animalFarmFamilyLabel), title = current.title,
+                                fact = if (current.status == "done") "Completed" else "Open · ${current.moduleCode}",
+                                actionLabel = "Open task", onAction = { homeOpen(FarmDestination.Task(current.id)) }, family = family, modifier = swipe,
+                            )
+                            AnimalFarmCarouselControls("${safeIndex + 1} / ${matching.size}", { move(-1) }, { move(1) },
+                                safeIndex > 0, safeIndex < matching.lastIndex, position = safeIndex, count = matching.size)
+                        }
+                        Row(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 13.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("${summary.tasks.mapNotNull { inferTaskSpeciesFamily(it.moduleCode) }.distinct().size} species", style = AnimalFarmHtmlType.caption, color = AnimalFarmTheme.colors.mutedInk)
+                            Text("${summary.openTasks} open tasks", style = AnimalFarmHtmlType.caption, color = AnimalFarmTheme.colors.mutedInk)
+                        }
+                        HomeReferenceQuickRow(onOpen, { sheet = HomeReferenceSheet.RESOURCES })
                     }
                 }
             }
         }
-        AnimalFarmHomeBottomBar(
-            onHome = {},
-            onAnimals = onAnimals,
-            onTasks = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
-            onMore = onMore,
-        )
+        AnimalFarmHomeBottomBar(onHome = {}, onAnimals = onAnimals, onTasks = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
+            onMore = { sheet = HomeReferenceSheet.GUIDES }, onRecord = { sheet = HomeReferenceSheet.RECORD }, worker = true)
+    }
+    HomeReferenceSheets(sheet, { sheet = null }, { sheet = it }, homeOpen, onMore, summary, worker = true)
+    previewTaskId?.let { taskId ->
+        HomeTaskPreviewSheet(taskId, summary, { previewTaskId = null },
+            { destination -> previewTaskId = null; onOpen(destination) },
+            { previewTaskId = null; sheet = HomeReferenceSheet.RESOURCES })
     }
 }
 
@@ -364,12 +217,12 @@ internal fun SpecialistRoleShell(
                 AnimalFarmSummaryTile(
                     title = "Today",
                     value = "${summary.openTasks} open tasks",
-                    detail = "${summary.activeWithdrawals} withdrawal(s) · ${summary.pendingSync} waiting to sync",
+                    detail = "${summary.activeWithdrawals} withdrawal(s)",
                     onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) },
                     lime = true,
                 )
                 AnimalFarmQuickAction("Search farm", { onOpen(FarmDestination.Search) })
-                actions.forEach { (label, dest) ->
+                actions.filterNot { it.second is FarmDestination.HomePanel || it.second == FarmDestination.Goat(com.farmos.feature.goat.GoatEntryPage.SYNC) }.forEach { (label, dest) ->
                     AnimalFarmQuickAction(
                         label,
                         { onOpen(dest) },
@@ -387,23 +240,11 @@ internal fun SpecialistRoleShell(
     }
 }
 
+
 @Composable
-private fun ResourceSummaryTile(
-    summary: FarmHomeSummary,
-    onOpen: (FarmDestination) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val resourceValue =
-        when {
-            summary.inventoryItemCount == 0 && summary.activeWithdrawals == 0 -> "No records"
-            summary.inventoryBelowReorder > 0 -> "${summary.inventoryBelowReorder} below reorder"
-            else -> "${summary.inventoryItemCount} item(s)"
-        }
-    AnimalFarmSummaryTile(
-        title = "Resources",
-        value = resourceValue,
-        detail = "${summary.activeWithdrawals} withdrawal window(s)",
-        onClick = { onOpen(FarmDestination.Module(FarmModule.INVENTORY)) },
-        modifier = modifier,
-    )
+private fun ResourceSummaryTile(summary: FarmHomeSummary, onOpen: (FarmDestination) -> Unit, modifier: Modifier = Modifier,
+    onResources: () -> Unit = { onOpen(FarmDestination.Module(FarmModule.INVENTORY)) }) {
+    AnimalFarmSummaryTile("Resources", summary.inventoryItemCount.toString(),
+        if (summary.inventoryBelowReorder > 0) "${summary.inventoryBelowReorder} below reorder" else "Recorded inventory items",
+        onResources, modifier, valueSuffix = "items")
 }

@@ -64,13 +64,13 @@ fun RationBuilderScreen(
         onBack = onBack,
     ) {
         FarmOperationalSection("Ration") {
-            androidx.compose.material3.OutlinedTextField(name.value, { name.value = it }, label = { androidx.compose.material3.Text("Ration name") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(species.value, { species.value = it }, label = { androidx.compose.material3.Text("Species") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(ration.value, { ration.value = it }, label = { androidx.compose.material3.Text("Ration g/head/day") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(head.value, { head.value = it }, label = { androidx.compose.material3.Text("Head count") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(start.value, { start.value = it }, label = { androidx.compose.material3.Text("Start date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(end.value, { end.value = it }, label = { androidx.compose.material3.Text("End date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(note.value, { note.value = it }, label = { androidx.compose.material3.Text("Note") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(name.value, { name.value = it }, label = { androidx.compose.material3.Text("Ration name") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(species.value, { species.value = it }, label = { androidx.compose.material3.Text("Species") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(ration.value, { ration.value = it }, label = { androidx.compose.material3.Text("Ration g/head/day") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(head.value, { head.value = it }, label = { androidx.compose.material3.Text("Head count") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(start.value, { start.value = it }, label = { androidx.compose.material3.Text("Start date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(end.value, { end.value = it }, label = { androidx.compose.material3.Text("End date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(note.value, { note.value = it }, label = { androidx.compose.material3.Text("Note") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
         }
         FarmOperationalSection("Preview") {
             val rationG = ration.value.toLongOrNull() ?: 0L
@@ -81,7 +81,7 @@ fun RationBuilderScreen(
             androidx.compose.material3.Text("Daily requirement: ${dailyKgLabel(rationG, headCount)}")
             androidx.compose.material3.Text("Whole-ration requirement: ${reportKg(feedDailyGrams(rationG, headCount).multiply(java.math.BigDecimal.valueOf(days)))} over $days days")
             error?.let { androidx.compose.material3.Text(it) }
-            androidx.compose.material3.Button(
+            com.farmos.core.design.FarmPrimaryButton(
                 onClick = {
                     scope.launch {
                         busy = true; error = null
@@ -133,7 +133,7 @@ fun RationAnalysisScreen(
                 androidx.compose.material3.Text("No feed plans recorded on this device.")
             } else {
                 plans.forEach { p ->
-                    androidx.compose.material3.TextButton(onClick = { selectedPlan = p.id }) {
+                    com.farmos.core.design.FarmActionButton(onClick = { selectedPlan = p.id }) {
                         androidx.compose.material3.Text("${if (p.id == selectedPlan) "● " else ""}${p.name} — ${p.speciesCode}")
                     }
                 }
@@ -149,7 +149,7 @@ fun RationAnalysisScreen(
             }
             FarmOperationalSection("Price against an inventory item (optional)") {
                 items.forEach { item ->
-                    androidx.compose.material3.TextButton(onClick = { selectedItem = item.id }) {
+                    com.farmos.core.design.FarmActionButton(onClick = { selectedItem = item.id }) {
                         androidx.compose.material3.Text("${if (item.id == selectedItem) "● " else ""}${item.name}")
                     }
                 }
@@ -203,10 +203,10 @@ fun RationCompareScreen(
             } else {
                 plans.forEach { p ->
                     androidx.compose.foundation.layout.Row {
-                        androidx.compose.material3.TextButton(onClick = { first = p.id }) {
+                        com.farmos.core.design.FarmActionButton(onClick = { first = p.id }) {
                             androidx.compose.material3.Text("${if (p.id == first) "[A] " else ""}${p.name}")
                         }
-                        androidx.compose.material3.TextButton(onClick = { second = p.id }) {
+                        com.farmos.core.design.FarmActionButton(onClick = { second = p.id }) {
                             androidx.compose.material3.Text("${if (p.id == second) "[B] " else ""}${p.name}")
                         }
                     }

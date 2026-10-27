@@ -1,5 +1,9 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmWorkflowState
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowTimeline
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -84,7 +88,16 @@ internal fun HealthTimelineScreen(timeline: HealthTimeline, onBack: () -> Unit) 
                 modifier = Modifier.testTag("health-timeline-window"),
             )
         }
-        FarmOperationalSection(recordListTitle("Records", timeline.entries.size, timeline.totalCount)) {
+        FarmWorkflowTimeline(
+            title = "Recorded health activity",
+            steps = timeline.entries.take(6).map { entry -> FarmWorkflowStep(
+                "${LocalDate.ofEpochDay(entry.epochDay)} · ${entry.kind.label}",
+                HealthRecords.subject(entry.subjectLabel, entry.speciesCode), entry.detail, FarmWorkflowState.RECORDED,
+            ) },
+            caption = recordListTitle("Latest events", minOf(6, timeline.entries.size), timeline.totalCount),
+            modifier = Modifier.testTag("health-recorded-workflow"),
+            recordsContent = {
+            Text(recordListTitle("Records", timeline.entries.size, timeline.totalCount), style = MaterialTheme.typography.titleMedium)
             timeline.entries.forEachIndexed { index, entry ->
                 if (index > 0) HorizontalDivider()
                 Column(
@@ -96,6 +109,7 @@ internal fun HealthTimelineScreen(timeline: HealthTimeline, onBack: () -> Unit) 
                     Text(entry.detail)
                 }
             }
-        }
+            },
+        )
     }
 }

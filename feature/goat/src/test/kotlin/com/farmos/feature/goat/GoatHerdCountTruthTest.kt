@@ -1,5 +1,9 @@
 package com.farmos.feature.goat
 
+import com.farmos.review.NativeModuleReviewRule
+import com.farmos.review.NativeModuleReviewTheme
+import com.farmos.review.captureObservedNativeOwners
+
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -24,8 +28,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class GoatHerdCountTruthTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val today = LocalDate.of(2026, 9, 24)
     private val listed = listOf(
@@ -37,16 +41,16 @@ class GoatHerdCountTruthTest {
     @Test
     fun dashboardMetricsUseExhaustiveCounts() {
         render(GoatPage.DASHBOARD, counts)
-        compose.onNodeWithText("612").assertExists()
-        compose.onNodeWithText("410").assertExists()
-        compose.onNodeWithText("202").assertExists()
-        compose.onNodeWithText("97").assertExists()
+        compose.onNodeWithText("612").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("410").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("202").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("97").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun herdListSaysWhenItShowsOnlyPartOfTheHerd() {
         render(GoatPage.HERD, counts)
-        compose.onNodeWithText("Showing the first 2 of 640 goats by tag.").assertExists()
+        compose.onNodeWithText("Showing the first 2 of 640 goats by tag.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
@@ -57,7 +61,7 @@ class GoatHerdCountTruthTest {
 
     private fun render(page: GoatPage, herdCounts: GoatHerdCounts) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 GoatExperienceScreen(
                     state = GoatSliceUiState(farmName = "Premier Farm", herd = listed, herdCounts = herdCounts),
                     actions = GoatExperienceActions(

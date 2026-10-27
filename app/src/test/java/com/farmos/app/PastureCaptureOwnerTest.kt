@@ -40,8 +40,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class PastureCaptureOwnerTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val farm = "11111111-1111-4111-8111-111111111111"
     private val otherFarm = "22222222-2222-4222-8222-222222222222"
@@ -68,7 +68,7 @@ class PastureCaptureOwnerTest {
     fun grazingSelectsThisFarmsPaddockAndGroupAndStartsLocally() {
         var syncRequests = 0
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 PastureModuleHost(
                     farmId = farm,
                     ops = RoomOpsRepository(database, farm),
@@ -78,9 +78,10 @@ class PastureCaptureOwnerTest {
                 )
             }
         }
+        compose.onNodeWithTag("farm-section:Start").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-005:option:grp-ewes").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithTag("farm-screen:FOS-PASTURE-001").assertExists()
-        compose.onNodeWithTag("farm-atom:FOS-ATOM-007").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-PASTURE-001").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-007").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-007:option:pad-other").assertDoesNotExist()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-005:option:grp-other").assertDoesNotExist()
 

@@ -12,10 +12,13 @@ required=(
   feature/goat/src/main/kotlin/com/farmos/feature/goat/GoatCaptureScreens.kt
   core/design/src/main/kotlin/com/farmos/core/design/FarmOperationalPage.kt
   feature/ops/src/main/kotlin/com/farmos/feature/ops/HealthExperienceScreen.kt
+  feature/ops/src/main/kotlin/com/farmos/feature/ops/HealthDashboard.kt
   feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryExperienceScreen.kt
+  feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryDashboard.kt
   feature/ops/src/main/kotlin/com/farmos/feature/ops/FinanceExperienceScreen.kt
   feature/ops/src/main/kotlin/com/farmos/feature/ops/TasksBoardScreen.kt
   feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryExperienceScreen.kt
+  feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryDashboard.kt
   app/src/main/java/com/farmos/app/SpeciesHerdScreen.kt
   feature/ops/src/main/kotlin/com/farmos/feature/ops/SheepOperationsScreen.kt
   feature/ops/src/main/kotlin/com/farmos/feature/ops/CattleOperationsScreen.kt
@@ -67,10 +70,10 @@ grep -q '^screen_count: 545$' docs/ux/FARM_OS_SCREEN_REGISTRY.yaml || {
 
 grep -q 'FOS-SHEEP-010' feature/ops/src/main/kotlin/com/farmos/feature/ops/SheepOperationsScreen.kt || { echo 'ERROR: sheep visual reference family missing'; exit 1; }
 grep -q 'FOS-CATTLE-018' feature/ops/src/main/kotlin/com/farmos/feature/ops/CattleOperationsScreen.kt || { echo 'ERROR: cattle visual reference family missing'; exit 1; }
-grep -q 'FOS-POULTRY-001' feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryExperienceScreen.kt || { echo 'ERROR: poultry visual reference family missing'; exit 1; }
+grep -q 'PoultryDashboard(' feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryExperienceScreen.kt && grep -q 'fun PoultryDashboard(' feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryDashboard.kt && grep -q 'FOS-POULTRY-001' feature/ops/src/main/kotlin/com/farmos/feature/ops/PoultryDashboard.kt || { echo 'ERROR: poultry owning dashboard or route binding missing'; exit 1; }
 grep -q 'FOS-RABBIT-001' feature/rabbit/src/main/kotlin/com/farmos/feature/rabbit/RabbitProgrammeScreen.kt || { echo 'ERROR: rabbit visual reference family missing'; exit 1; }
-grep -q 'FOS-HEALTH-001' feature/ops/src/main/kotlin/com/farmos/feature/ops/HealthExperienceScreen.kt || { echo 'ERROR: health visual reference family missing'; exit 1; }
-grep -q 'FOS-INV-001' feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryExperienceScreen.kt || { echo 'ERROR: inventory visual reference family missing'; exit 1; }
+grep -q 'HealthDashboard(' feature/ops/src/main/kotlin/com/farmos/feature/ops/HealthExperienceScreen.kt && grep -q 'fun HealthDashboard(' feature/ops/src/main/kotlin/com/farmos/feature/ops/HealthDashboard.kt && grep -q 'FOS-HEALTH-001' feature/ops/src/main/kotlin/com/farmos/feature/ops/HealthDashboard.kt || { echo 'ERROR: health owning dashboard or route binding missing'; exit 1; }
+grep -q 'InventoryDashboard(' feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryExperienceScreen.kt && grep -q 'fun InventoryDashboard(' feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryDashboard.kt && grep -q 'FOS-INV-001' feature/ops/src/main/kotlin/com/farmos/feature/ops/InventoryDashboard.kt || { echo 'ERROR: inventory owning dashboard or route binding missing'; exit 1; }
 grep -q 'FOS-FIN-001' feature/ops/src/main/kotlin/com/farmos/feature/ops/FinanceExperienceScreen.kt || { echo 'ERROR: finance visual reference family missing'; exit 1; }
 
 grep -q '^visual_green_count: 0$' docs/ux/FARM_OS_SCREEN_REGISTRY.yaml || {

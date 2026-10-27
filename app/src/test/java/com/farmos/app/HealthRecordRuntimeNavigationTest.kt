@@ -38,7 +38,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class HealthRecordRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private val dashboardTag = "farm-screen:" + "FOS-" + "HEALTH-" + "001"
@@ -60,6 +61,7 @@ class HealthRecordRuntimeNavigationTest {
         compose.onNodeWithText("Ended 2026-09-20").assertExists()
 
         compose.onNodeWithTag("health-treatment-window:t1:milk").performScrollTo().performClick()
+        compose.showRecordedRows()
         compose.onNodeWithTag("farm-screen:FOS-HEALTH-010").assertExists()
         compose.onNodeWithText("Active milk withdrawal").assertExists()
 
@@ -77,6 +79,7 @@ class HealthRecordRuntimeNavigationTest {
         open("Treatment records")
         compose.onNodeWithTag("health-treatment:t1").performScrollTo().performClick()
         compose.onNodeWithTag("health-treatment-window:t1:meat-old").performScrollTo().performClick()
+        compose.showRecordedRows()
         compose.onNodeWithTag("farm-screen:FOS-HEALTH-010").assertExists()
         compose.onNodeWithText("Active meat withdrawal").assertDoesNotExist()
         compose.onNodeWithText("Ended").assertExists()
@@ -203,11 +206,13 @@ class HealthRecordRuntimeNavigationTest {
     }
 
     private fun open(label: String) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+        compose.revealFarmTool(label).performScrollTo().performClick()
+        compose.showRecordedRows()
     }
 
     private fun back() {
-        compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
+        compose.captureCurrentModuleReview()
+        compose.revealFarmTool("Farm home").performScrollTo().performClick()
     }
 
     private fun model() = HealthReadModel(
@@ -225,7 +230,7 @@ class HealthRecordRuntimeNavigationTest {
 
     private fun render(readModel: HealthReadModel = model()) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 HealthObservationScreen(
                     rows = emptyList(),
                     catalog = emptyList(),

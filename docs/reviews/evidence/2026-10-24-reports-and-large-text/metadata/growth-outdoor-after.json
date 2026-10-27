@@ -1,0 +1,74 @@
+{
+  "schema_version": 2,
+  "screen_id": "FOS-GOAT-013",
+  "visit": 1,
+  "test": "GoatHistoryRuntimeNavigationTest.recordsRemainReadableAfterALifecycleExit",
+  "test_class": "com.farmos.feature.goat.GoatHistoryRuntimeNavigationTest",
+  "owner_node_id": 542,
+  "owner_instance_tag": "farm-screen:FOS-GOAT-013",
+  "evidence_class": "OBSERVED_NATIVE_PRODUCT_OWNER",
+  "source": "actual Compose tree",
+  "variant": "observed state after successful assertion",
+  "owner_observed_before_capture": true,
+  "mode": "OUTDOOR",
+  "width_dp": 360,
+  "actual_device_width_dp": 360,
+  "actual_device_height_dp": 900,
+  "font_scale": 2,
+  "vertical_scroll_containers": 1,
+  "vertical_sweep_complete": true,
+  "scroll_restored": true,
+  "incomplete_reasons": [],
+  "viewports": [
+    {
+      "image": "FOS-GOAT-013.png",
+      "image_sha256": "977b66813d4b3fb8dd836b0f41f8464c61d2ac76d5f31cff7d04b3d967988fa7",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-GOAT-013"
+      ],
+      "observed_owner_ids": [
+        "FOS-GOAT-013"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-GOAT-013",
+          "tag": "farm-screen:FOS-GOAT-013",
+          "node_id": 542,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [
+        {
+          "tag": null,
+          "name": "Back",
+          "width_dp": 114,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            16,
+            130,
+            80
+          ],
+          "touch_bounds_px": [
+            16,
+            16,
+            130,
+            80
+          ],
+          "touch_width_dp": 114,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        }
+      ],
+      "layout_findings": [],
+      "scroll_position": 0
+    }
+  ],
+  "accessibility_manual_review": "TALKBACK_FOCUS_AND_HUMAN_PIXEL_REVIEW_REMAIN_REQUIRED",
+  "approval": "UNAPPROVED_REVIEW_CANDIDATE"
+}

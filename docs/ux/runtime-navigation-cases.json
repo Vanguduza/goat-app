@@ -4,8 +4,8 @@
   "sources": [
     {
       "path": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
-      "sha256": "fa0af15fbe071729c386d95fcb36c3cd757fad77b86863063d9efed869f6f591",
-      "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+      "sha256": "440205ac0c34dbd015e8e4e34c38ec98907af5b8890ad2aee01bead25bf20c72",
+      "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
       "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
       "cases": [
         {
@@ -398,8 +398,8 @@
     },
     {
       "path": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
-      "sha256": "13dae4f17a94377dd1f09f796bd16b26a36f1e2951db6e17242b3fcee7ab6ed5",
-      "reviewed_source_commit": "6e70319c13aa79a6731f53bd11d95a44d173a75c",
+      "sha256": "4fa6c3fa9dc8bbf22efab2b1d516056ca2f4b1a2e8fa72c24538ecf395953d50",
+      "reviewed_source_commit": "26b8e84cedaec7347d056e840fed64f15dc5e49f",
       "class_name": "com.farmos.app.AndroidBackNavigationTest",
       "cases": [
         {
@@ -585,7 +585,7 @@
               },
               "return": {
                 "within": "sheepProfileAndWeightKeepTheSelectedAnimalAndReturnThroughTheirOwner",
-                "expression": "compose.onNodeWithText(\"Individual sheep records on this device\").assertIsDisplayed()",
+                "expression": "compose.onNodeWithTag(\"farm-screen:FOS-SHEEP-001\").assertIsDisplayed()",
                 "via": [],
                 "occurrence": 0
               }
@@ -601,8 +601,8 @@
     },
     {
       "path": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
-      "sha256": "9a66a528058d1025c0a3a1141c7ae2d5b86ab4e272b69adb5b9b8a7ae9a1954f",
-      "reviewed_source_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
+      "sha256": "299fb896418c2a38e96d24214c106fef711b5ab2d0dbf7813603214eff6a13af",
+      "reviewed_source_commit": "26b8e84cedaec7347d056e840fed64f15dc5e49f",
       "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
       "cases": [
         {
@@ -852,13 +852,23 @@
           "method": "exactIdentifiersPrecedePartialMatchesAndDuplicateIdentifiersDoNotDuplicateAnimals",
           "execution_only_reason": "Room query ordering/deduplication only; no rendered journey.",
           "claims": []
+        },
+        {
+          "method": "speciesAndStatusFiltersFindEligibleTextAndIdentifiersBeyondTheFirstFifty",
+          "execution_only_reason": "Real Room eligibility, farm isolation and identifier matching beyond the display limit; execution only, no new route claim.",
+          "claims": []
+        },
+        {
+          "method": "manyMatchingAliasesCannotConsumeTheCanonicalAnimalResultWindow",
+          "execution_only_reason": "Real Room canonical-animal result window and alias deduplication; execution only, no new route claim.",
+          "claims": []
         }
       ]
     },
     {
       "path": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
-      "sha256": "a2b445b852d0f3514730177839115b73b466d92b7bd3ca1213119e3baccf650f",
-      "reviewed_source_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
+      "sha256": "6f683451fbe75c022589ce3be333788b967e8cfa21f851bd470a11c774831425",
+      "reviewed_source_commit": "1f808fb02c060b4b03be946b489577429fee88c3",
       "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
       "cases": [
         {
@@ -1336,8 +1346,8 @@
     },
     {
       "path": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
-      "sha256": "f5dd7ff93d6ed6ad797881fbaa85e99199faaedad58be66f45648139f0982438",
-      "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+      "sha256": "a0eac28745893664b40b7c9adc7167e65e9765444ef70b351ae1df0821020485",
+      "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
       "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
       "cases": [
         {
@@ -1397,8 +1407,8 @@
     },
     {
       "path": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
-      "sha256": "cd347a819475182615cd16f66846b4c7cfd213be800ac73d9b0a4002ff67c23e",
-      "reviewed_source_commit": "f7ab02b443e07f6903f75821c78885f8369953ab",
+      "sha256": "a06494d330a347feac8bc6b962fd3d4087e924079084641502bbb154267099e5",
+      "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
       "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
       "cases": [
         {
@@ -1434,6 +1444,49 @@
         {
           "method": "cancellationInsideDestinationOpenClosesTheResourceBeforeAWriteOrSuccessCanRun",
           "execution_only_reason": "Cancellation/resource ownership regression at output-open; no delivery or traversal claim.",
+          "claims": []
+        },
+        {
+          "method": "cancellationWhileProviderReturnIsDelayedClosesExactlyOnce",
+          "execution_only_reason": "Resource-cleanup cancellation regression. Execution evidence only; no additional route, owner or visual approval claim.",
+          "claims": []
+        }
+      ]
+    },
+    {
+      "path": "app/src/test/java/com/farmos/app/ReportsFocusedWorkspaceTest.kt",
+      "sha256": "180bd3044bd74bbb108bdf0712647d58ce26959bf16780ec9a47a8044ccbec22",
+      "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+      "class_name": "com.farmos.app.ReportsFocusedWorkspaceTest",
+      "cases": [
+        {
+          "method": "emptyFiguresAreNotMistakenForAnEmptyAnimalRegister",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+          "claims": []
+        },
+        {
+          "method": "failedOrLoadingFiguresDoNotBlockReportNavigationOrInventZeros",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+          "claims": []
+        },
+        {
+          "method": "incompleteMetricKeepsItsWarningVisibleBeforeCalculationExpansion",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+          "claims": []
+        },
+        {
+          "method": "noRecordedValuesAreNotPresentedAsZeroInScreenOrSharedSummary",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+          "claims": []
+        },
+        {
+          "method": "reportActionsAreReachableBeforeAnyMetricDetailsEvenForManyMetrics",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+          "claims": []
+        },
+        {
+          "method": "wholeFigureSearchFindsLateItemsAndSurvivesExportBackWithoutWriting",
+          "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
           "claims": []
         }
       ]

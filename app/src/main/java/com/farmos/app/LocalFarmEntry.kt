@@ -13,12 +13,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -396,8 +396,7 @@ private fun ColumnScope.DriveSetupScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val authorizer = remember(context) { GoogleDriveAuthorizer(context) }
-    var folderName by remember { mutableStateOf("Farm OS") }
-    var accountEmail by remember { mutableStateOf("") }
+    var folderName by remember { mutableStateOf("Animal Farm") }
     var busy by remember { mutableStateOf(false) }
     var outcome by remember { mutableStateOf<DriveSetupOutcome?>(null) }
 
@@ -408,7 +407,7 @@ private fun ColumnScope.DriveSetupScreen(
             // A blank ID creates or reuses this farm's app-owned folder after Google consent.
             val result = DriveSetupAttempt.connect(
                 farmId = account.farmId,
-                accountEmail = accountEmail.trim(),
+                accountEmail = null,
                 folderName = folderName.trim(),
                 folderId = "",
                 authorizer = authorizer,
@@ -432,13 +431,14 @@ private fun ColumnScope.DriveSetupScreen(
 
     Text("Back up to Google Drive", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
     Text(
-        "Farm OS can copy this farm's operation journal — the record of every change — into a folder " +
-            "in your Google Drive as each operation is recorded. Your whole database file is never " +
-            "copied or synchronised to Drive; only journal operations and attachment bytes travel.",
+        "Copy this farm's saved changes and attachments to a folder in your Google Drive. You can connect it later.",
+        color = AnimalFarmTheme.colors.mutedInk,
+    )
+    Text(
+        "Google will ask which account to use. That account is used only for this farm's backup; it does not replace your Animal Farm account.",
         color = AnimalFarmTheme.colors.mutedInk,
     )
     EntryField("Backup folder name", folderName, busy) { folderName = it }
-    EntryField("Google account email", accountEmail, busy) { accountEmail = it }
     when (val failed = outcome) {
         is DriveSetupOutcome.AuthUnavailable -> Text(
             "Google Drive permission was not granted, so backup stays off. Nothing on " +
@@ -456,10 +456,10 @@ private fun ColumnScope.DriveSetupScreen(
     if (outcome == null) {
         EntryButton(
             if (busy) "Connecting" else "Connect Google Drive",
-            !busy && folderName.isNotBlank() && accountEmail.isNotBlank(),
-        ) { busy = true; consent(accountEmail.trim()) }
+            !busy && folderName.isNotBlank(),
+        ) { busy = true; consent(null) }
     } else {
-        EntryButton("Try again", !busy) { busy = true; consent(accountEmail.trim()) }
+        EntryButton("Try again", !busy) { busy = true; consent(null) }
     }
     TextButton(onClick = onSkip, enabled = !busy, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Skip for now") }
 }

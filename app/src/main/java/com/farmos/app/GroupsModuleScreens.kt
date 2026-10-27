@@ -1,5 +1,16 @@
 package com.farmos.app
 
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -64,7 +75,7 @@ internal fun GroupCreatePage(
             title = "New group",
             description = "The head count becomes the group's first census entry.",
         ) {
-            androidx.compose.material3.OutlinedTextField(
+            com.farmos.core.design.FarmOutlinedTextField(
                 value = name.value,
                 onValueChange = { name.value = it },
                 label = { androidx.compose.material3.Text("Name") },
@@ -80,14 +91,14 @@ internal fun GroupCreatePage(
                 "No species available.",
                 enabled = !busy,
             )
-            androidx.compose.material3.OutlinedTextField(
+            com.farmos.core.design.FarmOutlinedTextField(
                 value = heads.value,
                 onValueChange = { heads.value = it },
                 label = { androidx.compose.material3.Text("Head count") },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !busy,
             )
-            androidx.compose.material3.Button(
+            com.farmos.core.design.FarmPrimaryButton(
                 onClick = { onCreate(name.value.trim(), species.value, heads.value.toIntOrNull() ?: 0) },
                 enabled = !busy && name.value.isNotBlank(),
             ) {
@@ -195,7 +206,7 @@ internal fun GroupEditPage(
             enabled = !busy,
         )
         FarmOperationalSection("Details") {
-            androidx.compose.material3.OutlinedTextField(
+            com.farmos.core.design.FarmOutlinedTextField(
                 value = name.value,
                 onValueChange = { name.value = it },
                 label = { androidx.compose.material3.Text("Name") },
@@ -211,7 +222,7 @@ internal fun GroupEditPage(
                 "No species available.",
                 enabled = !busy && groupId != null,
             )
-            androidx.compose.material3.Button(
+            com.farmos.core.design.FarmPrimaryButton(
                 onClick = { onSave(groupId!!, name.value.trim(), species.value) },
                 enabled = !busy && groupId != null && name.value.isNotBlank(),
             ) {
@@ -425,8 +436,13 @@ internal fun GroupMovePage(
                         enabled = !busy,
                     )
                 }
+                FarmWorkflowTimeline("Move preview", listOf(
+                    FarmWorkflowStep("Source group", groupOptions.firstOrNull { it.id == fromId }?.label ?: "Not selected", state = FarmWorkflowState.RECORDED),
+                    FarmWorkflowStep("Selected animals", selected.size.toString(), "Recorded membership changes only after confirmation", FarmWorkflowState.CURRENT),
+                    FarmWorkflowStep("Target group", targetName ?: "Not selected", state = if (toId == null) FarmWorkflowState.NOT_RECORDED else FarmWorkflowState.CURRENT),
+                ), caption = "Preview of the requested membership change.")
                 FarmOperationalSection(title = "Confirm") {
-                    androidx.compose.material3.Button(
+                    com.farmos.core.design.FarmPrimaryButton(
                         onClick = {
                             if (armed) {
                                 submitted = selected.size

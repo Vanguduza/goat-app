@@ -1,5 +1,8 @@
 package com.farmos.app
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -99,10 +102,12 @@ class AnimalFarmReferenceContractTest {
             }
         }
 
-        compose.onNodeWithText("Open tasks").performClick()
+        compose.onNodeWithTag("home-attention").performClick()
+        compose.onNodeWithTag("home-task-sheet:task-health-nala").assertIsDisplayed()
+        compose.onNodeWithTag("home-task-preview-open").performScrollTo().performClick()
 
         compose.runOnIdle {
-            assertEquals(FarmDestination.Tasks(TaskEntryPage.BOARD), opened)
+            assertEquals(FarmDestination.Task("task-health-nala"), opened)
         }
         assertNamedClickTargets()
     }
@@ -110,20 +115,37 @@ class AnimalFarmReferenceContractTest {
     @Test
     fun managementSyncEntryRendersCanonicalOwnerAndOpensSync() {
         var opened: FarmDestination? = null
+        var showMore by mutableStateOf(false)
         compose.setContent {
             FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
-                ManagementControlRoomScreen(
-                    farmName = "Premier Farm",
-                    ownerMode = true,
-                    summary = referenceSummary(),
-                    onOpen = { opened = it },
-                    onAnimals = {},
-                    onMore = {},
-                    today = fixedDate,
-                )
+                if (showMore) {
+                    FarmMoreScreen(
+                        onOpen = {},
+                        onBack = { showMore = false },
+                        onSignOut = {},
+                        onNavigate = { opened = it },
+                        persona = FarmHomePersona.OWNER,
+                        summary = referenceSummary(),
+                        farmName = "Premier Farm",
+                    )
+                } else {
+                    ManagementControlRoomScreen(
+                        farmName = "Premier Farm",
+                        ownerMode = true,
+                        summary = referenceSummary(),
+                        onOpen = { opened = it },
+                        onAnimals = {},
+                        onMore = { showMore = true },
+                        today = fixedDate,
+                    )
+                }
             }
         }
 
+        compose.onNodeWithTag("farm-screen:FOS-HOME-009").assertDoesNotExist()
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-menu").assertIsDisplayed()
         compose.onNodeWithTag("farm-screen:FOS-HOME-009")
             .performScrollTo()
             .assertIsDisplayed()
@@ -151,10 +173,12 @@ class AnimalFarmReferenceContractTest {
             }
         }
 
-        compose.onNode(hasClickAction() and hasText("Continue task"))
+        compose.onNode(hasClickAction() and hasText("Open task"))
             .performScrollTo()
             .assertIsDisplayed()
             .performClick()
+        compose.onNodeWithTag("home-task-sheet:task-health-nala").assertIsDisplayed()
+        compose.onNodeWithTag("home-task-preview-open").performScrollTo().performClick()
 
         compose.runOnIdle {
             assertEquals(FarmDestination.Task("task-health-nala"), opened)

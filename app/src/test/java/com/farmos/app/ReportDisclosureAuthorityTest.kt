@@ -60,7 +60,8 @@ import org.robolectric.shadows.ShadowContentResolver
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class ReportDisclosureAuthorityTest {
-    @get:Rule val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
     private val context get() = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var fixture: LocalSessionAuthorityFixture
     private lateinit var authority: LocalSessionAuthority
@@ -188,17 +189,49 @@ class ReportDisclosureAuthorityTest {
         assertNoOutput()
     }
 
+    @Test
+    fun cancellationWhileProviderReturnIsDelayedClosesExactlyOnce() = runBlocking {
+        repeat(12) {
+            val closes = AtomicInteger()
+            val writes = AtomicInteger()
+            val successes = AtomicInteger()
+            val stream = object : ByteArrayOutputStream() {
+                override fun close() { closes.incrementAndGet(); super.close() }
+            }
+            val job = launch(Dispatchers.IO) {
+                val caller = coroutineContext
+                writeAuthorizedReport(fixture.farmId, authority,
+                    open = {
+                        caller.cancel()
+                        // A provider may finish returning a descriptor after cancellation is delivered.
+                        Thread.sleep(10)
+                        stream
+                    },
+                    write = { writes.incrementAndGet() },
+                )
+                successes.incrementAndGet()
+            }
+            job.join()
+            assertTrue(job.isCancelled)
+            assertEquals("Acquired provider resource must be closed before completion", 1, closes.get())
+            assertEquals(0, writes.get())
+            assertEquals(0, successes.get())
+        }
+        assertNoOutput()
+    }
+
     private fun render(farmId: String = fixture.farmId) {
         compose.setContent {
-            if (mounted.value) FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            if (mounted.value) NativeModuleReviewTheme() {
                 CompositionLocalProvider(LocalActivityResultRegistryOwner provides documents) {
                     ReportsModuleHost(fixture.database, farmId, canExport = true, onBack = {}, exportAuthority = authority)
                 }
             }
         }
         awaitTag("farm-screen:FOS-REPORT-001")
-        // The hub exists before the Room projection inserts metric sections above its actions.
-        // Exited is present even for an empty farm, so both authority fixtures wait for final data.
+        // Inspect the same actual totals in the focused figures view, then return through the real tab.
+        awaitTag("report-data-ready")
+        compose.onNodeWithTag("farm-section:Farm figures").performScrollTo().performClick()
         awaitTag("report-metric:exited")
         compose.onNodeWithTag("report-metric:exited").assertTextEquals("0 animals")
         if (farmId == fixture.farmId) {
@@ -206,6 +239,7 @@ class ReportDisclosureAuthorityTest {
         } else {
             compose.onNodeWithTag("report-metric:active-goat").assertDoesNotExist()
         }
+        compose.onNodeWithTag("farm-section:Reports").performScrollTo().performClick()
     }
 
     private fun choose(action: String, farmId: String = fixture.farmId) {
@@ -221,13 +255,17 @@ class ReportDisclosureAuthorityTest {
     }
 
     private fun clickTag(tag: String) {
+        if (tag.startsWith("report-open:")) {
+            val entry = reportDetailEntries.single { "report-open:${it.screenId}" == tag }
+            compose.revealFarmTool(entry.label)
+        }
         compose.waitUntil(10_000) {
             compose.onAllNodes(hasTestTag(tag) and hasClickAction() and isEnabled())
                 .fetchSemanticsNodes().size == 1
         }
         compose.onNodeWithTag(tag)
             .performScrollTo()
-            .assertIsDisplayed()
+            .assertIsDisplayed().also { compose.captureObservedNativeOwners() }
             .assertIsEnabled()
             .performClick()
     }

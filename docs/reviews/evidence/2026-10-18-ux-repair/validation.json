@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "purpose": "LOCAL_UX_REVIEW_CANDIDATE_NOT_APPROVAL",
+  "production_commit": "555afc283cba673078a99b25230ee42258e42e06",
+  "source_fingerprint": "sha256:4a1333107e4cb3d8d39869366683489d03247a27923f6725f2467081c4611015",
+  "test_summary": {
+    "app_tests": 83,
+    "rabbit_helper_tests": 9,
+    "failures": 0,
+    "note": "Latest passing result for each focused class: 53 original app checks plus 30 checks in the five broader-CI navigation classes, and 9 rabbit helpers. Native captures retain their original source identity. These are local results across named runs, not exact-head CI certification.",
+    "classes": [
+      {
+        "class": "com.farmos.app.AndroidBackNavigationTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "focused-tests-3",
+        "source": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
+        "source_sha256": "fd0204f3c0a0915cdd0d9ad5621ba1a4a2e06a5ee76af8e4335f067c864ae00a"
+      },
+      {
+        "class": "com.farmos.app.AnimalFarmReferenceContractTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "ci-navigation-tests-6",
+        "source": "app/src/test/java/com/farmos/app/AnimalFarmReferenceContractTest.kt",
+        "source_sha256": "99909726c619bdc5e593afd102efcddd0859bab6a951366ea338f609933e51aa"
+      },
+      {
+        "class": "com.farmos.app.FarmRuntimeNavigationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "focused-tests-3",
+        "source": "app/src/test/java/com/farmos/app/FarmRuntimeNavigationTest.kt",
+        "source_sha256": "bfb76f6bc5e21cc2cf4b46d8ffeacc5c9c77a68fe2719a6548dc044d2d9af631"
+      },
+      {
+        "class": "com.farmos.app.FarmWorkflowUxCaptureTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "rabbit-final-tests-5",
+        "source": "app/src/test/java/com/farmos/app/FarmWorkflowUxCaptureTest.kt",
+        "source_sha256": "2010aba9bdf3317bee400b77b17b38e7c17d11adea857eb14f0a0b7db46e5ef9"
+      },
+      {
+        "class": "com.farmos.app.GlobalSearchContractTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "focused-tests-3",
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchContractTest.kt",
+        "source_sha256": "7777a99fd99790e683408b02db0fc5b7f5fa30439306446f184aab644af86d56"
+      },
+      {
+        "class": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "focused-tests-3",
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+        "source_sha256": "f45edbc8044fd0b62fea50ad826bf9c2da613bb4a7166c898a73f8b2fbda3efc"
+      },
+      {
+        "class": "com.farmos.app.GlobalSearchTypeaheadTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "focused-tests-3",
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchTypeaheadTest.kt",
+        "source_sha256": "4f8ee936c1ed2dbdc62af58ad62b0398a8971f8c3e3afc8e7255d0e2fd911e3b"
+      },
+      {
+        "class": "com.farmos.app.HomeMenuAndTaskUxTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "focused-tests-3",
+        "source": "app/src/test/java/com/farmos/app/HomeMenuAndTaskUxTest.kt",
+        "source_sha256": "d3afddbece7a402c4cad51470dae64001e840aa53298ca10641d143d19255e46"
+      },
+      {
+        "class": "com.farmos.app.HomeNavigationLayoutTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "focused-tests-3",
+        "source": "app/src/test/java/com/farmos/app/HomeNavigationLayoutTest.kt",
+        "source_sha256": "ce896084bbc55566fde135b11bf8d2c9d9b811b993ff29589764ad1de53b2f6e"
+      },
+      {
+        "class": "com.farmos.app.HomeUtilityRuntimeNavigationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "focused-tests-3",
+        "source": "app/src/test/java/com/farmos/app/HomeUtilityRuntimeNavigationTest.kt",
+        "source_sha256": "ebb795b63d4a0b82d9204b0931e2d5d0555af273c5542103fc87f597d40cb3f7"
+      },
+      {
+        "class": "com.farmos.app.OperationalRuntimeNavigationTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "ci-navigation-tests-6",
+        "source": "app/src/test/java/com/farmos/app/OperationalRuntimeNavigationTest.kt",
+        "source_sha256": "65a3da4c94c154f13fae1f29c7ebabb9ab39bf82904d7187681be1134431b767"
+      },
+      {
+        "class": "com.farmos.app.PoultryCaptureOwnerTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "ci-navigation-tests-6",
+        "source": "app/src/test/java/com/farmos/app/PoultryCaptureOwnerTest.kt",
+        "source_sha256": "eca70648f1847f67e2be5c1f4730cb88bf936c5ed9093b635bda02fc341b829b"
+      },
+      {
+        "class": "com.farmos.app.PoultryRecordRuntimeNavigationTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "ci-navigation-tests-6",
+        "source": "app/src/test/java/com/farmos/app/PoultryRecordRuntimeNavigationTest.kt",
+        "source_sha256": "364bc51e206ee3176292db382b041a5fce7113a2ffdd097501a847b53adc7ecf"
+      },
+      {
+        "class": "com.farmos.app.RabbitCaptureOwnerTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "rabbit-final-tests-5",
+        "source": "app/src/test/java/com/farmos/app/RabbitCaptureOwnerTest.kt",
+        "source_sha256": "4d70262e6f36cd1867c10d50130453eed7903083f0b84f4019759530f198b99b"
+      },
+      {
+        "class": "com.farmos.app.RabbitPedigreeScreensTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "ci-navigation-tests-6",
+        "source": "app/src/test/java/com/farmos/app/RabbitPedigreeScreensTest.kt",
+        "source_sha256": "e93b44c4f58fac5ca17942d142f7b035fc8d5d7a073abc77187c7694714d9ca9"
+      },
+      {
+        "class": "com.farmos.app.RabbitProfileScreensTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "focused-tests-3",
+        "source": "app/src/test/java/com/farmos/app/RabbitProfileScreensTest.kt",
+        "source_sha256": "82170098ba5c155bb03d46df7bdad143b41a0dddc21443bef66439bc0b952fb0"
+      },
+      {
+        "class": "com.farmos.app.RabbitRecordRuntimeNavigationTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "rabbit-final-tests-5",
+        "source": "app/src/test/java/com/farmos/app/RabbitRecordRuntimeNavigationTest.kt",
+        "source_sha256": "57bdbf0e85df133318e23bd994f93867c2824ac11042554964c084a4d62e433b"
+      },
+      {
+        "class": "com.farmos.app.RabbitRuntimeNavigationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "rabbit-final-tests-5",
+        "source": "app/src/test/java/com/farmos/app/RabbitRuntimeNavigationTest.kt",
+        "source_sha256": "72f63017340db05bb92c95aa9bf8726654ad36ad1eb6e6c5c31b0f4c5b6c8f67"
+      },
+      {
+        "class": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "focused-tests-3",
+        "source": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
+        "source_sha256": "8e91a464e8735977d5c07633893daef3fe63d1ca0a7df4a32ebe3c3bde8e443b"
+      },
+      {
+        "class": "com.farmos.feature.rabbit.RabbitWorkflowVisualsTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "run": "rabbit-final-tests-5",
+        "source": "feature/rabbit/src/test/kotlin/com/farmos/feature/rabbit/RabbitWorkflowVisualsTest.kt",
+        "source_sha256": "8067e5f3563d6c148309145d7fff660874ad89410937af6240669f99a318cb62"
+      }
+    ]
+  },
+  "native_capture": {
+    "test_class": "com.farmos.app.FarmWorkflowUxCaptureTest",
+    "source_commit": "555afc283cba673078a99b25230ee42258e42e06",
+    "viewport_dp": {
+      "width": 360,
+      "height": 860
+    },
+    "sdk": 36,
+    "themes": [
+      "light",
+      "dark",
+      "outdoor"
+    ],
+    "outdoor_font_scale": 2.0,
+    "files": [
+      {
+        "file": "breeding-timeline-dark.png",
+        "sha256": "aa89afd60a6a3be3f314520a92501e6c5a3f77fa1f42a2da24b85107ec380e83",
+        "size_bytes": 42191
+      },
+      {
+        "file": "breeding-timeline-light.png",
+        "sha256": "078f1dc5a75978d95d3abedb2afc3f23b81ea8eb4e6fc13c9ea4fe39f5f3b19f",
+        "size_bytes": 42123
+      },
+      {
+        "file": "breeding-timeline-outdoor.png",
+        "sha256": "8360ffe76f7e36e092502894b7ee42121c0b4c23b6b25fe40dc04aa4445ee28d",
+        "size_bytes": 51035
+      },
+      {
+        "file": "cage-rotation-dark.png",
+        "sha256": "6aa396127b49329d24b225e31617bb6c6d0c6753fa733cb1b0bbbff5732fbee6",
+        "size_bytes": 43860
+      },
+      {
+        "file": "cage-rotation-light.png",
+        "sha256": "1e6641a1c063774d769d1cf53297190d29065ea73ebb1f5e6fd0574c89c56ffa",
+        "size_bytes": 43489
+      },
+      {
+        "file": "cage-rotation-outdoor.png",
+        "sha256": "c61ca019c026805084e13c9d7d831583724b29bc312075693328ba6effcc3272",
+        "size_bytes": 47277
+      },
+      {
+        "file": "home-dark.png",
+        "sha256": "18226fb8ab9eeeffada737450c7084d9ef02e03358025c2a7f731cd7f522c629",
+        "size_bytes": 87888
+      },
+      {
+        "file": "home-light.png",
+        "sha256": "aef736bdf00bf90dcb67e3dc4a2692a748a49bb27f33625e1e72dc4aec24337b",
+        "size_bytes": 86599
+      },
+      {
+        "file": "home-outdoor.png",
+        "sha256": "bf941cbdc32bf02523d5bae02bee25744bb9a7e6d599ef8acb1664b3605a4013",
+        "size_bytes": 41078
+      },
+      {
+        "file": "menu-dark.png",
+        "sha256": "8208107b27529d5e950e099fa7de8d64458bab782e59bdd8fe2de8cfc347debb",
+        "size_bytes": 34749
+      },
+      {
+        "file": "menu-light.png",
+        "sha256": "5718c2c33692cec3d80f919ce0e1a50f4fef976be2829696862c2da18b256af8",
+        "size_bytes": 33457
+      },
+      {
+        "file": "menu-outdoor.png",
+        "sha256": "fd8e7b8b35fc994ab5b88f2dfdf5dd6428d4378ef54ceede8935bac19b2057ba",
+        "size_bytes": 36094
+      },
+      {
+        "file": "nest-cycle-dark.png",
+        "sha256": "2fe80b0dea831918c3ba8ac80d6710d07a9b183a15f91f810007780c1f8c5567",
+        "size_bytes": 36769
+      },
+      {
+        "file": "nest-cycle-light.png",
+        "sha256": "527eec62453ee0b558d545d672a6304d0afdf51755a03e0e1e3a29a3b3f48655",
+        "size_bytes": 36644
+      },
+      {
+        "file": "nest-cycle-outdoor.png",
+        "sha256": "fce15fc951fce2cb5883ad12dc2d2639a4732dad62a26eeb4176ac3f1dd5b35c",
+        "size_bytes": 44951
+      },
+      {
+        "file": "rabbitry-dark.png",
+        "sha256": "c28879a7d1019aacfdedb744fc15ef9c545325bf2b7c1927b29fccb7842f1935",
+        "size_bytes": 47815
+      },
+      {
+        "file": "rabbitry-empty-light.png",
+        "sha256": "b399b278cd6a1e0cdf06a5744661cfb8d5954ba477ab934e56255dc99f16aadf",
+        "size_bytes": 42409
+      },
+      {
+        "file": "rabbitry-light.png",
+        "sha256": "faa85da8ab8d9ee59de4b5d8abdc07078a5c352979e4bba430731a0dd17961a1",
+        "size_bytes": 47492
+      },
+      {
+        "file": "rabbitry-outdoor.png",
+        "sha256": "8d4c0f8f39ff68a174fcc2db4e0ad444f57d05a4c11aabdf473d106f9eb86052",
+        "size_bytes": 56477
+      },
+      {
+        "file": "search-dark.png",
+        "sha256": "2be3826f941c307cc111bc5b2a059e4ad0403756b6cf31141cd557f4559280d1",
+        "size_bytes": 21889
+      },
+      {
+        "file": "search-empty-light.png",
+        "sha256": "ff5af5631c20876312f7c142217d4b657e3db68b0a6ac35231cb5a8a4dfe0779",
+        "size_bytes": 13746
+      },
+      {
+        "file": "search-light.png",
+        "sha256": "8d7cd0362317535b42b9f880dffe46198e95007b376d6dfec20cc7afee02d27d",
+        "size_bytes": 21951
+      },
+      {
+        "file": "search-outdoor.png",
+        "sha256": "5108df9f95c0ccbcfae019a59f75fb0357e02a2c9ecb7aa669705f3b26958a42",
+        "size_bytes": 32215
+      },
+      {
+        "file": "tasks-dark.png",
+        "sha256": "c32f41d090534607cb07d88b05b492e2bb407d56fb82481345477530b94cb898",
+        "size_bytes": 25625
+      },
+      {
+        "file": "tasks-light.png",
+        "sha256": "70d7b9ee1a480da7adff26cdd6911fdfda20b0dd9af0913bf348c9b3f8b22469",
+        "size_bytes": 25506
+      },
+      {
+        "file": "tasks-outdoor.png",
+        "sha256": "a5bba30a4900c4e16a710df00b63afa15b6f8d6534fb73ef67621ff993db6ddc",
+        "size_bytes": 42207
+      }
+    ],
+    "acceptance": "UNAPPROVED_CANDIDATES"
+  },
+  "static_checks": {
+    "kotlin_architecture": "PASS",
+    "visual_authority": "PASS",
+    "source_inventory_consistency": "PASS_CI_PENDING_ZERO_NEW_CLAIMS",
+    "git_diff_check": "PASS"
+  },
+  "physical_device": "No device attached to existing ADB endpoint; not installed or tested on S24",
+  "release_qualification": "NOT_GRANTED",
+  "ci_navigation_correction": {
+    "source_commit": "f59bf6bfd1555cfb0b3d81d13f012918218404c8",
+    "source_fingerprint": "sha256:d131d909197f6dad1cb48acda9247781555c114adef30a86c9a16e385ee04a7d",
+    "run": {
+      "command": [
+        "./gradlew",
+        ":app:testDebugUnitTest",
+        "--tests",
+        "com.farmos.app.AnimalFarmReferenceContractTest",
+        "--tests",
+        "com.farmos.app.OperationalRuntimeNavigationTest",
+        "--tests",
+        "com.farmos.app.PoultryCaptureOwnerTest",
+        "--tests",
+        "com.farmos.app.PoultryRecordRuntimeNavigationTest",
+        "--tests",
+        "com.farmos.app.RabbitPedigreeScreensTest",
+        "--init-script",
+        "/home/ubuntu/work/goat-ux-evidence-20261018/ux-focused-tests-2.gradle",
+        "--no-daemon",
+        "--no-parallel",
+        "--max-workers=1",
+        "--console=plain",
+        "-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8",
+        "-Pkotlin.compiler.execution.strategy=in-process"
+      ],
+      "started_at": "2026-10-18T14:53:47.163416+00:00",
+      "finished_at": "2026-10-18T14:54:55.181287+00:00",
+      "exit_code": 0
+    },
+    "tests": 30,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "previous_ci_run": "https://github.com/Vanguduza/goat-app/actions/runs/39137044234",
+    "previous_failures": 16,
+    "reason": "Legacy selectors still expected Sync on home, Open-prefixed Poultry links and ungrouped rabbit pedigree links. Tests now traverse the native menu/buttons while preserving destination, farm scope, command ownership and record-selection assertions.",
+    "apk_source_commit": "036b83ee11263f3f83480fef4b112c65a1c61cda",
+    "production_inputs_changed": false
+  },
+  "connected_navigation_correction": {
+    "source_commit": "59a12ad3d37d0903511cf3838636917ffcf62c7d",
+    "source": "app/src/androidTest/kotlin/com/farmos/app/LocalFarmActivityJourneyTest.kt",
+    "source_sha256": "84ac0968e4bf932256efc3b8b7762cdbe12aadbbd697eee466648c459f36afaa",
+    "source_fingerprint": "sha256:79e39e3c22450b80a0f4db3929bc0149b4eae6f815e06bbca3bf5a54bc366838",
+    "compile_receipt": {
+      "command": [
+        "./gradlew",
+        ":app:compileDebugAndroidTestKotlin",
+        "--no-daemon",
+        "--no-parallel",
+        "--max-workers=1",
+        "--console=plain",
+        "-Dorg.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8",
+        "-Pkotlin.compiler.execution.strategy=in-process"
+      ],
+      "started_at": "2026-10-18T15:41:43.684850+00:00",
+      "finished_at": "2026-10-18T15:42:04.885348+00:00",
+      "exit_code": 0
+    },
+    "execution": "Connected runtime result is tracked separately in PR #112. No local emulator was started.",
+    "previous_ci_run": "https://github.com/Vanguduza/goat-app/actions/runs/39138335924",
+    "previous_ci_result": {
+      "android_junit": {
+        "tests": 811,
+        "passed": 809,
+        "skipped": 2,
+        "failures": 0,
+        "errors": 0
+      },
+      "native_reference_matrix": "PASS",
+      "connected_database_tests": 51,
+      "connected_app_tests": 9,
+      "connected_app_failures": 1,
+      "failed_case": "LocalFarmActivityJourneyTest.localOnboardingWeightAndRecreatedActivityUseTheSameFarmAndAnimal",
+      "failed_step": "Legacy home Search farm entry at line 147"
+    },
+    "change": "Enter More, open Search, type into Tag/name/ID, select canonical live result by animal ID, and retain all farm/owner/operation/weight/activity-recreation/Back assertions.",
+    "production_inputs_changed": false
+  }
+}

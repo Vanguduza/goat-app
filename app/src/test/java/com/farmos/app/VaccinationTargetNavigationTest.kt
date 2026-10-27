@@ -60,6 +60,6 @@ class VaccinationTargetNavigationTest {
     }
 
     private fun click(label: String) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+        compose.revealFarmTool(label).performScrollTo().performClick()
     }
 }

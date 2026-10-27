@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-RABBIT-013",
+  "registry_name": "Nest-Box Schedule",
+  "feature_ids": [
+    "FTR-RABBIT-003"
+  ],
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "user_job": "See recorded nest states and permitted transitions beside planned cage dates.",
+  "personas_and_grants": [
+    "Active local farm session; preserve each existing persona's destination and command grants"
+  ],
+  "scope": {
+    "farm_source": "Active authenticated local farm session",
+    "species_kind": "Existing explicit species module and selected record",
+    "subject": "Existing selected record/route; menu never fabricates a subject",
+    "sensitive_fields": []
+  },
+  "navigation": {
+    "route": "FOS-RABBIT-013",
+    "entry_points": [
+      "Existing home/module/profile routing"
+    ],
+    "arguments": [
+      "Unchanged existing FarmDestination/host arguments"
+    ],
+    "deep_link_authorization": "Unchanged native farm/record authorization; no new deep link or grant",
+    "back_and_draft_behavior": "Existing native host; rabbit group selection survives child navigation; no draft ownership moves",
+    "aliases": []
+  },
+  "design": {
+    "recipe": "P08",
+    "reference_ids": [],
+    "native_golden_family": "Unapproved candidates in docs/reviews/evidence/2026-10-18-ux-repair; no reference replacement",
+    "token_version": "Existing AnimalFarmThemeTokens.kt and AnimalFarmHomeMetrics",
+    "ordered_sections": [
+      "Back and heading",
+      "Native cycle diagram",
+      "State counts and matching boxes",
+      "Planned cage rotation",
+      "Existing management buttons"
+    ],
+    "shared_components": [
+      "RabbitNestCycle",
+      "NestCycleGraphic",
+      "RabbitCageRotationBoard",
+      "FarmFilterChip",
+      "FarmActionButton"
+    ],
+    "illustration_use": "Original approved family assets only where already applicable",
+    "copy": {
+      "policy": "Concise action labels; preserve identity, units, safety and truthful receipt text"
+    },
+    "adaptive_layout": {
+      "phone": "Scrollable content within existing insets; compact controls use governed 48dp targets",
+      "tablet": "Existing responsive components; tablet acceptance pending",
+      "large_text": "Native 200% search/rabbit candidates; vertical labels, wrapping date ranges and selectable controls",
+      "outdoor": "Existing outdoor tokens and 64dp minimum controls"
+    }
+  },
+  "fields": [],
+  "queries": [
+    {
+      "name": "Native statuses: available/sanitized are ready; assigned and in_cage remain distinct; dirty needs cleaning; unknown stays Other",
+      "read_model": "Native statuses: available/sanitized are ready; assigned and in_cage remain distinct; dirty needs cleaning; unknown stays Other",
+      "loading_empty_error": "Existing host errors; explicit empty/unavailable records; search and status-option retries remain separate",
+      "freshness": "Current local projection; no claimed remote freshness",
+      "offline_source": "Room/SQLite and local operation journal"
+    },
+    {
+      "name": "Ready to assigned or in_cage; assigned to in_cage or dirty; in_cage to dirty; dirty to sanitized/available",
+      "read_model": "Ready to assigned or in_cage; assigned to in_cage or dirty; in_cage to dirty; dirty to sanitized/available",
+      "loading_empty_error": "Existing host errors; explicit empty/unavailable records; search and status-option retries remain separate",
+      "freshness": "Current local projection; no claimed remote freshness",
+      "offline_source": "Room/SQLite and local operation journal"
+    }
+  ],
+  "actions": [
+    {
+      "label": "State chips filter actual boxes and counts",
+      "intent": "State chips filter actual boxes and counts",
+      "permission": "Existing active-farm and owning command authorization",
+      "command_or_destination": "State chips filter actual boxes and counts",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Presentation/navigation only; existing business commands retain ownership"
+      ],
+      "idempotency": "No new writer or command identity",
+      "success_receipt": "No fabricated success; owning command retains its receipt",
+      "failure_and_recovery": "Existing host error/retry routes"
+    },
+    {
+      "label": "Show all exposes additional matching boxes",
+      "intent": "Show all exposes additional matching boxes",
+      "permission": "Existing active-farm and owning command authorization",
+      "command_or_destination": "Show all exposes additional matching boxes",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Presentation/navigation only; existing business commands retain ownership"
+      ],
+      "idempotency": "No new writer or command identity",
+      "success_receipt": "No fabricated success; owning command retains its receipt",
+      "failure_and_recovery": "Existing host error/retry routes"
+    },
+    {
+      "label": "Existing operations retain validation, permission and receipts",
+      "intent": "Existing operations retain validation, permission and receipts",
+      "permission": "Existing active-farm and owning command authorization",
+      "command_or_destination": "Existing operations retain validation, permission and receipts",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Presentation/navigation only; existing business commands retain ownership"
+      ],
+      "idempotency": "No new writer or command identity",
+      "success_receipt": "No fabricated success; owning command retains its receipt",
+      "failure_and_recovery": "Existing host error/retry routes"
+    }
+  ],
+  "state_matrix": [
+    {
+      "state": "empty",
+      "fixture": "No active-farm records",
+      "expected_ui": "Truthful empty state with usable relevant controls",
+      "test_id": "RabbitRecordRuntimeNavigationTest"
+    },
+    {
+      "state": "content",
+      "fixture": "Deterministic active-farm records",
+      "expected_ui": "Data-backed content with native destinations and no new writes",
+      "test_id": "RabbitRecordRuntimeNavigationTest"
+    }
+  ],
+  "not_applicable_states": [
+    {
+      "state": "schema migration / new business mutation",
+      "reason": "This contract changes presentation/navigation; existing query and command authorities retained"
+    }
+  ],
+  "accessibility_tests": [
+    "FarmWorkflowUxCaptureTest: 360x860 light, dark and outdoor at 200% for search/rabbit surfaces; owner acceptance pending"
+  ],
+  "functional_tests": [
+    "RabbitRecordRuntimeNavigationTest",
+    "RabbitCaptureOwnerTest",
+    "RabbitWorkflowVisualsTest"
+  ],
+  "linked_routes": [],
+  "guide_and_resource_links": [
+    "docs/ux/animal-farm-visual-lock/PAGE-PATTERNS.md",
+    "docs/reviews/2026-10-18-ux-repair.md"
+  ],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": "docs/reviews/2026-10-18-ux-repair.md"
+}

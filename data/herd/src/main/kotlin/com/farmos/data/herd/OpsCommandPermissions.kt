@@ -41,6 +41,7 @@ object OpsCommandPermissions {
             "poultry.flock_close.v1", "poultry.hatch_candle.v1", "poultry.hatch_record.v1",
             "poultry.record_biosecurity.v1",
             "rabbit.kit_register.v1", "rabbit.nest_box_set_status.v1",
+            RabbitryCommands.HOUSING, RabbitryCommands.NEST,
             "rabbit.record_foster.v1", "rabbit.record_gi_stasis.v1", "rabbit.record_kindling.v1",
             "rabbit.record_palpation.v1", "rabbit.record_wean.v1",
             "sheep.record_bcs.v1", "sheep.record_dag.v1", "sheep.record_famacha.v1",
@@ -77,6 +78,7 @@ object OpsCommandPermissions {
         )
         commands(
             Permission.MANAGE_BREEDING,
+            RabbitryCommands.START_SERVICE, RabbitryCommands.END_SERVICE, RabbitryCommands.MATING,
             "cattle.record_service.v1", "cattle.record_service.v2", "sheep.record_joining.v2",
             "pedigree.link.v1", "poultry.hatch_set.v1",
             "rabbit.kit_promote.v1", "rabbit.market_plan.v1", "rabbit.record_mating_outcome.v1",

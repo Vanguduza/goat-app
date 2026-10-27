@@ -1,5 +1,11 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmWorkflowState
+
+import com.farmos.core.design.FarmWorkflowStep
+
+import com.farmos.core.design.FarmWorkflowTimeline
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -153,12 +159,7 @@ private fun CattleLactationContent(records: CattleRecords) {
         CattleRow("Records", records.milk.size.toString(), "cattle-milk-count")
         CattleRow("Total recorded", cattleLitres(records.milk.sumOf { it.litresMilli }), "cattle-milk-total")
     }
-    FarmOperationalSection("Milk records") {
-        records.milk.forEachIndexed { index, row ->
-            if (index > 0) HorizontalDivider()
-            CattleRow(LocalDate.ofEpochDay(row.epochDay).toString(), cattleLitres(row.litresMilli), "cattle-milk:${row.id}")
-        }
-    }
+    CattleMilkRecordChart(records.milk)
 }
 
 /** FOS-CATTLE-022 */
@@ -168,16 +169,7 @@ private fun CattleSccContent(records: CattleRecords) {
         AnimalFarmEmptyState("No SCC results recorded for this animal on this device.")
         return
     }
-    FarmOperationalSection("SCC results") {
-        records.scc.forEachIndexed { index, row ->
-            if (index > 0) HorizontalDivider()
-            CattleRow(
-                LocalDate.ofEpochDay(row.epochDay).toString(),
-                "%,d cells/mL".format(row.cellsPerMl) + (row.dimDays?.let { " · DIM $it" } ?: ""),
-                "cattle-scc:${row.id}",
-            )
-        }
-    }
+    CattleSccRecordChart(records.scc)
 }
 
 /** FOS-CATTLE-033 */
@@ -214,12 +206,22 @@ private fun CattleTimelineContent(records: CattleRecords) {
         AnimalFarmEmptyState("No records for this animal on this device.")
         return
     }
+    FarmWorkflowTimeline(
+        title = "Events · ${records.timeline.size}",
+        steps = records.timeline.sortedWith(compareByDescending<CattleTimelineRow> { it.epochDay }.thenBy { it.id }).take(12).map { row ->
+            FarmWorkflowStep("${LocalDate.ofEpochDay(row.epochDay)} · ${row.kind}", row.summary, state = FarmWorkflowState.RECORDED)
+        },
+        modifier = Modifier.testTag("cattle-recorded-timeline"),
+        caption = if (records.timeline.size > 12) "Latest 12 of ${records.timeline.size} events. Open Records for the full history." else null,
+        recordsContent = {
     FarmOperationalSection("Events · ${records.timeline.size}") {
         records.timeline.forEachIndexed { index, row ->
             if (index > 0) HorizontalDivider()
             CattleRow("${LocalDate.ofEpochDay(row.epochDay)} · ${row.kind}", row.summary, "cattle-timeline:${row.id}")
         }
     }
+        },
+    )
 }
 
 /** FOS-CATTLE-031 */
@@ -239,6 +241,9 @@ private fun CattleMovementContent(records: CattleRecords) {
             )
         }
     }
+    FarmWorkflowTimeline("Movements · ${records.movements.size}", records.movements.sortedByDescending { it.epochDay }.take(12).map { row ->
+        FarmWorkflowStep("${LocalDate.ofEpochDay(row.epochDay)} · ${cattleMovementDirection(row.direction)}", "From ${row.fromPlace ?: "not recorded"} · to ${row.toPlace ?: "not recorded"}", state = FarmWorkflowState.RECORDED)
+    }, modifier = Modifier.testTag("cattle-movement-workflow"), caption = if (records.movements.size > 12) "Latest 12 movements; all records remain available." else null, recordsContent = {
     FarmOperationalSection("Movements · ${records.movements.size}") {
         if (records.movements.isEmpty()) Text("No movements recorded for this animal.", color = AnimalFarmTheme.colors.mutedInk)
         records.movements.forEachIndexed { index, row ->
@@ -250,6 +255,7 @@ private fun CattleMovementContent(records: CattleRecords) {
             )
         }
     }
+    })
 }
 
 /** FOS-CATTLE-036 — farm cattle aggregates. */

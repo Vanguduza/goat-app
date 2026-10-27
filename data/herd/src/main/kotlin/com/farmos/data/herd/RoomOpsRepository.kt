@@ -192,6 +192,7 @@ class RoomOpsRepository(
     suspend fun createTask(command: CreateFarmTask, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.task(command)?.let { error(it) }
         enqueue(context, "task.create.v1", "task", command.taskId, 0, command) {
+            database.requireFarmAnimalSubject(farmId, command.animalId)
             database.tasks().insert(command.toEntity(farmId, context.occurredAtEpochMillis, "open"))
         }
         return LocalCommandResult(context.mutationId, command.taskId, true)
@@ -835,6 +836,7 @@ class RoomOpsRepository(
         val parent = requireNotNull(database.animals().get(farmId, command.parentId)) { "Pedigree link needs two animals of the same species on this farm" }
         require(child.speciesCode == parent.speciesCode) { "Pedigree link needs two animals of the same species on this farm" }
         enqueue(context, "pedigree.link.v1", "animal", command.animalId, expectedVersion("animal", command.animalId), command) {
+            if (!replaying) database.requireNewPedigreeLink(farmId, command)
             database.lifecycle().insertPedigree(
                 PedigreeRelationEntity(command.linkId, farmId, command.animalId, command.parentId, command.relationType),
             )
@@ -850,6 +852,7 @@ class RoomOpsRepository(
     suspend fun recordObservation(command: RecordHealthObservation, context: LocalCommandContext): LocalCommandResult {
         OpsValidator.observation(command)?.let { error(it) }
         enqueue(context, "health.record_observation.v1", "health_observation", command.observationId, 0, command) {
+            database.requireFarmAnimalSubject(farmId, command.animalId, command.speciesCode)
             database.healthObservations().insert(
                 HealthObservationEntity(
                     id = command.observationId,

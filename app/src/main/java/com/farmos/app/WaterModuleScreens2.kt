@@ -117,20 +117,20 @@ fun WaterPointEventCaptureScreen(
                 androidx.compose.material3.Text("No water points recorded on this device. Register one first.")
             } else {
                 points.forEach { point ->
-                    androidx.compose.material3.TextButton(onClick = { selectedPoint = point.id }) {
+                    com.farmos.core.design.FarmActionButton(onClick = { selectedPoint = point.id }) {
                         androidx.compose.material3.Text("${if (point.id == selectedPoint) "● " else ""}${point.code} · ${point.name}")
                     }
                 }
             }
         }
         FarmOperationalSection("Event") {
-            androidx.compose.material3.OutlinedTextField(day.value, { day.value = it }, label = { androidx.compose.material3.Text("Date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(result.value, { result.value = it }, label = { androidx.compose.material3.Text("Result") }, placeholder = { androidx.compose.material3.Text("e.g. pass, clean, leak found") }, modifier = Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(value.value, { value.value = it }, label = { androidx.compose.material3.Text("Reading (optional, numeric)") }, modifier = Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(unit.value, { unit.value = it }, label = { androidx.compose.material3.Text("Unit (optional)") }, placeholder = { androidx.compose.material3.Text("e.g. L, pH") }, modifier = Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(note.value, { note.value = it }, label = { androidx.compose.material3.Text("Note") }, modifier = Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(day.value, { day.value = it }, label = { androidx.compose.material3.Text("Date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(result.value, { result.value = it }, label = { androidx.compose.material3.Text("Result") }, placeholder = { androidx.compose.material3.Text("e.g. pass, clean, leak found") }, modifier = Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(value.value, { value.value = it }, label = { androidx.compose.material3.Text("Reading (optional, numeric)") }, modifier = Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(unit.value, { unit.value = it }, label = { androidx.compose.material3.Text("Unit (optional)") }, placeholder = { androidx.compose.material3.Text("e.g. L, pH") }, modifier = Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(note.value, { note.value = it }, label = { androidx.compose.material3.Text("Note") }, modifier = Modifier.fillMaxWidth())
             error?.let { androidx.compose.material3.Text(it) }
-            androidx.compose.material3.Button(
+            com.farmos.core.design.FarmPrimaryButton(
                 onClick = {
                     scope.launch {
                         busy = true; error = null

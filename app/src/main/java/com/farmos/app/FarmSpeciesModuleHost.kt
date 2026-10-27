@@ -26,6 +26,7 @@ internal fun FarmSpeciesModuleHost(
     key(database, farmId, module, profile) {
         when (module) {
             FarmModule.RABBIT -> RabbitModuleHost(
+                database = database,
                 farmId = farmId,
                 ops = ops,
                 rabbitHerd = remember(database, farmId) { RoomHerdRepository(database, farmId, "rabbit") },

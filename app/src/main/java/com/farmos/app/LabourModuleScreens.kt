@@ -1,5 +1,16 @@
 package com.farmos.app
 
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -40,7 +51,7 @@ internal fun LabourAttendancePage(
             androidx.compose.material3.Text("No labour entries on this device.")
             return@FarmOperationalPage
         }
-        androidx.compose.material3.Text("From the ${entries.size} most recent entries on this device.")
+        androidx.compose.material3.Text("From all ${entries.size} recorded entries on this device.")
         byDay.forEach { (day, dayEntries) ->
             FarmOperationalSection(LocalDate.ofEpochDay(day).toString()) {
                 dayEntries.groupBy { it.workerName }.toSortedMap().forEach { (name, workerEntries) ->
@@ -113,6 +124,7 @@ internal fun LabourReportPage(
         }
         val totalMinutes = entries.sumOf { it.minutes }
         androidx.compose.material3.Text("${entries.size} entries · ${"%.1f".format(totalMinutes / 60.0)} h total.")
+        FarmMetricBars("Recorded work by worker", entries.groupBy { it.workerName }.toSortedMap().map { (name, values) -> FarmBarValue(name, values.sumOf { it.minutes.toLong() }.toDouble(), "${values.sumOf { it.minutes.toLong() }} min", "${values.size} entries") }, "minutes")
         FarmOperationalSection("By worker") {
             entries.groupBy { it.workerName }.toSortedMap().forEach { (name, workerEntries) ->
                 androidx.compose.material3.Text("$name · ${workerEntries.sumOf { it.minutes }} min · ${workerEntries.size} entries")

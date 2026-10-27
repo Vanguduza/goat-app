@@ -55,15 +55,15 @@ fun FeedPlanListScreen(
         onBack = onBack,
     ) {
         FarmOperationalSection("Record a feed plan") {
-            androidx.compose.material3.OutlinedTextField(name.value, { name.value = it }, label = { androidx.compose.material3.Text("Name") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(species.value, { species.value = it }, label = { androidx.compose.material3.Text("Species") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(ration.value, { ration.value = it }, label = { androidx.compose.material3.Text("Ration g/head/day") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(head.value, { head.value = it }, label = { androidx.compose.material3.Text("Head count") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(start.value, { start.value = it }, label = { androidx.compose.material3.Text("Start date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(end.value, { end.value = it }, label = { androidx.compose.material3.Text("End date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
-            androidx.compose.material3.OutlinedTextField(note.value, { note.value = it }, label = { androidx.compose.material3.Text("Note") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(name.value, { name.value = it }, label = { androidx.compose.material3.Text("Name") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(species.value, { species.value = it }, label = { androidx.compose.material3.Text("Species") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(ration.value, { ration.value = it }, label = { androidx.compose.material3.Text("Ration g/head/day") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(head.value, { head.value = it }, label = { androidx.compose.material3.Text("Head count") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(start.value, { start.value = it }, label = { androidx.compose.material3.Text("Start date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(end.value, { end.value = it }, label = { androidx.compose.material3.Text("End date") }, placeholder = { androidx.compose.material3.Text("YYYY-MM-DD") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
+            com.farmos.core.design.FarmOutlinedTextField(note.value, { note.value = it }, label = { androidx.compose.material3.Text("Note") }, modifier = androidx.compose.ui.Modifier.fillMaxWidth())
             error?.let { androidx.compose.material3.Text(it) }
-            androidx.compose.material3.Button(
+            com.farmos.core.design.FarmPrimaryButton(
                 onClick = {
                     run {
                         ops.recordFeedPlan(
@@ -85,7 +85,7 @@ fun FeedPlanListScreen(
                 androidx.compose.material3.Text("No feed plans recorded on this device.")
             } else {
                 plans.forEach { plan ->
-                    androidx.compose.material3.TextButton(onClick = { onSelect(plan.id) }) {
+                    com.farmos.core.design.FarmActionButton(onClick = { onSelect(plan.id) }) {
                         androidx.compose.material3.Text("${plan.name} — ${plan.speciesCode} · ${plan.rationGramsPerHeadPerDay} g/head/day × ${plan.headCount} head = ${dailyKgLabel(plan.rationGramsPerHeadPerDay, plan.headCount)}")
                     }
                 }

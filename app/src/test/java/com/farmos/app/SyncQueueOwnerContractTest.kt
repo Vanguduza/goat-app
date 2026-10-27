@@ -33,66 +33,66 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class SyncQueueOwnerContractTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val base = 1_790_000_000_000L // 2026-09-21T14:13:20Z
 
     @Test
     fun inFlightQueueRendersClaimedRows() {
         render(SyncQueueView.IN_FLIGHT, listOf(row("m-flight", "IN_FLIGHT", attempts = 0, next = base + 300_000)))
-        compose.onNodeWithTag("farm-screen:FOS-SYNC-004").assertIsDisplayed()
-        compose.onNodeWithTag("sync-queue-row:m-flight").assertExists()
-        compose.onNodeWithText("Claimed until 2026-09-21 14:18").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-004").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("sync-queue-row:m-flight").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Claimed until 2026-09-21 14:18").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun retryQueueRendersNextAttemptAndReason() {
         render(SyncQueueView.RETRY_WAITING, listOf(row("m-retry", "RETRY_WAIT", attempts = 2, error = "TRANSPORT_FAILURE", next = base + 8_000)))
-        compose.onNodeWithTag("farm-screen:FOS-SYNC-005").assertIsDisplayed()
-        compose.onNodeWithText("record_goat_weight").assertExists()
-        compose.onNodeWithText("goat · goat-nala").assertExists()
-        compose.onNodeWithText("Saved 2026-09-21 14:13 · 2 attempt(s)").assertExists()
-        compose.onNodeWithText("Network unavailable").assertExists()
-        compose.onNodeWithText("Next attempt after 2026-09-21 14:13").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-005").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("record_goat_weight").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("goat · goat-nala").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Saved 2026-09-21 14:13 · 2 attempt(s)").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Network unavailable").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Next attempt after 2026-09-21 14:13").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun conflictCentreStatesChangesWereNotApplied() {
         render(SyncQueueView.CONFLICTS, listOf(row("m-conflict", "CONFLICT", attempts = 1, error = "CONFLICT")))
-        compose.onNodeWithTag("farm-screen:FOS-SYNC-006").assertIsDisplayed()
-        compose.onNodeWithText("Kept on this device and not applied to the farm record.").assertExists()
-        compose.onNodeWithText("Farm record changed on the server").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-006").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Kept on this device and not applied to the farm record.").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Farm record changed on the server").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun rejectedQueueShowsTheRejectionClass() {
         render(SyncQueueView.REJECTED, listOf(row("m-rejected", "REJECTED", attempts = 1, error = "AUTH_REJECTED")))
-        compose.onNodeWithTag("farm-screen:FOS-SYNC-008").assertIsDisplayed()
-        compose.onNodeWithText("Not authorised for this farm").assertExists()
-        compose.onNodeWithText("Kept on this device and not applied to the farm record.").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-008").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Not authorised for this farm").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Kept on this device and not applied to the farm record.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun deadLetterQueueRendersStoppedChanges() {
         render(SyncQueueView.DEAD_LETTER, listOf(row("m-dead", "DEAD_LETTER", attempts = 9, error = "VALIDATION_REJECTED")))
-        compose.onNodeWithTag("farm-screen:FOS-SYNC-009").assertIsDisplayed()
-        compose.onNodeWithTag("sync-queue-row:m-dead").assertExists()
-        compose.onNodeWithText("Failed server validation").assertExists()
-        compose.onNodeWithText("Kept on this device and not applied to the farm record.").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-009").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("sync-queue-row:m-dead").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Failed server validation").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Kept on this device and not applied to the farm record.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun emptyDeadLetterQueueSaysSo() {
         render(SyncQueueView.DEAD_LETTER, emptyList())
-        compose.onNodeWithTag("farm-screen:FOS-SYNC-009").assertIsDisplayed()
-        compose.onNodeWithText("No changes have stopped retrying.").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-009").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("No changes have stopped retrying.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun boundedQueueStatesTheExhaustiveTotal() {
         render(SyncQueueView.RETRY_WAITING, listOf(row("m-retry", "RETRY_WAIT", attempts = 1)), total = 240L)
-        compose.onNodeWithText("Latest 1 of 240 changes").assertExists()
+        compose.onNodeWithText("Latest 1 of 240 changes").assertExists().also { compose.captureObservedNativeOwners() }
         assertEquals("Latest 100 of 240 changes", syncQueueCountLabel(100, 240L))
         assertEquals("3 change(s)", syncQueueCountLabel(3, 3L))
         assertEquals("Latest 100 changes", syncQueueCountLabel(100, null))
@@ -103,7 +103,7 @@ class SyncQueueOwnerContractTest {
     fun emptyQueueSaysSoAndSwitcherSelectsAnotherView() {
         val selected = AtomicReference<SyncQueueView?>(null)
         render(SyncQueueView.CONFLICTS, emptyList(), onSelect = selected::set)
-        compose.onNodeWithText("No sync conflicts.").assertExists()
+        compose.onNodeWithText("No sync conflicts.").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNode(hasClickAction() and hasText("Rejected")).performScrollTo().performClick()
         compose.runOnIdle { assertEquals(SyncQueueView.REJECTED, selected.get()) }
     }
@@ -111,7 +111,7 @@ class SyncQueueOwnerContractTest {
     @Test
     fun failedLoadIsShownInsteadOfAnEmptyQueue() {
         render(SyncQueueView.RETRY_WAITING, rows = null)
-        compose.onNodeWithText("database unavailable").assertExists()
+        compose.onNodeWithText("database unavailable").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithText("No changes are waiting to retry.").assertDoesNotExist()
     }
 
@@ -119,7 +119,7 @@ class SyncQueueOwnerContractTest {
     fun deniedRoleNeverLoadsRows() {
         var loads = 0
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SyncQueueHost(
                     view = SyncQueueView.REJECTED,
                     permitted = false,
@@ -130,8 +130,8 @@ class SyncQueueOwnerContractTest {
                 )
             }
         }
-        compose.onNodeWithText("Sync queues are not available for your farm role.").assertExists()
-        compose.onNodeWithTag("farm-atom:FOS-ATOM-028").assertExists()
+        compose.onNodeWithText("Sync queues are not available for your farm role.").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-028").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNode(hasClickAction() and hasText("Conflicts")).assertDoesNotExist()
         compose.runOnIdle { assertEquals(0, loads) }
         assertFalse(syncQueuesPermitted("buyer"))
@@ -171,7 +171,7 @@ class SyncQueueOwnerContractTest {
         total: Long? = null,
     ) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SyncQueueHost(
                     view = view,
                     permitted = true,
@@ -218,7 +218,7 @@ class SyncQueueOwnerContractTest {
     fun failedQueueLoadRecoversOnRetry() {
         var loads = 0
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SyncQueueHost(
                     view = SyncQueueView.CONFLICTS,
                     permitted = true,
@@ -230,7 +230,7 @@ class SyncQueueOwnerContractTest {
             }
         }
         compose.waitUntil(5_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-033").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText("database unavailable").assertExists()
+        compose.onNodeWithText("database unavailable").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNode(hasClickAction() and hasText("Try again")).performScrollTo().performClick()
         compose.waitUntil(5_000) { compose.onAllNodesWithTag("sync-queue-row:m-conflict").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-033").assertDoesNotExist()

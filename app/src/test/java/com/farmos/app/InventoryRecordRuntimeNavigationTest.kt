@@ -33,7 +33,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class InventoryRecordRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private val dashboardTag = "farm-screen:" + "FOS-" + "INV-" + "001"
@@ -65,7 +66,7 @@ class InventoryRecordRuntimeNavigationTest {
     @Test
     fun drillDownsOpenItemAndLotRecordsAndReturnToTheirOrigin() {
         render()
-        compose.onNode(hasClickAction() and hasText("Low stock")).performScrollTo().performClick()
+        compose.revealFarmTool("Low stock").performScrollTo().performClick()
         compose.onNodeWithTag("inventory-low-item:dw").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-INV-003").assertExists()
         compose.onNodeWithText("At or below its reorder point").assertExists()
@@ -83,7 +84,7 @@ class InventoryRecordRuntimeNavigationTest {
         back()
         compose.onNodeWithTag(dashboardTag).assertExists()
 
-        compose.onNode(hasClickAction() and hasText("Expiry queue")).performScrollTo().performClick()
+        compose.revealFarmTool("Expiry queue").performScrollTo().performClick()
         compose.onNodeWithTag("inventory-expiry-lot:lot-new").performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:FOS-INV-009").assertExists()
         back()
@@ -93,7 +94,7 @@ class InventoryRecordRuntimeNavigationTest {
     @Test
     fun searchMatchesSkuOrNameAndOpensTheItem() {
         render()
-        compose.onNode(hasClickAction() and hasText("Search inventory")).performScrollTo().performClick()
+        compose.revealFarmTool("Search inventory").performScrollTo().performClick()
         compose.onNodeWithTag("inventory-search-field").performTextInput("pellet")
         compose.onNodeWithText("1 match(es)").assertExists()
         compose.onNodeWithTag("inventory-search-item:fd").performScrollTo().performClick()
@@ -104,11 +105,12 @@ class InventoryRecordRuntimeNavigationTest {
     }
 
     private fun back() {
-        compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
+        compose.captureCurrentModuleReview()
+        compose.revealFarmTool("Farm home").performScrollTo().performClick()
     }
 
     private fun traverseFromDashboard(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+        compose.revealFarmTool(label).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         assertions()
         back()
@@ -132,7 +134,7 @@ class InventoryRecordRuntimeNavigationTest {
             movementLimit = 200,
         )
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 InventoryScreen(
                     rows = emptyList(),
                     busy = false,

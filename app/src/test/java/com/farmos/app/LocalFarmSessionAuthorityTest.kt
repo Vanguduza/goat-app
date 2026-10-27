@@ -49,7 +49,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class LocalFarmSessionAuthorityTest {
-    @get:Rule val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
     private lateinit var fixture: LocalSessionAuthorityFixture
     private val mounted = mutableStateOf(true)
     private val started = AtomicInteger()
@@ -140,7 +141,7 @@ class LocalFarmSessionAuthorityTest {
         render(staleResult = authenticated)
         // This delivery control is outside the scrolling production sign-in form.
         compose.onNode(hasClickAction() and hasText("Deliver completed sign-in"))
-            .assertIsDisplayed().assertIsEnabled().performClick()
+            .assertIsDisplayed().also { compose.captureObservedNativeOwners() }.assertIsEnabled().performClick()
         awaitText("Your farm account is disabled. Ask farm management to restore access, then sign in again.")
         compose.onNodeWithTag("farm-screen:FOS-REPORT-001").assertDoesNotExist()
         assertEquals(0, started.get())
@@ -163,7 +164,7 @@ class LocalFarmSessionAuthorityTest {
 
     private fun render(staleResult: LocalAccount? = null, carrierFailure: Boolean = false) {
         compose.setContent {
-            if (mounted.value) FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            if (mounted.value) NativeModuleReviewTheme() {
                 // The stale-result case uses a real completed sign-in from before the accepted disable.
                 val delivered = remember { mutableStateOf(false) }
                 LocalFarmSessionHost(
@@ -216,9 +217,14 @@ class LocalFarmSessionAuthorityTest {
     }
 
     private fun openReport(id: String) {
-        // The hub exists before its Room summary arrives; wait for data before scrolling past it.
+        // Verify exact current-farm totals in the figures view before opening a report.
+        awaitTag("report-data-ready")
+        compose.onNodeWithTag("farm-section:Farm figures").performScrollTo().performClick()
         awaitTag("report-metric:active-goat")
         compose.onNodeWithTag("report-metric:active-goat").assertTextEquals("1 animals")
+        compose.onNodeWithTag("farm-section:Reports").performScrollTo().performClick()
+        val entry = reportDetailEntries.single { it.screenId == id }
+        compose.revealFarmTool(entry.label)
         clickTag("report-open:$id")
         awaitTag("farm-screen:$id")
     }
@@ -229,19 +235,19 @@ class LocalFarmSessionAuthorityTest {
         compose.waitUntil(10_000) {
             compose.onAllNodes(hasSetTextAction() and hasText(label) and isEnabled()).fetchSemanticsNodes().size == 1
         }
-        compose.onNode(hasSetTextAction() and hasText(label)).performScrollTo().assertIsDisplayed().assertIsEnabled().performTextInput(value)
+        compose.onNode(hasSetTextAction() and hasText(label)).performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }.assertIsEnabled().performTextInput(value)
     }
     private fun click(label: String) {
         compose.waitUntil(10_000) {
             compose.onAllNodes(hasClickAction() and hasText(label) and isEnabled()).fetchSemanticsNodes().size == 1
         }
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().assertIsDisplayed().assertIsEnabled().performClick()
+        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }.assertIsEnabled().performClick()
     }
     private fun clickTag(tag: String) {
         compose.waitUntil(10_000) {
             compose.onAllNodes(hasTestTag(tag) and hasClickAction() and isEnabled()).fetchSemanticsNodes().size == 1
         }
-        compose.onNodeWithTag(tag).performScrollTo().assertIsDisplayed().assertIsEnabled().performClick()
+        compose.onNodeWithTag(tag).performScrollTo().assertIsDisplayed().also { compose.captureObservedNativeOwners() }.assertIsEnabled().performClick()
     }
     private fun awaitTag(tag: String) = compose.waitUntil(10_000) {
         compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()

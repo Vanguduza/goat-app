@@ -54,10 +54,11 @@ fun WaterModuleHost(
     val selectedPoint = remember { mutableStateOf<String?>(null) }
     val eventKind = remember { mutableStateOf("inspection") }
 
+    val workspace = androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("Overview") }
     when (page.value) {
         WaterModulePage.HOME -> WaterRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
         screenId = "FOS-WATER-001", title = "Water",
-        help = "Enter litres as a figure. The device stores milli-litres.",
+        help = "",
         empty = "No water records on this device.", rows = rows.value,
         busy = busy.value, error = error.value,
         fields = listOf("Source" to source, "Litres" to litres, "Date" to day),
@@ -68,11 +69,11 @@ fun WaterModuleHost(
         } },
         onBack = onBack,
         saved = saved.value,
-        extra = {
-            recordActions()
-            androidx.compose.material3.TextButton(onClick = { page.value = WaterModulePage.POINTS }) { androidx.compose.material3.Text("Water points") }
-            androidx.compose.material3.TextButton(onClick = { page.value = WaterModulePage.REPORT }) { androidx.compose.material3.Text("Water report") }
-        },
+        overview = { if (workspace.value == "Overview") WaterStockOverview(records.value) },
+        navigation = { WaterHomeNavigation(workspace.value, { workspace.value = it }, { page.value = it }, recordActions, records.value) },
+        captureVisible = workspace.value == "Record water",
+        captureScreenId = "FOS-WATER-004",
+        recordsVisible = false,
     ) }
         WaterModulePage.POINTS -> WaterPointListScreen(
             ops = ops,
@@ -102,4 +103,4 @@ fun WaterModuleHost(
     }
 }
 
-private enum class WaterModulePage { HOME, POINTS, POINT_DETAIL, EVENT, REPORT }
+internal enum class WaterModulePage { HOME, POINTS, POINT_DETAIL, EVENT, REPORT }

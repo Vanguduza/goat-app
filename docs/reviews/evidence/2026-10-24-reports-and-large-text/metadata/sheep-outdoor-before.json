@@ -1,0 +1,191 @@
+{
+  "schema_version": 2,
+  "screen_id": "FOS-SHEEP-030",
+  "visit": 1,
+  "test": "SpeciesHerdRuntimeNavigationTest.sheepIndividualAnimalSurfacesTraverseAndReturn",
+  "test_class": "com.farmos.app.SpeciesHerdRuntimeNavigationTest",
+  "owner_node_id": 629,
+  "owner_instance_tag": "farm-screen:FOS-SHEEP-030",
+  "evidence_class": "OBSERVED_NATIVE_PRODUCT_OWNER",
+  "source": "actual Compose tree",
+  "variant": "observed state after successful assertion",
+  "owner_observed_before_capture": true,
+  "mode": "OUTDOOR",
+  "width_dp": 360,
+  "actual_device_width_dp": 360,
+  "actual_device_height_dp": 900,
+  "font_scale": 2,
+  "vertical_scroll_containers": 1,
+  "vertical_sweep_complete": true,
+  "scroll_restored": true,
+  "incomplete_reasons": [],
+  "viewports": [
+    {
+      "image": "FOS-SHEEP-030.png",
+      "image_sha256": "05211b6284fdb1f078740fafe3e89951372b7f3b8dca5e5e9a259df535bc1757",
+      "width_px": 360,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 2,
+      "visible_tags": [
+        "farm-screen:FOS-SHEEP-030"
+      ],
+      "observed_owner_ids": [
+        "FOS-SHEEP-030"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-SHEEP-030",
+          "tag": "farm-screen:FOS-SHEEP-030",
+          "node_id": 629,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [
+        {
+          "tag": null,
+          "name": "Farm home",
+          "width_dp": 190,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            16,
+            206,
+            80
+          ],
+          "touch_bounds_px": [
+            16,
+            16,
+            206,
+            80
+          ],
+          "touch_width_dp": 190,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": null,
+          "name": "Sold",
+          "width_dp": 84,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            32,
+            393,
+            116,
+            457
+          ],
+          "touch_bounds_px": [
+            32,
+            393,
+            116,
+            457
+          ],
+          "touch_width_dp": 84,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": null,
+          "name": "Deceased",
+          "width_dp": 152,
+          "height_dp": 64,
+          "disabled": false,
+          "bounds_px": [
+            124,
+            393,
+            276,
+            457
+          ],
+          "touch_bounds_px": [
+            124,
+            393,
+            276,
+            457
+          ],
+          "touch_width_dp": 152,
+          "touch_height_dp": 64,
+          "fully_visible": true
+        },
+        {
+          "tag": null,
+          "name": "Culled",
+          "width_dp": 44,
+          "height_dp": 199,
+          "disabled": false,
+          "bounds_px": [
+            284,
+            393,
+            328,
+            592
+          ],
+          "touch_bounds_px": [
+            282,
+            393,
+            330,
+            592
+          ],
+          "touch_width_dp": 48,
+          "touch_height_dp": 199,
+          "fully_visible": true
+        }
+      ],
+      "layout_findings": [
+        {
+          "kind": "TEXT_LAYOUT_OVERFLOW_REQUIRES_PIXEL_REVIEW",
+          "text": "Culled",
+          "tag": null,
+          "bounds_px": [
+            300,
+            405,
+            312,
+            580
+          ],
+          "text_layouts": [
+            {
+              "measured_width_px": 12,
+              "measured_height_px": 175,
+              "paragraph_width_px": 12,
+              "paragraph_height_px": 175,
+              "line_ink_bounds_px": [
+                [
+                  0,
+                  18
+                ],
+                [
+                  0,
+                  15
+                ],
+                [
+                  0,
+                  12
+                ],
+                [
+                  0,
+                  15
+                ],
+                [
+                  0,
+                  15
+                ]
+              ],
+              "exceeded_max_lines": false,
+              "ellipsized": false
+            }
+          ]
+        },
+        {
+          "kind": "TOUCH_TARGET_BELOW_REQUIRED_MINIMUM",
+          "minimum_dp": 64,
+          "width_dp": 48,
+          "height_dp": 199,
+          "name": "Culled"
+        }
+      ],
+      "scroll_position": 0
+    }
+  ],
+  "accessibility_manual_review": "TALKBACK_FOCUS_AND_HUMAN_PIXEL_REVIEW_REMAIN_REQUIRED",
+  "approval": "UNAPPROVED_REVIEW_CANDIDATE"
+}

@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -79,7 +79,7 @@ private fun ReferenceSwitcher(title: String, options: List<Pair<String, String>>
 
 private fun withdrawal(days: Int?) = days?.let { "$it day(s)" } ?: "Not recorded"
 
-/** FOS-HEALTH-014 — one formulary item exactly as recorded. Farm OS does not prescribe a dose. */
+/** FOS-HEALTH-014 — one formulary item exactly as recorded. Animal Farm does not prescribe a dose. */
 @Composable
 internal fun FormularyItemScreen(items: List<FormularyItemView>, onBack: () -> Unit) {
     var selectedId by rememberSaveable { mutableStateOf(items.firstOrNull()?.id) }
@@ -106,7 +106,7 @@ internal fun FormularyItemScreen(items: List<FormularyItemView>, onBack: () -> U
 @Composable
 internal fun ProtocolPackDetailScreen(packs: List<ProtocolPackView>, onBack: () -> Unit) {
     var selectedId by rememberSaveable { mutableStateOf(packs.firstOrNull()?.id) }
-    FarmOperationalPage("FOS-HEALTH-016", "Protocol pack", "A protocol pack and its schedule slots as recorded. Farm OS does not prescribe.", FarmVisualClass.I3, onBack) {
+    FarmOperationalPage("FOS-HEALTH-016", "Protocol pack", "A protocol pack and its schedule slots as recorded. Animal Farm does not prescribe.", FarmVisualClass.I3, onBack) {
         if (packs.isEmpty()) {
             AnimalFarmEmptyState("No protocol packs on this device.")
             return@FarmOperationalPage

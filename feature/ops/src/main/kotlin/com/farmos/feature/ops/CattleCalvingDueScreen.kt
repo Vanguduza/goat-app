@@ -88,7 +88,7 @@ internal fun CattleCalvingDueScreen(loadDue: suspend () -> CattleCalvingDue, tod
     FarmOperationalPage(
         "FOS-CATTLE-014",
         "Calving due",
-        "Cows expected to calve from their latest service, grouped by how close the window is.",
+        "",
         FarmVisualClass.I2,
         onBack,
     ) {
@@ -96,15 +96,16 @@ internal fun CattleCalvingDueScreen(loadDue: suspend () -> CattleCalvingDue, tod
             CalvingDueState.Loading -> Text("Loading cows expected to calve")
             is CalvingDueState.Failed -> AnimalFarmWarningSurface { Text(current.message) }
             is CalvingDueState.Loaded -> {
+                if (current.due.rows.isEmpty()) {
+                    AnimalFarmEmptyState("No cows are expected to calve.")
+                    return@FarmOperationalPage
+                }
+                CattleCalvingWorkflow(current.due, today, recordsContent = {
                 Text(
                     "Predicted from each cow's latest service with this farm's ${current.due.typicalDays}-day gestation unless an expected calving date was recorded at dry-off. " +
                         "A recorded calving removes her from the list; a cow diagnosed open since her service is not listed.",
                     color = AnimalFarmTheme.colors.mutedInk,
                 )
-                if (current.due.rows.isEmpty()) {
-                    AnimalFarmEmptyState("No cows are expected to calve.")
-                    return@FarmOperationalPage
-                }
                 val grouped = current.due.rows.groupBy { cattleDueWindow(it, today.toEpochDay()) }
                 CattleDueWindow.entries.forEach { window ->
                     val rows = grouped[window].orEmpty()
@@ -117,6 +118,7 @@ internal fun CattleCalvingDueScreen(loadDue: suspend () -> CattleCalvingDue, tod
                         }
                     }
                 }
+                })
             }
         }
     }

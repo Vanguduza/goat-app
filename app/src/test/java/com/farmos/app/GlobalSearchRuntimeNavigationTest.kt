@@ -1,5 +1,9 @@
 package com.farmos.app
 
+import androidx.compose.ui.test.performImeAction
+
+import androidx.compose.ui.test.assertIsSelected
+
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
@@ -97,19 +101,19 @@ class GlobalSearchRuntimeNavigationTest {
         }
         content { session(FarmMembership(farmA, "owner")) }
         search("ZZ-TARGET")
-        awaitText("Goat · ZZ-TARGET · Target doe · active · local")
-        compose.onNodeWithText("Goat · ZZ-TARGET · Other farm doe · active · local").assertDoesNotExist()
+        awaitText("ZZ-TARGET · Target doe")
+        compose.onNodeWithText("ZZ-TARGET · Other farm doe").assertDoesNotExist()
         click("Filter results")
-        click("Goat")
-        compose.onNodeWithText("Goat (active)").assertExists()
-        click("Goat · ZZ-TARGET · Target doe · active · local")
+        clickTag("search-species:goat")
+        compose.onNodeWithTag("search-species:goat").assertIsSelected()
+        clickTag("search-result:$targetId")
         awaitScreen("FOS-GOAT-003")
         awaitText("Target doe")
         compose.onNodeWithTag("farm-runtime-route:goat.profile:FOS-GOAT-003").assertExists()
         compose.onNodeWithText("First doe").assertDoesNotExist()
         compose.onNodeWithText("Target cow").assertDoesNotExist()
         compose.onNodeWithText("Other farm doe").assertDoesNotExist()
-        click("Weight")
+        compose.revealFarmTool("Weight").performScrollTo().performClick()
         awaitScreen("FOS-GOAT-011")
         field("Weight", "53.125")
         click("Record weight")
@@ -131,10 +135,10 @@ class GlobalSearchRuntimeNavigationTest {
         awaitScreen("FOS-GOAT-003")
         back()
         awaitScreen("FOS-HOME-006")
-        compose.onNode(hasSetTextAction() and hasText("Tag, name, species or identifier") and hasText("ZZ-TARGET")).assertExists()
-        compose.onNodeWithText("Goat (active)").assertExists()
-        compose.onNodeWithText("Goat · ZZ-TARGET · Target doe · active · local").assertExists()
-        compose.onNodeWithText("Cattle · ZZ-TARGET · Target cow · active · local").assertDoesNotExist()
+        compose.onNode(hasSetTextAction() and hasText("Tag, name or ID") and hasText("ZZ-TARGET")).assertExists()
+        compose.onNodeWithTag("search-species:goat").assertIsSelected()
+        awaitText("ZZ-TARGET · Target doe")
+        compose.onNodeWithText("ZZ-TARGET · Target cow").assertDoesNotExist()
         back()
         awaitScreen("FOS-HOME-012-A")
     }
@@ -145,34 +149,34 @@ class GlobalSearchRuntimeNavigationTest {
         io { animal(soldId, farmA, "SOLD-EXACT", "Sold doe", status = "sold") }
         content { session(FarmMembership(farmA, "owner")) }
         search("ZZ-TARGET")
-        awaitText("Goat · ZZ-TARGET · Target doe · active · local")
+        awaitText("ZZ-TARGET · Target doe")
         click("Filter results")
-        click("Goat")
-        click("active")
-        compose.onNodeWithText("active (active)").assertExists()
+        clickTag("search-species:goat")
+        clickTag("search-status:active")
+        compose.onNodeWithTag("search-status:active").assertIsSelected()
 
-        compose.onNode(hasSetTextAction() and hasText("Tag, name, species or identifier"))
+        compose.onNode(hasSetTextAction() and hasText("Tag, name or ID"))
             .performScrollTo().performTextReplacement("SOLD-EXACT")
-        click("Search farm")
-        awaitText("No animal records match the active filters.")
-        compose.onNodeWithText("active (active)").assertDoesNotExist()
-        compose.onNodeWithText("Clear filters to show the 1 local result(s) from this search.").assertExists()
-        compose.onNodeWithText("Goat · SOLD-EXACT · Sold doe · sold · local").assertDoesNotExist()
+        compose.onNodeWithTag("farm-screen:FOS-SEARCH-001").performImeAction()
+        awaitText("No matching animal records.")
+        compose.onNodeWithTag("search-status:active").assertIsSelected()
+        compose.onNodeWithText("Try another search or clear the filters.").assertExists()
+        compose.onNodeWithText("SOLD-EXACT · Sold doe").assertDoesNotExist()
 
         // A prior filter must remain resettable even when its status is absent from new results.
         click("Hide filters")
         click("Clear filters")
-        awaitText("Goat · SOLD-EXACT · Sold doe · sold · local")
+        awaitText("SOLD-EXACT · Sold doe")
         compose.onNodeWithTag("farm-screen:FOS-SEARCH-004").assertDoesNotExist()
         compose.onNodeWithText("Clear filters").assertDoesNotExist()
-        compose.onNode(hasSetTextAction() and hasText("Tag, name, species or identifier") and hasText("SOLD-EXACT")).assertExists()
-        click("Goat · SOLD-EXACT · Sold doe · sold · local")
+        compose.onNode(hasSetTextAction() and hasText("Tag, name or ID") and hasText("SOLD-EXACT")).assertExists()
+        clickTag("search-result:$soldId")
         awaitScreen("FOS-GOAT-003")
         awaitText("Sold doe")
         compose.onNodeWithText("Target doe").assertDoesNotExist()
         back()
         awaitScreen("FOS-HOME-006")
-        compose.onNodeWithText("Goat · SOLD-EXACT · Sold doe · sold · local").assertExists()
+        awaitText("SOLD-EXACT · Sold doe")
         compose.onNodeWithText("Clear filters").assertDoesNotExist()
         io { assertTrue(app.database.replication().operationsInRange(farmA, app.deviceId, 1, Long.MAX_VALUE).isEmpty()) }
     }
@@ -182,24 +186,26 @@ class GlobalSearchRuntimeNavigationTest {
         val membership = mutableStateOf(FarmMembership(farmA, "owner"))
         content { session(membership.value) }
         search("ZZ-TARGET")
-        awaitText("Goat · ZZ-TARGET · Target doe · active · local")
-        click("Goat · ZZ-TARGET · Target doe · active · local")
+        awaitText("ZZ-TARGET · Target doe")
+        clickTag("search-result:$targetId")
         awaitScreen("FOS-GOAT-003")
         awaitText("Target doe")
 
         compose.runOnIdle { membership.value = FarmMembership(farmB, "owner") }
         awaitScreen("FOS-HOME-012-A")
         compose.onNodeWithTag("farm-screen:FOS-GOAT-003").assertDoesNotExist()
-        click("Search farm")
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-menu-action:Search farm").performClick()
         awaitScreen("FOS-HOME-006")
         compose.onNodeWithTag("farm-screen:FOS-HOME-007").assertDoesNotExist()
-        compose.onNodeWithText("Recent searches in this farm session").assertDoesNotExist()
-        compose.onNode(hasSetTextAction() and hasText("Tag, name, species or identifier") and hasText("ZZ-TARGET")).assertDoesNotExist()
-        field("Tag, name, species or identifier", "ZZ-TARGET")
-        click("Search farm")
-        awaitText("Goat · ZZ-TARGET · Other farm doe · active · local")
-        compose.onNodeWithText("Goat · ZZ-TARGET · Target doe · active · local").assertDoesNotExist()
-        click("Goat · ZZ-TARGET · Other farm doe · active · local")
+        compose.onNodeWithText("Recent searches").assertDoesNotExist()
+        compose.onNode(hasSetTextAction() and hasText("Tag, name or ID") and hasText("ZZ-TARGET")).assertDoesNotExist()
+        field("Tag, name or ID", "ZZ-TARGET")
+        compose.onNodeWithTag("farm-screen:FOS-SEARCH-001").performImeAction()
+        awaitText("ZZ-TARGET · Other farm doe")
+        compose.onNodeWithText("ZZ-TARGET · Target doe").assertDoesNotExist()
+        clickTag("search-result:$foreignId")
         awaitScreen("FOS-GOAT-003")
         awaitText("Other farm doe")
         compose.onNodeWithText("Target doe").assertDoesNotExist()
@@ -245,10 +251,10 @@ class GlobalSearchRuntimeNavigationTest {
                 onOpen = { opened++ }, onBack = {},
             )
         }
-        field("Tag, name, species or identifier", "ZZ-TARGET")
-        click("Search farm")
+        field("Tag, name or ID", "ZZ-TARGET")
+        compose.onNodeWithTag("farm-screen:FOS-SEARCH-001").performImeAction()
         compose.waitUntil(10_000) {
-            compose.onAllNodes(hasText("Local search failed:", substring = true)).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodes(hasText("Search is unavailable. Try again.", substring = true)).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithTag("farm-screen:FOS-SEARCH-004").assertDoesNotExist()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-031").assertDoesNotExist()
@@ -256,7 +262,7 @@ class GlobalSearchRuntimeNavigationTest {
         compose.onNodeWithText("0 local result(s)", substring = true).assertDoesNotExist()
         compose.runOnIdle { assertEquals(0, opened) }
         compose.waitForIdle()
-        compose.onNodeWithText("Local search failed:", substring = true).assertExists()
+        compose.onNodeWithText("Search is unavailable. Try again.", substring = true).assertExists()
     }
 
     @Test
@@ -297,6 +303,90 @@ class GlobalSearchRuntimeNavigationTest {
         }
     }
 
+
+    @Test
+    fun speciesAndStatusFiltersFindEligibleTextAndIdentifiersBeyondTheFirstFifty() {
+        val eligibleId = "$farmA-filter-eligible"
+        val foreignEligibleId = "$farmB-filter-eligible"
+        io {
+            app.database.withTransaction {
+                repeat(70) { index ->
+                    val activeGoat = "$farmA-filter-active-$index"
+                    val soldCow = "$farmA-filter-cow-$index"
+                    animal(activeGoat, farmA, "WINDOW-A-$index", "Active goat $index", species = "goat", status = "active")
+                    animal(soldCow, farmA, "WINDOW-C-$index", "Sold cow $index", species = "cattle", status = "sold")
+                    app.database.lifecycle().insertIdentifier(
+                        AnimalIdentifierEntity("$activeGoat-chip", farmA, activeGoat, "rfid", "FILTER-CHIP-A-$index", true, 100L + index),
+                    )
+                    app.database.lifecycle().insertIdentifier(
+                        AnimalIdentifierEntity("$soldCow-chip", farmA, soldCow, "rfid", "FILTER-CHIP-C-$index", true, 200L + index),
+                    )
+                }
+                animal(eligibleId, farmA, "WINDOW-Z-ELIGIBLE", "Eligible sold goat", species = "goat", status = "sold")
+                animal(foreignEligibleId, farmB, "WINDOW-Z-ELIGIBLE", "Other farm sold goat", species = "goat", status = "sold")
+                app.database.lifecycle().insertIdentifier(
+                    AnimalIdentifierEntity("$eligibleId-chip", farmA, eligibleId, "rfid", "FILTER-CHIP-Z", true, 400),
+                )
+                app.database.lifecycle().insertIdentifier(
+                    AnimalIdentifierEntity("$foreignEligibleId-chip", farmB, foreignEligibleId, "rfid", "FILTER-CHIP-Z", true, 401),
+                )
+            }
+            val unfiltered = searchLocalFarmAnimalPage(app.database, farmA, "WINDOW")
+            assertEquals(GLOBAL_SEARCH_LIMIT, unfiltered.rows.size)
+            assertTrue(unfiltered.hasMore)
+            assertFalse(unfiltered.rows.any { it.animalId == eligibleId })
+            val textPage = searchLocalFarmAnimalPage(app.database, farmA, "WINDOW", species = "goat", status = "sold")
+            assertEquals(listOf(eligibleId), textPage.rows.map { it.animalId })
+            assertFalse(textPage.hasMore)
+            val identifierPage = searchLocalFarmAnimalPage(app.database, farmA, "FILTER-CHIP", species = "goat", status = "sold")
+            assertEquals(listOf(eligibleId), identifierPage.rows.map { it.animalId })
+            assertTrue(identifierPage.rows.single().source.startsWith("identifier:"))
+            assertFalse(identifierPage.hasMore)
+            assertFalse(identifierPage.rows.any { it.animalId == foreignEligibleId })
+            assertEquals(listOf("active", "sold"), app.database.animals().globalSearchStatuses(farmA))
+            assertTrue(app.database.replication().operationsInRange(farmA, app.deviceId, 1, Long.MAX_VALUE).isEmpty())
+        }
+    }
+
+    @Test
+    fun manyMatchingAliasesCannotConsumeTheCanonicalAnimalResultWindow() {
+        io {
+            app.database.withTransaction {
+                repeat(70) { index ->
+                    app.database.lifecycle().insertIdentifier(
+                        AnimalIdentifierEntity(
+                            "$farmA-window-alias-$index", farmA, targetId, "rfid",
+                            "WINDOW-CHIP-A-" + index.toString().padStart(3, '0'), true, 500L + index,
+                        ),
+                    )
+                }
+                repeat(55) { index ->
+                    val subject = "$farmA-window-subject-$index"
+                    animal(subject, farmA, "ALIAS-$index", "Alias subject $index")
+                    app.database.lifecycle().insertIdentifier(
+                        AnimalIdentifierEntity(
+                            "$subject-chip", farmA, subject, "rfid",
+                            "WINDOW-CHIP-B-" + index.toString().padStart(3, '0'), true, 700L + index,
+                        ),
+                    )
+                }
+                app.database.lifecycle().insertIdentifier(
+                    AnimalIdentifierEntity("$farmB-window-foreign", farmB, foreignId, "rfid", "WINDOW-CHIP-FOREIGN", true, 900),
+                )
+                app.database.lifecycle().insertIdentifier(
+                    AnimalIdentifierEntity("$farmA-window-retired", farmA, firstId, "rfid", "WINDOW-CHIP-RETIRED", false, 901),
+                )
+            }
+            val page = searchLocalFarmAnimalPage(app.database, farmA, "WINDOW-CHIP", species = "goat", status = "active")
+            assertEquals(GLOBAL_SEARCH_LIMIT, page.rows.size)
+            assertTrue(page.hasMore)
+            assertEquals(GLOBAL_SEARCH_LIMIT, page.rows.map { it.animalId }.distinct().size)
+            assertTrue(page.rows.all { it.source.startsWith("identifier:") })
+            assertFalse(page.rows.any { it.animalId == foreignId })
+            assertFalse(page.rows.any { it.animalId == firstId })
+        }
+    }
+
     private suspend fun animal(id: String, farmId: String, tag: String, name: String, species: String = "goat", status: String = "active") {
         app.database.animals().insert(
             AnimalEntity(
@@ -326,11 +416,13 @@ class GlobalSearchRuntimeNavigationTest {
 
     private fun search(query: String) {
         awaitScreen("FOS-HOME-012-A")
-        click("Search farm")
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-menu-action:Search farm").performClick()
         awaitScreen("FOS-HOME-006")
         compose.onNodeWithTag("farm-screen:FOS-SEARCH-005").assertExists()
-        field("Tag, name, species or identifier", query)
-        click("Search farm")
+        field("Tag, name or ID", query)
+        compose.onNodeWithTag("farm-screen:FOS-SEARCH-001").performImeAction()
         awaitScreen("FOS-HOME-007")
         compose.onNodeWithTag("farm-screen:FOS-SEARCH-002").assertExists()
     }
@@ -344,6 +436,14 @@ class GlobalSearchRuntimeNavigationTest {
         // A route tag can render while its real Room-backed content is still loading.
         compose.waitUntil(10_000) { compose.onAllNodes(action).fetchSemanticsNodes().isNotEmpty() }
         compose.onNode(action).performScrollTo().assertIsDisplayed().performClick()
+    }
+
+
+    private fun clickTag(tag: String) {
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag(tag).performScrollTo().assertIsDisplayed().performClick()
     }
 
     private fun back() {

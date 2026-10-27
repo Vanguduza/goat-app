@@ -4,16 +4,23 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.farmos.core.design.FarmActionButton
+import com.farmos.core.design.FarmPrimaryButton
+import com.farmos.core.design.FarmFilterChip
+import com.farmos.core.design.FarmBackButton
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +38,7 @@ import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FosDimens
 import java.time.LocalDate
 
-/** UI projection only; authoritative task state remains in Room/Supabase. */
+/** UI projection only; authoritative task state remains in the farm-local database and operation journal. */
 data class TaskUiRow(
     val id: String,
     val title: String,
@@ -49,6 +56,8 @@ data class TaskUiRow(
     val assigneeLabel: String? = null,
     /** How the task repeats, in words; null for a task that does not repeat. */
     val repeatLabel: String? = null,
+    val animalId: String? = null,
+    val subjectLabel: String? = null,
 )
 
 private enum class TaskTab { TODAY, SCHEDULED, OVERDUE, COMPLETED, ALL, CALENDAR, MINE, REPEATING }
@@ -57,6 +66,7 @@ private enum class TaskTab { TODAY, SCHEDULED, OVERDUE, COMPLETED, ALL, CALENDAR
  * FOS-TASK-001 / 002 / 003 / 004 — shared Farm OS task reference family. [rows] hold every open
  * task and may hold only the latest completed ones; [completedCount] is the exhaustive count.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TasksBoardScreen(
     rows: List<TaskUiRow>,
@@ -78,13 +88,22 @@ fun TasksBoardScreen(
     /** How far ahead repeating occurrences are listed; null when the board has no repeating tasks. */
     repeatHorizonDays: Long? = null,
     extraActions: @Composable () -> Unit = {},
+    searchAnimals: com.farmos.core.design.FarmSelectorSearch = com.farmos.core.design.NoFarmSelectorSearch,
+    onCreateDetailed: ((TaskCreateDraft) -> Unit)? = null,
+    savedRevision: Int = 0,
 ) {
     if (entryPage == TaskEntryPage.CREATE) {
-        CreateTaskScreen(busy = busy, error = error, onCreate = onCreate, onBack = onBack, canPlanWork = canPlanWork, assignees = assignees, onCreateSeries = onCreateSeries)
+        CreateTaskScreen(busy = busy, error = error, onCreate = onCreate, onBack = onBack, canPlanWork = canPlanWork, assignees = assignees, onCreateSeries = onCreateSeries,
+            searchAnimals = searchAnimals, onCreateDetailed = onCreateDetailed, savedRevision = savedRevision)
         return
     }
-    var tab by remember { mutableStateOf(TaskTab.TODAY) }
-    var showCreate by remember { mutableStateOf(false) }
+    var tab by rememberSaveable { mutableStateOf(TaskTab.TODAY) }
+    var showCreate by rememberSaveable { mutableStateOf(false) }
+    if (showCreate) {
+        CreateTaskScreen(busy,error,onCreate,{showCreate=false},canPlanWork,assignees,onCreateSeries,
+            searchAnimals=searchAnimals,onCreateDetailed=onCreateDetailed,savedRevision=savedRevision)
+        return
+    }
     val today = LocalDate.now().toEpochDay()
     val visible = when (tab) {
         TaskTab.TODAY -> rows.filter { it.status == "open" && it.dueEpochDay == today }
@@ -100,7 +119,7 @@ fun TasksBoardScreen(
 
     AnimalFarmCanvas {
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = com.farmos.core.design.animalFarmHomePageInset(), vertical = com.farmos.core.design.AnimalFarmHomeMetrics.headerInset),
             verticalArrangement = Arrangement.spacedBy(FosDimens.IntraCardGap),
         ) {
             AnimalFarmModuleHeader(
@@ -108,18 +127,13 @@ fun TasksBoardScreen(
                 subtitle = "${rows.count { it.status == "open" }} open task(s)",
             )
 
+            FarmPrimaryButton(onClick = { showCreate = true }, enabled = !busy,
+                modifier = Modifier.fillMaxWidth().testTag("task-add")) { Text("Add task") }
+            com.farmos.core.design.FarmChoicePicker(
+                title = "Work view", options = TaskTab.entries.map { it to taskTabLabel(it) },
+                selected = tab, onSelect = { tab = it }, tag = "task-filter",
+            )
             extraActions()
-
-            TaskTab.entries.chunked(3).forEach { tabs ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    tabs.forEach { option ->
-                        TextButton(onClick = { tab = option }, modifier = Modifier.weight(1f)) {
-                            Text(taskTabLabel(option, selected = tab == option))
-                        }
-                    }
-                    repeat(3 - tabs.size) { Spacer(Modifier.weight(1f)) }
-                }
-            }
 
             Column(
                 Modifier.fillMaxWidth().testTag("farm-screen:${taskTabScreenId(tab)}"),
@@ -171,20 +185,8 @@ fun TasksBoardScreen(
                 }
             }
 
-            FarmIllustratedSectionSurface {
-                Text("Quick action", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Text("Create a farm task. Species-specific capture stays inside its native module.")
-                Button(onClick = { showCreate = !showCreate }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
-                    Text(if (showCreate) "Close task form" else "Add task")
-                }
-            }
-
-            if (showCreate) {
-                CreateTaskCard(busy = busy, onCreate = onCreate, canPlanWork = canPlanWork, assignees = assignees, onCreateSeries = onCreateSeries) { showCreate = false }
-            }
-
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            TextButton(onClick = onBack, enabled = !busy) { Text("Farm home") }
+            FarmBackButton("Farm home", onBack)
         }
     }
 }
@@ -205,6 +207,7 @@ private fun TaskCard(
                 Text(
                     listOfNotNull(
                         "${task.moduleCode} · ${task.taskCode}",
+                        task.subjectLabel?.let { "Animal: $it" },
                         task.repeatLabel,
                         task.assigneeLabel?.let { "Assigned to $it" },
                     ).joinToString(" · "),
@@ -223,83 +226,9 @@ private fun TaskCard(
                 )
             }
             if (task.status == "open") {
-                TextButton(onClick = { onComplete(task.id) }, enabled = !busy) { Text("Done") }
+                FarmActionButton(onClick = { onComplete(task.id) }, enabled = !busy) { Text("Done") }
             }
         }
-    }
-}
-
-@Composable
-fun CreateTaskScreen(
-    busy: Boolean,
-    error: String?,
-    onCreate: (title: String, module: String, code: String, due: String) -> Unit,
-    onBack: () -> Unit,
-    canPlanWork: Boolean = false,
-    assignees: List<TaskAssigneeOption> = emptyList(),
-    onCreateSeries: (TaskSeriesDraft) -> Unit = {},
-) {
-    FarmOperationalPage(
-        screenId = "FOS-TASK-004",
-        title = "Add task",
-        subtitle = "Create a farm task. Species-specific capture stays inside its native module.",
-        onBack = onBack,
-    ) {
-        CreateTaskCard(busy = busy, onCreate = onCreate, canPlanWork = canPlanWork, assignees = assignees, onCreateSeries = onCreateSeries) {}
-        error?.let { Text(it, color = AnimalFarmTheme.colors.critical) }
-    }
-}
-
-@Composable
-private fun CreateTaskCard(
-    busy: Boolean,
-    onCreate: (title: String, module: String, code: String, due: String) -> Unit,
-    canPlanWork: Boolean,
-    assignees: List<TaskAssigneeOption>,
-    onCreateSeries: (TaskSeriesDraft) -> Unit,
-    onCreated: () -> Unit,
-) {
-    var title by remember { mutableStateOf("") }
-    var module by remember { mutableStateOf("goat") }
-    var code by remember { mutableStateOf("CHECK") }
-    var due by remember { mutableStateOf(LocalDate.now().toString()) }
-    var repeat by remember { mutableStateOf(TaskRepeat.NONE) }
-    var interval by remember { mutableStateOf("2") }
-    var endDate by remember { mutableStateOf("") }
-    var assigneeId by remember { mutableStateOf<String?>(null) }
-    FarmIllustratedSectionSurface {
-        Text("Add task", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        OutlinedTextField(title, { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(module, { module = it }, label = { Text("Module") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(code, { code = it }, label = { Text("Task code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        OutlinedTextField(due, { due = it }, label = { Text(if (repeat == TaskRepeat.NONE) "Due date" else "First day") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
-        if (canPlanWork) {
-            TaskPlanningFields(busy, assignees, repeat, { repeat = it }, interval, { interval = it }, endDate, { endDate = it }, assigneeId, { assigneeId = it })
-        }
-        Button(
-            onClick = {
-                if (repeat == TaskRepeat.NONE && assigneeId == null) {
-                    onCreate(title, module, code, due)
-                } else {
-                    onCreateSeries(
-                        TaskSeriesDraft(
-                            title = title.trim(),
-                            moduleCode = module.trim(),
-                            taskCode = code.trim(),
-                            startDate = LocalDate.parse(due),
-                            repeat = repeat,
-                            interval = if (repeat.takesInterval) interval.toInt() else 1,
-                            endDate = endDate.takeIf { repeat != TaskRepeat.NONE && it.isNotBlank() }?.let { LocalDate.parse(it) },
-                            assigneeAccountId = assigneeChange(assigneeId).accountId,
-                            assigneeWorkerId = assigneeChange(assigneeId).workerId,
-                        ),
-                    )
-                }
-                onCreated()
-            },
-            enabled = !busy && title.isNotBlank() && module.isNotBlank() && code.isNotBlank() && planningValid(repeat, interval, due, endDate),
-            modifier = Modifier.fillMaxWidth(),
-        ) { Text("Create task") }
     }
 }
 
@@ -324,7 +253,7 @@ private fun calendarDayLabel(day: Long, today: Long, count: Int): String {
     return "${LocalDate.ofEpochDay(day)}$marker · $count open " + if (count == 1) "task" else "tasks"
 }
 
-private fun taskTabLabel(tab: TaskTab, selected: Boolean): String {
+private fun taskTabLabel(tab: TaskTab): String {
     val label = when (tab) {
         TaskTab.TODAY -> "Today"
         TaskTab.SCHEDULED -> "Scheduled"
@@ -335,7 +264,7 @@ private fun taskTabLabel(tab: TaskTab, selected: Boolean): String {
         TaskTab.MINE -> "Assigned to me"
         TaskTab.REPEATING -> "Repeating"
     }
-    return if (selected) "$label · selected" else label
+    return label
 }
 
 private fun emptyTaskMessage(tab: TaskTab): String = when (tab) {
@@ -384,6 +313,7 @@ fun TaskDetailScreen(
         if (task == null) {
             Text("The selected task is not in the local records.")
         } else {
+            TaskStateWorkflow(task, today)
             val overdue = task.status == "open" && task.dueEpochDay < today
             Text(
                 when {
@@ -403,7 +333,7 @@ fun TaskDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text("Mark done") }
                 if (canPlanWork) {
-                    TextButton(onClick = onEdit, enabled = !busy, modifier = Modifier.fillMaxWidth().testTag("task-detail-edit")) { Text("Edit") }
+                    FarmActionButton(onClick = onEdit, enabled = !busy, modifier = Modifier.fillMaxWidth().testTag("task-detail-edit")) { Text("Edit") }
                 }
             }
         }

@@ -8,7 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -22,6 +22,12 @@ import com.farmos.core.design.FarmEntitySelector
 import com.farmos.core.design.FarmIllustratedSectionSurface
 import com.farmos.core.design.FarmSelectionAtoms
 import com.farmos.core.design.FarmSelectorOption
+import com.farmos.core.design.FarmOperationalPage
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmToolGroup
 import com.farmos.core.design.FarmSyncPendingReceipt
 import com.farmos.core.network.FarmMembership
 import com.farmos.feature.goat.GoatEntryPage
@@ -62,29 +68,17 @@ internal fun HomeUtilityScreen(
         HomeSurface.ACTIVITY_STREAM -> "Recent task and farm-work history on this device"
         HomeSurface.FARM_SWITCHER -> "Move between farms you are authorised to access"
         HomeSurface.NOTIFICATIONS -> "Current operational notices derived from farm state"
-        HomeSurface.QUICK_CAPTURE -> "Record common farm work without hunting through modules"
+        HomeSurface.QUICK_CAPTURE -> ""
     }
 
-    AnimalFarmCanvas(Modifier.testTag("farm-screen:$screenId")) {
-        Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(AnimalFarmHomeMetrics.pageInset),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            AnimalFarmModuleHeader(title, subtitle)
-            when (surface) {
-                HomeSurface.TODAY_SUMMARY -> TodaySummaryContent(summary, onOpen)
-                HomeSurface.ALERTS -> FarmAlertsContent(summary, onOpen)
-                HomeSurface.ACTIVITY_STREAM -> FarmActivityContent(summary)
-                HomeSurface.FARM_SWITCHER -> FarmSwitcherContent(
-                    memberships = memberships,
-                    farmNames = farmNames,
-                    currentFarmId = currentFarmId,
-                    onSwitchFarm = onSwitchFarm,
-                )
-                HomeSurface.NOTIFICATIONS -> NotificationCentreContent(summary, onOpen)
-                HomeSurface.QUICK_CAPTURE -> QuickCaptureContent(onOpen)
-            }
-            TextButton(onClick = onBack) { Text("Farm home") }
+    FarmOperationalPage(screenId, title, "", onBack = onBack) {
+        when (surface) {
+            HomeSurface.TODAY_SUMMARY -> TodaySummaryContent(summary, onOpen)
+            HomeSurface.ALERTS -> FarmAlertsContent(summary, onOpen)
+            HomeSurface.ACTIVITY_STREAM -> FarmActivityContent(summary)
+            HomeSurface.FARM_SWITCHER -> FarmSwitcherContent(memberships, farmNames, currentFarmId, onSwitchFarm)
+            HomeSurface.NOTIFICATIONS -> NotificationCentreContent(summary, onOpen)
+            HomeSurface.QUICK_CAPTURE -> QuickCaptureContent(onOpen)
         }
     }
 }
@@ -98,16 +92,15 @@ private fun TodaySummaryContent(
     val dueToday = summary.tasks.count { it.status == "open" && it.dueEpochDay == today }
     val overdue = summary.tasks.count { it.status == "open" && it.dueEpochDay < today }
 
-    FarmIllustratedSectionSurface {
-        SummaryLine("Open tasks", summary.openTasks.toString())
-        SummaryLine("Due today", dueToday.toString())
-        SummaryLine("Overdue", overdue.toString())
-        SummaryLine("Active withdrawals", summary.activeWithdrawals.toString())
-        SummaryLine("Low-stock items", summary.inventoryBelowReorder.toString())
-        SummaryLine("Waiting to sync", summary.pendingSync.toString())
-    }
+    FarmMetricStrip(listOf(
+        FarmMetricValue("Open tasks", summary.openTasks.toString(), onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) }),
+        FarmMetricValue("Due today", dueToday.toString()),
+        FarmMetricValue("Overdue", overdue.toString(), onClick = { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) }),
+        FarmMetricValue("Withdrawals", summary.activeWithdrawals.toString(), onClick = { onOpen(FarmDestination.Health(HealthEntryPage.WITHDRAWALS)) }),
+        FarmMetricValue("Low stock", summary.inventoryBelowReorder.toString(), onClick = { onOpen(FarmDestination.Module(FarmModule.INVENTORY)) }),
+        FarmMetricValue("Waiting to sync", summary.pendingSync.toString(), onClick = { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) }),
+    ))
     if (summary.pendingSync > 0) FarmSyncPendingReceipt(summary.pendingSync)
-    AnimalFarmQuickAction("Open tasks", { onOpen(FarmDestination.Tasks(TaskEntryPage.BOARD)) })
     AnimalFarmQuickAction("Open health", { onOpen(FarmDestination.Health()) })
     AnimalFarmQuickAction("Open sync status", { onOpen(FarmDestination.Goat(GoatEntryPage.SYNC)) })
     summary.syncQueueCounts?.let { counts -> SyncQueueEntries(counts, onOpen) }
@@ -265,7 +258,6 @@ private fun homeAttentionMessages(summary: FarmHomeSummary): List<String> =
 private fun QuickCaptureContent(onOpen: (FarmDestination) -> Unit) {
     FarmIllustratedSectionSurface {
         Text("Common records", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Text("Each action opens the existing authoritative capture surface.")
     }
     AnimalFarmQuickAction("Add task", { onOpen(FarmDestination.Tasks(TaskEntryPage.CREATE)) })
     AnimalFarmQuickAction("Record goat weight", { onOpen(FarmDestination.Goat(GoatEntryPage.WEIGHT)) })

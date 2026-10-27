@@ -31,13 +31,20 @@ internal class PastureModuleState(
     var records by mutableStateOf(PastureRecords())
     var paddockOptions by mutableStateOf(emptyList<FarmSelectorOption>())
     var groupOptions by mutableStateOf(emptyList<FarmSelectorOption>())
+    var openSessionOptions by mutableStateOf(emptyList<FarmSelectorOption>())
 
     suspend fun refresh() {
         val paddocks = ops.paddocks()
         paddockRows = paddocks.map { "${it.id} ${it.code} · ${it.displayName} · ${it.waterSource}" }
         paddockOptions = paddocks.map { FarmSelectorOption(it.id, "${it.code} · ${it.displayName}", "Water ${it.waterSource}") }
         groupOptions = ops.groups().map { FarmSelectorOption(it.id, it.name, "${it.speciesCode} · ${it.headCount} head recorded") }
-        grazingRows = ops.openGrazing().map { "${it.id} paddock ${it.paddockId} · group ${it.groupId}" }
+        val openSessions = ops.openGrazing()
+        grazingRows = openSessions.map { "${it.id} paddock ${it.paddockId} · group ${it.groupId}" }
+        openSessionOptions = openSessions.map { session ->
+            val paddock = paddocks.firstOrNull { it.id == session.paddockId }?.code ?: session.paddockId
+            val group = groupOptions.firstOrNull { it.id == session.groupId }?.label ?: session.groupId
+            FarmSelectorOption(session.id, "$paddock · $group", "${session.headCount} head recorded at entry")
+        }
         records = loadRecords()
     }
 

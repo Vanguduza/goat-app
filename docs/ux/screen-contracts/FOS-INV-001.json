@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "screen_id": "FOS-INV-001",
+  "registry_name": "Inventory Dashboard",
+  "feature_ids": [
+    "FTR-INV-001"
+  ],
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "user_job": "Open stock, movement, lot, search, count and reorder workflows through clear controls.",
+  "personas_and_grants": [
+    "Active local farm session; preserve each existing persona's destination and command grants"
+  ],
+  "scope": {
+    "farm_source": "Active authenticated local farm session",
+    "species_kind": "Existing route's explicit species/module; N/A for menu chrome",
+    "subject": "Existing selected record/route; menu never fabricates a subject",
+    "sensitive_fields": []
+  },
+  "navigation": {
+    "route": "InventoryExperienceScreen > InventoryDashboard",
+    "entry_points": [
+      "Existing home/module navigation"
+    ],
+    "arguments": [
+      "Unchanged existing FarmDestination/host arguments"
+    ],
+    "deep_link_authorization": "Unchanged native farm/record authorization; no new deep link or grant",
+    "back_and_draft_behavior": "Existing navigation callbacks; shared page back control is now visible before content; no business draft ownership moves",
+    "aliases": []
+  },
+  "design": {
+    "recipe": "P04",
+    "reference_ids": [
+      "DERIVED-LOCKED-FAMILY_REQUIRES_NATIVE_APPROVAL"
+    ],
+    "native_golden_family": "CANDIDATE; protected references unchanged",
+    "token_version": "Existing AnimalFarmThemeTokens.kt and AnimalFarmHomeMetrics",
+    "ordered_sections": [
+      "Existing stock overview",
+      "Movement",
+      "Dated lots",
+      "Stock records",
+      "Counts and reorder"
+    ],
+    "shared_components": [
+      "FarmOperationalPage",
+      "FarmOperationalSection",
+      "FarmActionButton"
+    ],
+    "illustration_use": "Original approved family assets only where already applicable",
+    "copy": {
+      "policy": "Concise action labels; preserve identity, units, safety and truthful receipt text"
+    },
+    "adaptive_layout": {
+      "phone": "Scrollable content within existing insets; compact controls use governed 48dp targets",
+      "tablet": "Existing responsive layout preserved; no separate data/command model",
+      "large_text": "Wrap labels and chips, retain user font scale; summaries stack at large text",
+      "outdoor": "Existing outdoor tokens and 64dp minimum controls"
+    }
+  },
+  "fields": [],
+  "queries": [
+    {
+      "name": "Existing scoped inventory read model",
+      "read_model": "Existing scoped inventory read model",
+      "loading_empty_error": "Retain existing loading/error/empty contract; sync unknown is not zero",
+      "freshness": "Local host projection; no invented remote freshness",
+      "offline_source": "Room/SQLite and immutable local operation journal"
+    }
+  ],
+  "actions": [
+    {
+      "label": "Existing inventory navigation callbacks; no posting or FEFO changes",
+      "intent": "Existing navigation or explicit user selection",
+      "permission": "Unchanged existing destination/command authorization",
+      "command_or_destination": "Existing inventory navigation callbacks; no posting or FEFO changes",
+      "validation": [
+        "Existing subject/farm/permission validation"
+      ],
+      "effects": [
+        "Navigation or existing governed command only"
+      ],
+      "idempotency": "Navigation is read-only; writes retain their existing operation identity",
+      "success_receipt": "Existing owning screen's truthful local receipt",
+      "failure_and_recovery": "Retain existing error and retry route"
+    }
+  ],
+  "state_matrix": [
+    {
+      "state": "empty",
+      "fixture": "No applicable farm records",
+      "expected_ui": "Truthful empty state with working relevant controls",
+      "test_id": "InventoryRecordRuntimeNavigationTest"
+    },
+    {
+      "state": "content",
+      "fixture": "Explicit deterministic test records",
+      "expected_ui": "Data-backed content and exact destination callbacks",
+      "test_id": "InventoryRecordRuntimeNavigationTest"
+    }
+  ],
+  "not_applicable_states": [
+    {
+      "state": "schema migration / new business mutation",
+      "reason": "This contract changes presentation/navigation; existing query and command authorities retained"
+    }
+  ],
+  "accessibility_tests": [
+    "HomeNavigationLayoutTest",
+    "Native light/dark/outdoor, narrow/large text capture review; acceptance remains pending until evidence recorded"
+  ],
+  "functional_tests": [
+    "InventoryRecordRuntimeNavigationTest",
+    "InventoryCaptureOwnerTest"
+  ],
+  "linked_routes": [],
+  "guide_and_resource_links": [
+    "docs/ux/animal-farm-visual-lock/PAGE-PATTERNS.md",
+    "docs/reviews/2026-10-18-ux-repair.md"
+  ],
+  "review": {
+    "design_contract_reviewer": null,
+    "approval_reference": null
+  },
+  "evidence_file": "docs/reviews/2026-10-18-ux-repair.md"
+}

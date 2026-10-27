@@ -1,6 +1,12 @@
 package com.farmos.app
 
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.test.assertIsDisplayed
+import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -20,20 +26,20 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class SpeciesHerdRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     @Test
     fun sheepIndividualAnimalSurfacesTraverseAndReturn() {
         renderSpecies(FarmModule.SHEEP, "Sheep One")
 
-        open("Open Sheep records")
+        open("Sheep records")
         assertScreen("FOS-SHEEP-002")
         open("Sheep One")
         assertScreen("FOS-SHEEP-003")
         home()
 
-        open("Open Register sheep")
+        open("Register sheep")
         assertScreen("FOS-SHEEP-004")
         home()
 
@@ -46,6 +52,7 @@ class SpeciesHerdRuntimeNavigationTest {
         open("Open profile")
         open("Lifecycle status")
         assertScreen("FOS-SHEEP-030")
+        assertReadableStatusActions()
         home()
     }
 
@@ -53,13 +60,13 @@ class SpeciesHerdRuntimeNavigationTest {
     fun cattleIndividualAnimalSurfacesTraverseAndReturn() {
         renderSpecies(FarmModule.CATTLE, "Cattle One")
 
-        open("Open Cattle records")
+        open("Cattle records")
         assertScreen("FOS-CATTLE-002")
         open("Cattle One")
         assertScreen("FOS-CATTLE-003")
         home()
 
-        open("Open Register cattle")
+        open("Register cattle")
         assertScreen("FOS-CATTLE-004")
         home()
 
@@ -72,22 +79,38 @@ class SpeciesHerdRuntimeNavigationTest {
         open("Open profile")
         open("Lifecycle status")
         assertScreen("FOS-CATTLE-034")
+        assertReadableStatusActions()
         home()
     }
 
     @Test
     fun herdMetricsUseExhaustiveCountsAndTheListSaysWhenBounded() {
         renderSpecies(FarmModule.CATTLE, "Cow One", SpeciesHerdCounts(total = 640, active = 612))
-        compose.onNodeWithText("640").assertExists()
-        compose.onNodeWithText("612").assertExists()
-        open("Open Cattle records")
+        compose.onNodeWithText("640").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("612").assertExists().also { compose.captureObservedNativeOwners() }
+        open("Cattle records")
         assertScreen("FOS-CATTLE-002")
-        compose.onNodeWithText("Showing the first 1 of 640 cattle by tag.").assertExists()
+        compose.onNodeWithText("Showing the first 1 of 640 cattle by tag.").assertExists().also { compose.captureObservedNativeOwners() }
+    }
+
+    private fun assertReadableStatusActions() {
+        val minimum = if (System.getenv("GOAT_MODULE_REVIEW_MODE") == "OUTDOOR") 64f else 48f
+        listOf("Sold", "Deceased", "Culled").forEach { label ->
+            val control = compose.onNode(hasClickAction() and hasText(label)).performScrollTo().assertIsDisplayed().fetchSemanticsNode()
+            val target = control.touchBoundsInRoot
+            val density = control.layoutInfo.density.density
+            assertTrue("$label needs the full $minimum dp touch width and height", target.width / density + 0.5f >= minimum && target.height / density + 0.5f >= minimum)
+            val text = compose.onNodeWithText(label, useUnmergedTree = true).fetchSemanticsNode()
+            val layouts = mutableListOf<TextLayoutResult>()
+            compose.runOnIdle { text.config.getOrNull(SemanticsActions.GetTextLayoutResult)?.action?.invoke(layouts) }
+            assertEquals("A named lifecycle action must expose a text layout", 1, layouts.size)
+            assertEquals("$label must not be squeezed into letter-by-letter wrapping", 1, layouts.single().lineCount)
+        }
     }
 
     private fun renderSpecies(module: FarmModule, label: String, counts: SpeciesHerdCounts? = null) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SpeciesHerdScreen(
                     module = module,
                     title = module.name,
@@ -114,7 +137,7 @@ class SpeciesHerdRuntimeNavigationTest {
     }
 
     private fun assertScreen(screenId: String) {
-        compose.onNodeWithTag("farm-screen:$screenId").assertExists()
+        compose.onNodeWithTag("farm-screen:$screenId").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     private fun home() {

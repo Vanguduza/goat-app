@@ -1,5 +1,16 @@
 package com.farmos.app
 
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,19 +69,22 @@ internal fun MaintenanceSchedulePage(
     val names = assets.associate { it.id to "${it.code} · ${it.name}" }
     val upcoming = events.filter { it.occurredEpochDay >= today }.sortedBy { it.occurredEpochDay }
     val history = events.filter { it.occurredEpochDay < today }.sortedByDescending { it.occurredEpochDay }
-    val latestByAsset = events.groupBy { it.assetId }.mapValues { (_, assetEvents) -> assetEvents.maxOf { it.occurredEpochDay } }
+    val latestByAsset = events.filter { it.occurredEpochDay <= today }.groupBy { it.assetId }.mapValues { (_, assetEvents) -> assetEvents.maxOf { it.occurredEpochDay } }
     FarmOperationalPage(
         screenId = "FOS-ASSET-006",
         title = "Maintenance schedule",
-        subtitle = "Planned maintenance and service history per asset.",
+        subtitle = "Maintenance record dates by asset.",
         onBack = onBack,
     ) {
+        if (events.isNotEmpty()) FarmWorkflowTimeline("Maintenance dates", events.sortedBy { it.occurredEpochDay }.map { event ->
+            FarmWorkflowStep(names[event.assetId] ?: "Asset unavailable", event.title, LocalDate.ofEpochDay(event.occurredEpochDay).toString(), if (event.occurredEpochDay > today) FarmWorkflowState.UNKNOWN else FarmWorkflowState.RECORDED)
+        }, caption = "Recorded dates; future-dated entries are not completion evidence.")
         FarmOperationalSection(
             title = "Upcoming",
-            description = "Events recorded with a future date. Overdue cannot be shown: maintenance events carry no due date.",
+            description = "Future-dated records. A record date is not a scheduled due date or proof of completed work.",
         ) {
             if (upcoming.isEmpty()) {
-                androidx.compose.material3.Text("No planned maintenance.")
+                androidx.compose.material3.Text("No future-dated maintenance records.")
             } else {
                 upcoming.forEach { event ->
                     androidx.compose.material3.Text("${names[event.assetId] ?: "Asset not on this device"} · ${event.title} · ${LocalDate.ofEpochDay(event.occurredEpochDay)}")
@@ -99,7 +113,7 @@ internal fun MaintenanceSchedulePage(
                 }
             }
         }
-        androidx.compose.material3.TextButton(
+        com.farmos.core.design.FarmActionButton(
             onClick = onRecordBreakdown,
             modifier = Modifier.fillMaxWidth(),
         ) { androidx.compose.material3.Text("Record breakdown") }
@@ -138,14 +152,14 @@ internal fun BreakdownPage(
                 "Create an asset first.",
                 enabled = !busy,
             )
-            androidx.compose.material3.OutlinedTextField(
+            com.farmos.core.design.FarmOutlinedTextField(
                 value = title.value,
                 onValueChange = { title.value = it },
                 label = { androidx.compose.material3.Text("What failed") },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !busy,
             )
-            androidx.compose.material3.OutlinedTextField(
+            com.farmos.core.design.FarmOutlinedTextField(
                 value = day.value,
                 onValueChange = { day.value = it },
                 label = { androidx.compose.material3.Text("Date") },
@@ -153,14 +167,14 @@ internal fun BreakdownPage(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !busy,
             )
-            androidx.compose.material3.OutlinedTextField(
+            com.farmos.core.design.FarmOutlinedTextField(
                 value = note.value,
                 onValueChange = { note.value = it },
                 label = { androidx.compose.material3.Text("Note (optional)") },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !busy,
             )
-            androidx.compose.material3.Button(
+            com.farmos.core.design.FarmPrimaryButton(
                 onClick = {
                     onRecord(assetId.value, title.value, LocalDate.parse(day.value).toEpochDay(), note.value)
                 },
@@ -206,21 +220,21 @@ internal fun MeterCapturePage(
                 "Create an asset first.",
                 enabled = !busy,
             )
-            androidx.compose.material3.OutlinedTextField(
+            com.farmos.core.design.FarmOutlinedTextField(
                 value = value.value,
                 onValueChange = { value.value = it },
                 label = { androidx.compose.material3.Text("Reading") },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !busy,
             )
-            androidx.compose.material3.OutlinedTextField(
+            com.farmos.core.design.FarmOutlinedTextField(
                 value = unit.value,
                 onValueChange = { unit.value = it },
                 label = { androidx.compose.material3.Text("Unit (hours, kWh, litres)") },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !busy,
             )
-            androidx.compose.material3.OutlinedTextField(
+            com.farmos.core.design.FarmOutlinedTextField(
                 value = day.value,
                 onValueChange = { day.value = it },
                 label = { androidx.compose.material3.Text("Date") },
@@ -228,14 +242,14 @@ internal fun MeterCapturePage(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !busy,
             )
-            androidx.compose.material3.OutlinedTextField(
+            com.farmos.core.design.FarmOutlinedTextField(
                 value = note.value,
                 onValueChange = { note.value = it },
                 label = { androidx.compose.material3.Text("Note (optional)") },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !busy,
             )
-            androidx.compose.material3.Button(
+            com.farmos.core.design.FarmPrimaryButton(
                 onClick = {
                     onRecord(assetId.value, value.value.toLongOrNull() ?: -1L, unit.value, LocalDate.parse(day.value).toEpochDay(), note.value)
                 },

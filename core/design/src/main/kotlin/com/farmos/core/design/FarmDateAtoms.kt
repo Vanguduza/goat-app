@@ -1,14 +1,13 @@
 package com.farmos.core.design
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,9 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneOffset
 
 /** P13 date and time atoms; the `farm-atom:` tag names the canonical atom Screen ID realised. */
 object FarmDateAtoms {
@@ -29,11 +26,10 @@ object FarmDateAtoms {
 /**
  * FOS-ATOM-001 — a calendar date field. The value stays an ISO `YYYY-MM-DD` string the owning
  * capture already validates, so typed entry keeps working offline and in the field; "Choose date"
- * opens a calendar that writes the same ISO string. The calendar starts on the typed date when it
- * parses, otherwise on [today]. Choosing a date never submits anything by itself. Each field is
+ * opens an adaptive date selector that writes the same ISO string. The selector starts on the typed date when it
+ * parses, otherwise on [today]. A narrow or enlarged-text dialog uses native date input rather than a clipped seven-column calendar. Choosing a date never submits anything by itself. Each field is
  * tagged `farm-atom:FOS-ATOM-001:<key>` so several dates on one capture stay distinguishable.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FarmDateField(
     label: String,
@@ -54,37 +50,22 @@ fun FarmDateField(
         singleLine = true,
         enabled = enabled,
         trailingIcon = {
-            TextButton(
+            IconButton(
                 onClick = { open = true },
                 enabled = enabled,
-                modifier = Modifier.heightIn(min = AnimalFarmTheme.minimumTouchDp.dp).testTag("$fieldTag:open"),
-            ) { Text("Choose date") }
+                modifier = Modifier.size(AnimalFarmTheme.minimumTouchDp.dp).testTag("$fieldTag:open"),
+            ) { Icon(Icons.Rounded.CalendarMonth, contentDescription = "Choose date for $label") }
         },
         modifier = modifier.fillMaxWidth().testTag(fieldTag),
     )
     if (open) {
         val initial = runCatching { LocalDate.parse(value) }.getOrDefault(today)
-        val state = rememberDatePickerState(
-            initialSelectedDateMillis = initial.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
+        FarmDateSelectionDialog(
+            label = label,
+            initialDate = initial,
+            fieldTag = fieldTag,
+            onDismiss = { open = false },
+            onConfirm = { selected -> onValueChange(selected.toString()); open = false },
         )
-        DatePickerDialog(
-            onDismissRequest = { open = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        state.selectedDateMillis?.let { millis ->
-                            onValueChange(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC).toLocalDate().toString())
-                        }
-                        open = false
-                    },
-                    modifier = Modifier.testTag("$fieldTag:confirm"),
-                ) { Text("Use date") }
-            },
-            dismissButton = {
-                TextButton(onClick = { open = false }, modifier = Modifier.testTag("$fieldTag:cancel")) { Text("Cancel") }
-            },
-        ) {
-            DatePicker(state = state, modifier = Modifier.testTag("$fieldTag:calendar"))
-        }
     }
 }

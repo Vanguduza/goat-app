@@ -39,14 +39,14 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class TaskViewRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     @Test
     fun scheduledOverdueAndCompletedViewsAreDistinctAndRestoreToday() {
         val today = LocalDate.now().toEpochDay()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 TasksBoardScreen(
                     rows = listOf(
                         TaskUiRow("today", "Today check", "goat", "CHECK", today, "open"),
@@ -63,25 +63,25 @@ class TaskViewRuntimeNavigationTest {
             }
         }
 
-        compose.onNodeWithTag("farm-screen:FOS-TASK-001").assertIsDisplayed()
-        compose.onNodeWithText("Today check").assertIsDisplayed()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-001").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Today check").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         assertTextAbsent("Past check")
 
         openTab("Scheduled")
-        compose.onNodeWithTag("farm-screen:FOS-TASK-007").assertIsDisplayed()
-        compose.onNodeWithText("Future check").assertIsDisplayed()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-007").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Future check").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         assertTextAbsent("Past check")
         restoreToday()
 
         openTab("Overdue")
-        compose.onNodeWithTag("farm-screen:FOS-TASK-008").assertIsDisplayed()
-        compose.onNodeWithText("Past check").assertIsDisplayed()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-008").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Past check").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         assertTextAbsent("Today check")
         restoreToday()
 
         openTab("Completed")
-        compose.onNodeWithTag("farm-screen:FOS-TASK-009").assertIsDisplayed()
-        compose.onNodeWithText("Done check").assertIsDisplayed()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-009").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Done check").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
         assertTextAbsent("Future check")
         restoreToday()
     }
@@ -90,7 +90,7 @@ class TaskViewRuntimeNavigationTest {
     fun allTasksViewListsOpenAndCompletedWorkWithTheExactCompletedTotal() {
         val today = LocalDate.now().toEpochDay()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 TasksBoardScreen(
                     rows = listOf(
                         TaskUiRow("today", "Today check", "goat", "CHECK", today, "open"),
@@ -108,11 +108,11 @@ class TaskViewRuntimeNavigationTest {
         }
 
         openTab("All")
-        compose.onNodeWithTag("farm-screen:FOS-TASK-002").assertIsDisplayed()
-        compose.onNodeWithText("Today check").assertExists()
-        compose.onNodeWithText("Past check").assertExists()
-        compose.onNodeWithText("Done check").assertExists()
-        compose.onNodeWithText("Completed tasks · latest 1 of 140").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-002").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Today check").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Past check").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Done check").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Completed tasks · latest 1 of 140").assertExists().also { compose.captureObservedNativeOwners() }
         restoreToday()
         assertTextAbsent("Completed tasks · latest 1 of 140")
     }
@@ -121,7 +121,7 @@ class TaskViewRuntimeNavigationTest {
     fun calendarGroupsOpenTasksUnderTheirDueDates() {
         val today = LocalDate.now().toEpochDay()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 TasksBoardScreen(
                     rows = listOf(
                         TaskUiRow("today", "Today check", "goat", "CHECK", today, "open"),
@@ -140,11 +140,11 @@ class TaskViewRuntimeNavigationTest {
         }
 
         openTab("Calendar")
-        compose.onNodeWithTag("farm-screen:FOS-TASK-010").assertIsDisplayed()
-        compose.onNodeWithText("${LocalDate.ofEpochDay(today - 2)} · Overdue · 1 open task").assertExists()
-        compose.onNodeWithText("${LocalDate.ofEpochDay(today)} · Today · 1 open task").assertExists()
-        compose.onNodeWithText("${LocalDate.ofEpochDay(today + 2)} · 2 open tasks").assertExists()
-        compose.onNodeWithText("Drench ewes").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-010").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("${LocalDate.ofEpochDay(today - 2)} · Overdue · 1 open task").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("${LocalDate.ofEpochDay(today)} · Today · 1 open task").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("${LocalDate.ofEpochDay(today + 2)} · 2 open tasks").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Drench ewes").assertExists().also { compose.captureObservedNativeOwners() }
         assertTextAbsent("Done check")
         restoreToday()
     }
@@ -152,7 +152,7 @@ class TaskViewRuntimeNavigationTest {
     @Test
     fun emptyAllTasksViewSaysNothingIsRecorded() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 TasksBoardScreen(
                     rows = emptyList(),
                     busy = false,
@@ -165,8 +165,8 @@ class TaskViewRuntimeNavigationTest {
             }
         }
         openTab("All")
-        compose.onNodeWithTag("farm-screen:FOS-TASK-002").assertIsDisplayed()
-        compose.onNodeWithText("No tasks on this device").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-002").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("No tasks on this device").assertExists().also { compose.captureObservedNativeOwners() }
         assertTextAbsent("Completed tasks · latest 0 of 0")
     }
 
@@ -175,7 +175,7 @@ class TaskViewRuntimeNavigationTest {
         val today = LocalDate.now().toEpochDay()
         val ended = mutableListOf<String>()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 TasksBoardScreen(
                     rows = listOf(
                         TaskUiRow("today", "Today check", "goat", "CHECK", today, "open"),
@@ -199,24 +199,24 @@ class TaskViewRuntimeNavigationTest {
             }
         }
 
-        compose.onNodeWithText("ops · WATER · Daily · Assigned to Farai").assertExists()
+        compose.onNodeWithText("ops · WATER · Daily · Assigned to Farai").assertExists().also { compose.captureObservedNativeOwners() }
         openTab("Assigned to me")
-        compose.onNodeWithTag("farm-screen:FOS-TASK-006").assertIsDisplayed()
-        compose.onNodeWithText("Check troughs").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-006").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Check troughs").assertExists().also { compose.captureObservedNativeOwners() }
         assertTextAbsent("Feed calves")
         assertTextAbsent("Today check")
         restoreToday()
 
         openTab("Repeating")
-        compose.onNodeWithTag("farm-screen:FOS-TASK-011").assertIsDisplayed()
-        compose.onNodeWithText("Weekdays · from ${LocalDate.ofEpochDay(today - 3)} · until ${LocalDate.ofEpochDay(today + 20)}").assertExists()
-        compose.onNodeWithText("Next ${LocalDate.ofEpochDay(today)} · Assigned to Tendai").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-011").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Weekdays · from ${LocalDate.ofEpochDay(today - 3)} · until ${LocalDate.ofEpochDay(today + 20)}").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Next ${LocalDate.ofEpochDay(today)} · Assigned to Tendai").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("task-series-end:s2").performScrollTo().performClick()
         compose.runOnIdle { assertTrue(ended == listOf("s2")) }
         restoreToday()
 
         openTab("Scheduled")
-        compose.onNodeWithTag("task-repeat-horizon").assertExists()
+        compose.onNodeWithTag("task-repeat-horizon").assertExists().also { compose.captureObservedNativeOwners() }
         restoreToday()
     }
 
@@ -225,7 +225,7 @@ class TaskViewRuntimeNavigationTest {
         var planner by mutableStateOf(false)
         val drafts = mutableListOf<TaskSeriesDraft>()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 CreateTaskScreen(
                     busy = false,
                     error = null,
@@ -237,14 +237,16 @@ class TaskViewRuntimeNavigationTest {
                 )
             }
         }
-        compose.onNodeWithTag("farm-screen:FOS-TASK-004").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-004").assertExists().also { compose.captureObservedNativeOwners() }
         assertTextAbsent("Repeat")
         assertTextAbsent("Assign to")
 
         planner = true
         compose.onNodeWithText("Title").performTextInput("Check troughs")
+        compose.onNodeWithTag("task-repeat:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-repeat:EVERY_N_DAYS").performScrollTo().performClick()
         compose.onNodeWithTag("task-repeat-interval").performTextReplacement("3")
+        compose.onNodeWithTag("task-assignee:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-assignee:farai").performScrollTo().performClick()
         compose.onNode(hasClickAction() and hasText("Create task")).performScrollTo().performClick()
         compose.runOnIdle {
@@ -258,7 +260,7 @@ class TaskViewRuntimeNavigationTest {
         val today = LocalDate.now().toEpochDay()
         val saved = mutableListOf<TaskEditDraft>()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 EditTaskScreen(
                     task = TaskUiRow("o1", "Check troughs", "ops", "WATER", today, "open", seriesId = "s1", occurrenceEpochDay = today, repeatLabel = "Daily"),
                     assignees = listOf(TaskAssigneeOption("farai", "Farai")),
@@ -269,7 +271,7 @@ class TaskViewRuntimeNavigationTest {
                 )
             }
         }
-        compose.onNodeWithTag("farm-screen:FOS-TASK-005").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-005").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("task-edit-due").performTextReplacement(LocalDate.ofEpochDay(today + 1).toString())
         compose.onNodeWithTag("task-edit-save").performScrollTo().performClick()
         compose.runOnIdle {
@@ -278,8 +280,10 @@ class TaskViewRuntimeNavigationTest {
         }
 
         // This and future: no due date to move; the repeat can change.
+        compose.onNodeWithTag("task-edit-scope:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-edit-scope:THIS_AND_FUTURE").performScrollTo().performClick()
         assertTextAbsent("Due date")
+        compose.onNodeWithTag("task-edit-repeat:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-edit-repeat:WEEKLY").performScrollTo().performClick()
         compose.onNodeWithTag("task-edit-save").performScrollTo().performClick()
         compose.runOnIdle {
@@ -293,7 +297,7 @@ class TaskViewRuntimeNavigationTest {
         val today = LocalDate.now().toEpochDay()
         val saved = mutableListOf<TaskUpdateDraft>()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 EditTaskScreen(
                     task = TaskUiRow("gate", "Fix gate", "ops", "FIX", today, "open"),
                     assignees = listOf(TaskAssigneeOption("farai", "Farai")),
@@ -305,8 +309,9 @@ class TaskViewRuntimeNavigationTest {
                 )
             }
         }
-        compose.onNodeWithTag("farm-screen:FOS-TASK-005").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-005").assertExists().also { compose.captureObservedNativeOwners() }
         assertTextAbsent("This occurrence")
+        compose.onNodeWithTag("task-edit-assignee:field").performScrollTo().performClick()
         compose.onNodeWithTag("task-edit-assignee:farai").performScrollTo().performClick()
         compose.onNodeWithTag("task-edit-save").performScrollTo().performClick()
         compose.runOnIdle {
@@ -316,15 +321,16 @@ class TaskViewRuntimeNavigationTest {
     }
 
     private fun openTab(label: String) {
-        compose.onNode(hasClickAction() and hasText(label))
-            .performScrollTo()
-            .performClick()
+        compose.onNodeWithTag("task-filter:field").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText(label) and
+            androidx.compose.ui.test.hasAnyAncestor(androidx.compose.ui.test.hasTestTag("home-sheet:Work view")))
+            .performScrollTo().performClick()
     }
 
     private fun restoreToday() {
         openTab("Today")
-        compose.onNodeWithTag("farm-screen:FOS-TASK-001").assertIsDisplayed()
-        compose.onNodeWithText("Today check").assertIsDisplayed()
+        compose.onNodeWithTag("farm-screen:FOS-TASK-001").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Today check").assertIsDisplayed().also { compose.captureObservedNativeOwners() }
     }
 
     private fun assertTextAbsent(text: String) {

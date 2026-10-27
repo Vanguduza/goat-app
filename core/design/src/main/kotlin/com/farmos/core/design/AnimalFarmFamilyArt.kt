@@ -91,6 +91,7 @@ fun AnimalFarmFamilyPortrait(
     family: AnimalFarmFamily,
     modifier: Modifier = Modifier,
     contentDescription: String = animalFarmFamilyLabel(family),
+    cornerRadius: androidx.compose.ui.unit.Dp = AnimalFarmHomeMetrics.actionRadius,
 ) {
     val image = ImageBitmap.imageResource(R.drawable.farm_family_portraits_v1)
     val window = AnimalFarmFamilyWindows.forFamily(family)
@@ -98,7 +99,7 @@ fun AnimalFarmFamilyPortrait(
     Image(
         painter = painter,
         contentDescription = contentDescription,
-        modifier = modifier.clip(RoundedCornerShape(AnimalFarmHomeMetrics.actionRadius)),
+        modifier = modifier.clip(RoundedCornerShape(cornerRadius)),
         contentScale = ContentScale.Fit,
     )
 }

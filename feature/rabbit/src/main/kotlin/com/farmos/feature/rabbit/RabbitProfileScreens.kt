@@ -3,6 +3,8 @@ package com.farmos.feature.rabbit
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -10,12 +12,20 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmEmptyState
+import com.farmos.core.design.AnimalFarmFamily
+import com.farmos.core.design.AnimalFarmFamilyPortrait
+import com.farmos.core.design.FarmSectionTabs
 import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalSection
@@ -36,7 +46,7 @@ data class RabbitProfileEntry(val animalId: String, val isDoe: Boolean) {
 /** FOS-RABBIT-002 — breeding animals; each opens its doe or buck profile. */
 @Composable
 internal fun RabbitAnimalsScreen(rabbits: List<RabbitAnimalView>, rabbitCount: Int?, error: String?, onOpen: (RabbitAnimalView) -> Unit, onBack: () -> Unit) {
-    FarmOperationalPage("FOS-RABBIT-002", "Breeding animals", "Registered does and bucks on this device, by tag.", onBack = onBack) {
+    FarmOperationalPage("FOS-RABBIT-002", "Breeding animals", "", onBack = onBack) {
         rabbitCount?.takeIf { it > rabbits.size }?.let { Text("Showing the first ${rabbits.size} of $it rabbits by tag.", modifier = Modifier.testTag("rabbit-list-bounded")) }
         if (rabbits.isEmpty()) {
             AnimalFarmEmptyState("No rabbits registered")
@@ -44,14 +54,18 @@ internal fun RabbitAnimalsScreen(rabbits: List<RabbitAnimalView>, rabbitCount: I
             FarmOperationalSection("Does and bucks") {
                 rabbits.forEachIndexed { index, rabbit ->
                     if (index > 0) HorizontalDivider()
-                    Column(
+                    Row(
                         Modifier.fillMaxWidth().heightIn(min = AnimalFarmTheme.minimumTouchDp.dp)
                             .clickable(role = Role.Button) { onOpen(rabbit) }
-                            .padding(vertical = 6.dp).testTag("rabbit:${rabbit.animalId}"),
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                            .padding(vertical = 8.dp).testTag("rabbit:${rabbit.animalId}"),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        AnimalFarmFamilyPortrait(AnimalFarmFamily.RABBIT, Modifier.size(52.dp), contentDescription = "Rabbit family")
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(rabbit.label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                         Text("${if (rabbit.isDoe) "Doe" else "Buck"} · ${rabbit.status}", color = AnimalFarmTheme.colors.mutedInk)
+                        }
                     }
                 }
             }
@@ -76,14 +90,25 @@ internal fun RabbitProfileScreen(
     val screenId = if (rabbit.isDoe) "FOS-RABBIT-003" else "FOS-RABBIT-004"
     val kind = if (rabbit.isDoe) "Doe" else "Buck"
     FarmOperationalPage(screenId, rabbit.label, "$kind · ${rabbit.status}", FarmVisualClass.I3, onBack, backLabel = backLabel) {
-        FarmOperationalSection("Identity") {
-            Text("Tag ${rabbit.tag}")
-            Text(rabbit.name?.takeIf { it.isNotBlank() }?.let { "Name $it" } ?: "No name recorded.")
-            Text(if (rabbit.active) "In the rabbitry" else "Left the rabbitry: ${rabbit.status}")
+        var section by rememberSaveable(rabbit.animalId) { mutableStateOf("Identity") }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            AnimalFarmFamilyPortrait(AnimalFarmFamily.RABBIT, Modifier.size(80.dp), contentDescription = "Rabbit family portrait")
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(rabbit.tag, style = MaterialTheme.typography.titleLarge)
+                rabbit.name?.takeIf { it.isNotBlank() }?.let { Text(it) }
+            }
         }
-        FarmOperationalSection(if (rabbit.active) "Leaving the rabbitry" else "Exit record") {
-            exit(rabbit)
+        com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(rabbit.animalId,"rabbit"))
+            com.farmos.core.design.FarmProfileBreeding(rabbit.animalId,"rabbit")
+        FarmSectionTabs(listOf("Identity", "Photos and documents", "Exit record"), section, { section = it })
+        when (section) {
+            "Identity" -> FarmOperationalSection("Identity") {
+                Text("Tag ${rabbit.tag}")
+                Text(rabbit.name?.takeIf { it.isNotBlank() }?.let { "Name $it" } ?: "No name recorded.")
+                Text(if (rabbit.active) "In the rabbitry" else "Left the rabbitry: ${rabbit.status}")
+            }
+            "Exit record" -> FarmOperationalSection(if (rabbit.active) "Leaving the rabbitry" else "Exit record") { exit(rabbit) }
+            else -> attachments(rabbit)
         }
-        attachments(rabbit)
     }
 }

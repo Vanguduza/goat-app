@@ -6,7 +6,9 @@
     <application
         android:name=".FarmOsApplication"
         android:allowBackup="false"
-        android:label="Farm OS"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="Animal Farm"
         android:supportsRtl="true"
         android:theme="@style/Theme.FarmOS">
         <activity

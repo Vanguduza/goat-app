@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,6 +83,7 @@ fun StockCountScreen(
             FarmPermissionExplanation("Stock counts are recorded by farm staff", "Your role can view counts but not record them.")
         }
         val open = counts.firstOrNull { it.status == "COUNTING" }
+        (open ?: counts.firstOrNull())?.let { StockCountWorkflow(it) }
         if (open == null) {
             if (canCount) Button(onClick = onStart, enabled = !busy, modifier = Modifier.fillMaxWidth().testTag("stock-count-start")) { Text("Start a stock count") }
         } else {
@@ -164,6 +165,7 @@ fun StockAdjustmentScreen(
         submitted.forEach { count ->
             var reason by remember(count.countId) { mutableStateOf("") }
             val differences = count.lines.filter { it.varianceMilli != 0L }
+            StockCountWorkflow(count)
             FarmOperationalSection("Count started ${count.started}" + (count.submitted?.let { " · submitted $it" } ?: "")) {
                 Text("${count.lines.size} item(s) counted · ${differences.size} with a difference", modifier = Modifier.testTag("stock-review-summary:${count.countId}"))
                 count.lines.forEach { line ->

@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +64,8 @@ data class TaskSeriesDraft(
     val assigneeAccountId: String?,
     /** A worker record assignee (resolution R1); never together with [assigneeAccountId]. */
     val assigneeWorkerId: String? = null,
+    /** Optional exact current-farm animal; never inferred from the title. */
+    val animalId: String? = null,
 )
 
 /** Which occurrences an edit changes. */
@@ -126,7 +128,6 @@ internal fun TaskPlanningFields(
     assigneeId: String?,
     onAssignee: (String?) -> Unit,
 ) {
-    Text("Repeat", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
     ChoiceList(TaskRepeat.entries.map { it to it.label }, repeat, busy, "task-repeat", onRepeat)
     if (repeat.takesInterval) {
         OutlinedTextField(
@@ -143,7 +144,6 @@ internal fun TaskPlanningFields(
             modifier = Modifier.fillMaxWidth().testTag("task-repeat-end"), enabled = !busy, singleLine = true,
         )
     }
-    Text("Assign to", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
     ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.key to it.label }, assigneeId, busy, "task-assignee", onAssignee)
 }
 
@@ -158,16 +158,12 @@ internal fun planningValid(repeat: TaskRepeat, interval: String, start: String, 
 
 @Composable
 private fun <T> ChoiceList(options: List<Pair<T, String>>, selected: T, busy: Boolean, tag: String, onSelect: (T) -> Unit) {
-    Column(Modifier.fillMaxWidth()) {
-        options.forEach { (value, label) ->
-            val isSelected = value == selected
-            TextButton(
-                onClick = { onSelect(value) },
-                enabled = !busy,
-                modifier = Modifier.fillMaxWidth().semantics { this.selected = isSelected }.testTag("$tag:${value ?: "none"}"),
-            ) { Text(if (isSelected) "$label · selected" else label, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal) }
-        }
+    val title = when(tag) {
+        "task-edit-scope" -> "Apply changes to"
+        "task-repeat", "task-edit-repeat" -> "Repeat"
+        else -> "Assign to"
     }
+    com.farmos.core.design.FarmChoicePicker(title,options,selected,onSelect,tag,enabled=!busy)
 }
 
 /**
@@ -205,14 +201,12 @@ fun EditTaskScreen(
             if (scope == TaskEditScope.THIS) {
                 OutlinedTextField(moveTo, { moveTo = it }, label = { Text("Due date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth().testTag("task-edit-due"), enabled = !busy, singleLine = true)
             } else {
-                Text("Repeat", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                ChoiceList(listOf<Pair<TaskRepeat?, String>>(null to "Keep how it repeats") + TaskRepeat.entries.filter { it != TaskRepeat.NONE }.map { it to it.label }, repeat, busy, "task-edit-repeat") { repeat = it }
+                            ChoiceList(listOf<Pair<TaskRepeat?, String>>(null to "Keep how it repeats") + TaskRepeat.entries.filter { it != TaskRepeat.NONE }.map { it to it.label }, repeat, busy, "task-edit-repeat") { repeat = it }
                 if (repeat?.takesInterval == true) {
                     OutlinedTextField(interval, { interval = it }, label = { Text("Interval (2–365)") }, modifier = Modifier.fillMaxWidth().testTag("task-edit-interval"), enabled = !busy, singleLine = true)
                 }
             }
-            Text("Assign to", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.key to it.label }, assigneeId, busy, "task-edit-assignee") { assigneeId = it }
+                    ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.key to it.label }, assigneeId, busy, "task-edit-assignee") { assigneeId = it }
         }
         val movedTo = runCatching { LocalDate.parse(moveTo) }.getOrNull()
         val chosenRepeat = repeat
@@ -258,8 +252,7 @@ private fun EditOneOffTask(
         FarmOperationalSection("Task") {
             OutlinedTextField(title, { title = it }, label = { Text("Title") }, modifier = Modifier.fillMaxWidth().testTag("task-edit-title"), enabled = !busy, singleLine = true)
             OutlinedTextField(due, { due = it }, label = { Text("Due date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth().testTag("task-edit-due"), enabled = !busy, singleLine = true)
-            Text("Assign to", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.key to it.label }, assigneeId, busy, "task-edit-assignee") { assigneeId = it }
+                    ChoiceList(listOf<Pair<String?, String>>(null to "Nobody") + assignees.map { it.key to it.label }, assigneeId, busy, "task-edit-assignee") { assigneeId = it }
         }
         val dueDate = runCatching { LocalDate.parse(due) }.getOrNull()
         val changed = title.trim() != task.title || dueDate?.toEpochDay() != task.dueEpochDay || assigneeId != assigneeKey(task.assigneeAccountId, task.assigneeWorkerId)

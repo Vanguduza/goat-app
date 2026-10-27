@@ -2,43 +2,43 @@
   "schema_version": 1,
   "phase": "phase_5_runtime_navigation_reachability",
   "evidence_class": "EXECUTABLE_TEST_DERIVED_RUNTIME_NAVIGATION",
-  "tested_commit": "8846676126d1baa7efa1216b2c4823c9856f4b17",
-  "source_fingerprint": "sha256:0a65545a83e6694540bbdbbe2f06efd118fd812e47c1a15a168984e8929d1c23",
-  "ci_status": "PASS_EXACT_HEAD_CI",
-  "foundation_run_id": 37969611312,
+  "tested_commit": "9cd3d107479bdf03a6a484766a95e5740395774f",
+  "source_fingerprint": "sha256:ec2181706c6b928617e872434ed6789203692bce1b5ed0c9f7ef1d4caa8f5cec",
+  "ci_status": "CI_PENDING",
+  "foundation_run_id": null,
   "additional_case_evidence": {
     "schema_version": 1,
     "mapping_path": "docs/ux/runtime-navigation-cases.json",
-    "mapping_sha256": "bdad010b5bec7003681110f7d9636ba0a04c5758f9418ee8679b3dab8559cb37",
+    "mapping_sha256": "52b4a7f08649b7572471687d88fdab8371cb2cde74705de64b0c1c4524c2ac66",
     "sources": [
       {
         "path": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
-        "sha256": "fa0af15fbe071729c386d95fcb36c3cd757fad77b86863063d9efed869f6f591",
-        "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+        "sha256": "440205ac0c34dbd015e8e4e34c38ec98907af5b8890ad2aee01bead25bf20c72",
+        "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
         "class_name": "com.farmos.app.ReportRuntimeNavigationTest"
       },
       {
         "path": "app/src/test/java/com/farmos/app/AndroidBackNavigationTest.kt",
-        "sha256": "13dae4f17a94377dd1f09f796bd16b26a36f1e2951db6e17242b3fcee7ab6ed5",
-        "reviewed_source_commit": "6e70319c13aa79a6731f53bd11d95a44d173a75c",
+        "sha256": "4fa6c3fa9dc8bbf22efab2b1d516056ca2f4b1a2e8fa72c24538ecf395953d50",
+        "reviewed_source_commit": "26b8e84cedaec7347d056e840fed64f15dc5e49f",
         "class_name": "com.farmos.app.AndroidBackNavigationTest"
       },
       {
         "path": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
-        "sha256": "9a66a528058d1025c0a3a1141c7ae2d5b86ab4e272b69adb5b9b8a7ae9a1954f",
-        "reviewed_source_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
+        "sha256": "299fb896418c2a38e96d24214c106fef711b5ab2d0dbf7813603214eff6a13af",
+        "reviewed_source_commit": "26b8e84cedaec7347d056e840fed64f15dc5e49f",
         "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest"
       },
       {
         "path": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
-        "sha256": "a2b445b852d0f3514730177839115b73b466d92b7bd3ca1213119e3baccf650f",
-        "reviewed_source_commit": "69b3eb244d5e99983bcb2db4301560315f49c671",
+        "sha256": "6f683451fbe75c022589ce3be333788b967e8cfa21f851bd470a11c774831425",
+        "reviewed_source_commit": "1f808fb02c060b4b03be946b489577429fee88c3",
         "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest"
       },
       {
         "path": "app/src/test/java/com/farmos/app/LocalFarmSessionAuthorityTest.kt",
-        "sha256": "f5dd7ff93d6ed6ad797881fbaa85e99199faaedad58be66f45648139f0982438",
-        "reviewed_source_commit": "88de9dabf8e277bf0fb7a6ef4a21769041761aa4",
+        "sha256": "a0eac28745893664b40b7c9adc7167e65e9765444ef70b351ae1df0821020485",
+        "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
         "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest"
       },
       {
@@ -49,12 +49,18 @@
       },
       {
         "path": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
-        "sha256": "cd347a819475182615cd16f66846b4c7cfd213be800ac73d9b0a4002ff67c23e",
-        "reviewed_source_commit": "f7ab02b443e07f6903f75821c78885f8369953ab",
+        "sha256": "a06494d330a347feac8bc6b962fd3d4087e924079084641502bbb154267099e5",
+        "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
         "class_name": "com.farmos.app.ReportDisclosureAuthorityTest"
+      },
+      {
+        "path": "app/src/test/java/com/farmos/app/ReportsFocusedWorkspaceTest.kt",
+        "sha256": "180bd3044bd74bbb108bdf0712647d58ce26959bf16780ec9a47a8044ccbec22",
+        "reviewed_source_commit": "38f975630a576eec0093dde83cde630382472fbb",
+        "class_name": "com.farmos.app.ReportsFocusedWorkspaceTest"
       }
     ],
-    "expected_case_count": 42,
+    "expected_case_count": 51,
     "cases": [
       {
         "source": "app/src/test/java/com/farmos/app/ReportRuntimeNavigationTest.kt",
@@ -368,6 +374,20 @@
         "claims": []
       },
       {
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+        "method": "speciesAndStatusFiltersFindEligibleTextAndIdentifiersBeyondTheFirstFifty",
+        "execution_only_reason": "Real Room eligibility, farm isolation and identifier matching beyond the display limit; execution only, no new route claim.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/GlobalSearchRuntimeNavigationTest.kt",
+        "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
+        "method": "manyMatchingAliasesCannotConsumeTheCanonicalAnimalResultWindow",
+        "execution_only_reason": "Real Room canonical-animal result window and alias deduplication; execution only, no new route claim.",
+        "claims": []
+      },
+      {
         "source": "app/src/test/java/com/farmos/app/SpeciesSearchRuntimeNavigationTest.kt",
         "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
         "method": "sheepSearchBeyondTheHerdWindowKeepsTheWeightSubjectAndReturnsThroughItsProfile",
@@ -599,408 +619,59 @@
         "method": "cancellationInsideDestinationOpenClosesTheResourceBeforeAWriteOrSuccessCanRun",
         "execution_only_reason": "Cancellation/resource ownership regression at output-open; no delivery or traversal claim.",
         "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportDisclosureAuthorityTest.kt",
+        "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
+        "method": "cancellationWhileProviderReturnIsDelayedClosesExactlyOnce",
+        "execution_only_reason": "Resource-cleanup cancellation regression. Execution evidence only; no additional route, owner or visual approval claim.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportsFocusedWorkspaceTest.kt",
+        "class_name": "com.farmos.app.ReportsFocusedWorkspaceTest",
+        "method": "emptyFiguresAreNotMistakenForAnEmptyAnimalRegister",
+        "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportsFocusedWorkspaceTest.kt",
+        "class_name": "com.farmos.app.ReportsFocusedWorkspaceTest",
+        "method": "failedOrLoadingFiguresDoNotBlockReportNavigationOrInventZeros",
+        "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportsFocusedWorkspaceTest.kt",
+        "class_name": "com.farmos.app.ReportsFocusedWorkspaceTest",
+        "method": "incompleteMetricKeepsItsWarningVisibleBeforeCalculationExpansion",
+        "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportsFocusedWorkspaceTest.kt",
+        "class_name": "com.farmos.app.ReportsFocusedWorkspaceTest",
+        "method": "noRecordedValuesAreNotPresentedAsZeroInScreenOrSharedSummary",
+        "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportsFocusedWorkspaceTest.kt",
+        "class_name": "com.farmos.app.ReportsFocusedWorkspaceTest",
+        "method": "reportActionsAreReachableBeforeAnyMetricDetailsEvenForManyMetrics",
+        "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+        "claims": []
+      },
+      {
+        "source": "app/src/test/java/com/farmos/app/ReportsFocusedWorkspaceTest.kt",
+        "class_name": "com.farmos.app.ReportsFocusedWorkspaceTest",
+        "method": "wholeFigureSearchFindsLateItemsAndSurvivesExportBackWithoutWriting",
+        "execution_only_reason": "Presentation, exact-value, draft/permission and whole-query regression. Native rendered-owner captures are separate; this does not invent additional canonical route acceptance or visual approval.",
+        "claims": []
       }
     ],
-    "executed_case_count": 42,
-    "execution": {
-      "schema_version": 1,
-      "foundation_run_id": 37969611312,
-      "candidate_commit": "8846676126d1baa7efa1216b2c4823c9856f4b17",
-      "candidate_tree": "bade7d22c223c229ec1c8fe22b86c465b917cf6d",
-      "actual_checkout_commit": "09b70ac214efd3c11500369d534873f33c7c384b",
-      "actual_checkout_tree": "bade7d22c223c229ec1c8fe22b86c465b917cf6d",
-      "test_task": ":app:testDebugUnitTest",
-      "task_outcome": "EXECUTED",
-      "task_log_sha256": "bf365932d3afb8678c9f3d22d5cdcd415cace6af59a9653268f933908397301e",
-      "execution_window_utc": {
-        "start": "2026-10-09T17:54:56.231267+00:00",
-        "finish": "2026-10-09T17:59:19.189374+00:00"
-      },
-      "reports": [
-        {
-          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
-          "sha256": "04017f397a45e07a93a44b66549330c8ec9615bffe374ec74b3e967bd685162f",
-          "tests": 8,
-          "timestamp": "2026-10-09T17:59:05.196Z"
-        },
-        {
-          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
-          "sha256": "c8a961ceef23f9e57a0bc59017acd141669fa122da8428c22148816dae2b8368",
-          "tests": 6,
-          "timestamp": "2026-10-09T17:58:19.216Z"
-        },
-        {
-          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
-          "sha256": "630b7f784f88c2e5a86ac2ab37d74d1a9a08984c74824eb3ac1cb2c3af1c5696",
-          "tests": 6,
-          "timestamp": "2026-10-09T17:58:39.202Z"
-        },
-        {
-          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
-          "sha256": "fc8cff48973887cd5d0a633d3aafc095d3cc1262802815045fbfba5c47b3d809",
-          "tests": 6,
-          "timestamp": "2026-10-09T17:59:10.212Z"
-        },
-        {
-          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
-          "sha256": "1a85f6923dc916b65df90f5105edf6e86783316448a1199ee5e63a08fa64c10c",
-          "tests": 6,
-          "timestamp": "2026-10-09T17:58:48.155Z"
-        },
-        {
-          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalSessionAuthorityTest.xml",
-          "sha256": "468f13a0c7b627c66a36710bc25d52e815832cfb3c2745b7404a600b1a0598d0",
-          "tests": 3,
-          "timestamp": "2026-10-09T17:58:49.946Z"
-        },
-        {
-          "path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
-          "sha256": "545a8c1d7a1e22653a4313a3ddac0118c8614655ebec82c3126a8bf7d9ff51c6",
-          "tests": 7,
-          "timestamp": "2026-10-09T17:59:00.022Z"
-        }
-      ],
-      "cases": [
-        {
-          "class_name": "com.farmos.app.AndroidBackNavigationTest",
-          "method": "animalsAndMoreReturnToTheSameOwnerHomeWithoutSigningOut",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
-          "junit_sha256": "c8a961ceef23f9e57a0bc59017acd141669fa122da8428c22148816dae2b8368",
-          "suite_timestamp": "2026-10-09T17:58:19.216Z"
-        },
-        {
-          "class_name": "com.farmos.app.AndroidBackNavigationTest",
-          "method": "directWeightEntryReturnsToItsCallerWithoutCreatingAProfile",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
-          "junit_sha256": "c8a961ceef23f9e57a0bc59017acd141669fa122da8428c22148816dae2b8368",
-          "suite_timestamp": "2026-10-09T17:58:19.216Z"
-        },
-        {
-          "class_name": "com.farmos.app.AndroidBackNavigationTest",
-          "method": "exportSheetReturnsToReportsBeforeReturningToTheFarm",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
-          "junit_sha256": "c8a961ceef23f9e57a0bc59017acd141669fa122da8428c22148816dae2b8368",
-          "suite_timestamp": "2026-10-09T17:58:19.216Z"
-        },
-        {
-          "class_name": "com.farmos.app.AndroidBackNavigationTest",
-          "method": "registerReturnDoesNotSaveOrSignOutAndDashboardReturnsToTheFarm",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
-          "junit_sha256": "c8a961ceef23f9e57a0bc59017acd141669fa122da8428c22148816dae2b8368",
-          "suite_timestamp": "2026-10-09T17:58:19.216Z"
-        },
-        {
-          "class_name": "com.farmos.app.AndroidBackNavigationTest",
-          "method": "sheepProfileAndWeightKeepTheSelectedAnimalAndReturnThroughTheirOwner",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
-          "junit_sha256": "c8a961ceef23f9e57a0bc59017acd141669fa122da8428c22148816dae2b8368",
-          "suite_timestamp": "2026-10-09T17:58:19.216Z"
-        },
-        {
-          "class_name": "com.farmos.app.AndroidBackNavigationTest",
-          "method": "theCurrentPageCallbackIsUsedAndANullReturnLeavesItsParentInControl",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.AndroidBackNavigationTest.xml",
-          "junit_sha256": "c8a961ceef23f9e57a0bc59017acd141669fa122da8428c22148816dae2b8368",
-          "suite_timestamp": "2026-10-09T17:58:19.216Z"
-        },
-        {
-          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
-          "method": "aDatabaseFailureRemainsAnErrorAndDoesNotRenderTheNoResultsState",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "630b7f784f88c2e5a86ac2ab37d74d1a9a08984c74824eb3ac1cb2c3af1c5696",
-          "suite_timestamp": "2026-10-09T17:58:39.202Z"
-        },
-        {
-          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
-          "method": "anExactResultOutsideTheHerdWindowOpensThatGoatAndReturnsToItsSearch",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "630b7f784f88c2e5a86ac2ab37d74d1a9a08984c74824eb3ac1cb2c3af1c5696",
-          "suite_timestamp": "2026-10-09T17:58:39.202Z"
-        },
-        {
-          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
-          "method": "exactIdentifiersPrecedePartialMatchesAndDuplicateIdentifiersDoNotDuplicateAnimals",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "630b7f784f88c2e5a86ac2ab37d74d1a9a08984c74824eb3ac1cb2c3af1c5696",
-          "suite_timestamp": "2026-10-09T17:58:39.202Z"
-        },
-        {
-          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
-          "method": "profileEntriesRejectAnotherSpeciesAndAnotherFarmWithoutSelectingTheFirstGoat",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "630b7f784f88c2e5a86ac2ab37d74d1a9a08984c74824eb3ac1cb2c3af1c5696",
-          "suite_timestamp": "2026-10-09T17:58:39.202Z"
-        },
-        {
-          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
-          "method": "retainedStatusFilterCanBeClearedAfterAQueryWithADifferentStatus",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "630b7f784f88c2e5a86ac2ab37d74d1a9a08984c74824eb3ac1cb2c3af1c5696",
-          "suite_timestamp": "2026-10-09T17:58:39.202Z"
-        },
-        {
-          "class_name": "com.farmos.app.GlobalSearchRuntimeNavigationTest",
-          "method": "switchingFarmsClearsSearchAndLoadsOnlyTheNewFarmsSubject",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.GlobalSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "630b7f784f88c2e5a86ac2ab37d74d1a9a08984c74824eb3ac1cb2c3af1c5696",
-          "suite_timestamp": "2026-10-09T17:58:39.202Z"
-        },
-        {
-          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
-          "method": "aSignInResultThatBecameDisabledBeforeAdmissionNeverStartsCarriersOrFarmContent",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
-          "junit_sha256": "1a85f6923dc916b65df90f5105edf6e86783316448a1199ee5e63a08fa64c10c",
-          "suite_timestamp": "2026-10-09T17:58:48.155Z"
-        },
-        {
-          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
-          "method": "disablingTheCurrentAccountEndsTheSignedInComposition",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
-          "junit_sha256": "1a85f6923dc916b65df90f5105edf6e86783316448a1199ee5e63a08fa64c10c",
-          "suite_timestamp": "2026-10-09T17:58:48.155Z"
-        },
-        {
-          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
-          "method": "receivedCredentialResetEndsTheSessionAndOnlyTheNewPinCanOpenItAgain",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
-          "junit_sha256": "1a85f6923dc916b65df90f5105edf6e86783316448a1199ee5e63a08fa64c10c",
-          "suite_timestamp": "2026-10-09T17:58:48.155Z"
-        },
-        {
-          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
-          "method": "receivedDeviceRevocationDisposesTheCarriersAndFarmContent",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
-          "junit_sha256": "1a85f6923dc916b65df90f5105edf6e86783316448a1199ee5e63a08fa64c10c",
-          "suite_timestamp": "2026-10-09T17:58:48.155Z"
-        },
-        {
-          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
-          "method": "receivedRoleDowngradeRefreshesMembershipAndClearsTheNestedManagementRouteWithoutRestartingCarriers",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
-          "junit_sha256": "1a85f6923dc916b65df90f5105edf6e86783316448a1199ee5e63a08fa64c10c",
-          "suite_timestamp": "2026-10-09T17:58:48.155Z"
-        },
-        {
-          "class_name": "com.farmos.app.LocalFarmSessionAuthorityTest",
-          "method": "unavailableCarrierKeysKeepLocalRecordsOpenAndCloseAnythingAlreadyStarted",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalFarmSessionAuthorityTest.xml",
-          "junit_sha256": "1a85f6923dc916b65df90f5105edf6e86783316448a1199ee5e63a08fa64c10c",
-          "suite_timestamp": "2026-10-09T17:58:48.155Z"
-        },
-        {
-          "class_name": "com.farmos.app.LocalSessionAuthorityTest",
-          "method": "aMissingAccountOrDeviceCannotAdmitAStoredSignIn",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalSessionAuthorityTest.xml",
-          "junit_sha256": "468f13a0c7b627c66a36710bc25d52e815832cfb3c2745b7404a600b1a0598d0",
-          "suite_timestamp": "2026-10-09T17:58:49.946Z"
-        },
-        {
-          "class_name": "com.farmos.app.LocalSessionAuthorityTest",
-          "method": "endingASignInPermanentlyDisarmsRetainedCallbacksEvenWhenItsRowsStayActive",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalSessionAuthorityTest.xml",
-          "junit_sha256": "468f13a0c7b627c66a36710bc25d52e815832cfb3c2745b7404a600b1a0598d0",
-          "suite_timestamp": "2026-10-09T17:58:49.946Z"
-        },
-        {
-          "class_name": "com.farmos.app.LocalSessionAuthorityTest",
-          "method": "inactiveNonlocalAndCutoffBearingDevicesCannotAdmitAStoredSignIn",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.LocalSessionAuthorityTest.xml",
-          "junit_sha256": "468f13a0c7b627c66a36710bc25d52e815832cfb3c2745b7404a600b1a0598d0",
-          "suite_timestamp": "2026-10-09T17:58:49.946Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
-          "method": "aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
-          "junit_sha256": "545a8c1d7a1e22653a4313a3ddac0118c8614655ebec82c3126a8bf7d9ff51c6",
-          "suite_timestamp": "2026-10-09T17:59:00.022Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
-          "method": "aDelayedChooserCannotUseTheOldAuthenticatedCredentialAfterAReset",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
-          "junit_sha256": "545a8c1d7a1e22653a4313a3ddac0118c8614655ebec82c3126a8bf7d9ff51c6",
-          "suite_timestamp": "2026-10-09T17:59:00.022Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
-          "method": "aDelayedCsvChooserCannotDiscloseAfterAnAcceptedRemoteDemotionEvenWithAStaleUiBoolean",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
-          "junit_sha256": "545a8c1d7a1e22653a4313a3ddac0118c8614655ebec82c3126a8bf7d9ff51c6",
-          "suite_timestamp": "2026-10-09T17:59:00.022Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
-          "method": "aDelayedPdfChooserCannotDiscloseAfterDeviceRevocation",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
-          "junit_sha256": "545a8c1d7a1e22653a4313a3ddac0118c8614655ebec82c3126a8bf7d9ff51c6",
-          "suite_timestamp": "2026-10-09T17:59:00.022Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
-          "method": "aRetainedShareActionChecksTheCurrentRoomRoleBeforeStartingAnyActivity",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
-          "junit_sha256": "545a8c1d7a1e22653a4313a3ddac0118c8614655ebec82c3126a8bf7d9ff51c6",
-          "suite_timestamp": "2026-10-09T17:59:00.022Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
-          "method": "anAuthorityFromAnotherFarmCannotWriteThisFarmsChosenReport",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
-          "junit_sha256": "545a8c1d7a1e22653a4313a3ddac0118c8614655ebec82c3126a8bf7d9ff51c6",
-          "suite_timestamp": "2026-10-09T17:59:00.022Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportDisclosureAuthorityTest",
-          "method": "cancellationInsideDestinationOpenClosesTheResourceBeforeAWriteOrSuccessCanRun",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportDisclosureAuthorityTest.xml",
-          "junit_sha256": "545a8c1d7a1e22653a4313a3ddac0118c8614655ebec82c3126a8bf7d9ff51c6",
-          "suite_timestamp": "2026-10-09T17:59:00.022Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
-          "method": "aRoleWithoutExportPermissionCanReadReportsButCannotOpenExportOrShare",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
-          "junit_sha256": "04017f397a45e07a93a44b66549330c8ec9615bffe374ec74b3e967bd685162f",
-          "suite_timestamp": "2026-10-09T17:59:05.196Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
-          "method": "animalSearchSelectsOnlyThisFarmsRecordAndBackRestoresTheReportHub",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
-          "junit_sha256": "04017f397a45e07a93a44b66549330c8ec9615bffe374ec74b3e967bd685162f",
-          "suite_timestamp": "2026-10-09T17:59:05.196Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
-          "method": "generatedDocumentsKeepTheSelectedExportAndFarmWhenReturningToTheList",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
-          "junit_sha256": "04017f397a45e07a93a44b66549330c8ec9615bffe374ec74b3e967bd685162f",
-          "suite_timestamp": "2026-10-09T17:59:05.196Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
-          "method": "reportJourneysUseExhaustiveFarmRecordsAndKeepUnitsAndCurrenciesSeparate",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
-          "junit_sha256": "04017f397a45e07a93a44b66549330c8ec9615bffe374ec74b3e967bd685162f",
-          "suite_timestamp": "2026-10-09T17:59:05.196Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
-          "method": "revokingExportPermissionClosesAnAlreadyOpenShareRoute",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
-          "junit_sha256": "04017f397a45e07a93a44b66549330c8ec9615bffe374ec74b3e967bd685162f",
-          "suite_timestamp": "2026-10-09T17:59:05.196Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
-          "method": "revokingExportPermissionClosesTheExportSheetAndDoesNotRestoreItOnRegrant",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
-          "junit_sha256": "04017f397a45e07a93a44b66549330c8ec9615bffe374ec74b3e967bd685162f",
-          "suite_timestamp": "2026-10-09T17:59:05.196Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
-          "method": "sharingUsesThisFarmsActualSummaryAndRetainsMissingDataDisclosure",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
-          "junit_sha256": "04017f397a45e07a93a44b66549330c8ec9615bffe374ec74b3e967bd685162f",
-          "suite_timestamp": "2026-10-09T17:59:05.196Z"
-        },
-        {
-          "class_name": "com.farmos.app.ReportRuntimeNavigationTest",
-          "method": "switchingFarmsDiscardsThePreviousAnimalsReportAndSearchSelection",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.ReportRuntimeNavigationTest.xml",
-          "junit_sha256": "04017f397a45e07a93a44b66549330c8ec9615bffe374ec74b3e967bd685162f",
-          "suite_timestamp": "2026-10-09T17:59:05.196Z"
-        },
-        {
-          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
-          "method": "cattleSearchBeyondTheHerdWindowKeepsTheWeightSubjectAndReturnsThroughItsProfile",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "fc8cff48973887cd5d0a633d3aafc095d3cc1262802815045fbfba5c47b3d809",
-          "suite_timestamp": "2026-10-09T17:59:10.212Z"
-        },
-        {
-          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
-          "method": "rabbitSearchOpensTheRecordedDoeAndBuckProfilesAndRetainsItsReturnQuery",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "fc8cff48973887cd5d0a633d3aafc095d3cc1262802815045fbfba5c47b3d809",
-          "suite_timestamp": "2026-10-09T17:59:10.212Z"
-        },
-        {
-          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
-          "method": "replacingOneValidProfileAndThenItsFarmDiscardsThePreviousSubject",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "fc8cff48973887cd5d0a633d3aafc095d3cc1262802815045fbfba5c47b3d809",
-          "suite_timestamp": "2026-10-09T17:59:10.212Z"
-        },
-        {
-          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
-          "method": "sheepSearchBeyondTheHerdWindowKeepsTheWeightSubjectAndReturnsThroughItsProfile",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "fc8cff48973887cd5d0a633d3aafc095d3cc1262802815045fbfba5c47b3d809",
-          "suite_timestamp": "2026-10-09T17:59:10.212Z"
-        },
-        {
-          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
-          "method": "unsupportedIndividualProfilesRemainVisibleWithoutAnUnrelatedDestination",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "fc8cff48973887cd5d0a633d3aafc095d3cc1262802815045fbfba5c47b3d809",
-          "suite_timestamp": "2026-10-09T17:59:10.212Z"
-        },
-        {
-          "class_name": "com.farmos.app.SpeciesSearchRuntimeNavigationTest",
-          "method": "wrongSpeciesForeignFarmAndWrongRabbitSexNeverSubstituteTheFirstAnimal",
-          "status": "PASS",
-          "junit_path": "app/build/test-results/testDebugUnitTest/TEST-com.farmos.app.SpeciesSearchRuntimeNavigationTest.xml",
-          "junit_sha256": "fc8cff48973887cd5d0a633d3aafc095d3cc1262802815045fbfba5c47b3d809",
-          "suite_timestamp": "2026-10-09T17:59:10.212Z"
-        }
-      ],
-      "origin_verification": "FIRST_PARTY_CI_ORIGIN_AND_RUN_ACCEPTANCE_REQUIRED_SEPARATELY",
-      "limits": "JVM/Room/Compose case evidence. No physical-device, live-provider, visual approval or full-product qualification."
-    },
+    "executed_case_count": 0,
+    "execution": null,
     "law": "Case/source/JUnit consistency only. First-party CI origin and run acceptance require independent verification. No visual, feature, module, MVP or approval claim."
   },
   "test_sources": {
@@ -1015,6 +686,7 @@
         "FOS-GROUP-001",
         "FOS-HEALTH-001",
         "FOS-HOME-006",
+        "FOS-HOME-009",
         "FOS-INV-001",
         "FOS-LABOUR-001",
         "FOS-PASTURE-001",
@@ -1447,6 +1119,7 @@
         "FOS-GOAT-022",
         "FOS-GOAT-031",
         "FOS-GOAT-032",
+        "FOS-GOAT-033",
         "FOS-GOAT-034",
         "FOS-GOAT-037",
         "FOS-GOAT-039",
@@ -1620,9 +1293,9 @@
   },
   "coverage": {
     "registered_screen_count": 545,
-    "entry_action_screen_count": 27,
+    "entry_action_screen_count": 28,
     "rendered_traversal_screen_count": 225,
-    "rendered_owner_screen_count": 111,
+    "rendered_owner_screen_count": 112,
     "route_contract_screen_count": 72,
     "combined_screen_count": 330,
     "entry_action_screen_ids": [
@@ -1635,6 +1308,7 @@
       "FOS-GROUP-001",
       "FOS-HEALTH-001",
       "FOS-HOME-006",
+      "FOS-HOME-009",
       "FOS-INV-001",
       "FOS-LABOUR-001",
       "FOS-PASTURE-001",
@@ -1934,6 +1608,7 @@
       "FOS-GOAT-022",
       "FOS-GOAT-031",
       "FOS-GOAT-032",
+      "FOS-GOAT-033",
       "FOS-GOAT-034",
       "FOS-GOAT-036",
       "FOS-GOAT-037",
@@ -2093,12 +1768,12 @@
     "missing_registry_ids": []
   },
   "certification": {
-    "runtime_reachability_executed": 225,
-    "entry_action_emission_executed": 27,
-    "rendered_surface_owners_executed": 111,
-    "route_contracts_executed": 72,
-    "parameter_scope_executed": true,
-    "return_restoration_executed": 225,
+    "runtime_reachability_executed": 0,
+    "entry_action_emission_executed": 0,
+    "rendered_surface_owners_executed": 0,
+    "route_contracts_executed": 0,
+    "parameter_scope_executed": false,
+    "return_restoration_executed": 0,
     "deep_links": "NOT_CLAIMED_BY_THIS_EVIDENCE"
   },
   "green_claims": {

@@ -117,7 +117,8 @@ class FarmNetworkPairingUiTest {
                 SettingsHost(tabletDirectory, tabletDb, farmId, owner.accountId, "tablet", onBack = {}, lan = runtime)
             }
         }
-        click("Devices")
+        waitForTag("settings-signed-in")
+        compose.revealFarmTool("Devices").performScrollTo().performClick()
         waitForTag("farm-screen:FOS-ADMIN-021")
         click("Add a device")
         waitForTag("settings-pairing-waiting")

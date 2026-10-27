@@ -31,8 +31,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class SyncMutationTraceRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val base = 1_790_000_000_000L // 2026-09-21T14:13:20Z
     private val traceScreen = "farm-screen:FOS-SYNC-018"
@@ -45,24 +45,24 @@ class SyncMutationTraceRuntimeNavigationTest {
             ServerMutationTrace.NotFound
         }
         compose.onNodeWithTag("sync-queue-trace:m-dead").performScrollTo().performClick()
-        compose.onNodeWithTag(traceScreen).assertExists()
-        compose.onNodeWithText("m-dead").assertExists()
-        compose.onNodeWithText("record_goat_weight · schema v2").assertExists()
-        compose.onNodeWithText("goat · goat-nala").assertExists()
-        compose.onNodeWithText("DEAD_LETTER").assertExists()
-        compose.onNodeWithText("Failed server validation (VALIDATION_REJECTED)").assertExists()
-        compose.onNodeWithText("None (new record)").assertExists()
-        compose.onNodeWithText("Not scheduled").assertExists()
+        compose.onNodeWithTag(traceScreen).assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("m-dead").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("record_goat_weight · schema v2").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("goat · goat-nala").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("DEAD_LETTER").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Failed server validation (VALIDATION_REJECTED)").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("None (new record)").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Not scheduled").assertExists().also { compose.captureObservedNativeOwners() }
         compose.runOnIdle { assertEquals(0, serverCalls) }
 
         compose.onNode(hasClickAction() and hasText("Check the farm server")).performScrollTo().performClick()
-        compose.onNodeWithText("The farm server has no record of this change for this farm.").assertExists()
+        compose.onNodeWithText("The farm server has no record of this change for this farm.").assertExists().also { compose.captureObservedNativeOwners() }
         compose.runOnIdle { assertEquals(1, serverCalls) }
 
         compose.onNode(hasClickAction() and hasText("Back to Dead letter")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-SYNC-009").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-SYNC-009").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag(traceScreen).assertDoesNotExist()
-        compose.onNodeWithTag("sync-queue-row:m-dead").assertExists()
+        compose.onNodeWithTag("sync-queue-row:m-dead").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
@@ -78,10 +78,10 @@ class SyncMutationTraceRuntimeNavigationTest {
         render(SyncQueueView.CONFLICTS, row("m-conflict", "CONFLICT", error = "CONFLICT")) { response.toServerMutationTrace() }
         compose.onNodeWithTag("sync-queue-trace:m-conflict").performScrollTo().performClick()
         compose.onNode(hasClickAction() and hasText("Check the farm server")).performScrollTo().performClick()
-        compose.onNodeWithText("goat_weight_recorded").assertExists()
-        compose.onNodeWithText("812").assertExists()
-        compose.onNodeWithText("completed · 1 attempt(s)").assertExists()
-        compose.onNode(hasClickAction() and hasText("Check again")).assertExists()
+        compose.onNodeWithText("goat_weight_recorded").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("812").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("completed · 1 attempt(s)").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNode(hasClickAction() and hasText("Check again")).assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
@@ -89,7 +89,7 @@ class SyncMutationTraceRuntimeNavigationTest {
         render(SyncQueueView.REJECTED, row("m-rejected", "REJECTED", error = "AUTH_REJECTED")) { error("Authentication required") }
         compose.onNodeWithTag("sync-queue-trace:m-rejected").performScrollTo().performClick()
         compose.onNode(hasClickAction() and hasText("Check the farm server")).performScrollTo().performClick()
-        compose.onNodeWithText("Authentication required").assertExists()
+        compose.onNodeWithText("Authentication required").assertExists().also { compose.captureObservedNativeOwners() }
         assertEquals(
             ServerMutationTrace.Refused("Farm access denied"),
             MutationTraceResponse(code = "AUTH_REJECTED", safeMessage = "Farm access denied").toServerMutationTrace(),
@@ -101,14 +101,14 @@ class SyncMutationTraceRuntimeNavigationTest {
     fun withoutAFarmServerOnlyTheDeviceRecordIsShown() {
         render(SyncQueueView.RETRY_WAITING, row("m-retry", "RETRY_WAIT", error = "TRANSPORT_FAILURE"), traceOnServer = null)
         compose.onNodeWithTag("sync-queue-trace:m-retry").performScrollTo().performClick()
-        compose.onNodeWithTag(traceScreen).assertExists()
-        compose.onNodeWithText("This app is not connected to a farm server, so only the device record is shown.").assertExists()
+        compose.onNodeWithTag(traceScreen).assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("This app is not connected to a farm server, so only the device record is shown.").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNode(hasClickAction() and hasText("Check the farm server")).assertDoesNotExist()
     }
 
     private fun render(view: SyncQueueView, row: OutboxEntity, traceOnServer: (suspend (String) -> ServerMutationTrace)?) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SyncQueueHost(
                     view = view,
                     permitted = true,
@@ -122,7 +122,7 @@ class SyncMutationTraceRuntimeNavigationTest {
             }
         }
         compose.waitForIdle()
-        compose.onNodeWithTag("farm-screen:${view.screenId}").assertExists()
+        compose.onNodeWithTag("farm-screen:${view.screenId}").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     private fun row(id: String, state: String, error: String?) = OutboxEntity(

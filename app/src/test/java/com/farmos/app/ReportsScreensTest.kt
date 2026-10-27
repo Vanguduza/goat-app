@@ -23,8 +23,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class ReportsScreensTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val rows = listOf(
         HerdRegisterRow("s1", "sheep", "SH-1", "Dora", "FEMALE", "active", null, null, 42_500),
@@ -35,17 +35,19 @@ class ReportsScreensTest {
     @Test
     fun eachMetricShowsHowItIsWorkedOutAndAPartialFigureSaysSo() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ReportsScreen(herdMetrics(rows), failure = null, canExport = false, exporting = false, exportMessage = null, onExportHerdRegister = {}, onBack = {})
             }
         }
-        compose.onNodeWithTag("farm-screen:FOS-REPORT-001").assertExists()
-        compose.onNodeWithTag("report-metric:active-sheep").assertExists()
-        compose.onNodeWithText("2 animals").assertExists()
-        compose.onNodeWithText("How: Count of sheep records whose status is active").assertExists()
-        compose.onNodeWithText("42.5 kg").assertExists()
-        compose.onNodeWithText("Partial: 1 of 2 record(s) have no value").assertExists()
-        compose.onNodeWithText("Exports are made by farm management.").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-REPORT-001").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-section:Farm figures").performScrollTo().performClick()
+        compose.onNodeWithTag("report-metric:active-sheep").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("2 animals").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("report-calculation:active-sheep").performScrollTo().performClick()
+        compose.onNodeWithText("How: Count of sheep records whose status is active").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("42.5 kg").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Partial: 1 of 2 record(s) have no value").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Exports are made by farm management.").assertExists().also { compose.captureObservedNativeOwners() }
         assertTrue(compose.onAllNodes(hasText("Export records")).fetchSemanticsNodes().isEmpty())
     }
 
@@ -53,26 +55,26 @@ class ReportsScreensTest {
     fun managementOpensTheExportSheetAndExportsTheHerdRegister() {
         var exports = 0
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ReportsScreen(herdMetrics(rows), failure = null, canExport = true, exporting = false, exportMessage = "Herd register exported: 3 animal(s).", onExportHerdRegister = { exports++ }, onExportMoney = { exports++ }, onExportSummary = { exports++ }, onBack = {})
             }
         }
         compose.onNodeWithTag("report-open-export").performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-REPORT-011").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-REPORT-011").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("report-export-herd-register").performScrollTo().performClick()
         compose.onNodeWithTag("report-export-money").performScrollTo().performClick()
         compose.onNodeWithTag("report-export-summary").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(3, exports) }
-        compose.onNodeWithText("Herd register exported: 3 animal(s).").assertExists()
+        compose.onNodeWithText("Herd register exported: 3 animal(s).").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun anEmptyFarmIsShownTruthfully() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ReportsScreen(emptyList(), failure = null, canExport = true, exporting = false, exportMessage = null, onExportHerdRegister = {}, onBack = {})
             }
         }
-        compose.onNodeWithText("No animals are recorded on this device yet.").assertExists()
+        compose.onNodeWithText("No report figures are recorded on this device yet.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 }

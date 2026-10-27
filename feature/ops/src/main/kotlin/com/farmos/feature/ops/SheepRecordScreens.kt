@@ -1,5 +1,11 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmWorkflowState
+
+import com.farmos.core.design.FarmWorkflowStep
+
+import com.farmos.core.design.FarmWorkflowTimeline
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -142,12 +148,22 @@ internal fun SheepTimelineScreen(selectedId: String?, loadRecords: suspend (Stri
             if (records.timeline.isEmpty()) {
                 AnimalFarmEmptyState("No records for this sheep on this device.")
             } else {
+                FarmWorkflowTimeline(
+                    title = "Events · ${records.timeline.size}",
+                    steps = records.timeline.sortedWith(compareByDescending<SheepTimelineRow> { it.epochDay }.thenBy { it.id }).take(12).map { row ->
+                        FarmWorkflowStep("${LocalDate.ofEpochDay(row.epochDay)} · ${row.kind}", row.summary, state = FarmWorkflowState.RECORDED)
+                    },
+                    modifier = Modifier.testTag("sheep-recorded-timeline"),
+                    caption = if (records.timeline.size > 12) "Latest 12 of ${records.timeline.size} events. Open Records for the full history." else null,
+                    recordsContent = {
                 FarmOperationalSection("Events · ${records.timeline.size}") {
                     records.timeline.forEachIndexed { index, row ->
                         if (index > 0) HorizontalDivider()
                         SheepRow("${LocalDate.ofEpochDay(row.epochDay)} · ${row.kind}", row.summary, "sheep-timeline:${row.id}")
                     }
                 }
+                    },
+                )
             }
         }
     }
@@ -234,6 +250,8 @@ internal fun SheepLambProfileScreen(
                 profile.birthEpochDay?.let { SheepRow("Birth date", LocalDate.ofEpochDay(it).toString(), "sheep-lamb-birth") }
                 profile.birthType?.let { SheepRow("Birth type", it, "sheep-lamb-type") }
             }
+            com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(profile.lambId,"sheep"))
+            com.farmos.core.design.FarmProfileBreeding(profile.lambId,"sheep")
             FarmOperationalSection("Dam") {
                 if (profile.damId == null) {
                     Text("Dam not linked on this device.", color = AnimalFarmTheme.colors.mutedInk)
@@ -241,11 +259,11 @@ internal fun SheepLambProfileScreen(
                     SheepRow("Dam", profile.damTag ?: profile.damId, "sheep-lamb-dam")
                 }
             }
-            FarmOperationalSection("Early life") {
+            SheepLambDevelopment(profile, recordsContent = {
                 profile.birthWeightGrams?.let { SheepRow("Birth weight", sheepKg(it), "sheep-lamb-birth-weight") }
                 profile.markingEpochDay?.let { SheepRow("Marked", LocalDate.ofEpochDay(it).toString(), "sheep-lamb-marked") }
                 profile.weaningEpochDay?.let { SheepRow("Weaned", LocalDate.ofEpochDay(it).toString(), "sheep-lamb-weaned") }
-            }
+            })
         }
     }
 }

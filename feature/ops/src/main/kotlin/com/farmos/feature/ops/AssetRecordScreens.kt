@@ -1,5 +1,16 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,7 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,11 +83,7 @@ fun AssetRecordNavigator(records: AssetRecords, home: @Composable (recordActions
     val back = { page = null }
     when (page) {
         null -> home {
-            FarmOperationalSection("Records") {
-                AssetRecordPage.entries.forEach { target ->
-                    TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text("Open ${target.label}") }
-                }
-            }
+            FarmModuleTools(listOf(FarmToolGroup("Browse", AssetRecordPage.entries.map { target -> FarmToolAction("Open ${target.label}", { page = target }) })), title = "Records")
         }
         AssetRecordPage.REGISTER -> AssetRegisterScreen(records, back)
         AssetRecordPage.DETAIL -> AssetDetailScreen(records, back)

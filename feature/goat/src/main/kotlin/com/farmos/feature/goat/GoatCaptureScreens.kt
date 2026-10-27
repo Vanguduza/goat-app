@@ -1,16 +1,24 @@
 package com.farmos.feature.goat
 
+import com.farmos.core.design.FarmSectionTabs
+
+import androidx.compose.runtime.saveable.listSaver
+
+import androidx.compose.runtime.saveable.rememberSaveable
+
+import androidx.compose.runtime.LaunchedEffect
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +64,6 @@ internal fun GoatRegisterScreen(
                 TextButton(onClick = { sex = GoatSex.FEMALE }) { Text(if (sex == GoatSex.FEMALE) "Female · selected" else "Female") }
                 TextButton(onClick = { sex = GoatSex.MALE }) { Text(if (sex == GoatSex.MALE) "Male · selected" else "Male") }
             }
-            Text("The record is saved locally first, then synchronized through the authoritative command path.")
             Button(
                 onClick = { onRegister(tag, name.trim().ifBlank { null }, sex, dob) },
                 enabled = tag.isNotBlank(),
@@ -131,52 +138,61 @@ internal fun GoatHealthCaptureScreen(
     actions: GoatExperienceActions,
     onBack: () -> Unit,
 ) {
-    var famacha by remember { mutableStateOf("") }
-    var famachaDay by remember { mutableStateOf("") }
-    var bcs by remember { mutableStateOf("") }
-    var bcsDay by remember { mutableStateOf("") }
-    var scc by remember { mutableStateOf("") }
-    var dim by remember { mutableStateOf("") }
-    var sccDay by remember { mutableStateOf("") }
+    var famacha by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var famachaDay by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var bcs by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var bcsDay by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var scc by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var dim by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var sccDay by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var section by rememberSaveable(state.selected?.animalId) { mutableStateOf("FAMACHA") }
     IllustratedGoatPage("Health observations", "FOS-GOAT-022/016/020 · I3/I4", onBack) {
         val goat = state.selected
         if (goat == null) {
             Text("Select a goat first.")
             return@IllustratedGoatPage
         }
-        FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-022")) {
-            Text("FAMACHA", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text("Record the eyelid score from 1 to 5. This observation does not start a treatment.")
-            OutlinedTextField(famacha, { famacha = it }, label = { Text("Score 1–5") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-            OutlinedTextField(famachaDay, { famachaDay = it }, label = { Text("Date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-            Button(
-                onClick = { actions.onRecordFamacha(famacha, famachaDay) },
-                enabled = !state.busy && famacha.toIntOrNull() in 1..5 && famachaDay.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text("Record FAMACHA") }
+        Text(goatDisplayName(goat) + " · " + goat.tag, style = MaterialTheme.typography.titleMedium)
+        FarmSectionTabs(listOf("FAMACHA", "Body condition", "SCC"), section, { section = it })
+        if (section == "FAMACHA") {
+            FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-022")) {
+                Text("FAMACHA", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text("Record the eyelid score from 1 to 5. This observation does not start a treatment.")
+                OutlinedTextField(famacha, { famacha = it }, label = { Text("Score 1–5") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                FarmDateField(label = "Date", value = famachaDay, onValueChange = { famachaDay = it }, key = "famacha", enabled = !state.busy)
+                Button(
+                    onClick = { actions.onRecordFamacha(famacha, famachaDay) },
+                    enabled = !state.busy && famacha.toIntOrNull() in 1..5 && famachaDay.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Record FAMACHA") }
+            }
         }
-        FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-016")) {
-            Text("Body condition", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text("Record a BCS from 1.0 to 5.0. It remains an observation, not a diagnosis.")
-            OutlinedTextField(bcs, { bcs = it }, label = { Text("BCS") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
-            OutlinedTextField(bcsDay, { bcsDay = it }, label = { Text("Date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-            Button(
-                onClick = { actions.onRecordBcs(((bcs.toDoubleOrNull() ?: 0.0) * 10).toInt().toString(), bcsDay) },
-                enabled = !state.busy && bcs.toDoubleOrNull()?.let { it in 1.0..5.0 } == true && bcsDay.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text("Record BCS") }
+        if (section == "Body condition") {
+            FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-016")) {
+                Text("Body condition", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text("Record a BCS from 1.0 to 5.0. It remains an observation, not a diagnosis.")
+                OutlinedTextField(bcs, { bcs = it }, label = { Text("BCS") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
+                FarmDateField(label = "Date", value = bcsDay, onValueChange = { bcsDay = it }, key = "bcs", enabled = !state.busy)
+                Button(
+                    onClick = { actions.onRecordBcs(((bcs.toDoubleOrNull() ?: 0.0) * 10).toInt().toString(), bcsDay) },
+                    enabled = !state.busy && bcs.toDoubleOrNull()?.let { it in 1.0..5.0 } == true && bcsDay.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Record BCS") }
+            }
         }
-        FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-020")) {
-            Text("Somatic cell count", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text("SCC is recorded as a laboratory/production measure, not as a diagnosis.")
-            OutlinedTextField(scc, { scc = it }, label = { Text("Cells/ml") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-            OutlinedTextField(dim, { dim = it }, label = { Text("Days in milk (optional)") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-            OutlinedTextField(sccDay, { sccDay = it }, label = { Text("Date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-            Button(
-                onClick = { actions.onRecordScc(scc, dim, sccDay) },
-                enabled = !state.busy && scc.toIntOrNull()?.let { it > 0 } == true && sccDay.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text("Record SCC") }
+        if (section == "SCC") {
+            FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-020")) {
+                Text("Somatic cell count", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text("SCC is recorded as a laboratory/production measure, not as a diagnosis.")
+                OutlinedTextField(scc, { scc = it }, label = { Text("Cells/ml") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                OutlinedTextField(dim, { dim = it }, label = { Text("Days in milk (optional)") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                FarmDateField(label = "Date", value = sccDay, onValueChange = { sccDay = it }, key = "scc", enabled = !state.busy)
+                Button(
+                    onClick = { actions.onRecordScc(scc, dim, sccDay) },
+                    enabled = !state.busy && scc.toIntOrNull()?.let { it > 0 } == true && sccDay.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Record SCC") }
+            }
         }
     }
 }
@@ -187,17 +203,27 @@ internal fun GoatReproductionScreen(
     actions: GoatExperienceActions,
     onSelectGoat: (String) -> Unit,
     onCompareMates: () -> Unit = {},
+    initialSection: String = "Mating",
+    onSectionChange: (String) -> Unit = {},
     onBack: () -> Unit,
 ) {
-    var milk by remember { mutableStateOf("") }
-    var milkDay by remember { mutableStateOf("") }
-    var heatDay by remember { mutableStateOf("") }
-    var method by remember { mutableStateOf("natural") }
-    var sire by remember { mutableStateOf(NO_SIRE) }
-    var matingDay by remember { mutableStateOf("") }
-    var pregResult by remember { mutableStateOf("pregnant") }
-    var pregDay by remember { mutableStateOf("") }
-    var lactationDay by remember { mutableStateOf("") }
+    var milk by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var milkDay by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var heatDay by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var method by rememberSaveable(state.selected?.animalId) { mutableStateOf("natural") }
+    var sire by rememberSaveable(
+        state.selected?.animalId,
+        stateSaver = listSaver<FarmSelectorOption, String?>(
+            save = { listOf(it.id, it.label, it.detail) },
+            restore = { FarmSelectorOption(it[0]!!, it[1]!!, it[2]) },
+        ),
+    ) { mutableStateOf(NO_SIRE) }
+    var matingDay by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var pregResult by rememberSaveable(state.selected?.animalId) { mutableStateOf("pregnant") }
+    var pregDay by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var lactationDay by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var section by rememberSaveable(state.selected?.animalId) { mutableStateOf(initialSection) }
+    LaunchedEffect(initialSection) { section = initialSection }
     IllustratedGoatPage("Reproduction & milk", "FOS-GOAT-017/031/032/033/034/043 · I3", onBack) {
         val goat = state.selected
         if (goat == null || goat.sex != GoatSex.FEMALE) {
@@ -208,70 +234,84 @@ internal fun GoatReproductionScreen(
             )
             return@IllustratedGoatPage
         }
-        FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-017")) {
-            Text("Milk", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            OutlinedTextField(milk, { milk = it }, label = { Text("Litres") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
-            FarmDateField(label = "Date", value = milkDay, onValueChange = { milkDay = it }, key = "milk", enabled = !state.busy)
-            Button(onClick = { actions.onRecordMilk(milk, milkDay) }, enabled = !state.busy && milk.toDoubleOrNull()?.let { it > 0.0 } == true && milkDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record milk") }
-        }
-        FarmIllustratedSectionSurface {
-            Text("Heat and mating", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Column(
-                Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-031"),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                FarmDateField(label = "Heat date", value = heatDay, onValueChange = { heatDay = it }, key = "heat", enabled = !state.busy)
-                Button(onClick = { actions.onRecordHeat(heatDay) }, enabled = !state.busy && heatDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record heat") }
+        Text(goatDisplayName(goat) + " · " + goat.tag, style = MaterialTheme.typography.titleMedium)
+        FarmSectionTabs(listOf("Milk", "Heat", "Mating", "Pregnancy", "Lactation"), section, { section = it; onSectionChange(it) })
+        if (section == "Milk") {
+            FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-017")) {
+                Text("Milk", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                OutlinedTextField(milk, { milk = it }, label = { Text("Litres") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal))
+                FarmDateField(label = "Date", value = milkDay, onValueChange = { milkDay = it }, key = "milk", enabled = !state.busy)
+                Button(onClick = { actions.onRecordMilk(milk, milkDay) }, enabled = !state.busy && milk.toDoubleOrNull()?.let { it > 0.0 } == true && milkDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record milk") }
             }
-            Column(
-                Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-032"),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                OutlinedTextField(method, { method = it }, label = { Text("Method: natural, ai, hand_mating") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                // The server accepts only a goat on this farm as sire, so the sire is chosen from the herd.
-                // FOS-GOAT-033 — the goat sire selector: a search over every buck in the local database, never
-                // the capped herd list. The server accepts only a goat on this farm as sire.
-                Column(Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-033"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FarmSearchSelector(
-                        atomTag = FarmSelectionAtoms.SIRE_DAM_SELECTOR,
-                        title = "Sire (optional)",
-                        search = actions.searchSires,
-                        selected = sire,
-                        onSelect = { sire = it },
-                        emptyText = "No bucks match on this device",
-                        enabled = !state.busy,
-                        pinned = listOf(NO_SIRE),
-                    )
-                    if (sire.id != NO_SIRE.id) GoatMatingCoi(actions.mateAnalysis, goat.animalId, sire.id)
-                    TextButton(onClick = onCompareMates, enabled = !state.busy, modifier = Modifier.fillMaxWidth().testTag("goat-compare-bucks")) {
-                        Text("Compare bucks for this doe")
+        }
+        if (section == "Heat") {
+            FarmIllustratedSectionSurface {
+                Column(
+                    Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-031"),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FarmDateField(label = "Heat date", value = heatDay, onValueChange = { heatDay = it }, key = "heat", enabled = !state.busy)
+                    Button(onClick = { actions.onRecordHeat(heatDay) }, enabled = !state.busy && heatDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record heat") }
+                }
+            }
+        }
+        if (section == "Mating") {
+            FarmIllustratedSectionSurface {
+                Column(
+                    Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-032"),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    OutlinedTextField(method, { method = it }, label = { Text("Method: natural, ai, hand_mating") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                    // The server accepts only a goat on this farm as sire, so the sire is chosen from the herd.
+                    // FOS-GOAT-033 — the goat sire selector: a search over every buck in the local database, never
+                    // the capped herd list. The server accepts only a goat on this farm as sire.
+                    Column(Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-033"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FarmSearchSelector(
+                            atomTag = FarmSelectionAtoms.SIRE_DAM_SELECTOR,
+                            title = "Sire (optional)",
+                            search = actions.searchSires,
+                            selected = sire,
+                            onSelect = { sire = it },
+                            emptyText = "No bucks match on this device",
+                            enabled = !state.busy,
+                            pinned = listOf(NO_SIRE),
+                        )
+                        if (sire.id != NO_SIRE.id) GoatMatingCoi(actions.mateAnalysis, goat.animalId, sire.id)
+                        TextButton(onClick = onCompareMates, enabled = !state.busy, modifier = Modifier.fillMaxWidth().testTag("goat-compare-bucks")) {
+                            Text("Compare bucks for this doe")
+                        }
                     }
+                    FarmDateField(label = "Mating date", value = matingDay, onValueChange = { matingDay = it }, key = "mating", enabled = !state.busy)
+                    Text("Pregnancy-check task: 45 days after this service.")
+                    Button(onClick = { actions.onRecordMating(method, sire.id.takeUnless { it == NO_SIRE.id }.orEmpty(), matingDay) }, enabled = !state.busy && method in setOf("natural", "ai", "hand_mating") && matingDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record mating") }
                 }
-                FarmDateField(label = "Mating date", value = matingDay, onValueChange = { matingDay = it }, key = "mating", enabled = !state.busy)
-                Text("A mating record creates the governed +45 day pregnancy-check task.")
-                Button(onClick = { actions.onRecordMating(method, sire.id.takeUnless { it == NO_SIRE.id }.orEmpty(), matingDay) }, enabled = !state.busy && method in setOf("natural", "ai", "hand_mating") && matingDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record mating") }
             }
         }
-        FarmIllustratedSectionSurface {
-            Text("Pregnancy & lactation follow-up", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Column(
-                Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-034"),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(com.farmos.core.design.FosDimens.Grid)) {
-                    TextButton(onClick = { pregResult = "pregnant" }) { Text(if (pregResult == "pregnant") "Pregnant · selected" else "Pregnant") }
-                    TextButton(onClick = { pregResult = "open" }) { Text(if (pregResult == "open") "Open · selected" else "Open") }
+        if (section == "Pregnancy") {
+            FarmIllustratedSectionSurface {
+                Column(
+                    Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-034"),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(com.farmos.core.design.FosDimens.Grid)) {
+                        TextButton(onClick = { pregResult = "pregnant" }) { Text(if (pregResult == "pregnant") "Pregnant · selected" else "Pregnant") }
+                        TextButton(onClick = { pregResult = "open" }) { Text(if (pregResult == "open") "Open · selected" else "Open") }
+                    }
+                    FarmDateField(label = "Check date", value = pregDay, onValueChange = { pregDay = it }, key = "pregnancy-check", enabled = !state.busy)
+                    Text("Record the observed pregnancy-check result.")
+                    Button(onClick = { actions.onRecordPregnancy(pregResult, pregDay) }, enabled = !state.busy && pregDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record pregnancy check") }
                 }
-                FarmDateField(label = "Check date", value = pregDay, onValueChange = { pregDay = it }, key = "pregnancy-check", enabled = !state.busy)
-                Text("The pregnancy result is a recorded check; Farm OS does not diagnose autonomously.")
-                Button(onClick = { actions.onRecordPregnancy(pregResult, pregDay) }, enabled = !state.busy && pregDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record pregnancy check") }
             }
-            Column(
-                Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-043"),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                FarmDateField(label = "Kidding date for +7 day follow-up", value = lactationDay, onValueChange = { lactationDay = it }, key = "lactation-follow-up", enabled = !state.busy)
-                Button(onClick = { actions.onPlanLactation(lactationDay) }, enabled = !state.busy && lactationDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Plan lactation follow-up") }
+        }
+        if (section == "Lactation") {
+            FarmIllustratedSectionSurface {
+                Column(
+                    Modifier.fillMaxWidth().testTag("farm-screen:FOS-GOAT-043"),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FarmDateField(label = "Kidding date for +7 day follow-up", value = lactationDay, onValueChange = { lactationDay = it }, key = "lactation-follow-up", enabled = !state.busy)
+                    Button(onClick = { actions.onPlanLactation(lactationDay) }, enabled = !state.busy && lactationDay.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Plan lactation follow-up") }
+                }
             }
         }
     }
@@ -284,12 +324,13 @@ internal fun GoatKiddingScreen(
     onSelectGoat: (String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var born by remember { mutableStateOf("") }
-    var live by remember { mutableStateOf("") }
-    var dead by remember { mutableStateOf("") }
-    var day by remember { mutableStateOf("") }
-    var kidTag by remember { mutableStateOf("") }
-    var kidSex by remember { mutableStateOf(GoatSex.FEMALE) }
+    var born by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var live by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var dead by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var day by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var kidTag by rememberSaveable(state.selected?.animalId) { mutableStateOf("") }
+    var kidSex by rememberSaveable(state.selected?.animalId) { mutableStateOf(GoatSex.FEMALE) }
+    var section by rememberSaveable(state.selected?.animalId) { mutableStateOf("Birth") }
     IllustratedGoatPage("Kidding", "FOS-GOAT-037/039 · I3/I4", onBack) {
         val goat = state.selected
         if (goat == null || goat.sex != GoatSex.FEMALE) {
@@ -300,30 +341,36 @@ internal fun GoatKiddingScreen(
             )
             return@IllustratedGoatPage
         }
-        FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-037")) {
-            Text("Record kidding", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text("Born must equal live + dead. Mortality remains explicit and is never hidden by optimistic copy.")
-            OutlinedTextField(born, { born = it }, label = { Text("Born") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-            OutlinedTextField(live, { live = it }, label = { Text("Live") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-            OutlinedTextField(dead, { dead = it }, label = { Text("Dead") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-            OutlinedTextField(day, { day = it }, label = { Text("Kidding date") }, placeholder = { Text("YYYY-MM-DD") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-            val countsValid = born.toIntOrNull()?.let { b -> live.toIntOrNull()?.let { l -> dead.toIntOrNull()?.let { d -> b > 0 && l >= 0 && d >= 0 && l + d == b } } } == true
-            Button(onClick = { actions.onRecordKidding(born, live, dead, day) }, enabled = !state.busy && countsValid && day.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record kidding") }
-        }
-        FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-039")) {
-            Text("Register live kid", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            val latest = goat.kiddingHistory.firstOrNull()
-            if (latest == null) Text("Record a kidding event first.")
-            OutlinedTextField(kidTag, { kidTag = it }, label = { Text("Kid tag") }, modifier = Modifier.fillMaxWidth(), singleLine = true, enabled = latest != null)
-            Row(horizontalArrangement = Arrangement.spacedBy(com.farmos.core.design.FosDimens.Grid)) {
-                TextButton(onClick = { kidSex = GoatSex.FEMALE }, enabled = latest != null) { Text(if (kidSex == GoatSex.FEMALE) "Doe kid · selected" else "Doe kid") }
-                TextButton(onClick = { kidSex = GoatSex.MALE }, enabled = latest != null) { Text(if (kidSex == GoatSex.MALE) "Buck kid · selected" else "Buck kid") }
+        Text(goatDisplayName(goat) + " · " + goat.tag, style = MaterialTheme.typography.titleMedium)
+        FarmSectionTabs(listOf("Birth", "Register kid"), section, { section = it })
+        if (section == "Birth") {
+            FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-037")) {
+                Text("Record kidding", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text("Born must equal live + dead.")
+                OutlinedTextField(born, { born = it }, label = { Text("Born") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                OutlinedTextField(live, { live = it }, label = { Text("Live") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                OutlinedTextField(dead, { dead = it }, label = { Text("Dead") }, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                FarmDateField(label = "Kidding date", value = day, onValueChange = { day = it }, key = "kidding", enabled = !state.busy)
+                val countsValid = born.toIntOrNull()?.let { b -> live.toIntOrNull()?.let { l -> dead.toIntOrNull()?.let { d -> b > 0 && l >= 0 && d >= 0 && l + d == b } } } == true
+                Button(onClick = { actions.onRecordKidding(born, live, dead, day) }, enabled = !state.busy && countsValid && day.isNotBlank(), modifier = Modifier.fillMaxWidth()) { Text("Record kidding") }
             }
-            Button(
-                onClick = { latest?.let { actions.onRegisterKid(it.kiddingId, kidTag, kidSex) } },
-                enabled = !state.busy && latest != null && kidTag.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text("Register kid") }
+        }
+        if (section == "Register kid") {
+            FarmIllustratedSectionSurface(Modifier.testTag("farm-screen:FOS-GOAT-039")) {
+                Text("Register live kid", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                val latest = goat.kiddingHistory.firstOrNull()
+                if (latest == null) Text("Record a kidding event first.")
+                OutlinedTextField(kidTag, { kidTag = it }, label = { Text("Kid tag") }, modifier = Modifier.fillMaxWidth(), singleLine = true, enabled = latest != null)
+                Row(horizontalArrangement = Arrangement.spacedBy(com.farmos.core.design.FosDimens.Grid)) {
+                    TextButton(onClick = { kidSex = GoatSex.FEMALE }, enabled = latest != null) { Text(if (kidSex == GoatSex.FEMALE) "Doe kid · selected" else "Doe kid") }
+                    TextButton(onClick = { kidSex = GoatSex.MALE }, enabled = latest != null) { Text(if (kidSex == GoatSex.MALE) "Buck kid · selected" else "Buck kid") }
+                }
+                Button(
+                    onClick = { latest?.let { actions.onRegisterKid(it.kiddingId, kidTag, kidSex) } },
+                    enabled = !state.busy && latest != null && kidTag.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Register kid") }
+            }
         }
     }
 }

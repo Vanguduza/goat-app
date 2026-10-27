@@ -1,13 +1,27 @@
 package com.farmos.app
 
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.ui.platform.testTag
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
+import com.farmos.core.design.FarmPedigreeFamily
+import com.farmos.core.design.FarmPedigreeView
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,7 +74,7 @@ fun GeneticsModuleHost(
     enqueueSync: () -> Unit,
     onBack: () -> Unit,
 ) {
-    var page by remember(farmId) { mutableStateOf(GeneticsPage.DASHBOARD) }
+    var page by rememberSaveable(farmId) { mutableStateOf(GeneticsPage.DASHBOARD) }
     val scope = rememberCoroutineScope()
     var summary by remember(farmId) { mutableStateOf<GeneticsSummary?>(null) }
     var error by remember(farmId) { mutableStateOf<String?>(null) }
@@ -111,104 +125,65 @@ fun GeneticsModuleHost(
         }
     }
 
+    val retainedPages = rememberSaveableStateHolder()
     val current = page
     FarmOperationalPage(
         screenId = current.screenId,
         title = current.title,
-        subtitle = "Pedigree and breeding analysis from this device's local records.",
+        subtitle = "",
         onBack = if (current == GeneticsPage.DASHBOARD) onBack else ({ page = GeneticsPage.DASHBOARD }),
         backLabel = if (current == GeneticsPage.DASHBOARD) "Farm home" else "Genetics",
     ) {
         if (error != null) {
             FarmOperationalSection("Attention", error) {}
         }
+        retainedPages.SaveableStateProvider("$farmId:${current.name}") {
         when (current) {
             GeneticsPage.DASHBOARD -> GeneticsDashboard(summary = summary, onOpen = { page = it })
             GeneticsPage.PEDIGREE -> PedigreeExplorer(pedigree = pedigree, database = database, farmId = farmId)
             GeneticsPage.PARENTAGE -> ParentageCapture(onRecord = { a, p, r, done -> recordParentage(a, p, r, done) })
-            GeneticsPage.VERIFY -> VerificationList(conflictingIds = summary?.conflictingIds.orEmpty())
+            GeneticsPage.VERIFY -> if (summary == null) Text("Reading parentage records") else VerificationList(conflictingIds = summary!!.conflictingIds)
             GeneticsPage.RELATIONSHIP -> RelationshipExplorer(pedigree = pedigree, database = database, farmId = farmId)
             GeneticsPage.RANKING -> CandidateRanking(pedigree = pedigree, database = database, farmId = farmId)
             GeneticsPage.WARNINGS -> GeneticWarnings(summary = summary, database = database, farmId = farmId)
             GeneticsPage.REPORT -> GeneticsReport(summary = summary)
+        }
         }
     }
 }
 
 @Composable
 private fun GeneticsDashboard(summary: GeneticsSummary?, onOpen: (GeneticsPage) -> Unit) {
-    FarmOperationalSection("Herd genetics at a glance") {
-        val rows = summary?.let {
-            listOf(
-                "Animals on farm: ${it.animalCount}",
-                "Recorded pedigree links: ${it.pedigreeLinks}",
-                "Animals with parentage recorded: ${it.animalsWithParentage}",
-                "Conflicting parentage records: ${it.conflictingIds.size}",
-            )
-        } ?: listOf("Loading local genetics summary…")
-        rows.forEach { Text(it, style = MaterialTheme.typography.bodyMedium) }
-    }
-    FarmOperationalSection("Work areas") {
-        GeneticsPage.entries.filter { it != GeneticsPage.DASHBOARD }.forEach { target ->
-            TextButton(onClick = { onOpen(target) }, modifier = Modifier.fillMaxWidth()) {
-                Text(target.title)
-            }
-        }
-    }
+    FarmMetricStrip(listOf(
+        FarmMetricValue("Animals", summary?.animalCount?.toString() ?: "—"),
+        FarmMetricValue("With parentage", summary?.animalsWithParentage?.toString() ?: "—", onClick = { onOpen(GeneticsPage.PEDIGREE) }),
+        FarmMetricValue("Pedigree links", summary?.pedigreeLinks?.toString() ?: "—"),
+        FarmMetricValue("Conflicts", summary?.conflictingIds?.size?.toString() ?: "—", onClick = { onOpen(GeneticsPage.VERIFY) }),
+    ))
+    FarmModuleTools(listOf(
+        FarmToolGroup("Family records", listOf(GeneticsPage.PEDIGREE, GeneticsPage.PARENTAGE, GeneticsPage.VERIFY).map { page -> FarmToolAction(page.title, { onOpen(page) }) }),
+        FarmToolGroup("Compare and review", listOf(GeneticsPage.RELATIONSHIP, GeneticsPage.RANKING, GeneticsPage.WARNINGS, GeneticsPage.REPORT).map { page -> FarmToolAction(page.title, { onOpen(page) }) }),
+    ), title = "Genetics tools")
 }
 
 @Composable
 private fun PedigreeExplorer(pedigree: PedigreeQueries, database: FarmOsDatabase, farmId: String) {
-    val scope = rememberCoroutineScope()
-    var tag by remember { mutableStateOf("") }
-    var lines by remember { mutableStateOf(listOf("Enter an animal tag to explore its recorded ancestors.")) }
-    var busy by remember { mutableStateOf(false) }
-    FarmOperationalSection("Pedigree explorer") {
-        OutlinedTextField(value = tag, onValueChange = { tag = it }, label = { Text("Animal tag") }, modifier = Modifier.fillMaxWidth())
-        Button(onClick = {
-            scope.launch {
-                busy = true
-                lines = runSuspendCatching {
-                    val animal = resolveGeneticsAnimal(database, farmId, tag)
-                    val graph = pedigree.graph(listOf(animal.id))
-                    if (graph.parents.isEmpty()) return@runSuspendCatching listOf("No recorded parentage for ${animal.tag}.")
-                    suspend fun label(id: String): String =
-                        database.animals().get(farmId, id)?.let { "${it.tag}${it.name?.let { n -> " ($n)" } ?: ""}" } ?: id
-                    val out = mutableListOf("Ancestors of ${animal.tag}:")
-                    graph.parents.forEach { (child, parents) ->
-                        val bits = listOfNotNull(
-                            parents.sireId?.let { "sire ${label(it)}" },
-                            parents.damId?.let { "dam ${label(it)}" },
-                        )
-                        out += "${label(child)} <- ${bits.joinToString(", ")}"
-                    }
-                    if (graph.conflicting.isNotEmpty()) out += "Conflicting parentage left unknown for: ${graph.conflicting.joinToString(", ")}"
-                    out
-                }.getOrElse { listOf("Could not load pedigree: ${it.message}") }
-                busy = false
-            }
-        }, enabled = !busy) { Text(if (busy) "Loading…" else "Show pedigree") }
-    }
-    FarmOperationalRows(lines, "No pedigree loaded", "Search by the exact animal tag.")
+    LineageExplorerContent(database,farmId)
 }
 
 /** FOS-GEN-003 — record a parentage link through the governed pedigree command. */
 @Composable
 private fun ParentageCapture(onRecord: (String, String, String, (String) -> Unit) -> Unit) {
-    var animalTag by remember { mutableStateOf("") }
-    var parentTag by remember { mutableStateOf("") }
-    var relation by remember { mutableStateOf("sire") }
+    var animalTag by rememberSaveable { mutableStateOf("") }
+    var parentTag by rememberSaveable { mutableStateOf("") }
+    var relation by rememberSaveable { mutableStateOf("sire") }
     var receipt by remember { mutableStateOf<String?>(null) }
     FarmOperationalSection("Record parentage") {
         OutlinedTextField(value = animalTag, onValueChange = { animalTag = it }, label = { Text("Animal tag") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = parentTag, onValueChange = { parentTag = it }, label = { Text("Parent tag") }, modifier = Modifier.fillMaxWidth())
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("sire", "dam", "genetic_dam").forEach { option ->
-                TextButton(onClick = { relation = option }) {
-                    Text(if (relation == option) "[$option]" else option)
-                }
-            }
-        }
+        FarmSectionTabs(listOf("Sire", "Dam", "Genetic dam"), when (relation) { "dam" -> "Dam"; "genetic_dam" -> "Genetic dam"; else -> "Sire" }, {
+            relation = when (it) { "Dam" -> "dam"; "Genetic dam" -> "genetic_dam"; else -> "sire" }
+        })
         Button(onClick = { onRecord(animalTag, parentTag, relation) { receipt = it } }) { Text("Record link") }
         receipt?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
     }
@@ -292,41 +267,15 @@ private suspend fun resolveGeneticsAnimal(database: FarmOsDatabase, farmId: Stri
 
 @Composable
 private fun CandidateRanking(pedigree: PedigreeQueries, database: FarmOsDatabase, farmId: String) {
-    val scope = rememberCoroutineScope()
-    var damTag by remember(farmId) { mutableStateOf("") }
-    var lines by remember(farmId) { mutableStateOf(listOf("Enter a dam tag to compare active sires by recorded offspring inbreeding coefficient.")) }
-    var busy by remember(farmId) { mutableStateOf(false) }
-    FarmOperationalSection("Candidate ranking", "Recorded COI is a lower bound. Incomplete parentage does not establish that animals are unrelated.") {
-        OutlinedTextField(value = damTag, onValueChange = { damTag = it }, label = { Text("Dam tag") }, modifier = Modifier.fillMaxWidth())
-        Button(onClick = {
-            scope.launch {
-                busy = true
-                lines = runSuspendCatching {
-                    val dam = resolveGeneticsAnimal(database, farmId, damTag)
-                    require(dam.sex.equals("FEMALE", ignoreCase = true) && dam.status == "active") { "Select an active female" }
-                    val sires = database.animals().search(farmId, dam.speciesCode, null, null, -1, 0)
-                        .filter { it.status == "active" && it.sex.equals("MALE", ignoreCase = true) }
-                    if (sires.isEmpty()) return@runSuspendCatching listOf("No active sires of " + dam.speciesCode + " on this farm.")
-                    val ranked = sires.map { sire -> sire to pedigree.mating(sire.id, dam.id) }
-                        .sortedWith(compareBy({ it.second.inbreeding.coefficient }, { it.first.tag }, { it.first.id }))
-                    val out = mutableListOf("Sire candidates for " + dam.tag + " (recorded offspring COI, lowest first):")
-                    ranked.take(20).forEach { (sire, analysis) ->
-                        val label = sire.tag + (sire.name?.let { " (" + it + ")" } ?: "")
-                        val result = analysis.inbreeding
-                        out += label + " — recorded COI " + "%.4f".format(result.coefficient) +
-                            " over " + result.generationsKnown + " complete generations"
-                        if (analysis.conflictingParentage.isNotEmpty()) {
-                            out += "Parentage conflicts left unknown: " + analysis.conflictingParentage.size + "; review before selecting this candidate."
-                        }
-                    }
-                    if (ranked.size > 20) out += "Showing the first 20 of " + ranked.size + " candidates assessed."
-                    out
-                }.getOrElse { listOf("Could not rank: " + it.message) }
-                busy = false
-            }
-        }, enabled = !busy) { Text(if (busy) "Ranking…" else "Rank sires") }
+    var selectedPedigree by remember { mutableStateOf<String?>(null) }
+    PairingEvidenceContent(database,farmId) { id ->
+        selectedPedigree=id
     }
-    FarmOperationalRows(lines, "No ranking yet", null)
+    selectedPedigree?.let { id ->
+        com.farmos.core.design.AnimalFarmSelectionSheet("Candidate pedigree",{selectedPedigree=null}) {
+            LineageExplorerContent(database,farmId,id,showSelector=false)
+        }
+    }
 }
 
 @Composable

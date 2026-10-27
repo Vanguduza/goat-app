@@ -1,0 +1,88 @@
+name: HTML-to-native dashboard parity
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'core/design/**'
+      - 'feature/**'
+      - 'scripts/design/render-html-home-reference.py'
+      - 'scripts/design/verify_html_style_adoption.py'
+      - 'scripts/design/test_html_style_adoption.py'
+      - 'scripts/testing/html-native-parity.gradle'
+      - '.github/workflows/html-native-parity.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: html-native-parity-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      GOAT_HTML_PARITY_DIR: ${{ github.workspace }}/app/build/reports/html-native-parity/native
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Configure Android SDK
+        run: |
+          sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          manager="$(find "$sdk_root/cmdline-tools" -type f -path '*/bin/sdkmanager' | sort -V | tail -n 1)"
+          test -x "$manager"
+          echo "ANDROID_SDK_ROOT=$sdk_root" >> "$GITHUB_ENV"
+          yes | "$manager" --licenses >/dev/null || true
+          "$manager" "platforms;android-37.0" "build-tools;37.0.0"
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a
+      - name: Check shared HTML style adoption across feature modules
+        run: |
+          python3 scripts/design/test_html_style_adoption.py
+          python3 scripts/design/verify_html_style_adoption.py --output app/build/reports/html-native-parity/style-adoption.json
+      - name: Render original approved HTML, not a replacement mockup
+        run: python3 scripts/design/render-html-home-reference.py --output app/build/reports/html-native-parity/reference
+      - name: Exercise actual native compositions and retained interaction contracts
+        run: >-
+          ./gradlew :app:testDebugUnitTest
+          --tests com.farmos.app.LockedHtmlHomeParityTest
+          --tests com.farmos.app.LockedHtmlDashboardCaptureTest
+          --tests com.farmos.app.HomeTaskIdentityTest
+          --tests com.farmos.app.HtmlAppWideStyleContractTest
+          --tests com.farmos.app.HtmlOpticalParityTest
+          --tests com.farmos.app.HtmlHomeTaskSheetContractTest
+          --tests com.farmos.app.AndroidBackNavigationTest
+          --tests com.farmos.app.GlobalSearchRuntimeNavigationTest
+          --tests com.farmos.app.SpeciesSearchRuntimeNavigationTest
+          --tests com.farmos.app.HomeNavigationLayoutTest
+          --tests com.farmos.app.AnimalFarmReferenceContractTest
+          --tests com.farmos.app.HomeMenuAndTaskUxTest
+          --tests com.farmos.app.HomeUtilityRuntimeNavigationTest
+          --tests com.farmos.app.FarmRuntimeNavigationTest
+          -I scripts/testing/html-native-parity.gradle
+          -I scripts/testing/fresh-test-evidence.gradle
+          --no-daemon --no-parallel --max-workers=2 --continue --stacktrace
+      - name: Retain actual source identity and test reports
+        if: always()
+        run: |
+          mkdir -p app/build/reports/html-native-parity/junit
+          git rev-parse HEAD > app/build/reports/html-native-parity/commit.txt
+          git rev-parse 'HEAD^{tree}' > app/build/reports/html-native-parity/tree.txt
+          git status --porcelain=v1 > app/build/reports/html-native-parity/worktree-status.txt
+          cp app/build/test-results/testDebugUnitTest/TEST-*.xml app/build/reports/html-native-parity/junit/ 2>/dev/null || true
+          find app/build/reports/html-native-parity -name '*.png' -print0 | sort -z | xargs -0 -r sha256sum > app/build/reports/html-native-parity/images.sha256
+      - name: Upload unapproved HTML and native side-by-side evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: html-native-dashboard-parity
+          path: app/build/reports/html-native-parity/**
+          if-no-files-found: error
+          retention-days: 30

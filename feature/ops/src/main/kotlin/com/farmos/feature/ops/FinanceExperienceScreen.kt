@@ -3,19 +3,32 @@ package com.farmos.feature.ops
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.farmos.core.design.FarmOperationalPage
+import com.farmos.core.design.FarmBarValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
 import com.farmos.core.design.FarmOperationalRows
 import com.farmos.core.design.FarmOperationalSection
 import com.farmos.core.design.FarmVisualClass
@@ -95,12 +108,15 @@ fun MoneyCaptureScreen(
     onOpenTransaction: (String) -> Unit = {},
     minorDigitsFor: (String) -> Int = { 2 },
 ) {
-    var page by remember { mutableStateOf(FinancePage.DASHBOARD) }
+    var page by rememberSaveable { mutableStateOf(FinancePage.DASHBOARD) }
+    val retainedPages = rememberSaveableStateHolder()
+    retainedPages.SaveableStateProvider(page.name) {
     when (page) {
         FinancePage.DASHBOARD -> FinanceDashboard(rows, error, onOpen = { page = it }, onOpenReports = onOpenReports, onBack = onBack)
         FinancePage.TRANSACTIONS -> FinanceTransactions(rows, transactions, error, onOpenTransaction, minorDigitsFor) { page = FinancePage.DASHBOARD }
         FinancePage.INCOME -> FinanceRecord("income", busy, error, onRecord) { page = FinancePage.DASHBOARD }
         FinancePage.EXPENSE -> FinanceRecord("expense", busy, error, onRecord) { page = FinancePage.DASHBOARD }
+    }
     }
 }
 
@@ -119,18 +135,19 @@ private fun FinanceDashboard(
         visualClass = FarmVisualClass.I2,
         onBack = onBack,
     ) {
-        FarmOperationalSection("Farm money") {
-            Text("${rows.size} recent transaction(s)", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            Text("Values are persisted as integer minor units; this view never uses floating-point money.")
-        }
-        FarmOperationalSection("Quick actions") {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Button(onClick = { onOpen(FinancePage.INCOME) }) { Text("Record income") }
-                Button(onClick = { onOpen(FinancePage.EXPENSE) }) { Text("Record expense") }
-            }
-            TextButton(onClick = { onOpen(FinancePage.TRANSACTIONS) }) { Text("View transactions") }
-            TextButton(onClick = onOpenReports) { Text("Reports and analysis") }
-        }
+        FarmMetricStrip(listOf(FarmMetricValue("Recent transactions", rows.size.toString(), onClick = { onOpen(FinancePage.TRANSACTIONS) })))
+        FarmModuleTools(
+            groups = listOf(
+                FarmToolGroup("Record", listOf(
+                    FarmToolAction("Record income", { onOpen(FinancePage.INCOME) }),
+                    FarmToolAction("Record expense", { onOpen(FinancePage.EXPENSE) }),
+                )),
+                FarmToolGroup("Review", listOf(
+                    FarmToolAction("View transactions", { onOpen(FinancePage.TRANSACTIONS) }),
+                    FarmToolAction("Reports and analysis", onOpenReports),
+                )),
+            ), title = "Finance tools",
+        )
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }
@@ -144,16 +161,23 @@ private fun FinanceTransactions(
     minorDigitsFor: (String) -> Int,
     onBack: () -> Unit,
 ) {
+    var query by rememberSaveable { mutableStateOf("") }
+    val visibleTransactions = transactions.filter {
+        query.isBlank() || (it.kind + " " + it.category + " " + financeDateText(it.epochDay) + " " +
+            formatMoneyMinor(it.amountMinor, it.currency, minorDigitsFor(it.currency))).contains(query.trim(), ignoreCase = true)
+    }
     FarmOperationalPage(
         screenId = "FOS-FIN-002",
         title = "Transactions",
-        subtitle = "Recent farm income and expense records. Tap a row for detail.",
+        subtitle = "Recent income and expenses",
         onBack = onBack,
         backLabel = "Finance",
     ) {
+        OutlinedTextField(query, { query = it }, label = { Text("Filter recent transactions") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         if (transactions.isNotEmpty()) {
+            if (visibleTransactions.isEmpty()) Text("No matching transactions")
             FarmOperationalSection("Current records") {
-                transactions.forEach { tx ->
+                visibleTransactions.forEach { tx ->
                     TextButton(onClick = { onOpenTransaction(tx.id) }, modifier = Modifier.fillMaxWidth()) {
                         Text(
                             "${tx.kind} ${tx.category} " +
@@ -179,9 +203,9 @@ private fun FinanceRecord(
     onRecord: (kind: String, category: String, amount: String, day: String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var category by remember { mutableStateOf(if (kind == "income") "sales" else "feed") }
-    var amount by remember { mutableStateOf("") }
-    var day by remember { mutableStateOf(LocalDate.now().toString()) }
+    var category by rememberSaveable(kind) { mutableStateOf(if (kind == "income") "sales" else "feed") }
+    var amount by rememberSaveable(kind) { mutableStateOf("") }
+    var day by rememberSaveable(kind) { mutableStateOf(LocalDate.now().toString()) }
     val income = kind == "income"
     FarmOperationalPage(
         screenId = if (income) "FOS-FIN-004" else "FOS-FIN-005",
@@ -190,7 +214,7 @@ private fun FinanceRecord(
         onBack = onBack,
         backLabel = "Finance",
     ) {
-        FarmOperationalSection("Details", "Enter a decimal amount such as 12.50. Storage converts it to exact minor units.") {
+        FarmOperationalSection("Details", "") {
             OutlinedTextField(category, {
                 category = it
             }, label = { Text("Category") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -231,32 +255,24 @@ fun FinanceReportsHub(
         onBack = onBack,
         backLabel = "Finance",
     ) {
-        FarmOperationalSection("Reports") {
-            TextButton(onClick = { onOpen(FinanceReportDestination.ENTERPRISE) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Enterprise profitability", modifier = Modifier.fillMaxWidth())
-            }
-            TextButton(onClick = { onOpen(FinanceReportDestination.SPECIES_COST) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Species cost", modifier = Modifier.fillMaxWidth())
-            }
-            TextButton(onClick = { onOpen(FinanceReportDestination.ACTIVITY_COST) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Activity cost", modifier = Modifier.fillMaxWidth())
-            }
-            TextButton(onClick = { onOpen(FinanceReportDestination.CASH_FLOW) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Cash flow", modifier = Modifier.fillMaxWidth())
-            }
-            TextButton(onClick = { onOpen(FinanceReportDestination.BUDGET) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Budget", modifier = Modifier.fillMaxWidth())
-            }
-            TextButton(onClick = { onOpen(FinanceReportDestination.VARIANCE) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Budget variance", modifier = Modifier.fillMaxWidth())
-            }
-            TextButton(onClick = { onOpen(FinanceReportDestination.FINANCE_REPORT) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Finance report", modifier = Modifier.fillMaxWidth())
-            }
-            TextButton(onClick = { onOpen(FinanceReportDestination.EXPORT) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Export", modifier = Modifier.fillMaxWidth())
-            }
-        }
+        FarmModuleTools(
+            groups = listOf(
+                FarmToolGroup("Performance", listOf(
+                    FarmToolAction("Enterprise profitability", { onOpen(FinanceReportDestination.ENTERPRISE) }),
+                    FarmToolAction("Species cost", { onOpen(FinanceReportDestination.SPECIES_COST) }),
+                    FarmToolAction("Activity cost", { onOpen(FinanceReportDestination.ACTIVITY_COST) }),
+                    FarmToolAction("Cash flow", { onOpen(FinanceReportDestination.CASH_FLOW) }),
+                )),
+                FarmToolGroup("Planning", listOf(
+                    FarmToolAction("Budget", { onOpen(FinanceReportDestination.BUDGET) }),
+                    FarmToolAction("Budget variance", { onOpen(FinanceReportDestination.VARIANCE) }),
+                )),
+                FarmToolGroup("Documents", listOf(
+                    FarmToolAction("Finance report", { onOpen(FinanceReportDestination.FINANCE_REPORT) }),
+                    FarmToolAction("Export", { onOpen(FinanceReportDestination.EXPORT) }),
+                )),
+            ), title = "Finance reports",
+        )
     }
 }
 
@@ -283,7 +299,7 @@ fun FinanceTransactionDetailScreen(
             transaction.note?.takeIf { it.isNotBlank() }?.let { Text("Note: $it") }
         }
         FarmOperationalSection("Integrity") {
-            Text("Amounts are stored as integer minor units; no floating-point money is used anywhere in this record.")
+            Text("This amount is shown in its recorded currency.")
         }
     }
 }
@@ -319,9 +335,19 @@ fun EnterpriseProfitabilityScreen(
         }
         FarmOperationalSection("By enterprise") {
             Text(
-                "Profit is income minus expense in exact minor units. " +
+                "Profit is income minus expense. " +
                     "Currencies are reported separately and never added together.",
                 style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        keys.map { it.second }.distinct().forEach { currency ->
+            val currencyKeys = keys.filter { it.second == currency }
+            FarmMetricBars(
+                title = "Income and expense · $currency",
+                values = currencyKeys.flatMap { (category, _) -> listOf(
+                    FarmBarValue("$category · income", BigDecimal.valueOf(incomeMap[category to currency]?.amountMinor ?: 0L, minorDigitsFor(currency)).toDouble(), formatMoneyMinor(incomeMap[category to currency]?.amountMinor ?: 0L, currency, minorDigitsFor(currency))),
+                    FarmBarValue("$category · expense", BigDecimal.valueOf(expenseMap[category to currency]?.amountMinor ?: 0L, minorDigitsFor(currency)).toDouble(), formatMoneyMinor(expenseMap[category to currency]?.amountMinor ?: 0L, currency, minorDigitsFor(currency))),
+                ) }, unit = currency, caption = "All recorded categories. Each currency is shown separately.",
             )
         }
         keys.forEach { (category, currency) ->
@@ -366,7 +392,7 @@ fun SpeciesCostScreen(onBack: () -> Unit) {
                     "carry no species field. No cost is shown rather than a guessed attribution.",
                 fontWeight = FontWeight.Bold,
             )
-            Text("Required: a species attribution field on money records with a governed command change.")
+            Text("Species totals will be available when costs are linked to species.")
         }
     }
 }
@@ -393,6 +419,11 @@ fun ActivityCostScreen(
                 Text("No expense records yet. Activity costs appear here after local expense capture.")
             }
             return@FarmOperationalPage
+        }
+        expense.groupBy { it.currency }.toSortedMap().forEach { (currency, values) ->
+            FarmMetricBars("Expense by activity · $currency", values.sortedByDescending { it.amountMinor }.map {
+                FarmBarValue(it.category, BigDecimal.valueOf(it.amountMinor, minorDigitsFor(currency)).toDouble(), formatMoneyMinor(it.amountMinor, currency, minorDigitsFor(currency)), "${it.recordCount} records")
+            }, currency)
         }
         expense.sortedWith(compareBy({ it.currency }, { it.category })).forEach { row ->
             FarmOperationalSection("${row.category} (${row.currency})") {
@@ -425,6 +456,12 @@ fun CashFlowScreen(
                 Text("No money records yet. Cash flow appears here after local income and expense capture.")
             }
             return@FarmOperationalPage
+        }
+        flows.groupBy { it.currency }.toSortedMap().forEach { (currency, values) ->
+            FarmMetricBars("Money flow · $currency", values.sortedBy { it.yearMonth }.flatMap { flow -> listOf(
+                FarmBarValue("${flow.yearMonth} · in", BigDecimal.valueOf(flow.incomeMinor, minorDigitsFor(currency)).toDouble(), formatMoneyMinor(flow.incomeMinor, currency, minorDigitsFor(currency))),
+                FarmBarValue("${flow.yearMonth} · out", BigDecimal.valueOf(flow.expenseMinor, minorDigitsFor(currency)).toDouble(), formatMoneyMinor(flow.expenseMinor, currency, minorDigitsFor(currency))),
+            ) }, currency, caption = "Recorded movement per calendar month.")
         }
         flows.sortedWith(compareBy({ it.yearMonth }, { it.currency })).forEach { flow ->
             val net = flow.incomeMinor - flow.expenseMinor
@@ -543,13 +580,10 @@ fun BudgetCaptureScreen(
         onBack = onBack,
         backLabel = "Budget",
     ) {
-        FarmOperationalSection("Details", "Enter a decimal amount such as 12.50. Storage converts it to exact minor units.") {
+        FarmOperationalSection("Details", "") {
             OutlinedTextField(name, { name = it }, label = { Text("Name") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
             if (!revising) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Button(onClick = { kind = "expense" }, enabled = !busy && kind != "expense") { Text("Expense") }
-                    Button(onClick = { kind = "income" }, enabled = !busy && kind != "income") { Text("Income") }
-                }
+                FarmSectionTabs(listOf("Expense", "Income"), if (kind == "expense") "Expense" else "Income", { if (!busy) kind = it.lowercase() })
                 OutlinedTextField(category, { category = it }, label = { Text("Category code") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
                 OutlinedTextField(periodStart, { periodStart = it }, label = { Text("Period start (YYYY-MM)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
                 OutlinedTextField(periodEnd, { periodEnd = it }, label = { Text("Period end (YYYY-MM)") }, modifier = Modifier.fillMaxWidth(), enabled = !busy, singleLine = true)
@@ -566,14 +600,9 @@ fun BudgetCaptureScreen(
             ) { Text(if (revising) "Save revision" else "Save budget") }
         }
         if (revising && revisions.isNotEmpty()) {
-            FarmOperationalSection("Revision history") {
-                revisions.forEach { revision ->
-                    Text(
-                        "v${revision.version} — ${formatMoneyMinor(revision.amountMinor, revision.currency, minorDigitsFor(revision.currency))}" +
-                            if (revision.superseded) " (superseded)" else " (current)",
-                    )
-                }
-            }
+            FarmWorkflowTimeline("Revision history", revisions.sortedBy { it.version }.map { revision ->
+                FarmWorkflowStep("Version ${revision.version}", formatMoneyMinor(revision.amountMinor, revision.currency, minorDigitsFor(revision.currency)), if (revision.superseded) "Superseded" else "Current revision", FarmWorkflowState.RECORDED)
+            }, caption = "Recorded revisions. Earlier versions remain in the history.")
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
@@ -615,6 +644,10 @@ fun VarianceScreen(
                 val budget = row.budget
                 val digits = minorDigitsFor(budget.currency)
                 val over = row.varianceMinor > 0 && budget.kind == "expense"
+                FarmMetricBars(budget.name, listOf(
+                    FarmBarValue("Budget", BigDecimal.valueOf(budget.amountMinor, digits).toDouble(), formatMoneyMinor(budget.amountMinor, budget.currency, digits)),
+                    FarmBarValue("Actual", BigDecimal.valueOf(row.actualMinor, digits).toDouble(), formatMoneyMinor(row.actualMinor, budget.currency, digits)),
+                ), budget.currency, caption = "${budget.periodStartYearMonth} to ${budget.periodEndYearMonth} · ${budget.kind}")
                 Text(
                     "${budget.name} (${budget.periodStartYearMonth} to ${budget.periodEndYearMonth})",
                     fontWeight = FontWeight.Bold,
@@ -629,7 +662,7 @@ fun VarianceScreen(
             }
         }
         FarmOperationalSection("Reading variance") {
-            Text("For expense budgets, a positive variance means overspend. For income budgets, a positive variance means beating the plan. Every figure is exact minor units; no currency is ever converted or summed.")
+            Text("For expense budgets, a positive variance means overspend. For income budgets, a positive variance means beating the plan. Currencies remain separate.")
         }
     }
 }
@@ -676,7 +709,7 @@ fun FinanceReportSummaryScreen(
             }
             FarmOperationalSection("Net position") {
                 Text(
-                    "Net per currency is income minus expense in exact minor units. " +
+                    "Net is income minus expense. " +
                         "Currencies are never added together.",
                     style = MaterialTheme.typography.bodySmall,
                 )

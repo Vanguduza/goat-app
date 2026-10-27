@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +18,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.farmos.core.design.AnimalFarmEmptyState
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
+import java.util.Currency
+import java.math.BigDecimal
 import com.farmos.core.design.AnimalFarmTheme
 import com.farmos.core.design.FarmOperationalPage
 import com.farmos.core.design.FarmOperationalSection
@@ -35,7 +43,7 @@ data class RabbitReservationView(
     val matchedKitLabel: String?,
 )
 
-/** One agreed rabbit sale contract. [amountMinor] is shown exactly as stored, in minor units of [currency]. */
+/** One agreed rabbit sale contract. Exact minor units are displayed using the recorded currency scale. */
 data class RabbitContractView(
     val id: String,
     val buyerName: String,
@@ -95,7 +103,11 @@ internal fun rabbitPlanPurposeLabel(purpose: String): String = when (purpose) {
     else -> purpose
 }
 
-private fun minorAmount(amountMinor: Long, currency: String) = "$amountMinor $currency minor units"
+private fun minorAmount(amountMinor: Long, currency: String): String {
+    val digits = runCatching { Currency.getInstance(currency).defaultFractionDigits }.getOrNull()
+    return if (digits != null && digits >= 0) "${BigDecimal.valueOf(amountMinor, digits).toPlainString()} $currency"
+    else "$amountMinor $currency minor units"
+}
 
 @Composable
 private fun CommerceRow(primary: String, secondary: String, tag: String) {
@@ -115,11 +127,13 @@ fun RabbitCommerceRecordNavigator(records: RabbitCommerceRecords, home: @Composa
     val back = { page = null }
     when (page) {
         null -> home {
-            FarmOperationalSection("Records") {
-                RabbitCommercePage.entries.forEach { target ->
-                    TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text("Open ${target.label}") }
-                }
-            }
+            FarmModuleTools(
+                title = "Browse records",
+                initialGroup = "Records",
+                groups = listOf(FarmToolGroup("Records", RabbitCommercePage.entries.map { target ->
+                    FarmToolAction(target.label, { page = target }, tag = "rabbit-commerce-record:${target.name}")
+                })),
+            )
         }
         RabbitCommercePage.RETENTION -> RabbitRetentionScreen(records, back)
         RabbitCommercePage.MARKET_PLANS -> RabbitMarketPlanScreen(records, back)
@@ -131,7 +145,7 @@ fun RabbitCommerceRecordNavigator(records: RabbitCommerceRecords, home: @Composa
 /** FOS-RABBIT-024 — recorded kit retention decisions, newest first. */
 @Composable
 internal fun RabbitRetentionScreen(records: RabbitCommerceRecords, onBack: () -> Unit) {
-    FarmOperationalPage("FOS-RABBIT-024", "Retention decisions", "Retention decisions recorded for kits on this device, newest first.", FarmVisualClass.I3, onBack) {
+    FarmOperationalPage("FOS-RABBIT-024", "Retention decisions", "", FarmVisualClass.I3, onBack) {
         if (records.retention.isEmpty()) {
             AnimalFarmEmptyState("No retention decisions recorded on this device.")
             return@FarmOperationalPage
@@ -153,11 +167,23 @@ internal fun RabbitRetentionScreen(records: RabbitCommerceRecords, onBack: () ->
 /** FOS-RABBIT-026 — recorded market plans with their recorded targets. No readiness is predicted. */
 @Composable
 internal fun RabbitMarketPlanScreen(records: RabbitCommerceRecords, onBack: () -> Unit) {
-    FarmOperationalPage("FOS-RABBIT-026", "Market plans", "Market plans recorded on this device with their recorded target weight and date.", FarmVisualClass.I3, onBack) {
+    FarmOperationalPage("FOS-RABBIT-026", "Market plans", "", FarmVisualClass.I3, onBack) {
         if (records.plans.isEmpty()) {
             AnimalFarmEmptyState("No market plans recorded on this device.")
             return@FarmOperationalPage
         }
+        FarmWorkflowTimeline(
+            title = "Market schedule",
+            steps = records.plans.sortedBy { it.targetEpochDay }.map { plan ->
+                FarmWorkflowStep(
+                    plan.subjectLabel,
+                    LocalDate.ofEpochDay(plan.targetEpochDay).toString(),
+                    "Target ${plan.targetWeightGrams} g · ${rabbitPlanPurposeLabel(plan.purpose)} · ${plan.status}",
+                    FarmWorkflowState.PLANNED,
+                )
+            },
+            caption = "Targets are plans; they do not record a sale or readiness.",
+        )
         FarmOperationalSection("Plans · ${records.plans.size}") {
             records.plans.forEachIndexed { index, plan ->
                 if (index > 0) HorizontalDivider()
@@ -174,7 +200,7 @@ internal fun RabbitMarketPlanScreen(records: RabbitCommerceRecords, onBack: () -
 /** FOS-RABBIT-028 — buyer reservations on the waitlist and their recorded matches. */
 @Composable
 internal fun RabbitReservationScreen(records: RabbitCommerceRecords, onBack: () -> Unit) {
-    FarmOperationalPage("FOS-RABBIT-028", "Reservations", "Buyer reservations recorded on the waitlist on this device.", FarmVisualClass.I3, onBack) {
+    FarmOperationalPage("FOS-RABBIT-028", "Reservations", "", FarmVisualClass.I3, onBack) {
         if (records.reservations.isEmpty()) {
             AnimalFarmEmptyState("No reservations recorded on this device.")
             return@FarmOperationalPage
@@ -200,7 +226,7 @@ internal fun RabbitReservationScreen(records: RabbitCommerceRecords, onBack: () 
 /** FOS-RABBIT-029 — agreed contracts, newest first, totalled per currency. */
 @Composable
 internal fun RabbitContractScreen(records: RabbitCommerceRecords, onBack: () -> Unit) {
-    FarmOperationalPage("FOS-RABBIT-029", "Contracts", "Rabbit sale contracts recorded on this device, newest first. Amounts are shown as stored.", FarmVisualClass.I3, onBack) {
+    FarmOperationalPage("FOS-RABBIT-029", "Contracts", "", FarmVisualClass.I3, onBack) {
         if (records.contracts.isEmpty()) {
             AnimalFarmEmptyState("No contracts recorded on this device.")
             return@FarmOperationalPage

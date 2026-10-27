@@ -1,5 +1,6 @@
 package com.farmos.app
 
+import androidx.compose.runtime.key
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,6 +21,8 @@ data class HomeTaskRow(
     val dueEpochDay: Long,
     val status: String,
     val animalId: String?,
+    val subjectLabel: String? = null,
+    val subjectSpecies: String? = null,
 )
 
 internal data class FarmHomeSummary(
@@ -56,6 +59,7 @@ fun FarmHomeHost(
     /** Exhaustive farm-scoped counts; null falls back to counting the loaded rows. */
     loadCompletedTaskCount: suspend () -> Int? = { null },
     loadActiveWithdrawalCount: suspend (todayEpochDay: Long) -> Int? = { null },
+    loadTaskIdentities: suspend (List<com.farmos.core.database.TaskEntity>) -> Map<String, HomeTaskIdentity> = { emptyMap() },
 ) {
     var summary by remember(farmId) { mutableStateOf(FarmHomeSummary(loading = true)) }
     LaunchedEffect(ops, farmId) {
@@ -65,6 +69,7 @@ fun FarmHomeHost(
             val done = ops.completedTasks()
             val withdrawals = ops.withdrawals()
             val items = runSuspendCatching { ops.items() }.getOrDefault(emptyList())
+            val identities = loadTaskIdentities(open + done)
             val rows = (open + done).map { row ->
                 HomeTaskRow(
                     id = row.id,
@@ -74,6 +79,8 @@ fun FarmHomeHost(
                     dueEpochDay = row.dueOnEpochDay,
                     status = row.status,
                     animalId = row.animalId,
+                    subjectLabel = identities[row.id]?.label,
+                    subjectSpecies = identities[row.id]?.speciesCode,
                 )
             }
             val stages = rows.mapNotNull { projectWorkerTaskStage(it.status, it.dueEpochDay, today) }
@@ -95,6 +102,7 @@ fun FarmHomeHost(
                 summary = FarmHomeSummary(loading = false, loadError = failure.message)
             }
     }
+    key(farmId, membershipRole) {
     RoleAwareFarmHomeScreen(
         role = membershipRole,
         farmName = farmName,
@@ -106,4 +114,5 @@ fun FarmHomeHost(
         currentFarmId = farmId,
         onSwitchFarm = onSwitchFarm,
     )
+    }
 }

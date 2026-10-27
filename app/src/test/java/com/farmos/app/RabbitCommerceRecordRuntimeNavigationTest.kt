@@ -33,7 +33,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class RabbitCommerceRecordRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private val homeTag = "farm-screen:" + "FOS-" + "RABBIT-" + "027"
@@ -61,10 +62,10 @@ class RabbitCommerceRecordRuntimeNavigationTest {
             compose.onNodeWithTag("rabbit-reservation-count:open").assertExists()
         }
         traverse("Contracts", "FOS-RABBIT-029") {
-            compose.onNodeWithText("9500 USD minor units · 2 contracts").assertExists()
-            compose.onNodeWithText("40000 ZAR minor units · 1 contract").assertExists()
+            compose.onNodeWithText("95.00 USD · 2 contracts").assertExists()
+            compose.onNodeWithText("400.00 ZAR · 1 contract").assertExists()
             compose.onNodeWithText("2026-09-20 · Thandi · agreed").assertExists()
-            compose.onNodeWithText("4500 USD minor units · reservation Thandi · animal RB-7").assertExists()
+            compose.onNodeWithText("45.00 USD · reservation Thandi · animal RB-7").assertExists()
         }
     }
 
@@ -85,11 +86,29 @@ class RabbitCommerceRecordRuntimeNavigationTest {
         }
     }
 
+    @Test
+    fun contractAmountsKeepCurrencyScaleAndUnknownCurrencyEvidence() {
+        render(RabbitCommerceRecords(contracts = listOf(
+            RabbitContractView("yen", "Buyer A", null, null, 1234, "JPY", "agreed", day(9, 20)),
+            RabbitContractView("dinar", "Buyer B", null, null, 1234, "KWD", "agreed", day(9, 20)),
+            RabbitContractView("unknown", "Buyer C", null, null, 1234, "ZZZ", "agreed", day(9, 20)),
+        )))
+        traverse("Contracts", "FOS-RABBIT-029") {
+            compose.onNodeWithText("1234 JPY · 1 contract").assertExists()
+            compose.onNodeWithText("1.234 KWD · 1 contract").assertExists()
+            compose.onNodeWithText("1234 ZZZ minor units · 1 contract").assertExists()
+            compose.onNodeWithTag("rabbit-contract-total:JPY").assertExists()
+            compose.onNodeWithTag("rabbit-contract-total:KWD").assertExists()
+            compose.onNodeWithTag("rabbit-contract-total:ZZZ").assertExists()
+        }
+    }
+
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText("Open $label")).performScrollTo().performClick()
+        compose.revealFarmTool(label).performScrollTo().performClick()
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         assertions()
-        compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
+        compose.captureModuleReview(screenId)
+        compose.revealFarmTool("Farm home").performScrollTo().performClick()
         compose.onNodeWithTag(homeTag).assertExists()
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
     }
@@ -116,7 +135,7 @@ class RabbitCommerceRecordRuntimeNavigationTest {
 
     private fun render(records: RabbitCommerceRecords) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 RabbitCommerceRecordNavigator(records) { recordActions ->
                     SimpleCaptureScreen(
                         screenId = "FOS-" + "RABBIT-" + "027",

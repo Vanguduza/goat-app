@@ -1,5 +1,9 @@
 package com.farmos.app
 
+import androidx.compose.ui.test.performImeAction
+
+import androidx.compose.ui.test.assertIsSelected
+
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
@@ -115,10 +119,10 @@ class SpeciesSearchRuntimeNavigationTest {
         seedBeyondHerdWindow("rabbit", listOf(doeId, buckId))
         content { session() }
         search("ZZ-RABBIT")
-        awaitText("Rabbit · ZZ-RABBIT-D · Target doe · active · local")
-        compose.onNodeWithText("Rabbit · ZZ-RABBIT-D · Other farm doe · active · local").assertDoesNotExist()
+        awaitText("ZZ-RABBIT-D · Target doe")
+        compose.onNodeWithText("ZZ-RABBIT-D · Other farm doe").assertDoesNotExist()
 
-        click("Rabbit · ZZ-RABBIT-D · Target doe · active · local")
+        clickTag("search-result:$doeId")
         awaitScreen("FOS-RABBIT-003")
         awaitText("Name Target doe")
         compose.onNodeWithTag("farm-runtime-route:rabbit.doe_profile:FOS-RABBIT-003").assertExists()
@@ -130,7 +134,7 @@ class SpeciesSearchRuntimeNavigationTest {
         awaitScreen("FOS-HOME-006")
         assertQuery("ZZ-RABBIT")
 
-        click("Rabbit · ZZ-RABBIT-B · Target buck · active · local")
+        clickTag("search-result:$buckId")
         awaitScreen("FOS-RABBIT-004")
         awaitText("Name Target buck")
         compose.onNodeWithTag("farm-runtime-route:rabbit.buck_profile:FOS-RABBIT-004").assertExists()
@@ -139,7 +143,7 @@ class SpeciesSearchRuntimeNavigationTest {
         click("Back")
         awaitScreen("FOS-HOME-006")
         assertQuery("ZZ-RABBIT")
-        compose.onNodeWithText("Rabbit · ZZ-RABBIT-D · Target doe · active · local").assertExists()
+        awaitText("ZZ-RABBIT-D · Target doe")
         back()
         awaitScreen("FOS-HOME-012-A")
         assertNoLocalOperations()
@@ -213,10 +217,10 @@ class SpeciesSearchRuntimeNavigationTest {
         }
         var opened = 0
         content { GlobalSearchHost(app.database, farmA, onOpen = { opened++ }, onBack = {}) }
-        field("Tag, name, species or identifier", "UNSUPPORTED")
-        click("Search farm")
-        val rabbit = "Rabbit · UNSUPPORTED-R · Unknown sex rabbit · active · local"
-        val bird = "Poultry · UNSUPPORTED-P · Individual hen · active · local"
+        field("Tag, name or ID", "UNSUPPORTED")
+        compose.onNodeWithTag("farm-screen:FOS-SEARCH-001").performImeAction()
+        val rabbit = "UNSUPPORTED-R · Unknown sex rabbit"
+        val bird = "UNSUPPORTED-P · Individual hen"
         awaitText(rabbit)
         awaitText(bird)
         compose.onNodeWithText("Rabbit profile unavailable: recorded sex has no Doe or Buck profile.").assertExists()
@@ -240,10 +244,10 @@ class SpeciesSearchRuntimeNavigationTest {
         seedBeyondHerdWindow(species, listOf(targetId))
         content { session() }
         search("ZZ-TARGET")
-        awaitText("$label · ZZ-TARGET · $name · active · local")
+        awaitText("ZZ-TARGET · $name")
         click("Filter results")
-        click(label)
-        click("$label · ZZ-TARGET · $name · active · local")
+        clickTag("search-species:$species")
+        clickTag("search-result:$targetId")
         awaitScreen("$prefix-003")
         awaitText("ZZ-TARGET · $name · female · active")
         compose.onNodeWithTag("farm-runtime-route:${kind.routeKey}:$prefix-003").assertExists()
@@ -251,7 +255,7 @@ class SpeciesSearchRuntimeNavigationTest {
         compose.onNodeWithText("Other farm", substring = true).assertDoesNotExist()
         compose.onNodeWithText("AA-FIRST", substring = true).assertDoesNotExist()
 
-        click("Record weight")
+        clickTag("species-profile-record-weight")
         awaitScreen("$prefix-006")
         compose.onNodeWithText("ZZ-TARGET · $name · female · active").assertExists()
         field("Weight", weight)
@@ -284,9 +288,9 @@ class SpeciesSearchRuntimeNavigationTest {
         back()
         awaitScreen("FOS-HOME-006")
         assertQuery("ZZ-TARGET")
-        compose.onNodeWithText("$label (active)").assertExists()
-        compose.onNodeWithText("$label · ZZ-TARGET · $name · active · local").assertExists()
-        compose.onNodeWithText("Goat · ZZ-TARGET · Same tag goat · active · local").assertDoesNotExist()
+        compose.onNodeWithTag("search-species:$species").assertIsSelected()
+        awaitText("ZZ-TARGET · $name")
+        compose.onNodeWithText("ZZ-TARGET · Same tag goat").assertDoesNotExist()
         back()
         awaitScreen("FOS-HOME-012-A")
         io { assertEquals(1, app.database.replication().operationsInRange(farmA, app.deviceId, 1, Long.MAX_VALUE).size) }
@@ -346,15 +350,17 @@ class SpeciesSearchRuntimeNavigationTest {
 
     private fun search(query: String) {
         awaitScreen("FOS-HOME-012-A")
-        click("Search farm")
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-menu-action:Search farm").performClick()
         awaitScreen("FOS-HOME-006")
-        field("Tag, name, species or identifier", query)
-        click("Search farm")
+        field("Tag, name or ID", query)
+        compose.onNodeWithTag("farm-screen:FOS-SEARCH-001").performImeAction()
         awaitScreen("FOS-HOME-007")
     }
 
     private fun assertQuery(query: String) {
-        compose.onNode(hasSetTextAction() and hasText("Tag, name, species or identifier") and hasText(query)).assertExists()
+        compose.onNode(hasSetTextAction() and hasText("Tag, name or ID") and hasText(query)).assertExists()
     }
 
     private fun field(label: String, value: String) {
@@ -365,6 +371,14 @@ class SpeciesSearchRuntimeNavigationTest {
         val action = hasClickAction() and hasText(label)
         compose.waitUntil(10_000) { compose.onAllNodes(action).fetchSemanticsNodes().isNotEmpty() }
         compose.onNode(action).performScrollTo().assertIsDisplayed().performClick()
+    }
+
+
+    private fun clickTag(tag: String) {
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag(tag).performScrollTo().assertIsDisplayed().performClick()
     }
 
     private fun back() {

@@ -1,8 +1,22 @@
 package com.farmos.app
 
+import com.farmos.core.design.FarmMetricStrip
+import com.farmos.core.design.FarmMetricValue
+import com.farmos.core.design.FarmMetricBars
+import com.farmos.core.design.FarmBarValue
+import com.farmos.core.design.FarmModuleTools
+import com.farmos.core.design.FarmToolAction
+import com.farmos.core.design.FarmToolGroup
+import com.farmos.core.design.FarmSectionTabs
+import com.farmos.core.design.FarmWorkflowTimeline
+import com.farmos.core.design.FarmWorkflowStep
+import com.farmos.core.design.FarmWorkflowState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,24 +29,43 @@ import java.util.UUID
 @Composable
 internal fun ProcurementModuleContent(state: ProcurementModuleState) {
     with(state) {
+    var homeSection by rememberSaveable(farmId) { mutableStateOf("Overview") }
     when (page.value) {
         ProcurementModulePage.HOME -> {
             val name = remember { mutableStateOf("") }; val lead = remember { mutableStateOf("0") }
             ProcurementRecordNavigator(records.value) { recordActions -> SimpleCaptureScreen(
                 screenId = "FOS-PROC-001", title = "Procurement",
-                help = "A purchase receives inventory and posts an expense in integer minor units of ${currency ?: "the farm currency"}.",
+                help = "Suppliers, purchases and receipts",
                 empty = "No suppliers on this device.", rows = rows.value, busy = busy.value, error = error.value,
                 fields = listOf("Supplier name" to name, "Lead time days" to lead), actionLabel = "Create supplier",
                 onSubmit = { run { ops.createSupplier(CreateSupplier(UUID.randomUUID().toString(), name.value, lead.value.toIntOrNull() ?: 0), newContext()) } },
                 onBack = onBack,
+            overview = {
+                FarmSectionTabs(listOf("Overview", "Record", "Tools", "Records"), homeSection, { homeSection = it })
+                if (homeSection == "Overview") {
+                    FarmMetricStrip(listOf(FarmMetricValue("Suppliers", records.value.suppliers.size.toString()), FarmMetricValue("Recorded purchases", records.value.purchaseCount?.toString() ?: "—")))
+                    if (records.value.suppliers.isNotEmpty()) FarmMetricBars("Purchases by supplier", records.value.suppliers.map { FarmBarValue(it.name, it.purchaseCount.toDouble(), "${it.purchaseCount} purchases", "Lead time ${it.leadTimeDays} days") }, "purchases")
+                }
+            },
+            navigation = { if (homeSection == "Tools") {
+                    FarmModuleTools(listOf(
+                        FarmToolGroup("Purchase", listOf(
+                            FarmToolAction("Create purchase", { openPage(ProcurementModulePage.CREATE) }),
+                            FarmToolAction("Purchase orders", { openPage(ProcurementModulePage.ORDERS) }),
+                        )),
+                        FarmToolGroup("Receipts", listOf(
+                            FarmToolAction("Receive purchase", { openPage(ProcurementModulePage.RECEIVE) }),
+                            FarmToolAction("Purchase to inventory", { openPage(ProcurementModulePage.TO_INVENTORY) }),
+                            FarmToolAction("Procurement report", { openPage(ProcurementModulePage.REPORT) }),
+                        )),
+                    ), title = "Procurement tools")
+                    recordActions()
+            } },
+            captureVisible = homeSection == "Record",
+            recordsVisible = homeSection == "Records",
+            showPrimaryAction = true,
                 saved = saved.value,
                 extra = {
-                    recordActions()
-                    TextButton(onClick = { openPage(ProcurementModulePage.ORDERS) }, modifier = Modifier.fillMaxWidth()) { Text("Purchase orders") }
-                    TextButton(onClick = { openPage(ProcurementModulePage.CREATE) }, modifier = Modifier.fillMaxWidth()) { Text("Create purchase") }
-                    TextButton(onClick = { openPage(ProcurementModulePage.RECEIVE) }, modifier = Modifier.fillMaxWidth()) { Text("Receive purchase") }
-                    TextButton(onClick = { openPage(ProcurementModulePage.TO_INVENTORY) }, modifier = Modifier.fillMaxWidth()) { Text("Purchase to inventory") }
-                    TextButton(onClick = { openPage(ProcurementModulePage.REPORT) }, modifier = Modifier.fillMaxWidth()) { Text("Procurement report") }
                 },
             ) }
         }

@@ -1,17 +1,37 @@
 package com.farmos.app
 
+import androidx.compose.foundation.layout.navigationBarsPadding
+
+import androidx.compose.foundation.layout.imePadding
+
+import com.farmos.core.design.FarmSectionTabs
+
+import com.farmos.core.design.FarmMetricValue
+
+import com.farmos.core.design.FarmMetricStrip
+
+import com.farmos.core.design.FarmBackButton
+
+import com.farmos.core.design.FarmActionButton
+
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+
+import androidx.compose.runtime.saveable.rememberSaveable
+
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -125,12 +145,14 @@ fun SpeciesHerdScreen(
             )
         }
     require(entryAnimalId == null || entryAnimalId.isNotBlank()) { "An animal profile needs an id" }
-    var page by remember(module, entryAnimalId) { mutableStateOf(if (entryAnimalId == null) SpeciesPage.DASHBOARD else SpeciesPage.PROFILE) }
-    var selectedId by remember(module, entryAnimalId) { mutableStateOf(entryAnimalId ?: rows.firstOrNull()?.animalId) }
+    var page by rememberSaveable(module.name, entryAnimalId) { mutableStateOf(if (entryAnimalId == null) SpeciesPage.DASHBOARD else SpeciesPage.PROFILE) }
+    var selectedId by rememberSaveable(module.name, entryAnimalId) { mutableStateOf(entryAnimalId ?: rows.firstOrNull()?.animalId) }
     val selected = rows.firstOrNull { it.animalId == selectedId }
     val home = { page = SpeciesPage.DASHBOARD }
     val profileBack: () -> Unit = if (entryAnimalId != null) onBack else home
     val detailBack = { page = if (entryAnimalId != null) SpeciesPage.PROFILE else SpeciesPage.DASHBOARD }
+    val pageStateHolder = rememberSaveableStateHolder()
+    pageStateHolder.SaveableStateProvider(page.name) {
     when (page) {
         SpeciesPage.DASHBOARD -> {
             SpeciesDashboard(config, rows, counts, selected, error, { page = it }, onBack)
@@ -170,6 +192,7 @@ fun SpeciesHerdScreen(
             }
         }
     }
+    }
 }
 
 @Composable
@@ -183,21 +206,21 @@ private fun SpeciesDashboard(
     onBack: () -> Unit,
 ) {
     FarmBackHandler(onBack)
-    AnimalFarmCanvas {
+    AnimalFarmCanvas(Modifier.testTag("farm-screen:${config.prefix}-001")) {
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(FosDimens.SectionGap),
+            Modifier.weight(1f).imePadding().navigationBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = com.farmos.core.design.animalFarmHomePageInset(), vertical = com.farmos.core.design.AnimalFarmHomeMetrics.headerInset),
+            verticalArrangement = Arrangement.spacedBy(com.farmos.core.design.AnimalFarmHomeMetrics.contentGap),
         ) {
+            FarmBackButton("Farm home", onBack)
             AnimalFarmModuleHeader(
                 title = config.name,
-                subtitle = "Individual ${config.plural} records on this device",
+                subtitle = "",
                 family = config.visual.toAnimalFarmFamily(),
             )
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Exhaustive counts when loaded; the row list is bounded and is only a fallback.
-                SpeciesMetric("Total", counts?.total ?: rows.size, Modifier.weight(1f))
-                SpeciesMetric("Active", counts?.active ?: rows.count { it.active }, Modifier.weight(1f))
-            }
+            FarmMetricStrip(listOf(
+                FarmMetricValue("Total", counts?.total?.toString() ?: "—", onClick = { onOpen(SpeciesPage.HERD) }),
+                FarmMetricValue("Active", counts?.active?.toString() ?: "—", onClick = { onOpen(SpeciesPage.HERD) }),
+            ))
             SpeciesAction("${config.name} records", "Browse the current ${config.plural} list") { onOpen(SpeciesPage.HERD) }
             SpeciesAction("Register ${config.name.lowercase()}", "Create an individual animal identity") { onOpen(SpeciesPage.REGISTER) }
             if (selected != null) SpeciesAction("Open profile", selected.label) { onOpen(SpeciesPage.PROFILE) }
@@ -206,7 +229,6 @@ private fun SpeciesDashboard(
                 "Open this species module",
             ) { onOpen(SpeciesPage.OPERATIONS) }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-            TextButton(onClick = onBack) { Text("Farm home") }
         }
     }
 }
@@ -224,17 +246,10 @@ private fun SpeciesMetric(
 }
 
 @Composable
-private fun SpeciesAction(
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-) {
-    FarmIllustratedSectionSurface(Modifier.fillMaxWidth()) {
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        val actionLabel = if (title.startsWith("Open ")) title else "Open $title"
-        TextButton(onClick = onClick) { Text(actionLabel) }
-    }
+private fun SpeciesAction(title: String, subtitle: String, onClick: () -> Unit) {
+    com.farmos.core.design.FarmResourceAction(
+        title = title, detail = subtitle.takeIf { title == "Open profile" }, onClick = onClick,
+    )
 }
 
 @Composable
@@ -247,26 +262,34 @@ private fun SpeciesHerdList(
     onSelect: (String) -> Unit,
     onBack: () -> Unit,
 ) {
+    var filter by rememberSaveable { mutableStateOf("All") }
+    val visibleRows = rows.filter { filter == "All" || (filter == "Active") == it.active }
     val id = config.screenIds.herd
     FarmOperationalPage(
         id,
         "${config.name} ${if (config.prefix.endsWith("SHEEP")) "mob / flock" else "herd"}",
-        "Individual ${config.plural} records on this device.",
+        "",
         onBack = onBack,
     ) {
+        FarmSectionTabs(listOf("All", "Active", "Closed"), filter, { filter = it })
         listedTotal?.takeIf { it > rows.size }?.let { total ->
             Text("Showing the first ${rows.size} of $total ${config.plural} by tag.", Modifier.testTag("species-herd-bounded"))
         }
-        if (rows.isEmpty()) {
-            FarmOperationalRows(emptyList(), "No ${config.plural} registered", "Register the first animal from the dashboard.")
+        if (visibleRows.isEmpty()) {
+            FarmOperationalRows(emptyList(), if (rows.isEmpty()) "No ${config.plural} registered" else "No ${filter.lowercase()} records shown", if (rows.isEmpty()) "Register the first animal from the dashboard." else null)
         } else {
             FarmOperationalSection("Animals") {
-                rows.forEach { row ->
+                visibleRows.forEach { row ->
                     TextButton(
                         onClick = { onSelect(row.animalId) },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text(row.label) }
+                    ) {
+                        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(FosDimens.Grid)) {
+                            Text(row.label, fontWeight = FontWeight.SemiBold)
+                            Text(if (row.active) "Active" else "Closed lifecycle record", style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
                 }
             }
         }
@@ -289,7 +312,7 @@ private fun SpeciesProfile(
     FarmOperationalPage(
         config.screenIds.profile,
         "${config.name} profile",
-        "Identity, current state and species-native actions.",
+        "",
         FarmVisualClass.I2,
         onBack,
         backLabel = if (exactEntry) "Back" else "Farm home",
@@ -311,14 +334,12 @@ private fun SpeciesProfile(
                 Text(if (selected.active) "Active" else "Closed lifecycle record")
             }
             FarmOperationalSection("Actions") {
-                Button(
-                    onClick = { onOpen(SpeciesPage.WEIGHT) },
-                    enabled = selected.active,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text("Record weight") }
-                TextButton(onClick = { onOpen(SpeciesPage.OPERATIONS) }, enabled = selected.active) { Text(config.operationsTitle) }
-                TextButton(onClick = { onOpen(SpeciesPage.STATUS) }, enabled = selected.active || exitsReversible) { Text("Lifecycle status") }
+                TextButton(onClick = { onOpen(SpeciesPage.WEIGHT) }, enabled = selected.active, modifier = Modifier.fillMaxWidth().testTag("species-profile-record-weight")) { Text("Record weight") }
+                TextButton(onClick = { onOpen(SpeciesPage.OPERATIONS) }, enabled = selected.active, modifier = Modifier.fillMaxWidth().testTag("species-profile-operations")) { Text(config.operationsTitle) }
+                TextButton(onClick = { onOpen(SpeciesPage.STATUS) }, enabled = selected.active || exitsReversible, modifier = Modifier.fillMaxWidth().testTag("species-profile-status")) { Text("Lifecycle status") }
             }
+            com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(selected.animalId,config.plural))
+            com.farmos.core.design.FarmProfileBreeding(selected.animalId,config.plural)
             // Owner decision D-015: photos and documents of this animal, when the host provides them.
             attachmentContent?.invoke(selected)
         }
@@ -333,13 +354,13 @@ private fun SpeciesRegister(
     onRegister: (String, String?, String, String?) -> Unit,
     onBack: () -> Unit,
 ) {
-    var tag by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var sex by remember { mutableStateOf("FEMALE") }
+    var tag by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var sex by rememberSaveable { mutableStateOf("FEMALE") }
     FarmOperationalPage(
         config.screenIds.register,
         "Register ${config.name.lowercase()}",
-        "Create an individual animal record.",
+        "",
         onBack = onBack,
     ) {
         FarmOperationalSection("Identity") {
@@ -403,9 +424,9 @@ private fun SpeciesWeight(
     onBack: () -> Unit,
     backLabel: String = "Farm home",
 ) {
-    var weight by remember { mutableStateOf("") }
+    var weight by rememberSaveable { mutableStateOf("") }
     val id = config.screenIds.weight
-    FarmOperationalPage(id, "Record weight", "Capture live weight in kilograms.", onBack = onBack, backLabel = backLabel) {
+    FarmOperationalPage(id, "Record weight", "", onBack = onBack, backLabel = backLabel) {
         if (selected == null) {
             FarmOperationalRows(emptyList(), "No animal selected", null)
         } else {
@@ -438,6 +459,7 @@ private fun SpeciesOperations(
     extra(selected, onBack)
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SpeciesStatus(
     config: SpeciesUiConfig,
@@ -460,7 +482,7 @@ private fun SpeciesStatus(
             FarmOperationalRows(emptyList(), "No animal selected", null)
         } else {
             FarmOperationalSection(selected.label) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = { pending = "sold" }, enabled = !busy) { Text("Sold") }
                     TextButton(onClick = { pending = "dead" }, enabled = !busy) { Text("Deceased") }
                     TextButton(onClick = { pending = "culled" }, enabled = !busy) { Text("Culled") }

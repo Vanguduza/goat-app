@@ -2,11 +2,14 @@ package com.farmos.app
 
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
@@ -38,7 +41,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class SheepRecordRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private val homeTag = "farm-screen:" + "FOS-" + "SHEEP-" + "010"
@@ -137,11 +141,45 @@ class SheepRecordRuntimeNavigationTest {
         }
     }
 
+    @Test
+    fun lambingWorkflowUsesTheSelectedMobAndRetainsEveryRecordedScan() {
+        render(null, lambingDue = {
+            SheepLambingDue(
+                listOf(SheepMobLambingView("mob-a", "Ewes A", 120, day(4, 20), day(9, 9), day(9, 14)), SheepMobLambingView("mob-b", "Maidens", 40, day(6, 1), day(10, 22), day(10, 27))),
+                listOf(SheepInLambView("e1", "S-0001", "Molly", "twin", day(7, 1))), 147,
+            )
+        }) { SheepAnimalRecords() }
+        openTool("Lambing due")
+        compose.onNodeWithTag("sheep-lambing-workflow:mob-a").assertExists()
+        compose.onNodeWithText("Choose mob").performScrollTo().performClick()
+        compose.onNodeWithTag("sheep-lambing-selector:option:mob-b").performScrollTo().performClick()
+        compose.onNodeWithTag("sheep-lambing-workflow:mob-b").assertExists()
+        compose.onNodeWithText("2026-10-27").assertExists()
+        compose.onNodeWithTag("farm-section:Records").performScrollTo().performClick()
+        compose.onNodeWithTag("sheep-due-mob:mob-a").assertExists()
+        compose.onNodeWithTag("sheep-due-mob:mob-b").assertExists()
+        compose.onNodeWithTag("sheep-due-ewe:e1").assertExists()
+        compose.onNodeWithTag("farm-section:Schedule").performScrollTo().performClick()
+        compose.onNodeWithTag("sheep-lambing-workflow:mob-b").assertExists()
+    }
+
+    private fun openTool(label: String) {
+        if (compose.onAllNodesWithTag("farm-tools-search").fetchSemanticsNodes().isEmpty()) {
+            compose.onNodeWithText("Find tool").performScrollTo().performClick()
+        }
+        compose.onNodeWithTag("farm-tools-search").performScrollTo().performTextReplacement(label)
+        compose.onNode(hasClickAction() and hasText(label) and !hasTestTag("farm-tools-search")).performScrollTo().performClick()
+    }
+
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+        openTool(label)
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         compose.waitForIdle()
+        if (screenId == "FOS-SHEEP-013" && compose.onAllNodesWithTag("farm-section:Records").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithTag("farm-section:Records").performScrollTo().performClick()
+        }
         assertions()
+        compose.captureModuleReview(screenId)
         compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
         compose.onNodeWithTag(homeTag).assertExists()
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
@@ -179,7 +217,7 @@ class SheepRecordRuntimeNavigationTest {
         load: suspend (String) -> SheepAnimalRecords,
     ) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SheepOperationsScreen(
                     selectedAnimalId = selected,
                     busy = false,

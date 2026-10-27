@@ -40,8 +40,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class InventoryCaptureOwnerTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val farm = "11111111-1111-4111-8111-111111111111"
     private val otherFarm = "22222222-2222-4222-8222-222222222222"
@@ -67,7 +67,7 @@ class InventoryCaptureOwnerTest {
         var syncRequests = 0
         render { syncRequests++ }
         compose.onNode(hasClickAction() and hasText("Receive")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-INV-005").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-INV-005").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-009:option:item-mash").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-009:option:item-other").assertDoesNotExist()
 
@@ -84,13 +84,13 @@ class InventoryCaptureOwnerTest {
         seedCommandAuthority(database, farm, "user-1", "device-1", LocalRole.MANAGER)
         var syncRequests = 0
         render { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Set reorder point")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-INV-012").assertExists()
+        compose.revealFarmTool("Set reorder point").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-INV-012").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("farm-atom:FOS-ATOM-009:option:item-mash").fetchSemanticsNodes().isNotEmpty() }
 
         compose.onNodeWithTag("farm-atom:FOS-ATOM-009:option:item-mash").performScrollTo().performClick()
         compose.onNode(hasSetTextAction() and hasText("Reorder quantity")).performScrollTo().performTextInput("4")
-        compose.onNode(hasClickAction() and hasText("Set reorder point")).performScrollTo().performClick()
+        compose.revealFarmTool("Set reorder point").performScrollTo().performClick()
 
         compose.waitUntil(10_000) { runBlocking { database.inventory().item(farm, "item-mash") }?.reorderMilli == 4_000L }
         assertEquals(12_500L, runBlocking { database.inventory().item(farm, "item-mash") }?.quantityMilli)
@@ -99,7 +99,7 @@ class InventoryCaptureOwnerTest {
 
     private fun render(onSync: () -> Unit) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 InventoryModuleHost(
                     farmId = farm,
                     ops = RoomOpsRepository(database, farm),

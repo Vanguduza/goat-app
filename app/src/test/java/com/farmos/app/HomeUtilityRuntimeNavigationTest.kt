@@ -26,8 +26,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class HomeUtilityRuntimeNavigationTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     @Test
     fun homeUtilityPanelsTraverseAndRestoreWithoutCrossingAuthorityBoundaries() {
@@ -37,7 +37,7 @@ class HomeUtilityRuntimeNavigationTest {
         var switched: FarmMembership? = null
 
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 RoleAwareFarmHomeScreen(
                     role = "owner",
                     farmName = "Premier Farm",
@@ -82,35 +82,35 @@ class HomeUtilityRuntimeNavigationTest {
             }
         }
 
-        open("Today summary")
-        compose.onNodeWithTag("farm-screen:FOS-HOME-003").assertExists()
-        compose.onNode(hasClickAction() and hasText("Open tasks")).assertExists()
+        openFromMenu("Today summary")
+        compose.onNodeWithTag("farm-screen:FOS-HOME-003").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNode(hasClickAction() and hasText("Open tasks")).assertExists().also { compose.captureObservedNativeOwners() }
         restoreHome()
 
-        open("Farm alerts")
-        compose.onNodeWithTag("farm-screen:FOS-HOME-004").assertExists()
-        compose.onNodeWithText("• 1 overdue task(s)").assertExists()
+        openFromMenu("Farm alerts")
+        compose.onNodeWithTag("farm-screen:FOS-HOME-004").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("• 1 overdue task(s)").assertExists().also { compose.captureObservedNativeOwners() }
         restoreHome()
 
-        open("Farm activity")
-        compose.onNodeWithTag("farm-screen:FOS-HOME-005").assertExists()
-        compose.onNodeWithText("Review kid feed").assertExists()
-        compose.onNodeWithText("Check Nala condition").assertExists()
+        openFromMenu("Farm activity")
+        compose.onNodeWithTag("farm-screen:FOS-HOME-005").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Review kid feed").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Check Nala condition").assertExists().also { compose.captureObservedNativeOwners() }
         restoreHome()
 
-        open("Notifications")
-        compose.onNodeWithTag("farm-screen:FOS-HOME-011").assertExists()
-        compose.onNodeWithText("• 2 local change(s) waiting to sync").assertExists()
+        openFromMenu("Notifications")
+        compose.onNodeWithTag("farm-screen:FOS-HOME-011").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("• 2 local change(s) waiting to sync").assertExists().also { compose.captureObservedNativeOwners() }
         restoreHome()
 
-        open("Quick capture")
-        compose.onNodeWithTag("farm-screen:FOS-HOME-008").assertExists()
-        compose.onNodeWithText("Record goat weight").assertExists()
+        openFromMenu("Quick capture")
+        compose.onNodeWithTag("farm-screen:FOS-HOME-008").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Record goat weight").assertExists().also { compose.captureObservedNativeOwners() }
         restoreHome()
 
-        open("Switch farm")
-        compose.onNodeWithTag("farm-screen:FOS-HOME-010").assertExists()
-        compose.onNodeWithTag("farm-atom:FOS-ATOM-006").assertExists()
+        openFromMenu("Switch farm")
+        compose.onNodeWithTag("farm-screen:FOS-HOME-010").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-006").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-006:option:${premier.farmId}").assertIsSelected()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-006:option:${premier.farmId}").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(null, switched) }
@@ -119,7 +119,14 @@ class HomeUtilityRuntimeNavigationTest {
             .performScrollTo()
             .performClick()
         compose.runOnIdle { assertEquals(irene, switched) }
-        compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertExists().also { compose.captureObservedNativeOwners() }
+    }
+
+    private fun openFromMenu(label: String) {
+        compose.onNodeWithTag("home-nav:Modules").performClick()
+        compose.onNode(hasClickAction() and hasText("All farm tools")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-menu").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-menu-action:$label").performScrollTo().performClick()
     }
 
     private fun open(label: String) {
@@ -130,14 +137,14 @@ class HomeUtilityRuntimeNavigationTest {
 
     private fun restoreHome() {
         open("Farm home")
-        compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-HOME-012-A").assertExists().also { compose.captureObservedNativeOwners() }
     }
 
     @Test
     fun todaySummaryShowsTheSyncPendingReceiptOnlyWhileChangesWait() {
         val pending = mutableStateOf(2L)
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 HomeUtilityScreen(
                     surface = HomeSurface.TODAY_SUMMARY,
                     summary = FarmHomeSummary(pendingSync = pending.value),
@@ -146,10 +153,10 @@ class HomeUtilityRuntimeNavigationTest {
                 )
             }
         }
-        compose.onNodeWithTag("farm-atom:FOS-ATOM-035").assertExists()
-        compose.onNodeWithText("2 changes saved on this device are waiting to sync").assertExists()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-035").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("2 changes saved on this device are waiting to sync").assertExists().also { compose.captureObservedNativeOwners() }
         pending.value = 1L
-        compose.onNodeWithText("1 change saved on this device is waiting to sync").assertExists()
+        compose.onNodeWithText("1 change saved on this device is waiting to sync").assertExists().also { compose.captureObservedNativeOwners() }
         pending.value = 0L
         compose.onNodeWithTag("farm-atom:FOS-ATOM-035").assertDoesNotExist()
     }

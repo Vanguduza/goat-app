@@ -1,0 +1,235 @@
+{
+  "schema_version": 2,
+  "screen_id": "FOS-REPORT-001",
+  "visit": 1,
+  "test": "ReportDisclosureAuthorityTest.aCurrentSessionWritesTheChosenCsvAndItsTruthfulExportReceipt",
+  "test_class": "com.farmos.app.ReportDisclosureAuthorityTest",
+  "owner_node_id": 1771,
+  "owner_instance_tag": "farm-screen:FOS-REPORT-001",
+  "evidence_class": "OBSERVED_NATIVE_PRODUCT_OWNER",
+  "source": "actual Compose tree",
+  "variant": "observed state after successful assertion",
+  "owner_observed_before_capture": true,
+  "mode": "LIGHT",
+  "width_dp": 411,
+  "actual_device_width_dp": 411,
+  "actual_device_height_dp": 900,
+  "font_scale": 1,
+  "vertical_scroll_containers": 1,
+  "vertical_sweep_complete": true,
+  "scroll_restored": true,
+  "incomplete_reasons": [],
+  "viewports": [
+    {
+      "image": "FOS-REPORT-001.png",
+      "image_sha256": "8957030bbccca9b7f59be0a679c69d1b770e7f8b3c1817904b5adc898b1a6d18",
+      "width_px": 411,
+      "height_px": 900,
+      "density": 1,
+      "actual_font_scale": 1,
+      "visible_tags": [
+        "farm-screen:FOS-REPORT-001",
+        "farm-section:Farm figures",
+        "farm-section:Reports",
+        "farm-tools-group:Animals",
+        "farm-tools-group:Documents",
+        "farm-tools-group:Production and resources",
+        "report-data-ready",
+        "report-open-export"
+      ],
+      "observed_owner_ids": [
+        "FOS-REPORT-001"
+      ],
+      "canonical_owner_bindings": [
+        {
+          "id": "FOS-REPORT-001",
+          "tag": "farm-screen:FOS-REPORT-001",
+          "node_id": 1771,
+          "kind": "EXACT_CANONICAL_TAG"
+        }
+      ],
+      "controls": [
+        {
+          "tag": null,
+          "name": "Farm home",
+          "width_dp": 126,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            16,
+            142,
+            64
+          ],
+          "touch_bounds_px": [
+            16,
+            16,
+            142,
+            64
+          ],
+          "touch_width_dp": 126,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        },
+        {
+          "tag": "farm-section:Reports",
+          "name": "Reports",
+          "width_dp": 98,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            161,
+            114,
+            209
+          ],
+          "touch_bounds_px": [
+            16,
+            161,
+            114,
+            209
+          ],
+          "touch_width_dp": 98,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        },
+        {
+          "tag": "farm-section:Farm figures",
+          "name": "Farm figures",
+          "width_dp": 111,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            122,
+            161,
+            233,
+            209
+          ],
+          "touch_bounds_px": [
+            122,
+            161,
+            233,
+            209
+          ],
+          "touch_width_dp": 111,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        },
+        {
+          "tag": null,
+          "name": "Find tool",
+          "width_dp": 112,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            283,
+            233,
+            395,
+            281
+          ],
+          "touch_bounds_px": [
+            283,
+            233,
+            395,
+            281
+          ],
+          "touch_width_dp": 112,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        },
+        {
+          "tag": "farm-tools-group:Animals",
+          "name": "Animals · 5",
+          "width_dp": 379,
+          "height_dp": 54,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            293,
+            395,
+            347
+          ],
+          "touch_bounds_px": [
+            16,
+            293,
+            395,
+            347
+          ],
+          "touch_width_dp": 379,
+          "touch_height_dp": 54,
+          "fully_visible": true
+        },
+        {
+          "tag": "farm-tools-group:Production and resources",
+          "name": "Production and resources · 4",
+          "width_dp": 379,
+          "height_dp": 54,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            359,
+            395,
+            413
+          ],
+          "touch_bounds_px": [
+            16,
+            359,
+            395,
+            413
+          ],
+          "touch_width_dp": 379,
+          "touch_height_dp": 54,
+          "fully_visible": true
+        },
+        {
+          "tag": "farm-tools-group:Documents",
+          "name": "Documents · 4",
+          "width_dp": 379,
+          "height_dp": 54,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            425,
+            395,
+            479
+          ],
+          "touch_bounds_px": [
+            16,
+            425,
+            395,
+            479
+          ],
+          "touch_width_dp": 379,
+          "touch_height_dp": 54,
+          "fully_visible": true
+        },
+        {
+          "tag": "report-open-export",
+          "name": "Export records",
+          "width_dp": 379,
+          "height_dp": 48,
+          "disabled": false,
+          "bounds_px": [
+            16,
+            543,
+            395,
+            591
+          ],
+          "touch_bounds_px": [
+            16,
+            543,
+            395,
+            591
+          ],
+          "touch_width_dp": 379,
+          "touch_height_dp": 48,
+          "fully_visible": true
+        }
+      ],
+      "layout_findings": [],
+      "scroll_position": 0
+    }
+  ],
+  "accessibility_manual_review": "TALKBACK_FOCUS_AND_HUMAN_PIXEL_REVIEW_REMAIN_REQUIRED",
+  "approval": "UNAPPROVED_REVIEW_CANDIDATE"
+}

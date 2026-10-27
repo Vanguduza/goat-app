@@ -43,8 +43,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class ProcurementCaptureOwnerTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val farm = "11111111-1111-4111-8111-111111111111"
     private val otherFarm = "22222222-2222-4222-8222-222222222222"
@@ -70,7 +70,7 @@ class ProcurementCaptureOwnerTest {
     fun purchaseSelectsThisFarmsSupplierAndItemAndCommitsLocally() {
         var syncRequests = 0
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ProcurementModuleHost(
                     farmId = farm,
                     ops = RoomOpsRepository(database, farm),
@@ -81,8 +81,8 @@ class ProcurementCaptureOwnerTest {
             }
         }
         openPurchaseCapture("USD")
-        compose.onNodeWithTag("farm-atom:FOS-ATOM-011").assertExists()
-        compose.onNodeWithTag("farm-atom:FOS-ATOM-009").assertExists()
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-011").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-atom:FOS-ATOM-009").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("farm-atom:FOS-ATOM-011:option:sup-other-farm").assertDoesNotExist()
 
         compose.onNodeWithTag("farm-atom:FOS-ATOM-011:option:sup-agri").performScrollTo().performClick()
@@ -109,7 +109,7 @@ class ProcurementCaptureOwnerTest {
     fun purchaseIsRecordedInTheFarmCurrencyWithThatCurrencysMinorUnit() {
         runBlocking { database.setFarmCurrency(farm, "JPY", actorId = "user-1", deviceId = "device-1") }
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ProcurementModuleHost(
                     farmId = farm,
                     ops = RoomOpsRepository(database, farm),
@@ -140,7 +140,7 @@ class ProcurementCaptureOwnerTest {
     @Test
     fun supplierSuccessDoesNotClaimANewPurchaseWasSaved() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 ProcurementModuleHost(
                     farmId = farm,
                     ops = RoomOpsRepository(database, farm),
@@ -150,6 +150,7 @@ class ProcurementCaptureOwnerTest {
                 )
             }
         }
+        compose.onNodeWithTag("farm-section:Record").performScrollTo().performClick()
         compose.onNode(hasSetTextAction() and hasText("Supplier name"))
             .performScrollTo().performTextInput("Local co-op")
         compose.onNode(hasClickAction() and hasText("Create supplier")).performScrollTo().performClick()
@@ -164,9 +165,9 @@ class ProcurementCaptureOwnerTest {
     }
 
     private fun openPurchaseCapture(currency: String) {
-        compose.onNodeWithTag("farm-screen:FOS-PROC-001").assertExists()
-        compose.onNode(hasClickAction() and hasText("Create purchase")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-PROC-006").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-PROC-001").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.revealFarmTool("Create purchase").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-PROC-006").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("farm-atom:FOS-ATOM-011:option:sup-agri").fetchSemanticsNodes().isNotEmpty()
         }

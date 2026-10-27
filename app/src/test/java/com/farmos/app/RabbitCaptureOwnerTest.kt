@@ -5,6 +5,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -40,8 +41,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class RabbitCaptureOwnerTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val farm = "11111111-1111-4111-8111-111111111111"
     private val otherFarm = "22222222-2222-4222-8222-222222222222"
@@ -67,8 +68,8 @@ class RabbitCaptureOwnerTest {
     fun palpationTakesItsWaveFromThisFarmsWaves() {
         var syncRequests = 0
         render { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Open Palpation")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-RABBIT-011").assertExists()
+        compose.onNodeWithTag("rabbit-action:PALPATION").performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-RABBIT-011").assertExists().also { compose.captureObservedNativeOwners() }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-wave-selector:wave:option:wave-sept").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("rabbit-wave-selector:wave:option:wave-other").assertDoesNotExist()
 
@@ -86,14 +87,16 @@ class RabbitCaptureOwnerTest {
     fun nestBoxCycleOffersOnlyTheGovernedNextStatuses() {
         var syncRequests = 0
         render { syncRequests++ }
-        compose.onNode(hasClickAction() and hasText("Open Cages & nest boxes")).performScrollTo().performClick()
-        compose.onNodeWithTag("farm-screen:FOS-RABBIT-006").assertExists()
+        compose.onNodeWithTag("rabbit-section:Housing").performScrollTo().performClick()
+        compose.onNode(hasClickAction() and hasText("Cages & nest boxes")).performScrollTo().performClick()
+        compose.onNodeWithTag("farm-screen:FOS-RABBIT-006").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("farm-section:Nest-box cycle").performScrollTo().performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("rabbit-nest-box-selector:option:box-7").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("rabbit-nest-status-selector").assertDoesNotExist()
 
         compose.onNodeWithTag("rabbit-nest-box-selector:option:box-7").performScrollTo().performClick()
-        compose.onNodeWithTag("rabbit-nest-status-selector:option:sanitized").assertExists()
-        compose.onNodeWithTag("rabbit-nest-status-selector:option:available").assertExists()
+        compose.onNodeWithTag("rabbit-nest-status-selector:option:sanitized").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithTag("rabbit-nest-status-selector:option:available").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("rabbit-nest-status-selector:option:assigned").assertDoesNotExist()
         compose.onNodeWithTag("rabbit-nest-status-selector:option:in_cage").assertDoesNotExist()
 
@@ -106,7 +109,7 @@ class RabbitCaptureOwnerTest {
 
     private fun render(onSync: () -> Unit) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 RabbitModuleHost(
                     farmId = farm,
                     ops = RoomOpsRepository(database, farm),
@@ -116,6 +119,11 @@ class RabbitCaptureOwnerTest {
                     onBack = {},
                 )
             }
+        }
+        // Wait for the real initial projection before scrolling; the loaded overview
+        // changes the action positions while Room is still completing its first read.
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Ready nests").fetchSemanticsNodes().isNotEmpty()
         }
     }
 

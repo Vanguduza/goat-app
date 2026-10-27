@@ -26,6 +26,7 @@ internal data class TaskModuleActions(
     val endSeries: (String) -> Unit,
     val editSeries: (TaskEditDraft, () -> Unit) -> Unit,
     val updateTask: (TaskUpdateDraft, () -> Unit) -> Unit,
+    val createDetailed: ((com.farmos.feature.ops.TaskCreateDraft) -> Unit)? = null,
 )
 
 /** Owns task route state; every save delegates to the host's governed command adapters. */
@@ -43,6 +44,7 @@ internal fun TaskModuleNavigator(
     newContext: () -> LocalCommandContext,
     actions: TaskModuleActions,
     onBack: () -> Unit,
+    savedRevision: Int = 0,
 ) {
     val rows = board.rows
     var selectedId by remember(farmId, focusTaskId) { mutableStateOf(focusTaskId) }
@@ -89,15 +91,17 @@ internal fun TaskModuleNavigator(
         canPlanWork = planning?.canPlanWork == true, currentAccountId = planning?.currentAccountId,
         assignees = board.assignees, series = board.series, onCreateSeries = actions.createSeries,
         onEndSeries = actions.endSeries, repeatHorizonDays = planning?.let { TaskPlanning.HORIZON_DAYS },
+        onCreateDetailed = actions.createDetailed, savedRevision = savedRevision,
+        searchAnimals = androidx.compose.runtime.remember(database,farmId) {
+            database?.let { animalSelectorSearch(it,farmId,null) } ?: com.farmos.core.design.NoFarmSelectorSearch
+        },
         extraActions = {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(FosDimens.Grid)) {
-                androidx.compose.material3.TextButton(onClick = { originPage = "protocol" }, modifier = Modifier.weight(1f)) {
-                    androidx.compose.material3.Text("From protocols")
-                }
-                androidx.compose.material3.TextButton(onClick = { originPage = "lifecycle" }, modifier = Modifier.weight(1f)) {
-                    androidx.compose.material3.Text("From lifecycle")
-                }
-            }
+            com.farmos.core.design.FarmModuleTools(title="Work tools", groups=listOf(
+                com.farmos.core.design.FarmToolGroup("Task sources", listOf(
+                    com.farmos.core.design.FarmToolAction("From protocols", { originPage = "protocol" }),
+                    com.farmos.core.design.FarmToolAction("From lifecycle", { originPage = "lifecycle" }),
+                )),
+            ))
         },
     )
 }

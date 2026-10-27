@@ -1,5 +1,11 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmToolAction
+
+import com.farmos.core.design.FarmToolGroup
+
+import com.farmos.core.design.FarmModuleTools
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,11 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -63,6 +70,7 @@ data class FeedRecords(
 )
 
 enum class FeedRecordPage(val label: String) {
+    INVENTORY("Feed inventory"),
     ITEM("Feed item"),
     ISSUES("Feed issues"),
 }
@@ -84,25 +92,29 @@ private fun FeedRow(primary: String, secondary: String, tag: String) {
 @Composable
 fun FeedRecordNavigator(records: FeedRecords, home: @Composable (recordActions: @Composable () -> Unit) -> Unit) {
     var page by rememberSaveable { mutableStateOf<FeedRecordPage?>(null) }
+    var selectedItemId by rememberSaveable { mutableStateOf<String?>(null) }
+    var detailFromInventory by rememberSaveable { mutableStateOf(false) }
+    val retained = rememberSaveableStateHolder()
     val back = { page = null }
+    retained.SaveableStateProvider(page?.name ?: "HOME") {
     when (page) {
         null -> home {
-            FarmOperationalSection("Records") {
-                FeedRecordPage.entries.forEach { target ->
-                    TextButton(onClick = { page = target }, modifier = Modifier.fillMaxWidth()) { Text("Open ${target.label}") }
-                }
-            }
+            FarmModuleTools(listOf(FarmToolGroup("Browse", FeedRecordPage.entries.map { target ->
+                FarmToolAction("Open ${target.label}", { detailFromInventory = false; selectedItemId = null; page = target })
+            })), title = "Records")
         }
-        FeedRecordPage.ITEM -> FeedItemScreen(records, back)
+        FeedRecordPage.INVENTORY -> FeedInventoryScreen(records, { id -> selectedItemId = id; detailFromInventory = true; page = FeedRecordPage.ITEM }, back)
+        FeedRecordPage.ITEM -> FeedItemScreen(records, { if (detailFromInventory) page = FeedRecordPage.INVENTORY else back() }, selectedItemId, if (detailFromInventory) "Feed inventory" else "Farm home")
         FeedRecordPage.ISSUES -> FeedIssuesScreen(records, back)
+    }
     }
 }
 
 /** FOS-FEED-003 — one feed item: exhaustive issued total, current stock and its latest issues. */
 @Composable
-internal fun FeedItemScreen(records: FeedRecords, onBack: () -> Unit) {
-    var selectedId by rememberSaveable { mutableStateOf(records.items.firstOrNull()?.itemId) }
-    FarmOperationalPage("FOS-FEED-003", "Feed item", "Recorded feed issued from one inventory item, summed across every issue.", FarmVisualClass.I3, onBack) {
+internal fun FeedItemScreen(records: FeedRecords, onBack: () -> Unit, initialItemId: String? = null, backLabel: String = "Farm home") {
+    var selectedId by rememberSaveable(initialItemId) { mutableStateOf(initialItemId ?: records.items.firstOrNull()?.itemId) }
+    FarmOperationalPage("FOS-FEED-003", "Feed item", "Recorded feed issued from one inventory item, summed across every issue.", FarmVisualClass.I3, onBack, backLabel = backLabel) {
         if (records.items.isEmpty()) {
             AnimalFarmEmptyState("No feed issued on this device.")
             return@FarmOperationalPage
@@ -149,11 +161,12 @@ internal fun FeedIssuesScreen(records: FeedRecords, onBack: () -> Unit) {
                 FeedRow(it.itemLabel, "${it.totalIssued} · ${issueCountLabel(it.issueCount)}", "feed-item:${it.itemId}")
             }
         }
-        FarmOperationalSection(recordListTitle("Issues", records.issues.size, records.issueCount)) {
+        FeedRecordedFlow(records, recordsContent = {
+            Text(recordListTitle("Issues", records.issues.size, records.issueCount), style = MaterialTheme.typography.titleMedium)
             records.issues.forEachIndexed { index, issue ->
                 if (index > 0) HorizontalDivider()
                 FeedRow("${LocalDate.ofEpochDay(issue.epochDay)} · ${issue.groupLabel}", "${issue.itemLabel} · ${issue.quantity}", "feed-issue:${issue.id}")
             }
-        }
+        })
     }
 }

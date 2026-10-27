@@ -29,8 +29,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class AnimalSaleScreensTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val exit = SaleExitView("x1", "g1", "GT-7 · goat", "Moyo Butchery", LocalDate.of(2026, 9, 20), "150.00")
 
@@ -38,12 +38,12 @@ class AnimalSaleScreensTest {
     fun aSoldAnimalsMoneyIsRecordedFromItsExitWithThePricePrefilled() {
         val recorded = mutableListOf<Pair<String, String>>()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 AnimalSaleScreen(listOf(exit), "USD", customerSearch = null, busy = false, error = null, onRecord = { e, amount, _, _ -> recorded += e.exitId to amount }, onBack = {})
             }
         }
-        compose.onNodeWithTag("farm-screen:FOS-SALES-007").assertExists()
-        compose.onNodeWithText("Sold animals · 1 waiting").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-SALES-007").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Sold animals · 1 waiting").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("animal-sale-exit:x1").performScrollTo().performClick()
         compose.onNodeWithTag("animal-sale-amount").performScrollTo().performTextReplacement("")
         compose.onNodeWithTag("animal-sale-record").performScrollTo().assertIsNotEnabled()
@@ -55,14 +55,14 @@ class AnimalSaleScreensTest {
     @Test
     fun theSalesHomeOpensAnimalSale() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 SalesRecordNavigator(
                     SalesRecords(),
                     animalSale = { back -> AnimalSaleScreen(emptyList(), "USD", null, false, null, { _, _, _, _ -> }, back) },
                 ) { actions -> androidx.compose.foundation.layout.Column { actions() } }
             }
         }
-        compose.onNode(hasClickAction() and hasText("Animal sale")).performClick()
-        compose.onNodeWithText("No sold animals are waiting for their sale money.").assertExists()
+        compose.revealFarmTool("Animal sale").performClick()
+        compose.onNodeWithText("No sold animals are waiting for their sale money.").assertExists().also { compose.captureObservedNativeOwners() }
     }
 }

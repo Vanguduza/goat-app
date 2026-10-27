@@ -44,7 +44,7 @@ fun FarmOsTheme(
         MaterialTheme(
             colorScheme = colors.materialScheme(mode),
             shapes = FarmShapes,
-            typography = FarmOsTypography,
+            typography = AnimalFarmHtmlTypography,
             content = content,
         )
     }

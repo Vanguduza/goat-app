@@ -1,14 +1,24 @@
 package com.farmos.feature.ops
 
+import com.farmos.core.design.FarmToolGroup
+
+import com.farmos.core.design.FarmToolAction
+
+import com.farmos.core.design.FarmModuleTools
+
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+
+import androidx.compose.runtime.saveable.rememberSaveable
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
+import com.farmos.core.design.FarmPrimaryButton as Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import com.farmos.core.design.FarmOutlinedTextField as OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.farmos.core.design.FarmActionButton as TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -93,8 +103,10 @@ fun CattleOperationsScreen(
     loadCattleReport: suspend () -> CattleHerdReport = { CattleHerdReport() },
     backLabel: String = "Farm home",
 ) {
-    var page by remember { mutableStateOf(CattleOpsPage.HOME) }
+    var page by rememberSaveable { mutableStateOf(CattleOpsPage.HOME) }
     val home = { page = CattleOpsPage.HOME }
+    val pageStateHolder = rememberSaveableStateHolder()
+    pageStateHolder.SaveableStateProvider(page.name) {
     when (page) {
         CattleOpsPage.HOME -> {
             CattleOpsHome(selectedAnimalId, error, { page = it }, onBack, backLabel)
@@ -195,6 +207,7 @@ fun CattleOperationsScreen(
             CattleHeatScreen(selectedAnimalId, busy, error, actions.onHeat, loadRecords, home)
         }
     }
+    }
 }
 
 @Composable
@@ -208,51 +221,56 @@ private fun CattleOpsHome(
     FarmOperationalPage(
         screenId = "FOS-CATTLE-018",
         title = "Dairy & cattle operations",
-        subtitle = "Reproduction, milk, health, traceability and beef records.",
+        subtitle = "",
         visualClass = FarmVisualClass.I2,
         onBack = onBack,
         backLabel = backLabel,
     ) {
         FarmOperationalSection("Selected cattle") { Text(selectedId ?: "No individual selected — lot workflows remain available.") }
-        FarmOperationalSection("Reproduction") {
-            CattleNav("Service") { onOpen(CattleOpsPage.SERVICE) }
-            CattleNav("Pregnancy diagnosis") { onOpen(CattleOpsPage.PD) }
-            CattleNav("Calving due") { onOpen(CattleOpsPage.CALVING_DUE) }
-            CattleNav("Calving") { onOpen(CattleOpsPage.CALVING) }
-            CattleNav("Calf registration") { onOpen(CattleOpsPage.CALF_REG) }
-            CattleNav("Heat detection") { onOpen(CattleOpsPage.HEAT_DETECTION) }
-            CattleNav("Weaning") { onOpen(CattleOpsPage.WEANING) }
-        }
-        FarmOperationalSection("Dairy & condition") {
-            CattleNav("Body condition score") { onOpen(CattleOpsPage.BCS) }
-            CattleNav("Milk capture") { onOpen(CattleOpsPage.MILK) }
-            CattleNav("SCC") { onOpen(CattleOpsPage.SCC) }
-            CattleNav("Dry-off") { onOpen(CattleOpsPage.DRY_OFF) }
-            CattleNav("Locomotion") { onOpen(CattleOpsPage.LOCOMOTION) }
-        }
-        FarmOperationalSection("Animal records") {
-            CattleNav("Cattle report") { onOpen(CattleOpsPage.CATTLE_REPORT) }
-            CattleNav("Lactation history") { onOpen(CattleOpsPage.LACTATION_HISTORY) }
-            CattleNav("SCC history") { onOpen(CattleOpsPage.SCC_HISTORY) }
-            CattleNav("Health summary") { onOpen(CattleOpsPage.HEALTH_SUMMARY) }
-            CattleNav("Timeline") { onOpen(CattleOpsPage.TIMELINE) }
-            CattleNav("Growth history") { onOpen(CattleOpsPage.GROWTH_HISTORY) }
-        }
-        FarmOperationalSection("Traceability") {
-            CattleNav("Official identifier") { onOpen(CattleOpsPage.IDENTIFIER) }
-            CattleNav("Movement") { onOpen(CattleOpsPage.MOVEMENT) }
-            CattleNav("Official movement record") { onOpen(CattleOpsPage.MOVEMENT_RECORD) }
-            CattleNav("Pedigree link") { onOpen(CattleOpsPage.PEDIGREE) }
-            CattleNav("Inbreeding check") { onOpen(CattleOpsPage.COI) }
-            CattleNav("Compare bulls") { onOpen(CattleOpsPage.MATE_COMPARE) }
-        }
-        FarmOperationalSection("Beef / feedlot") {
-            CattleNav("Place lot on feed") { onOpen(CattleOpsPage.LOT_PLACE) }
-            CattleNav("Days on feed") { onOpen(CattleOpsPage.DAYS_ON_FEED) }
-            CattleNav("Close-out") { onOpen(CattleOpsPage.LOT_CLOSE) }
-            CattleNav("Beef dashboard") { onOpen(CattleOpsPage.BEEF_DASHBOARD) }
-            CattleNav("Feedlot lot detail") { onOpen(CattleOpsPage.LOT_DETAIL) }
-        }
+        FarmModuleTools(
+            groups = listOf(
+                FarmToolGroup("Reproduction", listOf(
+                    FarmToolAction("Service", { onOpen(CattleOpsPage.SERVICE) }, tag = "cattle-action:SERVICE"),
+                    FarmToolAction("Pregnancy diagnosis", { onOpen(CattleOpsPage.PD) }, tag = "cattle-action:PD"),
+                    FarmToolAction("Calving due", { onOpen(CattleOpsPage.CALVING_DUE) }, tag = "cattle-action:CALVING_DUE"),
+                    FarmToolAction("Calving", { onOpen(CattleOpsPage.CALVING) }, tag = "cattle-action:CALVING"),
+                    FarmToolAction("Calf registration", { onOpen(CattleOpsPage.CALF_REG) }, tag = "cattle-action:CALF_REG"),
+                    FarmToolAction("Heat detection", { onOpen(CattleOpsPage.HEAT_DETECTION) }, tag = "cattle-action:HEAT_DETECTION"),
+                    FarmToolAction("Weaning", { onOpen(CattleOpsPage.WEANING) }, tag = "cattle-action:WEANING"),
+                )),
+                FarmToolGroup("Dairy & condition", listOf(
+                    FarmToolAction("Body condition score", { onOpen(CattleOpsPage.BCS) }, tag = "cattle-action:BCS"),
+                    FarmToolAction("Milk capture", { onOpen(CattleOpsPage.MILK) }, tag = "cattle-action:MILK"),
+                    FarmToolAction("SCC", { onOpen(CattleOpsPage.SCC) }, tag = "cattle-action:SCC"),
+                    FarmToolAction("Dry-off", { onOpen(CattleOpsPage.DRY_OFF) }, tag = "cattle-action:DRY_OFF"),
+                    FarmToolAction("Locomotion", { onOpen(CattleOpsPage.LOCOMOTION) }, tag = "cattle-action:LOCOMOTION"),
+                )),
+                FarmToolGroup("Animal records", listOf(
+                    FarmToolAction("Cattle report", { onOpen(CattleOpsPage.CATTLE_REPORT) }, tag = "cattle-action:CATTLE_REPORT"),
+                    FarmToolAction("Lactation history", { onOpen(CattleOpsPage.LACTATION_HISTORY) }, tag = "cattle-action:LACTATION_HISTORY"),
+                    FarmToolAction("SCC history", { onOpen(CattleOpsPage.SCC_HISTORY) }, tag = "cattle-action:SCC_HISTORY"),
+                    FarmToolAction("Health summary", { onOpen(CattleOpsPage.HEALTH_SUMMARY) }, tag = "cattle-action:HEALTH_SUMMARY"),
+                    FarmToolAction("Timeline", { onOpen(CattleOpsPage.TIMELINE) }, tag = "cattle-action:TIMELINE"),
+                    FarmToolAction("Growth history", { onOpen(CattleOpsPage.GROWTH_HISTORY) }, tag = "cattle-action:GROWTH_HISTORY"),
+                )),
+                FarmToolGroup("Traceability", listOf(
+                    FarmToolAction("Official identifier", { onOpen(CattleOpsPage.IDENTIFIER) }, tag = "cattle-action:IDENTIFIER"),
+                    FarmToolAction("Movement", { onOpen(CattleOpsPage.MOVEMENT) }, tag = "cattle-action:MOVEMENT"),
+                    FarmToolAction("Official movement record", { onOpen(CattleOpsPage.MOVEMENT_RECORD) }, tag = "cattle-action:MOVEMENT_RECORD"),
+                    FarmToolAction("Pedigree link", { onOpen(CattleOpsPage.PEDIGREE) }, tag = "cattle-action:PEDIGREE"),
+                    FarmToolAction("Inbreeding check", { onOpen(CattleOpsPage.COI) }, tag = "cattle-action:COI"),
+                    FarmToolAction("Compare bulls", { onOpen(CattleOpsPage.MATE_COMPARE) }, tag = "cattle-action:MATE_COMPARE"),
+                )),
+                FarmToolGroup("Beef / feedlot", listOf(
+                    FarmToolAction("Place lot on feed", { onOpen(CattleOpsPage.LOT_PLACE) }, tag = "cattle-action:LOT_PLACE"),
+                    FarmToolAction("Days on feed", { onOpen(CattleOpsPage.DAYS_ON_FEED) }, tag = "cattle-action:DAYS_ON_FEED"),
+                    FarmToolAction("Close-out", { onOpen(CattleOpsPage.LOT_CLOSE) }, tag = "cattle-action:LOT_CLOSE"),
+                    FarmToolAction("Beef dashboard", { onOpen(CattleOpsPage.BEEF_DASHBOARD) }, tag = "cattle-action:BEEF_DASHBOARD"),
+                    FarmToolAction("Feedlot lot detail", { onOpen(CattleOpsPage.LOT_DETAIL) }, tag = "cattle-action:LOT_DETAIL"),
+                )),
+            ),
+            title = "Operations",
+        )
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }
@@ -262,7 +280,7 @@ private fun CattleNav(
     label: String,
     onClick: () -> Unit,
 ) {
-    TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) { Text(label) }
+    com.farmos.core.design.FarmActionButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) { Text(label) }
 }
 
 /**
@@ -278,7 +296,7 @@ private fun CattleServiceScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var method by remember { mutableStateOf("ai") }
+    var method by rememberSaveable { mutableStateOf("ai") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage(
         "FOS-CATTLE-010",
@@ -313,12 +331,12 @@ private fun CattlePdScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var result by remember { mutableStateOf("pregnant") }
+    var result by rememberSaveable { mutableStateOf("pregnant") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage(
         "FOS-CATTLE-013",
         "Pregnancy diagnosis",
-        "Record pregnant or open. Farm OS records the result; it does not diagnose.",
+        "Record pregnant or open. Animal Farm records the result; it does not diagnose.",
         busy,
         error,
         onBack,
@@ -345,9 +363,9 @@ private fun CattleCalvingScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var born by remember { mutableStateOf("") }
-    var live by remember { mutableStateOf("") }
-    var dead by remember { mutableStateOf("0") }
+    var born by rememberSaveable { mutableStateOf("") }
+    var live by rememberSaveable { mutableStateOf("") }
+    var dead by rememberSaveable { mutableStateOf("0") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-015", "Record calving", "Live plus dead must equal born.", busy, error, onBack, FarmVisualClass.I4) {
         OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
@@ -378,8 +396,8 @@ private fun CattleBcsScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var scale by remember { mutableStateOf("1_5") }
-    var score by remember { mutableStateOf("") }
+    var scale by rememberSaveable { mutableStateOf("1_5") }
+    var score by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage(
         "FOS-CATTLE-008",
@@ -414,7 +432,7 @@ private fun CattleMilkScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var litres by remember { mutableStateOf("") }
+    var litres by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-019", "Milk capture", "Enter litres; the device stores milli-litres exactly.", busy, error, onBack) {
         OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
@@ -445,7 +463,7 @@ private fun CattleScoreScreen(
     visualClass: FarmVisualClass,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var score by remember { mutableStateOf("") }
+    var score by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage(screenId, title, subtitle, busy, error, onBack, visualClass) {
         OpsAnimalPicker("Cattle", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
@@ -472,13 +490,13 @@ private fun CattleSccScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var cells by remember { mutableStateOf("") }
-    var dim by remember { mutableStateOf("") }
+    var cells by rememberSaveable { mutableStateOf("") }
+    var dim by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage(
         "FOS-CATTLE-021",
         "SCC capture",
-        "SCC is a cell count, not a Farm OS diagnosis.",
+        "SCC is a cell count, not a Animal Farm diagnosis.",
         busy,
         error,
         onBack,
@@ -510,7 +528,7 @@ private fun CattleDryOffScreen(
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
-    var expected by remember { mutableStateOf("") }
+    var expected by rememberSaveable { mutableStateOf("") }
     CattleFormPage("FOS-CATTLE-024", "Dry-off", "Record dry-off and an optional expected calving date.", busy, error, onBack) {
         OpsAnimalPicker("Cow", animalId, OpsAnimalFilter.FEMALE, busy) { animalId = it }
         CattleField(day, { day = it }, "Dry-off date", busy)
@@ -536,7 +554,7 @@ private fun CattleWeaningScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var grams by remember { mutableStateOf("") }
+    var grams by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-017", "Weaning", "Record calf weaning and optional weight in grams.", busy, error, onBack) {
         OpsAnimalPicker("Calf", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
@@ -560,8 +578,8 @@ private fun CattleIdentifierScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var type by remember { mutableStateOf("nlis") }
-    var value by remember { mutableStateOf("") }
+    var type by rememberSaveable { mutableStateOf("nlis") }
+    var value by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-005", "Official identifier", "Bind an approved identifier to this cattle record.", busy, error, onBack) {
         OpsAnimalPicker("Cattle", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
@@ -589,9 +607,9 @@ private fun CattleMovementScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var direction by remember { mutableStateOf("on") }
-    var from by remember { mutableStateOf("") }
-    var to by remember { mutableStateOf("") }
+    var direction by rememberSaveable { mutableStateOf("on") }
+    var from by rememberSaveable { mutableStateOf("") }
+    var to by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-030", "Movement", "Record on, off or transfer movement.", busy, error, onBack) {
         OpsAnimalPicker("Cattle", animalId, OpsAnimalFilter.ANY, busy) { animalId = it }
@@ -617,8 +635,8 @@ private fun CattlePedigreeScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var parent by remember { mutableStateOf("") }
-    var relation by remember { mutableStateOf("sire") }
+    var parent by rememberSaveable { mutableStateOf("") }
+    var relation by rememberSaveable { mutableStateOf("sire") }
     CattleFormPage(
         "FOS-CATTLE-032",
         "Pedigree",
@@ -646,8 +664,8 @@ private fun CattleLotPlaceScreen(
     onRecord: (String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var group by remember { mutableStateOf("") }
-    var heads by remember { mutableStateOf("") }
+    var group by rememberSaveable { mutableStateOf("") }
+    var heads by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-026", "Feedlot placement", "Place a cattle group onto feed with head count.", busy, error, onBack) {
         OpsGroupPicker("Cattle lot", group, busy) { group = it }
@@ -671,8 +689,8 @@ private fun CattleDaysOnFeedScreen(
     onRecord: (String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var group by remember { mutableStateOf("") }
-    var days by remember { mutableStateOf("") }
+    var group by rememberSaveable { mutableStateOf("") }
+    var days by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage("FOS-CATTLE-028", "Days on feed", "Record non-negative days on feed for a cattle lot.", busy, error, onBack) {
         OpsGroupPicker("Cattle lot", group, busy) { group = it }
@@ -696,10 +714,10 @@ private fun CattleLotCloseScreen(
     onRecord: (String, String, String, String, String) -> Unit,
     onBack: () -> Unit,
 ) {
-    var group by remember { mutableStateOf("") }
-    var heads by remember { mutableStateOf("") }
-    var grams by remember { mutableStateOf("") }
-    var days by remember { mutableStateOf("") }
+    var group by rememberSaveable { mutableStateOf("") }
+    var heads by rememberSaveable { mutableStateOf("") }
+    var grams by rememberSaveable { mutableStateOf("") }
+    var days by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage(
         "FOS-CATTLE-029",
@@ -739,8 +757,8 @@ private fun CattleCalfRegistrationScreen(
     onBack: () -> Unit,
 ) {
     var damId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var tag by remember { mutableStateOf("") }
-    var sex by remember { mutableStateOf("FEMALE") }
+    var tag by rememberSaveable { mutableStateOf("") }
+    var sex by rememberSaveable { mutableStateOf("FEMALE") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     CattleFormPage(
         "FOS-CATTLE-016",
@@ -821,8 +839,8 @@ fun CattleHeatScreen(
     onBack: () -> Unit,
 ) {
     var animalId by remember(selectedId) { mutableStateOf(selectedId.orEmpty()) }
-    var signs by remember { mutableStateOf("") }
-    var note by remember { mutableStateOf("") }
+    var signs by rememberSaveable { mutableStateOf("") }
+    var note by rememberSaveable { mutableStateOf("") }
     var day by remember { mutableStateOf(LocalDate.now().toString()) }
     var heats by remember { mutableStateOf<List<CattleHeatRow>>(emptyList()) }
     LaunchedEffect(animalId) {

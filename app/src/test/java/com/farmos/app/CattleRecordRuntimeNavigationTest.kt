@@ -2,12 +2,14 @@ package com.farmos.app
 
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.farmos.core.design.AnimalFarmThemeMode
 import com.farmos.core.design.FarmOsTheme
@@ -48,7 +50,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class CattleRecordRuntimeNavigationTest {
-    @get:Rule
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1)
     val compose = createComposeRule()
 
     private val homeTag = "farm-screen:" + "FOS-" + "CATTLE-" + "018"
@@ -213,11 +216,44 @@ class CattleRecordRuntimeNavigationTest {
         }
     }
 
+    @Test
+    fun calvingWorkflowKeepsPredictionsSeparateAndSelectsTheActualCow() {
+        val rows = listOf(
+            CattleCalvingDueView("cow-a", "C-A", "Daisy", day(1, 1), "ai", null, CattleDueSource.PREDICTED, day(9, 3), day(9, 10), day(9, 17)),
+            CattleCalvingDueView("cow-b", "C-B", "Willow", day(3, 1), "natural", "pregnant", CattleDueSource.STORED, day(12, 30), day(12, 30), day(12, 30)),
+        )
+        render(null, calvingDue = { CattleCalvingDue(rows, 285) }) { CattleRecords() }
+        openTool("Calving due")
+        compose.onNodeWithTag("cattle-calving-workflow:cow-a").assertExists()
+        compose.onNodeWithText("No pregnancy check recorded").assertExists()
+        compose.onNodeWithText("Choose cow").performScrollTo().performClick()
+        compose.onNodeWithTag("cattle-calving-selector:option:cow-b").performScrollTo().performClick()
+        compose.onNodeWithTag("cattle-calving-workflow:cow-b").assertExists()
+        compose.onNodeWithText("Expected date recorded at dry-off").assertExists()
+        compose.onNodeWithTag("farm-section:Records").performScrollTo().performClick()
+        compose.onNodeWithTag("cattle-due:cow-a").assertExists()
+        compose.onNodeWithTag("cattle-due:cow-b").assertExists()
+        compose.onNodeWithTag("farm-section:Schedule").performScrollTo().performClick()
+        compose.onNodeWithTag("cattle-calving-workflow:cow-b").assertExists()
+    }
+
+    private fun openTool(label: String) {
+        if (compose.onAllNodesWithTag("farm-tools-search").fetchSemanticsNodes().isEmpty()) {
+            compose.onNodeWithText("Find tool").performScrollTo().performClick()
+        }
+        compose.onNodeWithTag("farm-tools-search").performScrollTo().performTextReplacement(label)
+        compose.onNode(hasClickAction() and hasText(label) and !hasTestTag("farm-tools-search")).performScrollTo().performClick()
+    }
+
     private fun traverse(label: String, screenId: String, assertions: () -> Unit) {
-        compose.onNode(hasClickAction() and hasText(label)).performScrollTo().performClick()
+        openTool(label)
         compose.onNodeWithTag("farm-screen:$screenId").assertExists()
         compose.waitForIdle()
+        if (screenId == "FOS-CATTLE-014" && compose.onAllNodesWithTag("farm-section:Records").fetchSemanticsNodes().isNotEmpty()) {
+            compose.onNodeWithTag("farm-section:Records").performScrollTo().performClick()
+        }
         assertions()
+        compose.captureModuleReview(screenId)
         compose.onNode(hasClickAction() and hasText("Farm home")).performScrollTo().performClick()
         compose.onNodeWithTag(homeTag).assertExists()
         compose.onNodeWithTag("farm-screen:$screenId").assertDoesNotExist()
@@ -260,7 +296,7 @@ class CattleRecordRuntimeNavigationTest {
         load: suspend (String) -> CattleRecords,
     ) {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 CattleOperationsScreen(
                     selectedAnimalId = selected,
                     busy = false,
@@ -304,7 +340,7 @@ class CattleRecordRuntimeNavigationTest {
             }
             records()
         }
-        compose.onNode(hasClickAction() and hasText("Lactation history")).performScrollTo().performClick()
+        openTool("Lactation history")
         compose.onNodeWithTag("farm-screen:FOS-CATTLE-020").assertExists()
         compose.onNodeWithTag("farm-atom:FOS-ATOM-032").assertExists()
         compose.onNodeWithText("Loading records").assertExists()

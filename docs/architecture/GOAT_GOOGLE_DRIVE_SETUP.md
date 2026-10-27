@@ -2,7 +2,7 @@
 
 ## Implemented route
 
-The optional Drive gateway uses Google Play services `AuthorizationClient` with the `drive.file` scope. The owner starts consent from onboarding or Settings. This is a transport permission: the local GOAT account, farm membership, roles and device keys remain authoritative.
+The optional Drive gateway uses Google Play services AuthorizationClient with the non-sensitive drive.file scope. The owner starts consent from onboarding or Settings. First connection uses Google account selection; the app reads the authorized account identity from Drive itself and never asks the customer to type a Google email. This is a transport permission: the local Animal Farm account, farm membership, roles and device keys remain authoritative.
 
 Both entry points use the same checked connection boundary. After consent, GOAT verifies the selected Google account and the actual writable Drive folder. A blank folder ID creates or reuses a folder carrying this farm's application metadata. An existing ID must identify a folder already accessible to this app under `drive.file`; typing an arbitrary folder ID grants no access.
 
@@ -30,10 +30,11 @@ Implementation: [rotation staging and reconciliation](../../app/src/main/java/co
 
 Before a physical-device Drive acceptance run, configure the Google Cloud project used by the app:
 
-1. Enable the Google Drive API and complete the app's OAuth consent/branding configuration.
-2. Register an Android OAuth client for application ID `com.farmos.app` and the SHA-1 fingerprint of the certificate that signs the installed build. Register debug and release distributions separately when their signing certificates differ.
-3. During an OAuth testing rollout, include the intended test Google accounts. Install a build with supported Google Play services.
-4. Use the existing local Owner/Management account to choose the Google account and connect. Consent is handled by Google's system UI.
+1. Enable the Google Drive API. Configure the OAuth audience as External for customer accounts and move the production Cloud project from Testing to In production. Testing mode permits only explicitly listed test users.
+2. Keep the requested Drive scope to https://www.googleapis.com/auth/drive.file. It is Google recommended non-sensitive per-file scope; do not add broad drive or drive.readonly scopes for this backup flow.
+3. Complete the production OAuth branding/basic-verification requirements: final app name (Animal Farm), support/developer contact, privacy-policy and terms URLs as applicable, authorized-domain ownership, and the declared drive.file scope.
+4. Register an Android OAuth client for application ID com.farmos.app and the SHA-1 fingerprint of the certificate that signs the installed build. Register testing and production signing identities separately when their certificates differ.
+5. Install a build with supported Google Play services and verify authorization with a Google account that is not listed as a test user. Google account selection should appear, followed by Drive consent; the app then creates or reuses only its own farm backup folder.
 
 No application server, web-client secret or server-side refresh-token exchange is used. Missing project/signature configuration, permission refusal, unavailable Play services or network failure must leave the connection unsuccessful and ordinary local farm work available.
 

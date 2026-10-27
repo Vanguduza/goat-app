@@ -137,7 +137,7 @@ data class KiddingEntity(
     val occurredEpochDay: Long,
 )
 
-@Entity(tableName = "rabbit_cages", indices = [Index(value = ["farmId", "code"], unique = true)])
+@Entity(tableName = "rabbit_cages", indices = [Index(value = ["farmId", "code"], unique = true), Index(value = ["farmId", "id"], unique = true)])
 data class RabbitCageEntity(
     @PrimaryKey val id: String,
     val farmId: String,
@@ -145,7 +145,7 @@ data class RabbitCageEntity(
     val doeCapacity: Int,
 )
 
-@Entity(tableName = "rabbit_nest_boxes", indices = [Index(value = ["farmId", "cageId", "code"], unique = true)])
+@Entity(tableName = "rabbit_nest_boxes", indices = [Index(value = ["farmId", "cageId", "code"], unique = true), Index(value = ["farmId", "id"], unique = true)])
 data class RabbitNestBoxEntity(
     @PrimaryKey val id: String,
     val farmId: String,
@@ -154,7 +154,7 @@ data class RabbitNestBoxEntity(
     val status: String,
 )
 
-@Entity(tableName = "rabbit_breeding_waves", indices = [Index(value = ["farmId", "cageId"])])
+@Entity(tableName = "rabbit_breeding_waves", indices = [Index(value = ["farmId", "cageId"]), Index(value = ["farmId", "id"], unique = true)])
 data class RabbitWaveEntity(
     @PrimaryKey val id: String,
     val farmId: String,
@@ -361,6 +361,46 @@ interface AnimalDao {
         query: String,
         limit: Int,
     ): List<AnimalEntity>
+
+    /** Canonical animals are filtered before limiting; identifier aliases never consume result slots. */
+    @Query("""
+        SELECT a.* FROM animals AS a
+        WHERE a.farmId = :farmId
+          AND a.status != 'closed'
+          AND (:species IS NULL OR a.speciesCode = :species COLLATE NOCASE)
+          AND (:status IS NULL OR a.status = :status COLLATE NOCASE)
+          AND (
+              a.tag LIKE '%' || :query || '%' COLLATE NOCASE
+              OR COALESCE(a.name, '') LIKE '%' || :query || '%' COLLATE NOCASE
+              OR a.speciesCode LIKE '%' || :query || '%' COLLATE NOCASE
+              OR EXISTS (
+                  SELECT 1 FROM animal_identifiers AS i
+                  WHERE i.farmId = :farmId AND i.animalId = a.id AND i.isActive = 1
+                    AND i.value LIKE '%' || :query || '%' COLLATE NOCASE
+              )
+          )
+        ORDER BY CASE WHEN
+            a.tag = :query COLLATE NOCASE
+            OR EXISTS (
+                SELECT 1 FROM animal_identifiers AS exactIdentifier
+                WHERE exactIdentifier.farmId = :farmId AND exactIdentifier.animalId = a.id
+                  AND exactIdentifier.isActive = 1
+                  AND exactIdentifier.value = :query COLLATE NOCASE
+            )
+            THEN 0 ELSE 1 END,
+            a.speciesCode COLLATE NOCASE, a.tag COLLATE NOCASE, a.id
+        LIMIT :limit
+    """)
+    suspend fun searchGlobal(
+        farmId: String,
+        query: String,
+        species: String?,
+        status: String?,
+        limit: Int,
+    ): List<AnimalEntity>
+
+    @Query("SELECT DISTINCT status FROM animals WHERE farmId = :farmId AND status != 'closed' ORDER BY status COLLATE NOCASE")
+    suspend fun globalSearchStatuses(farmId: String): List<String>
 }
 
 @Dao
@@ -737,6 +777,10 @@ interface SyncCursorDao {
         HealthPackEntity::class,
         RabbitWeanEntity::class,
         RabbitWeightEntity::class,
+        RabbitHousingEntity::class,
+        RabbitBuckServiceEntity::class,
+        RabbitPairMatingEntity::class,
+        RabbitNestAssignmentEntity::class,
         SheepMarkingEntity::class,
         SheepWeaningEntity::class,
         CattleBcsEntity::class,
@@ -806,7 +850,7 @@ interface SyncCursorDao {
         AttachmentEntity::class,
         HealthVaccinationEntity::class,
     ],
-    version = 37,
+    version = 38,
     exportSchema = true,
 )
 abstract class FarmOsDatabase : RoomDatabase() {
@@ -830,6 +874,7 @@ abstract class FarmOsDatabase : RoomDatabase() {
     abstract fun tasks(): TaskDao
     abstract fun kidding(): KiddingDao
     abstract fun rabbitProgramme(): RabbitProgrammeDao
+    abstract fun rabbitry(): RabbitryDao
     abstract fun healthObservations(): HealthObservationDao
     abstract fun money(): MoneyDao
     abstract fun inventory(): InventoryDao
@@ -1450,6 +1495,6 @@ abstract class FarmOsDatabase : RoomDatabase() {
             }
         }
 
-        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37)
+        val ALL_MIGRATIONS = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, RabbitryMigration37To38)
     }
 }

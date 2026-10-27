@@ -30,8 +30,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [36], qualifiers = "en-rUS")
 class StockCountScreensTest {
-    @get:Rule
-    val compose = createComposeRule()
+    @get:Rule(order = 0) val nativeReview = NativeModuleReviewRule()
+    @get:Rule(order = 1) val compose = createComposeRule()
 
     private val items = listOf(StockCountItem("mash", "Layer mash · MASH", "kg", 10_000), StockCountItem("salt", "Salt lick · SALT", "each", 4_000))
 
@@ -55,7 +55,7 @@ class StockCountScreensTest {
         val recorded = mutableListOf<Triple<String, String, Long>>()
         val submittedIds = mutableListOf<String>()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 StockCountScreen(
                     counts = listOf(counting(listOf(StockCountLineView("salt", "Salt lick · SALT", "each", 4_000, 3_000, "worker-1")))),
                     items = items,
@@ -70,12 +70,12 @@ class StockCountScreensTest {
                 )
             }
         }
-        compose.onNodeWithTag("farm-screen:FOS-INV-016").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-INV-016").assertExists().also { compose.captureObservedNativeOwners() }
         // Blind count: on-hand figures are never shown while counting.
         assertAbsent("on hand")
         assertAbsent("10 kg")
         assertAbsent("4 each")
-        compose.onNodeWithText("Counted 3 each by worker-1").assertExists()
+        compose.onNodeWithText("Counted 3 each by worker-1").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("stock-count-qty:mash").performScrollTo().performTextInput("12.5")
         compose.onNodeWithTag("stock-count-record:mash").performScrollTo().performClick()
         compose.onNodeWithTag("stock-count-submit").performScrollTo().performClick()
@@ -88,11 +88,11 @@ class StockCountScreensTest {
     @Test
     fun aViewerCanNeitherStartNorRecordACount() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 StockCountScreen(emptyList(), items, canCount = false, busy = false, error = null, onStart = {}, onRecord = { _, _, _ -> }, onSubmit = {}, onOpenReview = {}, onBack = {})
             }
         }
-        compose.onNodeWithText("Stock counts are recorded by farm staff").assertExists()
+        compose.onNodeWithText("Stock counts are recorded by farm staff").assertExists().also { compose.captureObservedNativeOwners() }
         assertAbsent("Start a stock count")
     }
 
@@ -101,14 +101,14 @@ class StockCountScreensTest {
         val posted = mutableListOf<String>()
         val rejected = mutableListOf<Pair<String, String>>()
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 StockAdjustmentScreen(listOf(submitted()), canPost = true, busy = false, error = null, onPost = { posted += it }, onReject = { c, r -> rejected += c to r }, onBack = {})
             }
         }
-        compose.onNodeWithTag("farm-screen:FOS-INV-015").assertExists()
-        compose.onNodeWithText("2 item(s) counted · 1 with a difference").assertExists()
-        compose.onNodeWithText("Layer mash · MASH: on hand 10 · counted 12.5 · difference +2.5 kg").assertExists()
-        compose.onNodeWithText("Salt lick · SALT: on hand 4 · counted 4 · no difference").assertExists()
+        compose.onNodeWithTag("farm-screen:FOS-INV-015").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("2 item(s) counted · 1 with a difference").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Layer mash · MASH: on hand 10 · counted 12.5 · difference +2.5 kg").assertExists().also { compose.captureObservedNativeOwners() }
+        compose.onNodeWithText("Salt lick · SALT: on hand 4 · counted 4 · no difference").assertExists().also { compose.captureObservedNativeOwners() }
         compose.onNodeWithTag("stock-review-post:c2").performScrollTo().performClick()
         compose.onNodeWithTag("stock-review-reason:c2").performScrollTo().performTextInput("Recount the second shed")
         compose.onNodeWithTag("stock-review-reject:c2").performScrollTo().performClick()
@@ -121,11 +121,11 @@ class StockCountScreensTest {
     @Test
     fun aWorkerSeesTheReviewButCannotPost() {
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 StockAdjustmentScreen(listOf(submitted()), canPost = false, busy = false, error = null, onPost = {}, onReject = { _, _ -> }, onBack = {})
             }
         }
-        compose.onNodeWithText("Adjustments are posted by farm management").assertExists()
+        compose.onNodeWithText("Adjustments are posted by farm management").assertExists().also { compose.captureObservedNativeOwners() }
         assertAbsent("Post 1 adjustment")
         assertAbsent("Reject count")
     }
@@ -134,11 +134,11 @@ class StockCountScreensTest {
     fun theInventoryDashboardOpensStockCount() {
         var opened = 0
         compose.setContent {
-            FarmOsTheme(mode = AnimalFarmThemeMode.LIGHT) {
+            NativeModuleReviewTheme() {
                 InventoryScreen(rows = emptyList(), busy = false, error = null, onCreate = { _, _, _ -> }, onMove = { _, _, _ -> }, onBack = {}, onOpenStockCount = { opened++ })
             }
         }
-        compose.onNode(hasClickAction() and hasText("Count stock and review differences")).performScrollTo().performClick()
+        compose.revealFarmTool("Count stock and review differences").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(1, opened) }
     }
 }
