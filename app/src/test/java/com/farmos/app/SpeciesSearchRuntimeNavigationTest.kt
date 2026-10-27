@@ -13,7 +13,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -257,12 +256,10 @@ class SpeciesSearchRuntimeNavigationTest {
         compose.onNodeWithText("AA-FIRST", substring = true).assertDoesNotExist()
 
         click("Record weight")
-        awaitScreen("FOS-HOME-008")
-        compose.waitUntil(10_000) {
-            compose.onAllNodes(hasTestTag("weight-animal:field") and hasText("ZZ-TARGET · $name")).fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithTag("species-weight-kg").performScrollTo().performTextInput(weight)
-        compose.onNodeWithTag("species-weight-save").performScrollTo().performClick()
+        awaitScreen("$prefix-006")
+        compose.onNodeWithText("ZZ-TARGET · $name · female · active").assertExists()
+        field("Weight", weight)
+        click("Record weight")
         compose.waitUntil(10_000) { io { app.database.measurements().history(farmA, targetId, "weight").size == 1 } }
         io {
             assertEquals(grams, app.database.measurements().history(farmA, targetId, "weight").single().valueLong)
@@ -276,7 +273,7 @@ class SpeciesSearchRuntimeNavigationTest {
             assertEquals("owner-a", operation.actorId)
             assertEquals(app.deviceId, operation.deviceId)
         }
-        back()
+        click("Profile")
         awaitScreen("$prefix-003")
         click("Lifecycle status")
         awaitScreen(if (kind == AnimalProfileKind.SHEEP) "FOS-SHEEP-030" else "FOS-CATTLE-034")
