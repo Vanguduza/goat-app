@@ -333,13 +333,13 @@ private fun SpeciesProfile(
                 Text(selected.label, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Text(if (selected.active) "Active" else "Closed lifecycle record")
             }
-            com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(selected.animalId,config.plural))
-            com.farmos.core.design.FarmProfileBreeding(selected.animalId,config.plural)
             FarmOperationalSection("Actions") {
                 TextButton(onClick = { onOpen(SpeciesPage.WEIGHT) }, enabled = selected.active, modifier = Modifier.fillMaxWidth().testTag("species-profile-record-weight")) { Text("Record weight") }
-                TextButton(onClick = { onOpen(SpeciesPage.OPERATIONS) }, enabled = selected.active, modifier = Modifier.fillMaxWidth()) { Text(config.operationsTitle) }
-                TextButton(onClick = { onOpen(SpeciesPage.STATUS) }, enabled = selected.active || exitsReversible, modifier = Modifier.fillMaxWidth()) { Text("Lifecycle status") }
+                TextButton(onClick = { onOpen(SpeciesPage.OPERATIONS) }, enabled = selected.active, modifier = Modifier.fillMaxWidth().testTag("species-profile-operations")) { Text(config.operationsTitle) }
+                TextButton(onClick = { onOpen(SpeciesPage.STATUS) }, enabled = selected.active || exitsReversible, modifier = Modifier.fillMaxWidth().testTag("species-profile-status")) { Text("Lifecycle status") }
             }
+            com.farmos.core.design.FarmProfileHealth(com.farmos.core.design.FarmHealthSubject(selected.animalId,config.plural))
+            com.farmos.core.design.FarmProfileBreeding(selected.animalId,config.plural)
             // Owner decision D-015: photos and documents of this animal, when the host provides them.
             attachmentContent?.invoke(selected)
         }
