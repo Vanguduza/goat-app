@@ -133,6 +133,9 @@ internal class DriveAuthNeededException : IOException("Google Drive sign-in is r
  * objects are write-once.
  */
 internal interface DriveObjectStore {
+    /** Exact account behind the authorized Drive token. Used for destination identity, never app login. */
+    suspend fun currentAccountEmail(): String = throw IOException("Drive account identity is unavailable")
+
     /** Verify that the authenticated account can write to this actual folder. */
     suspend fun validateDestination(accountEmail: String) = Unit
 

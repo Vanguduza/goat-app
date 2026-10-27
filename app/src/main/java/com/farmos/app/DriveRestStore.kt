@@ -214,6 +214,11 @@ internal class DriveRestStore(
     constructor(authorizer: DriveAuthorizer, folderId: () -> String) :
         this(authorizer, folderId, { it.openConnection() as HttpURLConnection })
 
+    override suspend fun currentAccountEmail(): String = withContext(Dispatchers.IO) {
+        val token = authorizer.accessToken() ?: throw DriveAuthNeededException()
+        driveAccountEmail(token)
+    }
+
     override suspend fun validateDestination(accountEmail: String) = withContext(Dispatchers.IO) {
         val token = authorizer.accessToken() ?: throw DriveAuthNeededException()
         val id = requireDriveFolderId(folderId())
@@ -269,12 +274,17 @@ internal class DriveRestStore(
         }
 
     private fun validateAccount(token: String, accountEmail: String) {
+        require(driveAccountEmail(token).equals(accountEmail.trim(), ignoreCase = true)) {
+            "The signed-in Google account does not match the selected account"
+        }
+    }
+
+    private fun driveAccountEmail(token: String): String {
         val account = DriveJsonParser.parse(
             driveGet("https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)", token),
         ) as? DriveJson.Obj ?: throw IOException("Drive account returned an unexpected response")
-        require(account.obj("user")?.str("emailAddress")?.equals(accountEmail.trim(), ignoreCase = true) == true) {
-            "The signed-in Google account does not match the selected account"
-        }
+        return account.obj("user")?.str("emailAddress")?.takeIf { it.isNotBlank() }
+            ?: throw IOException("Google Drive did not return the signed-in account")
     }
 
     override suspend fun list(prefix: String): List<DriveObjectStore.DriveObject> = withContext(Dispatchers.IO) {

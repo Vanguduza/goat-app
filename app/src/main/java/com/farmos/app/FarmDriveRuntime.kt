@@ -49,13 +49,16 @@ internal class FarmDriveRuntime(
     }
 
     /** Persist local approval only after current storage permission and destination validation. */
-    suspend fun connect(actorId: String, accountEmail: String, folderId: String, folderName: String): DriveSetupOutcome =
+    suspend fun connect(actorId: String, accountEmail: String?, folderId: String, folderName: String): DriveSetupOutcome =
         withContext(Dispatchers.IO) {
             val outcome = coordinator.withFarm(farmId) {
                 authority.requireApprover(farmId, actorId)
+                val attemptAuthorizer = accountEmail?.takeIf { it.isNotBlank() }?.let { email ->
+                    googleAuthorizer?.forAccount(email)
+                } ?: authorizer
                 val result = DriveSetupAttempt.connect(
                     farmId, accountEmail, folderName, folderId,
-                    googleAuthorizer?.forAccount(accountEmail) ?: authorizer, clock(), openStore,
+                    attemptAuthorizer, clock(), openStore,
                 )
                 if (result is DriveSetupOutcome.Connected) {
                     val approved = authority.approve(farmId, actorId, result.config, configStore)

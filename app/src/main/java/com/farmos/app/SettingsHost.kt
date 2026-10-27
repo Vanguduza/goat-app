@@ -972,7 +972,6 @@ private fun DriveGatewaySection(
     val state by drive.state.collectAsState()
     val config = state.config
     var connecting by remember { mutableStateOf(false) }
-    var account by remember { mutableStateOf("") }
     var folderId by remember { mutableStateOf("") }
 
     fun runDrive(onDone: () -> Unit = {}, block: suspend () -> Unit) {
@@ -986,11 +985,10 @@ private fun DriveGatewaySection(
         }
     }
 
-    fun finishConnection() {
-        val email = account.ifBlank { config?.accountEmail.orEmpty() }
+    fun finishConnection(accountEmail: String? = config?.accountEmail) {
         val destination = folderId.ifBlank { config?.folderId.orEmpty() }
         runDrive(onDone = { connecting = false }) {
-            when (val result = drive.connect(requireNotNull(actorId), email, destination, config?.folderName?.ifBlank { "Farm OS" } ?: "Farm OS")) {
+            when (val result = drive.connect(requireNotNull(actorId), accountEmail, destination, config?.folderName?.ifBlank { "Animal Farm" } ?: "Animal Farm")) {
                 is DriveSetupOutcome.Connected -> Unit
                 DriveSetupOutcome.AuthUnavailable -> error("Google Drive permission is required before connecting")
                 is DriveSetupOutcome.Failed -> error(result.reason)
@@ -1006,10 +1004,10 @@ private fun DriveGatewaySection(
         )
     }
 
-    fun connectWithConsent(email: String) {
+    fun connectWithConsent(email: String? = null) {
         onBusyChange(true)
         onError(null)
-        if (consent != null) consent(email) else finishConnection()
+        if (consent != null) consent(email) else finishConnection(email)
     }
 
     if (config == null) {
@@ -1019,10 +1017,10 @@ private fun DriveGatewaySection(
             color = AnimalFarmTheme.colors.mutedInk,
         )
         if (connecting) {
-            SettingsField("Google account email", account, busy) { account = it }
+            Text("Google will ask which account to use for this farm's backup.", color = AnimalFarmTheme.colors.mutedInk)
             SettingsField("Drive folder ID (optional)", folderId, busy) { folderId = it }
             Text("Leave the folder ID empty to create this farm's backup folder.", color = AnimalFarmTheme.colors.mutedInk)
-            SettingsButton("Connect", canManage && !busy && account.isNotBlank()) { connectWithConsent(account) }
+            SettingsButton("Connect", canManage && !busy) { connectWithConsent() }
             SettingsButton("Cancel", !busy) { connecting = false }
         } else {
             SettingsButton("Connect Google Drive", canManage && !busy) { connecting = true }

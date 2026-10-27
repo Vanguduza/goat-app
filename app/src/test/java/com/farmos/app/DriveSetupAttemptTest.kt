@@ -95,8 +95,11 @@ class DriveSetupAttemptTest {
 
     private class FakeStore(
         private val onList: (String) -> List<DriveObjectStore.DriveObject> = { emptyList() },
+        private val accountEmail: String = "owner@example.com",
     ) : DriveObjectStore {
         var listedPrefix: String? = null
+
+        override suspend fun currentAccountEmail(): String = accountEmail
 
         override suspend fun list(prefix: String): List<DriveObjectStore.DriveObject> {
             listedPrefix = prefix
@@ -149,6 +152,21 @@ class DriveSetupAttemptTest {
             DriveGatewayConfig("owner@example.com", "folder-abc", "Farm OS", 1_700_000_000_000L),
             connected.config,
         )
+    }
+
+    @Test
+    fun firstConnectionUsesTheGoogleSelectedAccount() = runBlocking {
+        val store = FakeStore(accountEmail = "client@example.com")
+        val outcome = DriveSetupAttempt.connect(
+            farmId = farmId,
+            accountEmail = null,
+            folderName = "Animal Farm",
+            folderId = "folder-abc",
+            authorizer = FakeAuthorizer("token"),
+            nowEpochMillis = 42L,
+            openStore = { _, _ -> store },
+        )
+        assertEquals("client@example.com", assertIs<DriveSetupOutcome.Connected>(outcome).config.accountEmail)
     }
 
     @Test

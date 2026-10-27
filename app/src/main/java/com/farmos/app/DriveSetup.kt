@@ -113,7 +113,7 @@ internal sealed interface DriveSetupOutcome {
 internal object DriveSetupAttempt {
     suspend fun connect(
         farmId: String,
-        accountEmail: String,
+        accountEmail: String?,
         folderName: String,
         folderId: String,
         authorizer: DriveAuthorizer,
@@ -123,17 +123,18 @@ internal object DriveSetupAttempt {
         return try {
             if (authorizer.accessToken().isNullOrBlank()) return DriveSetupOutcome.AuthUnavailable
             require(farmId.matches(Regex("[A-Za-z0-9-]{1,64}"))) { "Invalid farm identity" }
-            require(accountEmail.isNotBlank()) { "Choose the Google account for this backup" }
             var destination = folderId.trim()
             val store = openStore(authorizer) { destination }
+            val selectedAccount = accountEmail?.trim()?.takeIf { it.isNotBlank() } ?: store.currentAccountEmail()
+            require(selectedAccount.isNotBlank()) { "Google Drive did not return the selected account" }
             if (destination.isBlank()) {
-                destination = store.ensureFarmFolder(farmId, folderName.trim(), accountEmail.trim())
+                destination = store.ensureFarmFolder(farmId, folderName.trim(), selectedAccount)
             }
             requireDriveFolderId(destination)
-            store.validateDestination(accountEmail.trim())
+            store.validateDestination(selectedAccount)
             store.list("GOAT/farms/$farmId/")
             DriveSetupOutcome.Connected(
-                DriveGatewayConfig(accountEmail.trim(), destination, folderName.trim(), nowEpochMillis),
+                DriveGatewayConfig(selectedAccount, destination, folderName.trim(), nowEpochMillis),
             )
         } catch (cancelled: CancellationException) {
             throw cancelled

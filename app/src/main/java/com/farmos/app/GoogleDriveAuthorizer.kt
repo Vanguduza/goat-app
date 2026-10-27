@@ -1,6 +1,5 @@
 package com.farmos.app
 
-import android.accounts.Account
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -39,10 +38,11 @@ internal class GoogleDriveAuthorizer(
 ) : DriveAuthorizer {
     private val client = Identity.getAuthorizationClient(context.applicationContext)
     @Volatile private var selectedAccount: String? = null
+    @Volatile private var selectedToken: String? = null
 
     override suspend fun accessToken(): String? {
-        val email = configuredAccount()?.takeIf { it.isNotBlank() } ?: selectedAccount ?: return null
-        return tokenFor(email)
+        val email = configuredAccount()?.takeIf { it.isNotBlank() } ?: selectedAccount
+        return if (email != null) tokenFor(email) else selectedToken
     }
 
     /** A pending account switch cannot change the active gateway's credential before verification. */
@@ -56,19 +56,22 @@ internal class GoogleDriveAuthorizer(
         return if (result.hasResolution()) null else checkedToken(result)
     }
 
-    suspend fun requestConsent(email: String): AuthorizationResult {
-        require(email.isNotBlank()) { "Enter the Google account email" }
-        selectedAccount = email.trim()
-        return client.authorize(request(email.trim())).awaitDriveTask()
+    suspend fun requestConsent(email: String? = null): AuthorizationResult {
+        selectedAccount = email?.trim()?.takeIf { it.isNotBlank() }
+        return client.authorize(request(selectedAccount)).awaitDriveTask().also(::rememberGrantedToken)
     }
 
     fun acceptConsent(data: Intent?): Boolean {
         requireNotNull(data) { "Google Drive permission was not granted" }
         val result = client.getAuthorizationResultFromIntent(data)
+        rememberGrantedToken(result)
         return !result.hasResolution() && checkedToken(result) != null
     }
 
-    fun granted(result: AuthorizationResult): Boolean = !result.hasResolution() && checkedToken(result) != null
+    fun granted(result: AuthorizationResult): Boolean {
+        rememberGrantedToken(result)
+        return !result.hasResolution() && checkedToken(result) != null
+    }
 
     override suspend fun invalidateToken(token: String) {
         client.clearToken(ClearTokenRequest.builder().setToken(token).build()).awaitDriveTask()
@@ -79,10 +82,19 @@ internal class GoogleDriveAuthorizer(
         return result.accessToken?.takeIf { it.isNotBlank() }
     }
 
-    private fun request(email: String): AuthorizationRequest = AuthorizationRequest.builder()
-        .setAccount(Account(email, "com.google"))
-        .setRequestedScopes(listOf(Scope(DRIVE_FILE_SCOPE)))
-        .build()
+    private fun rememberGrantedToken(result: AuthorizationResult) {
+        if (!result.hasResolution()) selectedToken = checkedToken(result)
+    }
+
+    private fun request(email: String?): AuthorizationRequest {
+        val builder = AuthorizationRequest.builder()
+            .setRequestedScopes(listOf(Scope(DRIVE_FILE_SCOPE)))
+        return if (email.isNullOrBlank()) {
+            builder.setPrompt(AuthorizationRequest.Prompt.SELECT_ACCOUNT).build()
+        } else {
+            builder.setAccount(android.accounts.Account(email, "com.google")).build()
+        }
+    }
 }
 
 internal const val DRIVE_FILE_SCOPE = "https://www.googleapis.com/auth/drive.file"
@@ -93,7 +105,7 @@ internal fun rememberDriveConsent(
     authorizer: GoogleDriveAuthorizer,
     onAuthorized: () -> Unit,
     onFailure: (String) -> Unit,
-): (String) -> Unit {
+): (String?) -> Unit {
     val scope = rememberCoroutineScope()
     val latestAuthorized by rememberUpdatedState(onAuthorized)
     val latestFailure by rememberUpdatedState(onFailure)
